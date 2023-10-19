@@ -35,6 +35,7 @@ import {
   CRAFTING_BASE_CHANCE_IMPACT,
   CRAFTING_DIFFICULTY_RATIO,
   CRAFTING_ITEMS_CHANCE,
+  TOOLS_BASE_CHANCE_RATIO,
 } from "@providers/constants/CraftingConstants";
 import { TraitGetter } from "@providers/skill/TraitGetter";
 import { AvailableBlueprints } from "./data/types/itemsBlueprintTypes";
@@ -170,7 +171,7 @@ export class ItemCraftable {
     const skillLevel = await this.getSkillLevel(character, baseSkill);
     const rarityChance = this.getRarityPercent(rarityOfTool);
 
-    return this.isCraftSuccessful.bind(null, skillLevel, baseChance + rarityChance ?? 0);
+    return this.isCraftSuccessful.bind(null, skillLevel, (baseChance + rarityChance ?? 0) * TOOLS_BASE_CHANCE_RATIO);
   }
 
   @TrackNewRelicTransaction()
