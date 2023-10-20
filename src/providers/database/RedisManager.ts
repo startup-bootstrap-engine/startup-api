@@ -1,47 +1,20 @@
+/* eslint-disable no-async-promise-executor */
 import { appEnv } from "@providers/config/env";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import IORedis from "ioredis";
-import mongoose from "mongoose";
-import { applySpeedGooseCacheLayer } from "speedgoose";
+import { RedisBareClient } from "./RedisManager/RedisBareClient";
+import { RedisIOClient } from "./RedisManager/RedisIOClient";
 @provideSingleton(RedisManager)
 export class RedisManager {
   public client: IORedis.Redis;
 
-  constructor() {}
+  constructor(private redisBareClient: RedisBareClient, private redisIOClient: RedisIOClient) {}
 
-  public connect(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      try {
-        const redisConnectionUrl = `redis://${appEnv.database.REDIS_CONTAINER}:${appEnv.database.REDIS_PORT}`;
-
-        this.client = new IORedis(redisConnectionUrl, {
-          maxRetriesPerRequest: null,
-        });
-
-        this.client.setMaxListeners(20);
-
-        this.client.on("connect", () => {
-          if (!appEnv.general.IS_UNIT_TEST) {
-            console.log("✅ Redis Client Connected");
-          }
-          resolve();
-        });
-
-        this.client.on("error", (err) => {
-          console.log("❌ Redis error:", err);
-          reject(err);
-        });
-
-        // @ts-ignore
-        void applySpeedGooseCacheLayer(mongoose, {
-          redisUri: redisConnectionUrl,
-        });
-      } catch (error) {
-        this.client.removeAllListeners("error");
-
-        console.log("❌ Redis initialization error: ", error);
-        reject(error);
-      }
-    });
+  public async connect(): Promise<void> {
+    if (appEnv.general.IS_UNIT_TEST) {
+      this.client = await this.redisBareClient.connect();
+    } else {
+      this.client = await this.redisIOClient.connect();
+    }
   }
 }
