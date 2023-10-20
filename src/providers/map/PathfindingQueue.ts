@@ -99,11 +99,6 @@ export class PathfindingQueue {
         {
           removeOnComplete: true,
           removeOnFail: true,
-          attempts: 3,
-          backoff: {
-            type: "exponential",
-            delay: 10,
-          },
         }
       );
     } catch (error) {
