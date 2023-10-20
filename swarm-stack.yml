@@ -118,8 +118,8 @@ services:
       - "${REDIS_PORT}:${REDIS_PORT}"
     volumes:
       - rpg-redis-data:/data
-      - ./config/redis.conf:/redis.conf
-    command: ["redis-server", "/redis.conf", "--port", "${REDIS_PORT}"]
+      - ./config/redis.conf:/usr/local/etc/redis/redis.conf
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--port", "${REDIS_PORT}"]
     networks:
       - rpg-network
     deploy:
