@@ -4,12 +4,13 @@ import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
 import { NPC_CYCLE_INTERVAL_RATIO, NPC_FRIENDLY_FREEZE_CHECK_CHANCE } from "@providers/constants/NPCConstants";
+import { RedisManager } from "@providers/database/RedisManager";
 import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { NPCAlignment, NPCMovementType, NPCPathOrientation, ToGridX, ToGridY } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
-import { provide } from "inversify-binding-decorators";
 import { random } from "lodash";
 import { NPCFreezer } from "./NPCFreezer";
 import { NPCLoader } from "./NPCLoader";
@@ -21,10 +22,11 @@ import { NPCMovementMoveTowards } from "./movement/NPCMovementMoveTowards";
 import { NPCMovementRandomPath } from "./movement/NPCMovementRandomPath";
 import { NPCMovementStopped } from "./movement/NPCMovementStopped";
 
-@provide(NPCCycleQueue)
+@provideSingleton(NPCCycleQueue)
 export class NPCCycleQueue {
   private queue: Queue<any, any, string>;
   private worker: Worker;
+  private connection: any;
 
   constructor(
     private specialEffect: SpecialEffect,
@@ -38,13 +40,15 @@ export class NPCCycleQueue {
     private npcMovementMoveAway: NPCMovementMoveAway,
     private npcLoader: NPCLoader,
     private newRelic: NewRelic,
-    private locker: Locker
-  ) {
+    private locker: Locker,
+    private redisManager: RedisManager
+  ) {}
+
+  public init(): void {
+    this.connection = this.redisManager.client;
+
     this.queue = new Queue("npc-cycle-queue", {
-      connection: {
-        host: appEnv.database.REDIS_CONTAINER,
-        port: Number(appEnv.database.REDIS_PORT),
-      },
+      connection: this.connection,
     });
 
     this.worker = new Worker(
@@ -60,10 +64,7 @@ export class NPCCycleQueue {
         }
       },
       {
-        connection: {
-          host: appEnv.database.REDIS_CONTAINER,
-          port: Number(appEnv.database.REDIS_PORT),
-        },
+        connection: this.connection,
       }
     );
 
@@ -83,6 +84,10 @@ export class NPCCycleQueue {
     if (appEnv.general.IS_UNIT_TEST) {
       await this.execNpcCycle(npc, npcSkills, true);
       return;
+    }
+
+    if (!this.connection) {
+      this.init();
     }
 
     const isJobBeingProcessed = await this.isJobBeingProcessed(npc._id);
@@ -108,6 +113,10 @@ export class NPCCycleQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
+    if (!this.queue) {
+      this.init();
+    }
+
     const jobs = await this.queue.getJobs(["waiting", "active", "delayed", "paused"]);
     for (const job of jobs) {
       try {
