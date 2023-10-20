@@ -278,6 +278,11 @@ itemSchema.pre("deleteOne", { document: false, query: true }, async function (ne
     // @ts-ignore
     const item = await this.model.findOne(this.getQuery());
 
+    if (!item) {
+      next();
+      return;
+    }
+
     if (!item.owner) {
       next();
       return;
