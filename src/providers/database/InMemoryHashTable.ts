@@ -15,9 +15,9 @@ export class InMemoryHashTable {
     return result === 1;
   }
 
-  public async expire(key: string, seconds: number): Promise<void> {
+  public async expire(key: string, seconds: number, mode: "NX" | "XX" | "GT" | "LT"): Promise<void> {
     if (!appEnv.general.IS_UNIT_TEST) {
-      await this.redisManager.client.expire(key?.toString(), seconds);
+      await this.redisManager.client.expire(key?.toString(), seconds, mode);
     }
   }
 
