@@ -1,5 +1,6 @@
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
+import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { EnvType } from "@rpg-engine/shared";
 import { Job, Queue, Worker } from "bullmq";
@@ -12,17 +13,19 @@ export class ItemUseCycleQueue {
   private queue: Queue;
   private worker: Worker;
   private itemCallbacks = new Map<string, CallbackRecord>();
+  private connection: any;
 
   private queueName: string = `item-use-cycle-${uuidv4()}-${
     appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
   }`;
 
-  constructor() {
+  constructor(private redisManager: RedisManager) {}
+
+  public init(): void {
+    this.connection = this.redisManager.client;
+
     this.queue = new Queue(this.queueName, {
-      connection: {
-        host: appEnv.database.REDIS_CONTAINER,
-        port: Number(appEnv.database.REDIS_PORT),
-      },
+      connection: this.connection,
     });
 
     this.worker = new Worker(
@@ -50,10 +53,7 @@ export class ItemUseCycleQueue {
         }
       },
       {
-        connection: {
-          host: appEnv.database.REDIS_CONTAINER,
-          port: Number(appEnv.database.REDIS_PORT),
-        },
+        connection: this.connection,
       }
     );
 
@@ -69,6 +69,10 @@ export class ItemUseCycleQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
+    if (!this.connection) {
+      this.init();
+    }
+
     const jobs = await this.queue.getJobs(["waiting", "active", "delayed", "paused"]);
     for (const job of jobs) {
       try {
@@ -106,6 +110,10 @@ export class ItemUseCycleQueue {
     iterations: number,
     intervalDurationMs: number
   ): Promise<Job> {
+    if (!this.connection) {
+      this.init();
+    }
+
     return await this.queue.add(
       this.queueName,
       {
