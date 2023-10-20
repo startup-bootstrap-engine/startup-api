@@ -6,6 +6,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { BattleAttackTarget } from "@providers/battle/BattleAttackTarget/BattleAttackTarget";
 import { appEnv } from "@providers/config/env";
 import { NPC_BATTLE_CYCLE_INTERVAL, NPC_MIN_DISTANCE_TO_ACTIVATE } from "@providers/constants/NPCConstants";
+import { RedisManager } from "@providers/database/RedisManager";
 import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
@@ -22,6 +23,7 @@ import { NPCTarget } from "./movement/NPCTarget";
 export class NPCBattleCycleQueue {
   private queue: Queue<any, any, string>;
   private worker: Worker;
+  private connection: any;
 
   constructor(
     private newRelic: NewRelic,
@@ -30,13 +32,15 @@ export class NPCBattleCycleQueue {
     private specialEffect: SpecialEffect,
     private movementHelper: MovementHelper,
     private battleAttackTarget: BattleAttackTarget,
-    private npcView: NPCView
-  ) {
+    private npcView: NPCView,
+    private redisManager: RedisManager
+  ) {}
+
+  public init(): void {
+    this.connection = this.redisManager.client;
+
     this.queue = new Queue("npc-battle-cycle-queue", {
-      connection: {
-        host: appEnv.database.REDIS_CONTAINER,
-        port: Number(appEnv.database.REDIS_PORT),
-      },
+      connection: this.connection,
     });
 
     this.worker = new Worker(
@@ -54,10 +58,7 @@ export class NPCBattleCycleQueue {
         }
       },
       {
-        connection: {
-          host: appEnv.database.REDIS_CONTAINER,
-          port: Number(appEnv.database.REDIS_PORT),
-        },
+        connection: this.connection,
       }
     );
 
@@ -75,6 +76,10 @@ export class NPCBattleCycleQueue {
 
   @TrackNewRelicTransaction()
   public async add(npc: INPC, npcSkills: ISkill): Promise<void> {
+    if (!this.connection) {
+      this.init();
+    }
+
     const canProceed = await this.locker.lock(`npc-${npc._id}-npc-add-battle-queue`);
 
     if (!canProceed) {
@@ -115,6 +120,10 @@ export class NPCBattleCycleQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
+    if (!this.connection) {
+      this.init();
+    }
+
     const jobs = await this.queue.getJobs(["waiting", "active", "delayed", "paused"]);
     for (const job of jobs) {
       try {

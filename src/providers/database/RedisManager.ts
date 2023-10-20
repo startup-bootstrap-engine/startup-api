@@ -18,6 +18,8 @@ export class RedisManager {
           maxRetriesPerRequest: null,
         });
 
+        this.client.setMaxListeners(20);
+
         this.client.on("connect", () => {
           if (!appEnv.general.IS_UNIT_TEST) {
             console.log("✅ Redis Client Connected");
@@ -35,6 +37,8 @@ export class RedisManager {
           redisUri: redisConnectionUrl,
         });
       } catch (error) {
+        this.client.removeAllListeners("error");
+
         console.log("❌ Redis initialization error: ", error);
         reject(error);
       }
