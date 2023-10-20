@@ -20,42 +20,50 @@ export enum EffectableAttribute {
 export class ItemUsableEffect {
   @TrackNewRelicTransaction()
   public async apply(target: ICharacter | INPC, attr: EffectableAttribute, value: number): Promise<void> {
-    target[attr] += value;
-    const updateObj: any = {};
-    switch (attr) {
-      case EffectableAttribute.Health:
-        const maxAttrHealth = EffectableMaxAttribute.Health;
-        if (target[attr] > target[maxAttrHealth]) {
-          target[attr] = target[maxAttrHealth];
-        } else if (target[attr] < 0) {
-          target[attr] = 0;
-        }
-        updateObj[attr] = target[attr];
-        break;
-
-      case EffectableAttribute.Mana:
-        const maxAttrMana = EffectableMaxAttribute.Mana;
-        if (target[attr] > target[maxAttrMana]) {
-          target[attr] = target[maxAttrMana];
-        } else if (target[attr] < 0) {
-          target[attr] = 0;
-        }
-        updateObj[attr] = target[attr];
-        break;
-
-      case EffectableAttribute.Speed:
-        const dataCharacter = target as ICharacter;
-        if (dataCharacter.baseSpeed === MovementSpeed.Slow || dataCharacter.baseSpeed === MovementSpeed.ExtraSlow) {
-          dataCharacter.baseSpeed = value;
-        }
-        // eslint-disable-next-line dot-notation
-        updateObj["baseSpeed"] = dataCharacter.baseSpeed;
-        break;
-
-      default:
-        break;
-    }
     try {
+      if (!target) {
+        throw new Error("Invalid target: target must be a valid entity");
+      }
+      if (isNaN(value)) {
+        throw new Error("Invalid value: value must be a number");
+      }
+
+      target[attr] += value;
+      const updateObj: any = {};
+      switch (attr) {
+        case EffectableAttribute.Health:
+          const maxAttrHealth = EffectableMaxAttribute.Health;
+          if (target[attr] > target[maxAttrHealth]) {
+            target[attr] = target[maxAttrHealth];
+          } else if (target[attr] < 0) {
+            target[attr] = 0;
+          }
+          updateObj[attr] = target[attr];
+          break;
+
+        case EffectableAttribute.Mana:
+          const maxAttrMana = EffectableMaxAttribute.Mana;
+          if (target[attr] > target[maxAttrMana]) {
+            target[attr] = target[maxAttrMana];
+          } else if (target[attr] < 0) {
+            target[attr] = 0;
+          }
+          updateObj[attr] = target[attr];
+          break;
+
+        case EffectableAttribute.Speed:
+          const dataCharacter = target as ICharacter;
+          if (dataCharacter.baseSpeed === MovementSpeed.Slow || dataCharacter.baseSpeed === MovementSpeed.ExtraSlow) {
+            dataCharacter.baseSpeed = value;
+          }
+          // eslint-disable-next-line dot-notation
+          updateObj["baseSpeed"] = dataCharacter.baseSpeed;
+          break;
+
+        default:
+          break;
+      }
+
       if (target.type === EntityType.Character) {
         await Character.updateOne({ _id: target._id }, { $set: updateObj });
       } else {

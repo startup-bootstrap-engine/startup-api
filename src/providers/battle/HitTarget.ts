@@ -88,9 +88,13 @@ export class HitTarget {
     this.worker = new Worker(
       "npc-hit",
       async (job) => {
-        const { attacker, target, magicAttack, bonusDamage, spellHit } = job.data;
+        try {
+          const { attacker, target, magicAttack, bonusDamage, spellHit } = job.data;
 
-        await this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
+          await this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
+        } catch (error) {
+          console.error(error);
+        }
       },
       {
         connection: {
@@ -219,6 +223,10 @@ export class HitTarget {
       let damage = this.battleDamageCalculator.getCriticalHitDamageIfSucceed(baseDamage);
       const maxDamage = target.health;
       damage = Math.min(damage, maxDamage);
+
+      if (isNaN(damage)) {
+        throw new Error("Damage is not a number");
+      }
 
       const damageRelatedPromises: any[] = [];
 

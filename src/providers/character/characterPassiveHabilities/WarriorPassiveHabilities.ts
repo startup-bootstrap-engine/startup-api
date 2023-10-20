@@ -66,6 +66,10 @@ export class WarriorPassiveHabilities {
                   return;
                 }
 
+                if (isNaN(strengthLvl) || isNaN(refreshCharacter.health) || isNaN(refreshCharacter.maxHealth)) {
+                  throw new Error("Invalid values: All values must be numbers");
+                }
+
                 const updatedCharacter = (await Character.findByIdAndUpdate(
                   _id,
                   {
