@@ -1,13 +1,13 @@
 /* eslint-disable no-async-promise-executor */
 import { appEnv } from "@providers/config/env";
-import { provide } from "inversify-binding-decorators";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
 import mongoose from "mongoose";
 import { createClient } from "redis";
 import { applySpeedGooseCacheLayer } from "speedgoose";
 
 //! in unit test, just use the traditional redis because its already being mocked by redisV4Mock and changing support to IORedis would be a pain
 
-@provide(RedisBareClient)
+@provideSingleton(RedisBareClient)
 export class RedisBareClient {
   public async connect(): Promise<void> {
     return await new Promise<void>(async (resolve, reject) => {

@@ -1,11 +1,11 @@
 import { appEnv } from "@providers/config/env";
-import { provide } from "inversify-binding-decorators";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
 import IORedis from "ioredis";
 import mongoose from "mongoose";
 import { applySpeedGooseCacheLayer } from "speedgoose";
 
 //! We use RedisIOClient because it has a built in pooling mechanism
-@provide(RedisIOClient)
+@provideSingleton(RedisIOClient)
 export class RedisIOClient {
   public async connect(): Promise<void> {
     return await new Promise<void>((resolve, reject) => {
