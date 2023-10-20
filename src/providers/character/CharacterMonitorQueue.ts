@@ -2,6 +2,7 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
+import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
@@ -19,17 +20,19 @@ type CallbackRecord = Record<string, CharacterMonitorCallback>;
 export class CharacterMonitorQueue {
   private queue: Queue<any, any, string>;
   private worker: Worker;
+  private connection;
   private charactersCallbacks = new Map<string, CallbackRecord>();
   private queueName: string = `character-monitor-queue-${uuidv4()}-${
     appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
   }`;
 
-  constructor(private newRelic: NewRelic, private locker: Locker) {
+  constructor(private newRelic: NewRelic, private locker: Locker, private redisManager: RedisManager) {}
+
+  public init(): void {
+    this.connection = this.redisManager.client;
+
     this.queue = new Queue(this.queueName, {
-      connection: {
-        host: appEnv.database.REDIS_CONTAINER,
-        port: Number(appEnv.database.REDIS_PORT),
-      },
+      connection: this.connection,
     });
 
     this.worker = new Worker(
@@ -57,10 +60,7 @@ export class CharacterMonitorQueue {
         }
       },
       {
-        connection: {
-          host: appEnv.database.REDIS_CONTAINER,
-          port: Number(appEnv.database.REDIS_PORT),
-        },
+        connection: this.connection,
       }
     );
 
@@ -82,6 +82,10 @@ export class CharacterMonitorQueue {
     callback: CharacterMonitorCallback,
     intervalMs: number = 7000
   ): Promise<void> {
+    if (!this.connection) {
+      this.init();
+    }
+
     const canProceed = await this.locker.lock(`character-monitor-queue-${character._id}-callback-${callbackId}`);
 
     if (!canProceed) {
@@ -155,6 +159,10 @@ export class CharacterMonitorQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
+    if (!this.connection) {
+      this.init();
+    }
+
     const jobs = await this.queue.getJobs(["waiting", "active", "delayed", "paused"]);
     for (const job of jobs) {
       try {
