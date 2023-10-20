@@ -1,6 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { appEnv } from "@providers/config/env";
+import { RedisManager } from "@providers/database/RedisManager";
 import { Locker } from "@providers/locks/Locker";
 import { Job, Queue, Worker } from "bullmq";
 import { provide } from "inversify-binding-decorators";
@@ -11,17 +12,24 @@ import { PathfindingResults } from "./PathfindingResults";
 export class PathfindingQueue {
   private queue: Queue;
   private worker: Worker;
+  private connection;
 
-  constructor(private pathfinder: Pathfinder, private pathfindingResults: PathfindingResults, private locker: Locker) {
+  constructor(
+    private redisManager: RedisManager,
+    private pathfinder: Pathfinder,
+    private pathfindingResults: PathfindingResults,
+    private locker: Locker
+  ) {}
+
+  public init(): void {
     if (appEnv.general.IS_UNIT_TEST) {
       return;
     }
 
+    this.connection = this.redisManager.client;
+
     this.queue = new Queue("pathfinding", {
-      connection: {
-        host: appEnv.database.REDIS_CONTAINER,
-        port: Number(appEnv.database.REDIS_PORT),
-      },
+      connection: this.connection,
     });
 
     this.worker = new Worker(
@@ -51,10 +59,7 @@ export class PathfindingQueue {
         }
       },
       {
-        connection: {
-          host: appEnv.database.REDIS_CONTAINER,
-          port: Number(appEnv.database.REDIS_PORT),
-        },
+        connection: this.connection,
       }
     );
 
@@ -68,6 +73,10 @@ export class PathfindingQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
+    if (!this.connection) {
+      this.init();
+    }
+
     const jobs = await this.queue.getJobs(["waiting", "active", "delayed", "paused"]);
     for (const job of jobs) {
       try {
@@ -86,6 +95,10 @@ export class PathfindingQueue {
     endGridX: number,
     endGridY: number
   ): Promise<Job | undefined> {
+    if (!this.connection) {
+      this.init();
+    }
+
     try {
       const canProceed = await this.locker.lock(`pathfinding-${npc._id}`);
 

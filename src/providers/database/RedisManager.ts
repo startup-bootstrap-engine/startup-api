@@ -14,9 +14,9 @@ export class RedisManager {
       try {
         const redisConnectionUrl = `redis://${appEnv.database.REDIS_CONTAINER}:${appEnv.database.REDIS_PORT}`;
 
-        console.log(redisConnectionUrl);
-
-        this.client = new IORedis(redisConnectionUrl);
+        this.client = new IORedis(redisConnectionUrl, {
+          maxRetriesPerRequest: null,
+        });
 
         this.client.on("connect", () => {
           if (!appEnv.general.IS_UNIT_TEST) {
