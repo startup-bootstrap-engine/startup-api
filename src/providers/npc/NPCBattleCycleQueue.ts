@@ -76,7 +76,7 @@ export class NPCBattleCycleQueue {
 
   @TrackNewRelicTransaction()
   public async add(npc: INPC, npcSkills: ISkill): Promise<void> {
-    if (!this.connection) {
+    if (!this.connection || !this.queue || !this.worker) {
       this.init();
     }
 
@@ -120,7 +120,7 @@ export class NPCBattleCycleQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    if (!this.connection) {
+    if (!this.connection || !this.queue || !this.worker) {
       this.init();
     }
 
@@ -135,8 +135,8 @@ export class NPCBattleCycleQueue {
   }
 
   public async shutdown(): Promise<void> {
-    await this.queue.close();
-    await this.worker.close();
+    await this.queue?.close();
+    await this.worker?.close();
   }
 
   private async execBattleCycle(npc: INPC, npcSkills: ISkill): Promise<void> {

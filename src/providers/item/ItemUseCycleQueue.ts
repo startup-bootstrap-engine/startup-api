@@ -10,9 +10,9 @@ type CallbackRecord = () => void;
 
 @provideSingleton(ItemUseCycleQueue)
 export class ItemUseCycleQueue {
+  public itemCallbacks = new Map<string, CallbackRecord>();
   private queue: Queue;
   private worker: Worker;
-  private itemCallbacks = new Map<string, CallbackRecord>();
   private connection: any;
 
   private queueName: string = `item-use-cycle-${uuidv4()}-${
@@ -69,7 +69,7 @@ export class ItemUseCycleQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    if (!this.connection) {
+    if (!this.connection || !this.queue || !this.worker) {
       this.init();
     }
 
@@ -84,8 +84,8 @@ export class ItemUseCycleQueue {
   }
 
   public async shutdown(): Promise<void> {
-    await this.queue.close();
-    await this.worker.close();
+    await this.queue?.close();
+    await this.worker?.close();
   }
 
   @TrackNewRelicTransaction()
@@ -110,7 +110,7 @@ export class ItemUseCycleQueue {
     iterations: number,
     intervalDurationMs: number
   ): Promise<Job> {
-    if (!this.connection) {
+    if (!this.connection || !this.queue || !this.worker) {
       this.init();
     }
 

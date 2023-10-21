@@ -14,6 +14,7 @@ import { MacroCaptchaCrons } from "./MacroCaptchaCrons";
 import { MarketplaceCrons } from "./MarketplaceCrons";
 import { NPCCrons } from "./NPCCrons";
 import { RankingCrons } from "./RankingCrons";
+import { RedisCrons } from "./RedisCrons";
 import { TotalAvailableGold } from "./TotalAvailableGold";
 
 @provide(Cronjob)
@@ -32,7 +33,8 @@ export class Cronjob {
     private macroCaptchaCrons: MacroCaptchaCrons,
     private totalAvailableGold: TotalAvailableGold,
     private marketplaceCrons: MarketplaceCrons,
-    private rankingCrons: RankingCrons
+    private rankingCrons: RankingCrons,
+    private redisCrons: RedisCrons
   ) {}
 
   public start(): void {
@@ -56,6 +58,7 @@ export class Cronjob {
         this.macroCaptchaCrons.schedule();
         this.marketplaceCrons.schedule();
         this.totalAvailableGold.schedule();
+        this.redisCrons.schedule();
         break;
       case EnvType.Staging:
       case EnvType.Production:
@@ -74,6 +77,7 @@ export class Cronjob {
           this.totalAvailableGold.schedule();
           this.marketplaceCrons.schedule();
           this.rankingCrons.schedule();
+          this.redisCrons.schedule();
         }
         break;
     }

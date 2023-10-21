@@ -73,7 +73,7 @@ export class PathfindingQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    if (!this.connection) {
+    if (!this.connection || !this.queue || !this.worker) {
       this.init();
     }
 
@@ -95,7 +95,7 @@ export class PathfindingQueue {
     endGridX: number,
     endGridY: number
   ): Promise<Job | undefined> {
-    if (!this.connection) {
+    if (!this.connection || !this.queue || !this.worker) {
       this.init();
     }
 
@@ -122,7 +122,7 @@ export class PathfindingQueue {
   }
 
   public async shutdown(): Promise<void> {
-    await this.queue.close();
-    await this.worker.close();
+    await this.queue?.close();
+    await this.worker?.close();
   }
 }

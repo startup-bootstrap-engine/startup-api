@@ -86,7 +86,7 @@ export class NPCCycleQueue {
       return;
     }
 
-    if (!this.connection) {
+    if (!this.connection || !this.queue || !this.worker) {
       this.init();
     }
 
@@ -128,8 +128,8 @@ export class NPCCycleQueue {
   }
 
   public async shutdown(): Promise<void> {
-    await this.queue.close();
-    await this.worker.close();
+    await this.queue?.close();
+    await this.worker?.close();
   }
 
   private async isJobBeingProcessed(npcId: string): Promise<boolean> {
