@@ -1,3 +1,4 @@
+import { RedisManager } from "@providers/database/RedisManager";
 import { database, socketAdapter } from "@providers/inversify/container";
 import { CharacterSocketEvents, EnvType } from "@rpg-engine/shared";
 import { Server } from "http";
@@ -9,6 +10,8 @@ import { IServerBootstrapVars } from "../types/ServerTypes";
 
 @provide(ServerHelper)
 export class ServerHelper {
+  constructor(private redisManager: RedisManager) {}
+
   public showBootstrapMessage(config: IServerBootstrapVars): void {
     const {
       port,
@@ -71,6 +74,8 @@ export class ServerHelper {
               console.info("🛑 Database connection closing");
 
               await database.close();
+
+              await this.redisManager.disconnect();
 
               console.info("✅ Graceful shutdown completed");
               process.exit(128 + termination.errno);

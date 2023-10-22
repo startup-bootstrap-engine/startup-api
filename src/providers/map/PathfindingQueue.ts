@@ -2,16 +2,16 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { Job, Queue, Worker } from "bullmq";
-import { provide } from "inversify-binding-decorators";
 import { Pathfinder } from "./Pathfinder";
 import { PathfindingResults } from "./PathfindingResults";
 
-@provide(PathfindingQueue)
+@provideSingleton(PathfindingQueue)
 export class PathfindingQueue {
-  private queue: Queue;
-  private worker: Worker;
+  private queue: Queue | null = null;
+  private worker: Worker | null = null;
   private connection;
 
   constructor(
@@ -26,58 +26,74 @@ export class PathfindingQueue {
       return;
     }
 
-    this.connection = this.redisManager.client;
+    if (!this.connection) {
+      this.connection = this.redisManager.client;
+    }
 
-    this.queue = new Queue("pathfinding", {
-      connection: this.connection,
-    });
-
-    this.worker = new Worker(
-      "pathfinding",
-      async (job) => {
-        const { npc, target, startGridX, startGridY, endGridX, endGridY } = job.data;
-
-        try {
-          const path = await this.pathfinder.findShortestPath(
-            npc as INPC,
-            target,
-            npc.scene,
-            startGridX,
-            startGridY,
-            endGridX,
-            endGridY
-          );
-
-          if (!path) {
-            return;
-          }
-
-          await this.pathfindingResults.setResult(job.id!, path);
-        } catch (err) {
-          console.error(`Error processing pathfinding for NPC ${npc.key}:`, err);
-          throw err;
-        }
-      },
-      {
+    if (!this.queue) {
+      this.queue = new Queue("pathfinding", {
         connection: this.connection,
+      });
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.queue.on("error", async (error) => {
+          console.error("Error in the pathfindingQueue:", error);
+
+          await this.queue?.close();
+          this.queue = null;
+        });
       }
-    );
+    }
 
-    this.worker.on("failed", (job, err) => {
-      console.log(`Pathfinding job ${job?.id} failed with error ${err.message}`);
-    });
+    if (!this.worker) {
+      this.worker = new Worker(
+        "pathfinding",
+        async (job) => {
+          const { npc, target, startGridX, startGridY, endGridX, endGridY } = job.data;
 
-    this.queue.on("error", (error) => {
-      console.error("Error in the pathfindingQueue:", error);
-    });
+          try {
+            const path = await this.pathfinder.findShortestPath(
+              npc as INPC,
+              target,
+              npc.scene,
+              startGridX,
+              startGridY,
+              endGridX,
+              endGridY
+            );
+
+            if (!path) {
+              return;
+            }
+
+            await this.pathfindingResults.setResult(job.id!, path);
+          } catch (err) {
+            console.error(`Error processing pathfinding for NPC ${npc.key}:`, err);
+            throw err;
+          }
+        },
+        {
+          connection: this.connection,
+        }
+      );
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.worker.on("failed", async (job, err) => {
+          console.log(`Pathfinding job ${job?.id} failed with error ${err.message}`);
+
+          await this.worker?.close();
+          this.worker = null;
+        });
+      }
+    }
   }
 
   public async clearAllJobs(): Promise<void> {
-    if (!this.connection) {
+    if (!this.connection || !this.queue || !this.worker) {
       this.init();
     }
 
-    const jobs = await this.queue.getJobs(["waiting", "active", "delayed", "paused"]);
+    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
     for (const job of jobs) {
       try {
         await job?.remove();
@@ -95,7 +111,7 @@ export class PathfindingQueue {
     endGridX: number,
     endGridY: number
   ): Promise<Job | undefined> {
-    if (!this.connection) {
+    if (!this.connection || !this.queue || !this.worker) {
       this.init();
     }
 
@@ -106,7 +122,7 @@ export class PathfindingQueue {
         return;
       }
 
-      return await this.queue.add(
+      return await this.queue?.add(
         "pathfindingJob",
         { npc, target, startGridX, startGridY, endGridX, endGridY },
         {
@@ -122,7 +138,9 @@ export class PathfindingQueue {
   }
 
   public async shutdown(): Promise<void> {
-    await this.queue.close();
-    await this.worker.close();
+    await this.queue?.close();
+    await this.worker?.close();
+    this.queue = null;
+    this.worker = null;
   }
 }

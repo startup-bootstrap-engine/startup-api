@@ -83,6 +83,10 @@ describe("PVP battle", () => {
     battleAttackTarget = container.get<BattleAttackTarget>(BattleAttackTarget);
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   beforeEach(async () => {
     targetCharacter = await unitTestHelper.createMockCharacter(null, {
       hasEquipment: true,

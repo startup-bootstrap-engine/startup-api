@@ -21,8 +21,8 @@ import { NPCTarget } from "./movement/NPCTarget";
 
 @provideSingleton(NPCBattleCycleQueue)
 export class NPCBattleCycleQueue {
-  private queue: Queue<any, any, string>;
-  private worker: Worker;
+  private queue: Queue<any, any, string> | null = null;
+  private worker: Worker | null = null;
   private connection: any;
 
   constructor(
@@ -37,46 +37,60 @@ export class NPCBattleCycleQueue {
   ) {}
 
   public init(): void {
-    this.connection = this.redisManager.client;
+    if (!this.connection) {
+      this.connection = this.redisManager.client;
+    }
 
-    this.queue = new Queue("npc-battle-cycle-queue", {
-      connection: this.connection,
-    });
+    if (!this.queue) {
+      this.queue = new Queue("npc-battle-cycle-queue", {
+        connection: this.connection,
+      });
 
-    this.worker = new Worker(
-      "npc-battle-cycle-queue",
-      async (job) => {
-        const { npc, npcSkills } = job.data;
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.queue.on("error", async (error) => {
+          console.error("Error in the npc-battle-cycle-queue :", error);
 
-        try {
-          await this.execBattleCycle(npc, npcSkills);
-        } catch (err) {
-          console.error(`Error processing npc-battle-cycle-queue for NPC ${npc.key}:`, err);
+          await this.queue?.close();
+          this.queue = null;
+        });
+      }
+    }
+
+    if (!this.worker) {
+      this.worker = new Worker(
+        "npc-battle-cycle-queue",
+        async (job) => {
+          const { npc, npcSkills } = job.data;
+
+          try {
+            await this.execBattleCycle(npc, npcSkills);
+          } catch (err) {
+            console.error(`Error processing npc-battle-cycle-queue for NPC ${npc.key}:`, err);
+            await this.locker.unlock(`npc-${job?.data?.npcId}-npc-battle-cycle`);
+
+            throw err;
+          }
+        },
+        {
+          connection: this.connection,
+        }
+      );
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.worker.on("failed", async (job, err) => {
+          console.log(`npc-battle-cycle-queue job ${job?.id} failed with error ${err.message}`);
           await this.locker.unlock(`npc-${job?.data?.npcId}-npc-battle-cycle`);
 
-          throw err;
-        }
-      },
-      {
-        connection: this.connection,
+          await this.worker?.close();
+          this.worker = null;
+        });
       }
-    );
-
-    if (!appEnv.general.IS_UNIT_TEST) {
-      this.worker.on("failed", async (job, err) => {
-        console.log(`npc-battle-cycle-queue job ${job?.id} failed with error ${err.message}`);
-        await this.locker.unlock(`npc-${job?.data?.npcId}-npc-battle-cycle`);
-      });
-
-      this.queue.on("error", (error) => {
-        console.error("Error in the npc-battle-cycle-queue :", error);
-      });
     }
   }
 
   @TrackNewRelicTransaction()
   public async add(npc: INPC, npcSkills: ISkill): Promise<void> {
-    if (!this.connection) {
+    if (!this.connection || !this.queue || !this.worker) {
       this.init();
     }
 
@@ -98,7 +112,7 @@ export class NPCBattleCycleQueue {
         return;
       }
 
-      await this.queue.add(
+      await this.queue?.add(
         "npc-battle-cycle-queue",
         {
           npcId: npc._id,
@@ -120,11 +134,11 @@ export class NPCBattleCycleQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    if (!this.connection) {
+    if (!this.connection || !this.queue || !this.worker) {
       this.init();
     }
 
-    const jobs = await this.queue.getJobs(["waiting", "active", "delayed", "paused"]);
+    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
     for (const job of jobs) {
       try {
         await job?.remove();
@@ -135,8 +149,11 @@ export class NPCBattleCycleQueue {
   }
 
   public async shutdown(): Promise<void> {
-    await this.queue.close();
-    await this.worker.close();
+    await this.queue?.close();
+    await this.worker?.close();
+
+    this.queue = null;
+    this.worker = null;
   }
 
   private async execBattleCycle(npc: INPC, npcSkills: ISkill): Promise<void> {
@@ -221,7 +238,7 @@ export class NPCBattleCycleQueue {
   }
 
   private async isJobBeingProcessed(npcId: string): Promise<boolean> {
-    const existingJobs = await this.queue.getJobs(["waiting", "active", "delayed"]);
+    const existingJobs = (await this.queue?.getJobs(["waiting", "active", "delayed"])) ?? [];
     const isJobExisting = existingJobs.some((job) => job?.data?.npcId === npcId);
 
     if (isJobExisting) {

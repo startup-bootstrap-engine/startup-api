@@ -59,7 +59,6 @@ const server = app.listen(port, async () => {
       //! Dev Warning: If you want to add a new operation on server bootstrap, make sure to add it to one of the methods below (check if needs to be executed in all PM2 instances or not.)
 
       await serverBootstrap.performOneTimeOperations();
-
       await serverBootstrap.performMultipleInstancesOperations();
 
       if (appEnv.general.ENV === EnvType.Production) {

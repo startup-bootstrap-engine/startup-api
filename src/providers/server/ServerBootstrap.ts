@@ -76,17 +76,17 @@ export class ServerBootstrap {
 
     await this.queueShutdownHandling();
 
-    await this.clearAllQueues();
+    await this.clearSomeQueues();
   }
 
   public queueShutdownHandling(): void {
     const execQueueShutdown = async (): Promise<void> => {
-      await this.npcBattleCycleQueue.shutdown();
-      await this.npcCycleQueue.shutdown();
-      await this.characterMonitorQueue.shutdown();
       await this.hitTarget.shutdown();
       await this.pathfindingQueue.shutdown();
       await this.itemUseCycleQueue.shutdown();
+      await this.npcBattleCycleQueue.shutdown();
+      await this.npcCycleQueue.shutdown();
+      await this.characterMonitorQueue.shutdown();
     };
 
     process.on("SIGTERM", async () => {
@@ -138,13 +138,11 @@ export class ServerBootstrap {
     await this.locker.clear();
   }
 
-  private async clearAllQueues(): Promise<void> {
-    await this.npcBattleCycleQueue.clearAllJobs();
-    await this.npcCycleQueue.clearAllJobs();
-    await this.characterMonitorQueue.clearAllJobs();
+  private async clearSomeQueues(): Promise<void> {
     await this.pathfindingQueue.clearAllJobs();
     await this.hitTarget.clearAllQueueJobs();
     await this.itemUseCycleQueue.clearAllJobs();
+    await this.npcBattleCycleQueue.clearAllJobs();
 
     console.log("🧹 BullMQ queues cleared...");
   }
