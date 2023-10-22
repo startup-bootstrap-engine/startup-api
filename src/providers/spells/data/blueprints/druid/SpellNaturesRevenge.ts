@@ -25,6 +25,8 @@ export const spellNaturesRevenge: Partial<ISpell> = {
   name: "Nature's Revenge",
   description:
     "Harnesses the wrathful force of nature, invoking a swift eruption of twisting, thorn-covered vines from the earth's embrace. These vines surge outward, engulfing the designated area with relentless fury, entangling all within like nature's wrath incarnate.",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/natures-revenge.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "aldaron nwalme lótealta",
   manaCost: 100,

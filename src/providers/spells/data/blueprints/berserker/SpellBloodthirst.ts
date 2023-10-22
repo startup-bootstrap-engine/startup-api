@@ -16,6 +16,8 @@ export const spellBloodthirst: Partial<ISpell> = {
   key: SpellsBlueprint.BerserkerBloodthirst,
   name: "Bloodthirst",
   description: "Bloodthirst is a spell designed for a Berserker to heal themselves.",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/berserker-bloodthirst.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "sanguis sitis",
   manaCost: 120,

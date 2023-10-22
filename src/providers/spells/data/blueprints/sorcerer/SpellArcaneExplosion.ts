@@ -20,6 +20,8 @@ export const spellArcaneExplosion: Partial<ISpell> = {
   key: SpellsBlueprint.ArcaneExplosion,
   name: "Arcane Explosion",
   description: "A devastating arcane spell so powerful that not even the caster can emerge unscathed.",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/arcane-explosion.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "thaltha aranel",
   manaCost: 1200,

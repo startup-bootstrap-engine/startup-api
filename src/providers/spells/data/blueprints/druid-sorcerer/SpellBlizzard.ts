@@ -26,6 +26,8 @@ export const spellBlizzard: Partial<ISpell> = {
   name: "Blizzard",
   description:
     "Conjures a relentless tempest of ice and snow, enveloping the designated area in a freezing whirlwind of wintry fury.",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/blizzard.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "losse ninqe lanta",
   manaCost: 70,

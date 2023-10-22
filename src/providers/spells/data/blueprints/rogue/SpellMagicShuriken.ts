@@ -19,6 +19,8 @@ export const spellMagicShuriken: Partial<ISpell> = {
   name: "Magic Shuriken",
   description:
     "Unleash a mystical shuriken imbued with arcane energy, striking enemies with both physical and magical damage",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/magic-shuriken.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "ithil celebatharth",
   manaCost: 50,

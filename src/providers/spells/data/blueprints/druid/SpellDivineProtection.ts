@@ -18,6 +18,8 @@ export const spellDivineProtection: Partial<ISpell> = {
   key: SpellsBlueprint.SpellDivineProtection,
   name: "Divine Protection",
   description: "A Shield boosts magic resistance by 30%, duration varies with magic level.",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/spell-divine-protection.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "divinum praesidium",
   manaCost: 60,

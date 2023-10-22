@@ -20,6 +20,8 @@ export const spellVampiricStorm: Partial<ISpell> = {
   name: "Vampiric Storm",
   description:
     "This dark vortex drains the life essence of enemies caught within its pull, simultaneously restoring the health of the caster.",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/vampiric-storm.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "sanguis tempestas nox",
   manaCost: 120,

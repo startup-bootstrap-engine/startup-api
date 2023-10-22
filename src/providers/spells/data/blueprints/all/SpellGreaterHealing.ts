@@ -10,6 +10,9 @@ export const spellGreaterHealing: Partial<ISpell> = {
   name: "Greater Healing Spell",
   description: "A greater healing spell.",
 
+  textureAtlas: "icons",
+  texturePath: "spell-icons/greater-healing-spell.png",
+
   castingType: SpellCastingType.SelfCasting,
   magicWords: "greater faenya",
   manaCost: 25,

@@ -17,6 +17,8 @@ export const spellSelfHaste: Partial<ISpell> = {
   key: SpellsBlueprint.SelfHasteSpell,
   name: "Self Haste Spell",
   description: "A self haste spell.",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/self-haste-spell.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "talas hiz",
   manaCost: 60,

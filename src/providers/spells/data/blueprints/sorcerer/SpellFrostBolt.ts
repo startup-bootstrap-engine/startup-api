@@ -23,6 +23,8 @@ export const spellFrostBolt: Partial<ISpell> = {
   key: SpellsBlueprint.FrostBolt,
   name: "Frost Bolt",
   description: "Cast a deadly frost bolt at your target.",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/frost-bolt.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "ning lhegren",
   manaCost: 80,

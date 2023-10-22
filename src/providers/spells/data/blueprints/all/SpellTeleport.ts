@@ -7,6 +7,8 @@ export const spellTeleport: Partial<ISpell> = {
   key: SpellsBlueprint.Teleport,
   name: "Teleport",
   description: "Teleport to the town",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/teleport.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "na lû e guil i-'ôr",
   manaCost: 0,

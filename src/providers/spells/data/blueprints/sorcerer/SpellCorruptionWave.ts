@@ -18,6 +18,8 @@ export const spellCorruptionWave: Partial<ISpell> = {
   key: SpellsBlueprint.CorruptionWave,
   name: "Corruption Wave",
   description: "Unleashes a dark, spiraling wave of energy that radiates outward from the caste",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/corruption-wave.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "mornië naltalma",
   manaCost: 130,
