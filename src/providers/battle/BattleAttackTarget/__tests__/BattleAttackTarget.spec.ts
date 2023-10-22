@@ -108,6 +108,8 @@ describe("PVP battle", () => {
     targetCharacter.class = CharacterClass.Warrior;
 
     (await Character.findByIdAndUpdate(targetCharacter._id, targetCharacter).lean()) as ICharacter;
+
+    jest.clearAllMocks();
   });
 
   it("should NOT hit a target if attacker has melee attack type and target is out of range", async () => {
