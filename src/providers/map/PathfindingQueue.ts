@@ -2,16 +2,16 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { Job, Queue, Worker } from "bullmq";
-import { provide } from "inversify-binding-decorators";
 import { Pathfinder } from "./Pathfinder";
 import { PathfindingResults } from "./PathfindingResults";
 
-@provide(PathfindingQueue)
+@provideSingleton(PathfindingQueue)
 export class PathfindingQueue {
-  private queue: Queue;
-  private worker: Worker;
+  private queue: Queue | null = null;
+  private worker: Worker | null = null;
   private connection;
 
   constructor(
@@ -21,12 +21,14 @@ export class PathfindingQueue {
     private locker: Locker
   ) {}
 
-  public init(): void {
+  public async init(): Promise<void> {
     if (appEnv.general.IS_UNIT_TEST) {
       return;
     }
 
     this.connection = this.redisManager.client;
+
+    await this.shutdown();
 
     this.queue = new Queue("pathfinding", {
       connection: this.connection,
@@ -63,21 +65,27 @@ export class PathfindingQueue {
       }
     );
 
-    this.worker.on("failed", (job, err) => {
+    this.worker.on("failed", async (job, err) => {
       console.log(`Pathfinding job ${job?.id} failed with error ${err.message}`);
+
+      await this.worker?.close();
+      this.worker = null;
     });
 
-    this.queue.on("error", (error) => {
+    this.queue.on("error", async (error) => {
       console.error("Error in the pathfindingQueue:", error);
+
+      await this.queue?.close();
+      this.queue = null;
     });
   }
 
   public async clearAllJobs(): Promise<void> {
     if (!this.connection || !this.queue || !this.worker) {
-      this.init();
+      await this.init();
     }
 
-    const jobs = await this.queue.getJobs(["waiting", "active", "delayed", "paused"]);
+    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
     for (const job of jobs) {
       try {
         await job?.remove();
@@ -96,7 +104,7 @@ export class PathfindingQueue {
     endGridY: number
   ): Promise<Job | undefined> {
     if (!this.connection || !this.queue || !this.worker) {
-      this.init();
+      await this.init();
     }
 
     try {
@@ -106,7 +114,7 @@ export class PathfindingQueue {
         return;
       }
 
-      return await this.queue.add(
+      return await this.queue?.add(
         "pathfindingJob",
         { npc, target, startGridX, startGridY, endGridX, endGridY },
         {
@@ -124,5 +132,7 @@ export class PathfindingQueue {
   public async shutdown(): Promise<void> {
     await this.queue?.close();
     await this.worker?.close();
+    this.queue = null;
+    this.worker = null;
   }
 }

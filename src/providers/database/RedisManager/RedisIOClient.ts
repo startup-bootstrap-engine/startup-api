@@ -35,9 +35,10 @@ export class RedisIOClient {
         this.client.on("error", (err) => {
           console.log("❌ Redis error:", err);
 
+          this.client?.disconnect();
+          this.client?.removeAllListeners("error");
+
           this.client = null;
-          this.client.disconnect();
-          this.client.removeAllListeners("error");
 
           reject(err);
         });
@@ -53,7 +54,7 @@ export class RedisIOClient {
         resolve(this.client);
       } catch (error) {
         if (!appEnv.general.IS_UNIT_TEST) {
-          this.client.removeAllListeners("error");
+          this.client?.removeAllListeners("error");
         }
 
         console.log("❌ Redis initialization error: ", error);
@@ -69,7 +70,7 @@ export class RedisIOClient {
       const clientList = await this.client.client("LIST"); // Assuming this.client is the IORedis client
       clientCount = clientList.split("\n").length - 1; // Each client info is separated by a newline
 
-      console.log("Redis - Total connected clients: ", clientCount);
+      console.log("📕 Redis - Total connected clients: ", clientCount);
 
       this.newRelic.trackMetric(
         NewRelicMetricCategory.Count,

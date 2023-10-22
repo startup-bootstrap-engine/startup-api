@@ -84,6 +84,9 @@ export class ServerBootstrap {
       await this.hitTarget.shutdown();
       await this.pathfindingQueue.shutdown();
       await this.itemUseCycleQueue.shutdown();
+      await this.npcBattleCycleQueue.shutdown();
+      await this.npcCycleQueue.shutdown();
+      await this.characterMonitorQueue.shutdown();
     };
 
     process.on("SIGTERM", async () => {

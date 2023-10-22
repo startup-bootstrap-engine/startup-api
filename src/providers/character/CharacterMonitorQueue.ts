@@ -18,8 +18,8 @@ type CallbackRecord = Record<string, CharacterMonitorCallback>;
 
 @provideSingleton(CharacterMonitorQueue)
 export class CharacterMonitorQueue {
-  private queue: Queue<any, any, string>;
-  private worker: Worker;
+  private queue: Queue<any, any, string> | null = null;
+  private worker: Worker | null = null;
   private connection;
   private charactersCallbacks = new Map<string, CallbackRecord>();
   private queueName: string = `character-monitor-queue-${uuidv4()}-${
@@ -28,8 +28,10 @@ export class CharacterMonitorQueue {
 
   constructor(private newRelic: NewRelic, private locker: Locker, private redisManager: RedisManager) {}
 
-  public init(): void {
+  public async init(): Promise<void> {
     this.connection = this.redisManager.client;
+
+    await this.shutdown();
 
     this.queue = new Queue(this.queueName, {
       connection: this.connection,
@@ -41,6 +43,9 @@ export class CharacterMonitorQueue {
         const { character, callbackId, intervalMs } = job.data;
 
         if (!character.isOnline) {
+          await this.locker.unlock(`character-monitor-queue-${character._id}-callback-${callbackId}`);
+          await this.unwatch(callbackId, character);
+
           return;
         }
 
@@ -65,12 +70,16 @@ export class CharacterMonitorQueue {
     );
 
     if (!appEnv.general.IS_UNIT_TEST) {
-      this.worker.on("failed", (job, err) => {
+      this.worker.on("failed", async (job, err) => {
         console.log(`${this.queueName} job ${job?.id} failed with error ${err.message}`);
+
+        await this.worker?.close();
       });
 
-      this.queue.on("error", (error) => {
+      this.queue.on("error", async (error) => {
         console.error(`Error in ${this.queueName}`, error);
+
+        await this.queue?.close();
       });
     }
   }
@@ -83,7 +92,7 @@ export class CharacterMonitorQueue {
     intervalMs: number = 7000
   ): Promise<void> {
     if (!this.connection || !this.queue || !this.worker) {
-      this.init();
+      await this.init();
     }
 
     const canProceed = await this.locker.lock(`character-monitor-queue-${character._id}-callback-${callbackId}`);
@@ -160,10 +169,10 @@ export class CharacterMonitorQueue {
 
   public async clearAllJobs(): Promise<void> {
     if (!this.connection || !this.queue || !this.worker) {
-      this.init();
+      await this.init();
     }
 
-    const jobs = await this.queue.getJobs(["waiting", "active", "delayed", "paused"]);
+    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
     for (const job of jobs) {
       try {
         await job?.remove();
@@ -176,10 +185,12 @@ export class CharacterMonitorQueue {
   public async shutdown(): Promise<void> {
     await this.queue?.close();
     await this.worker?.close();
+    this.queue = null;
+    this.worker = null;
   }
 
   private async isJobBeingProcessed(callbackId: string): Promise<boolean> {
-    const existingJobs = await this.queue.getJobs(["waiting", "active", "delayed"]);
+    const existingJobs = (await this.queue?.getJobs(["waiting", "active", "delayed"])) ?? [];
     const isJobExisting = existingJobs.some((job) => job?.data?.callbackId === callbackId);
 
     if (isJobExisting) {
@@ -195,7 +206,11 @@ export class CharacterMonitorQueue {
       return;
     }
 
-    await this.queue.add(
+    if (!this.queue) {
+      await this.init();
+    }
+
+    await this.queue?.add(
       this.queueName,
       {
         character,
@@ -218,6 +233,11 @@ export class CharacterMonitorQueue {
     console.log("CharacterMonitorCallback: ", character.name, `(${character._id.toString()})`, callbackId, intervalMs);
 
     const callback = characterCallbacks?.[callbackId];
+
+    if (!callback) {
+      await this.unwatch(callbackId, character);
+      return;
+    }
 
     if (callback) {
       const updatedCharacter = (await Character.findOne({ _id: character._id }).lean({
