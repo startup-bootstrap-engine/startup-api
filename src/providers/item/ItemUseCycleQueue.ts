@@ -22,44 +22,64 @@ export class ItemUseCycleQueue {
   constructor(private redisManager: RedisManager) {}
 
   public init(): void {
-    this.connection = this.redisManager.client;
-
-    if (this.queue && this.worker) {
-      return;
+    if (!this.connection) {
+      this.connection = this.redisManager.client;
     }
 
-    this.queue = new Queue(this.queueName, {
-      connection: this.connection,
-    });
-
-    this.worker = new Worker(
-      this.queueName,
-      async (job) => {
-        let { characterId, itemKey, iterations, intervalDurationMs } = job.data;
-
-        try {
-          const callback = this.itemCallbacks.get(`${characterId}-${itemKey}`);
-
-          if (!callback) {
-            return;
-          }
-
-          await callback();
-
-          iterations--;
-
-          if (iterations > 0) {
-            await this.add(characterId, itemKey, iterations, intervalDurationMs);
-          }
-        } catch (err) {
-          console.error("Error processing item-use-cycle queue", err);
-          throw err;
-        }
-      },
-      {
+    if (!this.queue) {
+      this.queue = new Queue(this.queueName, {
         connection: this.connection,
+      });
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.queue.on("error", async (error) => {
+          console.error("Error in the ItemUseCycleQueue:", error);
+
+          await this.queue?.close();
+          this.queue = null;
+        });
       }
-    );
+    }
+
+    if (!this.worker) {
+      this.worker = new Worker(
+        this.queueName,
+        async (job) => {
+          let { characterId, itemKey, iterations, intervalDurationMs } = job.data;
+
+          try {
+            const callback = this.itemCallbacks.get(`${characterId}-${itemKey}`);
+
+            if (!callback) {
+              return;
+            }
+
+            await callback();
+
+            iterations--;
+
+            if (iterations > 0) {
+              await this.add(characterId, itemKey, iterations, intervalDurationMs);
+            }
+          } catch (err) {
+            console.error("Error processing item-use-cycle queue", err);
+            throw err;
+          }
+        },
+        {
+          connection: this.connection,
+        }
+      );
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.worker.on("failed", async (job, err) => {
+          console.log(`ItemUseCycle job ${job?.id} failed with error ${err.message}`);
+
+          await this.worker?.close();
+          this.worker = null;
+        });
+      }
+    }
 
     if (!appEnv.general.IS_UNIT_TEST) {
       this.worker.on("failed", async (job, err) => {
@@ -68,19 +88,12 @@ export class ItemUseCycleQueue {
         await this.worker?.close();
         this.worker = null;
       });
-
-      this.queue.on("error", async (error) => {
-        console.error("Error in the ItemUseCycleQueue:", error);
-
-        await this.queue?.close();
-        this.queue = null;
-      });
     }
   }
 
   public async clearAllJobs(): Promise<void> {
     if (!this.connection || !this.queue || !this.worker) {
-      await this.init();
+      this.init();
     }
 
     const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
@@ -124,7 +137,7 @@ export class ItemUseCycleQueue {
     intervalDurationMs: number
   ): Promise<void> {
     if (!this.connection || !this.queue || !this.worker) {
-      await this.init();
+      this.init();
     }
 
     await this.queue?.add(

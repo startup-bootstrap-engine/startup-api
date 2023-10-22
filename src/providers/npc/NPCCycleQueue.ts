@@ -45,47 +45,51 @@ export class NPCCycleQueue {
   ) {}
 
   public init(): void {
-    if (this.queue && this.worker) {
-      return;
+    if (!this.connection) {
+      this.connection = this.redisManager.client;
     }
 
-    this.connection = this.redisManager.client;
-
-    this.queue = new Queue("npc-cycle-queue", {
-      connection: this.connection,
-    });
-
-    this.worker = new Worker(
-      "npc-cycle-queue",
-      async (job) => {
-        const { npc, npcSkills, isFirstCycle } = job.data;
-
-        try {
-          await this.execNpcCycle(npc, npcSkills, isFirstCycle);
-        } catch (err) {
-          console.error(`Error processing npc-cycle-queue for NPC ${npc.key}:`, err);
-          throw err;
-        }
-      },
-      {
+    if (!this.queue) {
+      this.queue = new Queue("npc-cycle-queue", {
         connection: this.connection,
+      });
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.queue.on("error", async (error) => {
+          console.error("Error in the npc-cycle-queue :", error);
+
+          await this.queue?.close();
+          this.queue = null;
+        });
       }
-    );
+    }
 
-    if (!appEnv.general.IS_UNIT_TEST) {
-      this.worker.on("failed", async (job, err) => {
-        console.log(`npc-cycle-queue job ${job?.id} failed with error ${err.message}`);
+    if (!this.worker) {
+      this.worker = new Worker(
+        "npc-cycle-queue",
+        async (job) => {
+          const { npc, npcSkills, isFirstCycle } = job.data;
 
-        await this.worker?.close();
-        this.worker = null;
-      });
+          try {
+            await this.execNpcCycle(npc, npcSkills, isFirstCycle);
+          } catch (err) {
+            console.error(`Error processing npc-cycle-queue for NPC ${npc.key}:`, err);
+            throw err;
+          }
+        },
+        {
+          connection: this.connection,
+        }
+      );
 
-      this.queue.on("error", async (error) => {
-        console.error("Error in the npc-cycle-queue :", error);
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.worker.on("failed", async (job, err) => {
+          console.log(`npc-cycle-queue job ${job?.id} failed with error ${err.message}`);
 
-        await this.queue?.close();
-        this.queue = null;
-      });
+          await this.worker?.close();
+          this.worker = null;
+        });
+      }
     }
   }
 
@@ -97,7 +101,7 @@ export class NPCCycleQueue {
     }
 
     if (!this.connection || !this.queue || !this.worker) {
-      await this.init();
+      this.init();
     }
 
     const isJobBeingProcessed = await this.isJobBeingProcessed(npc._id);

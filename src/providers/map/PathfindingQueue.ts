@@ -26,65 +26,71 @@ export class PathfindingQueue {
       return;
     }
 
-    if (this.queue && this.worker) {
-      return;
+    if (!this.connection) {
+      this.connection = this.redisManager.client;
     }
 
-    this.connection = this.redisManager.client;
-
-    this.queue = new Queue("pathfinding", {
-      connection: this.connection,
-    });
-
-    this.worker = new Worker(
-      "pathfinding",
-      async (job) => {
-        const { npc, target, startGridX, startGridY, endGridX, endGridY } = job.data;
-
-        try {
-          const path = await this.pathfinder.findShortestPath(
-            npc as INPC,
-            target,
-            npc.scene,
-            startGridX,
-            startGridY,
-            endGridX,
-            endGridY
-          );
-
-          if (!path) {
-            return;
-          }
-
-          await this.pathfindingResults.setResult(job.id!, path);
-        } catch (err) {
-          console.error(`Error processing pathfinding for NPC ${npc.key}:`, err);
-          throw err;
-        }
-      },
-      {
+    if (!this.queue) {
+      this.queue = new Queue("pathfinding", {
         connection: this.connection,
+      });
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.queue.on("error", async (error) => {
+          console.error("Error in the pathfindingQueue:", error);
+
+          await this.queue?.close();
+          this.queue = null;
+        });
       }
-    );
+    }
 
-    this.worker.on("failed", async (job, err) => {
-      console.log(`Pathfinding job ${job?.id} failed with error ${err.message}`);
+    if (!this.worker) {
+      this.worker = new Worker(
+        "pathfinding",
+        async (job) => {
+          const { npc, target, startGridX, startGridY, endGridX, endGridY } = job.data;
 
-      await this.worker?.close();
-      this.worker = null;
-    });
+          try {
+            const path = await this.pathfinder.findShortestPath(
+              npc as INPC,
+              target,
+              npc.scene,
+              startGridX,
+              startGridY,
+              endGridX,
+              endGridY
+            );
 
-    this.queue.on("error", async (error) => {
-      console.error("Error in the pathfindingQueue:", error);
+            if (!path) {
+              return;
+            }
 
-      await this.queue?.close();
-      this.queue = null;
-    });
+            await this.pathfindingResults.setResult(job.id!, path);
+          } catch (err) {
+            console.error(`Error processing pathfinding for NPC ${npc.key}:`, err);
+            throw err;
+          }
+        },
+        {
+          connection: this.connection,
+        }
+      );
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.worker.on("failed", async (job, err) => {
+          console.log(`Pathfinding job ${job?.id} failed with error ${err.message}`);
+
+          await this.worker?.close();
+          this.worker = null;
+        });
+      }
+    }
   }
 
   public async clearAllJobs(): Promise<void> {
     if (!this.connection || !this.queue || !this.worker) {
-      await this.init();
+      this.init();
     }
 
     const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
@@ -106,7 +112,7 @@ export class PathfindingQueue {
     endGridY: number
   ): Promise<Job | undefined> {
     if (!this.connection || !this.queue || !this.worker) {
-      await this.init();
+      this.init();
     }
 
     try {

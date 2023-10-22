@@ -8,6 +8,7 @@ import { CleanupBloodCrons } from "./CleanupBloodCrons";
 import { CleanupBodyCrons } from "./CleanupBodyCrons";
 import { CleanupEmptyBodyCrons } from "./CleanupEmptyBodies";
 import { ControlTimeCrons } from "./ControlTimeCrons";
+import { DatabaseMonitorCrons } from "./DatabaseMonitorCrons";
 import { DeleteChatCrons } from "./DeleteChatCrons";
 import { ItemDeleteCrons } from "./ItemDeleteCrons";
 import { MacroCaptchaCrons } from "./MacroCaptchaCrons";
@@ -34,7 +35,8 @@ export class Cronjob {
     private totalAvailableGold: TotalAvailableGold,
     private marketplaceCrons: MarketplaceCrons,
     private rankingCrons: RankingCrons,
-    private redisCrons: RedisCrons
+    private redisCrons: RedisCrons,
+    private databaseMonitorCrons: DatabaseMonitorCrons
   ) {}
 
   public start(): void {
@@ -59,6 +61,7 @@ export class Cronjob {
         this.marketplaceCrons.schedule();
         this.totalAvailableGold.schedule();
         this.redisCrons.schedule();
+        this.databaseMonitorCrons.schedule();
         break;
       case EnvType.Staging:
       case EnvType.Production:
@@ -78,6 +81,7 @@ export class Cronjob {
           this.marketplaceCrons.schedule();
           this.rankingCrons.schedule();
           this.redisCrons.schedule();
+          this.databaseMonitorCrons.schedule();
         }
         break;
     }

@@ -37,56 +37,61 @@ export class NPCBattleCycleQueue {
   ) {}
 
   public init(): void {
-    if (this.queue && this.worker) {
-      return;
+    if (!this.connection) {
+      this.connection = this.redisManager.client;
     }
-    this.connection = this.redisManager.client;
 
-    this.queue = new Queue("npc-battle-cycle-queue", {
-      connection: this.connection,
-    });
+    if (!this.queue) {
+      this.queue = new Queue("npc-battle-cycle-queue", {
+        connection: this.connection,
+      });
 
-    this.worker = new Worker(
-      "npc-battle-cycle-queue",
-      async (job) => {
-        const { npc, npcSkills } = job.data;
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.queue.on("error", async (error) => {
+          console.error("Error in the npc-battle-cycle-queue :", error);
 
-        try {
-          await this.execBattleCycle(npc, npcSkills);
-        } catch (err) {
-          console.error(`Error processing npc-battle-cycle-queue for NPC ${npc.key}:`, err);
+          await this.queue?.close();
+          this.queue = null;
+        });
+      }
+    }
+
+    if (!this.worker) {
+      this.worker = new Worker(
+        "npc-battle-cycle-queue",
+        async (job) => {
+          const { npc, npcSkills } = job.data;
+
+          try {
+            await this.execBattleCycle(npc, npcSkills);
+          } catch (err) {
+            console.error(`Error processing npc-battle-cycle-queue for NPC ${npc.key}:`, err);
+            await this.locker.unlock(`npc-${job?.data?.npcId}-npc-battle-cycle`);
+
+            throw err;
+          }
+        },
+        {
+          connection: this.connection,
+        }
+      );
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.worker.on("failed", async (job, err) => {
+          console.log(`npc-battle-cycle-queue job ${job?.id} failed with error ${err.message}`);
           await this.locker.unlock(`npc-${job?.data?.npcId}-npc-battle-cycle`);
 
-          throw err;
-        }
-      },
-      {
-        connection: this.connection,
+          await this.worker?.close();
+          this.worker = null;
+        });
       }
-    );
-
-    if (!appEnv.general.IS_UNIT_TEST) {
-      this.worker.on("failed", async (job, err) => {
-        console.log(`npc-battle-cycle-queue job ${job?.id} failed with error ${err.message}`);
-        await this.locker.unlock(`npc-${job?.data?.npcId}-npc-battle-cycle`);
-
-        await this.worker?.close();
-        this.worker = null;
-      });
-
-      this.queue.on("error", async (error) => {
-        console.error("Error in the npc-battle-cycle-queue :", error);
-
-        await this.queue?.close();
-        this.queue = null;
-      });
     }
   }
 
   @TrackNewRelicTransaction()
   public async add(npc: INPC, npcSkills: ISkill): Promise<void> {
     if (!this.connection || !this.queue || !this.worker) {
-      await this.init();
+      this.init();
     }
 
     const canProceed = await this.locker.lock(`npc-${npc._id}-npc-add-battle-queue`);
@@ -130,7 +135,7 @@ export class NPCBattleCycleQueue {
 
   public async clearAllJobs(): Promise<void> {
     if (!this.connection || !this.queue || !this.worker) {
-      await this.init();
+      this.init();
     }
 
     const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];

@@ -29,60 +29,64 @@ export class CharacterMonitorQueue {
   constructor(private newRelic: NewRelic, private locker: Locker, private redisManager: RedisManager) {}
 
   public init(): void {
-    if (this.queue && this.worker) {
-      return;
+    if (!this.connection) {
+      this.connection = this.redisManager.client;
     }
 
-    this.connection = this.redisManager.client;
-
-    this.queue = new Queue(this.queueName, {
-      connection: this.connection,
-    });
-
-    this.worker = new Worker(
-      this.queueName,
-      async (job) => {
-        const { character, callbackId, intervalMs } = job.data;
-
-        if (!character.isOnline) {
-          await this.locker.unlock(`character-monitor-queue-${character._id}-callback-${callbackId}`);
-          await this.unwatch(callbackId, character);
-
-          return;
-        }
-
-        try {
-          await this.newRelic.trackMetric(
-            NewRelicMetricCategory.Count,
-            NewRelicSubCategory.Characters,
-            "CharacterMonitor",
-            1
-          );
-
-          await this.execMonitorCallback(character, callbackId, intervalMs);
-        } catch (err) {
-          await this.locker.unlock(`character-monitor-queue-${character._id}-callback-${callbackId}`);
-          console.error("Error processing character monitor queue", err);
-          throw err;
-        }
-      },
-      {
+    if (!this.queue) {
+      this.queue = new Queue(this.queueName, {
         connection: this.connection,
+      });
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.queue.on("error", async (error) => {
+          console.error(`Error in ${this.queueName}`, error);
+
+          await this.queue?.close();
+        });
       }
-    );
+    }
 
-    if (!appEnv.general.IS_UNIT_TEST) {
-      this.worker.on("failed", async (job, err) => {
-        console.log(`${this.queueName} job ${job?.id} failed with error ${err.message}`);
+    if (!this.worker) {
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.worker = new Worker(
+          this.queueName,
+          async (job) => {
+            const { character, callbackId, intervalMs } = job.data;
 
-        await this.worker?.close();
-      });
+            if (!character.isOnline) {
+              await this.locker.unlock(`character-monitor-queue-${character._id}-callback-${callbackId}`);
+              await this.unwatch(callbackId, character);
 
-      this.queue.on("error", async (error) => {
-        console.error(`Error in ${this.queueName}`, error);
+              return;
+            }
 
-        await this.queue?.close();
-      });
+            try {
+              await this.newRelic.trackMetric(
+                NewRelicMetricCategory.Count,
+                NewRelicSubCategory.Characters,
+                "CharacterMonitor",
+                1
+              );
+
+              await this.execMonitorCallback(character, callbackId, intervalMs);
+            } catch (err) {
+              await this.locker.unlock(`character-monitor-queue-${character._id}-callback-${callbackId}`);
+              console.error("Error processing character monitor queue", err);
+              throw err;
+            }
+          },
+          {
+            connection: this.connection,
+          }
+        );
+
+        this.worker.on("failed", async (job, err) => {
+          console.log(`${this.queueName} job ${job?.id} failed with error ${err.message}`);
+
+          await this.worker?.close();
+        });
+      }
     }
   }
 
@@ -94,7 +98,7 @@ export class CharacterMonitorQueue {
     intervalMs: number = 7000
   ): Promise<void> {
     if (!this.connection || !this.queue || !this.worker) {
-      await this.init();
+      this.init();
     }
 
     const canProceed = await this.locker.lock(`character-monitor-queue-${character._id}-callback-${callbackId}`);
@@ -171,7 +175,7 @@ export class CharacterMonitorQueue {
 
   public async clearAllJobs(): Promise<void> {
     if (!this.connection || !this.queue || !this.worker) {
-      await this.init();
+      this.init();
     }
 
     const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
@@ -209,7 +213,7 @@ export class CharacterMonitorQueue {
     }
 
     if (!this.queue) {
-      await this.init();
+      this.init();
     }
 
     await this.queue?.add(

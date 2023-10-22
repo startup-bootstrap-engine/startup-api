@@ -25,6 +25,7 @@ import {
 
 import { appEnv } from "@providers/config/env";
 import { BONUS_DAMAGE_MULTIPLIER } from "@providers/constants/BattleConstants";
+import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Queue, Worker } from "bullmq";
 import random from "lodash/random";
@@ -38,6 +39,7 @@ export class HitTarget {
   private npcQueue: Queue | null = null;
   private characterQueue: Queue | null = null;
   private worker: Worker | null = null;
+  private connection: any;
 
   constructor(
     private battleEvent: BattleEvent,
@@ -52,84 +54,88 @@ export class HitTarget {
     private characterMovementWarn: CharacterMovementWarn,
     private socketMessaging: SocketMessaging,
     private entityEffectUse: EntityEffectUse,
-    private battleDamageCalculator: BattleDamageCalculator
-  ) {
+    private battleDamageCalculator: BattleDamageCalculator,
+    private redisManager: RedisManager
+  ) {}
+
+  public init(): void {
     if (appEnv.general.IS_UNIT_TEST) {
       return;
     }
 
-    if (this.npcQueue && this.characterQueue && this.worker) {
-      return;
+    if (!this.connection) {
+      this.connection = this.redisManager.client;
     }
 
-    this.npcQueue = new Queue("npc-hit", {
-      connection: {
-        host: appEnv.database.REDIS_CONTAINER,
-        port: Number(appEnv.database.REDIS_PORT),
-      },
-    });
-    this.characterQueue = new Queue("character-hit", {
-      connection: {
-        host: appEnv.database.REDIS_CONTAINER,
-        port: Number(appEnv.database.REDIS_PORT),
-      },
-    });
+    if (!this.npcQueue) {
+      this.npcQueue = new Queue("npc-hit", {
+        connection: this.connection,
+      });
 
-    this.worker = new Worker(
-      "character-hit",
-      async (job) => {
-        const { attacker, target, magicAttack, bonusDamage, spellHit } = job.data;
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.npcQueue.on("error", async (error) => {
+          console.error("Error in the npcQueue:", error);
 
-        await this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
-      },
-      {
-        connection: {
-          host: appEnv.database.REDIS_CONTAINER,
-          port: Number(appEnv.database.REDIS_PORT),
-        },
+          await this.npcQueue?.close();
+          this.npcQueue = null;
+        });
       }
-    );
-    this.worker = new Worker(
-      "npc-hit",
-      async (job) => {
-        try {
+    }
+
+    if (!this.characterQueue) {
+      this.characterQueue = new Queue("character-hit", {
+        connection: this.connection,
+      });
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.characterQueue.on("error", async (error) => {
+          console.error("Error in the characterQueue:", error);
+
+          await this.characterQueue?.close();
+          this.characterQueue = null;
+        });
+      }
+    }
+
+    if (!this.worker) {
+      this.worker = new Worker(
+        "character-hit",
+        async (job) => {
           const { attacker, target, magicAttack, bonusDamage, spellHit } = job.data;
 
           await this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
-        } catch (error) {
-          console.error(error);
-        }
-      },
-      {
-        connection: {
-          host: appEnv.database.REDIS_CONTAINER,
-          port: Number(appEnv.database.REDIS_PORT),
         },
+        {
+          connection: this.connection,
+        }
+      );
+      this.worker = new Worker(
+        "npc-hit",
+        async (job) => {
+          try {
+            const { attacker, target, magicAttack, bonusDamage, spellHit } = job.data;
+
+            await this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
+          } catch (error) {
+            console.error(error);
+          }
+        },
+        {
+          connection: this.connection,
+        }
+      );
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.worker.on("failed", async (job, err) => {
+          console.log(`HitTarget Job ${job?.id} failed with error ${err.message}`);
+          // log details
+          console.log(job);
+
+          await this.worker?.close();
+          this.worker = null;
+        });
       }
-    );
-
-    this.npcQueue.on("error", async (error) => {
-      console.error("Error in the npcQueue:", error);
-
-      await this.npcQueue?.close();
-      this.npcQueue = null;
-    });
-
-    this.characterQueue.on("error", async (error) => {
-      console.error("Error in the characterQueue:", error);
-
-      await this.characterQueue?.close();
-      this.characterQueue = null;
-    });
-
-    this.worker.on("failed", async (job, err) => {
-      console.log(`HitTarget Job ${job?.id} failed with error ${err.message}`);
-      // log details
-      console.log(job);
-
-      await this.worker?.close();
-      this.worker = null;
-    });
+    }
   }
 
   @TrackNewRelicTransaction()
@@ -143,6 +149,10 @@ export class HitTarget {
     if (appEnv.general.IS_UNIT_TEST) {
       await this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
       return;
+    }
+
+    if (!this.npcQueue || !this.characterQueue || !this.worker || !this.connection) {
+      this.init();
     }
 
     if (!attacker || !target) {
@@ -188,6 +198,10 @@ export class HitTarget {
 
   public async clearAllQueueJobs(): Promise<void> {
     try {
+      if (!this.npcQueue || !this.characterQueue) {
+        this.init();
+      }
+
       const jobs = (await this.npcQueue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
       for (const job of jobs) {
         await job?.remove();
