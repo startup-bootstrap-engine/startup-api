@@ -3,16 +3,16 @@ import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { EnvType } from "@rpg-engine/shared";
-import { Job, Queue, Worker } from "bullmq";
+import { Queue, Worker } from "bullmq";
 import { v4 as uuidv4 } from "uuid";
 
 type CallbackRecord = () => void;
 
 @provideSingleton(ItemUseCycleQueue)
 export class ItemUseCycleQueue {
-  private queue: Queue;
-  private worker: Worker;
-  private itemCallbacks = new Map<string, CallbackRecord>();
+  public itemCallbacks = new Map<string, CallbackRecord>();
+  private queue: Queue | null = null;
+  private worker: Worker | null = null;
   private connection: any;
 
   private queueName: string = `item-use-cycle-${uuidv4()}-${
@@ -22,58 +22,81 @@ export class ItemUseCycleQueue {
   constructor(private redisManager: RedisManager) {}
 
   public init(): void {
-    this.connection = this.redisManager.client;
+    if (!this.connection) {
+      this.connection = this.redisManager.client;
+    }
 
-    this.queue = new Queue(this.queueName, {
-      connection: this.connection,
-    });
-
-    this.worker = new Worker(
-      this.queueName,
-      async (job) => {
-        let { characterId, itemKey, iterations, intervalDurationMs } = job.data;
-
-        try {
-          const callback = this.itemCallbacks.get(`${characterId}-${itemKey}`);
-
-          if (!callback) {
-            return;
-          }
-
-          await callback();
-
-          iterations--;
-
-          if (iterations > 0) {
-            await this.add(characterId, itemKey, iterations, intervalDurationMs);
-          }
-        } catch (err) {
-          console.error("Error processing item-use-cycle queue", err);
-          throw err;
-        }
-      },
-      {
+    if (!this.queue) {
+      this.queue = new Queue(this.queueName, {
         connection: this.connection,
-      }
-    );
-
-    if (!appEnv.general.IS_UNIT_TEST) {
-      this.worker.on("failed", (job, err) => {
-        console.log(`ItemUseCycle job ${job?.id} failed with error ${err.message}`);
       });
 
-      this.queue.on("error", (error) => {
-        console.error("Error in the ItemUseCycleQueue:", error);
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.queue.on("error", async (error) => {
+          console.error("Error in the ItemUseCycleQueue:", error);
+
+          await this.queue?.close();
+          this.queue = null;
+        });
+      }
+    }
+
+    if (!this.worker) {
+      this.worker = new Worker(
+        this.queueName,
+        async (job) => {
+          let { characterId, itemKey, iterations, intervalDurationMs } = job.data;
+
+          try {
+            const callback = this.itemCallbacks.get(`${characterId}-${itemKey}`);
+
+            if (!callback) {
+              return;
+            }
+
+            await callback();
+
+            iterations--;
+
+            if (iterations > 0) {
+              await this.add(characterId, itemKey, iterations, intervalDurationMs);
+            }
+          } catch (err) {
+            console.error("Error processing item-use-cycle queue", err);
+            throw err;
+          }
+        },
+        {
+          connection: this.connection,
+        }
+      );
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.worker.on("failed", async (job, err) => {
+          console.log(`ItemUseCycle job ${job?.id} failed with error ${err.message}`);
+
+          await this.worker?.close();
+          this.worker = null;
+        });
+      }
+    }
+
+    if (!appEnv.general.IS_UNIT_TEST) {
+      this.worker.on("failed", async (job, err) => {
+        console.log(`ItemUseCycle job ${job?.id} failed with error ${err.message}`);
+
+        await this.worker?.close();
+        this.worker = null;
       });
     }
   }
 
   public async clearAllJobs(): Promise<void> {
-    if (!this.connection) {
+    if (!this.connection || !this.queue || !this.worker) {
       this.init();
     }
 
-    const jobs = await this.queue.getJobs(["waiting", "active", "delayed", "paused"]);
+    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
     for (const job of jobs) {
       try {
         await job?.remove();
@@ -84,8 +107,11 @@ export class ItemUseCycleQueue {
   }
 
   public async shutdown(): Promise<void> {
-    await this.queue.close();
-    await this.worker.close();
+    await this.queue?.close();
+    await this.worker?.close();
+
+    this.queue = null;
+    this.worker = null;
   }
 
   @TrackNewRelicTransaction()
@@ -109,12 +135,12 @@ export class ItemUseCycleQueue {
     itemKey: string,
     iterations: number,
     intervalDurationMs: number
-  ): Promise<Job> {
-    if (!this.connection) {
+  ): Promise<void> {
+    if (!this.connection || !this.queue || !this.worker) {
       this.init();
     }
 
-    return await this.queue.add(
+    await this.queue?.add(
       this.queueName,
       {
         characterId,

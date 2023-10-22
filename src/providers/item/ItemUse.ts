@@ -133,6 +133,11 @@ export class ItemUse {
       await this.newRelic.trackTransaction(NewRelicTransactionCategory.Interval, "ItemUseCycle", async () => {
         const character = await Character.findOne({ _id: characterId });
 
+        if (!character?.isOnline) {
+          this.itemUseCycleQueue.itemCallbacks.delete(`${characterId}-${bluePrintItem.key}`); // this will stop the watch
+          return;
+        }
+
         if (character) {
           try {
             if (healthRecovery) {
@@ -149,10 +154,6 @@ export class ItemUse {
         }
       });
     });
-
-    // new ItemUseCycle(async () => {
-
-    // }, intervals);
   }
 
   private async getInventoryContainer(character: ICharacter): Promise<IItemContainer | null> {

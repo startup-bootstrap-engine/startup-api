@@ -24,8 +24,8 @@ import { NPCMovementStopped } from "./movement/NPCMovementStopped";
 
 @provideSingleton(NPCCycleQueue)
 export class NPCCycleQueue {
-  private queue: Queue<any, any, string>;
-  private worker: Worker;
+  private queue: Queue<any, any, string> | null = null;
+  private worker: Worker | null = null;
   private connection: any;
 
   constructor(
@@ -45,37 +45,51 @@ export class NPCCycleQueue {
   ) {}
 
   public init(): void {
-    this.connection = this.redisManager.client;
+    if (!this.connection) {
+      this.connection = this.redisManager.client;
+    }
 
-    this.queue = new Queue("npc-cycle-queue", {
-      connection: this.connection,
-    });
-
-    this.worker = new Worker(
-      "npc-cycle-queue",
-      async (job) => {
-        const { npc, npcSkills, isFirstCycle } = job.data;
-
-        try {
-          await this.execNpcCycle(npc, npcSkills, isFirstCycle);
-        } catch (err) {
-          console.error(`Error processing npc-cycle-queue for NPC ${npc.key}:`, err);
-          throw err;
-        }
-      },
-      {
+    if (!this.queue) {
+      this.queue = new Queue("npc-cycle-queue", {
         connection: this.connection,
+      });
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.queue.on("error", async (error) => {
+          console.error("Error in the npc-cycle-queue :", error);
+
+          await this.queue?.close();
+          this.queue = null;
+        });
       }
-    );
+    }
 
-    if (!appEnv.general.IS_UNIT_TEST) {
-      this.worker.on("failed", (job, err) => {
-        console.log(`npc-cycle-queue job ${job?.id} failed with error ${err.message}`);
-      });
+    if (!this.worker) {
+      this.worker = new Worker(
+        "npc-cycle-queue",
+        async (job) => {
+          const { npc, npcSkills, isFirstCycle } = job.data;
 
-      this.queue.on("error", (error) => {
-        console.error("Error in the npc-cycle-queue :", error);
-      });
+          try {
+            await this.execNpcCycle(npc, npcSkills, isFirstCycle);
+          } catch (err) {
+            console.error(`Error processing npc-cycle-queue for NPC ${npc.key}:`, err);
+            throw err;
+          }
+        },
+        {
+          connection: this.connection,
+        }
+      );
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.worker.on("failed", async (job, err) => {
+          console.log(`npc-cycle-queue job ${job?.id} failed with error ${err.message}`);
+
+          await this.worker?.close();
+          this.worker = null;
+        });
+      }
     }
   }
 
@@ -86,7 +100,7 @@ export class NPCCycleQueue {
       return;
     }
 
-    if (!this.connection) {
+    if (!this.connection || !this.queue || !this.worker) {
       this.init();
     }
 
@@ -96,7 +110,7 @@ export class NPCCycleQueue {
       return;
     }
 
-    await this.queue.add(
+    await this.queue?.add(
       "npc-cycle-queue",
       {
         npcId: npc._id,
@@ -114,10 +128,10 @@ export class NPCCycleQueue {
 
   public async clearAllJobs(): Promise<void> {
     if (!this.queue) {
-      this.init();
+      await this.init();
     }
 
-    const jobs = await this.queue.getJobs(["waiting", "active", "delayed", "paused"]);
+    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
     for (const job of jobs) {
       try {
         await job?.remove();
@@ -128,12 +142,14 @@ export class NPCCycleQueue {
   }
 
   public async shutdown(): Promise<void> {
-    await this.queue.close();
-    await this.worker.close();
+    await this.queue?.close();
+    await this.worker?.close();
+    this.queue = null;
+    this.worker = null;
   }
 
   private async isJobBeingProcessed(npcId: string): Promise<boolean> {
-    const existingJobs = await this.queue.getJobs(["waiting", "active", "delayed"]);
+    const existingJobs = (await this.queue?.getJobs(["waiting", "active", "delayed"])) ?? [];
     const isJobExisting = existingJobs.some((job) => job?.data?.npcId === npcId);
 
     if (isJobExisting) {
@@ -181,7 +197,6 @@ export class NPCCycleQueue {
 
   private async stop(npc: INPC): Promise<void> {
     await this.locker.unlock(`npc-${npc._id}-npc-cycle`);
-
     await this.npcFreezer.freezeNPC(npc, "NPCCycle stop");
   }
 

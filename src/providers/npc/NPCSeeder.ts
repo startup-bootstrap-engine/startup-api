@@ -48,6 +48,10 @@ export class NPCSeeder {
       if (!npcFound) {
         await this.createNewNPCWithSkills(multipliedNPCData);
       } else {
+        if (npcFound.isBehaviorEnabled) {
+          continue; // skip if already active...
+        }
+
         // if npc already exists, restart initial position
 
         // console.log(`🧍 Updating NPC ${NPCData.key} database data...`);
@@ -83,6 +87,8 @@ export class NPCSeeder {
       await this.locker.unlock(`npc-body-generation-${npc._id}`);
       await this.locker.unlock(`npc-${npc._id}-release-xp`);
       await this.locker.unlock(`npc-${npc._id}-record-xp`);
+      await this.locker.unlock(`npc-${npc._id}-npc-cycle`);
+      await this.locker.unlock(`npc-${npc._id}-npc-battle-cycle`);
 
       await this.inMemoryHashTable.delete("npc-force-pathfinding-calculation", npc._id);
 
@@ -95,6 +101,7 @@ export class NPCSeeder {
         targetCharacter: undefined,
         currentMovementType: npc.originalMovementType,
         xpToRelease: [],
+        isBehaviorEnabled: false,
       } as any;
 
       if (randomMaxHealth) {
@@ -163,6 +170,7 @@ export class NPCSeeder {
         health: npcHealth,
         maxHealth: npcHealth,
         skills: skills._id,
+        isBehaviorEnabled: false,
       });
       await newNPC.save();
 

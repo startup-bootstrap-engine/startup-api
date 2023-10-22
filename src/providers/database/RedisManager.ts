@@ -6,15 +6,30 @@ import { RedisBareClient } from "./RedisManager/RedisBareClient";
 import { RedisIOClient } from "./RedisManager/RedisIOClient";
 @provideSingleton(RedisManager)
 export class RedisManager {
-  public client: IORedis.Redis;
+  public client: IORedis.Redis | null = null;
 
   constructor(private redisBareClient: RedisBareClient, private redisIOClient: RedisIOClient) {}
 
   public async connect(): Promise<void> {
+    // if we do already have a client, just return it
+    if (this.client) {
+      return;
+    }
+
     if (appEnv.general.IS_UNIT_TEST) {
       this.client = await this.redisBareClient.connect();
     } else {
       this.client = await this.redisIOClient.connect();
+    }
+  }
+
+  public async getClientCount(): Promise<number> {
+    return await this.redisIOClient.getTotalConnectedClients();
+  }
+
+  public async disconnect(): Promise<void> {
+    if (this.client) {
+      await this.client.disconnect();
     }
   }
 }

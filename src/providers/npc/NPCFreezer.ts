@@ -23,7 +23,7 @@ export class NPCFreezer {
   @TrackNewRelicTransaction()
   public async freezeNPC(npc: INPC, reason?: string): Promise<void> {
     try {
-      const canProceed = await this.locker.lock(`npc-freeze-${npc._id}`);
+      const canProceed = await this.locker.lock(`npc-freeze-${npc._id}`, 1000);
 
       if (!canProceed) {
         return;
@@ -49,8 +49,6 @@ export class NPCFreezer {
       await this.locker.unlock(`npc-${npc._id}-npc-cycle`);
     } catch (error) {
       console.error(error);
-    } finally {
-      await this.locker.unlock(`npc-freeze-${npc._id}`);
     }
   }
 
