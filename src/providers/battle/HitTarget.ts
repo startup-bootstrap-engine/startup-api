@@ -22,10 +22,10 @@ import {
   IBattleEventFromServer,
   ItemSubType,
 } from "@rpg-engine/shared";
-import { provide } from "inversify-binding-decorators";
 
 import { appEnv } from "@providers/config/env";
 import { BONUS_DAMAGE_MULTIPLIER } from "@providers/constants/BattleConstants";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Queue, Worker } from "bullmq";
 import random from "lodash/random";
 import { BattleAttackTargetDeath } from "./BattleAttackTarget/BattleAttackTargetDeath";
@@ -33,11 +33,11 @@ import { BattleDamageCalculator } from "./BattleDamageCalculator";
 import { BattleEffects } from "./BattleEffects";
 import { BattleEvent } from "./BattleEvent";
 
-@provide(HitTarget)
+@provideSingleton(HitTarget)
 export class HitTarget {
-  private npcQueue: Queue;
-  private characterQueue: Queue;
-  private worker: Worker;
+  private npcQueue: Queue | null = null;
+  private characterQueue: Queue | null = null;
+  private worker: Worker | null = null;
 
   constructor(
     private battleEvent: BattleEvent,
@@ -55,6 +55,10 @@ export class HitTarget {
     private battleDamageCalculator: BattleDamageCalculator
   ) {
     if (appEnv.general.IS_UNIT_TEST) {
+      return;
+    }
+
+    if (this.npcQueue && this.characterQueue && this.worker) {
       return;
     }
 
@@ -104,18 +108,27 @@ export class HitTarget {
       }
     );
 
-    this.npcQueue.on("error", (error) => {
+    this.npcQueue.on("error", async (error) => {
       console.error("Error in the npcQueue:", error);
+
+      await this.npcQueue?.close();
+      this.npcQueue = null;
     });
 
-    this.characterQueue.on("error", (error) => {
+    this.characterQueue.on("error", async (error) => {
       console.error("Error in the characterQueue:", error);
+
+      await this.characterQueue?.close();
+      this.characterQueue = null;
     });
 
-    this.worker.on("failed", (job, err) => {
+    this.worker.on("failed", async (job, err) => {
       console.log(`HitTarget Job ${job?.id} failed with error ${err.message}`);
       // log details
       console.log(job);
+
+      await this.worker?.close();
+      this.worker = null;
     });
   }
 
@@ -137,7 +150,7 @@ export class HitTarget {
     }
 
     if (attacker.type === EntityType.Character) {
-      await this.characterQueue.add(
+      await this.characterQueue?.add(
         "character-hit",
         { attacker, target, magicAttack, bonusDamage, spellHit },
         {
@@ -151,7 +164,7 @@ export class HitTarget {
         }
       );
     } else {
-      await this.npcQueue.add(
+      await this.npcQueue?.add(
         "npc-hit",
         { attacker, target, magicAttack, bonusDamage, spellHit },
         {
@@ -168,19 +181,19 @@ export class HitTarget {
   }
 
   public async shutdown(): Promise<void> {
-    await this.npcQueue.close();
-    await this.characterQueue.close();
-    await this.worker.close();
+    await this.npcQueue?.close();
+    await this.characterQueue?.close();
+    await this.worker?.close();
   }
 
   public async clearAllQueueJobs(): Promise<void> {
     try {
-      const jobs = await this.npcQueue.getJobs(["waiting", "active", "delayed", "paused"]);
+      const jobs = (await this.npcQueue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
       for (const job of jobs) {
         await job?.remove();
       }
 
-      const jobs2 = await this.characterQueue.getJobs(["waiting", "active", "delayed", "paused"]);
+      const jobs2 = (await this.characterQueue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
       for (const job of jobs2) {
         await job?.remove();
       }

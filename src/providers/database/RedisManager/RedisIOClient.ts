@@ -19,7 +19,12 @@ export class RedisIOClient {
         const redisConnectionUrl = `redis://${appEnv.database.REDIS_CONTAINER}:${appEnv.database.REDIS_PORT}`;
 
         this.client = new IORedis(redisConnectionUrl, {
-          maxRetriesPerRequest: null,
+          maxRetriesPerRequest: null, // Disables the retry mechanism for individual commands; be cautious
+          enableAutoPipelining: true, // Enables command pipelining for better performance
+          keepAlive: 3000, // Keeps idle sockets open for 3 seconds; however, this doesn't close idle connections
+          connectTimeout: 10000, // 10 seconds to timeout if a connection can't be established
+          lazyConnect: true, // Connection will be lazily created on the first command
+          autoResendUnfulfilledCommands: false, // Prevents re-sending of queued commands on reconnect, avoiding command duplication
         });
 
         this.client.setMaxListeners(20);

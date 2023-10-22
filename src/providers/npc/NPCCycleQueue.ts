@@ -44,10 +44,12 @@ export class NPCCycleQueue {
     private redisManager: RedisManager
   ) {}
 
-  public async init(): Promise<void> {
-    this.connection = this.redisManager.client;
+  public init(): void {
+    if (this.queue && this.worker) {
+      return;
+    }
 
-    await this.shutdown();
+    this.connection = this.redisManager.client;
 
     this.queue = new Queue("npc-cycle-queue", {
       connection: this.connection,

@@ -21,10 +21,12 @@ export class ItemUseCycleQueue {
 
   constructor(private redisManager: RedisManager) {}
 
-  public async init(): Promise<void> {
+  public init(): void {
     this.connection = this.redisManager.client;
 
-    await this.shutdown();
+    if (this.queue && this.worker) {
+      return;
+    }
 
     this.queue = new Queue(this.queueName, {
       connection: this.connection,

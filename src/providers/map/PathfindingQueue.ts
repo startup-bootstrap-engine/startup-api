@@ -21,14 +21,16 @@ export class PathfindingQueue {
     private locker: Locker
   ) {}
 
-  public async init(): Promise<void> {
+  public init(): void {
     if (appEnv.general.IS_UNIT_TEST) {
       return;
     }
 
-    this.connection = this.redisManager.client;
+    if (this.queue && this.worker) {
+      return;
+    }
 
-    await this.shutdown();
+    this.connection = this.redisManager.client;
 
     this.queue = new Queue("pathfinding", {
       connection: this.connection,
