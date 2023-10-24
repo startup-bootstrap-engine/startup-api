@@ -17,8 +17,6 @@ export const spellChefsDelight: Partial<ISpell> = {
   key: SpellsBlueprint.ChefsDelight,
   name: "Chef's delight",
   description: "Temporarily increases human's cooking skill.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/chefs-delight.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "les cook",
   manaCost: 25,

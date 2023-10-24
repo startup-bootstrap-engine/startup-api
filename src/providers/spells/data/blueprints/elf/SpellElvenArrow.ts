@@ -17,8 +17,6 @@ export const spellElvenArrow: Partial<ISpell> = {
   key: SpellsBlueprint.ElvenArrow,
   name: "Elven Arrow",
   description: "Temporarily increases elf's distance skill.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/elven-arrow.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "dista hast",
   manaCost: 35,

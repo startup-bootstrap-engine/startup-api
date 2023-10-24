@@ -17,8 +17,6 @@ export const spellDispelMagic: Partial<ISpell> = {
   key: SpellsBlueprint.OrcDispelMagic,
   name: "Dispel Magic",
   description: "Temporarily increases orc's magic resistance skill.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/dispel-magic.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "fell strike",
   manaCost: 25,

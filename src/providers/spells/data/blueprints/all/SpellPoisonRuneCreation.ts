@@ -10,9 +10,6 @@ export const spellPoisonRuneCreation: Partial<ISpell> = {
   name: "Poison Rune Creation Spell",
   description: "A spell that converts a blank rune, in your inventory, into poison rune.",
 
-  textureAtlas: "icons",
-  texturePath: "spell-icons/poison-rune-creation-spell.png",
-
   castingType: SpellCastingType.SelfCasting,
   magicWords: "iquar ansr athil",
   manaCost: 90,

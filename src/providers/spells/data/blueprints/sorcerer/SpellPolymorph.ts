@@ -10,19 +10,18 @@ import {
   CharacterBuffDurationType,
   CharacterBuffType,
   CharacterClass,
-  ISpell,
   RangeTypes,
   SpellCastingType,
 } from "@rpg-engine/shared";
 import { SpellCalculator } from "../../abstractions/SpellCalculator";
-import { SpellsBlueprint } from "../../types/SpellsBlueprintTypes";
+import { ISpell, SpellsBlueprint } from "../../types/SpellsBlueprintTypes";
 
 export const spellPolymorph: Partial<ISpell> = {
   key: SpellsBlueprint.SpellPolymorph,
+
   name: "Polymorph Spell",
   description: "A spell that transforms target into a harmless rat for a short period.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/spell-polymorph.png",
+
   castingType: SpellCastingType.RangedCasting,
   magicWords: "iquar ansr rattus",
   manaCost: 80,

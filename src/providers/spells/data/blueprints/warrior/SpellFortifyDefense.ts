@@ -18,8 +18,6 @@ export const spellFortifyDefense: Partial<ISpell> = {
   key: SpellsBlueprint.FortifyDefense,
   name: "Self Fortify Defense",
   description: "Temporarily increases the warrior's shielding skill.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/fortify-defense.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "thura korima",
   manaCost: 40,

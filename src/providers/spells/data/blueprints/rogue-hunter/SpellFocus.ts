@@ -17,8 +17,6 @@ export const spellFocus: Partial<ISpell> = {
   key: SpellsBlueprint.Focus,
   name: "Focus",
   description: "A spell that temporarily increases character dexterity, thus, increasing the chance to hit or dodge.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/focus.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "handalë tenn'amin",
   manaCost: 20,

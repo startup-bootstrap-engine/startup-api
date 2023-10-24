@@ -11,9 +11,6 @@ export const spellFoodCreation: Partial<ISpell> = {
   name: "Food Creation Spell",
   description: "A spell that creates food item in your inventory.",
 
-  textureAtlas: "icons",
-  texturePath: "spell-icons/food-creation-spell.png",
-
   castingType: SpellCastingType.SelfCasting,
   magicWords: "iquar klatha",
   manaCost: 30,

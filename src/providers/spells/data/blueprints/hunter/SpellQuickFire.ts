@@ -18,8 +18,6 @@ export const spellQuickFire: Partial<ISpell> = {
   key: SpellsBlueprint.HunterQuickFire,
   name: "QuickFire",
   description: "QuickFire spell unleash a flurry of attacks on their enemies.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/hunter-quick-fire.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "ieiunium iecit",
   manaCost: 80,

@@ -15,8 +15,6 @@ export const berserkerSpellExecution: Partial<ISpell> = {
   key: SpellsBlueprint.BerserkerExecution,
   name: "Execution",
   description: "The Execution spell is designed to instantly eliminate opponents if target's health is <= 30%",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/berserker-execution.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "insania supplicium",
   manaCost: 150,

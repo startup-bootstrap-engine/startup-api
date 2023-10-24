@@ -24,8 +24,6 @@ export const spellVineGrasp: Partial<ISpell> = {
   name: "Vine Grasp",
   description:
     "Summons the inherent power of nature, quickly manifesting a surge of entwining, thorny vines from the ground that shoot towards the enemy like a bolt.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/vine-grasp.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "gwedh lingalad",
   manaCost: 60,

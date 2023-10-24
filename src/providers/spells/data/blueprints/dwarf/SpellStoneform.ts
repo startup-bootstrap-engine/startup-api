@@ -17,8 +17,6 @@ export const spellStoneform: Partial<ISpell> = {
   key: SpellsBlueprint.DwarfStoneform,
   name: "Stoneform",
   description: "Temporarily increases drawf's mining skill.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/dwarf-stone-form.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "ston smask",
   manaCost: 25,

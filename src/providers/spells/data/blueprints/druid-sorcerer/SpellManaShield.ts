@@ -16,8 +16,6 @@ export const spellManaShield: Partial<ISpell> = {
   key: SpellsBlueprint.ManaShield,
   name: "Mana Shield",
   description: "A spell designed for a sorcerer to takes damage but damage is reduced from mana.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/mana-shield.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "mana scutum",
   manaCost: 70,

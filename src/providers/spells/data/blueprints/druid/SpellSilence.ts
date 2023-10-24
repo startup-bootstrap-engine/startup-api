@@ -17,8 +17,6 @@ export const spellSilence: Partial<ISpell> = {
   key: SpellsBlueprint.DruidSilence,
   name: "Silence Spell",
   description: "A spell that prevents the target from casting spells for a short period.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/druid-silence.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "vocem inhibeo",
   manaCost: 100,

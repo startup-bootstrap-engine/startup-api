@@ -22,8 +22,6 @@ export const spellCorruptionBolt: Partial<ISpell> = {
   key: SpellsBlueprint.CorruptionBolt,
   name: "Corruption Bolt",
   description: "Cast a deadly corruption bolt at your target.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/corruption-bolt.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "moe i morgul",
   manaCost: 120,

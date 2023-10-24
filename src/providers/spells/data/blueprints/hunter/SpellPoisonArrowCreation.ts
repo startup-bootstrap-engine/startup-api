@@ -16,8 +16,7 @@ export const spellPoisonArrowCreation: Partial<ISpell> = {
   key: SpellsBlueprint.PoisonArrowCreationSpell,
   name: "Poison Arrow Creation Spell",
   description: "A spell that creates poison arrows in your inventory.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/poison-arrow-creation-spell.png",
+
   castingType: SpellCastingType.SelfCasting,
   magicWords: "thalion pilya",
   manaCost: 25,

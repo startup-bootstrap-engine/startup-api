@@ -10,9 +10,6 @@ export const spellFireRuneCreation: Partial<ISpell> = {
   name: "Fire Rune Creation Spell",
   description: "A spell that converts a blank rune, in your inventory, into fire rune.",
 
-  textureAtlas: "icons",
-  texturePath: "spell-icons/fire-rune-creation-spell.png",
-
   castingType: SpellCastingType.SelfCasting,
   magicWords: "iquar ansr maskan",
   manaCost: 90,
