@@ -68,10 +68,10 @@ export class NPCCycleQueue {
       this.worker = new Worker(
         "npc-cycle-queue",
         async (job) => {
-          const { npc, npcSkills, isFirstCycle } = job.data;
+          const { npc, npcSkills } = job.data;
 
           try {
-            await this.execNpcCycle(npc, npcSkills, isFirstCycle);
+            await this.execNpcCycle(npc, npcSkills);
           } catch (err) {
             console.error(`Error processing npc-cycle-queue for NPC ${npc.key}:`, err);
             throw err;
@@ -94,9 +94,9 @@ export class NPCCycleQueue {
   }
 
   @TrackNewRelicTransaction()
-  public async add(npc: INPC, npcSkills: ISkill, isFirstCycle = true): Promise<void> {
+  public async add(npc: INPC, npcSkills: ISkill): Promise<void> {
     if (appEnv.general.IS_UNIT_TEST) {
-      await this.execNpcCycle(npc, npcSkills, true);
+      await this.execNpcCycle(npc, npcSkills);
       return;
     }
 
@@ -116,7 +116,6 @@ export class NPCCycleQueue {
         npcId: npc._id,
         npc,
         npcSkills,
-        isFirstCycle,
       },
       {
         delay: (1600 + random(0, 200)) / (npc.speed * 1.6) / NPC_CYCLE_INTERVAL_RATIO,
@@ -160,7 +159,7 @@ export class NPCCycleQueue {
   }
 
   @TrackNewRelicTransaction()
-  private async execNpcCycle(npc: INPC, npcSkills: ISkill, isFirstCycle: boolean): Promise<void> {
+  private async execNpcCycle(npc: INPC, npcSkills: ISkill): Promise<void> {
     this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Server, "NPCCycles", 1);
 
     npc = await NPC.findById(npc._id).lean({
@@ -175,12 +174,6 @@ export class NPCCycleQueue {
       return;
     }
 
-    if (!isFirstCycle && npc.alignment === NPCAlignment.Hostile && !npc.targetCharacter) {
-      await this.stop(npc);
-
-      return;
-    }
-
     await this.friendlyNPCFreezeCheck(npc);
 
     npc.skills = npcSkills;
@@ -192,7 +185,7 @@ export class NPCCycleQueue {
     }
 
     void this.startCoreNPCBehavior(npc);
-    await this.add(npc, npcSkills, false);
+    await this.add(npc, npcSkills);
   }
 
   private async stop(npc: INPC): Promise<void> {
