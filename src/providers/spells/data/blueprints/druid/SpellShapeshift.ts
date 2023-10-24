@@ -9,18 +9,15 @@ import {
   CharacterBuffDurationType,
   CharacterBuffType,
   CharacterClass,
-  ISpell,
   SpellCastingType,
 } from "@rpg-engine/shared";
 import { SpellCalculator } from "../../abstractions/SpellCalculator";
-import { SpellsBlueprint } from "../../types/SpellsBlueprintTypes";
+import { ISpell, SpellsBlueprint } from "../../types/SpellsBlueprintTypes";
 
 export const spellShapeshift: Partial<ISpell> = {
   key: SpellsBlueprint.DruidShapeshift,
   name: "Shapeshift Spell",
   description: "A spell designed to turn a druid into a Bear. Raise Attack and Resistance.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/druid-shapeshift.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "talas qabi",
   manaCost: 120,

@@ -8,8 +8,6 @@ export const spellBullStrength: Partial<ISpell> = {
   key: SpellsBlueprint.MinotaurBullStrength,
   name: "Bull strength",
   description: "Temporarily increases Minotaur's strength and enlarge body.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/minotaur-bull-strength.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "moo moo",
   manaCost: 25,

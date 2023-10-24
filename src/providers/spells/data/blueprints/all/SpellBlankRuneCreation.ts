@@ -10,9 +10,6 @@ export const spellBlankRuneCreation: Partial<ISpell> = {
   name: "Blank Rune Creation Spell",
   description: "A spell that creates a blank rune in your inventory.",
 
-  textureAtlas: "icons",
-  texturePath: "spell-icons/blank-rune-creation-spell.png",
-
   castingType: SpellCastingType.SelfCasting,
   magicWords: "iquar ansr ki",
   manaCost: 60,

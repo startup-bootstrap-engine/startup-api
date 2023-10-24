@@ -19,8 +19,6 @@ export const spellRage: Partial<ISpell> = {
   name: "Fury",
   description:
     "This spell unleashes a primal fury, imbuing the caster with untold strength and recklessness, but at a great cost to their defensive capabilities",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/berserker-rage.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "furore",
   manaCost: 90,

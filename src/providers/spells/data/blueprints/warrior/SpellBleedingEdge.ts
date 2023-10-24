@@ -21,8 +21,6 @@ export const spellBleedingEdge: Partial<ISpell> = {
   name: "Bleeding Edge",
   description:
     "Unleash the Crimson Strike, dealing immediate damage to your opponent while inflicting a bleeding effect",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/bleeding-edge.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "ithilgil urui",
   manaCost: 50,

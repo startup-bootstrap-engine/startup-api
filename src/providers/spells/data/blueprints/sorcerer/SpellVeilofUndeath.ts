@@ -8,18 +8,15 @@ import {
   CharacterBuffDurationType,
   CharacterBuffType,
   CharacterClass,
-  ISpell,
   SpellCastingType,
 } from "@rpg-engine/shared";
 import { SpellCalculator } from "../../abstractions/SpellCalculator";
-import { SpellsBlueprint } from "../../types/SpellsBlueprintTypes";
+import { ISpell, SpellsBlueprint } from "../../types/SpellsBlueprintTypes";
 
 export const spellVeilofUndeath: Partial<ISpell> = {
   key: SpellsBlueprint.SorcererVeilofUndeath,
   name: "Veil of Undeath Spell",
   description: "A spell designed to turn a sorcerer into a Powerfull Lich. Raise Magic Attack.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/veil-of-undead.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "talas umbra",
   manaCost: 120,

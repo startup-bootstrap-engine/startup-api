@@ -17,8 +17,6 @@ export const spellPowerStrike: Partial<ISpell> = {
   key: SpellsBlueprint.PowerStrike,
   name: "Power Strike",
   description: "Temporarily increases the warrior's strength.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/power-strike.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "gûl-eglir",
   manaCost: 40,

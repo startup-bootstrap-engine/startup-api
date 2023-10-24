@@ -15,8 +15,6 @@ export const spellStealth: Partial<ISpell> = {
   key: SpellsBlueprint.RogueStealth,
   name: "Stealth Spell",
   description: "A spell designed to turn a rogue invisible.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/rogue-stealth-spell.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "talas nelluon",
   manaCost: 80,

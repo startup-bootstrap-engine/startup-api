@@ -16,8 +16,7 @@ export const spellCrimsonArrowCreation: Partial<ISpell> = {
   key: SpellsBlueprint.CrimsonArrowCreation,
   name: "Crimson Arrow Creation",
   description: "A spell that creates crimson arrows in your inventory.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/crimson-arrow-creation.png",
+
   castingType: SpellCastingType.SelfCasting,
   magicWords: "sanguine sagitta",
   manaCost: 40,

@@ -15,8 +15,6 @@ export const rogueSpellExecution: Partial<ISpell> = {
   key: SpellsBlueprint.RogueExecution,
   name: "Execution",
   description: "The Execution spell is designed to instantly eliminate opponents if target's health is <= 30%",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/rogue-execution.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "supplicium furtim",
   manaCost: 80,

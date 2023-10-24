@@ -9,8 +9,7 @@ export const spellThunderRuneCreation: Partial<ISpell> = {
 
   name: "Thunder Rune Creation Spell",
   description: "A spell that converts a blank rune, in your inventory, into Thunder rune.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/thunder-rune-creation-spell.png",
+
   castingType: SpellCastingType.SelfCasting,
   magicWords: "iquar ansr runu",
   manaCost: 250,

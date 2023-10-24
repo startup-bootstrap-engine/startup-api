@@ -14,10 +14,10 @@ import { SpellItemCreation } from "../../abstractions/SpellItemCreation";
 
 export const spellBoltCreation: Partial<ISpell> = {
   key: SpellsBlueprint.BoltCreationSpell,
+
   name: "Bolt Creation Spell",
   description: "A spell that creates bolt in your inventory.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/bolt-creation-spell.png",
+
   castingType: SpellCastingType.SelfCasting,
   magicWords: "iquar lyn",
   manaCost: 15,

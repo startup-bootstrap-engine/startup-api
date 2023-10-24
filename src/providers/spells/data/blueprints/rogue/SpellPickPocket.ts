@@ -15,8 +15,6 @@ export const spellPickPocket: Partial<ISpell> = {
   key: SpellsBlueprint.PickPocket,
   name: "PickPocket",
   description: "A spell designed for stealing an item from a character.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/pick-pocket.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "levis manus",
   manaCost: 200,

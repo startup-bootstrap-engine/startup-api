@@ -18,8 +18,6 @@ export const spellFireStorm: Partial<ISpell> = {
   key: SpellsBlueprint.FireStorm,
   name: "FireStorm",
   description: "Unleashes a turbulent maelstrom of flames, engulfing a targeted area with destructive heat.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/fire-storm.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "naur ruine",
   manaCost: 80,

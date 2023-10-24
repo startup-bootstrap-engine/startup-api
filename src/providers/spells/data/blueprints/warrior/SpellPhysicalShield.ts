@@ -17,8 +17,6 @@ export const spellPhysicalShield: Partial<ISpell> = {
   key: SpellsBlueprint.SpellPhysicalShield,
   name: "Self Physical Shield",
   description: "A physical shield that boosts physical resistance by 30%, duration varies with magic level.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/spell-physical-shield.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "talas zirh",
   manaCost: 50,

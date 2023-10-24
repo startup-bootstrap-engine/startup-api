@@ -18,8 +18,6 @@ export const spellFocusSwitft: Partial<ISpell> = {
   key: SpellsBlueprint.FocusSwift,
   name: "Focus Swift",
   description: "Provoke the enemy so that they focus their attacks on you",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/focus-swift.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "cuio tenna",
   manaCost: 40,

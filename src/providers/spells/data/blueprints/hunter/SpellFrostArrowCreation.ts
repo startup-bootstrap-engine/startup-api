@@ -16,8 +16,7 @@ export const spellFrostArrowCreation: Partial<ISpell> = {
   key: SpellsBlueprint.FrostArrowCreation,
   name: "Frost Arrow Creation",
   description: "A spell that creates frost arrows in your inventory.",
-  textureAtlas: "icons",
-  texturePath: "spell-icons/frost-arrow-creation.png",
+
   castingType: SpellCastingType.SelfCasting,
   magicWords: "gelu sagitta",
   manaCost: 30,
