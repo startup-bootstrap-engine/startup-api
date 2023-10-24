@@ -17,6 +17,8 @@ import { SpellCalculator } from "../../abstractions/SpellCalculator";
 export const spellEagleEyes: Partial<ISpell> = {
   key: SpellsBlueprint.SpellEagleEyes,
   name: "Eagle Eyes",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/spell-eagle-eyes.png",
   description: "Increase hunter's distance skill for a short period of time.",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "kartal leri",

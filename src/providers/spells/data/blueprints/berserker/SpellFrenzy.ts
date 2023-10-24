@@ -19,6 +19,8 @@ export const spellFrenzy: Partial<ISpell> = {
   key: SpellsBlueprint.BerserkerFrenzy,
   name: "Frenzy",
   description: "A spell that causes a frenzy by increasing your attack speed but lowering your defense.",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/berserker-frenzy.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "kartal insanus",
   manaCost: 80,

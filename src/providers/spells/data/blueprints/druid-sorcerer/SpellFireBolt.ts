@@ -18,6 +18,8 @@ export const spellFireBolt: Partial<ISpell> = {
   key: SpellsBlueprint.FireBolt,
   name: "Fire Bolt",
   description: "Cast a deadly fire bolt at your target.",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/fire-bolt.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "naurlug lhegren",
   manaCost: 120,

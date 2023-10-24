@@ -10,6 +10,9 @@ export const spellHealRuneCreation: Partial<ISpell> = {
   name: "Healing Rune Creation Spell",
   description: "A spell that converts a blank rune, in your inventory, into healing rune.",
 
+  textureAtlas: "icons",
+  texturePath: "spell-icons/healing-rune-creation-spell.png",
+
   castingType: SpellCastingType.SelfCasting,
   magicWords: "iquar ansr faenya",
   manaCost: 400,

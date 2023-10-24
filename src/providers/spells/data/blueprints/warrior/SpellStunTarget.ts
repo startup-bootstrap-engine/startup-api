@@ -17,6 +17,8 @@ export const spellStunTarget: Partial<ISpell> = {
   key: SpellsBlueprint.WarriorStunTarget,
   name: "Stun",
   description: "A spell designed for a warrior to stun a target in battle.",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/warrior-stun-target.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "talas tamb-eth",
   manaCost: 50,

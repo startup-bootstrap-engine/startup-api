@@ -18,6 +18,9 @@ export const spellArrowCreation: Partial<ISpell> = {
   name: "Arrow Creation Spell",
   description: "A spell that creates arrow in your inventory.",
 
+  textureAtlas: "icons",
+  texturePath: "spell-icons/arrow-creation-spell.png",
+
   castingType: SpellCastingType.SelfCasting,
   magicWords: "iquar elandi",
   manaCost: 10,

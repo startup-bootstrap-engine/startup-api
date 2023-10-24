@@ -16,7 +16,8 @@ export const spellEmeraldArrowCreation: Partial<ISpell> = {
   key: SpellsBlueprint.EmeraldArrowCreation,
   name: "Emerald Arrow Creation",
   description: "A spell that creates emerald arrows in your inventory.",
-
+  textureAtlas: "icons",
+  texturePath: "spell-icons/emerald-arrow-creation.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "verdeum sagitta",
   manaCost: 25,

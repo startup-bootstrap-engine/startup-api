@@ -18,6 +18,8 @@ export const spellArrowStorm: Partial<ISpell> = {
   key: SpellsBlueprint.Arrowstorm,
   name: "Arrow Storm",
   description: "Unleashes a devastating barrage of enchanted arrows upon the targeted area.",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/arrowstorm.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "vanya lóte náren",
   manaCost: 70,

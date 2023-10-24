@@ -9,7 +9,8 @@ export const spellFireBoltRuneCreation: Partial<ISpell> = {
 
   name: "Fire Bolt Rune Creation Spell",
   description: "A spell that creates a fire bolt rune in your inventory.",
-
+  textureAtlas: "icons",
+  texturePath: "spell-icons/fire-bolt-rune-creation-spell.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "iquar kiran agni",
   manaCost: 220,

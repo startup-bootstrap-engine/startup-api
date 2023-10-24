@@ -9,7 +9,8 @@ export const spellEnergyBoltRuneCreation: Partial<ISpell> = {
 
   name: "Energy Bolt Creation Spell",
   description: "A spell that creates an energy bolt in your inventory.",
-
+  textureAtlas: "icons",
+  texturePath: "spell-icons/energy-bolt-rune-creation-spell.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "iquar kiran oorja",
   manaCost: 250,
