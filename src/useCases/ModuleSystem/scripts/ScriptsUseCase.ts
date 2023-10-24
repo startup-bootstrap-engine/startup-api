@@ -1,5 +1,6 @@
 import { Character } from "@entities/ModuleCharacter/CharacterModel";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { ItemContainerBodyCleaner } from "@providers/item/cleaner/ItemContainerBodyCleaner";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
@@ -14,12 +15,17 @@ export class ScriptsUseCase {
     private marketplaceCleaner: MarketplaceCleaner,
     private itemReportGenerator: ItemReportGenerator,
     private itemMissingReferenceCleaner: ItemMissingReferenceCleaner,
-    private itemContainerBodyCleaner: ItemContainerBodyCleaner
+    private itemContainerBodyCleaner: ItemContainerBodyCleaner,
+    private inMemoryHashTable: InMemoryHashTable
   ) {}
 
   public async cleanupItems(): Promise<void> {
     await this.itemMissingReferenceCleaner.cleanupItemsWithoutOwnership();
     await this.itemContainerBodyCleaner.cleanupBodies();
+  }
+
+  public async cleanupRedis(namespace: string): Promise<void> {
+    await this.inMemoryHashTable.deleteAll(namespace);
   }
 
   public async generateReportItems(): Promise<void> {

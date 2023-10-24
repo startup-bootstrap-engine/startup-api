@@ -16,7 +16,6 @@ import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DiscordBot } from "@providers/discord/DiscordBot";
 import { EntityEffectDurationControl } from "@providers/entityEffects/EntityEffectDurationControl";
-import { blueprintManager } from "@providers/inversify/container";
 import { ItemUseCycleQueue } from "@providers/item/ItemUseCycleQueue";
 import { Locker } from "@providers/locks/Locker";
 import { NPCBattleCycleQueue } from "@providers/npc/NPCBattleCycleQueue";
@@ -103,8 +102,6 @@ export class ServerBootstrap {
 
   private async execOneTimeOperations(): Promise<void> {
     await this.socketSessionControl.clearAllSessions();
-
-    await blueprintManager.loadAllBlueprints();
 
     await this.npcManager.disableNPCBehaviors();
 

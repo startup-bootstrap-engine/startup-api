@@ -1,6 +1,3 @@
-import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { appEnv } from "@providers/config/env";
-import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { itemsBlueprintIndex } from "@providers/item/data";
 import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTypes";
 import { usableEffectsIndex } from "@providers/item/data/usableEffects";
@@ -8,40 +5,25 @@ import { IUsableEffect, IUsableEffectRune } from "@providers/item/data/usableEff
 import { npcsBlueprintIndex } from "@providers/npc/data";
 import { questsBlueprintIndex } from "@providers/quest/data";
 import { spellsBlueprintsIndex } from "@providers/spells/data";
-import { recipeBlueprintsIndex } from "@providers/useWith/blueprints/index";
-import crypto from "crypto";
+import { recipeBlueprintsIndex } from "@providers/useWith/blueprints";
 import { provide } from "inversify-binding-decorators";
 
 export type BlueprintNamespaces = "npcs" | "items" | "spells" | "quests" | "recipes";
 
-interface IStoredBlueprint {
-  versionHash: string;
-  [key: string]: unknown;
-}
+type IBlueprint = Record<string, any>; //! Will be refactored later
 
 @provide(BlueprintManager)
 export class BlueprintManager {
-  constructor(private inMemoryHashTable: InMemoryHashTable) {}
+  constructor() {}
 
-  public async loadAllBlueprints(): Promise<void> {
-    await Promise.all([
-      this.loadBlueprintFor("npcs", npcsBlueprintIndex),
-      this.loadBlueprintFor("items", itemsBlueprintIndex),
-      this.loadBlueprintFor("quests", questsBlueprintIndex),
-      this.loadBlueprintFor("spells", spellsBlueprintsIndex),
-      this.loadBlueprintFor("recipes", recipeBlueprintsIndex),
-    ]);
-  }
-
-  @TrackNewRelicTransaction()
-  public async getBlueprint<T>(namespace: BlueprintNamespaces, key: AvailableBlueprints): Promise<T> {
-    const blueprint = await this.inMemoryHashTable.get(`blueprint-${namespace}`, key);
-
-    delete blueprint?.versionHash;
+  public getBlueprint<T>(namespace: BlueprintNamespaces, key: AvailableBlueprints): T {
+    const blueprint = this.getBlueprintFromKey<IBlueprint>(namespace, key);
 
     if (namespace === "items") {
       // if item, lookup for usable effect and inject it on the blueprint
-      let usableEffectBlueprint = usableEffectsIndex[blueprint?.usableEffectKey] as IUsableEffect | IUsableEffectRune;
+      let usableEffectBlueprint = usableEffectsIndex[blueprint?.usableEffectKey as string] as
+        | IUsableEffect
+        | IUsableEffectRune;
 
       if (usableEffectBlueprint && blueprint) {
         blueprint.usableEffect = usableEffectBlueprint.usableEffect;
@@ -57,71 +39,49 @@ export class BlueprintManager {
     return blueprint as T;
   }
 
-  @TrackNewRelicTransaction()
-  public async getAllBlueprintKeys(namespace: BlueprintNamespaces): Promise<string[]> {
-    return await this.inMemoryHashTable.getAllKeys(`blueprint-${namespace}`);
+  public getAllBlueprintKeys(namespace: BlueprintNamespaces): string[] {
+    const blueprintIndex = this.getBlueprintIndex<IBlueprint>(namespace);
+
+    return Object.keys(blueprintIndex);
   }
 
-  @TrackNewRelicTransaction()
-  public async getAllBlueprintValues<T>(namespace: BlueprintNamespaces): Promise<T[]> {
-    const blueprints = (await this.inMemoryHashTable.getAll<T>(`blueprint-${namespace}`)) as Record<string, T>;
+  public getAllBlueprintValues<T>(namespace: BlueprintNamespaces): T[] {
+    const blueprints = this.getBlueprintIndex<IBlueprint>(namespace);
 
     return Object.values(blueprints);
   }
 
-  @TrackNewRelicTransaction()
-  public async setBlueprint<T>(namespace: BlueprintNamespaces, key: AvailableBlueprints, data: T): Promise<void> {
-    await this.inMemoryHashTable.set(`blueprint-${namespace}`, key, data);
-  }
-
-  @TrackNewRelicTransaction()
-  public async updateBlueprint<T>(namespace: BlueprintNamespaces, key: AvailableBlueprints, data: T): Promise<void> {
-    const blueprint = await this.getBlueprint<T>(namespace, key);
-
-    await this.setBlueprint(namespace, key, {
-      ...blueprint,
-      ...data,
-    });
-  }
-
-  private async loadBlueprintFor(
-    namespace: BlueprintNamespaces,
-    blueprintIndex: Record<string, Record<string, string>>
-  ): Promise<void> {
-    if (!appEnv.general.IS_UNIT_TEST) {
-      console.time(`📜 Loading blueprints for ${namespace}...`);
-    }
-    for (const [key, blueprintData] of Object.entries(blueprintIndex)) {
-      try {
-        const currentHash = this.createHashFromBlueprint(blueprintData as Record<string, unknown>);
-
-        // get existing hash
-        const storedBlueprint = (await this.inMemoryHashTable.get(`blueprint-${namespace}`, key)) as IStoredBlueprint;
-        const existingHash = storedBlueprint?.versionHash ?? null;
-
-        if (existingHash === currentHash) {
-          continue;
-        }
-
-        // if hashes are different, update the hash and store the blueprint
-
-        await this.inMemoryHashTable.set(`blueprint-${namespace}`, key, {
-          ...blueprintData,
-          versionHash: currentHash,
-        });
-      } catch (error) {
-        console.log(`❌ Error loading blueprint ${key} for ${namespace}!`);
-        console.error(error);
-      }
-    }
-    if (!appEnv.general.IS_UNIT_TEST) {
-      console.timeEnd(`📜 Loading blueprints for ${namespace}...`);
+  public getBlueprintIndex<T>(namespace: BlueprintNamespaces): T {
+    switch (namespace) {
+      case "items":
+        return itemsBlueprintIndex as T;
+      case "npcs":
+        return npcsBlueprintIndex as T;
+      case "quests":
+        return questsBlueprintIndex as T;
+      case "recipes":
+        return recipeBlueprintsIndex as T;
+      case "spells":
+        return spellsBlueprintsIndex as T;
+      default:
+        throw new Error(`Unknown namespace ${namespace}`);
     }
   }
 
-  private createHashFromBlueprint(blueprint: Record<string, unknown>): string {
-    const hash = crypto.createHash("sha256");
-    hash.update(JSON.stringify(blueprint));
-    return hash.digest("hex");
+  private getBlueprintFromKey<T>(namespace: BlueprintNamespaces, key: AvailableBlueprints): T {
+    switch (namespace) {
+      case "items":
+        return itemsBlueprintIndex[key] as T;
+      case "npcs":
+        return npcsBlueprintIndex[key] as T;
+      case "quests":
+        return questsBlueprintIndex[key] as T;
+      case "recipes":
+        return recipeBlueprintsIndex[key] as T;
+      case "spells":
+        return spellsBlueprintsIndex[key] as T;
+      default:
+        throw new Error(`Unknown namespace ${namespace}`);
+    }
   }
 }

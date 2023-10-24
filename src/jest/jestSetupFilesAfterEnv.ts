@@ -4,7 +4,7 @@ import {
   MODE_EXP_MULTIPLIER,
   RACE_BONUS_OR_PENALTIES,
 } from "@providers/character/__tests__/mockConstants/SkillConstants.mock";
-import { blueprintManager, container, redisManager } from "@providers/inversify/container";
+import { container, redisManager } from "@providers/inversify/container";
 import { MapLoader } from "@providers/map/MapLoader";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
@@ -134,8 +134,6 @@ beforeAll(async () => {
   await mongoose.connection.db.dropDatabase();
 
   await redisManager.connect();
-
-  await blueprintManager.loadAllBlueprints();
 });
 
 afterAll(async () => {
