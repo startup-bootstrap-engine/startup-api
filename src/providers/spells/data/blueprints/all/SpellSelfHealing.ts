@@ -10,6 +10,9 @@ export const spellSelfHealing: Partial<ISpell> = {
   name: "Self Healing Spell",
   description: "A self healing spell.",
 
+  textureAtlas: "icons",
+  texturePath: "spell-icons/self-healing-spell.png",
+
   castingType: SpellCastingType.SelfCasting,
   magicWords: "talas faenya",
   manaCost: 20,

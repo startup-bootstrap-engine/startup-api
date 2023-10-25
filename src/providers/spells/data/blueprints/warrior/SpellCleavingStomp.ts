@@ -21,6 +21,8 @@ export const spellCleavingStomp: Partial<ISpell> = {
   key: SpellsBlueprint.CleavingStomp,
   name: "Cleaving Stomp",
   description: "Unleash a powerful shockwave by stomping the ground, doing damage and slow down nearby enemies.",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/cleaving-stomp.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "rista nwalma",
   manaCost: 50,

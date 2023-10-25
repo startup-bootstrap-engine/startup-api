@@ -19,6 +19,8 @@ export const spellMassHealing: Partial<ISpell> = {
   key: SpellsBlueprint.MassHealing,
   name: "Mass Healing",
   description: "Invokes a sacred area, rapidly restoring health to all allies within its radiant bounds.",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/mass-healing.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "vanyarosta coirea",
   manaCost: 200,

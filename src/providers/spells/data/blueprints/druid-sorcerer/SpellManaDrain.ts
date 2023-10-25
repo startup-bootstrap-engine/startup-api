@@ -14,6 +14,8 @@ export const spellManaDrain: Partial<ISpell> = {
   key: SpellsBlueprint.ManaDrain,
   name: "Mana Drain",
   description: "The spell is designed to absorb a % of the character's mana.",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/mana-drain.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "mana exhauriunt",
   manaCost: 0, // its 0

@@ -17,6 +17,8 @@ export const spellEntanglingRoots: Partial<ISpell> = {
   key: SpellsBlueprint.EntanglingRoots,
   name: "Entangling Roots",
   description: "Stun your enemy by manipulating the primal forces of nature",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/entangling-roots.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "raithin-nodrim",
   manaCost: 40,

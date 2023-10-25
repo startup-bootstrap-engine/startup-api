@@ -20,6 +20,8 @@ export const spellCurseOfWeakness: Partial<ISpell> = {
   key: SpellsBlueprint.CurseOfWeakness,
   name: "Curse of Weakness",
   description: "A sorcerer's spell designed to reduce the strength and resistance of a target.",
+  textureAtlas: "icons",
+  texturePath: "spell-icons/curse-of-weakness.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "dhagnir-lûth",
   manaCost: 60,

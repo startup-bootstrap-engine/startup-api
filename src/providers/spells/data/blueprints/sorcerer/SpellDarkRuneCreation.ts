@@ -6,10 +6,10 @@ import { SpellItemCreation } from "../../abstractions/SpellItemCreation";
 
 export const spellDarkRuneCreation: Partial<ISpell> = {
   key: SpellsBlueprint.DarkRuneCreationSpell,
-
   name: "Dark Rune Creation Spell",
   description: "A spell that converts a blank rune, in your inventory, into dark rune.",
-
+  textureAtlas: "icons",
+  texturePath: "spell-icons/dark-rune-creation-spell.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "iquar ansr nevae",
   manaCost: 250,
