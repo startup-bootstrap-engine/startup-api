@@ -106,7 +106,13 @@ export class CharacterMonitorQueue {
     try {
       const canProceed = await this.locker.lock(`character-monitor-queue-${character._id}-callback-${callbackId}`);
 
-      if (!canProceed) {
+      const hasCallback = this.characterMonitorCallback.getCallback(character)?.[callbackId];
+
+      if (!hasCallback) {
+        await this.locker.unlock(`character-monitor-queue-${character._id}-callback-${callbackId}`);
+      }
+
+      if (!canProceed && hasCallback) {
         return;
       }
 
@@ -162,8 +168,6 @@ export class CharacterMonitorQueue {
   }
 
   public async shutdown(): Promise<void> {
-    console.log("shutting down queue for", this.queueName);
-
     await this.queue?.close();
     await this.worker?.close();
     this.queue = null;
@@ -209,13 +213,6 @@ export class CharacterMonitorQueue {
       })) as ICharacter;
 
       if (!updatedCharacter.isOnline) {
-        await this.unwatch(callbackId, character);
-        return;
-      }
-
-      const hasLock = await this.locker.hasLock(`character-monitor-queue-${character._id}-callback-${callbackId}`);
-
-      if (!hasLock) {
         await this.unwatch(callbackId, character);
         return;
       }
