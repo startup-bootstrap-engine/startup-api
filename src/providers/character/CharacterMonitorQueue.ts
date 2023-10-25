@@ -3,28 +3,29 @@ import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
-import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { EnvType } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
+import { provide } from "inversify-binding-decorators";
 
 // uniqueId
 import { v4 as uuidv4 } from "uuid";
+import { CharacterMonitorCallback, CharacterMonitorCallbacks } from "./CharacterMonitorQueue/CharacterMonitorCallback";
 
-type CharacterMonitorCallback = (character: ICharacter) => void;
-
-type CallbackRecord = Record<string, CharacterMonitorCallback>;
-
-@provideSingleton(CharacterMonitorQueue)
+@provide(CharacterMonitorQueue)
 export class CharacterMonitorQueue {
   private queue: Queue<any, any, string> | null = null;
   private worker: Worker | null = null;
   private connection;
-  private charactersCallbacks = new Map<string, CallbackRecord>();
   private queueName: string;
 
-  constructor(private newRelic: NewRelic, private locker: Locker, private redisManager: RedisManager) {}
+  constructor(
+    private newRelic: NewRelic,
+    private locker: Locker,
+    private redisManager: RedisManager,
+    private characterMonitorCallback: CharacterMonitorCallbacks
+  ) {}
 
   public init(character: ICharacter): void {
     if (!this.connection) {
@@ -56,7 +57,6 @@ export class CharacterMonitorQueue {
           const { character, callbackId, intervalMs } = job.data;
 
           if (!character.isOnline) {
-            await this.locker.unlock(`character-monitor-queue-${character._id}-callback-${callbackId}`);
             await this.unwatch(callbackId, character);
 
             return;
@@ -110,18 +110,13 @@ export class CharacterMonitorQueue {
         return;
       }
 
-      const currentCallbackRecord = this.charactersCallbacks.get(character._id.toString());
-
       const isWatching = this.isWatching(callbackId, character);
 
       if (isWatching) {
         return;
       }
 
-      this.charactersCallbacks.set(character._id.toString(), {
-        ...currentCallbackRecord,
-        [callbackId]: callback,
-      });
+      this.characterMonitorCallback.setCallback(character, callbackId, callback);
 
       if (intervalMs < 3000) {
         intervalMs = 3000;
@@ -135,7 +130,7 @@ export class CharacterMonitorQueue {
   }
 
   public isWatching(callbackId: string, character: ICharacter): boolean {
-    const currentCallbackRecord = this.charactersCallbacks.get(character._id.toString());
+    const currentCallbackRecord = this.characterMonitorCallback.getCallback(character);
 
     const hasCallback = currentCallbackRecord?.[callbackId];
 
@@ -145,19 +140,9 @@ export class CharacterMonitorQueue {
   @TrackNewRelicTransaction()
   public async unwatch(callbackId: string, character: ICharacter): Promise<void> {
     try {
-      const currentCallbacks = this.charactersCallbacks.get(character._id.toString());
+      this.characterMonitorCallback.deleteCallback(character, callbackId);
 
-      if (!currentCallbacks) {
-        return;
-      }
-
-      delete currentCallbacks[callbackId];
-
-      if (Object.keys(currentCallbacks).length === 0) {
-        this.charactersCallbacks.delete(character._id.toString());
-      }
-
-      this.charactersCallbacks.set(character._id.toString(), currentCallbacks);
+      await this.shutdown();
     } catch (error) {
       console.error(error);
     } finally {
@@ -166,19 +151,19 @@ export class CharacterMonitorQueue {
   }
 
   public async unwatchAll(character: ICharacter): Promise<void> {
-    const currentCallbacks = this.charactersCallbacks.get(character._id.toString());
-
-    const callbackIds = Object.keys(currentCallbacks || {});
+    const callbackIds = this.characterMonitorCallback.getCallbackIds(character);
 
     // unlock all callbacks
     for (const callbackId of callbackIds) {
       await this.locker.unlock(`character-monitor-queue-${character._id}-callback-${callbackId}`);
     }
 
-    this.charactersCallbacks.delete(character._id);
+    this.characterMonitorCallback.deleteAllCallbacksFromCharacter(character);
   }
 
   public async shutdown(): Promise<void> {
+    console.log("shutting down queue for", this.queueName);
+
     await this.queue?.close();
     await this.worker?.close();
     this.queue = null;
@@ -213,7 +198,7 @@ export class CharacterMonitorQueue {
   @TrackNewRelicTransaction()
   private async execMonitorCallback(character: ICharacter, callbackId: string, intervalMs: number): Promise<void> {
     // execute character callback
-    const characterCallbacks = this.charactersCallbacks.get(character._id.toString());
+    const characterCallbacks = this.characterMonitorCallback.getCallback(character);
 
     const callback = characterCallbacks?.[callbackId];
 
