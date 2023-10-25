@@ -3,11 +3,11 @@ import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { EnvType } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
-import { provide } from "inversify-binding-decorators";
 
 // uniqueId
 import { v4 as uuidv4 } from "uuid";
@@ -16,7 +16,7 @@ type CharacterMonitorCallback = (character: ICharacter) => void;
 
 type CallbackRecord = Record<string, CharacterMonitorCallback>;
 
-@provide(CharacterMonitorQueue)
+@provideSingleton(CharacterMonitorQueue)
 export class CharacterMonitorQueue {
   private queue: Queue<any, any, string> | null = null;
   private worker: Worker | null = null;
@@ -103,19 +103,13 @@ export class CharacterMonitorQueue {
       this.init(character);
     }
 
-    const canProceed = await this.locker.lock(`character-monitor-queue-${character._id}-callback-${callbackId}`);
-
-    if (!canProceed) {
-      return;
-    }
-
-    const isJobBeingProcessed = await this.isJobBeingProcessed(callbackId);
-
-    if (isJobBeingProcessed) {
-      return;
-    }
-
     try {
+      const canProceed = await this.locker.lock(`character-monitor-queue-${character._id}-callback-${callbackId}`);
+
+      if (!canProceed) {
+        return;
+      }
+
       const currentCallbackRecord = this.charactersCallbacks.get(character._id.toString());
 
       const isWatching = this.isWatching(callbackId, character);
@@ -164,8 +158,6 @@ export class CharacterMonitorQueue {
       }
 
       this.charactersCallbacks.set(character._id.toString(), currentCallbacks);
-
-      await this.shutdown(); // shutdown queue
     } catch (error) {
       console.error(error);
     } finally {
@@ -173,7 +165,16 @@ export class CharacterMonitorQueue {
     }
   }
 
-  public unwatchAll(character: ICharacter): void {
+  public async unwatchAll(character: ICharacter): Promise<void> {
+    const currentCallbacks = this.charactersCallbacks.get(character._id.toString());
+
+    const callbackIds = Object.keys(currentCallbacks || {});
+
+    // unlock all callbacks
+    for (const callbackId of callbackIds) {
+      await this.locker.unlock(`character-monitor-queue-${character._id}-callback-${callbackId}`);
+    }
+
     this.charactersCallbacks.delete(character._id);
   }
 
@@ -182,17 +183,6 @@ export class CharacterMonitorQueue {
     await this.worker?.close();
     this.queue = null;
     this.worker = null;
-  }
-
-  private async isJobBeingProcessed(callbackId: string): Promise<boolean> {
-    const existingJobs = (await this.queue?.getJobs(["waiting", "active", "delayed"])) ?? [];
-    const isJobExisting = existingJobs.some((job) => job?.data?.callbackId === callbackId);
-
-    if (isJobExisting) {
-      return true; // Don't enqueue a new job if one with the same callbackId already exists
-    }
-
-    return false;
   }
 
   private async add(character: ICharacter, callbackId: string, intervalMs: number): Promise<void> {
@@ -227,20 +217,7 @@ export class CharacterMonitorQueue {
 
     const callback = characterCallbacks?.[callbackId];
 
-    if (!callback) {
-      await this.unwatch(callbackId, character);
-      return;
-    }
-
     if (callback) {
-      console.log(
-        "CharacterMonitorCallback: ",
-        character.name,
-        `(${character._id.toString()})`,
-        callbackId,
-        intervalMs
-      );
-
       const updatedCharacter = (await Character.findOne({ _id: character._id }).lean({
         virtuals: true,
         defaults: true,
@@ -257,6 +234,14 @@ export class CharacterMonitorQueue {
         await this.unwatch(callbackId, character);
         return;
       }
+
+      console.log(
+        "CharacterMonitorCallback: ",
+        character.name,
+        `(${character._id.toString()})`,
+        callbackId,
+        intervalMs
+      );
 
       // execute callback
       callback(updatedCharacter);
