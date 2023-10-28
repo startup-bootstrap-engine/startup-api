@@ -181,7 +181,13 @@ export class NPCBattleCycleQueue {
         npc.maxRangeInGridCells || NPC_MIN_DISTANCE_TO_ACTIVATE
       );
 
-      if (!targetCharacter || targetCharacter.health <= 0 || targetCharacter.scene !== npc.scene || !isUnderRange) {
+      if (
+        !targetCharacter ||
+        !targetCharacter.isOnline ||
+        targetCharacter.health <= 0 ||
+        targetCharacter.scene !== npc.scene ||
+        !isUnderRange
+      ) {
         await this.stop(npc);
         return;
       }
