@@ -14,7 +14,7 @@ import { NamespaceRedisControl } from "@providers/spells/data/types/SpellsBluepr
 import { CharacterSocketEvents, ICharacterLogout, SpellsBlueprint } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
-import { CharacterMonitorQueue } from "../CharacterMonitorQueue";
+import { CharacterMonitorInterval } from "../CharacterMonitorInterval/CharacterMonitorInterval";
 import { CharacterView } from "../CharacterView";
 
 @provide(CharacterNetworkLogout)
@@ -26,7 +26,7 @@ export class CharacterNetworkLogout {
     private characterView: CharacterView,
     private inMemoryHashTable: InMemoryHashTable,
     private spellLearn: SpellLearn,
-    private characterMonitorQueue: CharacterMonitorQueue,
+    private characterMonitorInterval: CharacterMonitorInterval,
     private specialEffect: SpecialEffect,
     private socketSessionControl: SocketSessionControl,
     private skillStatsIncrease: SkillStatsIncrease,
@@ -54,7 +54,7 @@ export class CharacterNetworkLogout {
   }
 
   private async unwatchCharacter(character: ICharacter): Promise<void> {
-    await this.characterMonitorQueue.unwatchAll(character);
+    await this.characterMonitorInterval.unwatchAll(character);
   }
 
   private async notifyNearbyCharacters(data: ICharacterLogout, character: ICharacter): Promise<void> {
