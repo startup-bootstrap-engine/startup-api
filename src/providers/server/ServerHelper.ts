@@ -79,7 +79,7 @@ export class ServerHelper {
 
               console.info("✅ Graceful shutdown completed");
               process.exit(128 + termination.errno);
-            }, 10000);
+            }, 3000);
           });
         } catch (error) {
           console.error("❌ An error occurred during graceful shutdown:", error);
