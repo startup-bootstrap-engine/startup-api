@@ -8,13 +8,13 @@ import { SpellCalculator } from "@providers/spells/data/abstractions/SpellCalcul
 import { NewRelicTransactionCategory } from "@providers/types/NewRelicTypes";
 import { BasicAttribute, CharacterClass, CharacterSocketEvents, ICharacterAttributeChanged } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { CharacterMonitorQueue } from "../CharacterMonitorQueue";
+import { CharacterMonitorInterval } from "../CharacterMonitorInterval/CharacterMonitorInterval";
 
 @provide(WarriorPassiveHabilities)
 export class WarriorPassiveHabilities {
   constructor(
     private socketMessaging: SocketMessaging,
-    private characterMonitorQueue: CharacterMonitorQueue,
+    private characterMonitorInterval: CharacterMonitorInterval,
     private traitGetter: TraitGetter,
     private newRelic: NewRelic,
     private spellCalculator: SpellCalculator
@@ -29,7 +29,7 @@ export class WarriorPassiveHabilities {
     const { _id, skills } = character;
 
     if (character.class !== CharacterClass.Warrior) {
-      await this.characterMonitorQueue.unwatch("health-regen", character);
+      await this.characterMonitorInterval.unwatch("health-regen", character);
       return;
     }
 
@@ -49,7 +49,7 @@ export class WarriorPassiveHabilities {
         skillAssociation: "reverse",
       });
 
-      await this.characterMonitorQueue.watch(
+      await this.characterMonitorInterval.watch(
         "health-regen",
         character,
         async () => {
@@ -98,7 +98,7 @@ export class WarriorPassiveHabilities {
                 );
               } catch (err) {
                 console.error("Error during health regeneration interval:", err);
-                await this.characterMonitorQueue.unwatch("health-regen", character);
+                await this.characterMonitorInterval.unwatch("health-regen", character);
               }
             }
           );

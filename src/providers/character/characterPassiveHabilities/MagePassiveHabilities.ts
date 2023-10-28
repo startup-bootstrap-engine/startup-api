@@ -8,14 +8,14 @@ import { SpellCalculator } from "@providers/spells/data/abstractions/SpellCalcul
 import { NewRelicTransactionCategory } from "@providers/types/NewRelicTypes";
 import { BasicAttribute, CharacterClass, CharacterSocketEvents, ICharacterAttributeChanged } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { CharacterMonitorQueue } from "../CharacterMonitorQueue";
+import { CharacterMonitorInterval } from "../CharacterMonitorInterval/CharacterMonitorInterval";
 
 //! Mage = sorcerer & druid
 @provide(MagePassiveHabilities)
 export class MagePassiveHabilities {
   constructor(
     private socketMessaging: SocketMessaging,
-    private characterMonitorQueue: CharacterMonitorQueue,
+    private characterMonitorInterval: CharacterMonitorInterval,
     private traitGetter: TraitGetter,
     private newRelic: NewRelic,
     private spellCalculator: SpellCalculator
@@ -26,7 +26,7 @@ export class MagePassiveHabilities {
     const { _id, mana, maxMana } = character;
 
     if (character.class !== CharacterClass.Sorcerer && character.class !== CharacterClass.Druid) {
-      await this.characterMonitorQueue.unwatch("mana-regen", character);
+      await this.characterMonitorInterval.unwatch("mana-regen", character);
       return;
     }
 
@@ -47,7 +47,7 @@ export class MagePassiveHabilities {
         skillAssociation: "reverse",
       });
 
-      await this.characterMonitorQueue.watch(
+      await this.characterMonitorInterval.watch(
         "mana-regen",
         character,
         async (character: ICharacter) => {
@@ -92,7 +92,7 @@ export class MagePassiveHabilities {
                 );
               } catch (err) {
                 console.error("Error during mana regeneration interval:", err);
-                await this.characterMonitorQueue.unwatch("mana-regen", character);
+                await this.characterMonitorInterval.unwatch("mana-regen", character);
               }
             }
           );
