@@ -5,17 +5,14 @@ import { provide } from "inversify-binding-decorators";
 @provide(CharacterConnection)
 export class CharacterConnection {
   @TrackNewRelicTransaction()
-  public async resetCharacterAttributes(): Promise<void> {
-    await Character.updateMany(
-      {},
-      {
-        $set: {
-          isOnline: false,
-        },
-        $unset: {
-          target: 1,
-        },
-      }
-    );
+  public async resetCharacterAttributes(filter: Record<string, unknown> = {}): Promise<void> {
+    await Character.updateMany(filter, {
+      $set: {
+        isOnline: false,
+      },
+      $unset: {
+        target: 1,
+      },
+    });
   }
 }
