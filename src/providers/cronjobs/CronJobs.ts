@@ -17,6 +17,7 @@ import { NPCCrons } from "./NPCCrons";
 import { RankingCrons } from "./RankingCrons";
 import { RedisCrons } from "./RedisCrons";
 import { TotalAvailableGold } from "./TotalAvailableGold";
+import { RemoveInactivePartyMembersCron } from "./RemoveInactivePartyMembersCron";
 
 @provide(Cronjob)
 export class Cronjob {
@@ -36,7 +37,8 @@ export class Cronjob {
     private marketplaceCrons: MarketplaceCrons,
     private rankingCrons: RankingCrons,
     private redisCrons: RedisCrons,
-    private databaseMonitorCrons: DatabaseMonitorCrons
+    private databaseMonitorCrons: DatabaseMonitorCrons,
+    private removeInactivePartyMembersCron: RemoveInactivePartyMembersCron
   ) {}
 
   public start(): void {
@@ -62,6 +64,7 @@ export class Cronjob {
         this.totalAvailableGold.schedule();
         this.redisCrons.schedule();
         this.databaseMonitorCrons.schedule();
+        this.removeInactivePartyMembersCron.schedule();
         break;
       case EnvType.Staging:
       case EnvType.Production:
@@ -82,6 +85,7 @@ export class Cronjob {
           this.rankingCrons.schedule();
           this.redisCrons.schedule();
           this.databaseMonitorCrons.schedule();
+          this.removeInactivePartyMembersCron.schedule();
         }
         break;
     }

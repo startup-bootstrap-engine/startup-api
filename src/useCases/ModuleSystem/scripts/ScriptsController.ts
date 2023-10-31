@@ -1,6 +1,6 @@
 import { AuthMiddleware } from "@providers/middlewares/AuthMiddleware";
 import { isAdminMiddleware } from "@providers/middlewares/IsAdminMiddleware";
-import { controller, httpGet, interfaces, response } from "inversify-express-utils";
+import { controller, httpGet, interfaces, requestParam, response } from "inversify-express-utils";
 import { ScriptsUseCase } from "./ScriptsUseCase";
 
 @controller("/scripts", AuthMiddleware, isAdminMiddleware)
@@ -22,6 +22,15 @@ export class ScriptsController implements interfaces.Controller {
 
     return res.status(200).send({
       message: "Items cleaned up!",
+    });
+  }
+
+  @httpGet("/cleanup/redis/:namespace")
+  public async cleanupRedis(@response() res, @requestParam("namespace") namespace: string): Promise<void> {
+    await this.scriptsUseCase.cleanupRedis(namespace);
+
+    return res.status(200).send({
+      message: "Redis blueprints cleaned up!",
     });
   }
 

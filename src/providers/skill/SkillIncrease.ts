@@ -6,7 +6,6 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { CharacterWeapon } from "@providers/character/CharacterWeapon";
 import { CharacterBonusPenalties } from "@providers/character/characterBonusPenalties/CharacterBonusPenalties";
 import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
-import { CRAFTING_FAILED_TRY_SP_INCREASE_RATIO } from "@providers/constants/CraftingConstants";
 import {
   LOW_SKILL_LEVEL_SP_INCREASE_BONUS,
   ML_INCREASE_RATIO,
@@ -257,13 +256,7 @@ export class SkillIncrease {
     }
 
     const craftSkillPointsCalculator = (skillDetails: ISkillDetails): number => {
-      const newCraftSP = this.calculateNewCraftSP(skillDetails);
-
-      if (!isSuccess) {
-        return newCraftSP - newCraftSP * CRAFTING_FAILED_TRY_SP_INCREASE_RATIO;
-      }
-
-      return newCraftSP;
+      return this.calculateNewCraftSP(skillDetails);
     };
 
     const result = this.increaseSP(skills, craftedItemKey, craftSkillPointsCalculator, CraftingSkillsMap);

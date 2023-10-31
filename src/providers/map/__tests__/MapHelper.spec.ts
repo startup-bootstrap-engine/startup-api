@@ -1,6 +1,6 @@
-import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
+import { BlueprintManager, BlueprintNamespaces } from "@providers/blueprint/BlueprintManager";
 import { container, unitTestHelper } from "@providers/inversify/container";
-import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTypes";
+import { IBlueprint } from "@providers/types/temp/BlueprintTypes";
 import { ITiledObject } from "@rpg-engine/shared";
 import { MapHelper } from "../MapHelper";
 
@@ -15,6 +15,14 @@ describe("MapHelper", () => {
 
     await unitTestHelper.initializeMapLoader();
   });
+
+  const updateBlueprint = (namespace: BlueprintNamespaces, key: string, data: any): IBlueprint => {
+    const blueprintIndex = blueprintManager.getBlueprintIndex<IBlueprint>(namespace);
+
+    blueprintIndex[key] = data;
+
+    return blueprintIndex;
+  };
 
   it("returns if a coordinate is valid or not", () => {
     const v1 = [0, 0];
@@ -52,7 +60,7 @@ describe("MapHelper", () => {
     };
     const mapName = "test-map";
 
-    await blueprintManager.updateBlueprint("items", "test-key" as AvailableBlueprints, {
+    updateBlueprint("items", "test-key", {
       foo: "bar",
     });
 
@@ -79,7 +87,7 @@ describe("MapHelper", () => {
 
     const additionalProperties = { baz: "qux" };
 
-    await blueprintManager.updateBlueprint("items", "test-key" as AvailableBlueprints, {
+    updateBlueprint("items", "test-key", {
       foo: "bar",
     });
 
@@ -110,7 +118,7 @@ describe("MapHelper", () => {
     };
     const mapName = "test-map";
 
-    await blueprintManager.updateBlueprint("items", "test-key" as AvailableBlueprints, {
+    updateBlueprint("items", "test-key", {
       foo: "bar",
     });
 
@@ -143,7 +151,7 @@ describe("MapHelper", () => {
     };
     const mapName = "test-map";
 
-    await blueprintManager.updateBlueprint("items", "test-key" as AvailableBlueprints, {
+    updateBlueprint("items", "test-key", {
       foo: "bar",
     });
 
@@ -174,7 +182,7 @@ describe("MapHelper", () => {
       y: 0,
       properties: [{ name: "key", value: "test-key" }],
     };
-    await blueprintManager.updateBlueprint("items", "test-key" as AvailableBlueprints, {
+    updateBlueprint("items", "test-key", {
       foo: "bar",
     });
 

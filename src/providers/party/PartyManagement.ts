@@ -3,6 +3,7 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { CharacterParty, ICharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { CharacterLastAction } from "@providers/character/CharacterLastAction";
 import { CharacterBuffActivator } from "@providers/character/characterBuff/CharacterBuffActivator";
 import { PARTY_BONUS_RATIO } from "@providers/constants/PartyConstants";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -26,6 +27,7 @@ import {
   PartySocketEvents,
   UISocketEvents,
 } from "@rpg-engine/shared";
+import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
 import { Types } from "mongoose";
@@ -34,7 +36,11 @@ type BuffSkillTypes = BasicAttribute | CombatSkill | CraftingSkill | CharacterAt
 
 @provide(PartyManagement)
 export default class PartyManagement {
-  constructor(private socketMessaging: SocketMessaging, private characterBuffActivator: CharacterBuffActivator) {}
+  constructor(
+    private socketMessaging: SocketMessaging,
+    private characterBuffActivator: CharacterBuffActivator,
+    private characterLastAction: CharacterLastAction
+  ) {}
 
   // PARTY MANAGEMENT
 
@@ -414,6 +420,46 @@ export default class PartyManagement {
     const uniqueClasses = new Set(memberClasses);
 
     return uniqueClasses.size;
+  }
+
+  @TrackNewRelicTransaction()
+  public async removeInactivePartyMembers(partyId: string): Promise<void> {
+    try {
+      const party = await CharacterParty.findById(partyId).lean();
+
+      if (party) {
+        const currentTime = dayjs();
+        const INACTIVITY_LIMIT_MS = 180000;
+
+        const inactiveMembers: ICharacter[] = [];
+
+        for (const member of party.members) {
+          const lastAction = await this.characterLastAction.getLastAction(member._id as string);
+          if (!lastAction || currentTime.diff(dayjs(lastAction), "milliseconds") > INACTIVITY_LIMIT_MS) {
+            inactiveMembers.push(member as ICharacter);
+          }
+        }
+
+        for (const inactiveMember of inactiveMembers) {
+          const removed = await this.removeMemberFromParty(party as ICharacterParty, inactiveMember as ICharacter);
+
+          if (removed) {
+            this.socketMessaging.sendEventToUser<IUIShowMessage>(
+              (inactiveMember as ICharacter).channelId!,
+              UISocketEvents.ShowMessage,
+              {
+                message: "You were removed from the party due to inactivity",
+                type: "info",
+              }
+            );
+          }
+        }
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
+    }
   }
 
   // CHARACTERS BUFFS

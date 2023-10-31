@@ -1,3 +1,4 @@
+import { CharacterConnection } from "@providers/character/CharacterConnection";
 import { RedisManager } from "@providers/database/RedisManager";
 import { database, socketAdapter } from "@providers/inversify/container";
 import { CharacterSocketEvents, EnvType } from "@rpg-engine/shared";
@@ -10,7 +11,7 @@ import { IServerBootstrapVars } from "../types/ServerTypes";
 
 @provide(ServerHelper)
 export class ServerHelper {
-  constructor(private redisManager: RedisManager) {}
+  constructor(private redisManager: RedisManager, private characterConnection: CharacterConnection) {}
 
   public showBootstrapMessage(config: IServerBootstrapVars): void {
     const {
@@ -60,11 +61,16 @@ export class ServerHelper {
     ];
 
     terminationSignals.forEach((termination) => {
-      process.on(termination.signal, () => {
+      process.on(termination.signal, async () => {
         try {
           console.info(`🛑 ${termination.signal} signal received, gracefully shutting down the server...`);
 
           socketAdapter.emitToAllUsers(CharacterSocketEvents.CharacterForceDisconnect); // TODO: Use an event name to inform players that they are getting disconnected because the server is restarting
+
+          // disconnect and clear target of all online characters
+          await this.characterConnection.resetCharacterAttributes({
+            isOnline: true,
+          });
 
           server.close(() => {
             console.info("✅ Express server closed successfully");
@@ -79,7 +85,7 @@ export class ServerHelper {
 
               console.info("✅ Graceful shutdown completed");
               process.exit(128 + termination.errno);
-            }, 10000);
+            }, 3000);
           });
         } catch (error) {
           console.error("❌ An error occurred during graceful shutdown:", error);

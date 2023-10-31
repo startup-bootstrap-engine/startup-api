@@ -11,12 +11,11 @@ import { Seeder } from "@providers/seeds/Seeder";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { HitTarget } from "@providers/battle/HitTarget";
 import { CharacterConsumptionControl } from "@providers/character/CharacterConsumptionControl";
-import { CharacterMonitorQueue } from "@providers/character/CharacterMonitorQueue";
+import { CharacterMonitorCallbackTracker } from "@providers/character/CharacterMonitorInterval/CharacterMonitorCallbackTracker";
 import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DiscordBot } from "@providers/discord/DiscordBot";
 import { EntityEffectDurationControl } from "@providers/entityEffects/EntityEffectDurationControl";
-import { blueprintManager } from "@providers/inversify/container";
 import { ItemUseCycleQueue } from "@providers/item/ItemUseCycleQueue";
 import { Locker } from "@providers/locks/Locker";
 import { NPCBattleCycleQueue } from "@providers/npc/NPCBattleCycleQueue";
@@ -50,10 +49,10 @@ export class ServerBootstrap {
     private discordBot: DiscordBot,
     private socketSessionControl: SocketSessionControl,
     private npcBattleCycleQueue: NPCBattleCycleQueue,
-    private characterMonitorQueue: CharacterMonitorQueue,
     private npcCycleQueue: NPCCycleQueue,
     private itemUseCycleQueue: ItemUseCycleQueue,
-    private entityEffectDuration: EntityEffectDurationControl
+    private entityEffectDuration: EntityEffectDurationControl,
+    private characterMonitorCallbackTracker: CharacterMonitorCallbackTracker
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -86,7 +85,6 @@ export class ServerBootstrap {
       await this.itemUseCycleQueue.shutdown();
       await this.npcBattleCycleQueue.shutdown();
       await this.npcCycleQueue.shutdown();
-      await this.characterMonitorQueue.shutdown();
     };
 
     process.on("SIGTERM", async () => {
@@ -103,8 +101,6 @@ export class ServerBootstrap {
 
   private async execOneTimeOperations(): Promise<void> {
     await this.socketSessionControl.clearAllSessions();
-
-    await blueprintManager.loadAllBlueprints();
 
     await this.npcManager.disableNPCBehaviors();
 
@@ -125,6 +121,7 @@ export class ServerBootstrap {
     await this.inMemoryHashTable.deleteAll("channel-bound-events");
     await this.inMemoryHashTable.deleteAll("raids");
     await this.entityEffectDuration.clearAll();
+    await this.characterMonitorCallbackTracker.clearAll();
 
     // Firebase-admin setup, that push notification requires.
     PushNotificationHelper.initialize();
