@@ -283,30 +283,14 @@ export class HitTarget {
         }
 
         if (!sorcererManaShield) {
-          const newTargetHealth = target.health - damage;
-
-          if (newTargetHealth <= 0) {
-            target.health = 0;
-            target.isAlive = false;
-          } else {
-            target.health -= damage;
-          }
-
-          if (target.type === "Character") {
-            damageRelatedPromises.push(
-              Character.updateOne({ _id: target.id, scene: target.scene }, { health: target.health })
-            );
-          }
-          if (target.type === "NPC") {
-            damageRelatedPromises.push(
-              NPC.updateOne(
-                {
-                  _id: target.id,
-                  scene: target.scene,
-                },
-                { health: target.health }
-              )
-            );
+          try {
+            const latestHealth = await this.fetchLatestHealth(target);
+            const newTargetHealth = latestHealth - damage;
+            target.health = newTargetHealth <= 0 ? 0 : newTargetHealth;
+            target.isAlive = newTargetHealth > 0;
+            await this.updateHealthInDatabase(target, target.health);
+          } catch (error) {
+            console.error(`Error processing target health: ${error.message}`);
           }
         }
 
@@ -378,6 +362,35 @@ export class HitTarget {
     remainingPromises.push(this.battleAttackTargetDeath.handleDeathAfterHit(attacker, target));
 
     await Promise.all(remainingPromises);
+  }
+
+  private async fetchLatestHealth(target: any): Promise<number> {
+    let data;
+    switch (target.type) {
+      case EntityType.Character:
+        data = await Character.findOne({ _id: target.id, scene: target.scene });
+        break;
+      case EntityType.NPC:
+        data = await NPC.findOne({ _id: target.id, scene: target.scene });
+        break;
+      default:
+        throw new Error(`Invalid target type: ${target.type}`);
+    }
+    return data ? data.health : 0;
+  }
+
+  private async updateHealthInDatabase(target: any, health: number): Promise<void> {
+    const updatePayload = { health };
+    switch (target.type) {
+      case EntityType.Character:
+        await Character.updateOne({ _id: target.id, scene: target.scene }, updatePayload);
+        break;
+      case EntityType.NPC:
+        await NPC.updateOne({ _id: target.id, scene: target.scene }, updatePayload);
+        break;
+      default:
+        throw new Error(`Invalid target type: ${target.type}`);
+    }
   }
 
   private async sendBattleEvent(character: ICharacter, battleEventPayload: IBattleEventFromServer): Promise<void> {
