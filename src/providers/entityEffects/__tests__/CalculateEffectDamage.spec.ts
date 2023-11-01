@@ -42,6 +42,7 @@ describe("CalculateEffectDamage", () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it("should return correct damage when attacker is Character", async () => {
