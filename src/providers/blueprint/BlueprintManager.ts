@@ -1,5 +1,4 @@
 import { itemsBlueprintIndex } from "@providers/item/data";
-import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTypes";
 import { usableEffectsIndex } from "@providers/item/data/usableEffects";
 import { IUsableEffect, IUsableEffectRune } from "@providers/item/data/usableEffects/types";
 import { npcsBlueprintIndex } from "@providers/npc/data";
@@ -16,7 +15,7 @@ type IBlueprint = Record<string, any>; //! Will be refactored later
 export class BlueprintManager {
   constructor() {}
 
-  public getBlueprint<T>(namespace: BlueprintNamespaces, key: AvailableBlueprints): T {
+  public getBlueprint<T>(namespace: BlueprintNamespaces, key: string): T {
     const blueprint = this.getBlueprintFromKey<IBlueprint>(namespace, key);
 
     if (namespace === "items") {
@@ -68,7 +67,7 @@ export class BlueprintManager {
     }
   }
 
-  private getBlueprintFromKey<T>(namespace: BlueprintNamespaces, key: AvailableBlueprints): T {
+  private getBlueprintFromKey<T>(namespace: BlueprintNamespaces, key: string): T {
     switch (namespace) {
       case "items":
         return itemsBlueprintIndex[key] as T;
