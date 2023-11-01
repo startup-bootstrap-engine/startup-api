@@ -126,6 +126,8 @@ export class EntityEffectCycle {
   }
 
   private async calculateDamage(entityEffect: IEntityEffect, target: IEntity, attacker: IEntity): Promise<number> {
+    const entityModel = target.type === EntityType.Character ? Character : NPC;
+    target = (await entityModel.findById(target._id)) as IEntity;
     let damage = await entityEffect.effect(target, attacker as ICharacter | INPC);
     damage = damage > target.health ? target.health : damage;
     return damage;

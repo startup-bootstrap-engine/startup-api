@@ -1,5 +1,6 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Equipment, IEquipment } from "@entities/ModuleCharacter/EquipmentModel";
+import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { HitTarget } from "@providers/battle/HitTarget";
@@ -10,7 +11,9 @@ import {
   StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
-import { BattleEventType, FromGridX } from "@rpg-engine/shared";
+import { SpellCast } from "@providers/spells/SpellCast";
+import { spellSelfHealing } from "@providers/spells/data/blueprints/all/SpellSelfHealing";
+import { BattleEventType, CharacterClass, FromGridX } from "@rpg-engine/shared";
 
 describe("HitTarget", () => {
   let hitTarget: HitTarget;
@@ -22,9 +25,12 @@ describe("HitTarget", () => {
   let applyEntitySpy: jest.SpyInstance;
   let getWeaponSpy: jest.SpyInstance;
   let findByIdSpy: jest.SpyInstance;
+  let spellCast: SpellCast;
+  let characterSkills: ISkill;
 
   beforeAll(() => {
     hitTarget = container.get(HitTarget);
+    spellCast = container.get<SpellCast>(SpellCast);
   });
 
   beforeEach(async () => {
@@ -60,10 +66,23 @@ describe("HitTarget", () => {
     let testCharacter: ICharacter;
 
     beforeEach(async () => {
-      testCharacter = await unitTestHelper.createMockCharacter(null, {
-        hasEquipment: true,
-        hasSkills: true,
-      });
+      testCharacter = await unitTestHelper.createMockCharacter(
+        {
+          health: 80,
+          learnedSpells: [spellSelfHealing.key],
+        },
+        {
+          hasEquipment: true,
+          hasSkills: true,
+        }
+      );
+
+      await Character.findByIdAndUpdate(testCharacter.id, { class: CharacterClass.Warrior });
+      const skills = (await Skill.findById(testCharacter.skills).lean()) as ISkill;
+      characterSkills = skills;
+      characterSkills.level = spellSelfHealing.minLevelRequired!;
+      characterSkills.magic.level = spellSelfHealing.minMagicLevelRequired;
+      (await Skill.findByIdAndUpdate(characterSkills._id, characterSkills).lean()) as ISkill;
 
       testCharacter.x = FromGridX(0);
       testCharacter.y = FromGridX(0);
@@ -93,6 +112,50 @@ describe("HitTarget", () => {
 
       expect(testNPC.health).toBeLessThan(testNPC.maxHealth);
       expect(increaseSkillsOnBattle).toHaveBeenCalled();
+    });
+
+    it("when healing spell cast before a hit,  it should properly adjusted the health", async () => {
+      const attackDamage = 20;
+      const characterHealth = testCharacter.health;
+
+      // Mock hit functionality
+      jest
+        // @ts-ignore
+        .spyOn(hitTarget.battleEvent, "calculateEvent" as any)
+        .mockImplementation(() => BattleEventType.Hit);
+      // @ts-ignore
+      jest.spyOn(hitTarget.battleDamageCalculator, "calculateHitDamage" as any).mockImplementation(() => attackDamage);
+
+      await spellCast.castSpell({ magicWords: "talas faenya" }, testCharacter);
+
+      await hitTarget.hit(testNPC, testCharacter);
+
+      const updatedTestCharacter = (await Character.findById(testCharacter._id)) as ICharacter;
+
+      expect(updatedTestCharacter.health).toBeLessThan(characterHealth);
+      expect(updatedTestCharacter.health).toBeGreaterThan(characterHealth - attackDamage);
+    });
+
+    it("when a hit occurred before a healing spell cast,  it should properly adjusted the health", async () => {
+      const attackDamage = 20;
+      const characterHealth = testCharacter.health;
+
+      // Mock hit functionality
+      jest
+        // @ts-ignore
+        .spyOn(hitTarget.battleEvent, "calculateEvent" as any)
+        .mockImplementation(() => BattleEventType.Hit);
+      // @ts-ignore
+      jest.spyOn(hitTarget.battleDamageCalculator, "calculateHitDamage" as any).mockImplementation(() => attackDamage);
+
+      await hitTarget.hit(testNPC, testCharacter);
+
+      await spellCast.castSpell({ magicWords: "talas faenya" }, testCharacter);
+
+      const updatedTestCharacter = (await Character.findById(testCharacter._id)) as ICharacter;
+
+      expect(updatedTestCharacter.health).toBeLessThan(characterHealth);
+      expect(updatedTestCharacter.health).toBeGreaterThan(characterHealth - attackDamage);
     });
 
     it("when battle event is a miss, it should not decrease the target's health", async () => {
