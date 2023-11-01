@@ -24,8 +24,6 @@ export class NPCMovementFixedPath {
       )!;
 
       if (!shortestPath) {
-        // throw new Error("No shortest path found!");
-
         await this.npcFreezer.freezeNPC(npc, "NPCMovementFixedPath: No shortest path found!");
 
         return;

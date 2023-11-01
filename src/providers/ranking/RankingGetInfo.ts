@@ -1,32 +1,21 @@
-import { Character } from "@entities/ModuleCharacter/CharacterModel";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Skill } from "@entities/ModuleCharacter/SkillsModel";
-import { CharacterClass } from "@rpg-engine/shared";
+import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import {
+  CharacterClass,
+  CharacterRankingClass,
+  CharacterRankingSkill,
+  ILeaderboardClassRankingResponse,
+  ILeaderboardLevelRankingResponse,
+  ILeaderboardSkillRankingResponse,
+  LeaderboardSocketEvents,
+  TopCharacterEntry,
+} from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-
-type TopCharacterEntry = {
-  name: string;
-  level: number;
-};
-
-type CharacterRankingClass = {
-  class: CharacterClass;
-  topPlayers: Array<{ name: string; level: number }>;
-};
-
-type TopSkillEntry = {
-  name: string;
-  skill: string;
-  level: number;
-};
-
-type CharacterRankingSkill = {
-  skill: string;
-  top10: TopSkillEntry[];
-};
 
 @provide(RankingGetInfo)
 export class RankingGetInfo {
-  constructor() {}
+  constructor(private socketMessaging: SocketMessaging) {}
 
   public async topLevelGlobal(): Promise<Set<TopCharacterEntry>> {
     const topSkill = await Skill.aggregate([
@@ -194,5 +183,45 @@ export class RankingGetInfo {
     }
 
     return top10ForAllSkills;
+  }
+
+  public async getLevelRanking(character: ICharacter): Promise<void | ILeaderboardLevelRankingResponse> {
+    const levelRank = await this.topLevelGlobal();
+    console.log("sending event to user");
+    this.socketMessaging.sendEventToUser<ILeaderboardLevelRankingResponse>(
+      character.channelId!,
+      LeaderboardSocketEvents.GetLevelRanking,
+      {
+        levelRank,
+      }
+    );
+    console.log("sent event to user");
+    return { levelRank };
+  }
+
+  public async getClassRanking(
+    character: ICharacter
+  ): Promise<void | Record<string, ILeaderboardClassRankingResponse>> {
+    const classRank = await this.topLevelClass();
+    this.socketMessaging.sendEventToUser<ILeaderboardClassRankingResponse>(
+      character.channelId!,
+      LeaderboardSocketEvents.GetClassRanking,
+      {
+        classRank,
+      }
+    );
+    return { classRank };
+  }
+
+  public async getSkillRanking(character: ICharacter): Promise<void | ILeaderboardSkillRankingResponse> {
+    const skillRank = await this.topLevelBySkillType();
+    this.socketMessaging.sendEventToUser<ILeaderboardSkillRankingResponse>(
+      character.channelId!,
+      LeaderboardSocketEvents.GetSkillRanking,
+      {
+        skillRank,
+      }
+    );
+    return { skillRank };
   }
 }

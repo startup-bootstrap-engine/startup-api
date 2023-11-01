@@ -40,6 +40,23 @@ export class Pathfinder {
       return;
     }
 
+    if (!target) {
+      // fixed path cases
+
+      const result = await this.findShortestPathBetweenPoints(map, {
+        start: {
+          x: startGridX,
+          y: startGridY,
+        },
+        end: {
+          x: endGridX,
+          y: endGridY,
+        },
+      });
+
+      return result;
+    }
+
     const cachedShortestPath = await this.pathfindingCaching.get(map, {
       start: {
         x: startGridX,
@@ -87,7 +104,7 @@ export class Pathfinder {
       }
     }
 
-    return this.findShortestPathBetweenPoints(map, {
+    return await this.findShortestPathBetweenPoints(map, {
       start: {
         x: startGridX,
         y: startGridY,

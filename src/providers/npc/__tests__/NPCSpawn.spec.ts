@@ -33,6 +33,7 @@ describe("NPCSpawn", () => {
   });
   afterEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it("should not spawn the NPC if it is too close to the nearest character", async () => {
@@ -137,6 +138,10 @@ describe("NPCSpawn", () => {
   });
 
   describe("calculateSpawnTime", () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+      jest.restoreAllMocks();
+    });
     it("should generate a spawn time between 1 to 3 minutes", () => {
       const spawnTime = npcSpawn.calculateSpawnTime(10);
       const currentTime = dayjs().toDate();
