@@ -2,6 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import _ from "lodash";
 import { CalculateEffectDamage } from "../CalculateEffectDamage";
 
 describe("CalculateEffectDamage", () => {
@@ -65,6 +66,14 @@ describe("CalculateEffectDamage", () => {
   });
 
   it("should return correct damage when attacker is NPC", async () => {
+    // mock lodash random
+    const mockRandom = jest.spyOn(_, "random");
+
+    // Assuming two calls to random within the function:
+    mockRandom
+      .mockReturnValueOnce(5) // For effectDamageRaw
+      .mockReturnValueOnce(10); // For maxDefense
+
     const spyGetTargetResistance = jest.spyOn(CalculateEffectDamage.prototype as any, "getTargetResistances");
     const spyCalculateTotalEffectDamage = jest.spyOn(
       CalculateEffectDamage.prototype as any,
