@@ -8,6 +8,7 @@ import { MapNonPVPZone } from "@providers/map/MapNonPVPZone";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { NPCAlignment, NPCTargetType, NPC_MAX_TALKING_DISTANCE_IN_GRID } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import { NPCFreezer } from "../NPCFreezer";
 import { NPCView } from "../NPCView";
 import { NPCDirection } from "./NPCMovement";
 
@@ -18,7 +19,8 @@ export class NPCTarget {
     private movementHelper: MovementHelper,
     private mapNonPVPZone: MapNonPVPZone,
     private specialEffect: SpecialEffect,
-    private locker: Locker
+    private locker: Locker,
+    private npcFreeze: NPCFreezer
   ) {}
 
   @TrackNewRelicTransaction()
@@ -35,6 +37,7 @@ export class NPCTarget {
         },
       }
     );
+    await this.npcFreeze.freezeNPC(npc, "Target is out of range");
     await this.locker.unlock(`npc-${npc._id}-npc-battle-cycle`);
   }
 
