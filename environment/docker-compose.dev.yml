@@ -77,4 +77,3 @@ services:
 
 networks:
   rpg-network:
-    external: true

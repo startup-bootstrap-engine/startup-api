@@ -245,7 +245,7 @@ export class NPCMovement {
         }
 
         tries++;
-        await new Promise((resolve) => setTimeout(resolve, 25)); // adjust this timeout as needed
+        await new Promise((resolve) => setTimeout(resolve, 5)); // adjust this timeout as needed
       } catch (error) {
         console.error(error);
         throw error;
