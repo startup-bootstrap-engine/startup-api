@@ -143,8 +143,8 @@ describe("NPCSpawn", () => {
       jest.restoreAllMocks();
     });
     it("should generate a spawn time between 1 to 3 minutes", () => {
-      const spawnTime = npcSpawn.calculateSpawnTime(10);
       const currentTime = dayjs().toDate();
+      const spawnTime = npcSpawn.calculateSpawnTime(10);
       const diffInMinutes = dayjs(spawnTime).diff(currentTime, "minutes");
 
       expect(diffInMinutes).toBeGreaterThanOrEqual(1);
