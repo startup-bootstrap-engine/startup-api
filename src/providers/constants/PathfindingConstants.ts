@@ -1,1 +1,1 @@
-export const PATHFINDING_MAX_TRIES = 300;
+export const PATHFINDING_MAX_TRIES = 50;

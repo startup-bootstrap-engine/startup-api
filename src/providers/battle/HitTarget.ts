@@ -248,7 +248,12 @@ export class HitTarget {
       }
 
       let damage = this.battleDamageCalculator.getCriticalHitDamageIfSucceed(baseDamage);
-      const maxDamage = target.health;
+
+      const updatedHealth = await this.fetchLatestHealth(target);
+
+      target.health = updatedHealth;
+
+      const maxDamage = updatedHealth;
       damage = Math.min(damage, maxDamage);
 
       if (isNaN(damage)) {
@@ -284,8 +289,7 @@ export class HitTarget {
 
         if (!sorcererManaShield) {
           try {
-            const latestHealth = await this.fetchLatestHealth(target);
-            const newTargetHealth = latestHealth - damage;
+            const newTargetHealth = updatedHealth - damage;
             target.health = newTargetHealth <= 0 ? 0 : newTargetHealth;
             target.isAlive = newTargetHealth > 0;
             await this.updateHealthInDatabase(target, target.health);
@@ -364,22 +368,22 @@ export class HitTarget {
     await Promise.all(remainingPromises);
   }
 
-  private async fetchLatestHealth(target: any): Promise<number> {
+  private async fetchLatestHealth(target: ICharacter | INPC): Promise<number> {
     let data;
     switch (target.type) {
       case EntityType.Character:
-        data = await Character.findOne({ _id: target.id, scene: target.scene });
+        data = await Character.findOne({ _id: target.id, scene: target.scene }).lean().select("health");
         break;
       case EntityType.NPC:
-        data = await NPC.findOne({ _id: target.id, scene: target.scene });
+        data = await NPC.findOne({ _id: target.id, scene: target.scene }).lean().select("health");
         break;
       default:
         throw new Error(`Invalid target type: ${target.type}`);
     }
-    return data ? data.health : 0;
+    return data.health;
   }
 
-  private async updateHealthInDatabase(target: any, health: number): Promise<void> {
+  private async updateHealthInDatabase(target: ICharacter | INPC, health: number): Promise<void> {
     const updatePayload = { health };
     switch (target.type) {
       case EntityType.Character:

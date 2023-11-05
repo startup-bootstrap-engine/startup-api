@@ -9,7 +9,7 @@ import {
 import { TraitGetter } from "@providers/skill/TraitGetter";
 import { BasicAttribute, EntityType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import random from "lodash/random";
+import _ from "lodash";
 
 interface ICalculateDamageOptions {
   maxBonusDamage?: number;
@@ -94,8 +94,8 @@ export class CalculateEffectDamage {
     const minDamage = minRawDamage;
 
     // Random number between min and max damage for attack and defense
-    const effectDamageRaw = random(minDamage, maxDamage);
-    const maxDefense = random(minRawDamage, resistanceLevel + magicResistanceLevel);
+    const effectDamageRaw = _.random(minDamage, maxDamage);
+    const maxDefense = _.random(minRawDamage, resistanceLevel + magicResistanceLevel);
 
     // Final effect damage calculation
     const effectDamage = effectDamageRaw - maxDefense + (options?.finalBonusDamage ?? 0);
