@@ -64,7 +64,7 @@ export class NPCMovementMoveTowards {
     }
 
     if (targetCharacter) {
-      if (targetCharacter.scene !== npc.scene) {
+      if (targetCharacter.scene !== npc.scene || !targetCharacter.isOnline || targetCharacter.isBanned) {
         await this.npcTarget.clearTarget(npc);
         return;
       }
