@@ -73,6 +73,11 @@ export class SpellCast {
       return false;
     }
 
+    if (character.target.id !== undefined && character.target.type !== undefined) {
+      data.targetId = character.target.id as unknown as string;
+      data.targetType = character.target.type as unknown as EntityType;
+    }
+
     if (spell.castingType === SpellCastingType.RangedCasting && (!data.targetType || !data.targetId)) {
       await this.sendPreSpellCastEvents(spell, character);
       this.sendIdentifyTargetEvent(character, data);
