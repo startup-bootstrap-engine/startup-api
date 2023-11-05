@@ -538,6 +538,16 @@ describe("SpellCast.ts", () => {
       expect(await spellCast.castSpell(spell, testCharacter)).toBeFalsy();
     });
 
+    it("should cast spell if Character has a target", async () => {
+      const testNPC = await unitTestHelper.createMockNPC();
+      // @ts-ignore
+      testCharacter.target = { id: testNPC.id, type: EntityType.NPC };
+      await testCharacter.save();
+
+      const spell = { magicWords: "talas tamb-eth" };
+      expect(await spellCast.castSpell(spell, testCharacter)).toBeFalsy();
+    });
+
     it("should  stun a target successfully", async () => {
       const timerMock = jest.spyOn(TimerWrapper.prototype, "setTimeout");
       timerMock.mockImplementation();
