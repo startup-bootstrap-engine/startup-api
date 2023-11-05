@@ -131,6 +131,13 @@ export class UseWithEntity {
       return false;
     }
 
+    if (caster.target.id && (target.type === EntityType.Character || EntityType.NPC)) {
+      if (target.id.toString() !== caster.target.id.toString()) {
+        this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, your target is invalid.");
+        return false;
+      }
+    }
+
     if (target.type === EntityType.Character) {
       const customMsg = new Map([
         ["not-online", "Sorry, your target is offline."],
