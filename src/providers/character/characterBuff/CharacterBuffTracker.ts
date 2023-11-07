@@ -44,6 +44,18 @@ export class CharacterBuffTracker {
     return allCharacterBuffs;
   }
 
+  public async hasBuffs(characterId: string): Promise<boolean> {
+    const buffs = await this.getAllCharacterBuffs(characterId);
+
+    return buffs.length > 0;
+  }
+
+  public async hasBuffsByTrait(characterId: string, trait: CharacterTrait): Promise<boolean> {
+    const buffs = await this.getAllCharacterBuffs(characterId);
+
+    return buffs.some((buff) => buff.trait === trait);
+  }
+
   @TrackNewRelicTransaction()
   public async getAllBuffAbsoluteChanges(characterId: string, trait: CharacterTrait): Promise<number> {
     const characterBuffs = await this.getAllCharacterBuffs(characterId);
@@ -132,7 +144,7 @@ export class CharacterBuffTracker {
     }
   }
 
-  private async clearCache(character: ICharacter, skillName: string): Promise<void> {
+  public async clearCache(character: ICharacter, skillName: string): Promise<void> {
     await clearCacheForKey(`characterBuffs_${character._id}`);
     await clearCacheForKey(`${character._id}-skills`);
     await this.inMemoryHashTable.delete(character._id.toString(), "totalAttack");
