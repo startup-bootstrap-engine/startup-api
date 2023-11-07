@@ -81,7 +81,9 @@ export class MarketplaceItemAddRemove {
     });
 
     await this.discordBot.sendMessage(
-      `**${character.name}** IS SELLING **${item.name}** (${item.stackQty}x) on the marketplace for **${marketplaceItem.price}** gold.`,
+      `**${character.name}** IS SELLING **${item.name}** ${
+        item.stackQty && `(${item.stackQty}x)`
+      } on the marketplace for **${marketplaceItem.price}** gold.`,
       "marketplaceBotNotifications"
     );
 
