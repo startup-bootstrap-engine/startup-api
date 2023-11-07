@@ -3,13 +3,13 @@ import { Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
   CharacterClass,
-  CharacterRankingClass,
-  CharacterRankingSkill,
   ILeaderboardClassRankingResponse,
   ILeaderboardLevelRankingResponse,
   ILeaderboardSkillRankingResponse,
+  IRankingCharacterClass,
+  IRankingCharacterSkill,
+  IRankingTopCharacterEntry,
   LeaderboardSocketEvents,
-  TopCharacterEntry,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
@@ -17,7 +17,7 @@ import { provide } from "inversify-binding-decorators";
 export class RankingGetInfo {
   constructor(private socketMessaging: SocketMessaging) {}
 
-  public async topLevelGlobal(): Promise<Set<TopCharacterEntry>> {
+  public async topLevelGlobal(): Promise<Set<IRankingTopCharacterEntry>> {
     const topSkill = await Skill.aggregate([
       {
         $lookup: {
@@ -44,7 +44,7 @@ export class RankingGetInfo {
       },
     ]).exec();
 
-    const result = new Set<TopCharacterEntry>();
+    const result = new Set<IRankingTopCharacterEntry>();
 
     for (const characterSkill of topSkill) {
       const character = await Character.findById(characterSkill.owner).lean().select("name");
@@ -58,8 +58,8 @@ export class RankingGetInfo {
     return result;
   }
 
-  public async topLevelClass(): Promise<Record<string, CharacterRankingClass>> {
-    const top10ForClass: CharacterRankingClass[] = await Character.aggregate([
+  public async topLevelClass(): Promise<Record<string, IRankingCharacterClass>> {
+    const top10ForClass: IRankingCharacterClass[] = await Character.aggregate([
       {
         $match: {
           class: { $in: Object.values(CharacterClass) },
@@ -100,7 +100,7 @@ export class RankingGetInfo {
       },
     ]).exec();
 
-    const result: Record<string, CharacterRankingClass> = {};
+    const result: Record<string, IRankingCharacterClass> = {};
 
     for (const ranking of top10ForClass) {
       if (!result[ranking.class]) {
@@ -120,7 +120,7 @@ export class RankingGetInfo {
     return result;
   }
 
-  public async topLevelBySkillType(): Promise<CharacterRankingSkill[]> {
+  public async topLevelBySkillType(): Promise<IRankingCharacterSkill[]> {
     const skills = [
       "stamina",
       "magic",
@@ -143,7 +143,7 @@ export class RankingGetInfo {
       "blacksmithing",
     ];
 
-    const top10ForAllSkills: CharacterRankingSkill[] = [];
+    const top10ForAllSkills: IRankingCharacterSkill[] = [];
 
     for (const skill of skills) {
       const top10ForSkill = await Skill.aggregate([
