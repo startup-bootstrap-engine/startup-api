@@ -24,7 +24,9 @@ import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/Ne
 import {
   AnimationEffectKeys,
   CharacterPartyBenefits,
+  CharacterSocketEvents,
   DisplayTextSocketEvents,
+  ICharacterAttributeChanged,
   IDisplayTextEvent,
   IIncreaseXPResult,
   IUIShowMessage,
@@ -225,6 +227,8 @@ export class NPCExperience {
       return;
     }
 
+    await this.bootHPAndManaOnLevelUp(character);
+
     this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId!, UISocketEvents.ShowMessage, {
       message: `You advanced from level ${this.numberFormatter.formatNumber(
         previousLevel
@@ -241,6 +245,39 @@ export class NPCExperience {
     await this.animationEffect.sendAnimationEventToCharacter(character, AnimationEffectKeys.LevelUp);
 
     await this.socketMessaging.sendEventToCharactersAroundCharacter(character, SkillSocketEvents.SkillGain, payload);
+  }
+
+  private async bootHPAndManaOnLevelUp(character: ICharacter): Promise<void> {
+    const updatedCharacter = await Character.findById(character._id).lean().select("maxHealth maxMana");
+
+    if (!updatedCharacter) {
+      throw new Error(`Character ${character._id} not found`);
+    }
+
+    await Character.updateOne(
+      {
+        _id: character._id,
+      },
+      {
+        $set: {
+          health: updatedCharacter.maxHealth,
+          mana: updatedCharacter.maxMana,
+        },
+      }
+    );
+
+    const HPManaBoostPayload: ICharacterAttributeChanged = {
+      targetId: character.id,
+      health: updatedCharacter.maxHealth,
+      mana: updatedCharacter.maxMana,
+    };
+
+    await this.socketMessaging.sendEventToCharactersAroundCharacter(
+      character,
+      CharacterSocketEvents.AttributeChanged,
+      HPManaBoostPayload,
+      true
+    );
   }
 
   private async warnCharactersAroundAboutExpGains(character: ICharacter, exp: number): Promise<void> {
