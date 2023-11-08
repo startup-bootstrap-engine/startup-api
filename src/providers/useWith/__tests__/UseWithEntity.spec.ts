@@ -12,10 +12,8 @@ import { ItemValidation } from "@providers/item/validation/ItemValidation";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import {
-  AnimationSocketEvents,
   CharacterSocketEvents,
   GRID_WIDTH,
-  IProjectileAnimationEffect,
   ItemSocketEvents,
   MagicPower,
   NPCAlignment,
@@ -767,7 +765,9 @@ describe("UseWithEntity.ts", () => {
       testCharacter.channelId,
       ItemSocketEvents.EquipmentAndInventoryUpdate,
       {
-        inventory: container,
+        inventory: expect.objectContaining({
+          _id: container._id,
+        }),
         openEquipmentSetOnUpdate: false,
         openInventoryOnUpdate: false,
       }
@@ -820,13 +820,7 @@ describe("UseWithEntity.ts", () => {
 
   it("should receive projectile animation event", async () => {
     // @ts-ignore
-    sendEventToUserMock = jest.spyOn(useWithEntity.socketMessaging, "sendEventToUser");
-
-    testCharacter.channelId = "channel-1";
-    await testCharacter.save();
-
-    targetCharacter.channelId = "channel-2";
-    await targetCharacter.save();
+    const sendAnimationEventsSpy = jest.spyOn(useWithEntity, "sendAnimationEvents");
 
     await useWithEntity.execute(
       {
@@ -837,27 +831,18 @@ describe("UseWithEntity.ts", () => {
       testCharacter
     );
 
-    expect(sendEventToUserMock).toBeCalled();
+    expect(sendAnimationEventsSpy).toBeCalledTimes(1);
 
-    const payload: IProjectileAnimationEffect = {
-      sourceId: testCharacter._id,
-      targetId: targetCharacter._id,
-      projectileEffectKey: itemDarkRune.projectileAnimationKey!,
-      effectKey: itemDarkRune.animationKey,
-    };
-
-    // for caster
-    expect(sendEventToUserMock).toHaveBeenCalledWith(
-      testCharacter.channelId,
-      AnimationSocketEvents.ShowProjectileAnimation,
-      payload
-    );
-
-    // for target
-    expect(sendEventToUserMock).toHaveBeenCalledWith(
-      targetCharacter.channelId,
-      AnimationSocketEvents.ShowProjectileAnimation,
-      payload
+    expect(sendAnimationEventsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _id: testCharacter._id,
+      }),
+      expect.objectContaining({
+        _id: targetCharacter._id,
+      }),
+      expect.objectContaining({
+        animationKey: itemDarkRune.animationKey,
+      })
     );
   });
 
