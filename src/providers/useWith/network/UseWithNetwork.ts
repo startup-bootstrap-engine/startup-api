@@ -1,7 +1,8 @@
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
-import { UseWithTile } from "@providers/useWith/UseWithTile";
+
 import { provide } from "inversify-binding-decorators";
-import { UseWithEntity } from "../UseWithEntity/UseWithEntity";
+import { UseWithEntity } from "../abstractions/UseWithEntity";
+import { UseWithTile } from "../abstractions/UseWithTile";
 
 @provide(UseWithNetwork)
 export class UseWithNetwork {

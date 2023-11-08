@@ -8,10 +8,10 @@ import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
-import { IItemUseWith, IUseWithTileValidationResponse } from "@providers/useWith/useWithTypes";
 import { IUseWithTile, MAP_LAYERS_TO_ID, ToGridX, ToGridY, UseWithSocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { UseWithHelper } from "./libs/UseWithHelper";
+import { UseWithHelper } from "../libs/UseWithHelper";
+import { IItemUseWith, IUseWithTileValidationResponse } from "../useWithTypes";
 
 @provide(UseWithTile)
 export class UseWithTile {

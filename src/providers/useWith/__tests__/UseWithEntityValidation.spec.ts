@@ -3,8 +3,8 @@ import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { blueprintManager, container, unitTestHelper } from "@providers/inversify/container";
 import { EntityType, MagicsBlueprint } from "@rpg-engine/shared";
-import { IUseWithItemSource } from "../UseWithEntity";
-import { UseWithEntityValidation } from "../UseWithEntityValidation";
+import { IUseWithItemSource } from "../abstractions/UseWithEntity";
+import { UseWithEntityValidation } from "../abstractions/UseWithEntityValidation";
 
 describe("UseWithEntityValidation", () => {
   let useWithEntityValidation: UseWithEntityValidation;
