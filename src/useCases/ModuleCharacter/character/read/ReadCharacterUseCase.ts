@@ -12,28 +12,40 @@ export class ReadCharacterUseCase {
     private specialEffect: SpecialEffect
   ) {}
 
-  public async read(id: string): Promise<ICharacter> {
-    const character = await this.characterRepository.readOne(
-      Character,
-      {
-        _id: id,
-      },
-      ["owner", "skills"]
-    );
+  public async read(id: string, selectFields: string[]): Promise<ICharacter> {
+    try {
+      const modelQuery = Character.findOne({ _id: id });
 
-    // convert character to object to we can pass the inventory to it (otherwise it will output a {})
-    //! TODO: Temporary ugly hack until we figure out a better way to do this
-    const charObject = character.toObject();
+      if (selectFields.length > 0) {
+        return (await modelQuery.select(selectFields.join(" ")).lean()) as ICharacter;
+      }
 
-    charObject.alpha = await this.specialEffect.getOpacity(character);
+      const character = (await modelQuery.populate("owner").populate("skills").lean({
+        virtuals: true,
+        defaults: true,
+      })) as ICharacter;
 
-    const inventory = await this.characterInventory.getInventory(character);
-    // @ts-ignore
-    delete charObject.inventory;
-    // @ts-ignore
-    charObject.inventory = inventory;
-    // @ts-ignore
-    return charObject;
+      if (!character) {
+        throw new Error("Character not found!");
+      }
+
+      // Assuming specialEffect.getOpacity and characterInventory.getInventory return promises.
+      const [alpha, inventory] = await Promise.all([
+        this.specialEffect.getOpacity(character),
+        this.characterInventory.getInventory(character),
+      ]);
+
+      const output = {
+        ...character,
+        alpha,
+        inventory,
+      } as unknown as ICharacter;
+
+      return output;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   public async readAll(ownerId: string): Promise<ICharacter[]> {
