@@ -89,7 +89,6 @@ export class UseWithEntity {
     const isSelfTarget = blueprint.hasSelfAutoTarget;
 
     if (isSelfTarget) {
-      console.log("self targeting item", item?.baseKey);
       character = (await Character.findById(character._id)) as unknown as ICharacter;
 
       await this.executeEffect(character, character, item!);
