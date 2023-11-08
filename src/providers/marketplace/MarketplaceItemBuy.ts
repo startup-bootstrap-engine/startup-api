@@ -53,9 +53,11 @@ export class MarketplaceItemBuy {
 
     const itemBought = marketplaceItem.item as IItem;
 
+    const hasStackQtyLargerThan1 = itemBought.stackQty && itemBought.stackQty > 1;
+
     await this.discordBot.sendMessage(
       `**${character.name}** BOUGHT **${itemBought?.name}** ${
-        itemBought.stackQty && `(${itemBought.stackQty}x)`
+        hasStackQtyLargerThan1 && `(${itemBought.stackQty}x)`
       } for **${marketplaceItem.price}** gold.`,
       "marketplaceBotNotifications"
     );
