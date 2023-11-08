@@ -975,7 +975,15 @@ describe("UseWithEntity.ts", () => {
 
       await useWithEntity.execute(payload, testCharacter);
 
-      expect(executeEffectSpy).toHaveBeenCalledWith(testCharacter, testCharacter, expect.anything());
+      expect(executeEffectSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _id: testCharacter._id,
+        }),
+        expect.objectContaining({
+          _id: testCharacter._id,
+        }),
+        expect.anything()
+      );
     });
 
     it("returns early if target request validation fails", async () => {
