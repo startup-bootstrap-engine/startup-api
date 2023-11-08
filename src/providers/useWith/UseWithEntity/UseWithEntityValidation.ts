@@ -10,7 +10,7 @@ import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { EntityType, MagicsBlueprint, NPCAlignment } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { IMagicItemUseWithEntity } from "../useWithTypes";
+import { IUseWithItemSource } from "./UseWithEntity";
 
 const StaticEntity = "Item"; // <--- should be added to the EntityType enum from @rpg-engine/shared
 
@@ -28,7 +28,7 @@ export class UseWithEntityValidation {
   public baseValidation(
     caster: ICharacter,
     item: IItem,
-    blueprint: IMagicItemUseWithEntity,
+    blueprint: IUseWithItemSource,
     targetType: EntityType | typeof StaticEntity
   ): boolean {
     if (!item) {
@@ -52,7 +52,7 @@ export class UseWithEntityValidation {
     caster: ICharacter,
     target: ICharacter | INPC | IItem | null,
     item: IItem | null,
-    blueprint: IMagicItemUseWithEntity,
+    blueprint: IUseWithItemSource,
     targetType: EntityType | typeof StaticEntity
   ): Promise<boolean> {
     const errorMessage = await this.getValidationErrorMessage(caster, target, item, blueprint, targetType);
@@ -67,7 +67,7 @@ export class UseWithEntityValidation {
     caster: ICharacter,
     target: ICharacter | INPC | IItem | null,
     item: IItem | null,
-    blueprint: IMagicItemUseWithEntity,
+    blueprint: IUseWithItemSource,
     targetType: EntityType | typeof StaticEntity
   ): Promise<string | null> {
     if (!target) return "Sorry, your target was not found.";

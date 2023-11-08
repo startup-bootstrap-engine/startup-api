@@ -2,8 +2,8 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { blueprintManager, container, unitTestHelper } from "@providers/inversify/container";
-import { IMagicItemUseWithEntity } from "@providers/useWith/useWithTypes";
 import { EntityType, MagicsBlueprint } from "@rpg-engine/shared";
+import { IUseWithItemSource } from "../UseWithEntity";
 import { UseWithEntityValidation } from "../UseWithEntityValidation";
 
 describe("UseWithEntityValidation", () => {
@@ -11,19 +11,19 @@ describe("UseWithEntityValidation", () => {
   let testCharacter: ICharacter;
   let testNPC: INPC;
   let testItem: IItem;
-  let testItemBlueprint: IMagicItemUseWithEntity;
+  let testItemBlueprint: IUseWithItemSource;
 
   beforeAll(() => {
     useWithEntityValidation = container.get(UseWithEntityValidation);
   });
 
   beforeEach(async () => {
-    testCharacter = await unitTestHelper.createMockCharacter({ hasSkills: true });
+    testCharacter = await unitTestHelper.createMockCharacter(null, { hasSkills: true });
     testNPC = await unitTestHelper.createMockNPC();
 
     testItem = await unitTestHelper.createMockItemFromBlueprint(MagicsBlueprint.HealRune);
 
-    testItemBlueprint = await blueprintManager.getBlueprint<IMagicItemUseWithEntity>("items", testItem.baseKey);
+    testItemBlueprint = await blueprintManager.getBlueprint<IUseWithItemSource>("items", testItem.baseKey);
   });
 
   afterEach(() => {
@@ -53,7 +53,7 @@ describe("UseWithEntityValidation", () => {
       const result = useWithEntityValidation.baseValidation(
         testCharacter,
         testItem,
-        { ...testItemBlueprint, power: undefined } as unknown as IMagicItemUseWithEntity,
+        { ...testItemBlueprint, power: undefined } as unknown as IUseWithItemSource,
         undefined as any
       );
 
@@ -105,7 +105,7 @@ describe("UseWithEntityValidation", () => {
         ...testItemBlueprint,
         key: MagicsBlueprint.HealRune,
         name: "Heal Rune",
-      } as IMagicItemUseWithEntity;
+      } as IUseWithItemSource;
       testNPC.type = EntityType.NPC;
       const result = await useWithEntityValidation.validateTargetRequest(
         testCharacter,

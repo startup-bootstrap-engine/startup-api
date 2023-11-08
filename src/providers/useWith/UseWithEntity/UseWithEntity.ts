@@ -22,6 +22,7 @@ import {
   ICharacterAttributeChanged,
   IEquipmentAndInventoryUpdatePayload,
   IItemContainer,
+  IRuneItemBlueprint,
   IUseWithEntity,
   ItemSocketEvents,
   UseWithSocketEvents,
@@ -31,6 +32,7 @@ import { provide } from "inversify-binding-decorators";
 import { IMagicItemUseWithEntity } from "../useWithTypes";
 import { UseWithEntityValidation } from "./UseWithEntityValidation";
 
+export type IUseWithItemSource = IRuneItemBlueprint & IMagicItemUseWithEntity;
 @provide(UseWithEntity)
 export class UseWithEntity {
   constructor(
@@ -70,7 +72,7 @@ export class UseWithEntity {
       throw new Error(`Item with id ${payload.itemId} not found!`);
     }
 
-    const blueprint = (await this.blueprintManager.getBlueprint("items", item?.baseKey)) as IMagicItemUseWithEntity;
+    const blueprint = (await this.blueprintManager.getBlueprint("items", item?.baseKey)) as IUseWithItemSource;
 
     const isBaseRequestValid = this.useWithEntityValidation.baseValidation(
       character,
@@ -80,6 +82,14 @@ export class UseWithEntity {
     );
 
     if (!isBaseRequestValid) {
+      return;
+    }
+
+    const isSelfTarget = blueprint.hasSelfAutoTarget;
+
+    if (isSelfTarget) {
+      await this.executeEffect(character, character, item!);
+
       return;
     }
 
@@ -109,12 +119,13 @@ export class UseWithEntity {
     const blueprint = await blueprintManager.getBlueprint<any>("items", item.baseKey as AvailableBlueprints);
 
     const damage = await blueprint.usableEffect?.(caster, target, item);
+
     await target.save();
 
     // handle static item case
     await this.characterItemInventory.decrementItemFromInventoryByKey(item.key, caster, 1);
 
-    void this.characterWeight.updateCharacterWeight(caster);
+    await this.characterWeight.updateCharacterWeight(caster);
 
     await this.sendRefreshItemsEvent(caster);
 
