@@ -55,89 +55,76 @@ export class UseWithEntityValidation {
     blueprint: IMagicItemUseWithEntity,
     targetType: EntityType | typeof StaticEntity
   ): Promise<boolean> {
-    if (!target) {
-      this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, your target was not found.");
+    const errorMessage = await this.getValidationErrorMessage(caster, target, item, blueprint, targetType);
+    if (errorMessage) {
+      this.socketMessaging.sendErrorMessageToCharacter(caster, errorMessage);
       return false;
     }
-
-    if (caster.scene !== target.scene) {
-      this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, your target is not on the same scene.");
-      return false;
-    }
-
-    if (blueprint.key === MagicsBlueprint.HealRune && target.type === EntityType.NPC) {
-      this.socketMessaging.sendErrorMessageToCharacter(caster, `Sorry, '${blueprint.name}' can not be apply on NPC.`);
-      return false;
-    }
-
-    if (targetType !== EntityType.Item) {
-      const isInvisible = await this.specialEffect.isInvisible(target as unknown as ICharacter | INPC);
-      if (isInvisible) {
-        this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, your target is invisible.");
-        return false;
-      }
-    }
-
-    if ("isAlive" in target && !target.isAlive && targetType !== (StaticEntity as EntityType)) {
-      this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, your target is dead.");
-      return false;
-    }
-
-    if (caster.target.id && (target.type === EntityType.Character || EntityType.NPC)) {
-      if (target.id.toString() !== caster.target.id.toString()) {
-        this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, your target is invalid.");
-        return false;
-      }
-    }
-
-    if (target.type === EntityType.Character) {
-      const customMsg = new Map([
-        ["not-online", "Sorry, your target is offline."],
-        ["banned", "Sorry, your target is banned."],
-      ]);
-
-      if (!this.characterValidation.hasBasicValidation(target as ICharacter, customMsg)) {
-        return false;
-      }
-    } else if ((target as INPC).alignment !== NPCAlignment.Hostile && targetType !== StaticEntity) {
-      this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, your target is not valid.");
-      return false;
-    }
-
-    const isUnderRange = this.movementHelper.isUnderRange(
-      caster.x,
-      caster.y,
-      target.x!,
-      target.y!,
-      blueprint.useWithMaxDistanceGrid
-    );
-    if (!isUnderRange) {
-      this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, your target is out of reach.");
-      return false;
-    }
-
-    if (!(await this.itemValidation.isItemInCharacterInventory(caster, item?._id))) {
-      return false;
-    }
-
-    const updatedCharacter = (await Character.findOne({ _id: caster._id }).populate("skills")) as unknown as ICharacter;
-    const skills = updatedCharacter.skills as unknown as ISkill;
-    const casterMagicLevel = skills?.magic?.level ?? 0;
-
-    if (casterMagicLevel < blueprint.minMagicLevelRequired) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        caster,
-        `Sorry, '${blueprint.name}' can not only be used at magic level '${blueprint.minMagicLevelRequired}' or greater.`
-      );
-      return false;
-    }
-
-    // check there're no solids between caster and target trajectory
-    const solidInTrajectory = await this.battleRangedAttack.isSolidInRangedTrajectory(caster, target);
-    if (solidInTrajectory) {
-      return false;
-    }
-
     return true;
+  }
+
+  private async getValidationErrorMessage(
+    caster: ICharacter,
+    target: ICharacter | INPC | IItem | null,
+    item: IItem | null,
+    blueprint: IMagicItemUseWithEntity,
+    targetType: EntityType | typeof StaticEntity
+  ): Promise<string | null> {
+    if (!target) return "Sorry, your target was not found.";
+    if (caster.scene !== target.scene) return "Sorry, your target is not on the same scene.";
+    if (blueprint.key === MagicsBlueprint.HealRune && target.type === EntityType.NPC) {
+      return `Sorry, '${blueprint.name}' cannot be applied to NPC.`;
+    }
+    if (targetType !== EntityType.Item && (await this.specialEffect.isInvisible(target as ICharacter | INPC))) {
+      return "Sorry, your target is invisible.";
+    }
+    if ("isAlive" in target && !target.isAlive && targetType !== (StaticEntity as EntityType)) {
+      return "Sorry, your target is dead.";
+    }
+    if (
+      caster.target.id &&
+      (target.type === EntityType.Character || EntityType.NPC) &&
+      target.id.toString() !== caster.target.id.toString()
+    ) {
+      return "Sorry, your target is invalid.";
+    }
+    if (
+      target.type === EntityType.Character &&
+      !this.characterValidation.hasBasicValidation(target as ICharacter, this.getCharacterValidationCustomMessages())
+    ) {
+      return "Sorry, your target does not meet the basic validation criteria.";
+    }
+    if ((target as INPC).alignment !== NPCAlignment.Hostile && targetType !== StaticEntity) {
+      return "Sorry, your target is not valid.";
+    }
+    if (!this.movementHelper.isUnderRange(caster.x, caster.y, target.x!, target.y!, blueprint.useWithMaxDistanceGrid)) {
+      return "Sorry, your target is out of reach.";
+    }
+    if (!(await this.itemValidation.isItemInCharacterInventory(caster, item?._id))) {
+      return "Sorry, the item is not in your inventory.";
+    }
+    const casterMagicLevel = (await this.getCasterMagicLevel(caster)) ?? 0;
+    if (casterMagicLevel < blueprint.minMagicLevelRequired) {
+      return `Sorry, '${blueprint.name}' can only be used at magic level '${blueprint.minMagicLevelRequired}' or greater.`;
+    }
+    if (await this.battleRangedAttack.isSolidInRangedTrajectory(caster, target)) {
+      return "Sorry, there is an obstacle in the way.";
+    }
+    return null;
+  }
+
+  private getCharacterValidationCustomMessages(): Map<string, string> {
+    return new Map([
+      ["not-online", "Sorry, your target is offline."],
+      ["banned", "Sorry, your target is banned."],
+    ]);
+  }
+
+  private async getCasterMagicLevel(caster: ICharacter): Promise<number | null> {
+    const updatedCharacter = (await Character.findOne({ _id: caster._id }).populate("skills")) as ICharacter;
+
+    const skills = updatedCharacter.skills as unknown as ISkill;
+
+    return skills?.magic?.level;
   }
 }
