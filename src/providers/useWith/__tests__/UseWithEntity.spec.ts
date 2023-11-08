@@ -27,7 +27,7 @@ import {
   UISocketEvents,
 } from "@rpg-engine/shared";
 import { EntityType } from "@rpg-engine/shared/dist/types/entity.types";
-import { UseWithEntity } from "../UseWithEntity";
+import { UseWithEntity } from "../UseWithEntity/UseWithEntity";
 
 describe("UseWithEntityValidation.ts", () => {
   let useWithEntity: UseWithEntity;

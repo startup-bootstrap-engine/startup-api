@@ -16,6 +16,9 @@ export const itemHealRune: IRuneItemBlueprint = {
   textureAtlas: "items",
   texturePath: "magics/heal-rune.png",
 
+  hasAutoTarget: false,
+  hasSelfAutoTarget: true,
+
   name: "Healing Rune",
   description: "An ancient healing rune.",
   weight: 0.01,
