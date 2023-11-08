@@ -68,15 +68,11 @@ export class UseWithEntity {
     const target = payload.entityId ? await EntityUtil.getEntity(payload.entityId, payload.entityType) : null;
     const item = payload.itemId ? ((await Item.findById(payload.itemId)) as unknown as IItem) : null;
 
-    if (!item) {
-      throw new Error(`Item with id ${payload.itemId} not found!`);
-    }
-
-    const blueprint = (await this.blueprintManager.getBlueprint("items", item?.baseKey)) as IUseWithItemSource;
+    const blueprint = (await this.blueprintManager.getBlueprint("items", item?.baseKey!)) as IUseWithItemSource;
 
     const isBaseRequestValid = this.useWithEntityValidation.baseValidation(
       character,
-      item,
+      item!,
       blueprint,
       payload.entityType
     );

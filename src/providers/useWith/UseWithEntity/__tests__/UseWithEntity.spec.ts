@@ -34,12 +34,6 @@ describe("UseWithEntity", () => {
   });
 
   describe("execute method", () => {
-    it("throws an error when the item is not found", async () => {
-      const payload = { entityId: testCharacter._id, itemId: null as any, entityType: EntityType.Character };
-
-      await expect(useWithEntity.execute(payload, testCharacter)).rejects.toThrow("Item with id null not found!");
-    });
-
     it("returns early if base request validation fails", async () => {
       // @ts-ignore
       jest.spyOn(useWithEntity.useWithEntityValidation, "baseValidation").mockReturnValueOnce(false);

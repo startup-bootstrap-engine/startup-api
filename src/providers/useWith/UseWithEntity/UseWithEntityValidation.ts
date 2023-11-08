@@ -8,7 +8,7 @@ import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { ItemValidation } from "@providers/item/validation/ItemValidation";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { EntityType, MagicsBlueprint, NPCAlignment } from "@rpg-engine/shared";
+import { EntityType, NPCAlignment } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { IUseWithItemSource } from "./UseWithEntity";
 
@@ -72,8 +72,11 @@ export class UseWithEntityValidation {
   ): Promise<string | null> {
     if (!target) return "Sorry, your target was not found.";
     if (caster.scene !== target.scene) return "Sorry, your target is not on the same scene.";
-    if (blueprint.key === MagicsBlueprint.HealRune && target.type === EntityType.NPC) {
-      return `Sorry, '${blueprint.name}' cannot be applied to NPC.`;
+
+    if (blueprint.canTargetNPC === false) {
+      if (target.type === EntityType.NPC) {
+        return "Sorry, your target is not valid.";
+      }
     }
     if (targetType !== EntityType.Item && (await this.specialEffect.isInvisible(target as ICharacter | INPC))) {
       return "Sorry, your target is invisible.";
@@ -94,7 +97,11 @@ export class UseWithEntityValidation {
     ) {
       return "Sorry, your target does not meet the basic validation criteria.";
     }
-    if ((target as INPC).alignment !== NPCAlignment.Hostile && targetType !== StaticEntity) {
+    if (
+      target.type === EntityType.NPC &&
+      (target as INPC).alignment !== NPCAlignment.Hostile &&
+      targetType !== StaticEntity
+    ) {
       return "Sorry, your target is not valid.";
     }
     if (!this.movementHelper.isUnderRange(caster.x, caster.y, target.x!, target.y!, blueprint.useWithMaxDistanceGrid)) {

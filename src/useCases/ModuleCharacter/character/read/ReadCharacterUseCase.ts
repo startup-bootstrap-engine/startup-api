@@ -41,8 +41,6 @@ export class ReadCharacterUseCase {
         inventory,
       } as unknown as ICharacter;
 
-      console.log(output);
-
       return output;
     } catch (error) {
       console.error(error);

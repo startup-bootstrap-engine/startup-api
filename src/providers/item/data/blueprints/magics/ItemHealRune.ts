@@ -17,6 +17,7 @@ export const itemHealRune: IRuneItemBlueprint = {
   texturePath: "magics/heal-rune.png",
 
   hasSelfAutoTarget: true,
+  canTargetNPC: false,
 
   name: "Healing Rune",
   description: "An ancient healing rune.",

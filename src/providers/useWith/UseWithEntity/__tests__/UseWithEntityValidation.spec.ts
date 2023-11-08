@@ -60,6 +60,18 @@ describe("UseWithEntityValidation", () => {
       expect(result).toBe(false);
     });
 
+    it("triggers an error if you try to target an NPC and the item canTargetNPC is false", async () => {
+      const result = await useWithEntityValidation.validateTargetRequest(
+        testCharacter,
+        testNPC,
+        testItem,
+        { ...testItemBlueprint, canTargetNPC: false } as unknown as IUseWithItemSource,
+        EntityType.NPC
+      );
+
+      expect(result).toBe(false);
+    });
+
     it("triggers an error if the character does not pass basic validation", () => {
       // @ts-ignore
       jest.spyOn(useWithEntityValidation.characterValidation, "hasBasicValidation").mockReturnValue(false);

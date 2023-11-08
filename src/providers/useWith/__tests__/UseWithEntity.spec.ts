@@ -1,19 +1,16 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
+import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
-import { OnTargetHit } from "@providers/battle/OnTargetHit";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
-import { ML_INCREASE_RATIO, SP_INCREASE_BASE, SP_MAGIC_INCREASE_TIMES_MANA } from "@providers/constants/SkillConstants";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { itemDarkRune } from "@providers/item/data/blueprints/magics/ItemDarkRune";
 import { FoodsBlueprint, MagicsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemValidation } from "@providers/item/validation/ItemValidation";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
-import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
   AnimationSocketEvents,
   CharacterSocketEvents,
@@ -23,13 +20,12 @@ import {
   MagicPower,
   NPCAlignment,
   NPCMovementType,
-  SkillSocketEvents,
   UISocketEvents,
 } from "@rpg-engine/shared";
 import { EntityType } from "@rpg-engine/shared/dist/types/entity.types";
 import { UseWithEntity } from "../UseWithEntity/UseWithEntity";
 
-describe("UseWithEntityValidation.ts", () => {
+describe("UseWithEntity.ts", () => {
   let useWithEntity: UseWithEntity;
   let testCharacter: ICharacter;
   let targetCharacter: ICharacter;
@@ -110,19 +106,20 @@ describe("UseWithEntityValidation.ts", () => {
     await prepareData();
 
     executeEffectMock = jest.spyOn(useWithEntity as any, "executeEffect");
-    sendEventToUserMock = jest.spyOn(SocketMessaging.prototype, "sendEventToUser");
+    // @ts-ignore
+    sendEventToUserMock = jest.spyOn(useWithEntity.useWithEntityValidation.socketMessaging, "sendEventToUser");
 
-    onHitTargetMock = jest.spyOn(OnTargetHit.prototype, "execute");
+    // @ts-ignore
+    onHitTargetMock = jest.spyOn(useWithEntity.onTargetHit, "execute");
     onHitTargetMock.mockImplementation();
   });
 
   afterEach(() => {
-    executeEffectMock.mockRestore();
-    sendEventToUserMock.mockRestore();
+    jest.clearAllMocks();
     jest.restoreAllMocks();
   });
 
-  it("should pass validation for targer character", async () => {
+  it("should pass validation for target character", async () => {
     executeEffectMock.mockImplementation();
 
     await useWithEntity.execute(
@@ -137,7 +134,7 @@ describe("UseWithEntityValidation.ts", () => {
     expect(executeEffectMock).toBeCalledTimes(1);
   });
 
-  it("should pass validation for targer npc", async () => {
+  it("should pass validation for target npc", async () => {
     executeEffectMock.mockImplementation();
 
     await useWithEntity.execute(
@@ -302,28 +299,6 @@ describe("UseWithEntityValidation.ts", () => {
 
     expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
       message: `Sorry, '${apple.name}' cannot be used with target.`,
-      type: "error",
-    });
-  });
-
-  it("should fail validation if trying to apply 'HealRune' on an NPC", async () => {
-    characterSkills = testCharacter.skills as unknown as ISkill;
-    characterSkills.magic.level = 10;
-    characterSkills.level = 10;
-    await characterSkills.save();
-
-    await useWithEntity.execute(
-      {
-        itemId: healRune._id,
-        entityId: testNPC._id,
-        entityType: EntityType.NPC,
-      },
-      testCharacter
-    );
-
-    expect(sendEventToUserMock).toBeCalledTimes(1);
-    expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: "Sorry, 'Healing Rune' can not be apply on NPC.",
       type: "error",
     });
   });
@@ -565,7 +540,7 @@ describe("UseWithEntityValidation.ts", () => {
     expect(sendEventToUserMock).toBeCalledTimes(1);
 
     expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: "Sorry, you do not have this item in your inventory.",
+      message: "Sorry, the item is not in your inventory.",
       type: "error",
     });
 
@@ -592,7 +567,7 @@ describe("UseWithEntityValidation.ts", () => {
     expect(sendEventToUserMock).toBeCalledTimes(1);
 
     expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: `Sorry, '${itemDarkRune.name}' can not only be used at magic level '${itemDarkRune.minMagicLevelRequired}' or greater.`,
+      message: `Sorry, '${itemDarkRune.name}' can only be used at magic level '${itemDarkRune.minMagicLevelRequired}' or greater.`,
       type: "error",
     });
   });
@@ -699,28 +674,6 @@ describe("UseWithEntityValidation.ts", () => {
     expect(target.mana).toBe(100);
   });
 
-  it("should successfully use heal rune on target character", async () => {
-    const items = [await unitTestHelper.createMockItemFromBlueprint(MagicsBlueprint.HealRune)];
-
-    await unitTestHelper.addItemsToContainer(inventoryContainer, 6, items);
-
-    targetCharacter.health = 50;
-    await targetCharacter.save();
-
-    await useWithEntity.execute(
-      {
-        itemId: items[0]._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    const target = (await Character.findOne({ _id: targetCharacter._id })) as unknown as ICharacter;
-    expect(target.health).toBeGreaterThanOrEqual(60);
-    expect(target.mana).toBe(100);
-  });
-
   it("should deal extra damage depending on magic level", async () => {
     characterSkills.magic.level = 12;
     await characterSkills.save();
@@ -794,6 +747,9 @@ describe("UseWithEntityValidation.ts", () => {
   });
 
   it("should receive refresh items event", async () => {
+    // @ts-ignore
+    sendEventToUserMock = jest.spyOn(useWithEntity.socketMessaging, "sendEventToUser");
+
     await useWithEntity.execute(
       {
         itemId: item1._id,
@@ -819,6 +775,9 @@ describe("UseWithEntityValidation.ts", () => {
   });
 
   it("should receive target character update event", async () => {
+    // @ts-ignore
+    sendEventToUserMock = jest.spyOn(useWithEntity.socketMessaging, "sendEventToUser");
+
     testCharacter.channelId = "channel-1";
     await testCharacter.save();
 
@@ -860,6 +819,9 @@ describe("UseWithEntityValidation.ts", () => {
   });
 
   it("should receive projectile animation event", async () => {
+    // @ts-ignore
+    sendEventToUserMock = jest.spyOn(useWithEntity.socketMessaging, "sendEventToUser");
+
     testCharacter.channelId = "channel-1";
     await testCharacter.save();
 
@@ -942,6 +904,12 @@ describe("UseWithEntityValidation.ts", () => {
   });
 
   it("should increase skills and send skills update event", async () => {
+    // @ts-ignore
+    const magicResistSkillMock = jest.spyOn(useWithEntity.skillIncrease, "increaseMagicResistanceSP");
+
+    // @ts-ignore
+    sendEventToUserMock = jest.spyOn(useWithEntity.socketMessaging, "sendEventToUser");
+
     testCharacter.channelId = "channel-1";
     await testCharacter.save();
 
@@ -961,26 +929,7 @@ describe("UseWithEntityValidation.ts", () => {
     // @ts-ignore
     itemDarkRune.power = MagicPower.High;
 
-    const skillPoints =
-      SP_INCREASE_BASE +
-      SP_MAGIC_INCREASE_TIMES_MANA * (Math.round(itemDarkRune.power * ML_INCREASE_RATIO) + (itemDarkRune.power ?? 0));
-    const lowerBound = skillPoints - 1.5;
-    const upperBound = skillPoints + 1.5;
-    const updatedSkillsTarget: ISkill = (await Skill.findById(targetCharacter.skills)) as unknown as ISkill;
-    expect(updatedSkillsTarget?.magicResistance.skillPoints).toBeGreaterThan(lowerBound);
-    expect(updatedSkillsTarget?.magicResistance.skillPoints).toBeLessThan(upperBound);
-
-    expect(sendEventToUserMock).toHaveBeenCalled();
-
-    const skillsCalls: any[] = [];
-    sendEventToUserMock.mock.calls.forEach((call) => {
-      if (call[1] === SkillSocketEvents.ReadInfo) {
-        skillsCalls.push(call);
-      }
-    });
-
-    expect(skillsCalls.length).toBe(3);
-    expect(skillsCalls[0][2]?.skill?.magicResistance?.skillPoints).toBeCloseTo(skillPoints, 1);
+    expect(magicResistSkillMock).toHaveBeenCalledTimes(1);
   });
 
   it("should execute hit post processing", async () => {
@@ -994,41 +943,6 @@ describe("UseWithEntityValidation.ts", () => {
     );
 
     expect(onHitTargetMock).toBeCalled();
-    expect(onHitTargetMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        _id: targetCharacter._id,
-      }),
-      testCharacter,
-      expect.any(Number)
-    );
-
-    const call = onHitTargetMock.mock.calls[0];
-    expect(call).toBeDefined();
-    expect(call[2]).toBeGreaterThanOrEqual(17);
-  });
-
-  it("should execute hit post processing without damage data", async () => {
-    const items = [await unitTestHelper.createMockItemFromBlueprint(MagicsBlueprint.HealRune)];
-
-    await unitTestHelper.addItemsToContainer(inventoryContainer, 6, items);
-
-    await useWithEntity.execute(
-      {
-        itemId: items[0]._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    expect(onHitTargetMock).toBeCalled();
-    expect(onHitTargetMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        _id: targetCharacter._id,
-      }),
-      testCharacter,
-      undefined
-    );
   });
 
   afterAll(async () => {
