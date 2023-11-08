@@ -108,44 +108,85 @@ export class UseWithEntity {
   }
 
   private async executeEffect(caster: ICharacter, target: ICharacter | INPC | IItem, item: IItem): Promise<void> {
+    // Ensure the item can be used in the current zone and context
+    if (!(await this.canUseItemInZone(caster, item, target))) return;
+
+    // Fetch blueprint before applying the effect as it's a dependency
+    const blueprint = await this.fetchItemBlueprint(item);
+    const damage = blueprint ? await this.applyUsableEffect(caster, target, item, blueprint) : 0;
+
+    // Operations that can be parallelized because they are independent
+    await Promise.all([
+      // Save the state of the target
+      target.save(),
+      // Handle inventory count and character weight
+      this.handleItemCountAndWeight(caster, item),
+      // Send refresh items event to the caster
+      this.sendRefreshItemsEvent(caster),
+      // Send animation events if applicable based on the blueprint
+      this.sendAnimationIfApplicable(caster, target, blueprint),
+    ]);
+
+    // Sequential operations due to potential data dependency
+    await this.updateTargetState(caster, target, damage, blueprint);
+    await this.applyCharacterSpecificEffects(target, blueprint);
+  }
+
+  // Additional refactored methods to break down the logic
+  private async canUseItemInZone(caster: ICharacter, item: IItem, target: ICharacter | INPC | IItem): Promise<boolean> {
     if (item.canUseOnNonPVPZone !== true && target?.type === EntityType.Character) {
-      const isUseValid = await this.battleCharacterAttackValidation.canAttack(caster, target as ICharacter);
-
-      if (!isUseValid) {
-        return;
-      }
+      return await this.battleCharacterAttackValidation.canAttack(caster, target as ICharacter);
     }
+    return true;
+  }
 
-    const blueprint = await blueprintManager.getBlueprint<any>("items", item.baseKey as AvailableBlueprints);
+  private async fetchItemBlueprint(item: IItem): Promise<any> {
+    return await blueprintManager.getBlueprint<any>("items", item.baseKey as AvailableBlueprints);
+  }
 
-    const damage = await blueprint.usableEffect?.(caster, target, item);
+  private async applyUsableEffect(
+    caster: ICharacter,
+    target: ICharacter | INPC | IItem,
+    item: IItem,
+    blueprint: any
+  ): Promise<number> {
+    return await blueprint.usableEffect?.(caster, target, item);
+  }
 
-    await target.save();
-
-    // handle static item case
+  private async handleItemCountAndWeight(caster: ICharacter, item: IItem): Promise<void> {
     await this.characterItemInventory.decrementItemFromInventoryByKey(item.key, caster, 1);
-
     await this.characterWeight.updateCharacterWeight(caster);
+  }
 
-    await this.sendRefreshItemsEvent(caster);
-
+  private async sendAnimationIfApplicable(
+    caster: ICharacter,
+    target: ICharacter | INPC | IItem,
+    blueprint: any
+  ): Promise<void> {
     if (blueprint.projectileAnimationKey) {
       await this.sendAnimationEvents(caster, target, blueprint as IMagicItemUseWithEntity);
     }
+  }
 
+  private async updateTargetState(
+    caster: ICharacter,
+    target: ICharacter | INPC | IItem,
+    damage: number,
+    blueprint: any
+  ): Promise<void> {
     if (target.type === EntityType.Character || target.type === EntityType.NPC) {
       const transformedTarget = target as ICharacter | INPC;
-
       await this.sendTargetUpdateEvents(caster, transformedTarget);
       await this.onTargetHit.execute(transformedTarget, caster, damage);
       if (blueprint.usableEntityEffect) {
         await blueprint.usableEntityEffect(caster, transformedTarget);
       }
     }
+  }
 
+  private async applyCharacterSpecificEffects(target: ICharacter | INPC | IItem, blueprint: any): Promise<void> {
     if (target.type === EntityType.Character) {
       await this.skillIncrease.increaseMagicResistanceSP(target as ICharacter, blueprint.power);
-
       await this.characterBonusPenalties.applyRaceBonusPenalties(target as ICharacter, BasicAttribute.MagicResistance);
     }
   }
