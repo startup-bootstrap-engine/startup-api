@@ -65,10 +65,15 @@ export class UseWithEntity {
   }
 
   public async execute(payload: IUseWithEntity, character: ICharacter): Promise<void> {
-    const target = payload.entityId ? await EntityUtil.getEntity(payload.entityId, payload.entityType) : null;
     const item = payload.itemId ? ((await Item.findById(payload.itemId)) as unknown as IItem) : null;
-
     const blueprint = (await this.blueprintManager.getBlueprint("items", item?.baseKey!)) as IUseWithItemSource;
+
+    if (!payload.entityId && blueprint.hasSelfAutoTarget) {
+      payload.entityId = character.id;
+      payload.entityType = EntityType.Character;
+    }
+
+    const target = payload.entityId ? await EntityUtil.getEntity(payload.entityId, payload.entityType) : null;
 
     const isBaseRequestValid = this.useWithEntityValidation.baseValidation(
       character,
@@ -84,6 +89,7 @@ export class UseWithEntity {
     const isSelfTarget = blueprint.hasSelfAutoTarget;
 
     if (isSelfTarget) {
+      console.log("self targeting item", item?.baseKey);
       character = (await Character.findById(character._id)) as unknown as ICharacter;
 
       await this.executeEffect(character, character, item!);
