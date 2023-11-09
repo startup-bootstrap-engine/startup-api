@@ -1,7 +1,6 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
-import { TrackExecutionTime } from "@jonit-dev/decorators-utils";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
@@ -289,7 +288,6 @@ export class NPCMovementMoveTowards {
     await this.npcBattleCycleQueue.add(npc, npcSkills);
   }
 
-  @TrackExecutionTime()
   @TrackNewRelicTransaction()
   private async moveTowardsPosition(npc: INPC, target: ICharacter, x: number, y: number): Promise<void> {
     try {
