@@ -1,8 +1,10 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
+import { TrackExecutionTime } from "@jonit-dev/decorators-utils";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { Locker } from "@providers/locks/Locker";
 import { MapHelper } from "@providers/map/MapHelper";
 import { PathfindingCaching } from "@providers/map/PathfindingCaching";
@@ -22,6 +24,7 @@ import {
 import { provide } from "inversify-binding-decorators";
 import _, { debounce } from "lodash";
 import { NPCBattleCycleQueue } from "../NPCBattleCycleQueue";
+import { NPCFreezer } from "../NPCFreezer";
 import { NPCView } from "../NPCView";
 import { NPCMovement } from "./NPCMovement";
 import { NPCTarget } from "./NPCTarget";
@@ -42,7 +45,9 @@ export class NPCMovementMoveTowards {
     private mapHelper: MapHelper,
     private pathfindingCaching: PathfindingCaching,
     private locker: Locker,
-    private npcBattleCycleQueue: NPCBattleCycleQueue
+    private npcBattleCycleQueue: NPCBattleCycleQueue,
+    private inMemoryHashTable: InMemoryHashTable,
+    private npcFreezer: NPCFreezer
   ) {}
 
   @TrackNewRelicTransaction()
@@ -53,6 +58,16 @@ export class NPCMovementMoveTowards {
     const targetCharacter = (await Character.findById(npc.targetCharacter)
       .lean()
       .select("_id x y scene health isOnline isBanned target")) as ICharacter;
+
+    if (
+      !npc.targetCharacter ||
+      !targetCharacter ||
+      !targetCharacter.isOnline ||
+      targetCharacter.scene !== npc.scene ||
+      targetCharacter.isBanned
+    ) {
+      await this.tryToFreezeIfTooManyFailedTargetChecks(npc);
+    }
 
     if (!targetCharacter) {
       // no target character
@@ -140,6 +155,18 @@ export class NPCMovementMoveTowards {
 
           break;
       }
+    }
+  }
+
+  @TrackNewRelicTransaction()
+  private async tryToFreezeIfTooManyFailedTargetChecks(npc: INPC): Promise<void> {
+    const targetCheckCount = ((await this.inMemoryHashTable.get("npc-target-check-count", npc._id)) ?? 0) as number;
+
+    await this.inMemoryHashTable.set("npc-target-check-count", npc._id, targetCheckCount + 1);
+
+    if (targetCheckCount >= 3) {
+      await this.npcFreezer.freezeNPC(npc, "freezing NPC due to invalid target");
+      await this.inMemoryHashTable.delete("npc-target-check-count", npc._id);
     }
   }
 
@@ -262,6 +289,7 @@ export class NPCMovementMoveTowards {
     await this.npcBattleCycleQueue.add(npc, npcSkills);
   }
 
+  @TrackExecutionTime()
   @TrackNewRelicTransaction()
   private async moveTowardsPosition(npc: INPC, target: ICharacter, x: number, y: number): Promise<void> {
     try {

@@ -120,6 +120,7 @@ export class ServerBootstrap {
     await this.inMemoryHashTable.deleteAll("load-craftable-items");
     await this.inMemoryHashTable.deleteAll("channel-bound-events");
     await this.inMemoryHashTable.deleteAll("raids");
+    await this.inMemoryHashTable.deleteAll("npc-target-check-count");
     await this.entityEffectDuration.clearAll();
     await this.characterMonitorCallbackTracker.clearAll();
 

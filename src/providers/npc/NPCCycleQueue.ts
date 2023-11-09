@@ -3,7 +3,11 @@ import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
-import { NPC_CYCLE_INTERVAL_RATIO, NPC_FRIENDLY_FREEZE_CHECK_CHANCE } from "@providers/constants/NPCConstants";
+import {
+  NPC_CYCLE_INTERVAL_RATIO,
+  NPC_FRIENDLY_NEUTRAL_FREEZE_CHECK_CHANCE,
+  NPC_HOSTILE_FREEZE_CHECK_CHANCE,
+} from "@providers/constants/NPCConstants";
 import { RedisManager } from "@providers/database/RedisManager";
 import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
@@ -173,7 +177,7 @@ export class NPCCycleQueue {
       return;
     }
 
-    await this.friendlyNPCFreezeCheck(npc);
+    await this.npcFreezeCheck(npc);
 
     npc.skills = npcSkills;
 
@@ -201,16 +205,28 @@ export class NPCCycleQueue {
   }
 
   @TrackNewRelicTransaction()
-  private async friendlyNPCFreezeCheck(npc: INPC): Promise<void> {
-    if (npc.alignment === NPCAlignment.Friendly) {
-      const n = random(0, 100);
+  private async npcFreezeCheck(npc: INPC): Promise<void> {
+    const n = random(0, 100);
 
-      if (n <= NPC_FRIENDLY_FREEZE_CHECK_CHANCE) {
-        const nearbyCharacters = await this.npcView.getCharactersInView(npc);
-        if (!nearbyCharacters.length) {
-          await this.npcFreezer.freezeNPC(npc, "friendlyNPCFreezeCheck");
+    switch (npc.alignment) {
+      case NPCAlignment.Friendly:
+      case NPCAlignment.Neutral:
+        if (n <= NPC_FRIENDLY_NEUTRAL_FREEZE_CHECK_CHANCE) {
+          const nearbyCharacters = await this.npcView.getCharactersInView(npc);
+          if (!nearbyCharacters.length) {
+            await this.npcFreezer.freezeNPC(npc, "friendlyNPCFreezeCheck");
+          }
         }
-      }
+        break;
+      case NPCAlignment.Hostile:
+        if (n <= NPC_HOSTILE_FREEZE_CHECK_CHANCE) {
+          const nearbyCharacters = await this.npcView.getCharactersInView(npc);
+          if (!nearbyCharacters.length) {
+            await this.npcFreezer.freezeNPC(npc, "hostileNPCFreezeCheck");
+          }
+        }
+
+        break;
     }
   }
 

@@ -23,12 +23,6 @@ export class NPCFreezer {
   @TrackNewRelicTransaction()
   public async freezeNPC(npc: INPC, reason?: string): Promise<void> {
     try {
-      const canProceed = await this.locker.lock(`npc-freeze-${npc._id}`, 1000);
-
-      if (!canProceed) {
-        return;
-      }
-
       if (!npc.isBehaviorEnabled) {
         return;
       }
