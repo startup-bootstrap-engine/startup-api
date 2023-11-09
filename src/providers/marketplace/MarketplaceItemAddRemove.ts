@@ -84,7 +84,7 @@ export class MarketplaceItemAddRemove {
 
     await this.discordBot.sendMessage(
       `**${character.name}** IS SELLING **${item.name}** ${
-        hasStackQtyLargerThan1 && `(${item.stackQty}x)`
+        hasStackQtyLargerThan1 ? `(${item.stackQty}x)` : ""
       } on the marketplace for **${marketplaceItem.price}** gold.`,
       "marketplaceBotNotifications"
     );
