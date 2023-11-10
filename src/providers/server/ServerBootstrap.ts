@@ -12,6 +12,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { HitTarget } from "@providers/battle/HitTarget";
 import { CharacterConsumptionControl } from "@providers/character/CharacterConsumptionControl";
 import { CharacterMonitorCallbackTracker } from "@providers/character/CharacterMonitorInterval/CharacterMonitorCallbackTracker";
+import { CharacterNetworkUpdateQueue } from "@providers/character/network/CharacterNetworkUpdate/CharacterNetworkUpdateQueue";
 import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DiscordBot } from "@providers/discord/DiscordBot";
@@ -52,7 +53,8 @@ export class ServerBootstrap {
     private npcCycleQueue: NPCCycleQueue,
     private itemUseCycleQueue: ItemUseCycleQueue,
     private entityEffectDuration: EntityEffectDurationControl,
-    private characterMonitorCallbackTracker: CharacterMonitorCallbackTracker
+    private characterMonitorCallbackTracker: CharacterMonitorCallbackTracker,
+    private characterNetworkUpdateQueue: CharacterNetworkUpdateQueue
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -85,6 +87,7 @@ export class ServerBootstrap {
       await this.itemUseCycleQueue.shutdown();
       await this.npcBattleCycleQueue.shutdown();
       await this.npcCycleQueue.shutdown();
+      await this.characterNetworkUpdateQueue.shutdown();
     };
 
     process.on("SIGTERM", async () => {
@@ -141,6 +144,7 @@ export class ServerBootstrap {
     await this.hitTarget.clearAllQueueJobs();
     await this.itemUseCycleQueue.clearAllJobs();
     await this.npcBattleCycleQueue.clearAllJobs();
+    await this.characterNetworkUpdateQueue.clearAllJobs();
 
     console.log("🧹 BullMQ queues cleared...");
   }
