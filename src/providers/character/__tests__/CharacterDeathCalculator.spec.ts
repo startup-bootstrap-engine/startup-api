@@ -90,4 +90,20 @@ describe("await characterDeathCalculator", () => {
       expect(xpLoss).toBe(10);
     });
   });
+
+  describe("Premium account", () => {
+    let testCharacter: ICharacter;
+
+    beforeEach(async () => {
+      testCharacter = await unitTestHelper.createMockCharacter(null, { isPremiumAccount: true });
+    });
+
+    it("doesn't drop an inventory if user is a premium account", async () => {
+      const result = await characterDeathCalculator.calculateInventoryDropChance(testCharacter, {
+        level: 7,
+      } as unknown as ISkill);
+
+      expect(result).toBe(0);
+    });
+  });
 });
