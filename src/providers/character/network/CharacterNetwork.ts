@@ -4,7 +4,7 @@ import { CharacterNetworkCreate } from "./CharacterNetworkCreate";
 import { CharacterNetworkLogout } from "./CharacterNetworkLogout";
 import { CharacterNetworkPing } from "./CharacterNetworkPing";
 import { CharacterNetworkTrading } from "./CharacterNetworkTrading";
-import { CharacterNetworkUpdate } from "./CharacterNetworkUpdate";
+import { CharacterNetworkUpdate } from "./CharacterNetworkUpdate/CharacterNetworkUpdate";
 
 @provide(CharacterNetwork)
 export class CharacterNetwork {

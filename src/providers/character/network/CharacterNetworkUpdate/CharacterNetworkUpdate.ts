@@ -1,8 +1,6 @@
 /* eslint-disable no-void */
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { GridManager } from "@providers/map/GridManager";
-import { MapNonPVPZone } from "@providers/map/MapNonPVPZone";
-import { MapTransitionTeleport } from "@providers/map/MapTransition/MapTransitionTeleport";
 import { MathHelper } from "@providers/math/MathHelper";
 import { IPosition, MovementHelper } from "@providers/movement/MovementHelper";
 import { NPCManager } from "@providers/npc/NPCManager";
@@ -16,23 +14,21 @@ import {
   ICharacterPositionUpdateConfirm,
   ICharacterPositionUpdateFromClient,
   ICharacterSyncPosition,
-  NPCAlignment,
   ToGridX,
   ToGridY,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
-import { NPC } from "@entities/ModuleNPC/NPCModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { MAX_PING_TRACKING_THRESHOLD } from "@providers/constants/ServerConstants";
 import { Locker } from "@providers/locks/Locker";
-import { MapTransitionInfo } from "@providers/map/MapTransition/MapTransitionInfo";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import dayjs from "dayjs";
 import random from "lodash/random";
-import { CharacterView } from "../CharacterView";
-import { CharacterMovementValidation } from "../characterMovement/CharacterMovementValidation";
-import { CharacterMovementWarn } from "../characterMovement/CharacterMovementWarn";
+import { CharacterView } from "../../CharacterView";
+import { CharacterMovementValidation } from "../../characterMovement/CharacterMovementValidation";
+import { CharacterMovementWarn } from "../../characterMovement/CharacterMovementWarn";
+import { CharacterNetworkUpdateMapManager } from "./CharacterNetworkUpdateMap";
 
 @provide(CharacterNetworkUpdate)
 export class CharacterNetworkUpdate {
@@ -40,17 +36,16 @@ export class CharacterNetworkUpdate {
     private socketMessaging: SocketMessaging,
     private socketAuth: SocketAuth,
     private movementHelper: MovementHelper,
-    private mapTransitionInfo: MapTransitionInfo,
-    private mapTransitionTeleport: MapTransitionTeleport,
+
     private npcManager: NPCManager,
     private gridManager: GridManager,
-    private mapNonPVPZone: MapNonPVPZone,
     private characterMovementValidation: CharacterMovementValidation,
     private characterMovementWarn: CharacterMovementWarn,
     private mathHelper: MathHelper,
     private characterView: CharacterView,
     private newRelic: NewRelic,
-    private locker: Locker
+    private locker: Locker,
+    private characterNetworkUpdateMapManager: CharacterNetworkUpdateMapManager
   ) {}
 
   public onCharacterUpdatePosition(channel: SocketChannel): void {
@@ -113,10 +108,10 @@ export class CharacterNetworkUpdate {
               void this.npcManager.startNearbyNPCsBehaviorLoop(character);
               await this.updateServerSideEmitterInfo(character, newX, newY, isMoving, data.direction);
 
-              void this.handleNonPVPZone(character, newX, newY);
+              void this.characterNetworkUpdateMapManager.handleNonPVPZone(character, newX, newY);
 
               // leave it for last!
-              void this.handleMapTransition(character, newX, newY);
+              void this.characterNetworkUpdateMapManager.handleMapTransition(character, newX, newY);
 
               void this.characterView.clearAllOutOfViewElements(character._id, character.x, character.y);
             }
@@ -199,63 +194,6 @@ export class CharacterNetworkUpdate {
           },
         }
       );
-    }
-  }
-
-  private async handleNonPVPZone(character: ICharacter, newX: number, newY: number): Promise<void> {
-    if (!character.target?.id) {
-      return;
-    }
-
-    if (String(character.target.type) === "NPC") {
-      const npc = await NPC.findById(character.target.id).lean();
-
-      if (npc?.alignment !== NPCAlignment.Friendly) {
-        return;
-      }
-    }
-
-    /* 
-          Verify if we're in a non pvp zone. If so, we need to trigger 
-          an attack stop event in case player was in a pvp combat
-          */
-    const nonPVPZone = this.mapNonPVPZone.isNonPVPZoneAtXY(character.scene, newX, newY);
-    if (nonPVPZone) {
-      this.mapNonPVPZone.stopCharacterAttack(character);
-    }
-  }
-
-  private async handleMapTransition(character: ICharacter, newX: number, newY: number): Promise<void> {
-    const frozenCharacter = Object.freeze(character);
-
-    // verify if we're in a map transition. If so, we need to trigger a scene transition
-    const transition = this.mapTransitionInfo.getTransitionAtXY(frozenCharacter.scene, newX, newY);
-    if (transition) {
-      const map = this.mapTransitionInfo.getTransitionProperty(transition, "map");
-      const gridX = Number(this.mapTransitionInfo.getTransitionProperty(transition, "gridX"));
-      const gridY = Number(this.mapTransitionInfo.getTransitionProperty(transition, "gridY"));
-
-      if (!map || !gridX || !gridY) {
-        console.error("Failed to fetch required destination properties.");
-        return;
-      }
-
-      const destination = {
-        map,
-        gridX,
-        gridY,
-      };
-
-      /*
-   Check if we are transitioning to the same map, 
-   if so we should only teleport the character
-   */
-
-      if (destination.map === frozenCharacter.scene) {
-        await this.mapTransitionTeleport.sameMapTeleport(frozenCharacter, destination);
-      } else {
-        await this.mapTransitionTeleport.changeCharacterScene(frozenCharacter, destination);
-      }
     }
   }
 
