@@ -1,4 +1,3 @@
-import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { provide } from "inversify-binding-decorators";
 import { CharacterUser } from "./CharacterUser";
 
@@ -6,8 +5,8 @@ import { CharacterUser } from "./CharacterUser";
 export class CharacterPremiumAccount {
   constructor(private characterUser: CharacterUser) {}
 
-  public async isPremiumAccount(character: ICharacter): Promise<boolean> {
-    const user = await this.characterUser.findUserByCharacter(character);
+  public async isPremiumAccount(characterId: string): Promise<boolean> {
+    const user = await this.characterUser.findUserByCharacter(characterId);
 
     if (!user) {
       return false;

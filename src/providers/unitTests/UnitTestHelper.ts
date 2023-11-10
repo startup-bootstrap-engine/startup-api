@@ -62,6 +62,7 @@ interface IMockCharacterOptions {
   hasInventory?: boolean;
   hasSkills?: boolean;
   isPremiumAccount?: boolean;
+  hasUser?: boolean;
 }
 
 interface IMockNPCOptions {
@@ -350,6 +351,14 @@ export class UnitTestHelper {
       charSkills.owner = testCharacter._id;
       testCharacter.skills = charSkills._id;
       await charSkills.save();
+    }
+
+    if (options?.hasUser) {
+      const user = await this.createMockUser({
+        characters: [testCharacter._id],
+      });
+
+      testCharacter.owner = user._id;
     }
 
     if (options?.isPremiumAccount) {

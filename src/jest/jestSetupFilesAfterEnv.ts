@@ -56,6 +56,10 @@ jest.mock("@providers/constants/SkillConstants", () => ({
 jest.mock("@providers/constants/PartyConstants", () => ({
   PARTY_BONUS_RATIO: 1,
 }));
+jest.mock("@providers/constants/PremiumAccountConstants", () => ({
+  PREMIUM_ACCOUNT_SKILL_LOSS_RATIO: 0.5,
+  PREMIUM_ACCOUNT_INVENTORY_DROP_RATIO: 0,
+}));
 
 jest.mock("@providers/constants/DeathConstants", () => ({
   DROP_EQUIPMENT_CHANCE: 15,

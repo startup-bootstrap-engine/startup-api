@@ -44,7 +44,7 @@ export class SkillDecrease {
       return false;
     }
 
-    let xpLossOnDeath = this.characterDeathCalculator.calculateSkillLoss(skills);
+    let xpLossOnDeath = this.characterDeathCalculator.calculateSkillAndXPLoss(skills);
     if (character.hasSkull) {
       switch (character.skullType) {
         case CharacterSkullType.YellowSkull:
@@ -134,7 +134,7 @@ export class SkillDecrease {
 
     const skill = skills[skillToUpdate] as ISkillDetails;
 
-    const spLossOnDeath = this.characterDeathCalculator.calculateSkillLoss(skills, multiply);
+    const spLossOnDeath = this.characterDeathCalculator.calculateSkillAndXPLoss(skills, multiply);
 
     const skillPoints = Math.round(skill.skillPoints);
     const deathPenaltySP = Math.round(skillPoints * (spLossOnDeath / 100));

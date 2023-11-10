@@ -14,7 +14,7 @@ describe("deathPenalty", () => {
       hasSkills: true,
     });
     // @ts-ignore
-    jest.spyOn(skillDecrease.characterDeathCalculator, "calculateSkillLoss").mockImplementation(() => 20);
+    jest.spyOn(skillDecrease.characterDeathCalculator, "calculateSkillAndXPLoss").mockImplementation(() => 20);
   });
 
   it("should call deathPenalty", async () => {
@@ -46,7 +46,7 @@ describe("deathPenalty", () => {
 
   it("should decrease character's strength/dextery", () => {
     // @ts-ignore
-    jest.spyOn(skillDecrease.characterDeathCalculator, "calculateSkillLoss").mockImplementation(() => 10);
+    jest.spyOn(skillDecrease.characterDeathCalculator, "calculateSkillAndXPLoss").mockImplementation(() => 10);
 
     const mockSkills = {
       strength: { level: 3, skillPoints: 42 },
