@@ -42,6 +42,7 @@ const userSchema = createSchema(
         ref: "Character",
       })
     ),
+    isPremiumAccount: Type.boolean({ default: false }),
 
     // Static method types
     ...({} as {
