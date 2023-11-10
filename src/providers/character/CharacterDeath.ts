@@ -407,7 +407,7 @@ export class CharacterDeath {
         cacheKey: `${character._id}-skills`,
       })) as unknown as ISkill as ISkill;
 
-    const dropInventoryChance = this.characterDeathCalculator.calculateInventoryDropChance(skills);
+    const dropInventoryChance = await this.characterDeathCalculator.calculateInventoryDropChance(character, skills);
 
     if (n <= dropInventoryChance || forceDropAll) {
       let item = (await Item.findById(inventory._id).lean({

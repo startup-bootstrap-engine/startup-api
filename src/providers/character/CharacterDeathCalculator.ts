@@ -1,9 +1,13 @@
+import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
 import { INVENTORY_DROP_CHANCE_MULTIPLIER, SKILL_LOSS_ON_DEATH_MULTIPLIER } from "@providers/constants/DeathConstants";
 import { provide } from "inversify-binding-decorators";
+import { CharacterPremiumAccount } from "./CharacterPremiumAccount";
 
 @provide(CharacterDeathCalculator)
 export class CharacterDeathCalculator {
+  constructor(private characterPremiumAccount: CharacterPremiumAccount) {}
+
   public calculateSkillLoss(skills: ISkill, multiply = 1): number {
     // Define the XP/SP loss based on character level
     const skillLossPercentageLevel = {
@@ -28,7 +32,13 @@ export class CharacterDeathCalculator {
     return 10 * SKILL_LOSS_ON_DEATH_MULTIPLIER;
   }
 
-  public calculateInventoryDropChance(skills: ISkill): number {
+  public async calculateInventoryDropChance(character: ICharacter, skills: ISkill): Promise<number> {
+    const isPremiumAccount = await this.characterPremiumAccount.isPremiumAccount(character);
+
+    if (isPremiumAccount) {
+      return 0;
+    }
+
     // Define the chances of dropping inventory based on character level
     const chancesByLevel = {
       5: 0,
