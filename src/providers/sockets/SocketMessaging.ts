@@ -1,7 +1,6 @@
 // @ts-ignore
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterView } from "@providers/character/CharacterView";
 import { appEnv } from "@providers/config/env";
 import { NPCView } from "@providers/npc/NPCView";
@@ -49,7 +48,6 @@ export class SocketMessaging {
     this.socketAdapter.emitToAllUsers(eventName, data || {});
   }
 
-  @TrackNewRelicTransaction()
   public async sendEventToCharactersAroundCharacter<T>(
     character: ICharacter,
     eventName: string,
@@ -58,30 +56,27 @@ export class SocketMessaging {
   ): Promise<void> {
     const charactersNearby = await this.characterView.getCharactersInView(character);
 
-    // Filter the character itself if includeSelf is false
-    const filteredCharacters = includeSelf ? charactersNearby : charactersNearby.filter((c) => c._id !== character._id);
+    if (charactersNearby) {
+      for (const nearbyCharacter of charactersNearby) {
+        this.sendEventToUser<T>(nearbyCharacter.channelId!, eventName, data || ({} as T));
+      }
+    }
 
-    const sendEvents = filteredCharacters.map((nearbyCharacter) =>
-      this.sendEventToUser<T>(nearbyCharacter.channelId!, eventName, data || ({} as T))
-    );
-
-    await Promise.all(sendEvents);
+    if (includeSelf) {
+      this.sendEventToUser<T>(character.channelId!, eventName, data || ({} as T));
+    }
   }
 
-  @TrackNewRelicTransaction()
   public async sendEventToCharactersAroundNPC<T>(npc: INPC, eventName: string, data?: T): Promise<void> {
     const charactersNearby = await this.npcView.getCharactersInView(npc);
 
-    const payload = data || ({} as T);
-
-    const sendEventsPromises = charactersNearby.map((character) =>
-      this.sendEventToUser<T>(character.channelId!, eventName, payload)
-    );
-
-    await Promise.all(sendEventsPromises);
+    if (charactersNearby) {
+      for (const character of charactersNearby) {
+        this.sendEventToUser<T>(character.channelId!, eventName, data || ({} as T));
+      }
+    }
   }
 
-  @TrackNewRelicTransaction()
   public async sendEventAttributeChange(characterId: Types.ObjectId): Promise<void> {
     const character = (await Character.findById(characterId).lean()) as ICharacter;
 
