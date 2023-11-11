@@ -2,6 +2,7 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { CharacterRepository } from "@repositories/ModuleCharacter/CharacterRepository";
 import { provide } from "inversify-binding-decorators";
+import { clearCacheForKey } from "speedgoose";
 
 @provide(DeleteCharacterUseCase)
 export class DeleteCharacterUseCase {
@@ -22,8 +23,10 @@ export class DeleteCharacterUseCase {
 
     await characterToDelete
       .remove()
-      .then(() => {
+      .then(async () => {
         wasDeleted = true;
+
+        await clearCacheForKey(`character-${characterToDelete._id}-user`);
 
         return wasDeleted;
       })

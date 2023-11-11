@@ -56,30 +56,61 @@ describe("NPCExperience.spec.ts | releaseXP test cases", () => {
     jest.clearAllTimers();
   });
 
-  it("should receive the regular experience when no mode is set (soft mode)", async () => {
-    await npcExperience.releaseXP(testNPC);
+  describe("Character modes", () => {
+    it("should receive the regular experience when no mode is set (soft mode)", async () => {
+      await npcExperience.releaseXP(testNPC);
 
-    const updatedSkills = (await Skill.findById(testCharacter.skills).lean()) as ISkill;
+      const updatedSkills = (await Skill.findById(testCharacter.skills).lean()) as ISkill;
 
-    expect(updatedSkills.level).toBe(2);
-    expect(updatedSkills.experience).toBe(expToRelease);
-    expect(updatedSkills.xpToNextLevel).toBe(1);
-    expect(testNPC.xpToRelease?.length).toBe(0);
+      expect(updatedSkills.level).toBe(2);
+      expect(updatedSkills.experience).toBe(expToRelease);
+      expect(updatedSkills.xpToNextLevel).toBe(1);
+      expect(testNPC.xpToRelease?.length).toBe(0);
+    });
+
+    it("should receive a experience bonus when the character is Hardcore Mode", async () => {
+      testCharacter.mode = Modes.HardcoreMode;
+      await testCharacter.save();
+
+      await npcExperience.releaseXP(testNPC);
+
+      const updatedSkills = (await Skill.findById(testCharacter.skills).lean()) as ISkill;
+
+      const expectedExperience = expToRelease * MODE_EXP_MULTIPLIER[Modes.HardcoreMode];
+      expect(updatedSkills.level).toBe(3);
+      expect(updatedSkills.experience).toBe(expectedExperience);
+      expect(updatedSkills.xpToNextLevel).toBe(xpToLvl4 - expectedExperience);
+      expect(testNPC.xpToRelease?.length).toBe(0);
+    });
   });
 
-  it("should receive a experience bonus when the character is Hardcore Mode)", async () => {
-    testCharacter.mode = Modes.HardcoreMode;
-    await testCharacter.save();
+  describe("Premium Account", () => {
+    let premiumCharacter: ICharacter;
+    let xpMultiplierSpy: jest.SpyInstance;
 
-    await npcExperience.releaseXP(testNPC);
+    beforeEach(async () => {
+      premiumCharacter = await unitTestHelper.createMockCharacter(null, { isPremiumAccount: true, hasSkills: true });
 
-    const updatedSkills = (await Skill.findById(testCharacter.skills).lean()) as ISkill;
+      // mock private method npcExperience.getXPMultiplier
+      xpMultiplierSpy = jest.spyOn(npcExperience as any, "getXPMultiplier");
+    });
 
-    const expectedExperience = expToRelease * MODE_EXP_MULTIPLIER[Modes.HardcoreMode];
-    expect(updatedSkills.level).toBe(3);
-    expect(updatedSkills.experience).toBe(expectedExperience);
-    expect(updatedSkills.xpToNextLevel).toBe(xpToLvl4 - expectedExperience);
-    expect(testNPC.xpToRelease?.length).toBe(0);
+    it("should receive a XP buff when the character has a Golden premium account", async () => {
+      testNPC.xpToRelease = [
+        {
+          xpId: uuidv4(),
+          charId: premiumCharacter.id,
+          xp: expToRelease,
+        } as any,
+      ];
+      await testNPC.save();
+
+      await npcExperience.releaseXP(testNPC);
+
+      //! That's why I fucking hate Jest. Look at this freak show
+      // check if xpMultiplierSpy async promise returns 1.5
+      expect(await xpMultiplierSpy.mock.results[0].value).toBe(1.5);
+    });
   });
 
   it("should update NPC when xp is in range", async () => {

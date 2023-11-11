@@ -39,6 +39,7 @@ import { Colors } from "discord.js";
 
 import { provide } from "inversify-binding-decorators";
 
+import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
 import random from "lodash/random";
 import uniqBy from "lodash/uniqBy";
 import { Types } from "mongoose";
@@ -63,7 +64,8 @@ export class NPCExperience {
     private partyManagement: PartyManagement,
     private newRelic: NewRelic,
     private discordBot: DiscordBot,
-    private experienceLimiter: NPCExperienceLimiter
+    private experienceLimiter: NPCExperienceLimiter,
+    private characterPremiumAccount: CharacterPremiumAccount
   ) {}
 
   /**
@@ -103,10 +105,7 @@ export class NPCExperience {
         return this.releaseXP(target);
       }
 
-      const characterMode: Modes = Object.values(Modes).find((mode) => mode === character.mode) ?? Modes.SoftMode;
-
-      const expMultiplier =
-        (target.isGiantForm ? NPC_GIANT_FORM_EXPERIENCE_MULTIPLIER : 1) * MODE_EXP_MULTIPLIER[characterMode];
+      const expMultiplier = await this.getXPMultiplier(character, target);
 
       let baseExp = record!.xp * expMultiplier;
       let expRecipients: Types.ObjectId[] = [];
@@ -214,6 +213,19 @@ export class NPCExperience {
     } finally {
       await this.locker.unlock(`npc-${target._id}-record-xp`);
     }
+  }
+
+  private async getXPMultiplier(character: ICharacter, target: INPC): Promise<number> {
+    const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(character._id);
+
+    const premiumAccountXPMultiplier = premiumAccountData ? premiumAccountData.XPBuff / 100 + 1 : 1;
+
+    const characterMode: Modes = Object.values(Modes).find((mode) => mode === character.mode) ?? Modes.SoftMode;
+
+    const giantNPCMultiplier = target.isGiantForm ? NPC_GIANT_FORM_EXPERIENCE_MULTIPLIER : 1;
+    const characterModeMultiplier = MODE_EXP_MULTIPLIER[characterMode];
+
+    return giantNPCMultiplier * characterModeMultiplier * premiumAccountXPMultiplier;
   }
 
   private async sendExpLevelUpEvents(
