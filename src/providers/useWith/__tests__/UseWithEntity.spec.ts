@@ -37,6 +37,8 @@ describe("UseWithEntity.ts", () => {
   let sendEventToUserMock: jest.SpyInstance;
   let executeEffectMock: jest.SpyInstance;
   let onHitTargetMock: jest.SpyInstance;
+  let useWithEntityBaseValidationSpy: jest.SpyInstance;
+  let useWithEntityTargetValidationSpy: jest.SpyInstance;
 
   beforeAll(() => {
     useWithEntity = container.get<UseWithEntity>(UseWithEntity);
@@ -110,6 +112,12 @@ describe("UseWithEntity.ts", () => {
     // @ts-ignore
     onHitTargetMock = jest.spyOn(useWithEntity.onTargetHit, "execute");
     onHitTargetMock.mockImplementation();
+
+    // @ts-ignore
+    useWithEntityBaseValidationSpy = jest.spyOn(useWithEntity.useWithEntityValidation, "baseValidation");
+
+    // @ts-ignore
+    useWithEntityTargetValidationSpy = jest.spyOn(useWithEntity.useWithEntityValidation, "validateTargetRequest");
   });
 
   afterEach(() => {
@@ -131,6 +139,21 @@ describe("UseWithEntity.ts", () => {
       );
 
       expect(executeEffectMock).toBeCalledTimes(1);
+    });
+
+    it("should properly pass validation if target is self", async () => {
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: testCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      expect(useWithEntityBaseValidationSpy).toBeTruthy();
+
+      expect(useWithEntityTargetValidationSpy).toBeTruthy();
     });
 
     it("should pass validation for target npc", async () => {
