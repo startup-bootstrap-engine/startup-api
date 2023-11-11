@@ -35,6 +35,7 @@ import {
   CRAFTING_BASE_CHANCE_IMPACT,
   CRAFTING_DIFFICULTY_RATIO,
   CRAFTING_ITEMS_CHANCE,
+  CRAFTING_OUTPUT_QTY_RATIO,
   TOOLS_BASE_CHANCE_RATIO,
 } from "@providers/constants/CraftingConstants";
 import { TraitGetter } from "@providers/skill/TraitGetter";
@@ -284,7 +285,14 @@ export class ItemCraftable {
   }
 
   private getQty(recipe: IUseWithCraftingRecipe): number {
-    const qty = random(recipe.outputQtyRange[0], recipe.outputQtyRange[1]);
+    let qty = random(recipe.outputQtyRange[0], recipe.outputQtyRange[1]);
+
+    const isSingleQtyItem = recipe.outputQtyRange[0] === recipe.outputQtyRange[1] && recipe.outputQtyRange[0] === 1;
+
+    if (!isSingleQtyItem) {
+      qty = qty * CRAFTING_OUTPUT_QTY_RATIO;
+    }
+
     return qty;
   }
 
