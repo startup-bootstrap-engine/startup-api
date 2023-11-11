@@ -18,7 +18,7 @@ import {
   ToGridX,
   ToGridY,
 } from "@rpg-engine/shared";
-import { provide as provideSingleton } from "inversify-binding-decorators";
+import { provide } from "inversify-binding-decorators";
 
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { appEnv } from "@providers/config/env";
@@ -34,12 +34,12 @@ import { CharacterView } from "../../CharacterView";
 import { CharacterMovementValidation } from "../../characterMovement/CharacterMovementValidation";
 import { CharacterMovementWarn } from "../../characterMovement/CharacterMovementWarn";
 import { CharacterNetworkUpdateMapManager } from "./CharacterNetworkUpdateMap";
-@provideSingleton(CharacterNetworkUpdateQueue)
+@provide(CharacterNetworkUpdateQueue)
 export class CharacterNetworkUpdateQueue {
   private queue: Queue<any, any, string> | null = null;
   private worker: Worker | null = null;
   private connection: any;
-  private queueName: string = `item-use-cycle-${uuidv4()}-${
+  private queueName: string = `character-network-update-${uuidv4()}-${
     appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
   }`;
 
