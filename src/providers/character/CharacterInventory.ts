@@ -131,6 +131,7 @@ export class CharacterInventory {
     }
   }
 
+  @TrackNewRelicTransaction()
   public async generateNewInventory(
     character: ICharacter,
     inventoryType: ContainersBlueprint,
