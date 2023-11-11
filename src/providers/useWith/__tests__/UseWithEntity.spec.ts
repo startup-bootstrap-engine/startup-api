@@ -617,31 +617,6 @@ describe("UseWithEntity.ts", () => {
         type: "error",
       });
     });
-
-    it("should not validate if caster target in not that same as entity target ", async () => {
-      executeEffectMock.mockImplementation();
-
-      // @ts-ignore
-      testCharacter.target = { id: targetCharacter._id, type: EntityType.Character };
-      await testCharacter.save();
-
-      await useWithEntity.execute(
-        {
-          itemId: item1._id,
-          entityId: testNPC._id,
-          entityType: EntityType.NPC,
-        },
-        testCharacter
-      );
-
-      expect(executeEffectMock).toBeCalledTimes(0);
-      expect(sendEventToUserMock).toBeCalledTimes(1);
-
-      expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-        message: "Sorry, your target is invalid.",
-        type: "error",
-      });
-    });
   });
 
   describe("Item usage", () => {

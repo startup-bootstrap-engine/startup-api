@@ -84,13 +84,7 @@ export class UseWithEntityValidation {
     if ("isAlive" in target && !target.isAlive && targetType !== (StaticEntity as EntityType)) {
       return "Sorry, your target is dead.";
     }
-    if (
-      caster.target.id &&
-      (target.type === EntityType.Character || EntityType.NPC) &&
-      target.id.toString() !== caster.target.id.toString()
-    ) {
-      return "Sorry, your target is invalid.";
-    }
+
     if (
       target.type === EntityType.Character &&
       !this.characterValidation.hasBasicValidation(target as ICharacter, this.getCharacterValidationCustomMessages())
