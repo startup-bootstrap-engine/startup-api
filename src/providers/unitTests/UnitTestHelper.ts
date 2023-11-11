@@ -29,6 +29,7 @@ import {
   stoppedMovementMockNPC,
 } from "@providers/unitTests/mock/NPCMock";
 import { characterMock } from "@providers/unitTests/mock/characterMock";
+import { UserAccountTypes } from "@providers/user/userTypes";
 import { ISocketTransmissionZone, NPCMovementType, PeriodOfDay, QuestType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { MongoMemoryServer } from "mongodb-memory-server";
@@ -364,7 +365,7 @@ export class UnitTestHelper {
     if (options?.isPremiumAccount) {
       const user = await this.createMockUser({
         characters: [testCharacter._id],
-        isPremiumAccount: true,
+        accountType: UserAccountTypes.PremiumGold,
       });
 
       testCharacter.owner = user._id;

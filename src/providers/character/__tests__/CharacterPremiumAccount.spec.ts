@@ -15,8 +15,8 @@ describe("CharacterPremiumAccount", () => {
   });
 
   it("properly checks if a character is a premium account", async () => {
-    const isPremium = await characterPremiumAccount.isPremiumAccount(testCharacter._id);
+    const premiumAccountData = await characterPremiumAccount.getPremiumAccountData(testCharacter._id);
 
-    expect(isPremium).toBe(true);
+    expect(premiumAccountData).not.toBeUndefined();
   });
 });

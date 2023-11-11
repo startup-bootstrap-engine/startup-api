@@ -44,7 +44,7 @@ export class SkillDecrease {
       return false;
     }
 
-    let xpLossOnDeath = this.characterDeathCalculator.calculateSkillAndXPLoss(skills);
+    let xpLossOnDeath = await this.characterDeathCalculator.calculateSkillAndXPLoss(skills);
     if (character.hasSkull) {
       switch (character.skullType) {
         case CharacterSkullType.YellowSkull:
@@ -81,7 +81,7 @@ export class SkillDecrease {
       for (let i = 0; i < BASIC_ATTRIBUTES.length; i++) {
         let multiply = 1;
         if (character.hasSkull && character.skullType === CharacterSkullType.RedSkull) multiply = 2;
-        const decreasedSP = this.decreaseSP(skills, BASIC_ATTRIBUTES[i], multiply);
+        const decreasedSP = await this.decreaseSP(skills, BASIC_ATTRIBUTES[i], multiply);
         await this.skillFunctions.updateSkills(skills, character);
 
         if (decreasedSP) {
@@ -108,7 +108,7 @@ export class SkillDecrease {
       for (let i = 0; i < COMBAT_SKILLS.length; i++) {
         let multiply = 1;
         if (character.hasSkull && character.skullType === CharacterSkullType.RedSkull) multiply = 2;
-        const decreasedSP = this.decreaseSP(skills, COMBAT_SKILLS[i], multiply);
+        const decreasedSP = await this.decreaseSP(skills, COMBAT_SKILLS[i], multiply);
 
         if (decreasedSP) {
           hasDecreasedSP = true;
@@ -125,7 +125,7 @@ export class SkillDecrease {
     }
   }
 
-  private decreaseSP(skills: ISkill, skillKey: string, multiply = 1): boolean {
+  private async decreaseSP(skills: ISkill, skillKey: string, multiply = 1): Promise<boolean> {
     const skillToUpdate = SKILLS_MAP.get(skillKey);
 
     if (!skillToUpdate) {
@@ -134,7 +134,7 @@ export class SkillDecrease {
 
     const skill = skills[skillToUpdate] as ISkillDetails;
 
-    const spLossOnDeath = this.characterDeathCalculator.calculateSkillAndXPLoss(skills, multiply);
+    const spLossOnDeath = await this.characterDeathCalculator.calculateSkillAndXPLoss(skills, multiply);
 
     const skillPoints = Math.round(skill.skillPoints);
     const deathPenaltySP = Math.round(skillPoints * (spLossOnDeath / 100));

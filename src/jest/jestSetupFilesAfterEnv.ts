@@ -56,9 +56,35 @@ jest.mock("@providers/constants/SkillConstants", () => ({
 jest.mock("@providers/constants/PartyConstants", () => ({
   PARTY_BONUS_RATIO: 1,
 }));
+
 jest.mock("@providers/constants/PremiumAccountConstants", () => ({
-  PREMIUM_ACCOUNT_SKILL_LOSS_RATIO: 0.5,
-  PREMIUM_ACCOUNT_INVENTORY_DROP_RATIO: 0,
+  PREMIUM_ACCOUNT_TYPES_RATIOS: {
+    free: undefined,
+    bronze: {
+      SPXPLostOnDeathRatio: 1 - 0.2, // only loses 80% of the regular skill loss
+      InventoryLossOnDeathRatio: 1 - 0.25, // 25% less chance to drop an item
+      SpeedBuff: 7,
+      XPBuff: 20,
+      lootDropBuff: 20,
+      teleportCooldownMin: 40,
+    },
+    silver: {
+      SPXPLostOnDeathRatio: 1 - 0.35, // only loses 60% of the regular skill loss
+      InventoryLossOnDeathRatio: 1 - 0.5, // 50% less chance to drop an item
+      SpeedBuff: 13,
+      XPBuff: 30,
+      lootDropBuff: 30,
+      teleportCooldownMin: 30,
+    },
+    gold: {
+      SPXPLostOnDeathRatio: 1 - 0.5, // only loses 50% of the regular skill loss
+      InventoryLossOnDeathRatio: 0, // 75% less chance to drop an item
+      SpeedBuff: 15,
+      XPBuff: 50,
+      lootDropBuff: 50,
+      teleportCooldownMin: 20,
+    },
+  },
 }));
 
 jest.mock("@providers/constants/DeathConstants", () => ({

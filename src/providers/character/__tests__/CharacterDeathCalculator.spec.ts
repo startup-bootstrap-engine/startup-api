@@ -2,6 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
 import { IUser } from "@entities/ModuleSystem/UserModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import { UserAccountTypes } from "@providers/user/userTypes";
 import { CharacterDeathCalculator } from "../CharacterDeathCalculator";
 import { CharacterUser } from "../CharacterUser";
 
@@ -113,7 +114,7 @@ describe("CharacterDeathCalculator", () => {
     beforeEach(async () => {
       testUser = (await characterUser.findUserByCharacter(testCharacter._id)) as IUser;
 
-      testUser.isPremiumAccount = true;
+      testUser.accountType = UserAccountTypes.PremiumGold;
 
       await testUser.save();
     });

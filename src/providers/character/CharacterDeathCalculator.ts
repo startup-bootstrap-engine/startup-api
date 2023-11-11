@@ -1,9 +1,5 @@
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INVENTORY_DROP_CHANCE_MULTIPLIER, SKILL_LOSS_ON_DEATH_MULTIPLIER } from "@providers/constants/DeathConstants";
-import {
-  PREMIUM_ACCOUNT_INVENTORY_DROP_RATIO,
-  PREMIUM_ACCOUNT_SKILL_LOSS_RATIO,
-} from "@providers/constants/PremiumAccountConstants";
 import { provide } from "inversify-binding-decorators";
 import { CharacterPremiumAccount } from "./CharacterPremiumAccount";
 
@@ -16,7 +12,7 @@ export class CharacterDeathCalculator {
       skills = (await Skill.findOne({ _id: skills._id }).lean()) as ISkill;
     }
 
-    const isPremiumAccount = await this.characterPremiumAccount.isPremiumAccount(String(skills.owner));
+    const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(String(skills.owner));
 
     // Define the XP/SP loss based on character level
     const skillLossPercentageLevel = {
@@ -36,8 +32,8 @@ export class CharacterDeathCalculator {
       if (level <= Number(threshold)) {
         const XPLossResult = xpLoss * multiply * SKILL_LOSS_ON_DEATH_MULTIPLIER;
 
-        if (isPremiumAccount) {
-          return XPLossResult * PREMIUM_ACCOUNT_SKILL_LOSS_RATIO;
+        if (premiumAccountData) {
+          return XPLossResult * premiumAccountData.SPXPLostOnDeathRatio;
         }
 
         return XPLossResult;
@@ -46,8 +42,8 @@ export class CharacterDeathCalculator {
 
     const regularSkillLoss = 10 * SKILL_LOSS_ON_DEATH_MULTIPLIER;
 
-    if (isPremiumAccount) {
-      return regularSkillLoss * PREMIUM_ACCOUNT_SKILL_LOSS_RATIO;
+    if (premiumAccountData) {
+      return regularSkillLoss * premiumAccountData.SPXPLostOnDeathRatio;
     }
 
     return regularSkillLoss;
@@ -58,7 +54,7 @@ export class CharacterDeathCalculator {
       skills = (await Skill.findOne({ _id: skills._id }).lean()) as ISkill;
     }
 
-    const isPremiumAccount = await this.characterPremiumAccount.isPremiumAccount(String(skills.owner));
+    const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(String(skills.owner));
 
     // Define the chances of dropping inventory based on character level
     const chancesByLevel = {
@@ -86,8 +82,8 @@ export class CharacterDeathCalculator {
       if (level <= Number(threshold)) {
         const regularChance = chance * INVENTORY_DROP_CHANCE_MULTIPLIER;
 
-        if (isPremiumAccount) {
-          return regularChance * PREMIUM_ACCOUNT_INVENTORY_DROP_RATIO;
+        if (premiumAccountData) {
+          return regularChance * premiumAccountData.InventoryLossOnDeathRatio;
         }
 
         return regularChance;
@@ -96,8 +92,8 @@ export class CharacterDeathCalculator {
 
     const regularChance = 100 * INVENTORY_DROP_CHANCE_MULTIPLIER;
 
-    if (isPremiumAccount) {
-      return regularChance * PREMIUM_ACCOUNT_INVENTORY_DROP_RATIO;
+    if (premiumAccountData) {
+      return regularChance * premiumAccountData.InventoryLossOnDeathRatio;
     }
 
     // Return the maximum chance of dropping inventory if the character's level is above the highest threshold
