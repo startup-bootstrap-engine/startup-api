@@ -85,9 +85,26 @@ describe("WithdrawItem.ts", () => {
   describe("Edge cases", () => {
     let sendEventToUserSpy: jest.SpyInstance;
 
-    beforeAll(() => {
+    beforeEach(() => {
       // @ts-ignore
       sendEventToUserSpy = jest.spyOn(withdrawItem.socketMessaging, "sendEventToUser");
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("should not withdraw item if isWithdrawValid returns false", async () => {
+      // @ts-ignore
+      jest.spyOn(withdrawItem, "isWithdrawValid").mockResolvedValue(false);
+
+      const result = await withdrawItem.withdraw(testCharacter, {
+        itemId: item.id,
+        npcId: testNPC.id,
+        toContainerId: characterBackpack.itemContainer?.toString()!,
+      });
+
+      expect(result).toBeUndefined();
     });
 
     it("should not withdraw from deposit if destination container if full", async () => {

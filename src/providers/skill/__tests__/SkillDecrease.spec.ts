@@ -54,9 +54,9 @@ describe("deathPenalty", () => {
     };
 
     // @ts-ignore
-    await skillDecrease.decreaseSP(mockSkills, "strength");
+    skillDecrease.decreaseSP(mockSkills, "strength");
     // @ts-ignore
-    await skillDecrease.decreaseSP(mockSkills, "dexterity");
+    skillDecrease.decreaseSP(mockSkills, "dexterity");
 
     expect(mockSkills).toEqual({
       strength: { level: 3, skillPoints: 38, skillPointsToNextLevel: 138 },
