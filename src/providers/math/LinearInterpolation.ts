@@ -19,4 +19,22 @@ export class LinearInterpolation {
 
     return round(value);
   }
+
+  public calculateMultiPointInterpolation(
+    inputValue: number,
+    inputRange: [number, number],
+    outputRange: [number, number]
+  ): number {
+    const [inputStart, inputEnd] = inputRange;
+    const [outputStart, outputEnd] = outputRange;
+
+    // Clamping the input value to the input range
+    const clampedValue = Math.min(Math.max(inputValue, inputStart), inputEnd);
+
+    // Calculating the interpolation factor
+    const factor = (clampedValue - inputStart) / (inputEnd - inputStart);
+
+    // Interpolating within the output range and returning the result
+    return outputStart + factor * (outputEnd - outputStart);
+  }
 }
