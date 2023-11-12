@@ -3,6 +3,7 @@ import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterConnection } from "@providers/character/CharacterConnection";
 
 import { CharacterBuffActivator } from "@providers/character/characterBuff/CharacterBuffActivator";
+import { CharacterBaseSpeed } from "@providers/character/characterMovement/CharacterBaseSpeed";
 import { ContainerSlotsCaching } from "@providers/container/ContainerSlotsCaching";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
@@ -102,5 +103,7 @@ export const hashGenerator = container.get<HashGenerator>(HashGenerator);
 export const locker = container.get<Locker>(Locker);
 
 export const blueprint = container.get<BlueprintManager>(BlueprintManager);
+
+export const characterBaseSpeed = container.get<CharacterBaseSpeed>(CharacterBaseSpeed);
 
 export { container };

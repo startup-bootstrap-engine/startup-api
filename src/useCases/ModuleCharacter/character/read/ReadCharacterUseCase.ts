@@ -1,5 +1,7 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
+import { CharacterBaseSpeed } from "@providers/character/characterMovement/CharacterBaseSpeed";
+import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { CharacterRepository } from "@repositories/ModuleCharacter/CharacterRepository";
 import { provide } from "inversify-binding-decorators";
@@ -9,7 +11,8 @@ export class ReadCharacterUseCase {
   constructor(
     private characterRepository: CharacterRepository,
     private characterInventory: CharacterInventory,
-    private specialEffect: SpecialEffect
+    private specialEffect: SpecialEffect,
+    private characterBaseSpeed: CharacterBaseSpeed
   ) {}
 
   public async read(id: string, selectFields: string[]): Promise<ICharacter> {
@@ -29,6 +32,8 @@ export class ReadCharacterUseCase {
         throw new Error("Character not found!");
       }
 
+      const baseSpeed = (await this.characterBaseSpeed.getBaseSpeed(character)) ?? MovementSpeed.Standard;
+
       // Assuming specialEffect.getOpacity and characterInventory.getInventory return promises.
       const [alpha, inventory] = await Promise.all([
         this.specialEffect.getOpacity(character),
@@ -39,6 +44,8 @@ export class ReadCharacterUseCase {
         ...character,
         alpha,
         inventory,
+        baseSpeed,
+        speed: baseSpeed,
       } as unknown as ICharacter;
 
       return output;
@@ -66,6 +73,13 @@ export class ReadCharacterUseCase {
 
       // @ts-ignore
       char.inventory = inventory;
+
+      // @ts-ignore
+      const baseSpeed = await this.characterBaseSpeed.getBaseSpeed(char);
+      char.baseSpeed = baseSpeed ?? MovementSpeed.Standard;
+
+      // @ts-ignore
+      char.speed = baseSpeed;
     }
 
     return characters;

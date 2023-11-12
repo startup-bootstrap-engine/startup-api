@@ -1,10 +1,11 @@
-import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { CharacterBuffSkill } from "@providers/character/characterBuff/CharacterBuffSkill";
+import { CharacterBaseSpeed } from "@providers/character/characterMovement/CharacterBaseSpeed";
 import { SP_INCREASE_BASE, SP_MAGIC_INCREASE_TIMES_MANA } from "@providers/constants/SkillConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -36,7 +37,8 @@ export class SkillFunctions {
     private numberFormatter: NumberFormatter,
     private skillBuff: SkillBuff,
     private inMemoryHashTable: InMemoryHashTable,
-    private newRelic: NewRelic
+    private newRelic: NewRelic,
+    private characterBaseSpeed: CharacterBaseSpeed
   ) {}
 
   public updateSkillByType(skills: ISkill, skillName: string, bonusOrPenalties: number): boolean {
@@ -85,6 +87,12 @@ export class SkillFunctions {
         this.skillBuff.getSkillsWithBuff(character),
         this.characterBuffSkill.calculateAllActiveBuffs(character),
       ]);
+
+      // update baseSpeed according to skill level
+      const baseSpeed = await this.characterBaseSpeed.getBaseSpeed(character);
+      if (baseSpeed && character.baseSpeed !== baseSpeed) {
+        await Character.updateOne({ _id: character._id }, { $set: { baseSpeed } });
+      }
 
       this.socketMessaging.sendEventToUser(character.channelId!, SkillSocketEvents.ReadInfo, {
         skill: buffedSkills,
