@@ -44,6 +44,7 @@ export class CharacterBuffTracker {
     return allCharacterBuffs;
   }
 
+  @TrackNewRelicTransaction()
   public async hasBuffs(characterId: string): Promise<boolean> {
     const buffs = await this.getAllCharacterBuffs(characterId);
 
@@ -109,6 +110,7 @@ export class CharacterBuffTracker {
     return buff;
   }
 
+  @TrackNewRelicTransaction()
   public async deleteBuff(character: ICharacter, buffId: string): Promise<boolean> {
     try {
       const buff = (await this.getBuff(character._id, buffId)) as ICharacterBuff;

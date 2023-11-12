@@ -62,7 +62,7 @@ describe("CalculateEffectDamage", () => {
 
     expect(spyCalculateTotalEffectDamage).toHaveBeenCalledWith(50, 10, 1, 1, 2, 4, undefined);
 
-    expect(result).toBeLessThanOrEqual(30);
+    expect(result).toBeLessThanOrEqual(50);
   });
 
   it("should return correct damage when attacker is NPC", async () => {

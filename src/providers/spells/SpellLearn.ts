@@ -88,6 +88,7 @@ export class SpellLearn {
     );
   }
 
+  @TrackNewRelicTransaction()
   public async levelingSpells(characterId: Types.ObjectId, skillId: Types.ObjectId): Promise<boolean> {
     const character = (await Character.findById(characterId).lean()) as ICharacter;
     const skills = (await Skill.findById(skillId)

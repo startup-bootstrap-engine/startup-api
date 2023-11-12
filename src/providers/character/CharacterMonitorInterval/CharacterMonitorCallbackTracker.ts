@@ -1,4 +1,5 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 
 import { provide } from "inversify-binding-decorators";
@@ -11,6 +12,7 @@ interface ICharacterMonitorCallbacks {
 export class CharacterMonitorCallbackTracker {
   constructor(private inMemoryHashTable: InMemoryHashTable) {}
 
+  @TrackNewRelicTransaction()
   public async setCallback(character: ICharacter, callbackId: string): Promise<void> {
     const namespaceKey = "character-monitor-callbacks";
 
@@ -22,6 +24,7 @@ export class CharacterMonitorCallbackTracker {
     await this.inMemoryHashTable.set(namespaceKey, character._id, callbacks);
   }
 
+  @TrackNewRelicTransaction()
   public async getCallback(character: ICharacter, callbackId: string): Promise<ICharacterMonitorCallbacks> {
     const namespaceKey = "character-monitor-callbacks";
 

@@ -1,6 +1,7 @@
 // @ts-ignore
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterView } from "@providers/character/CharacterView";
 import { appEnv } from "@providers/config/env";
 import { NPCView } from "@providers/npc/NPCView";
@@ -48,6 +49,7 @@ export class SocketMessaging {
     this.socketAdapter.emitToAllUsers(eventName, data || {});
   }
 
+  @TrackNewRelicTransaction()
   public async sendEventToCharactersAroundCharacter<T>(
     character: ICharacter,
     eventName: string,
@@ -67,6 +69,7 @@ export class SocketMessaging {
     }
   }
 
+  @TrackNewRelicTransaction()
   public async sendEventToCharactersAroundNPC<T>(npc: INPC, eventName: string, data?: T): Promise<void> {
     const charactersNearby = await this.npcView.getCharactersInView(npc);
 
@@ -77,6 +80,7 @@ export class SocketMessaging {
     }
   }
 
+  @TrackNewRelicTransaction()
   public async sendEventAttributeChange(characterId: Types.ObjectId): Promise<void> {
     const character = (await Character.findById(characterId).lean()) as ICharacter;
 

@@ -120,6 +120,7 @@ export class BattleCharacterAttack {
     await this.attackTarget(updatedCharacter, updatedTarget);
   }
 
+  @TrackNewRelicTransaction()
   public async attackTarget(character: ICharacter, target: ICharacter | INPC): Promise<boolean> {
     try {
       const canAttack = await this.battleCharacterAttackValidation.canAttack(character, target);
