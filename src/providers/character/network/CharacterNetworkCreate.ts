@@ -14,7 +14,6 @@ import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import {
   AnimationDirection,
   AvailableWeather,
-  CharacterAttributes,
   CharacterClass,
   CharacterSkullType,
   CharacterSocketEvents,
@@ -101,12 +100,8 @@ export class CharacterNetworkCreate {
         }
 
         // update baseSpeed according to skill level
-        const baseSpeed = await this.characterBaseSpeed.getBaseSpeed(character);
-        if (baseSpeed === undefined) {
-          await this.fixInconsistentSpeed(character);
-        } else if (character.baseSpeed !== baseSpeed) {
-          await Character.updateOne({ _id: character._id }, { $set: { baseSpeed } });
-        }
+
+        const { speed: updatedSpeed } = await this.recalculateSpeed(character);
 
         await clearCacheForKey(`characterBuffs_${character._id}`);
 
@@ -159,7 +154,7 @@ export class CharacterNetworkCreate {
           y: character.y!,
           direction: character.direction as AnimationDirection,
           layer: character.layer,
-          speed: character.speed,
+          speed: updatedSpeed,
           movementIntervalMs: character.movementIntervalMs,
           health: character.health,
           maxHealth: character.maxHealth,
@@ -307,37 +302,22 @@ export class CharacterNetworkCreate {
     }
   }
 
-  private async fixInconsistentSpeed(character: ICharacter): Promise<void> {
+  private async recalculateSpeed(character: ICharacter): Promise<{ speed: number }> {
     //! temporary ugly hack until we figure out why the hell sometimes the speed bugs out of nowhere
 
     await this.characterBuffTracker.clearCache(character, "speed");
 
-    const hasSpeedBuffs = await this.characterBuffTracker.hasBuffsByTrait(character._id, CharacterAttributes.Speed);
+    const baseSpeed = await this.characterBaseSpeed.getBaseSpeed(character);
 
-    if (!hasSpeedBuffs) {
-      // if it has no buffs, we can just check if speed is different than standard. If it is, we set it to standard
-
-      //! Change this when speed is tied to character level
-      if (character.baseSpeed !== MovementSpeed.Standard) {
-        await Character.findOneAndUpdate({ _id: character._id }, { baseSpeed: MovementSpeed.Standard });
+    await Character.updateOne(
+      {
+        _id: character._id,
+      },
+      {
+        baseSpeed,
       }
-
-      return;
-    }
-
-    // if it does have some speed buff, we need to calculate the speed based on the buffs and compare it to the current speed.
-    // if it is different, we set it to the calculated speed
-
-    const speedPercentageChange = await this.characterBuffTracker.getAllBuffPercentageChanges(
-      character._id,
-      CharacterAttributes.Speed
     );
 
-    // round to 2 decimals precision
-    const expectedSpeed = this.numberFormatter.formatNumber(MovementSpeed.Standard * (1 + speedPercentageChange / 100));
-
-    if (character.baseSpeed !== expectedSpeed) {
-      await Character.findOneAndUpdate({ _id: character._id }, { baseSpeed: expectedSpeed });
-    }
+    return { speed: baseSpeed ?? MovementSpeed.Standard };
   }
 }

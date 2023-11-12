@@ -44,7 +44,7 @@ export class CharacterBaseSpeed {
         this.linearInterpolation.calculateMultiPointInterpolation(
           level,
           [BASE_SPEED_MIN_LEVEL_THRESHOLD, BASE_SPEED_MAX_LEVEL_THRESHOLD],
-          [MovementSpeed.Standard, MovementSpeed.ExtraFast]
+          [MovementSpeed.Standard, MovementSpeed.Fast]
         ) + baseSpeedBuffValue;
 
       return this.numberFormatter.formatNumber(rawCalculation);

@@ -46,11 +46,11 @@ describe("CharacterBaseSpeed", () => {
     await setupSkillsForCharacter(HIGH_LEVEL);
 
     const baseSpeedFast = await characterBaseSpeed.getBaseSpeed(testCharacter);
-    expect(baseSpeedFast).toBeCloseTo(3.18);
+    expect(baseSpeedFast).toBeCloseTo(2.86);
 
     await setupSkillsForCharacter(VERY_HIGH_LEVEL);
     const baseSpeedExtraFast = await characterBaseSpeed.getBaseSpeed(testCharacter);
-    expect(baseSpeedExtraFast).toBe(MovementSpeed.ExtraFast);
+    expect(baseSpeedExtraFast).toBe(MovementSpeed.Fast);
   });
 
   it("Should add buff to base speed when the character level is above 50", async () => {
@@ -61,11 +61,11 @@ describe("CharacterBaseSpeed", () => {
     jest.spyOn(characterBaseSpeed.characterBuffSkill, "calculateAllActiveBuffs").mockImplementation(buff);
 
     const baseSpeedFast = await characterBaseSpeed.getBaseSpeed(testCharacter);
-    expect(baseSpeedFast).toBeCloseTo(5.18);
+    expect(baseSpeedFast).toBeCloseTo(4.86);
 
     await setupSkillsForCharacter(VERY_HIGH_LEVEL);
     const baseSpeedExtraFast = await characterBaseSpeed.getBaseSpeed(testCharacter);
-    expect(baseSpeedExtraFast).toBe(MovementSpeed.ExtraFast + buffValue);
+    expect(baseSpeedExtraFast).toBe(MovementSpeed.Fast + buffValue);
   });
 
   it("Should return MIN speed when character level is LOW", async () => {
@@ -77,19 +77,19 @@ describe("CharacterBaseSpeed", () => {
   it("should return MAX speed when character level is VERY_HIGH_LEVEL", async () => {
     await setupSkillsForCharacter(VERY_HIGH_LEVEL);
     const baseSpeed = await characterBaseSpeed.getBaseSpeed(testCharacter);
-    expect(baseSpeed).toBe(MovementSpeed.ExtraFast);
+    expect(baseSpeed).toBe(MovementSpeed.Fast);
   });
 
   it("Should interpolate speed correctly for mid-level character", async () => {
     await setupSkillsForCharacter(MID_LEVEL);
     const baseSpeed = await characterBaseSpeed.getBaseSpeed(testCharacter);
-    const expectedSpeed = 2.99;
+    const expectedSpeed = 2.77;
     expect(baseSpeed).toBeCloseTo(expectedSpeed);
   });
 
   it("Should return extra fast speed when character level is above 150", async () => {
     await setupSkillsForCharacter(HIGH_LEVEL);
     const baseSpeed = await characterBaseSpeed.getBaseSpeed(testCharacter);
-    expect(baseSpeed).toBe(3.18);
+    expect(baseSpeed).toBe(2.86);
   });
 });
