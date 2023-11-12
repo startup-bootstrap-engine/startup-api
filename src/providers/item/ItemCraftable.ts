@@ -290,7 +290,7 @@ export class ItemCraftable {
     const isSingleQtyItem = recipe.outputQtyRange[0] === recipe.outputQtyRange[1] && recipe.outputQtyRange[0] === 1;
 
     if (!isSingleQtyItem) {
-      qty = qty * CRAFTING_OUTPUT_QTY_RATIO;
+      qty = Math.ceil(qty * CRAFTING_OUTPUT_QTY_RATIO);
     }
 
     return qty;
