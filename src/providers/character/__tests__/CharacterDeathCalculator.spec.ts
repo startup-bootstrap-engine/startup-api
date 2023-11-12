@@ -59,7 +59,7 @@ describe("CharacterDeathCalculator", () => {
 
   describe("calculateXPLoss", () => {
     it("calculates correctly the XP loss for level 5", async () => {
-      const xpLoss = await characterDeathCalculator.calculateSkillAndXPLoss({
+      const xpLoss = await characterDeathCalculator.calculateSkillAndXPLossChance({
         level: 5,
         owner: testCharacter._id,
       } as unknown as ISkill);
@@ -68,7 +68,7 @@ describe("CharacterDeathCalculator", () => {
     });
 
     it("calculates correctly the XP loss for level 10", async () => {
-      const xpLoss = await characterDeathCalculator.calculateSkillAndXPLoss({
+      const xpLoss = await characterDeathCalculator.calculateSkillAndXPLossChance({
         level: 10,
         owner: testCharacter._id,
       } as unknown as ISkill);
@@ -77,7 +77,7 @@ describe("CharacterDeathCalculator", () => {
     });
 
     it("calculates correctly the XP loss for level 18", async () => {
-      const xpLoss = await characterDeathCalculator.calculateSkillAndXPLoss({
+      const xpLoss = await characterDeathCalculator.calculateSkillAndXPLossChance({
         level: 18,
         owner: testCharacter._id,
       } as unknown as ISkill);
@@ -86,7 +86,7 @@ describe("CharacterDeathCalculator", () => {
     });
 
     it("calculates correctly the XP loss for level 20", async () => {
-      const xpLoss = await characterDeathCalculator.calculateSkillAndXPLoss({
+      const xpLoss = await characterDeathCalculator.calculateSkillAndXPLossChance({
         level: 20,
         owner: testCharacter._id,
       } as unknown as ISkill);
@@ -95,7 +95,7 @@ describe("CharacterDeathCalculator", () => {
     });
 
     it("calculates correctly the XP loss for level 25", async () => {
-      const xpLoss = await characterDeathCalculator.calculateSkillAndXPLoss({
+      const xpLoss = await characterDeathCalculator.calculateSkillAndXPLossChance({
         level: 25,
         owner: testCharacter._id,
       } as unknown as ISkill);
@@ -118,7 +118,21 @@ describe("CharacterDeathCalculator", () => {
 
       await testUser.save();
     });
-    it("doesn't drop an inventory if user is a premium account", async () => {
+
+    it("only partially reduce inventory drop chance, if its not a golden premium account", async () => {
+      testUser.accountType = UserAccountTypes.PremiumBronze;
+
+      await testUser.save();
+
+      const result = await characterDeathCalculator.calculateInventoryDropChance({
+        level: 7,
+        owner: testCharacter._id,
+      } as unknown as ISkill);
+
+      expect(result).toBe(3.75); // 25% less chance to drop an item
+    });
+
+    it("doesn't drop an inventory if user is a golden premium account", async () => {
       const result = await characterDeathCalculator.calculateInventoryDropChance({
         level: 7,
         owner: testCharacter._id,
@@ -128,7 +142,7 @@ describe("CharacterDeathCalculator", () => {
     });
 
     it("loses 50% less Skills on death", async () => {
-      const result = await characterDeathCalculator.calculateSkillAndXPLoss({
+      const result = await characterDeathCalculator.calculateSkillAndXPLossChance({
         level: 20,
         owner: testCharacter._id,
       } as unknown as ISkill);

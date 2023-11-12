@@ -7,7 +7,7 @@ import { CharacterPremiumAccount } from "./CharacterPremiumAccount";
 export class CharacterDeathCalculator {
   constructor(private characterPremiumAccount: CharacterPremiumAccount) {}
 
-  public async calculateSkillAndXPLoss(skills: ISkill, multiply = 1): Promise<number> {
+  public async calculateSkillAndXPLossChance(skills: ISkill, multiply = 1): Promise<number> {
     if (!skills.owner) {
       skills = (await Skill.findOne({ _id: skills._id }).lean()) as ISkill;
     }
@@ -33,7 +33,7 @@ export class CharacterDeathCalculator {
         const XPLossResult = xpLoss * multiply * SKILL_LOSS_ON_DEATH_MULTIPLIER;
 
         if (premiumAccountData) {
-          return XPLossResult * premiumAccountData.SPXPLostOnDeathRatio;
+          return XPLossResult * (1 - premiumAccountData.SPXPLostOnDeathReduction / 100);
         }
 
         return XPLossResult;
@@ -43,7 +43,7 @@ export class CharacterDeathCalculator {
     const regularSkillLoss = 10 * SKILL_LOSS_ON_DEATH_MULTIPLIER;
 
     if (premiumAccountData) {
-      return regularSkillLoss * premiumAccountData.SPXPLostOnDeathRatio;
+      return regularSkillLoss * (1 - premiumAccountData.SPXPLostOnDeathReduction / 100);
     }
 
     return regularSkillLoss;
@@ -83,7 +83,9 @@ export class CharacterDeathCalculator {
         const regularChance = chance * INVENTORY_DROP_CHANCE_MULTIPLIER;
 
         if (premiumAccountData) {
-          return regularChance * premiumAccountData.InventoryLossOnDeathRatio;
+          if (premiumAccountData.InventoryLossOnDeathReduction === 0) return 0;
+
+          return regularChance * (1 - premiumAccountData.InventoryLossOnDeathReduction / 100);
         }
 
         return regularChance;
@@ -93,7 +95,7 @@ export class CharacterDeathCalculator {
     const regularChance = 100 * INVENTORY_DROP_CHANCE_MULTIPLIER;
 
     if (premiumAccountData) {
-      return regularChance * premiumAccountData.InventoryLossOnDeathRatio;
+      return regularChance * (1 - premiumAccountData.InventoryLossOnDeathReduction / 100);
     }
 
     // Return the maximum chance of dropping inventory if the character's level is above the highest threshold

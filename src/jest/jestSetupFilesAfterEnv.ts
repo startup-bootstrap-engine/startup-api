@@ -61,24 +61,24 @@ jest.mock("@providers/constants/PremiumAccountConstants", () => ({
   PREMIUM_ACCOUNT_TYPES_RATIOS: {
     free: undefined,
     bronze: {
-      SPXPLostOnDeathRatio: 1 - 0.2, // only loses 80% of the regular skill loss
-      InventoryLossOnDeathRatio: 1 - 0.25, // 25% less chance to drop an item
+      SPXPLostOnDeathReduction: 20, // only loses 80% of the regular skill loss
+      InventoryLossOnDeathReduction: 25, // 25% less chance to drop an item
       SpeedBuff: 7,
       XPBuff: 20,
       lootDropBuff: 20,
       teleportCooldownMin: 40,
     },
     silver: {
-      SPXPLostOnDeathRatio: 1 - 0.35, // only loses 60% of the regular skill loss
-      InventoryLossOnDeathRatio: 1 - 0.5, // 50% less chance to drop an item
+      SPXPLostOnDeathReduction: 35, // only loses 60% of the regular skill loss
+      InventoryLossOnDeathReduction: 50, // 50% less chance to drop an item
       SpeedBuff: 13,
       XPBuff: 30,
       lootDropBuff: 30,
       teleportCooldownMin: 30,
     },
     gold: {
-      SPXPLostOnDeathRatio: 1 - 0.5, // only loses 50% of the regular skill loss
-      InventoryLossOnDeathRatio: 0, // 75% less chance to drop an item
+      SPXPLostOnDeathReduction: 50, // only loses 50% of the regular skill loss
+      InventoryLossOnDeathReduction: 0,
       SpeedBuff: 15,
       XPBuff: 50,
       lootDropBuff: 50,
