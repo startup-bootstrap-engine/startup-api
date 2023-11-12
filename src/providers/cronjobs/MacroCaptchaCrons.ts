@@ -18,14 +18,16 @@ export class MacroCaptchaCrons {
 
   public schedule(): void {
     this.cronJobScheduler.uniqueSchedule("macro-captcha-cron-ban-macro-characters", "*/2 * * * *", async () => {
-      await this.banMacroCharacters();
+      //! Temporarily shutdown
+      // await this.banMacroCharacters();
     });
 
     this.cronJobScheduler.uniqueSchedule(
       "macro-captcha-cron-send-macro-captcha-to-active-characters",
       "*/5 * * * *",
       async () => {
-        await this.sendMacroCaptchaToActiveCharacters();
+        //! Temporarily shutdown
+        // await this.sendMacroCaptchaToActiveCharacters();
       }
     );
   }
