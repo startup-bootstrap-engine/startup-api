@@ -2,6 +2,7 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { BattleAttackRanged } from "@providers/battle/BattleAttackTarget/BattleAttackRanged";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
@@ -48,6 +49,7 @@ export class UseWithEntityValidation {
     return true;
   }
 
+  @TrackNewRelicTransaction()
   public async validateTargetRequest(
     caster: ICharacter,
     target: ICharacter | INPC | IItem | null,

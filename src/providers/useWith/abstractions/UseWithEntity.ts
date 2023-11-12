@@ -1,6 +1,7 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { BattleCharacterAttackValidation } from "@providers/battle/BattleCharacterAttack/BattleCharacterAttackValidation";
 import { OnTargetHit } from "@providers/battle/OnTargetHit";
@@ -64,6 +65,7 @@ export class UseWithEntity {
     );
   }
 
+  @TrackNewRelicTransaction()
   public async execute(payload: IUseWithEntity, character: ICharacter): Promise<void> {
     const item = payload.itemId ? ((await Item.findById(payload.itemId)) as unknown as IItem) : null;
     const blueprint = (await this.blueprintManager.getBlueprint("items", item?.baseKey!)) as IUseWithItemSource;

@@ -69,6 +69,7 @@ export class CharacterView {
     }
   }
 
+  @TrackNewRelicTransaction()
   public async isOnCharacterView(characterId: string, elementId: string, type: CharacterViewType): Promise<boolean> {
     const viewElements = await this.inMemoryHashTable.get(`character-view-${type}`, characterId);
 
@@ -249,6 +250,7 @@ export class CharacterView {
     return await this.getOtherElementsInView(Element, character.x, character.y, character.scene, filter);
   }
 
+  @TrackNewRelicTransaction()
   public async getCharactersInView(character: ICharacter): Promise<ICharacter[]> {
     return await this.getElementsInCharView(Character, character, {
       isOnline: true,

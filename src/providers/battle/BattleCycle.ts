@@ -1,5 +1,6 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
@@ -10,6 +11,7 @@ export class BattleCycle {
 
   constructor(private characterValidation: CharacterValidation, private newRelic: NewRelic) {}
 
+  @TrackNewRelicTransaction()
   public async init(
     character: ICharacter,
     targetId: string,

@@ -244,6 +244,7 @@ export class BattleAttackRanged {
     this.equipmentEquip.updateItemInventoryCharacter(payloadUpdate, character);
   }
 
+  @TrackNewRelicTransaction()
   public async consumeMana(
     attackParams: IRangedAttackParams,
     characterId: Types.ObjectId,
@@ -303,6 +304,7 @@ export class BattleAttackRanged {
     return { haveMana: false, newMana: 0 };
   }
 
+  @TrackNewRelicTransaction()
   public async isSolidInRangedTrajectory(
     attacker: ICharacter | INPC,
     target: ICharacter | INPC | IItem

@@ -1,5 +1,6 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Skill } from "@entities/ModuleCharacter/SkillsModel";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
   CharacterClass,
@@ -17,6 +18,7 @@ import { provide } from "inversify-binding-decorators";
 export class RankingGetInfo {
   constructor(private socketMessaging: SocketMessaging) {}
 
+  @TrackNewRelicTransaction()
   public async topLevelGlobal(): Promise<IRankingTopCharacterEntry[]> {
     const topSkill = await Skill.aggregate([
       {
@@ -63,6 +65,7 @@ export class RankingGetInfo {
     return result;
   }
 
+  @TrackNewRelicTransaction()
   public async topLevelClass(): Promise<Record<string, IRankingCharacterClass>> {
     const characterClasses = Object.values(CharacterClass);
 
@@ -101,6 +104,7 @@ export class RankingGetInfo {
     return result;
   }
 
+  @TrackNewRelicTransaction()
   public async topLevelBySkillType(): Promise<IRankingCharacterSkill[]> {
     const skills = [
       "stamina",
@@ -160,6 +164,7 @@ export class RankingGetInfo {
     return Promise.all(top10Promises);
   }
 
+  @TrackNewRelicTransaction()
   public async getLevelRanking(character: ICharacter): Promise<void | ILeaderboardLevelRankingResponse> {
     const levelRank = await this.topLevelGlobal();
     this.socketMessaging.sendEventToUser<ILeaderboardLevelRankingResponse>(
@@ -172,6 +177,7 @@ export class RankingGetInfo {
     return { levelRank };
   }
 
+  @TrackNewRelicTransaction()
   public async getClassRanking(
     character: ICharacter
   ): Promise<void | Record<string, ILeaderboardClassRankingResponse>> {
@@ -186,6 +192,7 @@ export class RankingGetInfo {
     return { classRank };
   }
 
+  @TrackNewRelicTransaction()
   public async getSkillRanking(character: ICharacter): Promise<void | ILeaderboardSkillRankingResponse> {
     const skillRank = await this.topLevelBySkillType();
     this.socketMessaging.sendEventToUser<ILeaderboardSkillRankingResponse>(
