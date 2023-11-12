@@ -1,17 +1,26 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Skill } from "@entities/ModuleCharacter/SkillsModel";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import {
+  BASE_SPEED_MAX_LEVEL_THRESHOLD,
+  BASE_SPEED_MIN_LEVEL_THRESHOLD,
+} from "@providers/constants/CharacterSpeedConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
+import { LinearInterpolation } from "@providers/math/LinearInterpolation";
+import { NumberFormatter } from "@providers/text/NumberFormatter";
+import { CharacterAttributes } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { CharacterBuffSkill } from "../characterBuff/CharacterBuffSkill";
 
-const LEVEL_FAST_SPEED = 50;
-const LEVEL_EXTRA_FAST_SPEED = 150;
-const BASE_SPEED_TRAIT = "baseSpeed";
-
 @provide(CharacterBaseSpeed)
 export class CharacterBaseSpeed {
-  constructor(private characterBuffSkill: CharacterBuffSkill) {}
+  constructor(
+    private characterBuffSkill: CharacterBuffSkill,
+    private linearInterpolation: LinearInterpolation,
+    private numberFormatter: NumberFormatter
+  ) {}
 
+  @TrackNewRelicTransaction()
   public async getBaseSpeed(character: ICharacter): Promise<number | undefined> {
     try {
       const skills = await Skill.findById(character.skills)
@@ -27,17 +36,18 @@ export class CharacterBaseSpeed {
       let baseSpeedBuffValue = 0; // Default value
 
       if (buffs) {
-        const baseSpeedBuff = buffs.find((buff) => buff.trait === BASE_SPEED_TRAIT);
+        const baseSpeedBuff = buffs.find((buff) => buff.trait === CharacterAttributes.Speed);
         baseSpeedBuffValue = baseSpeedBuff?.absoluteChange || 0;
       }
 
-      if (level > LEVEL_FAST_SPEED && level <= LEVEL_EXTRA_FAST_SPEED) {
-        return MovementSpeed.Fast + baseSpeedBuffValue;
-      } else if (level > LEVEL_EXTRA_FAST_SPEED) {
-        return MovementSpeed.ExtraFast + baseSpeedBuffValue;
-      }
+      const rawCalculation =
+        this.linearInterpolation.calculateMultiPointInterpolation(
+          level,
+          [BASE_SPEED_MIN_LEVEL_THRESHOLD, BASE_SPEED_MAX_LEVEL_THRESHOLD],
+          [MovementSpeed.Standard, MovementSpeed.ExtraFast]
+        ) + baseSpeedBuffValue;
 
-      return undefined;
+      return this.numberFormatter.formatNumber(rawCalculation);
     } catch (error) {
       console.error("Error calculating base speed", error);
       return undefined;
