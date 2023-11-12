@@ -55,7 +55,7 @@ describe("SpellItemCreation", () => {
     sendInventoryUpdateEvent = jest.spyOn(spellItemCreation.characterInventory, "sendInventoryUpdateEvent");
 
     testCharacter = await unitTestHelper.createMockCharacter(
-      { health: 50, learnedSpells: level2Spells.map((spell) => spell.key) },
+      { health: 50, learnedSpells: level2Spells.map((spell) => spell.key) as any },
       { hasEquipment: true, hasInventory: true, hasSkills: true }
     );
 

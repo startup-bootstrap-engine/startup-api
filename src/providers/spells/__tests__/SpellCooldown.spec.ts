@@ -21,7 +21,7 @@ describe("SpellCooldown", () => {
   beforeEach(async () => {
     testCharacter = await unitTestHelper.createMockCharacter(
       {
-        learnedSpells: [spellSelfHealing.key, spellGreaterHealing.key],
+        learnedSpells: [spellSelfHealing.key, spellGreaterHealing.key] as any,
       },
       { hasSkills: true }
     );

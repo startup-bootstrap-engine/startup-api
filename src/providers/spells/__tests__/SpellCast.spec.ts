@@ -75,7 +75,7 @@ describe("SpellCast.ts", () => {
     testCharacter = await unitTestHelper.createMockCharacter(
       {
         health: 50,
-        learnedSpells: [spellSelfHealing.key, spellGreaterHealing.key, rogueSpellExecution.key],
+        learnedSpells: [spellSelfHealing.key, spellGreaterHealing.key, rogueSpellExecution.key] as any,
         class: CharacterClass.Rogue,
       },
       { hasEquipment: false, hasInventory: false, hasSkills: true }
@@ -243,7 +243,7 @@ describe("SpellCast.ts", () => {
 
   it("should cast Greater Healing spell successfully", async () => {
     testCharacter = await await unitTestHelper.createMockCharacter(
-      { health: 50, learnedSpells: [spellGreaterHealing.key] },
+      { health: 50, learnedSpells: [spellGreaterHealing.key] as any },
       { hasEquipment: false, hasInventory: false, hasSkills: true }
     );
 

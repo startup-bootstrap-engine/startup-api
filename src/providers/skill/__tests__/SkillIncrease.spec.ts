@@ -88,7 +88,7 @@ describe("SkillIncrease.spec.ts | increaseSP test cases", () => {
   });
 
   beforeEach(async () => {
-    testCharacter = await unitTestHelper.createMockCharacter({ hasSkills: true });
+    testCharacter = await unitTestHelper.createMockCharacter();
 
     skills = new Skill({
       ownerType: "Character",

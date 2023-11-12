@@ -337,7 +337,7 @@ export class UnitTestHelper {
   }
 
   public async createMockCharacter(
-    extraProps?: Record<string, unknown> | null,
+    extraProps?: Partial<ICharacter> | null,
     options?: IMockCharacterOptions
   ): Promise<ICharacter> {
     const testCharacter = new Character({
