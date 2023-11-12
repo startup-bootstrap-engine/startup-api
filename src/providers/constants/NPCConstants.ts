@@ -10,7 +10,7 @@ export const NPC_SKILL_RESISTANCE_MULTIPLIER = 1;
 
 // Performance adjustments
 export const NPC_MAX_ACTIVE_NPC_PER_CHARACTER = appEnv.general.ENV === EnvType.Development ? 100 : 10;
-export const NPC_MIN_DISTANCE_TO_ACTIVATE = 8; // grid cells
+export const NPC_MIN_DISTANCE_TO_ACTIVATE = 10; // grid cells
 
 export const NPC_FRIENDLY_NEUTRAL_FREEZE_CHECK_CHANCE = 25;
 export const NPC_HOSTILE_FREEZE_CHECK_CHANCE = 10;
