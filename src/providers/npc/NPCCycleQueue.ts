@@ -13,9 +13,10 @@ import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
-import { NPCAlignment, NPCMovementType, NPCPathOrientation, ToGridX, ToGridY } from "@rpg-engine/shared";
+import { EnvType, NPCAlignment, NPCMovementType, NPCPathOrientation, ToGridX, ToGridY } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
 import { random } from "lodash";
+import { v4 as uuidv4 } from "uuid";
 import { NPCFreezer } from "./NPCFreezer";
 import { NPCView } from "./NPCView";
 import { NPCMovement } from "./movement/NPCMovement";
@@ -24,12 +25,14 @@ import { NPCMovementMoveAway } from "./movement/NPCMovementMoveAway";
 import { NPCMovementMoveTowards } from "./movement/NPCMovementMoveTowards";
 import { NPCMovementRandomPath } from "./movement/NPCMovementRandomPath";
 import { NPCMovementStopped } from "./movement/NPCMovementStopped";
-
 @provideSingleton(NPCCycleQueue)
 export class NPCCycleQueue {
   private queue: Queue<any, any, string> | null = null;
   private worker: Worker | null = null;
   private connection: any;
+  private queueName: string = `npc-cycle-queue-${uuidv4()}-${
+    appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
+  }`;
 
   constructor(
     private specialEffect: SpecialEffect,
@@ -53,13 +56,13 @@ export class NPCCycleQueue {
     }
 
     if (!this.queue) {
-      this.queue = new Queue("npc-cycle-queue", {
+      this.queue = new Queue(this.queueName, {
         connection: this.connection,
       });
 
       if (!appEnv.general.IS_UNIT_TEST) {
         this.queue.on("error", async (error) => {
-          console.error("Error in the npc-cycle-queue :", error);
+          console.error(`Error in the ${this.queueName} :`, error);
 
           await this.queue?.close();
           this.queue = null;
@@ -69,14 +72,14 @@ export class NPCCycleQueue {
 
     if (!this.worker) {
       this.worker = new Worker(
-        "npc-cycle-queue",
+        this.queueName,
         async (job) => {
           const { npc, npcSkills } = job.data;
 
           try {
             await this.execNpcCycle(npc, npcSkills);
           } catch (err) {
-            console.error(`Error processing npc-cycle-queue for NPC ${npc.key}:`, err);
+            console.error(`Error processing ${this.queueName} for NPC ${npc.key}:`, err);
             throw err;
           }
         },
@@ -87,7 +90,7 @@ export class NPCCycleQueue {
 
       if (!appEnv.general.IS_UNIT_TEST) {
         this.worker.on("failed", async (job, err) => {
-          console.log(`npc-cycle-queue job ${job?.id} failed with error ${err.message}`);
+          console.log(`${this.queueName} job ${job?.id} failed with error ${err.message}`);
 
           await this.worker?.close();
           this.worker = null;
@@ -114,7 +117,7 @@ export class NPCCycleQueue {
     }
 
     await this.queue?.add(
-      "npc-cycle-queue",
+      this.queueName,
       {
         npcId: npc._id,
         npc,

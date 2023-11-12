@@ -37,7 +37,6 @@ export class NPCTarget {
         },
       }
     );
-    await this.npcFreeze.freezeNPC(npc, "Target is out of range");
     await this.locker.unlock(`npc-${npc._id}-npc-battle-cycle`);
   }
 

@@ -12,18 +12,21 @@ import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { EnvType, NPCAlignment } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
 import _ from "lodash";
+import { v4 as uuidv4 } from "uuid";
 import { NPCView } from "./NPCView";
 import { ICharacterHealth } from "./movement/NPCMovementMoveTowards";
 import { NPCTarget } from "./movement/NPCTarget";
-
 @provideSingleton(NPCBattleCycleQueue)
 export class NPCBattleCycleQueue {
   private queue: Queue<any, any, string> | null = null;
   private worker: Worker | null = null;
   private connection: any;
+  private queueName: string = `npc-battle-cycle-queue-${uuidv4()}-${
+    appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
+  }`;
 
   constructor(
     private newRelic: NewRelic,
@@ -42,13 +45,13 @@ export class NPCBattleCycleQueue {
     }
 
     if (!this.queue) {
-      this.queue = new Queue("npc-battle-cycle-queue", {
+      this.queue = new Queue(this.queueName, {
         connection: this.connection,
       });
 
       if (!appEnv.general.IS_UNIT_TEST) {
         this.queue.on("error", async (error) => {
-          console.error("Error in the npc-battle-cycle-queue :", error);
+          console.error(`Error in the ${this.queueName} :`, error);
 
           await this.queue?.close();
           this.queue = null;
@@ -58,14 +61,14 @@ export class NPCBattleCycleQueue {
 
     if (!this.worker) {
       this.worker = new Worker(
-        "npc-battle-cycle-queue",
+        this.queueName,
         async (job) => {
           const { npc, npcSkills } = job.data;
 
           try {
             await this.execBattleCycle(npc, npcSkills);
           } catch (err) {
-            console.error(`Error processing npc-battle-cycle-queue for NPC ${npc.key}:`, err);
+            console.error(`Error processing ${this.queueName} for NPC ${npc.key}:`, err);
             await this.locker.unlock(`npc-${job?.data?.npcId}-npc-battle-cycle`);
 
             throw err;
@@ -78,7 +81,7 @@ export class NPCBattleCycleQueue {
 
       if (!appEnv.general.IS_UNIT_TEST) {
         this.worker.on("failed", async (job, err) => {
-          console.log(`npc-battle-cycle-queue job ${job?.id} failed with error ${err.message}`);
+          console.log(`${this.queueName} job ${job?.id} failed with error ${err.message}`);
           await this.locker.unlock(`npc-${job?.data?.npcId}-npc-battle-cycle`);
 
           await this.worker?.close();
@@ -113,7 +116,7 @@ export class NPCBattleCycleQueue {
       }
 
       await this.queue?.add(
-        "npc-battle-cycle-queue",
+        this.queueName,
         {
           npcId: npc._id,
           npc,
