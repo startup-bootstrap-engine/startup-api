@@ -8,13 +8,13 @@ import { ItemView } from "@providers/item/ItemView";
 import { GridManager } from "@providers/map/GridManager";
 import { NPCManager } from "@providers/npc/NPCManager";
 import { NPCWarn } from "@providers/npc/NPCWarn";
-import { PM2Helper } from "@providers/server/PM2Helper";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import {
   AnimationDirection,
   AvailableWeather,
+  CharacterAttributes,
   CharacterClass,
   CharacterSkullType,
   CharacterSocketEvents,
@@ -31,12 +31,15 @@ import { CharacterView } from "../CharacterView";
 
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { BattleTargeting } from "@providers/battle/BattleTargeting";
+import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { socketEventsBinderControl } from "@providers/inversify/container";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { Locker } from "@providers/locks/Locker";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
+import { NumberFormatter } from "@providers/text/NumberFormatter";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterDeath } from "../CharacterDeath";
+import { CharacterBuffTracker } from "../characterBuff/CharacterBuffTracker";
 import { CharacterBuffValidation } from "../characterBuff/CharacterBuffValidation";
 import { CharacterBaseSpeed } from "../characterMovement/CharacterBaseSpeed";
 import { MagePassiveHabilities } from "../characterPassiveHabilities/MagePassiveHabilities";
@@ -53,7 +56,6 @@ export class CharacterNetworkCreate {
     private npcManager: NPCManager,
     private gridManager: GridManager,
     private npcWarn: NPCWarn,
-    private pm2Helper: PM2Helper,
     private characterView: CharacterView,
     private specialEffect: SpecialEffect,
     private warriorPassiveHabilities: WarriorPassiveHabilities,
@@ -67,7 +69,9 @@ export class CharacterNetworkCreate {
     private battleTargeting: BattleTargeting,
     private locker: Locker,
 
-    private characterBaseSpeed: CharacterBaseSpeed
+    private characterBaseSpeed: CharacterBaseSpeed,
+    private characterBuffTracker: CharacterBuffTracker,
+    private numberFormatter: NumberFormatter
   ) {}
 
   public onCharacterCreate(channel: SocketChannel): void {
@@ -179,6 +183,8 @@ export class CharacterNetworkCreate {
         await this.warnAboutWeatherStatus(character.channelId!);
 
         await this.handleCharacterRegen(character);
+
+        await this.fixInconsistentSpeed(character);
       },
       false
     );
@@ -297,6 +303,40 @@ export class CharacterNetworkCreate {
       }
     } catch (error) {
       console.error(`Error regenerating character ${character._id}: ${error}`);
+    }
+  }
+
+  private async fixInconsistentSpeed(character: ICharacter): Promise<void> {
+    //! temporary ugly hack until we figure out why the hell sometimes the speed bugs out of nowhere
+
+    await this.characterBuffTracker.clearCache(character, "speed");
+
+    const hasSpeedBuffs = await this.characterBuffTracker.hasBuffsByTrait(character._id, CharacterAttributes.Speed);
+
+    if (!hasSpeedBuffs) {
+      // if it has no buffs, we can just check if speed is different than standard. If it is, we set it to standard
+
+      //! Change this when speed is tied to character level
+      if (character.baseSpeed !== MovementSpeed.Standard) {
+        await Character.findOneAndUpdate({ _id: character._id }, { baseSpeed: MovementSpeed.Standard });
+      }
+
+      return;
+    }
+
+    // if it does have some speed buff, we need to calculate the speed based on the buffs and compare it to the current speed.
+    // if it is different, we set it to the calculated speed
+
+    const speedPercentageChange = await this.characterBuffTracker.getAllBuffPercentageChanges(
+      character._id,
+      CharacterAttributes.Speed
+    );
+
+    // round to 2 decimals precision
+    const expectedSpeed = this.numberFormatter.formatNumber(MovementSpeed.Standard * (1 + speedPercentageChange / 100));
+
+    if (character.baseSpeed !== expectedSpeed) {
+      await Character.findOneAndUpdate({ _id: character._id }, { baseSpeed: expectedSpeed });
     }
   }
 }

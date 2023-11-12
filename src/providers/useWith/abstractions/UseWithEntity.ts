@@ -1,22 +1,17 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
-import { BattleAttackRanged } from "@providers/battle/BattleAttackTarget/BattleAttackRanged";
 import { BattleCharacterAttackValidation } from "@providers/battle/BattleCharacterAttack/BattleCharacterAttackValidation";
 import { OnTargetHit } from "@providers/battle/OnTargetHit";
-import { CharacterValidation } from "@providers/character/CharacterValidation";
+import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterBonusPenalties } from "@providers/character/characterBonusPenalties/CharacterBonusPenalties";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
 import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
 import { EntityUtil } from "@providers/entityEffects/EntityUtil";
-import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { blueprintManager } from "@providers/inversify/container";
 import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTypes";
-import { ItemValidation } from "@providers/item/validation/ItemValidation";
-import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -27,25 +22,22 @@ import {
   ICharacterAttributeChanged,
   IEquipmentAndInventoryUpdatePayload,
   IItemContainer,
+  IRuneItemBlueprint,
   IUseWithEntity,
   ItemSocketEvents,
-  MagicsBlueprint,
-  NPCAlignment,
   UseWithSocketEvents,
 } from "@rpg-engine/shared";
 import { EntityType } from "@rpg-engine/shared/dist/types/entity.types";
 import { provide } from "inversify-binding-decorators";
-import { IMagicItemUseWithEntity } from "./useWithTypes";
+import { IMagicItemUseWithEntity } from "../useWithTypes";
+import { UseWithEntityValidation } from "./UseWithEntityValidation";
 
-const StaticEntity = "Item"; // <--- should be added to the EntityType enum from @rpg-engine/shared
-
+export type IUseWithItemSource = IRuneItemBlueprint & IMagicItemUseWithEntity;
 @provide(UseWithEntity)
 export class UseWithEntity {
   constructor(
     private socketMessaging: SocketMessaging,
-    private characterValidation: CharacterValidation,
-    private movementHelper: MovementHelper,
-    private itemValidation: ItemValidation,
+
     private socketAuth: SocketAuth,
     private characterItemInventory: CharacterItemInventory,
     private characterWeight: CharacterWeight,
@@ -55,8 +47,9 @@ export class UseWithEntity {
     private characterBonusPenalties: CharacterBonusPenalties,
     private onTargetHit: OnTargetHit,
     private battleCharacterAttackValidation: BattleCharacterAttackValidation,
-    private battleRangedAttack: BattleAttackRanged,
-    private specialEffect: SpecialEffect
+
+    private blueprintManager: BlueprintManager,
+    private useWithEntityValidation: UseWithEntityValidation
   ) {}
 
   public onUseWithEntity(channel: SocketChannel): void {
@@ -72,166 +65,131 @@ export class UseWithEntity {
   }
 
   public async execute(payload: IUseWithEntity, character: ICharacter): Promise<void> {
-    const target = payload.entityId ? await EntityUtil.getEntity(payload.entityId, payload.entityType) : null;
     const item = payload.itemId ? ((await Item.findById(payload.itemId)) as unknown as IItem) : null;
+    const blueprint = (await this.blueprintManager.getBlueprint("items", item?.baseKey!)) as IUseWithItemSource;
 
-    const isValid = await this.validateRequest(character, target, item, payload.entityType);
-    if (!isValid) {
+    if (!payload.entityId && blueprint.hasSelfAutoTarget) {
+      payload.entityId = character.id;
+      payload.entityType = EntityType.Character;
+    }
+
+    const target = payload.entityId ? await EntityUtil.getEntity(payload.entityId, payload.entityType) : null;
+
+    const isBaseRequestValid = this.useWithEntityValidation.baseValidation(
+      character,
+      item!,
+      blueprint,
+      payload.entityType
+    );
+
+    if (!isBaseRequestValid) {
+      return;
+    }
+
+    const isSelfTarget = blueprint.hasSelfAutoTarget;
+
+    if (isSelfTarget) {
+      character = (await Character.findById(character._id)) as unknown as ICharacter;
+
+      await this.executeEffect(character, character, item!);
+
+      return;
+    }
+
+    const isTargetValid = await this.useWithEntityValidation.validateTargetRequest(
+      character,
+      target,
+      item,
+      blueprint,
+      payload.entityType
+    );
+    if (!isTargetValid) {
       return;
     }
 
     await this.executeEffect(character, target!, item!);
   }
 
-  private async validateRequest(
-    caster: ICharacter,
-    target: ICharacter | INPC | IItem | null,
-    item: IItem | null,
-    targetType: EntityType | typeof StaticEntity
-  ): Promise<boolean> {
-    if (!target) {
-      this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, your target was not found.");
-      return false;
+  private async executeEffect(caster: ICharacter, target: ICharacter | INPC | IItem, item: IItem): Promise<void> {
+    // Ensure the item can be used in the current zone and context
+    if (!(await this.canUseItemInZone(caster, item, target))) return;
+
+    // Fetch blueprint before applying the effect as it's a dependency
+    const blueprint = await this.fetchItemBlueprint(item);
+    const damage = blueprint ? await this.applyUsableEffect(caster, target, item, blueprint) : 0;
+
+    // Operations that can be parallelized because they are independent
+    await Promise.all([
+      // Save the state of the target
+      target.save(),
+      // Handle inventory count and character weight
+      this.handleItemCountAndWeight(caster, item),
+      // Send refresh items event to the caster
+      this.sendRefreshItemsEvent(caster),
+      // Send animation events if applicable based on the blueprint
+      this.sendAnimationIfApplicable(caster, target, blueprint),
+    ]);
+
+    // Sequential operations due to potential data dependency
+    await this.updateTargetState(caster, target, damage, blueprint);
+    await this.applyCharacterSpecificEffects(target, blueprint);
+  }
+
+  // Additional refactored methods to break down the logic
+  private async canUseItemInZone(caster: ICharacter, item: IItem, target: ICharacter | INPC | IItem): Promise<boolean> {
+    if (item.canUseOnNonPVPZone !== true && target?.type === EntityType.Character) {
+      return await this.battleCharacterAttackValidation.canAttack(caster, target as ICharacter);
     }
-
-    if (!item) {
-      this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, item you are trying to use was not found.");
-      return false;
-    }
-
-    const blueprint = await blueprintManager.getBlueprint<IMagicItemUseWithEntity>(
-      "items",
-      item.baseKey as AvailableBlueprints
-    );
-
-    if (!blueprint || !(!!blueprint.power || targetType === StaticEntity) || !blueprint.usableEffect) {
-      this.socketMessaging.sendErrorMessageToCharacter(caster, `Sorry, '${item.name}' cannot be used with target.`);
-      return false;
-    }
-
-    if (!this.characterValidation.hasBasicValidation(caster)) {
-      return false;
-    }
-
-    if (blueprint.key === MagicsBlueprint.HealRune && target.type === EntityType.NPC) {
-      this.socketMessaging.sendErrorMessageToCharacter(caster, `Sorry, '${blueprint.name}' can not be apply on NPC.`);
-      return false;
-    }
-
-    if (targetType !== EntityType.Item) {
-      const isInvisible = await this.specialEffect.isInvisible(target as unknown as ICharacter | INPC);
-      if (isInvisible) {
-        this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, your target is invisible.");
-        return false;
-      }
-    }
-
-    if ("isAlive" in target && !target.isAlive && targetType !== (StaticEntity as EntityType)) {
-      this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, your target is dead.");
-      return false;
-    }
-
-    if (caster.target.id && (target.type === EntityType.Character || EntityType.NPC)) {
-      if (target.id.toString() !== caster.target.id.toString()) {
-        this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, your target is invalid.");
-        return false;
-      }
-    }
-
-    if (target.type === EntityType.Character) {
-      const customMsg = new Map([
-        ["not-online", "Sorry, your target is offline."],
-        ["banned", "Sorry, your target is banned."],
-      ]);
-
-      if (!this.characterValidation.hasBasicValidation(target as ICharacter, customMsg)) {
-        return false;
-      }
-    } else if ((target as INPC).alignment !== NPCAlignment.Hostile && targetType !== StaticEntity) {
-      this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, your target is not valid.");
-      return false;
-    }
-
-    if (caster.scene !== target.scene) {
-      this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, your target is not on the same scene.");
-      return false;
-    }
-
-    const isUnderRange = this.movementHelper.isUnderRange(
-      caster.x,
-      caster.y,
-      target.x!,
-      target.y!,
-      blueprint.useWithMaxDistanceGrid
-    );
-    if (!isUnderRange) {
-      this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, your target is out of reach.");
-      return false;
-    }
-
-    if (!(await this.itemValidation.isItemInCharacterInventory(caster, item._id))) {
-      return false;
-    }
-
-    const updatedCharacter = (await Character.findOne({ _id: caster._id }).populate("skills")) as unknown as ICharacter;
-    const skills = updatedCharacter.skills as unknown as ISkill;
-    const casterMagicLevel = skills?.magic?.level ?? 0;
-
-    if (casterMagicLevel < blueprint.minMagicLevelRequired) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        caster,
-        `Sorry, '${blueprint.name}' can not only be used at magic level '${blueprint.minMagicLevelRequired}' or greater.`
-      );
-      return false;
-    }
-
-    // check there're no solids between caster and target trajectory
-    const solidInTrajectory = await this.battleRangedAttack.isSolidInRangedTrajectory(caster, target);
-    if (solidInTrajectory) {
-      return false;
-    }
-
     return true;
   }
 
-  private async executeEffect(caster: ICharacter, target: ICharacter | INPC | IItem, item: IItem): Promise<void> {
-    if (item.canUseOnNonPVPZone !== true && target?.type === EntityType.Character) {
-      const isUseValid = await this.battleCharacterAttackValidation.canAttack(caster, target as ICharacter);
+  private async fetchItemBlueprint(item: IItem): Promise<any> {
+    return await blueprintManager.getBlueprint<any>("items", item.baseKey as AvailableBlueprints);
+  }
 
-      if (!isUseValid) {
-        return;
-      }
-    }
+  private async applyUsableEffect(
+    caster: ICharacter,
+    target: ICharacter | INPC | IItem,
+    item: IItem,
+    blueprint: any
+  ): Promise<number> {
+    return await blueprint.usableEffect?.(caster, target, item);
+  }
 
-    const blueprint = await blueprintManager.getBlueprint<any>("items", item.baseKey as AvailableBlueprints);
-
-    const damage = await blueprint.usableEffect?.(caster, target, item);
-    await target.save();
-
-    // handle static item case
+  private async handleItemCountAndWeight(caster: ICharacter, item: IItem): Promise<void> {
     await this.characterItemInventory.decrementItemFromInventoryByKey(item.key, caster, 1);
+    await this.characterWeight.updateCharacterWeight(caster);
+  }
 
-    void this.characterWeight.updateCharacterWeight(caster);
-
-    await this.sendRefreshItemsEvent(caster);
-
+  private async sendAnimationIfApplicable(
+    caster: ICharacter,
+    target: ICharacter | INPC | IItem,
+    blueprint: any
+  ): Promise<void> {
     if (blueprint.projectileAnimationKey) {
       await this.sendAnimationEvents(caster, target, blueprint as IMagicItemUseWithEntity);
     }
+  }
 
+  private async updateTargetState(
+    caster: ICharacter,
+    target: ICharacter | INPC | IItem,
+    damage: number,
+    blueprint: any
+  ): Promise<void> {
     if (target.type === EntityType.Character || target.type === EntityType.NPC) {
       const transformedTarget = target as ICharacter | INPC;
-
       await this.sendTargetUpdateEvents(caster, transformedTarget);
       await this.onTargetHit.execute(transformedTarget, caster, damage);
       if (blueprint.usableEntityEffect) {
         await blueprint.usableEntityEffect(caster, transformedTarget);
       }
     }
+  }
 
+  private async applyCharacterSpecificEffects(target: ICharacter | INPC | IItem, blueprint: any): Promise<void> {
     if (target.type === EntityType.Character) {
       await this.skillIncrease.increaseMagicResistanceSP(target as ICharacter, blueprint.power);
-
       await this.characterBonusPenalties.applyRaceBonusPenalties(target as ICharacter, BasicAttribute.MagicResistance);
     }
   }

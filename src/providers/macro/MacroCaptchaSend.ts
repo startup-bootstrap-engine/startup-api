@@ -37,27 +37,32 @@ export class MacroCaptchaSend {
 
   @TrackNewRelicTransaction()
   public async generateAndSendCaptcha(character: ICharacter): Promise<boolean> {
-    const captcha = svgCaptcha.create({
-      size: 6,
-      noise: 1,
-      color: true,
-      ignoreChars: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0Oo1il458pgqs",
-    });
+    try {
+      const captcha = svgCaptcha.create({
+        size: 6,
+        noise: 1,
+        color: true,
+        ignoreChars: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0Oo1il458pgqs",
+      });
 
-    const resolveUntil = new Date(Date.now() + 30 * 60 * 1000);
+      const resolveUntil = new Date(Date.now() + 30 * 60 * 1000);
 
-    await Character.findByIdAndUpdate(character._id, {
-      captchaVerifyCode: captcha.text,
-      captchaVerifyDate: resolveUntil,
-      captchaTriesLeft: 10,
-    }).lean();
+      await Character.findByIdAndUpdate(character._id, {
+        captchaVerifyCode: captcha.text,
+        captchaVerifyDate: resolveUntil,
+        captchaTriesLeft: 10,
+      }).lean();
 
-    this.socketMessaging.sendEventToUser(character.channelId!, MacroSocketEvents.OpenMacroModal, {
-      svgData: captcha.data,
-      triesLeft: 10,
-      resolveUntil,
-    });
+      this.socketMessaging.sendEventToUser(character.channelId!, MacroSocketEvents.OpenMacroModal, {
+        svgData: captcha.data,
+        triesLeft: 10,
+        resolveUntil,
+      });
 
-    return true;
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
   }
 }

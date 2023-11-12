@@ -3,13 +3,13 @@ import { Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
   CharacterClass,
-  CharacterRankingClass,
-  CharacterRankingSkill,
   ILeaderboardClassRankingResponse,
   ILeaderboardLevelRankingResponse,
   ILeaderboardSkillRankingResponse,
+  IRankingCharacterClass,
+  IRankingCharacterSkill,
+  IRankingTopCharacterEntry,
   LeaderboardSocketEvents,
-  TopCharacterEntry,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
@@ -17,7 +17,7 @@ import { provide } from "inversify-binding-decorators";
 export class RankingGetInfo {
   constructor(private socketMessaging: SocketMessaging) {}
 
-  public async topLevelGlobal(): Promise<Set<TopCharacterEntry>> {
+  public async topLevelGlobal(): Promise<IRankingTopCharacterEntry[]> {
     const topSkill = await Skill.aggregate([
       {
         $lookup: {
@@ -44,25 +44,32 @@ export class RankingGetInfo {
       },
     ]).exec();
 
-    const result = new Set<TopCharacterEntry>();
+    const result: IRankingTopCharacterEntry[] = [];
 
-    for (const characterSkill of topSkill) {
-      const character = await Character.findById(characterSkill.owner).lean().select("name");
+    const characterIds = topSkill.map((characterSkill) => characterSkill.owner);
+    const characterPromises = characterIds.map((characterId) =>
+      Character.findById(characterId).lean().select("name").exec()
+    );
 
-      result.add({
-        name: character!.name,
-        level: characterSkill.level,
+    const characters = await Promise.all(characterPromises);
+
+    characters.forEach((character, index) => {
+      result.push({
+        name: character?.name || "Unknown",
+        level: topSkill[index].level,
       });
-    }
+    });
 
     return result;
   }
 
-  public async topLevelClass(): Promise<Record<string, CharacterRankingClass>> {
-    const top10ForClass: CharacterRankingClass[] = await Character.aggregate([
+  public async topLevelClass(): Promise<Record<string, IRankingCharacterClass>> {
+    const characterClasses = Object.values(CharacterClass);
+
+    const characterInfo = await Character.aggregate([
       {
         $match: {
-          class: { $in: Object.values(CharacterClass) },
+          class: { $in: characterClasses },
           name: { $not: /^GM/ },
         },
       },
@@ -77,50 +84,24 @@ export class RankingGetInfo {
       {
         $unwind: "$skillInfo",
       },
-      {
-        $sort: { "skillInfo.level": -1 },
-      },
-      {
-        $group: {
-          _id: "$class",
-          topPlayers: {
-            $push: {
-              name: "$name",
-              level: "$skillInfo.level",
-            },
-          },
-        },
-      },
-      {
-        $project: {
-          class: "$_id",
-          _id: 0,
-          topPlayers: { $slice: ["$topPlayers", 10] },
-        },
-      },
     ]).exec();
 
-    const result: Record<string, CharacterRankingClass> = {};
+    const result: Record<string, IRankingCharacterClass> = {};
 
-    for (const ranking of top10ForClass) {
-      if (!result[ranking.class]) {
-        result[ranking.class] = { class: ranking.class, topPlayers: [] };
-      }
+    characterClasses.forEach((characterClass) => {
+      const topPlayersForClass = characterInfo
+        .filter((char) => char.class === characterClass)
+        .map((char) => ({ name: char.name, level: char.skillInfo.level }))
+        .sort((a, b) => b.level - a.level)
+        .slice(0, 10);
 
-      ranking.topPlayers.forEach((char) => {
-        result[ranking.class].topPlayers.push({
-          name: char.name,
-          level: char.level,
-        });
-      });
-
-      result[ranking.class].topPlayers.sort((a, b) => b.level - a.level);
-    }
+      result[characterClass] = { class: characterClass, topPlayers: topPlayersForClass };
+    });
 
     return result;
   }
 
-  public async topLevelBySkillType(): Promise<CharacterRankingSkill[]> {
+  public async topLevelBySkillType(): Promise<IRankingCharacterSkill[]> {
     const skills = [
       "stamina",
       "magic",
@@ -143,51 +124,44 @@ export class RankingGetInfo {
       "blacksmithing",
     ];
 
-    const top10ForAllSkills: CharacterRankingSkill[] = [];
+    const characterInfo = await Skill.aggregate([
+      {
+        $lookup: {
+          from: "characters",
+          localField: "owner",
+          foreignField: "_id",
+          as: "characterInfo",
+        },
+      },
+      {
+        $unwind: "$characterInfo",
+      },
+      {
+        $match: {
+          "characterInfo.name": { $not: /GM/ },
+        },
+      },
+    ]).exec();
 
-    for (const skill of skills) {
-      const top10ForSkill = await Skill.aggregate([
-        {
-          $lookup: {
-            from: "characters",
-            localField: "owner",
-            foreignField: "_id",
-            as: "characterInfo",
-          },
-        },
-        {
-          $unwind: "$characterInfo",
-        },
-        {
-          $match: {
-            "characterInfo.name": { $not: /GM/ },
-          },
-        },
-        {
-          $sort: { [`${skill}.level`]: -1 },
-        },
-        {
-          $limit: 10,
-        },
-        {
-          $project: {
-            _id: 0,
-            name: "$characterInfo.name",
-            skill: skill,
-            level: `$${skill}.level`,
-          },
-        },
-      ]).exec();
+    const top10Promises = skills.map((skill) => {
+      const top10ForSkill = characterInfo
+        .map((char) => ({
+          name: char.characterInfo.name,
+          skill: skill,
+          level: char[skill].level,
+        }))
+        .filter((char) => char.level)
+        .sort((a, b) => b.level - a.level)
+        .slice(0, 10);
 
-      top10ForAllSkills.push({ skill: skill, top10: top10ForSkill });
-    }
+      return { skill: skill, top10: top10ForSkill };
+    });
 
-    return top10ForAllSkills;
+    return Promise.all(top10Promises);
   }
 
   public async getLevelRanking(character: ICharacter): Promise<void | ILeaderboardLevelRankingResponse> {
     const levelRank = await this.topLevelGlobal();
-    console.log("sending event to user");
     this.socketMessaging.sendEventToUser<ILeaderboardLevelRankingResponse>(
       character.channelId!,
       LeaderboardSocketEvents.GetLevelRanking,
@@ -195,7 +169,6 @@ export class RankingGetInfo {
         levelRank,
       }
     );
-    console.log("sent event to user");
     return { levelRank };
   }
 

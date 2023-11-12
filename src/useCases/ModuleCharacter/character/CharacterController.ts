@@ -9,6 +9,7 @@ import {
   httpPatch,
   httpPost,
   interfaces,
+  queryParam,
   request,
   requestBody,
   requestParam,
@@ -47,8 +48,14 @@ export class CharacterController implements interfaces.Controller {
   }
 
   @httpGet("/:id")
-  private async readCharacter(@requestParam("id") id: string): Promise<ICharacter> {
-    return await this.readCharacterUseCase.read(id);
+  private async readCharacter(
+    @request() req,
+    @requestParam("id") id: string,
+    @queryParam("fields") fields?: string
+  ): Promise<ICharacter> {
+    const fieldsArray = fields?.split(",") ?? [];
+
+    return await this.readCharacterUseCase.read(id, fieldsArray);
   }
 
   @httpPatch("/:id", DTOValidatorMiddleware(UpdateCharacterDTO))

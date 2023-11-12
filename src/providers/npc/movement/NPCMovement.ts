@@ -5,7 +5,11 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { CharacterView } from "@providers/character/CharacterView";
 import { appEnv } from "@providers/config/env";
 import { NPC_CAN_ATTACK_IN_NON_PVP_ZONE } from "@providers/constants/NPCConstants";
-import { PATHFINDING_MAX_TRIES } from "@providers/constants/PathfindingConstants";
+import {
+  PATHFINDING_MAX_TRIES,
+  PATHFINDING_POLLER_BACKOFF_FACTOR,
+  PATHFINDING_POLLER_INTERVAL,
+} from "@providers/constants/PathfindingConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { GridManager } from "@providers/map/GridManager";
@@ -234,6 +238,7 @@ export class NPCMovement {
     }
 
     let tries = 0;
+    let delay = PATHFINDING_POLLER_INTERVAL;
 
     while (tries <= PATHFINDING_MAX_TRIES) {
       try {
@@ -245,14 +250,19 @@ export class NPCMovement {
         }
 
         tries++;
-        await new Promise((resolve) => setTimeout(resolve, 40)); // adjust this timeout as needed
+        await this.increaseDelay(delay);
+        delay = delay * PATHFINDING_POLLER_BACKOFF_FACTOR; // Exponential backoff
       } catch (error) {
         console.error(error);
-        throw error;
+        if (tries >= PATHFINDING_MAX_TRIES) throw error;
       }
     }
 
     await this.pathfindingResults.deleteResult(jobId);
     throw new Error("Error while trying to fetch pathfinding result for NPC. Timeout!");
+  }
+
+  private async increaseDelay(delay: number): Promise<void> {
+    return await new Promise((resolve) => setTimeout(resolve, delay));
   }
 }

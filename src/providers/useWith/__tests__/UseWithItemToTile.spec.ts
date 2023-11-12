@@ -3,7 +3,7 @@ import { container, unitTestHelper } from "@providers/inversify/container";
 import { CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { MapLayers } from "@rpg-engine/shared";
-import { IUseWithItemToTileOptions, UseWithItemToTile } from "../UseWithItemToTile";
+import { IUseWithItemToTileOptions, UseWithItemToTile } from "../abstractions/UseWithItemToTile";
 
 jest.mock("lodash/random", () => jest.fn());
 

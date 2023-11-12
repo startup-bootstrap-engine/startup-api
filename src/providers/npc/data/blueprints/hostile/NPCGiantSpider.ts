@@ -3,6 +3,7 @@ import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
+  AccessoriesBlueprint,
   ArmorsBlueprint,
   AxesBlueprint,
   BootsBlueprint,
@@ -33,23 +34,23 @@ export const npcGiantSpider: Partial<INPC> = {
   speed: MovementSpeed.ExtraFast,
   ammoKey: AnimationEffectKeys.Green,
   maxRangeAttack: 6,
-  baseHealth: 1000,
+  baseHealth: 1500,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
   skills: {
-    level: 60,
+    level: 100,
     strength: {
-      level: 45,
+      level: 85,
     },
     dexterity: {
-      level: 40,
+      level: 80,
     },
     resistance: {
-      level: 30,
+      level: 60,
     },
     magicResistance: {
-      level: 20,
+      level: 50,
     },
   },
   fleeOnLowHealth: true,
@@ -61,7 +62,7 @@ export const npcGiantSpider: Partial<INPC> = {
 
     {
       itemBlueprintKey: ContainersBlueprint.Backpack,
-      chance: 10,
+      chance: 25,
     },
 
     {
@@ -124,6 +125,10 @@ export const npcGiantSpider: Partial<INPC> = {
       chance: 3,
     },
     {
+      itemBlueprintKey: AxesBlueprint.HellishAxe,
+      chance: 5,
+    },
+    {
       itemBlueprintKey: ArmorsBlueprint.JadeEmperorsArmor,
       chance: 5,
     },
@@ -149,6 +154,14 @@ export const npcGiantSpider: Partial<INPC> = {
       itemBlueprintKey: CraftingResourcesBlueprint.RedSapphire,
       chance: 50,
       quantityRange: [1, 10],
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.RubyRing,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: LegsBlueprint.KingsGuardLegs,
+      chance: 5,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],

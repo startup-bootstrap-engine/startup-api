@@ -36,7 +36,14 @@ Content-Type: application/json
 ###
 
 # Character :: Read
-GET {{baseUrl}}/characters/6439a038c611a70034e53978 HTTP/1.1
+GET {{baseUrl}}/characters/6461787ead84fe004dbcfd7d HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+###
+
+# Character :: Read fields
+GET {{baseUrl}}/characters/6461787ead84fe004dbcfd7d?fields=health,mana HTTP/1.1
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
 

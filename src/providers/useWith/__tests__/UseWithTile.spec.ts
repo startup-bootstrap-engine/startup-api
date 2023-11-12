@@ -9,7 +9,7 @@ import { SkillIncrease } from "@providers/skill/SkillIncrease";
 
 import { ItemCraftable } from "@providers/item/ItemCraftable";
 import { FromGridX, FromGridY, IUseWithTile, MapLayers } from "@rpg-engine/shared";
-import { UseWithTile } from "../UseWithTile";
+import { UseWithTile } from "../abstractions/UseWithTile";
 
 describe("UseWithTile.ts", () => {
   let testItem: IItem,

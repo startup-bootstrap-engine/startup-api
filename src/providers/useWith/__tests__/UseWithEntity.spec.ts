@@ -1,35 +1,29 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
+import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
-import { OnTargetHit } from "@providers/battle/OnTargetHit";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
-import { ML_INCREASE_RATIO, SP_INCREASE_BASE, SP_MAGIC_INCREASE_TIMES_MANA } from "@providers/constants/SkillConstants";
-import { container, unitTestHelper } from "@providers/inversify/container";
+import { blueprintManager, container, unitTestHelper } from "@providers/inversify/container";
 import { itemDarkRune } from "@providers/item/data/blueprints/magics/ItemDarkRune";
 import { FoodsBlueprint, MagicsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemValidation } from "@providers/item/validation/ItemValidation";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
-import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
-  AnimationSocketEvents,
   CharacterSocketEvents,
   GRID_WIDTH,
-  IProjectileAnimationEffect,
   ItemSocketEvents,
   MagicPower,
   NPCAlignment,
   NPCMovementType,
-  SkillSocketEvents,
   UISocketEvents,
 } from "@rpg-engine/shared";
 import { EntityType } from "@rpg-engine/shared/dist/types/entity.types";
-import { UseWithEntity } from "../UseWithEntity";
+import { IUseWithItemSource, UseWithEntity } from "../abstractions/UseWithEntity";
 
-describe("UseWithEntityValidation.ts", () => {
+describe("UseWithEntity.ts", () => {
   let useWithEntity: UseWithEntity;
   let testCharacter: ICharacter;
   let targetCharacter: ICharacter;
@@ -110,937 +104,925 @@ describe("UseWithEntityValidation.ts", () => {
     await prepareData();
 
     executeEffectMock = jest.spyOn(useWithEntity as any, "executeEffect");
-    sendEventToUserMock = jest.spyOn(SocketMessaging.prototype, "sendEventToUser");
+    // @ts-ignore
+    sendEventToUserMock = jest.spyOn(useWithEntity.useWithEntityValidation.socketMessaging, "sendEventToUser");
 
-    onHitTargetMock = jest.spyOn(OnTargetHit.prototype, "execute");
+    // @ts-ignore
+    onHitTargetMock = jest.spyOn(useWithEntity.onTargetHit, "execute");
     onHitTargetMock.mockImplementation();
   });
 
   afterEach(() => {
-    executeEffectMock.mockRestore();
-    sendEventToUserMock.mockRestore();
+    jest.clearAllMocks();
     jest.restoreAllMocks();
   });
 
-  it("should pass validation for targer character", async () => {
-    executeEffectMock.mockImplementation();
+  describe("Validation", () => {
+    it("should pass validation for target character", async () => {
+      executeEffectMock.mockImplementation();
 
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
 
-    expect(executeEffectMock).toBeCalledTimes(1);
-  });
+      expect(executeEffectMock).toBeCalledTimes(1);
+    });
 
-  it("should pass validation for targer npc", async () => {
-    executeEffectMock.mockImplementation();
+    it("should pass validation for target npc", async () => {
+      executeEffectMock.mockImplementation();
 
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: testNPC._id,
-        entityType: EntityType.NPC,
-      },
-      testCharacter
-    );
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: testNPC._id,
+          entityType: EntityType.NPC,
+        },
+        testCharacter
+      );
 
-    expect(executeEffectMock).toBeCalledTimes(1);
-  });
+      expect(executeEffectMock).toBeCalledTimes(1);
+    });
 
-  it("should fail validation if entity id is not passed", async () => {
-    executeEffectMock.mockImplementation();
+    it("should fail validation if entity id is not passed", async () => {
+      executeEffectMock.mockImplementation();
 
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: "",
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: "",
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
 
-    expect(executeEffectMock).toBeCalledTimes(0);
-    expect(sendEventToUserMock).toBeCalledTimes(1);
+      expect(executeEffectMock).toBeCalledTimes(0);
+      expect(sendEventToUserMock).toBeCalledTimes(1);
 
-    expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: "Sorry, your target was not found.",
-      type: "error",
+      expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
+        message: "Sorry, your target was not found.",
+        type: "error",
+      });
+    });
+
+    it("should fail validation if entity type is wrong (npc for character entity)", async () => {
+      executeEffectMock.mockImplementation();
+
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.NPC,
+        },
+        testCharacter
+      );
+
+      expect(executeEffectMock).toBeCalledTimes(0);
+      expect(sendEventToUserMock).toBeCalledTimes(1);
+
+      expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
+        message: "Sorry, your target was not found.",
+        type: "error",
+      });
+    });
+
+    it("should fail validation if entity type is wrong (character for npc entity)", async () => {
+      executeEffectMock.mockImplementation();
+
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: testNPC._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      expect(executeEffectMock).toBeCalledTimes(0);
+      expect(sendEventToUserMock).toBeCalledTimes(1);
+
+      expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
+        message: "Sorry, your target was not found.",
+        type: "error",
+      });
+    });
+
+    it("should fail validation if item id is not provided", async () => {
+      executeEffectMock.mockImplementation();
+
+      await useWithEntity.execute(
+        {
+          itemId: "",
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      expect(executeEffectMock).toBeCalledTimes(0);
+      expect(sendEventToUserMock).toBeCalledTimes(1);
+
+      expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
+        message: "Sorry, item you are trying to use was not found.",
+        type: "error",
+      });
+    });
+
+    it("should fail validation if item id is not correct", async () => {
+      executeEffectMock.mockImplementation();
+
+      await useWithEntity.execute(
+        {
+          itemId: testCharacter._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      expect(executeEffectMock).toBeCalledTimes(0);
+      expect(sendEventToUserMock).toBeCalledTimes(1);
+
+      expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
+        message: "Sorry, item you are trying to use was not found.",
+        type: "error",
+      });
+    });
+
+    it("should fail validation if item blueprint does not exist", async () => {
+      executeEffectMock.mockImplementation();
+
+      const itemName = "Invalid Key Item";
+      item1.name = itemName;
+      item1.key = "invalid-item-key";
+      await item1.save();
+
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      expect(executeEffectMock).toBeCalledTimes(0);
+      expect(sendEventToUserMock).toBeCalledTimes(1);
+
+      expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
+        message: `Sorry, '${itemName}' cannot be used with target.`,
+        type: "error",
+      });
+    });
+
+    it("should fail validation if item blueprint does not have power", async () => {
+      executeEffectMock.mockImplementation();
+
+      const apple = await unitTestHelper.createMockItemFromBlueprint(FoodsBlueprint.Apple);
+
+      await useWithEntity.execute(
+        {
+          itemId: apple._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      expect(executeEffectMock).toBeCalledTimes(0);
+      expect(sendEventToUserMock).toBeCalledTimes(1);
+
+      expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
+        message: `Sorry, '${apple.name}' cannot be used with target.`,
+        type: "error",
+      });
+    });
+
+    it("should call character validation with success (for caster and target)", async () => {
+      executeEffectMock.mockImplementation();
+
+      const hasBasicValidationMock = jest.spyOn(CharacterValidation.prototype, "hasBasicValidation");
+
+      // if hasBasicValidation returns true
+      hasBasicValidationMock.mockImplementation();
+      hasBasicValidationMock.mockReturnValue(true);
+
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      expect(executeEffectMock).toBeCalledTimes(1);
+      // once for caster once for target
+      expect(hasBasicValidationMock).toBeCalledTimes(2);
+      expect(hasBasicValidationMock).toHaveBeenNthCalledWith(1, testCharacter);
+
+      expect(hasBasicValidationMock).toHaveBeenNthCalledWith(
+        2,
+        await Character.findById(targetCharacter._id),
+        new Map([
+          ["not-online", "Sorry, your target is offline."],
+          ["banned", "Sorry, your target is banned."],
+        ])
+      );
+
+      hasBasicValidationMock.mockRestore();
+    });
+
+    it("should call character validation for caster with failure", async () => {
+      executeEffectMock.mockImplementation();
+
+      const hasBasicValidationMock = jest.spyOn(CharacterValidation.prototype, "hasBasicValidation");
+
+      // if hasBasicValidation returns false;
+      hasBasicValidationMock.mockImplementation();
+      hasBasicValidationMock.mockReturnValue(false);
+
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      expect(executeEffectMock).toBeCalledTimes(0);
+      // is not called for target if caster validation fails
+      expect(hasBasicValidationMock).toBeCalledTimes(1);
+      expect(hasBasicValidationMock).toHaveBeenLastCalledWith(testCharacter);
+
+      hasBasicValidationMock.mockRestore();
+    });
+
+    it("should call character validation for target with failure", async () => {
+      executeEffectMock.mockImplementation();
+
+      const hasBasicValidationMock = jest.spyOn(CharacterValidation.prototype, "hasBasicValidation");
+
+      // if hasBasicValidation returns false;
+      hasBasicValidationMock.mockImplementation();
+      // success for caster but failure for target
+      hasBasicValidationMock.mockReturnValueOnce(true).mockReturnValueOnce(false);
+
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      expect(executeEffectMock).toBeCalledTimes(0);
+      // once for caster once for target
+      expect(hasBasicValidationMock).toBeCalledTimes(2);
+
+      hasBasicValidationMock.mockRestore();
+    });
+
+    it("should not call character validation for npc", async () => {
+      executeEffectMock.mockImplementation();
+
+      const hasBasicValidationMock = jest.spyOn(CharacterValidation.prototype, "hasBasicValidation");
+      hasBasicValidationMock.mockImplementation();
+      // fail validation if its called more than once
+      hasBasicValidationMock.mockReturnValueOnce(true).mockReturnValueOnce(false);
+
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: testNPC._id,
+          entityType: EntityType.NPC,
+        },
+        testCharacter
+      );
+
+      expect(executeEffectMock).toBeCalledTimes(1);
+      // once for caster
+      expect(hasBasicValidationMock).toBeCalledTimes(1);
+    });
+
+    it("should fail validation if target npc is not alive", async () => {
+      executeEffectMock.mockImplementation();
+
+      testNPC.health = 0;
+      await testNPC.save();
+
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: testNPC._id,
+          entityType: EntityType.NPC,
+        },
+        testCharacter
+      );
+
+      expect(executeEffectMock).toBeCalledTimes(0);
+      expect(sendEventToUserMock).toBeCalledTimes(1);
+
+      expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
+        message: "Sorry, your target is dead.",
+        type: "error",
+      });
+    });
+
+    it("should fail validation if target npc is friendly", async () => {
+      executeEffectMock.mockImplementation();
+
+      testNPC.alignment = NPCAlignment.Friendly;
+      await testNPC.save();
+
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: testNPC._id,
+          entityType: EntityType.NPC,
+        },
+        testCharacter
+      );
+
+      expect(executeEffectMock).toBeCalledTimes(0);
+      expect(sendEventToUserMock).toBeCalledTimes(1);
+
+      expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
+        message: "Sorry, your target is not valid.",
+        type: "error",
+      });
+    });
+
+    it("should fail validation if target npc is neutral", async () => {
+      executeEffectMock.mockImplementation();
+
+      testNPC.alignment = NPCAlignment.Neutral;
+      await testNPC.save();
+
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: testNPC._id,
+          entityType: EntityType.NPC,
+        },
+        testCharacter
+      );
+
+      expect(executeEffectMock).toBeCalledTimes(0);
+      expect(sendEventToUserMock).toBeCalledTimes(1);
+
+      expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
+        message: "Sorry, your target is not valid.",
+        type: "error",
+      });
+    });
+
+    it("should fail validation if target is out of reach", async () => {
+      executeEffectMock.mockImplementation();
+
+      const isUnderRangeMock = jest.spyOn(MovementHelper.prototype, "isUnderRange");
+
+      testNPC.x = testCharacter.x + (itemDarkRune.useWithMaxDistanceGrid! + 1) * GRID_WIDTH;
+      testNPC.y = testCharacter.y;
+      await testNPC.save();
+
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: testNPC._id,
+          entityType: EntityType.NPC,
+        },
+        testCharacter
+      );
+
+      expect(executeEffectMock).toBeCalledTimes(0);
+      expect(sendEventToUserMock).toBeCalledTimes(1);
+
+      expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
+        message: "Sorry, your target is out of reach.",
+        type: "error",
+      });
+
+      expect(isUnderRangeMock).toBeCalledTimes(1);
+      expect(isUnderRangeMock).toHaveBeenLastCalledWith(
+        testCharacter.x,
+        testCharacter.y,
+        testNPC.x,
+        testNPC.y,
+        itemDarkRune.useWithMaxDistanceGrid
+      );
+    });
+
+    it("should fail if item is not in inventory", async () => {
+      executeEffectMock.mockImplementation();
+
+      const isInInventoryMock = jest.spyOn(ItemValidation.prototype, "isItemInCharacterInventory");
+
+      const darkRune = await unitTestHelper.createMockItemFromBlueprint(MagicsBlueprint.DarkRune);
+
+      await useWithEntity.execute(
+        {
+          itemId: darkRune._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      expect(executeEffectMock).toBeCalledTimes(0);
+      expect(sendEventToUserMock).toBeCalledTimes(1);
+
+      expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
+        message: "Sorry, the item is not in your inventory.",
+        type: "error",
+      });
+
+      expect(isInInventoryMock).toBeCalledTimes(1);
+      expect(isInInventoryMock).toHaveBeenLastCalledWith(testCharacter, darkRune._id);
+    });
+
+    it("should fail validation if character does not have required magic level", async () => {
+      executeEffectMock.mockImplementation();
+
+      characterSkills.magic.level = (itemDarkRune.minMagicLevelRequired ?? 0) - 1;
+      await characterSkills.save();
+
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      expect(executeEffectMock).toBeCalledTimes(0);
+      expect(sendEventToUserMock).toBeCalledTimes(1);
+
+      expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
+        message: `Sorry, '${itemDarkRune.name}' can only be used at magic level '${itemDarkRune.minMagicLevelRequired}' or greater.`,
+        type: "error",
+      });
+    });
+
+    it("should fail validation if target is on different scene", async () => {
+      executeEffectMock.mockImplementation();
+
+      targetCharacter.scene = testCharacter.scene + "-2";
+      await targetCharacter.save();
+
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      expect(executeEffectMock).toBeCalledTimes(0);
+      expect(sendEventToUserMock).toBeCalledTimes(1);
+
+      expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
+        message: "Sorry, your target is not on the same scene.",
+        type: "error",
+      });
+    });
+
+    it("should not validate if caster target in not that same as entity target ", async () => {
+      executeEffectMock.mockImplementation();
+
+      // @ts-ignore
+      testCharacter.target = { id: targetCharacter._id, type: EntityType.Character };
+      await testCharacter.save();
+
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: testNPC._id,
+          entityType: EntityType.NPC,
+        },
+        testCharacter
+      );
+
+      expect(executeEffectMock).toBeCalledTimes(0);
+      expect(sendEventToUserMock).toBeCalledTimes(1);
+
+      expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
+        message: "Sorry, your target is invalid.",
+        type: "error",
+      });
     });
   });
 
-  it("should fail validation if entity type is wrong (npc for character entity)", async () => {
-    executeEffectMock.mockImplementation();
+  describe("Item usage", () => {
+    it("should successfully use dark rune on target character", async () => {
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
 
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.NPC,
-      },
-      testCharacter
-    );
+      const target = (await Character.findOne({ _id: targetCharacter._id })) as unknown as ICharacter;
+      expect(target.health).toBeLessThanOrEqual(83);
+      expect(target.mana).toBe(100);
+    });
 
-    expect(executeEffectMock).toBeCalledTimes(0);
-    expect(sendEventToUserMock).toBeCalledTimes(1);
+    it("should successfully use poison rune on target character", async () => {
+      const items = [await unitTestHelper.createMockItemFromBlueprint(MagicsBlueprint.PoisonRune)];
 
-    expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: "Sorry, your target was not found.",
-      type: "error",
+      await unitTestHelper.addItemsToContainer(inventoryContainer, 6, items);
+
+      await useWithEntity.execute(
+        {
+          itemId: items[0]._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      const target = (await Character.findOne({ _id: targetCharacter._id })) as unknown as ICharacter;
+      expect(target.health).toBeLessThanOrEqual(90);
+      expect(target.mana).toBe(100);
+    });
+
+    it("should successfully use fire rune on target character", async () => {
+      const items = [await unitTestHelper.createMockItemFromBlueprint(MagicsBlueprint.FireRune)];
+
+      await unitTestHelper.addItemsToContainer(inventoryContainer, 6, items);
+
+      await useWithEntity.execute(
+        {
+          itemId: items[0]._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      const target = (await Character.findOne({ _id: targetCharacter._id })) as unknown as ICharacter;
+      expect(target.health).toBeLessThanOrEqual(90);
+      expect(target.mana).toBe(100);
+    });
+    it("should successfully use fire rune on target npc", async () => {
+      const items = [await unitTestHelper.createMockItemFromBlueprint(MagicsBlueprint.FireRune)];
+
+      await unitTestHelper.addItemsToContainer(inventoryContainer, 6, items);
+
+      await useWithEntity.execute(
+        {
+          itemId: items[0]._id,
+          entityId: testNPC._id,
+          entityType: EntityType.NPC,
+        },
+        testCharacter
+      );
+
+      const target = (await NPC.findOne({ _id: testNPC._id })) as unknown as INPC;
+      expect(target.health).toBeLessThanOrEqual(90);
     });
   });
 
-  it("should fail validation if entity type is wrong (character for npc entity)", async () => {
-    executeEffectMock.mockImplementation();
+  describe("Side effects & events", () => {
+    it("should deal extra damage depending on magic level", async () => {
+      characterSkills.magic.level = 12;
+      await characterSkills.save();
 
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: testNPC._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
 
-    expect(executeEffectMock).toBeCalledTimes(0);
-    expect(sendEventToUserMock).toBeCalledTimes(1);
+      const target = (await Character.findOne({ _id: targetCharacter._id })) as unknown as ICharacter;
+      expect(target.health).toBeLessThanOrEqual(83);
+      expect(target.mana).toBe(100);
+    });
 
-    expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: "Sorry, your target was not found.",
-      type: "error",
+    it("should update character weight", async () => {
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      const character = (await Character.findById(testCharacter.id)) as unknown as ICharacter;
+      expect(character.weight).toBe(3);
+      expect(character.maxWeight).toBe(15);
+    });
+
+    it("should receive refresh items event", async () => {
+      // @ts-ignore
+      sendEventToUserMock = jest.spyOn(useWithEntity.socketMessaging, "sendEventToUser");
+
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      const inventory = await testCharacter.inventory;
+      const container = (await ItemContainer.findById(inventory.itemContainer)) as unknown as IItemContainer;
+
+      expect(sendEventToUserMock).toBeCalled();
+      expect(sendEventToUserMock).toHaveBeenCalledWith(
+        testCharacter.channelId,
+        ItemSocketEvents.EquipmentAndInventoryUpdate,
+        {
+          inventory: expect.objectContaining({
+            _id: container._id,
+          }),
+          openEquipmentSetOnUpdate: false,
+          openInventoryOnUpdate: false,
+        }
+      );
+    });
+
+    it("should receive target character update event", async () => {
+      // @ts-ignore
+      sendEventToUserMock = jest.spyOn(useWithEntity.socketMessaging, "sendEventToUser");
+
+      testCharacter.channelId = "channel-1";
+      await testCharacter.save();
+
+      targetCharacter.channelId = "channel-2";
+      await targetCharacter.save();
+
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      expect(sendEventToUserMock).toBeCalled();
+
+      const character = (await Character.findById(targetCharacter.id)) as unknown as ICharacter;
+      const payload = {
+        targetId: character._id,
+        health: character.health,
+        mana: character.mana,
+        speed: character.speed,
+      };
+
+      // for caster
+      expect(sendEventToUserMock).toHaveBeenCalledWith(
+        testCharacter.channelId,
+        CharacterSocketEvents.AttributeChanged,
+        payload
+      );
+
+      // for target
+      expect(sendEventToUserMock).toHaveBeenCalledWith(
+        targetCharacter.channelId,
+        CharacterSocketEvents.AttributeChanged,
+        payload
+      );
+    });
+
+    it("should receive projectile animation event", async () => {
+      // @ts-ignore
+      const sendAnimationEventsSpy = jest.spyOn(useWithEntity, "sendAnimationEvents");
+
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      expect(sendAnimationEventsSpy).toBeCalledTimes(1);
+
+      expect(sendAnimationEventsSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _id: testCharacter._id,
+        }),
+        expect.objectContaining({
+          _id: targetCharacter._id,
+        }),
+        expect.objectContaining({
+          animationKey: itemDarkRune.animationKey,
+        })
+      );
+    });
+
+    it("should call skill increase functionality to increase target skills", async () => {
+      const increaseSPMock = jest.spyOn(SkillIncrease.prototype, "increaseMagicResistanceSP");
+      increaseSPMock.mockImplementation();
+
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      expect(increaseSPMock).toHaveBeenCalledTimes(1);
+
+      const skillUpdateEventParams = increaseSPMock.mock.calls[0];
+
+      expect(skillUpdateEventParams[0]).toBeDefined();
+      expect(skillUpdateEventParams[0]._id).toStrictEqual(targetCharacter._id);
+      expect(skillUpdateEventParams[1]).toBe(itemDarkRune.power);
+
+      increaseSPMock.mockRestore();
+    });
+
+    it("should not call skill increase functionality for target npc", async () => {
+      const increaseSPMock = jest.spyOn(SkillIncrease.prototype, "increaseMagicResistanceSP");
+      increaseSPMock.mockImplementation();
+
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: testNPC._id,
+          entityType: EntityType.NPC,
+        },
+        testCharacter
+      );
+
+      expect(increaseSPMock).toHaveBeenCalledTimes(0);
+
+      increaseSPMock.mockRestore();
+    });
+
+    it("should increase skills and send skills update event", async () => {
+      // @ts-ignore
+      const magicResistSkillMock = jest.spyOn(useWithEntity.skillIncrease, "increaseMagicResistanceSP");
+
+      // @ts-ignore
+      sendEventToUserMock = jest.spyOn(useWithEntity.socketMessaging, "sendEventToUser");
+
+      testCharacter.channelId = "channel-1";
+      await testCharacter.save();
+
+      targetCharacter.channelId = "channel-2";
+      await targetCharacter.save();
+
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      // use jest to mock itemDarkRune.power property
+      // @ts-ignore
+      itemDarkRune.power = MagicPower.High;
+
+      expect(magicResistSkillMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("should execute hit post processing", async () => {
+      await useWithEntity.execute(
+        {
+          itemId: item1._id,
+          entityId: targetCharacter._id,
+          entityType: EntityType.Character,
+        },
+        testCharacter
+      );
+
+      expect(onHitTargetMock).toBeCalled();
     });
   });
 
-  it("should fail validation if item id is not provided", async () => {
-    executeEffectMock.mockImplementation();
-
-    await useWithEntity.execute(
-      {
-        itemId: "",
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    expect(executeEffectMock).toBeCalledTimes(0);
-    expect(sendEventToUserMock).toBeCalledTimes(1);
-
-    expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: "Sorry, item you are trying to use was not found.",
-      type: "error",
-    });
-  });
-
-  it("should fail validation if item id is not correct", async () => {
-    executeEffectMock.mockImplementation();
-
-    await useWithEntity.execute(
-      {
-        itemId: testCharacter._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    expect(executeEffectMock).toBeCalledTimes(0);
-    expect(sendEventToUserMock).toBeCalledTimes(1);
-
-    expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: "Sorry, item you are trying to use was not found.",
-      type: "error",
-    });
-  });
-
-  it("should fail validation if item blueprint does not exist", async () => {
-    executeEffectMock.mockImplementation();
-
-    const itemName = "Invalid Key Item";
-    item1.name = itemName;
-    item1.key = "invalid-item-key";
-    await item1.save();
-
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    expect(executeEffectMock).toBeCalledTimes(0);
-    expect(sendEventToUserMock).toBeCalledTimes(1);
-
-    expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: `Sorry, '${itemName}' cannot be used with target.`,
-      type: "error",
-    });
-  });
-
-  it("should fail validation if item blueprint does not have power", async () => {
-    executeEffectMock.mockImplementation();
-
-    const apple = await unitTestHelper.createMockItemFromBlueprint(FoodsBlueprint.Apple);
-
-    await useWithEntity.execute(
-      {
-        itemId: apple._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    expect(executeEffectMock).toBeCalledTimes(0);
-    expect(sendEventToUserMock).toBeCalledTimes(1);
-
-    expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: `Sorry, '${apple.name}' cannot be used with target.`,
-      type: "error",
-    });
-  });
-
-  it("should fail validation if trying to apply 'HealRune' on an NPC", async () => {
-    characterSkills = testCharacter.skills as unknown as ISkill;
-    characterSkills.magic.level = 10;
-    characterSkills.level = 10;
-    await characterSkills.save();
-
-    await useWithEntity.execute(
-      {
-        itemId: healRune._id,
-        entityId: testNPC._id,
-        entityType: EntityType.NPC,
-      },
-      testCharacter
-    );
-
-    expect(sendEventToUserMock).toBeCalledTimes(1);
-    expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: "Sorry, 'Healing Rune' can not be apply on NPC.",
-      type: "error",
-    });
-  });
-
-  it("should call character validation with success (for caster and target)", async () => {
-    executeEffectMock.mockImplementation();
-
-    const hasBasicValidationMock = jest.spyOn(CharacterValidation.prototype, "hasBasicValidation");
-
-    // if hasBasicValidation returns true
-    hasBasicValidationMock.mockImplementation();
-    hasBasicValidationMock.mockReturnValue(true);
-
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    expect(executeEffectMock).toBeCalledTimes(1);
-    // once for caster once for target
-    expect(hasBasicValidationMock).toBeCalledTimes(2);
-    expect(hasBasicValidationMock).toHaveBeenNthCalledWith(1, testCharacter);
-
-    expect(hasBasicValidationMock).toHaveBeenNthCalledWith(
-      2,
-      await Character.findById(targetCharacter._id),
-      new Map([
-        ["not-online", "Sorry, your target is offline."],
-        ["banned", "Sorry, your target is banned."],
-      ])
-    );
-
-    hasBasicValidationMock.mockRestore();
-  });
-
-  it("should call character validation for caster with failure", async () => {
-    executeEffectMock.mockImplementation();
-
-    const hasBasicValidationMock = jest.spyOn(CharacterValidation.prototype, "hasBasicValidation");
-
-    // if hasBasicValidation returns false;
-    hasBasicValidationMock.mockImplementation();
-    hasBasicValidationMock.mockReturnValue(false);
-
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    expect(executeEffectMock).toBeCalledTimes(0);
-    // is not called for target if caster validation fails
-    expect(hasBasicValidationMock).toBeCalledTimes(1);
-    expect(hasBasicValidationMock).toHaveBeenLastCalledWith(testCharacter);
-
-    hasBasicValidationMock.mockRestore();
-  });
-
-  it("should call character validation for target with failure", async () => {
-    executeEffectMock.mockImplementation();
-
-    const hasBasicValidationMock = jest.spyOn(CharacterValidation.prototype, "hasBasicValidation");
-
-    // if hasBasicValidation returns false;
-    hasBasicValidationMock.mockImplementation();
-    // success for caster but failure for target
-    hasBasicValidationMock.mockReturnValueOnce(true).mockReturnValueOnce(false);
-
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    expect(executeEffectMock).toBeCalledTimes(0);
-    // once for caster once for target
-    expect(hasBasicValidationMock).toBeCalledTimes(2);
-
-    hasBasicValidationMock.mockRestore();
-  });
-
-  it("should not call character validation for npc", async () => {
-    executeEffectMock.mockImplementation();
-
-    const hasBasicValidationMock = jest.spyOn(CharacterValidation.prototype, "hasBasicValidation");
-    hasBasicValidationMock.mockImplementation();
-    // fail validation if its called more than once
-    hasBasicValidationMock.mockReturnValueOnce(true).mockReturnValueOnce(false);
-
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: testNPC._id,
-        entityType: EntityType.NPC,
-      },
-      testCharacter
-    );
-
-    expect(executeEffectMock).toBeCalledTimes(1);
-    // once for caster
-    expect(hasBasicValidationMock).toBeCalledTimes(1);
-  });
-
-  it("should fail validation if target npc is not alive", async () => {
-    executeEffectMock.mockImplementation();
-
-    testNPC.health = 0;
-    await testNPC.save();
-
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: testNPC._id,
-        entityType: EntityType.NPC,
-      },
-      testCharacter
-    );
-
-    expect(executeEffectMock).toBeCalledTimes(0);
-    expect(sendEventToUserMock).toBeCalledTimes(1);
-
-    expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: "Sorry, your target is dead.",
-      type: "error",
-    });
-  });
-
-  it("should fail validation if target npc is friendly", async () => {
-    executeEffectMock.mockImplementation();
-
-    testNPC.alignment = NPCAlignment.Friendly;
-    await testNPC.save();
-
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: testNPC._id,
-        entityType: EntityType.NPC,
-      },
-      testCharacter
-    );
-
-    expect(executeEffectMock).toBeCalledTimes(0);
-    expect(sendEventToUserMock).toBeCalledTimes(1);
-
-    expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: "Sorry, your target is not valid.",
-      type: "error",
-    });
-  });
-
-  it("should fail validation if target npc is neutral", async () => {
-    executeEffectMock.mockImplementation();
-
-    testNPC.alignment = NPCAlignment.Neutral;
-    await testNPC.save();
-
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: testNPC._id,
-        entityType: EntityType.NPC,
-      },
-      testCharacter
-    );
-
-    expect(executeEffectMock).toBeCalledTimes(0);
-    expect(sendEventToUserMock).toBeCalledTimes(1);
-
-    expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: "Sorry, your target is not valid.",
-      type: "error",
-    });
-  });
-
-  it("should fail validation if target is out of reach", async () => {
-    executeEffectMock.mockImplementation();
-
-    const isUnderRangeMock = jest.spyOn(MovementHelper.prototype, "isUnderRange");
-
-    testNPC.x = testCharacter.x + (itemDarkRune.useWithMaxDistanceGrid! + 1) * GRID_WIDTH;
-    testNPC.y = testCharacter.y;
-    await testNPC.save();
-
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: testNPC._id,
-        entityType: EntityType.NPC,
-      },
-      testCharacter
-    );
-
-    expect(executeEffectMock).toBeCalledTimes(0);
-    expect(sendEventToUserMock).toBeCalledTimes(1);
-
-    expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: "Sorry, your target is out of reach.",
-      type: "error",
+  describe("Execute method ", () => {
+    let useWithEntity: UseWithEntity;
+    let testCharacter: ICharacter;
+    let testNPC: INPC;
+    let testItem: IItem;
+    let testItemBlueprint: IUseWithItemSource;
+
+    beforeAll(() => {
+      useWithEntity = container.get(UseWithEntity);
     });
 
-    expect(isUnderRangeMock).toBeCalledTimes(1);
-    expect(isUnderRangeMock).toHaveBeenLastCalledWith(
-      testCharacter.x,
-      testCharacter.y,
-      testNPC.x,
-      testNPC.y,
-      itemDarkRune.useWithMaxDistanceGrid
-    );
-  });
+    beforeEach(async () => {
+      testCharacter = await unitTestHelper.createMockCharacter(null, {
+        hasSkills: true,
+        hasEquipment: true,
+      });
+      testNPC = await unitTestHelper.createMockNPC();
 
-  it("should fail if item is not in inventory", async () => {
-    executeEffectMock.mockImplementation();
+      testItem = await unitTestHelper.createMockItemFromBlueprint(MagicsBlueprint.HealRune);
 
-    const isInInventoryMock = jest.spyOn(ItemValidation.prototype, "isItemInCharacterInventory");
-
-    const darkRune = await unitTestHelper.createMockItemFromBlueprint(MagicsBlueprint.DarkRune);
-
-    await useWithEntity.execute(
-      {
-        itemId: darkRune._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    expect(executeEffectMock).toBeCalledTimes(0);
-    expect(sendEventToUserMock).toBeCalledTimes(1);
-
-    expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: "Sorry, you do not have this item in your inventory.",
-      type: "error",
+      testItemBlueprint = await blueprintManager.getBlueprint<IUseWithItemSource>("items", testItem.baseKey);
     });
 
-    expect(isInInventoryMock).toBeCalledTimes(1);
-    expect(isInInventoryMock).toHaveBeenLastCalledWith(testCharacter, darkRune._id);
-  });
-
-  it("should fail validation if character does not have required magic level", async () => {
-    executeEffectMock.mockImplementation();
-
-    characterSkills.magic.level = (itemDarkRune.minMagicLevelRequired ?? 0) - 1;
-    await characterSkills.save();
-
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    expect(executeEffectMock).toBeCalledTimes(0);
-    expect(sendEventToUserMock).toBeCalledTimes(1);
-
-    expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: `Sorry, '${itemDarkRune.name}' can not only be used at magic level '${itemDarkRune.minMagicLevelRequired}' or greater.`,
-      type: "error",
-    });
-  });
-
-  it("should fail validation if target is on different scene", async () => {
-    executeEffectMock.mockImplementation();
-
-    targetCharacter.scene = testCharacter.scene + "-2";
-    await targetCharacter.save();
-
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    expect(executeEffectMock).toBeCalledTimes(0);
-    expect(sendEventToUserMock).toBeCalledTimes(1);
-
-    expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: "Sorry, your target is not on the same scene.",
-      type: "error",
-    });
-  });
-
-  it("should not validate if caster target in not that same as entity target ", async () => {
-    executeEffectMock.mockImplementation();
-
-    // @ts-ignore
-    testCharacter.target = { id: targetCharacter._id, type: EntityType.Character };
-    await testCharacter.save();
-
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: testNPC._id,
-        entityType: EntityType.NPC,
-      },
-      testCharacter
-    );
-
-    expect(executeEffectMock).toBeCalledTimes(0);
-    expect(sendEventToUserMock).toBeCalledTimes(1);
-
-    expect(sendEventToUserMock).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: "Sorry, your target is invalid.",
-      type: "error",
-    });
-  });
-
-  it("should successfully use dark rune on target character", async () => {
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    const target = (await Character.findOne({ _id: targetCharacter._id })) as unknown as ICharacter;
-    expect(target.health).toBeLessThanOrEqual(83);
-    expect(target.mana).toBe(100);
-  });
-
-  it("should successfully use poison rune on target character", async () => {
-    const items = [await unitTestHelper.createMockItemFromBlueprint(MagicsBlueprint.PoisonRune)];
-
-    await unitTestHelper.addItemsToContainer(inventoryContainer, 6, items);
-
-    await useWithEntity.execute(
-      {
-        itemId: items[0]._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    const target = (await Character.findOne({ _id: targetCharacter._id })) as unknown as ICharacter;
-    expect(target.health).toBeLessThanOrEqual(90);
-    expect(target.mana).toBe(100);
-  });
-
-  it("should successfully use fire rune on target character", async () => {
-    const items = [await unitTestHelper.createMockItemFromBlueprint(MagicsBlueprint.FireRune)];
-
-    await unitTestHelper.addItemsToContainer(inventoryContainer, 6, items);
-
-    await useWithEntity.execute(
-      {
-        itemId: items[0]._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    const target = (await Character.findOne({ _id: targetCharacter._id })) as unknown as ICharacter;
-    expect(target.health).toBeLessThanOrEqual(90);
-    expect(target.mana).toBe(100);
-  });
-
-  it("should successfully use heal rune on target character", async () => {
-    const items = [await unitTestHelper.createMockItemFromBlueprint(MagicsBlueprint.HealRune)];
-
-    await unitTestHelper.addItemsToContainer(inventoryContainer, 6, items);
-
-    targetCharacter.health = 50;
-    await targetCharacter.save();
-
-    await useWithEntity.execute(
-      {
-        itemId: items[0]._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    const target = (await Character.findOne({ _id: targetCharacter._id })) as unknown as ICharacter;
-    expect(target.health).toBeGreaterThanOrEqual(60);
-    expect(target.mana).toBe(100);
-  });
-
-  it("should deal extra damage depending on magic level", async () => {
-    characterSkills.magic.level = 12;
-    await characterSkills.save();
-
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    const target = (await Character.findOne({ _id: targetCharacter._id })) as unknown as ICharacter;
-    expect(target.health).toBeLessThanOrEqual(83);
-    expect(target.mana).toBe(100);
-  });
-
-  it("should successfully use fire rune on target npc", async () => {
-    const items = [await unitTestHelper.createMockItemFromBlueprint(MagicsBlueprint.FireRune)];
-
-    await unitTestHelper.addItemsToContainer(inventoryContainer, 6, items);
-
-    await useWithEntity.execute(
-      {
-        itemId: items[0]._id,
-        entityId: testNPC._id,
-        entityType: EntityType.NPC,
-      },
-      testCharacter
-    );
-
-    const target = (await NPC.findOne({ _id: testNPC._id })) as unknown as INPC;
-    expect(target.health).toBeLessThanOrEqual(90);
-  });
-
-  //! Runes are not stackable, so this test begin to fail. Please check.
-  // it("should remove rune from inventory after it has been used", async () => {
-  //   await useWithEntity.execute(
-  //     {
-  //       itemId: item1._id,
-  //       entityId: targetCharacter._id,
-  //       entityType: EntityType.Character,
-  //     },
-  //     testCharacter
-  //   );
-
-  //   const inventory = await testCharacter.inventory;
-  //   const container = (await ItemContainer.findById(inventory.itemContainer)) as unknown as IItemContainer;
-
-  //   console.log(container.slots);
-
-  //   expect(container.slots[0]).toBeNull();
-  //   expect(container.slots[1]).not.toBeNull();
-  //   expect(container.slots[1].key).toBe(MagicsBlueprint.DarkRune);
-  // });
-
-  it("should update character weight", async () => {
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    const character = (await Character.findById(testCharacter.id)) as unknown as ICharacter;
-    expect(character.weight).toBe(3);
-    expect(character.maxWeight).toBe(15);
-  });
-
-  it("should receive refresh items event", async () => {
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    const inventory = await testCharacter.inventory;
-    const container = (await ItemContainer.findById(inventory.itemContainer)) as unknown as IItemContainer;
-
-    expect(sendEventToUserMock).toBeCalled();
-    expect(sendEventToUserMock).toHaveBeenCalledWith(
-      testCharacter.channelId,
-      ItemSocketEvents.EquipmentAndInventoryUpdate,
-      {
-        inventory: container,
-        openEquipmentSetOnUpdate: false,
-        openInventoryOnUpdate: false,
-      }
-    );
-  });
-
-  it("should receive target character update event", async () => {
-    testCharacter.channelId = "channel-1";
-    await testCharacter.save();
-
-    targetCharacter.channelId = "channel-2";
-    await targetCharacter.save();
-
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    expect(sendEventToUserMock).toBeCalled();
-
-    const character = (await Character.findById(targetCharacter.id)) as unknown as ICharacter;
-    const payload = {
-      targetId: character._id,
-      health: character.health,
-      mana: character.mana,
-      speed: character.speed,
-    };
-
-    // for caster
-    expect(sendEventToUserMock).toHaveBeenCalledWith(
-      testCharacter.channelId,
-      CharacterSocketEvents.AttributeChanged,
-      payload
-    );
-
-    // for target
-    expect(sendEventToUserMock).toHaveBeenCalledWith(
-      targetCharacter.channelId,
-      CharacterSocketEvents.AttributeChanged,
-      payload
-    );
-  });
-
-  it("should receive projectile animation event", async () => {
-    testCharacter.channelId = "channel-1";
-    await testCharacter.save();
-
-    targetCharacter.channelId = "channel-2";
-    await targetCharacter.save();
-
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    expect(sendEventToUserMock).toBeCalled();
-
-    const payload: IProjectileAnimationEffect = {
-      sourceId: testCharacter._id,
-      targetId: targetCharacter._id,
-      projectileEffectKey: itemDarkRune.projectileAnimationKey!,
-      effectKey: itemDarkRune.animationKey,
-    };
-
-    // for caster
-    expect(sendEventToUserMock).toHaveBeenCalledWith(
-      testCharacter.channelId,
-      AnimationSocketEvents.ShowProjectileAnimation,
-      payload
-    );
-
-    // for target
-    expect(sendEventToUserMock).toHaveBeenCalledWith(
-      targetCharacter.channelId,
-      AnimationSocketEvents.ShowProjectileAnimation,
-      payload
-    );
-  });
-
-  it("should call skill increase functionality to increase target skills", async () => {
-    const increaseSPMock = jest.spyOn(SkillIncrease.prototype, "increaseMagicResistanceSP");
-    increaseSPMock.mockImplementation();
-
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    expect(increaseSPMock).toHaveBeenCalledTimes(1);
-
-    const skillUpdateEventParams = increaseSPMock.mock.calls[0];
-
-    expect(skillUpdateEventParams[0]).toBeDefined();
-    expect(skillUpdateEventParams[0]._id).toStrictEqual(targetCharacter._id);
-    expect(skillUpdateEventParams[1]).toBe(itemDarkRune.power);
-
-    increaseSPMock.mockRestore();
-  });
-
-  it("should not call skill increase functionality for target npc", async () => {
-    const increaseSPMock = jest.spyOn(SkillIncrease.prototype, "increaseMagicResistanceSP");
-    increaseSPMock.mockImplementation();
-
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: testNPC._id,
-        entityType: EntityType.NPC,
-      },
-      testCharacter
-    );
-
-    expect(increaseSPMock).toHaveBeenCalledTimes(0);
-
-    increaseSPMock.mockRestore();
-  });
-
-  it("should increase skills and send skills update event", async () => {
-    testCharacter.channelId = "channel-1";
-    await testCharacter.save();
-
-    targetCharacter.channelId = "channel-2";
-    await targetCharacter.save();
-
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
-
-    // use jest to mock itemDarkRune.power property
-    // @ts-ignore
-    itemDarkRune.power = MagicPower.High;
-
-    const skillPoints =
-      SP_INCREASE_BASE +
-      SP_MAGIC_INCREASE_TIMES_MANA * (Math.round(itemDarkRune.power * ML_INCREASE_RATIO) + (itemDarkRune.power ?? 0));
-    const lowerBound = skillPoints - 1.5;
-    const upperBound = skillPoints + 1.5;
-    const updatedSkillsTarget: ISkill = (await Skill.findById(targetCharacter.skills)) as unknown as ISkill;
-    expect(updatedSkillsTarget?.magicResistance.skillPoints).toBeGreaterThan(lowerBound);
-    expect(updatedSkillsTarget?.magicResistance.skillPoints).toBeLessThan(upperBound);
-
-    expect(sendEventToUserMock).toHaveBeenCalled();
-
-    const skillsCalls: any[] = [];
-    sendEventToUserMock.mock.calls.forEach((call) => {
-      if (call[1] === SkillSocketEvents.ReadInfo) {
-        skillsCalls.push(call);
-      }
+    afterEach(() => {
+      jest.clearAllMocks();
+      jest.restoreAllMocks();
     });
 
-    expect(skillsCalls.length).toBe(3);
-    expect(skillsCalls[0][2]?.skill?.magicResistance?.skillPoints).toBeCloseTo(skillPoints, 1);
-  });
+    it("returns early if base request validation fails", async () => {
+      // @ts-ignore
+      jest.spyOn(useWithEntity.useWithEntityValidation, "baseValidation").mockReturnValueOnce(false);
 
-  it("should execute hit post processing", async () => {
-    await useWithEntity.execute(
-      {
-        itemId: item1._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
+      // @ts-ignore
+      const validateTargetRequest = jest.spyOn(useWithEntity.useWithEntityValidation, "validateTargetRequest");
 
-    expect(onHitTargetMock).toBeCalled();
-    expect(onHitTargetMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        _id: targetCharacter._id,
-      }),
-      testCharacter,
-      expect.any(Number)
-    );
+      testCharacter.isOnline = false;
 
-    const call = onHitTargetMock.mock.calls[0];
-    expect(call).toBeDefined();
-    expect(call[2]).toBeGreaterThanOrEqual(17);
-  });
+      const payload = { entityId: testCharacter._id, itemId: testItem._id, entityType: EntityType.Character };
 
-  it("should execute hit post processing without damage data", async () => {
-    const items = [await unitTestHelper.createMockItemFromBlueprint(MagicsBlueprint.HealRune)];
+      await useWithEntity.execute(payload, testCharacter);
 
-    await unitTestHelper.addItemsToContainer(inventoryContainer, 6, items);
+      expect(validateTargetRequest).not.toHaveBeenCalled();
+    });
 
-    await useWithEntity.execute(
-      {
-        itemId: items[0]._id,
-        entityId: targetCharacter._id,
-        entityType: EntityType.Character,
-      },
-      testCharacter
-    );
+    it("executes effect on self when blueprint has self auto-target", async () => {
+      // @ts-ignore
+      jest.spyOn(useWithEntity.useWithEntityValidation, "baseValidation").mockReturnValueOnce(true);
 
-    expect(onHitTargetMock).toBeCalled();
-    expect(onHitTargetMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        _id: targetCharacter._id,
-      }),
-      testCharacter,
-      undefined
-    );
-  });
+      const selfTargetingBlueprint = { ...testItemBlueprint, hasSelfAutoTarget: true } as IUseWithItemSource;
+      jest
+        // @ts-ignore
+        .spyOn(useWithEntity.blueprintManager, "getBlueprint")
+        .mockResolvedValueOnce(selfTargetingBlueprint as never);
 
-  afterAll(async () => {
-    /**
-     * CharacterView.getOtherElementsInView when used with .lean({virtuals true})
-     * causes a little slow down and if we close the connection right after the test
-     * the test starts failing with connection closed error
-     */
-    await new Promise<void>((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 500);
+      // @ts-ignore
+      const executeEffectSpy = jest.spyOn(useWithEntity, "executeEffect");
+
+      const payload = { entityId: testCharacter._id, itemId: testItem._id, entityType: EntityType.Character };
+
+      await useWithEntity.execute(payload, testCharacter);
+
+      expect(executeEffectSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _id: testCharacter._id,
+        }),
+        expect.objectContaining({
+          _id: testCharacter._id,
+        }),
+        expect.anything()
+      );
+    });
+
+    it("returns early if target request validation fails", async () => {
+      testItemBlueprint.hasSelfAutoTarget = false;
+
+      // @ts-ignore
+      jest.spyOn(useWithEntity.useWithEntityValidation, "baseValidation").mockReturnValueOnce(true);
+
+      // @ts-ignore
+      jest.spyOn(useWithEntity.useWithEntityValidation, "validateTargetRequest").mockResolvedValueOnce(false);
+
+      // @ts-ignore
+      const executeEffectSpy = jest.spyOn(useWithEntity, "executeEffect");
+
+      const payload = { entityId: testNPC._id, itemId: testItem._id, entityType: EntityType.NPC };
+
+      await useWithEntity.execute(payload, testCharacter);
+
+      // @ts-ignore
+      expect(executeEffectSpy).not.toHaveBeenCalled();
+    });
+
+    it("executes effect with valid target", async () => {
+      testItemBlueprint.hasSelfAutoTarget = false;
+
+      // @ts-ignore
+      jest.spyOn(useWithEntity.useWithEntityValidation, "baseValidation").mockReturnValueOnce(true);
+
+      // @ts-ignore
+      jest.spyOn(useWithEntity.useWithEntityValidation, "validateTargetRequest").mockResolvedValueOnce(true);
+
+      // @ts-ignore
+      const executeEffectSpy = jest.spyOn(useWithEntity, "executeEffect");
+
+      const payload = { entityId: testNPC._id, itemId: testItem._id, entityType: EntityType.NPC };
+
+      await useWithEntity.execute(payload, testCharacter);
+
+      expect(executeEffectSpy).toHaveBeenCalled();
     });
   });
 });
