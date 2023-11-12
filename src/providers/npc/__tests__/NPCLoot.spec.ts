@@ -1,3 +1,4 @@
+import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import {
@@ -12,6 +13,7 @@ import { NPCLoot } from "../NPCLoot";
 describe("NPCLoot.spec.ts", () => {
   let npcLoot: NPCLoot;
   let npc: INPC;
+  let testCharacter: ICharacter;
 
   beforeAll(() => {
     npcLoot = container.get(NPCLoot);
@@ -19,6 +21,8 @@ describe("NPCLoot.spec.ts", () => {
 
   beforeEach(async () => {
     npc = await unitTestHelper.createMockNPC(null, { hasSkills: true });
+
+    testCharacter = await unitTestHelper.createMockCharacter();
   });
 
   it("properly calculates the gold that's going to be dropped", () => {
@@ -69,7 +73,7 @@ describe("NPCLoot.spec.ts", () => {
       const foodItem = await unitTestHelper.createMockItemFromBlueprint(FoodsBlueprint.Apple);
 
       // @ts-ignore
-      const result = await npcLoot.getLootMultiplier(foodItem);
+      const result = await npcLoot.getLootMultiplier(testCharacter, foodItem);
 
       expect(result).toBe(0.5);
     });
@@ -79,6 +83,25 @@ describe("NPCLoot.spec.ts", () => {
 
       // @ts-ignore
       const result = await npcLoot.getLootMultiplier(sword);
+
+      expect(result).toBe(1);
+    });
+  });
+
+  describe("Premium account", () => {
+    let premiumAccountCharacter: ICharacter;
+
+    beforeEach(async () => {
+      premiumAccountCharacter = await unitTestHelper.createMockCharacter(null, {
+        isPremiumAccount: true,
+      });
+    });
+
+    it("should return a buffed loot multipler for premium account characters", async () => {
+      const foodItem = await unitTestHelper.createMockItemFromBlueprint(FoodsBlueprint.Apple);
+
+      // @ts-ignore
+      const result = await npcLoot.getLootMultiplier(premiumAccountCharacter, foodItem);
 
       expect(result).toBe(1);
     });
