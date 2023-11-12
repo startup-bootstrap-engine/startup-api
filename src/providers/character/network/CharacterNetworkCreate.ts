@@ -100,8 +100,19 @@ export class CharacterNetworkCreate {
           return;
         }
 
+        // update baseSpeed according to skill level
+        // const baseSpeed = await this.characterBaseSpeed.getBaseSpeed(character);
+        // if (baseSpeed && character.baseSpeed !== baseSpeed) {
+        //   await Character.updateOne({ _id: character._id }, { $set: { baseSpeed } });
+        // }
+        // if (!baseSpeed) {
+        //   await this.fixInconsistentSpeed(character);
+        // }
+        // update baseSpeed according to skill level
         const baseSpeed = await this.characterBaseSpeed.getBaseSpeed(character);
-        if (baseSpeed && character.baseSpeed !== baseSpeed) {
+        if (baseSpeed === undefined) {
+          await this.fixInconsistentSpeed(character);
+        } else if (character.baseSpeed !== baseSpeed) {
           await Character.updateOne({ _id: character._id }, { $set: { baseSpeed } });
         }
 
@@ -183,8 +194,6 @@ export class CharacterNetworkCreate {
         await this.warnAboutWeatherStatus(character.channelId!);
 
         await this.handleCharacterRegen(character);
-
-        await this.fixInconsistentSpeed(character);
       },
       false
     );
