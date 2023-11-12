@@ -4,15 +4,20 @@ import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
+import { EnvType } from "@rpg-engine/shared";
 import { Job, Queue, Worker } from "bullmq";
+import { v4 as uuidv4 } from "uuid";
 import { Pathfinder } from "./Pathfinder";
 import { PathfindingResults } from "./PathfindingResults";
-
 @provideSingleton(PathfindingQueue)
 export class PathfindingQueue {
   private queue: Queue | null = null;
   private worker: Worker | null = null;
   private connection;
+
+  private queueName: string = `npc-pathfinding-${uuidv4()}-${
+    appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
+  }`;
 
   constructor(
     private redisManager: RedisManager,
@@ -31,7 +36,7 @@ export class PathfindingQueue {
     }
 
     if (!this.queue) {
-      this.queue = new Queue("pathfinding", {
+      this.queue = new Queue(this.queueName, {
         connection: this.connection,
       });
 
@@ -47,7 +52,7 @@ export class PathfindingQueue {
 
     if (!this.worker) {
       this.worker = new Worker(
-        "pathfinding",
+        this.queueName,
         async (job) => {
           const { npc, target, startGridX, startGridY, endGridX, endGridY } = job.data;
 
@@ -68,7 +73,7 @@ export class PathfindingQueue {
 
             await this.pathfindingResults.setResult(job.id!, path);
           } catch (err) {
-            console.error(`Error processing pathfinding for NPC ${npc.key}:`, err);
+            console.error(`Error processing ${this.queueName} for NPC ${npc.key}:`, err);
             throw err;
           }
         },

@@ -18,12 +18,12 @@ import {
   ToGridX,
   ToGridY,
 } from "@rpg-engine/shared";
-import { provide } from "inversify-binding-decorators";
 
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { appEnv } from "@providers/config/env";
 import { MAX_PING_TRACKING_THRESHOLD } from "@providers/constants/ServerConstants";
 import { RedisManager } from "@providers/database/RedisManager";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { Queue, Worker } from "bullmq";
@@ -34,7 +34,7 @@ import { CharacterView } from "../../CharacterView";
 import { CharacterMovementValidation } from "../../characterMovement/CharacterMovementValidation";
 import { CharacterMovementWarn } from "../../characterMovement/CharacterMovementWarn";
 import { CharacterNetworkUpdateMapManager } from "./CharacterNetworkUpdateMap";
-@provide(CharacterNetworkUpdateQueue)
+@provideSingleton(CharacterNetworkUpdateQueue)
 export class CharacterNetworkUpdateQueue {
   private queue: Queue<any, any, string> | null = null;
   private worker: Worker | null = null;

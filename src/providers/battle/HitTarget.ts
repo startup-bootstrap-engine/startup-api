@@ -19,6 +19,7 @@ import {
   BattleSocketEvents,
   CharacterClass,
   EntityType,
+  EnvType,
   IBattleEventFromServer,
   ItemSubType,
 } from "@rpg-engine/shared";
@@ -29,17 +30,25 @@ import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Queue, Worker } from "bullmq";
 import random from "lodash/random";
+import { v4 as uuidv4 } from "uuid";
 import { BattleAttackTargetDeath } from "./BattleAttackTarget/BattleAttackTargetDeath";
 import { BattleDamageCalculator } from "./BattleDamageCalculator";
 import { BattleEffects } from "./BattleEffects";
 import { BattleEvent } from "./BattleEvent";
-
 @provideSingleton(HitTarget)
 export class HitTarget {
   private npcQueue: Queue | null = null;
   private characterQueue: Queue | null = null;
   private worker: Worker | null = null;
   private connection: any;
+
+  private queueNPCHitName: string = `npc-hit-target-${uuidv4()}-${
+    appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
+  }`;
+
+  private queueCharacterHitName: string = `character-hit-target-${uuidv4()}-${
+    appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
+  }`;
 
   constructor(
     private battleEvent: BattleEvent,
@@ -68,7 +77,7 @@ export class HitTarget {
     }
 
     if (!this.npcQueue) {
-      this.npcQueue = new Queue("npc-hit", {
+      this.npcQueue = new Queue(this.queueNPCHitName, {
         connection: this.connection,
       });
 
@@ -83,7 +92,7 @@ export class HitTarget {
     }
 
     if (!this.characterQueue) {
-      this.characterQueue = new Queue("character-hit", {
+      this.characterQueue = new Queue(this.queueCharacterHitName, {
         connection: this.connection,
       });
 
@@ -99,7 +108,7 @@ export class HitTarget {
 
     if (!this.worker) {
       this.worker = new Worker(
-        "character-hit",
+        this.queueCharacterHitName,
         async (job) => {
           const { attacker, target, magicAttack, bonusDamage, spellHit } = job.data;
 
@@ -110,7 +119,7 @@ export class HitTarget {
         }
       );
       this.worker = new Worker(
-        "npc-hit",
+        this.queueNPCHitName,
         async (job) => {
           try {
             const { attacker, target, magicAttack, bonusDamage, spellHit } = job.data;
@@ -161,7 +170,7 @@ export class HitTarget {
 
     if (attacker.type === EntityType.Character) {
       await this.characterQueue?.add(
-        "character-hit",
+        this.queueCharacterHitName,
         { attacker, target, magicAttack, bonusDamage, spellHit },
         {
           removeOnComplete: true,
@@ -175,7 +184,7 @@ export class HitTarget {
       );
     } else {
       await this.npcQueue?.add(
-        "npc-hit",
+        this.queueNPCHitName,
         { attacker, target, magicAttack, bonusDamage, spellHit },
         {
           removeOnComplete: true,
