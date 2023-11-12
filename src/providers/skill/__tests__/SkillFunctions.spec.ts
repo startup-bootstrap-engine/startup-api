@@ -1,4 +1,4 @@
-import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { CharacterBuffActivator } from "@providers/character/characterBuff/CharacterBuffActivator";
 import { container, unitTestHelper } from "@providers/inversify/container";
@@ -101,6 +101,18 @@ describe("SkillFunctions", () => {
       const bonus = await skillFunctions.calculateBonus(res.level);
       expect(bonus).toEqual(tc.exp);
     }
+  });
+
+  it("should update base speed when increase skill level", async () => {
+    const skill = (await Skill.findById(testCharacter.skills)) as ISkill;
+    skill.level = 51;
+    const baseSpeed = testCharacter.baseSpeed;
+
+    await skillFunctions.updateSkills(skill, testCharacter);
+
+    const updatedCharacter = await Character.findById(testCharacter.id);
+
+    expect(updatedCharacter?.baseSpeed).toBeGreaterThan(baseSpeed);
   });
 
   describe("Bonus and penalties x Buff edge cases", () => {

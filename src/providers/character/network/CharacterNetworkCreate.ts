@@ -38,6 +38,7 @@ import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterDeath } from "../CharacterDeath";
 import { CharacterBuffValidation } from "../characterBuff/CharacterBuffValidation";
+import { CharacterBaseSpeed } from "../characterMovement/CharacterBaseSpeed";
 import { MagePassiveHabilities } from "../characterPassiveHabilities/MagePassiveHabilities";
 import { WarriorPassiveHabilities } from "../characterPassiveHabilities/WarriorPassiveHabilities";
 
@@ -64,7 +65,9 @@ export class CharacterNetworkCreate {
     private itemMissingReferenceCleaner: ItemMissingReferenceCleaner,
     private characterBuffValidation: CharacterBuffValidation,
     private battleTargeting: BattleTargeting,
-    private locker: Locker
+    private locker: Locker,
+
+    private characterBaseSpeed: CharacterBaseSpeed
   ) {}
 
   public onCharacterCreate(channel: SocketChannel): void {
@@ -91,6 +94,11 @@ export class CharacterNetworkCreate {
           });
 
           return;
+        }
+
+        const baseSpeed = await this.characterBaseSpeed.getBaseSpeed(character);
+        if (baseSpeed && character.baseSpeed !== baseSpeed) {
+          await Character.updateOne({ _id: character._id }, { $set: { baseSpeed } });
         }
 
         await clearCacheForKey(`characterBuffs_${character._id}`);
