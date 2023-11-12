@@ -101,14 +101,6 @@ export class CharacterNetworkCreate {
         }
 
         // update baseSpeed according to skill level
-        // const baseSpeed = await this.characterBaseSpeed.getBaseSpeed(character);
-        // if (baseSpeed && character.baseSpeed !== baseSpeed) {
-        //   await Character.updateOne({ _id: character._id }, { $set: { baseSpeed } });
-        // }
-        // if (!baseSpeed) {
-        //   await this.fixInconsistentSpeed(character);
-        // }
-        // update baseSpeed according to skill level
         const baseSpeed = await this.characterBaseSpeed.getBaseSpeed(character);
         if (baseSpeed === undefined) {
           await this.fixInconsistentSpeed(character);
