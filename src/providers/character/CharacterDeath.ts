@@ -387,7 +387,7 @@ export class CharacterDeath {
     inventory: IItem,
     forceDropAll: boolean = false
   ): Promise<void> {
-    let n = _.random(0, 100);
+    let n = _.random(1, 100);
     if (character.hasSkull && character.skullType) {
       // if has yellow, 30% more. If has red => all loss
       switch (character.skullType) {
