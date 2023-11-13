@@ -102,7 +102,7 @@ export class MacroCaptchaCrons {
 
     await Promise.all(
       charactersWithCaptchaNotVerified.map(async (character) => {
-        const n = _.random(0, 100);
+        const n = _.random(1, 100);
 
         if (n <= ANTI_MACRO_PROBABILITY_TRIGGER) {
           await this.macroCaptchaSend.sendAndStartCaptchaVerification(character);
