@@ -11,7 +11,7 @@ export class CharacterUser {
       });
 
       if (!user) {
-        throw new Error("User not found");
+        return;
       }
 
       return user;

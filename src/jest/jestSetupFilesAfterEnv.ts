@@ -4,6 +4,7 @@ import {
   MODE_EXP_MULTIPLIER,
   RACE_BONUS_OR_PENALTIES,
 } from "@providers/character/__tests__/mockConstants/SkillConstants.mock";
+import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { container, redisManager } from "@providers/inversify/container";
 import { MapLoader } from "@providers/map/MapLoader";
 import { MongoMemoryServer } from "mongodb-memory-server";
@@ -58,12 +59,12 @@ jest.mock("@providers/constants/PartyConstants", () => ({
 }));
 
 jest.mock("@providers/constants/PremiumAccountConstants", () => ({
-  PREMIUM_ACCOUNT_TYPES_RATIOS: {
+  PREMIUM_ACCOUNT_METADATA: {
     free: undefined,
     bronze: {
       SPXPLostOnDeathReduction: 20, // only loses 80% of the regular skill loss
       InventoryLossOnDeathReduction: 25, // 25% less chance to drop an item
-      SpeedBuff: 7,
+      maxSpeed: MovementSpeed.Fast,
       XPBuff: 20,
       lootDropBuff: 20,
       teleportCooldownMin: 40,
@@ -71,7 +72,7 @@ jest.mock("@providers/constants/PremiumAccountConstants", () => ({
     silver: {
       SPXPLostOnDeathReduction: 35, // only loses 60% of the regular skill loss
       InventoryLossOnDeathReduction: 50, // 50% less chance to drop an item
-      SpeedBuff: 13,
+      maxSpeed: MovementSpeed.ExtraFast,
       XPBuff: 30,
       lootDropBuff: 30,
       teleportCooldownMin: 30,
@@ -79,7 +80,7 @@ jest.mock("@providers/constants/PremiumAccountConstants", () => ({
     gold: {
       SPXPLostOnDeathReduction: 50, // only loses 50% of the regular skill loss
       InventoryLossOnDeathReduction: 0,
-      SpeedBuff: 15,
+      maxSpeed: MovementSpeed.ExtraFast,
       XPBuff: 50,
       lootDropBuff: 50,
       teleportCooldownMin: 20,

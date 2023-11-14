@@ -34,6 +34,7 @@ import { ISocketTransmissionZone, NPCMovementType, PeriodOfDay, QuestType } from
 import { provide } from "inversify-binding-decorators";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { Types } from "mongoose";
+import { v4 as uuidv4 } from "uuid";
 import { chatLogsMock } from "./mock/chatLogsMock";
 import {
   itemMeleeRangedMock,
@@ -63,6 +64,7 @@ interface IMockCharacterOptions {
   hasInventory?: boolean;
   hasSkills?: boolean;
   isPremiumAccount?: boolean;
+  isPremiumAccountType?: UserAccountTypes;
   hasUser?: boolean;
 }
 
@@ -357,6 +359,7 @@ export class UnitTestHelper {
     if (options?.hasUser) {
       const user = await this.createMockUser({
         characters: [testCharacter._id],
+        email: `premium-user-${uuidv4()}@definya.com`,
       });
 
       testCharacter.owner = user._id;
@@ -366,6 +369,17 @@ export class UnitTestHelper {
       const user = await this.createMockUser({
         characters: [testCharacter._id],
         accountType: UserAccountTypes.PremiumGold,
+        email: `premium-user-${uuidv4()}@definya.com`,
+      });
+
+      testCharacter.owner = user._id;
+    }
+
+    if (options?.isPremiumAccountType) {
+      const user = await this.createMockUser({
+        characters: [testCharacter._id],
+        accountType: options.isPremiumAccountType,
+        email: `premium-user-${uuidv4()}@definya.com`,
       });
 
       testCharacter.owner = user._id;
