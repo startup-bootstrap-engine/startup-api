@@ -78,7 +78,7 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
   },
   [UserAccountTypes.PremiumGold]: {
     SPXPLostOnDeathReduction: 50, // only loses 50% of the regular skill loss
-    InventoryLossOnDeathReduction: 0, // 75% less chance to drop an item
+    InventoryLossOnDeathReduction: 0, // Do not drop anything on death
     maxSpeed: MovementSpeed.ExtraFast,
     XPBuff: 50,
     lootDropBuff: 50,
