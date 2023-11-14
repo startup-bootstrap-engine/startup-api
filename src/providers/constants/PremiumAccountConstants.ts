@@ -17,6 +17,7 @@ export interface IPremiumAccountData {
     defaultReduction: number;
     customReduction: CustomSpellCooldown;
   };
+  craftingQtyBuff: number;
 }
 
 export interface IPremiumAccountPlansData {
@@ -62,6 +63,7 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
         ...generateCustomCooldownReduction(CUSTOM_COOLDOWN_REDUCTION_DEFAULT_BRONZE),
       },
     },
+    craftingQtyBuff: 20,
   },
   [UserAccountTypes.PremiumSilver]: {
     SPXPLostOnDeathReduction: 35, // only loses 60% of the regular skill loss
@@ -75,6 +77,7 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
         ...generateCustomCooldownReduction(CUSTOM_COOLDOWN_REDUCTION_DEFAULT_SILVER),
       },
     },
+    craftingQtyBuff: 35,
   },
   [UserAccountTypes.PremiumGold]: {
     SPXPLostOnDeathReduction: 50, // only loses 50% of the regular skill loss
@@ -88,5 +91,6 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
         ...generateCustomCooldownReduction(CUSTOM_COOLDOWN_REDUCTION_DEFAULT_GOLD),
       },
     },
+    craftingQtyBuff: 50,
   },
 };

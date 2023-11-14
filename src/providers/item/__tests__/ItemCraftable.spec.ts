@@ -6,7 +6,9 @@ import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { recipeSpikedClub } from "@providers/useWith/recipes/maces/recipeSpikedClub";
+import { recipeLifePotion } from "@providers/useWith/recipes/potions/recipeLifePotion";
 import { recipeBolt } from "@providers/useWith/recipes/ranged-weapons/recipeBolt";
+import { UserAccountTypes } from "@providers/user/userTypes";
 import {
   AnimationEffectKeys,
   AnimationSocketEvents,
@@ -17,6 +19,7 @@ import {
   ItemSubType,
   UISocketEvents,
 } from "@rpg-engine/shared";
+import _ from "lodash";
 import { ItemCraftable } from "../ItemCraftable";
 import { itemManaPotion } from "../data/blueprints/potions/ItemManaPotion";
 import { CraftingResourcesBlueprint, PotionsBlueprint } from "../data/types/itemsBlueprintTypes";
@@ -426,6 +429,41 @@ describe("ItemCraftable.ts", () => {
     // @ts-ignore
     const avgSkills = await craftableItem.getSkillLevel(testCharacter, CraftingSkill.Lumberjacking);
     expect(typeof avgSkills).toBe("number");
+  });
+
+  it("returns a single qty, if item output range is 1:1", async () => {
+    //@ts-ignore
+    const qtyOutput = await craftableItem.getQty(testCharacter, recipeSpikedClub);
+
+    expect(qtyOutput).toBe(1);
+  });
+
+  describe("Premium Account", () => {
+    let premiumAccountCharacter: ICharacter;
+
+    beforeEach(async () => {
+      premiumAccountCharacter = await unitTestHelper.createMockCharacter(null, {
+        isPremiumAccountType: UserAccountTypes.PremiumGold,
+      });
+    });
+
+    it("should increase crafting qty outcome, if character is on a golden premium account", async () => {
+      jest.spyOn(_, "random").mockReturnValue(10);
+
+      //@ts-ignore
+      const qtyOutput = await craftableItem.getQty(premiumAccountCharacter, recipeLifePotion);
+
+      expect(qtyOutput).toBe(15);
+    });
+
+    it("should return the regular outcome, if character is NOT a premium account", async () => {
+      jest.spyOn(_, "random").mockReturnValue(10);
+
+      //@ts-ignore
+      const qtyOutput = await craftableItem.getQty(testCharacter, recipeLifePotion);
+
+      expect(qtyOutput).toBe(10);
+    });
   });
 
   afterEach(() => {

@@ -73,6 +73,7 @@ jest.mock("@providers/constants/PremiumAccountConstants", () => ({
           "self-healing-spell": 20,
         },
       },
+      craftingQtyBuff: 20,
     },
     silver: {
       SPXPLostOnDeathReduction: 35, // only loses 60% of the regular skill loss
@@ -86,6 +87,7 @@ jest.mock("@providers/constants/PremiumAccountConstants", () => ({
           "self-healing-spell": 30,
         },
       },
+      craftingQtyBuff: 35,
     },
     gold: {
       SPXPLostOnDeathReduction: 50, // only loses 50% of the regular skill loss
@@ -99,6 +101,7 @@ jest.mock("@providers/constants/PremiumAccountConstants", () => ({
           ["self-healing-spell"]: 50,
         },
       },
+      craftingQtyBuff: 50,
     },
   },
 }));
