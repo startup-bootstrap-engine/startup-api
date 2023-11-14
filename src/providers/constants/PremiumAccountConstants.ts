@@ -25,6 +25,30 @@ export interface IPremiumAccountPlansData {
   [UserAccountTypes.PremiumGold]: IPremiumAccountData;
 }
 
+const CUSTOM_COOLDOWN_REDUCTION_DEFAULT_BRONZE = 20;
+const CUSTOM_COOLDOWN_REDUCTION_DEFAULT_SILVER = 35;
+const CUSTOM_COOLDOWN_REDUCTION_DEFAULT_GOLD = 50;
+
+const generateCustomCooldownReduction = (defaultValues: number) => {
+  return {
+    [SpellsBlueprint.Teleport]: defaultValues,
+    [SpellsBlueprint.SelfHasteSpell]: defaultValues,
+    [SpellsBlueprint.GreaterHealingSpell]: defaultValues,
+    [SpellsBlueprint.BerserkerBloodthirst]: defaultValues,
+    [SpellsBlueprint.MassHealing]: defaultValues,
+    [SpellsBlueprint.Blizzard]: defaultValues,
+    [SpellsBlueprint.FireStorm]: defaultValues,
+    [SpellsBlueprint.VampiricStorm]: defaultValues,
+    [SpellsBlueprint.Arrowstorm]: defaultValues,
+    [SpellsBlueprint.WildfireVolley]: defaultValues,
+    [SpellsBlueprint.RogueStealth]: defaultValues,
+    [SpellsBlueprint.MagicShuriken]: defaultValues,
+    [SpellsBlueprint.WarriorStunTarget]: defaultValues,
+    [SpellsBlueprint.PowerStrike]: defaultValues,
+    [SpellsBlueprint.BleedingEdge]: defaultValues,
+  };
+};
+
 export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
   [UserAccountTypes.PremiumBronze]: {
     SPXPLostOnDeathReduction: 20, // only loses 80% of the regular skill loss
@@ -35,7 +59,7 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
     spellCooldownReduction: {
       defaultReduction: 10,
       customReduction: {
-        [SpellsBlueprint.Teleport]: 20,
+        ...generateCustomCooldownReduction(CUSTOM_COOLDOWN_REDUCTION_DEFAULT_BRONZE),
       },
     },
   },
@@ -48,7 +72,7 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
     spellCooldownReduction: {
       defaultReduction: 20,
       customReduction: {
-        [SpellsBlueprint.Teleport]: 35,
+        ...generateCustomCooldownReduction(CUSTOM_COOLDOWN_REDUCTION_DEFAULT_SILVER),
       },
     },
   },
@@ -61,7 +85,7 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
     spellCooldownReduction: {
       defaultReduction: 30,
       customReduction: {
-        [SpellsBlueprint.Teleport]: 50,
+        ...generateCustomCooldownReduction(CUSTOM_COOLDOWN_REDUCTION_DEFAULT_GOLD),
       },
     },
   },
