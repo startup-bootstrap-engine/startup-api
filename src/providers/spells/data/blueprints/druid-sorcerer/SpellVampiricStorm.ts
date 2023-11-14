@@ -4,6 +4,7 @@ import { SPELL_AREA_MEDIUM_BLAST_RADIUS } from "@providers/constants/SpellConsta
 import { entityEffectBleeding } from "@providers/entityEffects/data/blueprints/entityEffectBleeding";
 import { container } from "@providers/inversify/container";
 import { SpellArea } from "@providers/spells/area-spells/SpellArea";
+import { UserAccountTypes } from "@providers/user/userTypes";
 import {
   AnimationEffectKeys,
   CharacterClass,
@@ -33,6 +34,8 @@ export const spellVampiricStorm: Partial<ISpell> = {
   projectileAnimationKey: AnimationEffectKeys.Red,
   maxDistanceGrid: RangeTypes.High,
   characterClass: [CharacterClass.Druid],
+
+  onlyPremiumAccountType: [UserAccountTypes.PremiumSilver, UserAccountTypes.PremiumGold],
 
   usableEffect: async (caster: ICharacter | INPC, target: ICharacter | INPC) => {
     const spellArea = container.get(SpellArea);

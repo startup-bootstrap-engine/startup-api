@@ -5,6 +5,7 @@ import { entityEffectBurning } from "@providers/entityEffects/data/blueprints/en
 import { container } from "@providers/inversify/container";
 import { EffectableAttribute, ItemUsableEffect } from "@providers/item/helper/ItemUsableEffect";
 import { SpellArea } from "@providers/spells/area-spells/SpellArea";
+import { UserAccountTypes } from "@providers/user/userTypes";
 import {
   AnimationEffectKeys,
   BasicAttribute,
@@ -33,6 +34,8 @@ export const spellArcaneExplosion: Partial<ISpell> = {
   projectileAnimationKey: AnimationEffectKeys.HitFire,
   maxDistanceGrid: RangeTypes.UltraShort,
   characterClass: [CharacterClass.Sorcerer],
+
+  onlyPremiumAccountType: [UserAccountTypes.PremiumSilver, UserAccountTypes.PremiumGold],
 
   usableEffect: async (character: ICharacter, target: ICharacter | INPC) => {
     const spellArea = container.get(SpellArea);
