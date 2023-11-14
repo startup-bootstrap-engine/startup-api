@@ -145,7 +145,7 @@ export class SpellCast {
     const hasSpellCooldown = await this.spellCoolDown.haveSpellCooldown(character._id, spell.magicWords);
 
     if (!hasSpellCooldown) {
-      await this.spellCoolDown.setSpellCooldown(character._id, spell.magicWords, spell.cooldown);
+      await this.spellCoolDown.setSpellCooldown(spell.key, character._id, spell.magicWords, spell.cooldown);
     }
     await this.spellCoolDown.getAllSpellCooldowns(character);
 

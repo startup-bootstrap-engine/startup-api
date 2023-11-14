@@ -67,7 +67,12 @@ jest.mock("@providers/constants/PremiumAccountConstants", () => ({
       maxSpeed: MovementSpeed.Fast,
       XPBuff: 20,
       lootDropBuff: 20,
-      teleportCooldownMin: 40,
+      spellCooldownReduction: {
+        defaultReduction: 10,
+        customCooldownSeconds: {
+          "self-healing-spell": 3,
+        },
+      },
     },
     silver: {
       SPXPLostOnDeathReduction: 35, // only loses 60% of the regular skill loss
@@ -75,7 +80,12 @@ jest.mock("@providers/constants/PremiumAccountConstants", () => ({
       maxSpeed: MovementSpeed.ExtraFast,
       XPBuff: 30,
       lootDropBuff: 30,
-      teleportCooldownMin: 30,
+      spellCooldownReduction: {
+        defaultReduction: 10,
+        customCooldownSeconds: {
+          "self-healing-spell": 2,
+        },
+      },
     },
     gold: {
       SPXPLostOnDeathReduction: 50, // only loses 50% of the regular skill loss
@@ -83,7 +93,12 @@ jest.mock("@providers/constants/PremiumAccountConstants", () => ({
       maxSpeed: MovementSpeed.ExtraFast,
       XPBuff: 50,
       lootDropBuff: 50,
-      teleportCooldownMin: 20,
+      spellCooldownReduction: {
+        defaultReduction: 10,
+        customCooldownSeconds: {
+          ["self-healing-spell"]: 1,
+        },
+      },
     },
   },
 }));
