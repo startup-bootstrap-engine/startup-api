@@ -57,12 +57,13 @@ export default class SpellCoolDown {
 
       if (premiumAccountData) {
         const premiumAccountCustomSpellReductionKeys = Object.keys(
-          premiumAccountData.spellCooldownReduction.customCooldownSeconds
+          premiumAccountData.spellCooldownReduction.customReduction
         );
 
         // has custom specificed cooldown for this spell
         if (premiumAccountCustomSpellReductionKeys.includes(spellKey)) {
-          const reducedCustomCooldown = premiumAccountData.spellCooldownReduction.customCooldownSeconds[spellKey];
+          const reducedCustomCooldown =
+            cooldown * (1 - premiumAccountData.spellCooldownReduction.customReduction[spellKey] / 100);
 
           await this.setInMemoryCooldown(namespace, key, reducedCustomCooldown);
         } else {

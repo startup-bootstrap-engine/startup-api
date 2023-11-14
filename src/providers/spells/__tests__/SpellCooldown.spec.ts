@@ -171,7 +171,7 @@ describe("SpellCooldown", () => {
 
       expect(spellCoolDown).toBeTruthy();
 
-      expect(inMemoryCooldownSetSpy).toHaveBeenCalledWith(expect.any(String), "greater_faenya", 9);
+      expect(inMemoryCooldownSetSpy).toHaveBeenCalledWith(expect.any(String), "greater_faenya", 5);
     });
 
     it("should set a CUSTOM cooldown reduction, if the spell key is supported", async () => {
@@ -188,7 +188,7 @@ describe("SpellCooldown", () => {
 
       expect(spellCoolDown).toBeTruthy();
 
-      expect(inMemoryCooldownSetSpy).toHaveBeenCalledWith(expect.any(String), "talas_faenya", 1);
+      expect(inMemoryCooldownSetSpy).toHaveBeenCalledWith(expect.any(String), "talas_faenya", 5);
     });
   });
 });

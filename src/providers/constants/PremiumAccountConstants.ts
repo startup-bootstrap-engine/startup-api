@@ -13,8 +13,9 @@ export interface IPremiumAccountData {
   XPBuff: number;
   lootDropBuff: number;
   spellCooldownReduction: {
+    //both are percentages
     defaultReduction: number;
-    customCooldownSeconds: CustomSpellCooldown;
+    customReduction: CustomSpellCooldown;
   };
 }
 
@@ -33,8 +34,8 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
     lootDropBuff: 20,
     spellCooldownReduction: {
       defaultReduction: 10,
-      customCooldownSeconds: {
-        [SpellsBlueprint.Teleport]: 40,
+      customReduction: {
+        [SpellsBlueprint.Teleport]: 20,
       },
     },
   },
@@ -45,8 +46,8 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
     XPBuff: 30,
     lootDropBuff: 30,
     spellCooldownReduction: {
-      defaultReduction: 15,
-      customCooldownSeconds: {
+      defaultReduction: 20,
+      customReduction: {
         [SpellsBlueprint.Teleport]: 35,
       },
     },
@@ -58,9 +59,9 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
     XPBuff: 50,
     lootDropBuff: 50,
     spellCooldownReduction: {
-      defaultReduction: 15,
-      customCooldownSeconds: {
-        [SpellsBlueprint.Teleport]: 25,
+      defaultReduction: 30,
+      customReduction: {
+        [SpellsBlueprint.Teleport]: 50,
       },
     },
   },

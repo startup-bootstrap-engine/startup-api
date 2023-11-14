@@ -69,8 +69,8 @@ jest.mock("@providers/constants/PremiumAccountConstants", () => ({
       lootDropBuff: 20,
       spellCooldownReduction: {
         defaultReduction: 10,
-        customCooldownSeconds: {
-          "self-healing-spell": 3,
+        customReduction: {
+          "self-healing-spell": 20,
         },
       },
     },
@@ -81,9 +81,9 @@ jest.mock("@providers/constants/PremiumAccountConstants", () => ({
       XPBuff: 30,
       lootDropBuff: 30,
       spellCooldownReduction: {
-        defaultReduction: 10,
-        customCooldownSeconds: {
-          "self-healing-spell": 2,
+        defaultReduction: 20,
+        customReduction: {
+          "self-healing-spell": 30,
         },
       },
     },
@@ -94,9 +94,9 @@ jest.mock("@providers/constants/PremiumAccountConstants", () => ({
       XPBuff: 50,
       lootDropBuff: 50,
       spellCooldownReduction: {
-        defaultReduction: 10,
-        customCooldownSeconds: {
-          ["self-healing-spell"]: 1,
+        defaultReduction: 50,
+        customReduction: {
+          ["self-healing-spell"]: 50,
         },
       },
     },
