@@ -3,6 +3,7 @@ import {
   ChatSocketEvents,
   ItemSocketEvents,
   SpellSocketEvents,
+  UseWithSocketEvents,
   ViewSocketEvents,
 } from "@rpg-engine/shared";
 
@@ -24,6 +25,7 @@ export const EXHAUSTABLE_EVENTS = [
   "UseWithItem",
   ItemSocketEvents.Use,
   ItemSocketEvents.CraftItem,
+  UseWithSocketEvents.UseWithTile,
 ] as string[];
 
 export const LOGGABLE_EVENTS = [

@@ -18,14 +18,16 @@ export class MacroCaptchaCrons {
 
   public schedule(): void {
     this.cronJobScheduler.uniqueSchedule("macro-captcha-cron-ban-macro-characters", "*/2 * * * *", async () => {
-      await this.banMacroCharacters();
+      //! Temporarily shutdown
+      // await this.banMacroCharacters();
     });
 
     this.cronJobScheduler.uniqueSchedule(
       "macro-captcha-cron-send-macro-captcha-to-active-characters",
       "*/5 * * * *",
       async () => {
-        await this.sendMacroCaptchaToActiveCharacters();
+        //! Temporarily shutdown
+        // await this.sendMacroCaptchaToActiveCharacters();
       }
     );
   }
@@ -100,7 +102,7 @@ export class MacroCaptchaCrons {
 
     await Promise.all(
       charactersWithCaptchaNotVerified.map(async (character) => {
-        const n = _.random(0, 100);
+        const n = _.random(1, 100);
 
         if (n <= ANTI_MACRO_PROBABILITY_TRIGGER) {
           await this.macroCaptchaSend.sendAndStartCaptchaVerification(character);

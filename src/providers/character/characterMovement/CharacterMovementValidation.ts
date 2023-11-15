@@ -159,7 +159,7 @@ export class CharacterMovementValidation {
       const lastMovement = dayjs(character.lastMovement);
       const movementDiff = now.diff(lastMovement, "millisecond");
 
-      if (movementDiff < character.movementIntervalMs / 4 || character.baseSpeed > 5) {
+      if (movementDiff < character.movementIntervalMs / 4 || character.baseSpeed > 6) {
         console.log(`⚠️ ${character.name} is moving too fast!`);
         this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId!, UISocketEvents.ShowMessage, {
           message: "Sorry, you're moving too fast.",
