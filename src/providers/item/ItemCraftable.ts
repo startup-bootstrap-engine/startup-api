@@ -27,9 +27,9 @@ import {
   UISocketEvents,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { throttle } from "lodash";
 import random from "lodash/random";
 import shuffle from "lodash/shuffle";
+import throttle from "lodash/throttle";
 
 import {
   CRAFTING_BASE_CHANCE_IMPACT,
@@ -301,7 +301,7 @@ export class ItemCraftable {
         baseQty = baseQty * (1 + premiumAccountData.craftingQtyBuff / 100);
       }
     }
-    return baseQty;
+    return Math.ceil(baseQty);
   }
 
   /*
