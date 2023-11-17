@@ -1,5 +1,6 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { ISpell, SpellSocketEvents } from "@rpg-engine/shared";
@@ -10,7 +11,11 @@ import { NamespaceRedisControl } from "./data/types/SpellsBlueprintTypes";
 
 @provide(SpellCoolDown)
 export default class SpellCoolDown {
-  constructor(private inMemoryHashtable: InMemoryHashTable, private socketMessaging: SocketMessaging) {}
+  constructor(
+    private inMemoryHashtable: InMemoryHashTable,
+    private socketMessaging: SocketMessaging,
+    private characterPremiumAccount: CharacterPremiumAccount
+  ) {}
 
   @TrackNewRelicTransaction()
   public async haveSpellCooldown(characterId: Types.ObjectId, magicWords: string): Promise<boolean> {
@@ -25,7 +30,12 @@ export default class SpellCoolDown {
   }
 
   @TrackNewRelicTransaction()
-  public async setSpellCooldown(characterId: Types.ObjectId, magicWords: string, cooldown: number): Promise<boolean> {
+  public async setSpellCooldown(
+    spellKey: string,
+    characterId: Types.ObjectId,
+    magicWords: string,
+    cooldown: number
+  ): Promise<boolean> {
     this.validateArguments(characterId, magicWords, cooldown);
 
     const key = this.getNamespaceKey(magicWords);
@@ -43,8 +53,30 @@ export default class SpellCoolDown {
     }
 
     try {
-      await this.inMemoryHashtable.set(namespace, key, cooldown);
-      await this.inMemoryHashtable.expire(namespace, cooldown, "NX");
+      const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(String(characterId));
+
+      if (premiumAccountData) {
+        const premiumAccountCustomSpellReductionKeys = Object.keys(
+          premiumAccountData.spellCooldownReduction.customReduction
+        );
+
+        // has custom specificed cooldown for this spell
+        if (premiumAccountCustomSpellReductionKeys.includes(spellKey)) {
+          const reducedCustomCooldown =
+            cooldown * (1 - premiumAccountData.spellCooldownReduction.customReduction[spellKey] / 100);
+
+          await this.setInMemoryCooldown(namespace, key, reducedCustomCooldown);
+        } else {
+          // if not, just set the default cooldown reduction
+
+          const reducedCooldown = cooldown * (1 - premiumAccountData.spellCooldownReduction.defaultReduction / 100);
+
+          await this.setInMemoryCooldown(namespace, key, reducedCooldown);
+        }
+      } else {
+        // set standard free account cooldown
+        await this.setInMemoryCooldown(namespace, key, cooldown);
+      }
 
       return true;
     } catch (error) {
@@ -88,6 +120,11 @@ export default class SpellCoolDown {
     const timeLeftSecs = timeLeftMs >= 0 ? Math.floor(timeLeftMs / 100) / 10 : -1;
 
     return timeLeftSecs;
+  }
+
+  private async setInMemoryCooldown(namespace: string, key: string, cooldown: number): Promise<void> {
+    await this.inMemoryHashtable.set(namespace, key, cooldown);
+    await this.inMemoryHashtable.expire(namespace, cooldown, "NX");
   }
 
   private getSpellCooldownNamespace(characterId: Types.ObjectId, magicWords: string): string {

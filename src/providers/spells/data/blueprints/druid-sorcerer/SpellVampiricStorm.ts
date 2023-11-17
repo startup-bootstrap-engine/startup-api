@@ -12,6 +12,7 @@ import {
   RangeTypes,
   SpellCastingType,
   SpellsBlueprint,
+  UserAccountTypes,
 } from "@rpg-engine/shared";
 import { SpellLifeSteal } from "../../logic/other/SpellLifeSteal/SpellLifeSteal";
 
@@ -33,6 +34,8 @@ export const spellVampiricStorm: Partial<ISpell> = {
   projectileAnimationKey: AnimationEffectKeys.Red,
   maxDistanceGrid: RangeTypes.High,
   characterClass: [CharacterClass.Druid],
+
+  onlyPremiumAccountType: [UserAccountTypes.PremiumSilver, UserAccountTypes.PremiumGold],
 
   usableEffect: async (caster: ICharacter | INPC, target: ICharacter | INPC) => {
     const spellArea = container.get(SpellArea);

@@ -13,6 +13,7 @@ import {
   RangeTypes,
   SpellCastingType,
   SpellsBlueprint,
+  UserAccountTypes,
 } from "@rpg-engine/shared";
 import { SpellCalculator } from "../../abstractions/SpellCalculator";
 
@@ -33,6 +34,8 @@ export const spellArcaneExplosion: Partial<ISpell> = {
   projectileAnimationKey: AnimationEffectKeys.HitFire,
   maxDistanceGrid: RangeTypes.UltraShort,
   characterClass: [CharacterClass.Sorcerer],
+
+  onlyPremiumAccountType: [UserAccountTypes.PremiumSilver, UserAccountTypes.PremiumGold],
 
   usableEffect: async (character: ICharacter, target: ICharacter | INPC) => {
     const spellArea = container.get(SpellArea);

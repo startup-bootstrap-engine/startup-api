@@ -69,7 +69,7 @@ describe("HitTarget", () => {
       testCharacter = await unitTestHelper.createMockCharacter(
         {
           health: 80,
-          learnedSpells: [spellSelfHealing.key],
+          learnedSpells: [spellSelfHealing.key as any],
         },
         {
           hasEquipment: true,

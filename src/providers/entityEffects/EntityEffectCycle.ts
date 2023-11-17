@@ -277,7 +277,7 @@ export class EntityEffectCycle {
         await this.characterDeath.handleCharacterDeath(attacker, target as ICharacter);
         break;
       case EntityType.NPC:
-        await this.npcDeath.handleNPCDeath(target as INPC);
+        await this.npcDeath.handleNPCDeath(attacker as ICharacter, target as INPC);
         break;
     }
   }
