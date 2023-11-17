@@ -4,6 +4,7 @@ import {
   MODE_EXP_MULTIPLIER,
   RACE_BONUS_OR_PENALTIES,
 } from "@providers/character/__tests__/mockConstants/SkillConstants.mock";
+import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { container, redisManager } from "@providers/inversify/container";
 import { MapLoader } from "@providers/map/MapLoader";
 import { MongoMemoryServer } from "mongodb-memory-server";
@@ -55,6 +56,68 @@ jest.mock("@providers/constants/SkillConstants", () => ({
 
 jest.mock("@providers/constants/PartyConstants", () => ({
   PARTY_BONUS_RATIO: 1,
+}));
+
+jest.mock("@providers/constants/PremiumAccountConstants", () => ({
+  PREMIUM_ACCOUNT_METADATA: {
+    free: undefined,
+    bronze: {
+      SPXPLostOnDeathReduction: 20, // only loses 80% of the regular skill loss
+      InventoryLossOnDeathReduction: 25, // 25% less chance to drop an item
+      maxSpeed: MovementSpeed.Fast,
+      XPBuff: 20,
+      lootDropBuff: 20,
+      spellCooldownReduction: {
+        defaultReduction: 10,
+        customReduction: {
+          "self-healing-spell": 20,
+        },
+      },
+      craftingQtyBuff: 20,
+    },
+    silver: {
+      SPXPLostOnDeathReduction: 35, // only loses 60% of the regular skill loss
+      InventoryLossOnDeathReduction: 50, // 50% less chance to drop an item
+      maxSpeed: MovementSpeed.ExtraFast,
+      XPBuff: 30,
+      lootDropBuff: 30,
+      spellCooldownReduction: {
+        defaultReduction: 20,
+        customReduction: {
+          "self-healing-spell": 30,
+        },
+      },
+      craftingQtyBuff: 35,
+    },
+    gold: {
+      SPXPLostOnDeathReduction: 50, // only loses 50% of the regular skill loss
+      InventoryLossOnDeathReduction: 0,
+      maxSpeed: MovementSpeed.ExtraFast,
+      XPBuff: 50,
+      lootDropBuff: 50,
+      spellCooldownReduction: {
+        defaultReduction: 50,
+        customReduction: {
+          "self-healing-spell": 50,
+        },
+      },
+      craftingQtyBuff: 50,
+    },
+  },
+  ultimate: {
+    SPXPLostOnDeathReduction: 100, // only loses 50% of the regular skill loss
+    InventoryLossOnDeathReduction: 100, // Do not drop anything on death
+    maxSpeed: MovementSpeed.ExtraFast,
+    XPBuff: 100,
+    lootDropBuff: 50,
+    spellCooldownReduction: {
+      defaultReduction: 60,
+      customReduction: {
+        "self-healing-spell": 75,
+      },
+    },
+    craftingQtyBuff: 100,
+  },
 }));
 
 jest.mock("@providers/constants/DeathConstants", () => ({

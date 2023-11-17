@@ -2,7 +2,7 @@ import { appEnv } from "@providers/config/env";
 import { InternalServerError } from "@providers/errors/InternalServerError";
 import { NotFoundError } from "@providers/errors/NotFoundError";
 import { TS } from "@providers/translation/TranslationHelper";
-import { IAuthResponse, TypeHelper, UserAuthFlow, UserTypes } from "@rpg-engine/shared";
+import { IAuthResponse, TypeHelper, UserAccountTypes, UserAuthFlow, UserTypes } from "@rpg-engine/shared";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import uniqueValidator from "mongoose-unique-validator";
@@ -42,7 +42,11 @@ const userSchema = createSchema(
         ref: "Character",
       })
     ),
-
+    accountType: Type.string({
+      required: true,
+      default: UserAccountTypes.Free,
+      enum: TypeHelper.enumToStringArray(UserAccountTypes),
+    }),
     // Static method types
     ...({} as {
       isValidPassword: (password: string) => Promise<boolean>;

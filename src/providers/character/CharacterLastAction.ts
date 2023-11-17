@@ -1,3 +1,4 @@
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
@@ -6,10 +7,12 @@ import { provide } from "inversify-binding-decorators";
 export class CharacterLastAction {
   constructor(private inMemoryHashTable: InMemoryHashTable) {}
 
+  @TrackNewRelicTransaction()
   public async setLastAction(characterId: string, lastAction: string): Promise<void> {
     await this.inMemoryHashTable.set("character-lastAction:characterId", characterId, lastAction);
   }
 
+  @TrackNewRelicTransaction()
   public async getLastAction(characterId: string): Promise<string | undefined> {
     const lastAction = await this.inMemoryHashTable.get("character-lastAction:characterId", characterId);
     return lastAction?.toString();

@@ -109,7 +109,7 @@ describe("CharacterDeath.ts", () => {
       testNPC = await unitTestHelper.createMockNPC();
       testCharacter = await unitTestHelper.createMockCharacter({
         mode: Modes.PermadeathMode,
-        isSoftDelete: false,
+        isSoftDeleted: false,
       });
     });
 

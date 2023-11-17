@@ -27,9 +27,9 @@ import {
   UISocketEvents,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { throttle } from "lodash";
 import random from "lodash/random";
 import shuffle from "lodash/shuffle";
+import throttle from "lodash/throttle";
 
 import {
   CRAFTING_BASE_CHANCE_IMPACT,
@@ -41,6 +41,8 @@ import {
 import { TraitGetter } from "@providers/skill/TraitGetter";
 import { AvailableBlueprints } from "./data/types/itemsBlueprintTypes";
 
+import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
+import _ from "lodash";
 import { ItemCraftbook } from "./ItemCraftbook";
 import { ItemCraftingRecipes } from "./ItemCraftingRecipes";
 
@@ -59,7 +61,8 @@ export class ItemCraftable {
     private inMemoryHashTable: InMemoryHashTable,
     private traitGetter: TraitGetter,
     private itemCraftingRecipes: ItemCraftingRecipes,
-    private itemCraftbook: ItemCraftbook
+    private itemCraftbook: ItemCraftbook,
+    private characterPremiumAccount: CharacterPremiumAccount
   ) {}
 
   @TrackNewRelicTransaction()
@@ -119,7 +122,7 @@ export class ItemCraftable {
       return;
     }
 
-    const qty = this.getQty(recipe);
+    const qty = await this.getQty(character, recipe);
 
     const itemToBeAdded = {
       ...blueprint,
@@ -257,7 +260,7 @@ export class ItemCraftable {
   @TrackNewRelicTransaction()
   private async createItems(recipe: IUseWithCraftingRecipe, character: ICharacter): Promise<void> {
     const blueprint = await blueprintManager.getBlueprint<IItem>("items", recipe.outputKey as AvailableBlueprints);
-    let qty = this.getQty(recipe);
+    let qty = await this.getQty(character, recipe);
 
     do {
       const props: Partial<IItem> = {
@@ -284,16 +287,21 @@ export class ItemCraftable {
     } while (qty > 0);
   }
 
-  private getQty(recipe: IUseWithCraftingRecipe): number {
-    let qty = random(recipe.outputQtyRange[0], recipe.outputQtyRange[1]);
+  private async getQty(character: ICharacter, recipe: IUseWithCraftingRecipe): Promise<number> {
+    let baseQty = _.random(recipe.outputQtyRange[0], recipe.outputQtyRange[1]);
 
     const isSingleQtyItem = recipe.outputQtyRange[0] === recipe.outputQtyRange[1] && recipe.outputQtyRange[0] === 1;
 
     if (!isSingleQtyItem) {
-      qty = Math.ceil(qty * CRAFTING_OUTPUT_QTY_RATIO);
-    }
+      baseQty = baseQty * CRAFTING_OUTPUT_QTY_RATIO;
 
-    return qty;
+      const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(character._id);
+
+      if (premiumAccountData) {
+        baseQty = baseQty * (1 + premiumAccountData.craftingQtyBuff / 100);
+      }
+    }
+    return Math.ceil(baseQty);
   }
 
   /*

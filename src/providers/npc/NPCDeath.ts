@@ -3,6 +3,7 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { CharacterView } from "@providers/character/CharacterView";
 
+import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { CharacterParty, ICharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
@@ -37,7 +38,7 @@ export class NPCDeath {
   ) {}
 
   @TrackNewRelicTransaction()
-  public async handleNPCDeath(npc: INPC): Promise<void> {
+  public async handleNPCDeath(killer: ICharacter, npc: INPC): Promise<void> {
     await this.npcFreezer.freezeNPC(npc, "NPCDeath");
     const hasLocked = await this.locker.lock(`npc-death-${npc._id}`);
     if (!hasLocked) {
@@ -65,7 +66,7 @@ export class NPCDeath {
         chance: loot.chance + totalDropRatioFromParty || 0,
         quantityRange: loot.quantityRange || undefined,
       }));
-      const addLootToNPCBody = this.npcLoot.addLootToNPCBody(npcBody, [...npcLoots, goldLoot], npc.isGiantForm);
+      const addLootToNPCBody = this.npcLoot.addLootToNPCBody(killer, npcBody, [...npcLoots, goldLoot], npc.isGiantForm);
       const removeItemOwnership = this.itemOwnership.removeItemOwnership(npcBody.id);
       const clearNPCBehavior = this.clearNPCBehavior(npc);
       const updateNPCAfterDeath = this.updateNPCAfterDeath(npcWithSkills);
