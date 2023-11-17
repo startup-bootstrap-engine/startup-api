@@ -98,11 +98,25 @@ jest.mock("@providers/constants/PremiumAccountConstants", () => ({
       spellCooldownReduction: {
         defaultReduction: 50,
         customReduction: {
-          ["self-healing-spell"]: 50,
+          "self-healing-spell": 50,
         },
       },
       craftingQtyBuff: 50,
     },
+  },
+  ultimate: {
+    SPXPLostOnDeathReduction: 100, // only loses 50% of the regular skill loss
+    InventoryLossOnDeathReduction: 100, // Do not drop anything on death
+    maxSpeed: MovementSpeed.ExtraFast,
+    XPBuff: 100,
+    lootDropBuff: 50,
+    spellCooldownReduction: {
+      defaultReduction: 60,
+      customReduction: {
+        "self-healing-spell": 75,
+      },
+    },
+    craftingQtyBuff: 100,
   },
 }));
 

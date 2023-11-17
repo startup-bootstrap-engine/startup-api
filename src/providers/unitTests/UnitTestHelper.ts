@@ -29,8 +29,7 @@ import {
   stoppedMovementMockNPC,
 } from "@providers/unitTests/mock/NPCMock";
 import { characterMock } from "@providers/unitTests/mock/characterMock";
-import { UserAccountTypes } from "@providers/user/userTypes";
-import { ISocketTransmissionZone, NPCMovementType, PeriodOfDay, QuestType } from "@rpg-engine/shared";
+import { ISocketTransmissionZone, NPCMovementType, PeriodOfDay, QuestType, UserAccountTypes } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { Types } from "mongoose";

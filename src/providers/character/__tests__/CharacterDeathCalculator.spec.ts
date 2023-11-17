@@ -2,7 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
 import { IUser } from "@entities/ModuleSystem/UserModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
-import { UserAccountTypes } from "@providers/user/userTypes";
+import { UserAccountTypes } from "@rpg-engine/shared";
 import { CharacterDeathCalculator } from "../CharacterDeathCalculator";
 import { CharacterUser } from "../CharacterUser";
 

@@ -4,7 +4,6 @@ import { SPELL_AREA_MEDIUM_BLAST_RADIUS } from "@providers/constants/SpellConsta
 import { entityEffectBleeding } from "@providers/entityEffects/data/blueprints/entityEffectBleeding";
 import { container } from "@providers/inversify/container";
 import { SpellArea } from "@providers/spells/area-spells/SpellArea";
-import { UserAccountTypes } from "@providers/user/userTypes";
 import {
   AnimationEffectKeys,
   CharacterClass,
@@ -13,6 +12,7 @@ import {
   RangeTypes,
   SpellCastingType,
   SpellsBlueprint,
+  UserAccountTypes,
 } from "@rpg-engine/shared";
 import { SpellLifeSteal } from "../../logic/other/SpellLifeSteal/SpellLifeSteal";
 

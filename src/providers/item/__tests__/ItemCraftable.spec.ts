@@ -8,7 +8,6 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { recipeSpikedClub } from "@providers/useWith/recipes/maces/recipeSpikedClub";
 import { recipeLifePotion } from "@providers/useWith/recipes/potions/recipeLifePotion";
 import { recipeBolt } from "@providers/useWith/recipes/ranged-weapons/recipeBolt";
-import { UserAccountTypes } from "@providers/user/userTypes";
 import {
   AnimationEffectKeys,
   AnimationSocketEvents,
@@ -18,6 +17,7 @@ import {
   ItemSocketEvents,
   ItemSubType,
   UISocketEvents,
+  UserAccountTypes,
 } from "@rpg-engine/shared";
 import _ from "lodash";
 import { ItemCraftable } from "../ItemCraftable";
@@ -432,7 +432,7 @@ describe("ItemCraftable.ts", () => {
   });
 
   it("returns a single qty, if item output range is 1:1", async () => {
-    //@ts-ignore
+    // @ts-ignore
     const qtyOutput = await craftableItem.getQty(testCharacter, recipeSpikedClub);
 
     expect(qtyOutput).toBe(1);
@@ -450,7 +450,7 @@ describe("ItemCraftable.ts", () => {
     it("should increase crafting qty outcome, if character is on a golden premium account", async () => {
       jest.spyOn(_, "random").mockReturnValue(10);
 
-      //@ts-ignore
+      // @ts-ignore
       const qtyOutput = await craftableItem.getQty(premiumAccountCharacter, recipeLifePotion);
 
       expect(qtyOutput).toBe(15);
@@ -459,7 +459,7 @@ describe("ItemCraftable.ts", () => {
     it("should return the regular outcome, if character is NOT a premium account", async () => {
       jest.spyOn(_, "random").mockReturnValue(10);
 
-      //@ts-ignore
+      // @ts-ignore
       const qtyOutput = await craftableItem.getQty(testCharacter, recipeLifePotion);
 
       expect(qtyOutput).toBe(10);

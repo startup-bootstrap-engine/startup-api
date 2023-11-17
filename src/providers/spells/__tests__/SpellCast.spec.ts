@@ -10,7 +10,6 @@ import { container, unitTestHelper } from "@providers/inversify/container";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { Execution } from "@providers/spells/data/logic/berserker/Execution";
-import { UserAccountTypes } from "@providers/user/userTypes";
 import {
   AnimationSocketEvents,
   CharacterClass,
@@ -25,6 +24,7 @@ import {
   SpellSocketEvents,
   SpellsBlueprint,
   UISocketEvents,
+  UserAccountTypes,
 } from "@rpg-engine/shared";
 import { SpellCast } from "../SpellCast";
 import { SpellLearn } from "../SpellLearn";
@@ -795,12 +795,12 @@ describe("SpellCast.ts", () => {
         },
         { isPremiumAccountType: UserAccountTypes.PremiumBronze, hasSkills: true }
       );
-      //@ts-ignore
+      // @ts-ignore
       sendErrorMessageToCharacter = jest.spyOn(spellCast.socketMessaging, "sendErrorMessageToCharacter");
     });
 
     it("properly casts a premium exclusive spell if character is on the right plan", async () => {
-      let goldenPremiumAccountCharacter = await unitTestHelper.createMockCharacter(
+      const goldenPremiumAccountCharacter = await unitTestHelper.createMockCharacter(
         {
           learnedSpells: [spellVampiricStorm.key] as any,
           class: CharacterClass.Druid,
@@ -813,7 +813,7 @@ describe("SpellCast.ts", () => {
       spellVampiricStorm.minMagicLevelRequired = 1;
       spellVampiricStorm.minLevelRequired = 1;
 
-      //@ts-ignore
+      // @ts-ignore
       const result = await spellCast.isSpellCastingValid(spellVampiricStorm, goldenPremiumAccountCharacter);
 
       expect(result).toBe(true);
@@ -824,7 +824,7 @@ describe("SpellCast.ts", () => {
 
       await testCharacter.save();
 
-      //@ts-ignore
+      // @ts-ignore
       const result = await spellCast.isSpellCastingValid(spellVampiricStorm, testCharacter);
 
       expect(result).toBe(false);
@@ -836,7 +836,7 @@ describe("SpellCast.ts", () => {
     });
 
     it("should prevent casting a spell if it exclusive to premium account, but the character is not on the required plan", async () => {
-      //@ts-ignore
+      // @ts-ignore
       const result = await spellCast.isSpellCastingValid(spellVampiricStorm, premiumAccountCharacter);
 
       expect(result).toBe(false);

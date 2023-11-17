@@ -1,5 +1,5 @@
 import { IPremiumAccountData, PREMIUM_ACCOUNT_METADATA } from "@providers/constants/PremiumAccountConstants";
-import { UserAccountTypes } from "@providers/user/userTypes";
+import { UserAccountTypes } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { CharacterUser } from "./CharacterUser";
 @provide(CharacterPremiumAccount)

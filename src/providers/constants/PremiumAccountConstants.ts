@@ -1,7 +1,5 @@
-import { UserAccountTypes } from "@providers/user/userTypes";
-import { SpellsBlueprint } from "@rpg-engine/shared";
+import { SpellsBlueprint, UserAccountTypes } from "@rpg-engine/shared";
 import { MovementSpeed } from "./MovementConstants";
-
 type CustomSpellCooldown = {
   [spell: string]: number;
 };
@@ -13,7 +11,7 @@ export interface IPremiumAccountData {
   XPBuff: number;
   lootDropBuff: number;
   spellCooldownReduction: {
-    //both are percentages
+    // both are percentages
     defaultReduction: number;
     customReduction: CustomSpellCooldown;
   };
@@ -24,13 +22,15 @@ export interface IPremiumAccountPlansData {
   [UserAccountTypes.PremiumBronze]: IPremiumAccountData;
   [UserAccountTypes.PremiumSilver]: IPremiumAccountData;
   [UserAccountTypes.PremiumGold]: IPremiumAccountData;
+  [UserAccountTypes.PremiumUltimate]: IPremiumAccountData;
 }
 
 const CUSTOM_COOLDOWN_REDUCTION_DEFAULT_BRONZE = 20;
 const CUSTOM_COOLDOWN_REDUCTION_DEFAULT_SILVER = 35;
 const CUSTOM_COOLDOWN_REDUCTION_DEFAULT_GOLD = 50;
+const CUSTOM_COOLDOWN_REDUCTION_DEFAULT_ULTIMATE = 75;
 
-const generateCustomCooldownReduction = (defaultValues: number) => {
+const generateCustomCooldownReduction = (defaultValues: number): CustomSpellCooldown => {
   return {
     [SpellsBlueprint.Teleport]: defaultValues,
     [SpellsBlueprint.SelfHasteSpell]: defaultValues,
@@ -81,7 +81,7 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
   },
   [UserAccountTypes.PremiumGold]: {
     SPXPLostOnDeathReduction: 50, // only loses 50% of the regular skill loss
-    InventoryLossOnDeathReduction: 0, // Do not drop anything on death
+    InventoryLossOnDeathReduction: 100, // Do not drop anything on death
     maxSpeed: MovementSpeed.ExtraFast,
     XPBuff: 50,
     lootDropBuff: 50,
@@ -92,5 +92,19 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
       },
     },
     craftingQtyBuff: 50,
+  },
+  [UserAccountTypes.PremiumUltimate]: {
+    SPXPLostOnDeathReduction: 100, // Do not lose any skill points or XP on death
+    InventoryLossOnDeathReduction: 100, // Do not drop anything on death
+    maxSpeed: MovementSpeed.ExtraFast,
+    XPBuff: 100,
+    lootDropBuff: 50,
+    spellCooldownReduction: {
+      defaultReduction: 60,
+      customReduction: {
+        ...generateCustomCooldownReduction(CUSTOM_COOLDOWN_REDUCTION_DEFAULT_ULTIMATE),
+      },
+    },
+    craftingQtyBuff: 100,
   },
 };

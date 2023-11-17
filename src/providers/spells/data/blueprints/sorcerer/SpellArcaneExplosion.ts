@@ -5,7 +5,6 @@ import { entityEffectBurning } from "@providers/entityEffects/data/blueprints/en
 import { container } from "@providers/inversify/container";
 import { EffectableAttribute, ItemUsableEffect } from "@providers/item/helper/ItemUsableEffect";
 import { SpellArea } from "@providers/spells/area-spells/SpellArea";
-import { UserAccountTypes } from "@providers/user/userTypes";
 import {
   AnimationEffectKeys,
   BasicAttribute,
@@ -14,6 +13,7 @@ import {
   RangeTypes,
   SpellCastingType,
   SpellsBlueprint,
+  UserAccountTypes,
 } from "@rpg-engine/shared";
 import { SpellCalculator } from "../../abstractions/SpellCalculator";
 

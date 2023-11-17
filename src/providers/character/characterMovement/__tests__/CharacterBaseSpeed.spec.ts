@@ -2,7 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { container, unitTestHelper } from "@providers/inversify/container";
-import { UserAccountTypes } from "@providers/user/userTypes";
+import { UserAccountTypes } from "@rpg-engine/shared";
 import { CharacterBaseSpeed } from "../CharacterBaseSpeed";
 
 describe("CharacterBaseSpeed", () => {
