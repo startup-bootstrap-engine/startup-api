@@ -248,8 +248,6 @@ export class SpellCast {
     }
 
     if (premiumAccountType && spell.onlyPremiumAccountType) {
-      console.log(premiumAccountType);
-
       const isSpellOnPremiumPlan = spell.onlyPremiumAccountType?.includes(premiumAccountType);
 
       if (!isSpellOnPremiumPlan) {
