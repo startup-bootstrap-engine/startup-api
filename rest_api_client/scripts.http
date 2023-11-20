@@ -24,6 +24,6 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 ### Scripts :: Cleanup character user cache
-GET {{baseUrl}}/scripts/cleanup-character-user-cache/655690a8aafdfe0033386bfd HTTP/1.1
+GET {{baseUrl}}/scripts/cleanup-character-user-cache/6554ce7c58ce91005ebc3d8c HTTP/1.1
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
