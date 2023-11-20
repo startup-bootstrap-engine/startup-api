@@ -1,3 +1,4 @@
+import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IPremiumAccountData, PREMIUM_ACCOUNT_METADATA } from "@providers/constants/PremiumAccountConstants";
 import { UserAccountTypes } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -6,8 +7,8 @@ import { CharacterUser } from "./CharacterUser";
 export class CharacterPremiumAccount {
   constructor(private characterUser: CharacterUser) {}
 
-  public async getPremiumAccountType(characterId: string): Promise<UserAccountTypes | undefined> {
-    const user = await this.characterUser.findUserByCharacter(characterId);
+  public async getPremiumAccountType(character: ICharacter): Promise<UserAccountTypes | undefined> {
+    const user = await this.characterUser.findUserByCharacter(character);
 
     if (!user || !user.accountType) {
       return;
@@ -16,8 +17,8 @@ export class CharacterPremiumAccount {
     return user.accountType as UserAccountTypes;
   }
 
-  public async getPremiumAccountData(characterId: string): Promise<IPremiumAccountData | undefined> {
-    const user = await this.characterUser.findUserByCharacter(characterId);
+  public async getPremiumAccountData(character: ICharacter): Promise<IPremiumAccountData | undefined> {
+    const user = await this.characterUser.findUserByCharacter(character);
 
     if (!user || !user.accountType) {
       return;

@@ -295,7 +295,7 @@ export class ItemCraftable {
     if (!isSingleQtyItem) {
       baseQty = baseQty * CRAFTING_OUTPUT_QTY_RATIO;
 
-      const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(character._id);
+      const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(character);
 
       if (premiumAccountData) {
         baseQty = baseQty * (1 + premiumAccountData.craftingQtyBuff / 100);

@@ -42,7 +42,7 @@ export class CharacterBaseSpeed {
         const baseSpeedBuff = buffs.find((buff) => buff.trait === CharacterAttributes.Speed);
         baseSpeedBuffValue = baseSpeedBuff?.absoluteChange || 0;
       }
-      const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(character._id);
+      const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(character);
 
       const rawCalculation = this.getRawBaseSpeed(level, premiumAccountData) + baseSpeedBuffValue;
 

@@ -15,7 +15,7 @@ describe("CharacterUser", () => {
   });
 
   it("properly fetches an user based on a character id", async () => {
-    const user = await characterUser.findUserByCharacter(testCharacter._id);
+    const user = await characterUser.findUserByCharacter(testCharacter);
 
     expect(user).toBeDefined();
   });

@@ -216,7 +216,7 @@ export class NPCExperience {
   }
 
   private async getXPMultiplier(character: ICharacter, target: INPC): Promise<number> {
-    const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(character._id);
+    const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(character);
 
     const premiumAccountXPMultiplier = premiumAccountData ? premiumAccountData.XPBuff / 100 + 1 : 1;
 

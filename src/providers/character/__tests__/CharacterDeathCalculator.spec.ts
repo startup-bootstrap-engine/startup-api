@@ -112,7 +112,7 @@ describe("CharacterDeathCalculator", () => {
     });
 
     beforeEach(async () => {
-      testUser = (await characterUser.findUserByCharacter(testCharacter._id)) as IUser;
+      testUser = (await characterUser.findUserByCharacter(testCharacter)) as IUser;
 
       testUser.accountType = UserAccountTypes.PremiumGold;
 

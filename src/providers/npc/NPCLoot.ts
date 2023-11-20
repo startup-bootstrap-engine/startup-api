@@ -172,7 +172,7 @@ export class NPCLoot {
   }
 
   private async getLootMultiplier(killer: ICharacter, blueprintData: IItem): Promise<number> {
-    const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(killer._id);
+    const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(killer);
 
     if (premiumAccountData) {
       return premiumAccountData.lootDropBuff / 100 + this.getBaseLootMultiplier(blueprintData);

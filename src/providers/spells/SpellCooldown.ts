@@ -5,7 +5,6 @@ import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { ISpell, SpellSocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { Types } from "mongoose";
 import { spellsBlueprints } from "./data/blueprints";
 import { NamespaceRedisControl } from "./data/types/SpellsBlueprintTypes";
 
@@ -18,11 +17,11 @@ export default class SpellCoolDown {
   ) {}
 
   @TrackNewRelicTransaction()
-  public async haveSpellCooldown(characterId: Types.ObjectId, magicWords: string): Promise<boolean> {
-    this.validateArguments(characterId, magicWords);
+  public async haveSpellCooldown(character: ICharacter, magicWords: string): Promise<boolean> {
+    this.validateArguments(character._id, magicWords);
 
     const key = this.getNamespaceKey(magicWords);
-    const namespace = this.getSpellCooldownNamespace(characterId, magicWords);
+    const namespace = this.getSpellCooldownNamespace(character._id, magicWords);
 
     const hasSpellCooldown = await this.inMemoryHashtable.has(namespace, key);
 
@@ -32,14 +31,14 @@ export default class SpellCoolDown {
   @TrackNewRelicTransaction()
   public async setSpellCooldown(
     spellKey: string,
-    characterId: Types.ObjectId,
+    character: ICharacter,
     magicWords: string,
     cooldown: number
   ): Promise<boolean> {
-    this.validateArguments(characterId, magicWords, cooldown);
+    this.validateArguments(character._id, magicWords, cooldown);
 
     const key = this.getNamespaceKey(magicWords);
-    const namespace = this.getSpellCooldownNamespace(characterId, magicWords);
+    const namespace = this.getSpellCooldownNamespace(character._id, magicWords);
 
     const hasSpellCooldown = await this.inMemoryHashtable.has(namespace, key);
 
@@ -47,13 +46,13 @@ export default class SpellCoolDown {
       return false;
     }
 
-    const timeLeftSecs = await this.getTimeLeft(characterId, magicWords);
+    const timeLeftSecs = await this.getTimeLeft(character._id, magicWords);
     if (timeLeftSecs >= 0) {
       return false;
     }
 
     try {
-      const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(String(characterId));
+      const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(character);
 
       if (premiumAccountData) {
         const premiumAccountCustomSpellReductionKeys = Object.keys(
@@ -111,7 +110,7 @@ export default class SpellCoolDown {
     return namespaceParts[namespaceParts.length - 1];
   }
 
-  public async getTimeLeft(characterId: Types.ObjectId, magicWords: string): Promise<number> {
+  public async getTimeLeft(characterId: string, magicWords: string): Promise<number> {
     this.validateArguments(characterId, magicWords);
 
     const namespace = this.getSpellCooldownNamespace(characterId, magicWords);
@@ -127,7 +126,7 @@ export default class SpellCoolDown {
     await this.inMemoryHashtable.expire(namespace, cooldown, "NX");
   }
 
-  private getSpellCooldownNamespace(characterId: Types.ObjectId, magicWords: string): string {
+  private getSpellCooldownNamespace(characterId: string, magicWords: string): string {
     this.validateArguments(characterId, magicWords);
     const key = this.getNamespaceKey(magicWords);
 
@@ -138,8 +137,8 @@ export default class SpellCoolDown {
     return magicWords.toLocaleLowerCase().replace(/\s+/g, "_");
   }
 
-  private validateArguments(characterId: Types.ObjectId, magicWords: string, cooldown?: number): void {
-    if (!(characterId instanceof Types.ObjectId)) {
+  private validateArguments(characterId: string, magicWords: string, cooldown?: number): void {
+    if (!characterId) {
       throw new Error("Invalid characterId argument");
     }
 
@@ -152,7 +151,7 @@ export default class SpellCoolDown {
     }
   }
 
-  public async clearCooldowns(characterId: Types.ObjectId): Promise<void> {
+  public async clearCooldowns(characterId: string): Promise<void> {
     const character = (await Character.findById(characterId).lean().select("learnedSpells")) as ICharacter;
 
     let spells: ISpell[] = [];

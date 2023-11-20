@@ -143,10 +143,10 @@ export class SpellCast {
       }
     }
 
-    const hasSpellCooldown = await this.spellCoolDown.haveSpellCooldown(character._id, spell.magicWords);
+    const hasSpellCooldown = await this.spellCoolDown.haveSpellCooldown(character, spell.magicWords);
 
     if (!hasSpellCooldown) {
-      await this.spellCoolDown.setSpellCooldown(spell.key, character._id, spell.magicWords, spell.cooldown);
+      await this.spellCoolDown.setSpellCooldown(spell.key, character, spell.magicWords, spell.cooldown);
     }
     await this.spellCoolDown.getAllSpellCooldowns(character);
 
@@ -237,7 +237,7 @@ export class SpellCast {
       return false;
     }
 
-    const premiumAccountType = await this.characterPremiumAccount.getPremiumAccountType(character._id);
+    const premiumAccountType = await this.characterPremiumAccount.getPremiumAccountType(character);
 
     if (!premiumAccountType && spell.onlyPremiumAccountType) {
       this.socketMessaging.sendErrorMessageToCharacter(

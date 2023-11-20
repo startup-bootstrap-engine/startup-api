@@ -850,14 +850,16 @@ describe("SpellCast.ts", () => {
     });
 
     it("should prevent casting a spell if it exclusive to premium account, but the character is not on the required plan", async () => {
+      spellVampiricStorm.onlyPremiumAccountType = [UserAccountTypes.PremiumGold];
+
       // @ts-ignore
-      const result = await spellCast.isSpellCastingValid(spellVampiricStorm, freeAccountCharacter);
+      const result = await spellCast.isSpellCastingValid(spellVampiricStorm, premiumAccountCharacter);
 
       expect(result).toBe(false);
 
       expect(sendErrorMessageToCharacter).toHaveBeenCalledWith(
         expect.any(Object),
-        "Sorry, this spell requires a premium account of type: bronze, silver, gold, ultimate."
+        "Sorry, this spell requires a premium account of type: gold."
       );
     });
   });
