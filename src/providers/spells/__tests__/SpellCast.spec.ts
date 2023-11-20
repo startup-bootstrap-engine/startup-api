@@ -783,6 +783,7 @@ describe("SpellCast.ts", () => {
 
   describe("Premium Account", () => {
     let premiumAccountCharacter: ICharacter;
+    let freeAccountCharacter: ICharacter;
     let sendErrorMessageToCharacter: jest.SpyInstance;
 
     beforeEach(async () => {
@@ -794,6 +795,19 @@ describe("SpellCast.ts", () => {
           mana: 999,
         },
         { isPremiumAccountType: UserAccountTypes.PremiumBronze, hasSkills: true }
+      );
+
+      freeAccountCharacter = await unitTestHelper.createMockCharacter(
+        {
+          learnedSpells: [spellVampiricStorm.key] as any,
+          class: CharacterClass.Druid,
+          health: 999,
+          mana: 999,
+        },
+        {
+          isPremiumAccountType: UserAccountTypes.Free,
+          hasSkills: true,
+        }
       );
       // @ts-ignore
       sendErrorMessageToCharacter = jest.spyOn(spellCast.socketMessaging, "sendErrorMessageToCharacter");
@@ -837,13 +851,13 @@ describe("SpellCast.ts", () => {
 
     it("should prevent casting a spell if it exclusive to premium account, but the character is not on the required plan", async () => {
       // @ts-ignore
-      const result = await spellCast.isSpellCastingValid(spellVampiricStorm, premiumAccountCharacter);
+      const result = await spellCast.isSpellCastingValid(spellVampiricStorm, freeAccountCharacter);
 
       expect(result).toBe(false);
 
       expect(sendErrorMessageToCharacter).toHaveBeenCalledWith(
         expect.any(Object),
-        "Sorry, this spell requires a premium account of type: silver, gold."
+        "Sorry, this spell requires a premium account of type: bronze, silver, gold, ultimate."
       );
     });
   });

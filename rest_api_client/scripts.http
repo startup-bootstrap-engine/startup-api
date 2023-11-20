@@ -22,3 +22,8 @@ Content-Type: application/json
 GET {{baseUrl}}/scripts/cleanup/redis/blueprint-spells HTTP/1.1
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
+
+### Scripts :: Cleanup character user cache
+GET {{baseUrl}}/scripts/cleanup-character-user-cache/655690a8aafdfe0033386bfd HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json

@@ -8,6 +8,7 @@ export class CharacterUser {
     try {
       const user = await User.findOne({ characters: mongoose.Types.ObjectId(characterId) }).cacheQuery({
         cacheKey: `character-${characterId}-user`,
+        ttl: 60 * 60 * 24, // 24 hours
       });
 
       if (!user) {

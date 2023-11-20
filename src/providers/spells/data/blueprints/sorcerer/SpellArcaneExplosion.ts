@@ -35,7 +35,12 @@ export const spellArcaneExplosion: Partial<ISpell> = {
   maxDistanceGrid: RangeTypes.UltraShort,
   characterClass: [CharacterClass.Sorcerer],
 
-  onlyPremiumAccountType: [UserAccountTypes.PremiumSilver, UserAccountTypes.PremiumGold],
+  onlyPremiumAccountType: [
+    UserAccountTypes.PremiumBronze,
+    UserAccountTypes.PremiumSilver,
+    UserAccountTypes.PremiumGold,
+    UserAccountTypes.PremiumUltimate,
+  ],
 
   usableEffect: async (character: ICharacter, target: ICharacter | INPC) => {
     const spellArea = container.get(SpellArea);

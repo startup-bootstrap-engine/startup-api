@@ -35,7 +35,12 @@ export const spellVampiricStorm: Partial<ISpell> = {
   maxDistanceGrid: RangeTypes.High,
   characterClass: [CharacterClass.Druid],
 
-  onlyPremiumAccountType: [UserAccountTypes.PremiumSilver, UserAccountTypes.PremiumGold],
+  onlyPremiumAccountType: [
+    UserAccountTypes.PremiumBronze,
+    UserAccountTypes.PremiumSilver,
+    UserAccountTypes.PremiumGold,
+    UserAccountTypes.PremiumUltimate,
+  ],
 
   usableEffect: async (caster: ICharacter | INPC, target: ICharacter | INPC) => {
     const spellArea = container.get(SpellArea);
