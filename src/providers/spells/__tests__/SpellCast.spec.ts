@@ -811,6 +811,16 @@ describe("SpellCast.ts", () => {
       );
       // @ts-ignore
       sendErrorMessageToCharacter = jest.spyOn(spellCast.socketMessaging, "sendErrorMessageToCharacter");
+
+      spellVampiricStorm.onlyPremiumAccountType = [
+        UserAccountTypes.PremiumBronze,
+        UserAccountTypes.PremiumSilver,
+        UserAccountTypes.PremiumGold,
+        UserAccountTypes.PremiumUltimate,
+      ];
+
+      spellVampiricStorm.minMagicLevelRequired = 1;
+      spellVampiricStorm.minLevelRequired = 1;
     });
 
     it("properly casts a premium exclusive spell if character is on the right plan", async () => {
@@ -823,9 +833,6 @@ describe("SpellCast.ts", () => {
         },
         { isPremiumAccountType: UserAccountTypes.PremiumGold, hasSkills: true }
       );
-
-      spellVampiricStorm.minMagicLevelRequired = 1;
-      spellVampiricStorm.minLevelRequired = 1;
 
       // @ts-ignore
       const result = await spellCast.isSpellCastingValid(spellVampiricStorm, goldenPremiumAccountCharacter);
