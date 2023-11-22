@@ -18,6 +18,7 @@ import { RankingCrons } from "./RankingCrons";
 import { RedisCrons } from "./RedisCrons";
 import { TotalAvailableGold } from "./TotalAvailableGold";
 import { RemoveInactivePartyMembersCron } from "./RemoveInactivePartyMembersCron";
+import { GuideSharing } from "./GuideSharingCrons";
 
 @provide(Cronjob)
 export class Cronjob {
@@ -38,7 +39,8 @@ export class Cronjob {
     private rankingCrons: RankingCrons,
     private redisCrons: RedisCrons,
     private databaseMonitorCrons: DatabaseMonitorCrons,
-    private removeInactivePartyMembersCron: RemoveInactivePartyMembersCron
+    private removeInactivePartyMembersCron: RemoveInactivePartyMembersCron,
+    private guideSharing: GuideSharing
   ) {}
 
   public start(): void {
@@ -65,6 +67,7 @@ export class Cronjob {
         this.redisCrons.schedule();
         this.databaseMonitorCrons.schedule();
         this.removeInactivePartyMembersCron.schedule();
+        this.guideSharing.schedule();
         break;
       case EnvType.Staging:
       case EnvType.Production:
@@ -86,6 +89,7 @@ export class Cronjob {
           this.redisCrons.schedule();
           this.databaseMonitorCrons.schedule();
           this.removeInactivePartyMembersCron.schedule();
+          this.guideSharing.schedule();
         }
         break;
     }
