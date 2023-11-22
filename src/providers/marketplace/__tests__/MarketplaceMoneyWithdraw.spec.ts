@@ -1,11 +1,11 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { container, unitTestHelper } from "@providers/inversify/container";
-import { CharacterInventory } from "@providers/character/CharacterInventory";
-import { MarketplaceMoney } from "@entities/ModuleMarketplace/MarketplaceMoneyModel";
-import { MarketplaceMoneyWithdraw } from "../MarketplaceMoneyWithdraw";
-import { OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
+import { MarketplaceMoney } from "@entities/ModuleMarketplace/MarketplaceMoneyModel";
+import { INPC } from "@entities/ModuleNPC/NPCModel";
+import { CharacterInventory } from "@providers/character/CharacterInventory";
+import { container, unitTestHelper } from "@providers/inversify/container";
+import { OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { MarketplaceMoneyWithdraw } from "../MarketplaceMoneyWithdraw";
 
 describe("MarketplaceMoneyWithdraw.ts", () => {
   let marketplaceMoneyWithdraw: MarketplaceMoneyWithdraw;
@@ -109,12 +109,12 @@ describe("MarketplaceMoneyWithdraw.ts", () => {
   it("should withdraw only part of the money if there is no space in bag", async () => {
     await MarketplaceMoney.create({
       owner: testCharacter._id,
-      money: 11000,
+      money: 110000,
     });
 
     const gold = await unitTestHelper.createMockItem({
-      stackQty: 9000,
-      maxStackSize: 9999,
+      stackQty: 90000,
+      maxStackSize: 99999,
       key: OthersBlueprint.GoldCoin,
     });
     const inventory = await characterInventory.getInventory(testCharacter);
@@ -132,7 +132,7 @@ describe("MarketplaceMoneyWithdraw.ts", () => {
     expect(marketplaceMoney?.money).toBe(2);
 
     const container = await ItemContainer.findById(inventory?.itemContainer);
-    expect(container?.slots[0].stackQty).toBe(9999);
-    expect(container?.slots[1].stackQty).toBe(9999);
+    expect(container?.slots[0].stackQty).toBe(99999);
+    expect(container?.slots[1].stackQty).toBe(99999);
   });
 });

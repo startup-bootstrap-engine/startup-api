@@ -5,6 +5,7 @@ import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { BattleCharacterAttackValidation } from "@providers/battle/BattleCharacterAttack/BattleCharacterAttackValidation";
+import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterBonusPenalties } from "@providers/character/characterBonusPenalties/CharacterBonusPenalties";
 import { CharacterItems } from "@providers/character/characterItems/CharacterItems";
@@ -53,7 +54,7 @@ export class SpellCast {
     private spellCoolDown: SpellCoolDown,
     private spellSilencer: SpellSilence,
     private mapNonPVPZone: MapNonPVPZone,
-
+    private characterPremiumAccount: CharacterPremiumAccount,
     private battleCharacterAttackValidation: BattleCharacterAttackValidation
   ) {}
 
@@ -142,10 +143,10 @@ export class SpellCast {
       }
     }
 
-    const hasSpellCooldown = await this.spellCoolDown.haveSpellCooldown(character._id, spell.magicWords);
+    const hasSpellCooldown = await this.spellCoolDown.haveSpellCooldown(character, spell.magicWords);
 
     if (!hasSpellCooldown) {
-      await this.spellCoolDown.setSpellCooldown(character._id, spell.magicWords, spell.cooldown);
+      await this.spellCoolDown.setSpellCooldown(spell.key, character, spell.magicWords, spell.cooldown);
     }
     await this.spellCoolDown.getAllSpellCooldowns(character);
 
@@ -225,7 +226,7 @@ export class SpellCast {
     return true;
   }
 
-  private async isSpellCastingValid(spell, character: ICharacter): Promise<boolean> {
+  private async isSpellCastingValid(spell: ISpell, character: ICharacter): Promise<boolean> {
     if (!spell) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, spell not found.");
       return false;
@@ -234,6 +235,28 @@ export class SpellCast {
     if (!character.learnedSpells || character.learnedSpells.indexOf(spell.key) < 0) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you have not learned this spell.");
       return false;
+    }
+
+    const premiumAccountType = await this.characterPremiumAccount.getPremiumAccountType(character);
+
+    if (!premiumAccountType && spell.onlyPremiumAccountType) {
+      this.socketMessaging.sendErrorMessageToCharacter(
+        character,
+        "Sorry, this spell requires a premium account to be casted."
+      );
+      return false;
+    }
+
+    if (premiumAccountType && spell.onlyPremiumAccountType) {
+      const isSpellOnPremiumPlan = spell.onlyPremiumAccountType?.includes(premiumAccountType);
+
+      if (!isSpellOnPremiumPlan) {
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          `Sorry, this spell requires a premium account of type: ${spell.onlyPremiumAccountType?.join(", ")}.`
+        );
+        return false;
+      }
     }
 
     if (await this.spellSilencer.isSilent(character)) {

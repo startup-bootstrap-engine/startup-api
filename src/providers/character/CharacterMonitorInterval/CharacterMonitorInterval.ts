@@ -64,7 +64,7 @@ export class CharacterMonitorInterval {
             defaults: true,
           })) as ICharacter;
 
-          if (!updatedCharacter.isOnline) {
+          if (!updatedCharacter || !updatedCharacter?.isOnline) {
             await this.unwatch(callbackId, character);
             return;
           }

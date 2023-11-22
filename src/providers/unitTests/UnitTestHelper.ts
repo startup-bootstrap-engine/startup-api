@@ -29,10 +29,11 @@ import {
   stoppedMovementMockNPC,
 } from "@providers/unitTests/mock/NPCMock";
 import { characterMock } from "@providers/unitTests/mock/characterMock";
-import { ISocketTransmissionZone, NPCMovementType, PeriodOfDay, QuestType } from "@rpg-engine/shared";
+import { ISocketTransmissionZone, NPCMovementType, PeriodOfDay, QuestType, UserAccountTypes } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { Types } from "mongoose";
+import { v4 as uuidv4 } from "uuid";
 import { chatLogsMock } from "./mock/chatLogsMock";
 import {
   itemMeleeRangedMock,
@@ -61,6 +62,9 @@ interface IMockCharacterOptions {
   hasEquipment?: boolean;
   hasInventory?: boolean;
   hasSkills?: boolean;
+  isPremiumAccount?: boolean;
+  isPremiumAccountType?: UserAccountTypes;
+  hasUser?: boolean;
 }
 
 interface IMockNPCOptions {
@@ -334,7 +338,7 @@ export class UnitTestHelper {
   }
 
   public async createMockCharacter(
-    extraProps?: Record<string, unknown> | null,
+    extraProps?: Partial<ICharacter> | null,
     options?: IMockCharacterOptions
   ): Promise<ICharacter> {
     const testCharacter = new Character({
@@ -349,6 +353,35 @@ export class UnitTestHelper {
       charSkills.owner = testCharacter._id;
       testCharacter.skills = charSkills._id;
       await charSkills.save();
+    }
+
+    if (options?.hasUser) {
+      const user = await this.createMockUser({
+        characters: [testCharacter._id],
+        email: `premium-user-${uuidv4()}@definya.com`,
+      });
+
+      testCharacter.owner = user._id;
+    }
+
+    if (options?.isPremiumAccount) {
+      const user = await this.createMockUser({
+        characters: [testCharacter._id],
+        accountType: UserAccountTypes.PremiumGold,
+        email: `premium-user-${uuidv4()}@definya.com`,
+      });
+
+      testCharacter.owner = user._id;
+    }
+
+    if (options?.isPremiumAccountType) {
+      const user = await this.createMockUser({
+        characters: [testCharacter._id],
+        accountType: options.isPremiumAccountType,
+        email: `premium-user-${uuidv4()}@definya.com`,
+      });
+
+      testCharacter.owner = user._id;
     }
 
     if (options?.hasEquipment) {

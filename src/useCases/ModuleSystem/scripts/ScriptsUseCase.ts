@@ -8,6 +8,7 @@ import { ItemReportGenerator } from "@providers/item/ItemReportGenerator";
 import { MarketplaceCleaner } from "@providers/marketplace/MarketplaceCleaner";
 import { FromGridX, FromGridY } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import { clearCacheForKey } from "speedgoose";
 
 @provide(ScriptsUseCase)
 export class ScriptsUseCase {
@@ -18,6 +19,10 @@ export class ScriptsUseCase {
     private itemContainerBodyCleaner: ItemContainerBodyCleaner,
     private inMemoryHashTable: InMemoryHashTable
   ) {}
+
+  public async cleanupCharacterUserCache(characterId: string): Promise<void> {
+    await clearCacheForKey(`character-${characterId}-user`);
+  }
 
   public async cleanupItems(): Promise<void> {
     await this.itemMissingReferenceCleaner.cleanupItemsWithoutOwnership();

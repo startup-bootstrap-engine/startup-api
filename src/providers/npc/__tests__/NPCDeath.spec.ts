@@ -50,7 +50,7 @@ describe("NPCDeath.ts", () => {
     // @ts-ignore
     const spySocketMessaging = jest.spyOn(npcDeath.socketMessaging, "sendEventToUser");
 
-    await npcDeath.handleNPCDeath(testNPC);
+    await npcDeath.handleNPCDeath(testCharacter, testNPC);
 
     expect(spyOnNearbyCharacters).toHaveBeenCalledWith(testNPC.x, testNPC.y, testNPC.scene);
 
@@ -74,7 +74,7 @@ describe("NPCDeath.ts", () => {
       },
     ];
 
-    await npcDeath.handleNPCDeath(testNPC);
+    await npcDeath.handleNPCDeath(testCharacter, testNPC);
 
     const npcBody = await Item.findOne({
       name: `${testNPC.name}'s body`,
@@ -110,7 +110,7 @@ describe("NPCDeath.ts", () => {
       { itemBlueprintKey: CraftingResourcesBlueprint.GoldenIngot, chance: 100, quantityRange: [1, 2] },
     ];
 
-    await npcDeath.handleNPCDeath(testNPC);
+    await npcDeath.handleNPCDeath(testCharacter, testNPC);
 
     const npcBody = await Item.findOne({
       name: `${testNPC.name}'s body`,
@@ -136,7 +136,7 @@ describe("NPCDeath.ts", () => {
     // @ts-ignore
     jest.spyOn(npcDeath.characterView, "getCharactersAroundXYPosition").mockReturnValueOnce([]);
 
-    await npcDeath.handleNPCDeath(testNPC);
+    await npcDeath.handleNPCDeath(testCharacter, testNPC);
 
     const npcBody = await Item.findOne({
       owner: testCharacter._id,
@@ -169,7 +169,7 @@ describe("NPCDeath.ts", () => {
     // @ts-ignore
     const SpyOnGetGoldLoot = jest.spyOn(npcDeath.npcLoot, "getGoldLoot");
 
-    await npcDeath.handleNPCDeath(testNPC);
+    await npcDeath.handleNPCDeath(testCharacter, testNPC);
 
     // Find the NPC's body
     const npcBody = await Item.findOne({
@@ -192,7 +192,7 @@ describe("NPCDeath.ts", () => {
     // @ts-ignore
     const spyAddLootInNPCBody = jest.spyOn(npcDeath.npcLoot, "addLootToNPCBody");
 
-    await npcDeath.handleNPCDeath(testNPC);
+    await npcDeath.handleNPCDeath(testCharacter, testNPC);
 
     expect(spyAddLootInNPCBody).toHaveBeenCalled();
 
@@ -226,7 +226,7 @@ describe("NPCDeath.ts", () => {
 
     await testNPC.save();
 
-    await npcDeath.handleNPCDeath(testNPC);
+    await npcDeath.handleNPCDeath(testCharacter, testNPC);
 
     expect(spyAddLootInNPCBody).toHaveBeenCalled();
 
@@ -321,7 +321,7 @@ describe("NPCDeath.ts", () => {
     const spyAddLootInNPCBody = jest.spyOn(npcDeath.npcLoot, "addLootToNPCBody");
 
     // @ts-ignore
-    await npcDeath.npcLoot.addLootToNPCBody(npcBody, testNPC.loots);
+    await npcDeath.npcLoot.addLootToNPCBody(testCharacter, npcBody, testNPC.loots);
 
     expect(spyAddLootInNPCBody).toHaveBeenCalled();
 
@@ -341,7 +341,7 @@ describe("NPCDeath.ts", () => {
 
     await testNPC.save();
 
-    await npcDeath.handleNPCDeath(testNPC);
+    await npcDeath.handleNPCDeath(testCharacter, testNPC);
 
     const updatedNPC = await NPC.findById(testNPC.id);
 
@@ -387,7 +387,7 @@ describe("NPCDeath.ts", () => {
     const spyAddLootInNPCBody = jest.spyOn(npcDeath.npcLoot, "addLootToNPCBody");
 
     // @ts-ignore
-    await npcDeath.npcLoot.addLootToNPCBody(npcBody, testNPC.loots);
+    await npcDeath.npcLoot.addLootToNPCBody(testCharacter, npcBody, testNPC.loots);
 
     expect(spyAddLootInNPCBody).toHaveBeenCalled();
 
@@ -419,7 +419,7 @@ describe("NPCDeath.ts", () => {
       // @ts-ignore
       const spyOnSetItemRarityOnLootDrop = jest.spyOn(npcDeath.npcLoot.itemRarity, "setItemRarityOnLootDrop");
 
-      await npcDeath.handleNPCDeath(testNPC);
+      await npcDeath.handleNPCDeath(testCharacter, testNPC);
 
       expect(spyOnSetItemRarityOnLootDrop).toHaveBeenCalled();
     });
@@ -446,7 +446,7 @@ describe("NPCDeath.ts", () => {
         "setItemRarityOnLootDropForFood"
       );
 
-      await npcDeath.handleNPCDeath(testNPC);
+      await npcDeath.handleNPCDeath(testCharacter, testNPC);
 
       expect(spyOnSetItemRarityOnLootDropForFood).toHaveBeenCalled();
     });

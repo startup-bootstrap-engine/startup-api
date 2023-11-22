@@ -1,8 +1,10 @@
+import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
 import {
   LOOT_CRAFTING_MATERIAL_DROP_CHANCE,
   LOOT_FOOD_DROP_CHANCE,
@@ -20,7 +22,7 @@ import { calculateGold } from "./NPCGold";
 
 @provide(NPCLoot)
 export class NPCLoot {
-  constructor(private itemRarity: ItemRarity) {}
+  constructor(private itemRarity: ItemRarity, private characterPremiumAccount: CharacterPremiumAccount) {}
 
   public getGoldLoot(npc: INPC): INPCLoot {
     if (!npc.skills) {
@@ -39,7 +41,12 @@ export class NPCLoot {
   }
 
   @TrackNewRelicTransaction()
-  public async addLootToNPCBody(npcBody: IItem, loots: INPCLoot[], wasNpcInGiantForm?: boolean): Promise<void> {
+  public async addLootToNPCBody(
+    killer: ICharacter,
+    npcBody: IItem,
+    loots: INPCLoot[],
+    wasNpcInGiantForm?: boolean
+  ): Promise<void> {
     const itemContainer = await this.fetchItemContainer(npcBody);
     let isDeadBodyLootable = false;
 
@@ -48,7 +55,7 @@ export class NPCLoot {
     for (const loot of loots) {
       const rand = round(random(0, 100, true), 2);
       const lootChance = round(
-        await this.calculateLootChance(loot, wasNpcInGiantForm ? NPC_GIANT_FORM_LOOT_MULTIPLIER : 1),
+        await this.calculateLootChance(killer, loot, wasNpcInGiantForm ? NPC_GIANT_FORM_LOOT_MULTIPLIER : 1),
         2
       );
 
@@ -140,7 +147,7 @@ export class NPCLoot {
     return itemContainer;
   }
 
-  private async calculateLootChance(loot: INPCLoot, baseMultiplier = 1): Promise<number> {
+  private async calculateLootChance(killer: ICharacter, loot: INPCLoot, baseMultiplier = 1): Promise<number> {
     try {
       const blueprintData = await blueprintManager.getBlueprint<IItem>(
         "items",
@@ -151,7 +158,7 @@ export class NPCLoot {
         throw new Error(`Error while calculating loot chance for item with key ${loot.itemBlueprintKey}`);
       }
 
-      const lootMultiplier = this.getLootMultiplier(blueprintData);
+      const lootMultiplier = await this.getLootMultiplier(killer, blueprintData);
 
       const finalMultiplier = lootMultiplier * baseMultiplier;
 
@@ -164,7 +171,16 @@ export class NPCLoot {
     }
   }
 
-  private getLootMultiplier(blueprintData: IItem): number {
+  private async getLootMultiplier(killer: ICharacter, blueprintData: IItem): Promise<number> {
+    const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(killer);
+
+    if (premiumAccountData) {
+      return premiumAccountData.lootDropBuff / 100 + this.getBaseLootMultiplier(blueprintData);
+    }
+    return this.getBaseLootMultiplier(blueprintData);
+  }
+
+  private getBaseLootMultiplier(blueprintData: IItem): number {
     if (blueprintData?.type === ItemType.CraftingResource) {
       return LOOT_CRAFTING_MATERIAL_DROP_CHANCE;
     }

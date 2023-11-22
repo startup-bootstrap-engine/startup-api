@@ -9,6 +9,6 @@ export const itemGoldCoin: IBaseItemBlueprint = {
   texturePath: "others/gold-coin.png",
   name: "Gold Coin",
   description: "A pile of gold coins.",
-  weight: 0.01,
-  maxStackSize: 9999,
+  weight: 0.001,
+  maxStackSize: 99999,
 };

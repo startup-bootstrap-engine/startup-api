@@ -15,7 +15,7 @@ export const itemGlacialRing: IEquippableAccessoryTier1Blueprint = {
   type: ItemType.Accessory,
   subType: ItemSubType.Accessory,
   textureAtlas: "items",
-  texturePath: "accessories/glacial-ring.png",
+  texturePath: "rings/glacial-ring.png",
   name: "Glacial Ring",
   description:
     "The Glacial Ring is a unique and powerful piece of jewelry that is said to have been crafted from the frozen glaciers of the far north.",

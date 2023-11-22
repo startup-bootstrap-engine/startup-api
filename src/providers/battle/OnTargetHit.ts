@@ -40,7 +40,7 @@ export class OnTargetHit {
     if (target.type === EntityType.Character) {
       await this.characterDeath.handleCharacterDeath(attacker, target as ICharacter);
     } else {
-      await this.npcDeath.handleNPCDeath(target as INPC);
+      await this.npcDeath.handleNPCDeath(attacker as ICharacter, target as INPC);
     }
   }
 

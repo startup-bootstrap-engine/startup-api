@@ -1,1 +1,1 @@
-export const MAX_DISTANCE_TO_NPC_IN_GRID = 4;
+export const MAX_DISTANCE_TO_NPC_IN_GRID = 12;

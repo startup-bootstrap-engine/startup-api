@@ -24,7 +24,7 @@ export const spellPowerStrike: Partial<ISpell> = {
   manaCost: 40,
   minLevelRequired: 4,
   minMagicLevelRequired: 5,
-  cooldown: 60,
+  cooldown: 80,
   castingAnimationKey: AnimationEffectKeys.BlueWings,
   attribute: BasicAttribute.Strength,
   characterClass: [CharacterClass.Warrior],

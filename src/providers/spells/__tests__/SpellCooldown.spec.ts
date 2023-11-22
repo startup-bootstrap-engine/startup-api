@@ -18,19 +18,23 @@ describe("SpellCooldown", () => {
     spellCast = container.get<SpellCast>(SpellCast);
   });
 
-  beforeEach(async () => {
-    testCharacter = await unitTestHelper.createMockCharacter(
-      {
-        learnedSpells: [spellSelfHealing.key, spellGreaterHealing.key],
-      },
-      { hasSkills: true }
-    );
-
+  const setupMagicLevel = async (testCharacter: ICharacter): Promise<void> => {
     const skills = (await Skill.findById(testCharacter.skills).lean().select("level magic")) as ISkill;
     characterSkills = skills;
     characterSkills.level = spellGreaterHealing.minLevelRequired!;
     characterSkills.magic.level = spellGreaterHealing.minMagicLevelRequired;
     (await Skill.findByIdAndUpdate(characterSkills._id, characterSkills).lean()) as ISkill;
+  };
+
+  beforeEach(async () => {
+    testCharacter = await unitTestHelper.createMockCharacter(
+      {
+        learnedSpells: [spellSelfHealing.key, spellGreaterHealing.key] as any,
+      },
+      { hasSkills: true }
+    );
+
+    await setupMagicLevel(testCharacter);
   });
 
   afterEach(() => {
@@ -39,33 +43,26 @@ describe("SpellCooldown", () => {
   });
 
   it("Should set a cooldown and return true.", async () => {
-    const characterId = testCharacter._id;
     const magicWords = spellSelfHealing.magicWords;
     const cooldown = 10;
 
-    const spellCooldown = await spellCoolDown.setSpellCooldown(characterId, magicWords!, cooldown);
+    const spellCooldown = await spellCoolDown.setSpellCooldown(
+      spellSelfHealing.key!,
+      testCharacter,
+      magicWords!,
+      cooldown
+    );
 
     expect(spellCooldown).toBeTruthy();
   });
 
-  it("An error should be thrown for an invalid characterId", async () => {
-    const characterId = "invalid-id";
-    const magicWords = spellSelfHealing.magicWords;
-    const cooldown = 10;
-
-    await expect(spellCoolDown.setSpellCooldown(characterId, magicWords!, cooldown)).rejects.toThrowError(
-      "Invalid characterId argument"
-    );
-  });
-
   it("An error should be thrown for an empty magic world.", async () => {
-    const characterId = testCharacter._id;
     const magicWords = "";
     const cooldown = 10;
 
-    await expect(spellCoolDown.setSpellCooldown(characterId, magicWords!, cooldown)).rejects.toThrowError(
-      "Invalid magicWords argument"
-    );
+    await expect(
+      spellCoolDown.setSpellCooldown(spellSelfHealing.key!, testCharacter, magicWords!, cooldown)
+    ).rejects.toThrowError("Invalid magicWords argument");
   });
 
   it("Should set a cooldown and check register.", async () => {
@@ -73,11 +70,16 @@ describe("SpellCooldown", () => {
     const magicWords = spellSelfHealing.magicWords;
     const cooldown = spellSelfHealing.cooldown;
 
-    const spellCooldown = await spellCoolDown.setSpellCooldown(characterId, magicWords!, cooldown!);
+    const spellCooldown = await spellCoolDown.setSpellCooldown(
+      spellSelfHealing.key!,
+      characterId,
+      magicWords!,
+      cooldown!
+    );
 
     expect(spellCooldown).toBeTruthy();
 
-    const spellCooldownCheck = await spellCoolDown.haveSpellCooldown(characterId, magicWords!);
+    const spellCooldownCheck = await spellCoolDown.haveSpellCooldown(testCharacter, magicWords!);
 
     expect(spellCooldownCheck).toBeTruthy();
   });
@@ -87,7 +89,7 @@ describe("SpellCooldown", () => {
 
     expect(await spellCast.castSpell({ magicWords: "talas faenya" }, testCharacter)).toBeFalsy();
 
-    const spellCooldownCheck = await spellCoolDown.haveSpellCooldown(testCharacter._id, "talas faenya");
+    const spellCooldownCheck = await spellCoolDown.haveSpellCooldown(testCharacter, "talas faenya");
 
     expect(spellCooldownCheck).toBeTruthy();
   });
@@ -96,19 +98,19 @@ describe("SpellCooldown", () => {
     const selfHealing = spellSelfHealing.magicWords;
     expect(await spellCast.castSpell({ magicWords: selfHealing! }, testCharacter)).toBeTruthy();
 
-    expect(await spellCoolDown.haveSpellCooldown(testCharacter._id, selfHealing!)).toBeTruthy();
+    expect(await spellCoolDown.haveSpellCooldown(testCharacter, selfHealing!)).toBeTruthy();
 
     const greaterHealing = spellGreaterHealing.magicWords;
     expect(await spellCast.castSpell({ magicWords: greaterHealing! }, testCharacter)).toBeTruthy();
 
-    expect(await spellCoolDown.haveSpellCooldown(testCharacter._id, greaterHealing!)).toBeTruthy();
+    expect(await spellCoolDown.haveSpellCooldown(testCharacter, greaterHealing!)).toBeTruthy();
   });
 
   it("Should cast spell and check the cooldown.", async () => {
     const magicWords = "talas faenya";
     expect(await spellCast.castSpell({ magicWords: magicWords }, testCharacter)).toBeTruthy();
 
-    const spellCooldownCheck = await spellCoolDown.haveSpellCooldown(testCharacter._id, magicWords);
+    const spellCooldownCheck = await spellCoolDown.haveSpellCooldown(testCharacter, magicWords);
 
     expect(spellCooldownCheck).toBeTruthy();
 
@@ -118,5 +120,61 @@ describe("SpellCooldown", () => {
     const cooldown = await inMemoryHashTable.get(namespace, regexMagicWords);
 
     expect(cooldown).toEqual(5);
+  });
+
+  describe("Premium Account", () => {
+    let premiumAccountCharacter: ICharacter;
+
+    let inMemoryCooldownSetSpy: jest.SpyInstance;
+
+    beforeEach(async () => {
+      premiumAccountCharacter = await unitTestHelper.createMockCharacter(
+        {
+          learnedSpells: [spellSelfHealing.key, spellGreaterHealing.key] as any,
+        },
+        { isPremiumAccount: true, hasSkills: true }
+      );
+
+      await setupMagicLevel(premiumAccountCharacter);
+
+      // @ts-ignore
+      inMemoryCooldownSetSpy = jest.spyOn(spellCoolDown, "setInMemoryCooldown");
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should set a default premium cooldown reduction, if spell key is not specified", async () => {
+      const magicWords = spellGreaterHealing.magicWords;
+      const cooldown = 10;
+
+      const result = await spellCoolDown.setSpellCooldown(
+        spellGreaterHealing.key!,
+        premiumAccountCharacter,
+        magicWords!,
+        cooldown
+      );
+
+      expect(result).toBeTruthy();
+
+      expect(inMemoryCooldownSetSpy).toHaveBeenCalledWith(expect.any(String), "greater_faenya", 5);
+    });
+
+    it("should set a CUSTOM cooldown reduction, if the spell key is supported", async () => {
+      const magicWords = spellSelfHealing.magicWords;
+      const cooldown = 10;
+
+      const result = await spellCoolDown.setSpellCooldown(
+        spellSelfHealing.key!,
+        premiumAccountCharacter,
+        magicWords!,
+        cooldown
+      );
+
+      expect(result).toBeTruthy();
+
+      expect(inMemoryCooldownSetSpy).toHaveBeenCalledWith(expect.any(String), "talas_faenya", 5);
+    });
   });
 });

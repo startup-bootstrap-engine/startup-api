@@ -1,10 +1,22 @@
-import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INVENTORY_DROP_CHANCE_MULTIPLIER, SKILL_LOSS_ON_DEATH_MULTIPLIER } from "@providers/constants/DeathConstants";
 import { provide } from "inversify-binding-decorators";
+import { CharacterPremiumAccount } from "./CharacterPremiumAccount";
 
 @provide(CharacterDeathCalculator)
 export class CharacterDeathCalculator {
-  public calculateSkillLoss(skills: ISkill, multiply = 1): number {
+  constructor(private characterPremiumAccount: CharacterPremiumAccount) {}
+
+  public async calculateSkillAndXPLossChance(skills: ISkill, multiply = 1): Promise<number> {
+    if (!skills.owner) {
+      skills = (await Skill.findOne({ _id: skills._id }).lean()) as ISkill;
+    }
+
+    const character = (await Character.findOne({ _id: skills.owner }).lean()) as ICharacter;
+
+    const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(character);
+
     // Define the XP/SP loss based on character level
     const skillLossPercentageLevel = {
       5: 0,
@@ -21,14 +33,34 @@ export class CharacterDeathCalculator {
 
     for (const [threshold, xpLoss] of Object.entries(skillLossPercentageLevel)) {
       if (level <= Number(threshold)) {
-        return xpLoss * multiply * SKILL_LOSS_ON_DEATH_MULTIPLIER;
+        const XPLossResult = xpLoss * multiply * SKILL_LOSS_ON_DEATH_MULTIPLIER;
+
+        if (premiumAccountData) {
+          return XPLossResult * (1 - premiumAccountData.SPXPLostOnDeathReduction / 100);
+        }
+
+        return XPLossResult;
       }
     }
 
-    return 10 * SKILL_LOSS_ON_DEATH_MULTIPLIER;
+    const regularSkillLoss = 10 * SKILL_LOSS_ON_DEATH_MULTIPLIER;
+
+    if (premiumAccountData) {
+      return regularSkillLoss * (1 - premiumAccountData.SPXPLostOnDeathReduction / 100);
+    }
+
+    return regularSkillLoss;
   }
 
-  public calculateInventoryDropChance(skills: ISkill): number {
+  public async calculateInventoryDropChance(skills: ISkill): Promise<number> {
+    if (!skills.owner) {
+      skills = (await Skill.findOne({ _id: skills._id }).lean()) as ISkill;
+    }
+
+    const character = (await Character.findOne({ _id: skills.owner }).lean()) as ICharacter;
+
+    const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(character);
+
     // Define the chances of dropping inventory based on character level
     const chancesByLevel = {
       5: 0,
@@ -53,11 +85,25 @@ export class CharacterDeathCalculator {
     for (const [threshold, chance] of Object.entries(chancesByLevel)) {
       // Return the chance of dropping inventory if the character's level is below the current threshold
       if (level <= Number(threshold)) {
-        return chance * INVENTORY_DROP_CHANCE_MULTIPLIER;
+        const regularChance = chance * INVENTORY_DROP_CHANCE_MULTIPLIER;
+
+        if (premiumAccountData) {
+          if (premiumAccountData.InventoryLossOnDeathReduction === 0) return 0;
+
+          return regularChance * (1 - premiumAccountData.InventoryLossOnDeathReduction / 100);
+        }
+
+        return regularChance;
       }
     }
 
+    const regularChance = 100 * INVENTORY_DROP_CHANCE_MULTIPLIER;
+
+    if (premiumAccountData) {
+      return regularChance * (1 - premiumAccountData.InventoryLossOnDeathReduction / 100);
+    }
+
     // Return the maximum chance of dropping inventory if the character's level is above the highest threshold
-    return 100 * INVENTORY_DROP_CHANCE_MULTIPLIER;
+    return regularChance;
   }
 }

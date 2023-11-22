@@ -24,6 +24,7 @@ import {
   SpellSocketEvents,
   SpellsBlueprint,
   UISocketEvents,
+  UserAccountTypes,
 } from "@rpg-engine/shared";
 import { SpellCast } from "../SpellCast";
 import { SpellLearn } from "../SpellLearn";
@@ -32,6 +33,7 @@ import { spellBlankRuneCreation } from "../data/blueprints/all/SpellBlankRuneCre
 import { spellGreaterHealing } from "../data/blueprints/all/SpellGreaterHealing";
 import { spellSelfHealing } from "../data/blueprints/all/SpellSelfHealing";
 import { spellTeleport } from "../data/blueprints/all/SpellTeleport";
+import { spellVampiricStorm } from "../data/blueprints/druid-sorcerer/SpellVampiricStorm";
 import { rogueSpellExecution } from "../data/blueprints/rogue/SpellExecution";
 import { spellStealth } from "../data/blueprints/rogue/SpellStealth";
 import { spellStunTarget } from "../data/blueprints/warrior/SpellStunTarget";
@@ -75,7 +77,7 @@ describe("SpellCast.ts", () => {
     testCharacter = await unitTestHelper.createMockCharacter(
       {
         health: 50,
-        learnedSpells: [spellSelfHealing.key, spellGreaterHealing.key, rogueSpellExecution.key],
+        learnedSpells: [spellSelfHealing.key, spellGreaterHealing.key, rogueSpellExecution.key] as any,
         class: CharacterClass.Rogue,
       },
       { hasEquipment: false, hasInventory: false, hasSkills: true }
@@ -243,7 +245,7 @@ describe("SpellCast.ts", () => {
 
   it("should cast Greater Healing spell successfully", async () => {
     testCharacter = await await unitTestHelper.createMockCharacter(
-      { health: 50, learnedSpells: [spellGreaterHealing.key] },
+      { health: 50, learnedSpells: [spellGreaterHealing.key] as any },
       { hasEquipment: false, hasInventory: false, hasSkills: true }
     );
 
@@ -778,4 +780,94 @@ describe("SpellCast.ts", () => {
   //     jest.clearAllTimers();
   //   });
   // });
+
+  describe("Premium Account", () => {
+    let premiumAccountCharacter: ICharacter;
+    let freeAccountCharacter: ICharacter;
+    let sendErrorMessageToCharacter: jest.SpyInstance;
+
+    beforeEach(async () => {
+      premiumAccountCharacter = await unitTestHelper.createMockCharacter(
+        {
+          learnedSpells: [spellVampiricStorm.key] as any,
+          class: CharacterClass.Druid,
+          health: 999,
+          mana: 999,
+        },
+        { isPremiumAccountType: UserAccountTypes.PremiumBronze, hasSkills: true }
+      );
+
+      freeAccountCharacter = await unitTestHelper.createMockCharacter(
+        {
+          learnedSpells: [spellVampiricStorm.key] as any,
+          class: CharacterClass.Druid,
+          health: 999,
+          mana: 999,
+        },
+        {
+          isPremiumAccountType: UserAccountTypes.Free,
+          hasSkills: true,
+        }
+      );
+      // @ts-ignore
+      sendErrorMessageToCharacter = jest.spyOn(spellCast.socketMessaging, "sendErrorMessageToCharacter");
+
+      spellVampiricStorm.onlyPremiumAccountType = [
+        UserAccountTypes.PremiumBronze,
+        UserAccountTypes.PremiumSilver,
+        UserAccountTypes.PremiumGold,
+        UserAccountTypes.PremiumUltimate,
+      ];
+
+      spellVampiricStorm.minMagicLevelRequired = 1;
+      spellVampiricStorm.minLevelRequired = 1;
+    });
+
+    it("properly casts a premium exclusive spell if character is on the right plan", async () => {
+      const goldenPremiumAccountCharacter = await unitTestHelper.createMockCharacter(
+        {
+          learnedSpells: [spellVampiricStorm.key] as any,
+          class: CharacterClass.Druid,
+          health: 999,
+          mana: 999,
+        },
+        { isPremiumAccountType: UserAccountTypes.PremiumGold, hasSkills: true }
+      );
+
+      // @ts-ignore
+      const result = await spellCast.isSpellCastingValid(spellVampiricStorm, goldenPremiumAccountCharacter);
+
+      expect(result).toBe(true);
+    });
+
+    it("should prevent casting a spell if its exclusive to premium account, and the character is not", async () => {
+      testCharacter.learnedSpells = [spellVampiricStorm.key!];
+
+      await testCharacter.save();
+
+      // @ts-ignore
+      const result = await spellCast.isSpellCastingValid(spellVampiricStorm, testCharacter);
+
+      expect(result).toBe(false);
+
+      expect(sendErrorMessageToCharacter).toHaveBeenCalledWith(
+        expect.any(Object),
+        "Sorry, this spell requires a premium account to be casted."
+      );
+    });
+
+    it("should prevent casting a spell if it exclusive to premium account, but the character is not on the required plan", async () => {
+      spellVampiricStorm.onlyPremiumAccountType = [UserAccountTypes.PremiumGold];
+
+      // @ts-ignore
+      const result = await spellCast.isSpellCastingValid(spellVampiricStorm, premiumAccountCharacter);
+
+      expect(result).toBe(false);
+
+      expect(sendErrorMessageToCharacter).toHaveBeenCalledWith(
+        expect.any(Object),
+        "Sorry, this spell requires a premium account of type: gold."
+      );
+    });
+  });
 });

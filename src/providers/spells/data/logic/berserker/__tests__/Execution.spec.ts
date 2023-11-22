@@ -29,7 +29,7 @@ describe("Execution", () => {
     testCharacter = await unitTestHelper.createMockCharacter(
       {
         health: 50,
-        learnedSpells: [spellSelfHealing.key, spellGreaterHealing.key, berserkerSpellExecution.key],
+        learnedSpells: [spellSelfHealing.key, spellGreaterHealing.key, berserkerSpellExecution.key] as any,
         class: CharacterClass.Berserker,
       },
       { hasSkills: true }

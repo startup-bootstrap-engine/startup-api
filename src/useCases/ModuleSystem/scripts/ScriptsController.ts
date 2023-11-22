@@ -62,4 +62,16 @@ export class ScriptsController implements interfaces.Controller {
       message: "Initial coordinates adjusted succesfully",
     });
   }
+
+  @httpGet("/cleanup-character-user-cache/:characterId")
+  public async cleanupCharacterUserCache(
+    @response() res,
+    @requestParam("characterId") characterId: string
+  ): Promise<void> {
+    await this.scriptsUseCase.cleanupCharacterUserCache(characterId);
+
+    return res.status(200).send({
+      message: "Character user cache cleaned up!",
+    });
+  }
 }
