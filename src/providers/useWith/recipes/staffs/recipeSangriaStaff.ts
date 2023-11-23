@@ -15,7 +15,7 @@ export const recipeSangriaStaff: IUseWithCraftingRecipe = {
       qty: 100,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 60,
     },
     {

@@ -19,7 +19,7 @@ export const recipePaviseShield: IUseWithCraftingRecipe = {
       qty: 15,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 5,
     },
     {

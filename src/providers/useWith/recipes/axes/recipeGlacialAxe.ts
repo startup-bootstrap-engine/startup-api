@@ -20,7 +20,7 @@ export const recipeGlacialAxe: IUseWithCraftingRecipe = {
       qty: 10,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 10,
     },
   ],
@@ -30,7 +30,7 @@ export const recipeGlacialAxe: IUseWithCraftingRecipe = {
       [CraftingResourcesBlueprint.SteelIngot, 10],
       [CraftingResourcesBlueprint.GoldenIngot, 10],
       [CraftingResourcesBlueprint.BlueSapphire, 10],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 10],
+      [CraftingResourcesBlueprint.WoodenBoard, 10],
     ]),
   ],
 };

@@ -16,7 +16,7 @@ export const recipeRuneAxe: IUseWithCraftingRecipe = {
       qty: 4,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 5,
     },
     {
@@ -28,7 +28,7 @@ export const recipeRuneAxe: IUseWithCraftingRecipe = {
     CraftingSkill.Blacksmithing,
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.SteelIngot, 4],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 5],
+      [CraftingResourcesBlueprint.WoodenBoard, 5],
       [CraftingResourcesBlueprint.MagicRecipe, 1],
     ]),
   ],

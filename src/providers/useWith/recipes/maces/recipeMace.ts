@@ -12,7 +12,7 @@ export const recipeMace: IUseWithCraftingRecipe = {
       qty: 3,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 1,
     },
   ],
@@ -20,7 +20,7 @@ export const recipeMace: IUseWithCraftingRecipe = {
     CraftingSkill.Blacksmithing,
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.IronIngot, 3],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 1],
+      [CraftingResourcesBlueprint.WoodenBoard, 1],
     ]),
   ],
 };

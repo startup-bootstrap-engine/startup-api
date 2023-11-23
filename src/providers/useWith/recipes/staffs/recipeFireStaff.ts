@@ -12,7 +12,7 @@ export const recipeFireStaff: IUseWithCraftingRecipe = {
       qty: 4,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 3,
     },
     {
@@ -24,7 +24,7 @@ export const recipeFireStaff: IUseWithCraftingRecipe = {
     CraftingSkill.Alchemy,
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.RedSapphire, 4],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 3],
+      [CraftingResourcesBlueprint.WoodenBoard, 3],
       [CraftingResourcesBlueprint.SteelIngot, 3],
     ]),
   ],

@@ -15,7 +15,7 @@ export const recipeStormBow: IUseWithCraftingRecipe = {
       qty: 20,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 25,
     },
     {

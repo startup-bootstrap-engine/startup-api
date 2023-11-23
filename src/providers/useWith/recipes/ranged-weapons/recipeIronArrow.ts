@@ -12,7 +12,7 @@ export const recipeIronArrow: IUseWithCraftingRecipe = {
       qty: 2,
     },
     {
-      key: CraftingResourcesBlueprint.SmallWoodenStick,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 2,
     },
     {
@@ -24,7 +24,7 @@ export const recipeIronArrow: IUseWithCraftingRecipe = {
     CraftingSkill.Lumberjacking,
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.Feather, 2],
-      [CraftingResourcesBlueprint.SmallWoodenStick, 2],
+      [CraftingResourcesBlueprint.WoodenBoard, 2],
       [CraftingResourcesBlueprint.IronIngot, 1],
     ]),
   ],

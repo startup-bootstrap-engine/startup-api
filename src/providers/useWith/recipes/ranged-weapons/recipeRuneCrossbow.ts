@@ -20,7 +20,7 @@ export const recipeCrossBow: IUseWithCraftingRecipe = {
       qty: 5,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 5,
     },
     {
@@ -33,7 +33,7 @@ export const recipeCrossBow: IUseWithCraftingRecipe = {
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.Rope, 5],
       [CraftingResourcesBlueprint.MagicRecipe, 5],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 5],
+      [CraftingResourcesBlueprint.WoodenBoard, 5],
       [CraftingResourcesBlueprint.SteelIngot, 5],
     ]),
   ],

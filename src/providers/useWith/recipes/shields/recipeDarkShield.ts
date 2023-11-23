@@ -24,7 +24,7 @@ export const recipeDarkShield: IUseWithCraftingRecipe = {
       qty: 2,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 5,
     },
     {
@@ -38,7 +38,7 @@ export const recipeDarkShield: IUseWithCraftingRecipe = {
       [CraftingResourcesBlueprint.CorruptionIngot, 20],
       [CraftingResourcesBlueprint.Eye, 20],
       [CraftingResourcesBlueprint.DragonTooth, 2],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 5],
+      [CraftingResourcesBlueprint.WoodenBoard, 5],
       [CraftingResourcesBlueprint.MagicRecipe, 5],
     ]),
   ],

@@ -16,7 +16,7 @@ export const recipeHeatherShield: IUseWithCraftingRecipe = {
       qty: 3,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 3,
     },
   ],
@@ -25,7 +25,7 @@ export const recipeHeatherShield: IUseWithCraftingRecipe = {
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.CopperIngot, 3],
       [CraftingResourcesBlueprint.BlueSapphire, 3],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 3],
+      [CraftingResourcesBlueprint.WoodenBoard, 3],
     ]),
   ],
 };

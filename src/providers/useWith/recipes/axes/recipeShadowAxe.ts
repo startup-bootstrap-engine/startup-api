@@ -16,7 +16,7 @@ export const recipeShadowAxe: IUseWithCraftingRecipe = {
       qty: 10,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 5,
     },
     {
@@ -28,7 +28,7 @@ export const recipeShadowAxe: IUseWithCraftingRecipe = {
     CraftingSkill.Blacksmithing,
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.CorruptionIngot, 10],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 5],
+      [CraftingResourcesBlueprint.WoodenBoard, 5],
       [CraftingResourcesBlueprint.MagicRecipe, 5],
     ]),
   ],

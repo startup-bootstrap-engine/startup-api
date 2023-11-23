@@ -15,7 +15,7 @@ export const recipeShockArrow: IUseWithCraftingRecipe = {
       qty: 2,
     },
     {
-      key: CraftingResourcesBlueprint.SmallWoodenStick,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 2,
     },
     {

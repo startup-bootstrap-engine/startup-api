@@ -12,7 +12,7 @@ export const recipePoisonArrow: IUseWithCraftingRecipe = {
       qty: 10,
     },
     {
-      key: CraftingResourcesBlueprint.SmallWoodenStick,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 5,
     },
     {
@@ -24,7 +24,7 @@ export const recipePoisonArrow: IUseWithCraftingRecipe = {
     CraftingSkill.Lumberjacking,
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.Feather, 10],
-      [CraftingResourcesBlueprint.SmallWoodenStick, 5],
+      [CraftingResourcesBlueprint.WoodenBoard, 5],
       [CraftingResourcesBlueprint.ElvenLeaf, 5],
     ]),
   ],

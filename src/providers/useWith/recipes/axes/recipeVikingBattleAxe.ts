@@ -20,7 +20,7 @@ export const recipeVikingBattleAxe: IUseWithCraftingRecipe = {
       qty: 10,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 5,
     },
   ],
@@ -30,7 +30,7 @@ export const recipeVikingBattleAxe: IUseWithCraftingRecipe = {
       [CraftingResourcesBlueprint.IronIngot, 20],
       [CraftingResourcesBlueprint.Leather, 15],
       [CraftingResourcesBlueprint.BatsWing, 10],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 5],
+      [CraftingResourcesBlueprint.WoodenBoard, 5],
     ]),
   ],
 };

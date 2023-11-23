@@ -17,7 +17,7 @@ export const recipePlateShield: IUseWithCraftingRecipe = {
       qty: 15,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 15,
     },
     {
@@ -30,7 +30,7 @@ export const recipePlateShield: IUseWithCraftingRecipe = {
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.IronIngot, 15],
       [CraftingResourcesBlueprint.PolishedStone, 15],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 15],
+      [CraftingResourcesBlueprint.WoodenBoard, 15],
       [CraftingResourcesBlueprint.SteelIngot, 2],
     ]),
   ],

@@ -16,7 +16,7 @@ export const recipeSilverBulbMace: IUseWithCraftingRecipe = {
       qty: 1,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 2,
     },
   ],
@@ -25,7 +25,7 @@ export const recipeSilverBulbMace: IUseWithCraftingRecipe = {
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.SilverIngot, 4],
       [CraftingResourcesBlueprint.Diamond, 1],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 2],
+      [CraftingResourcesBlueprint.WoodenBoard, 2],
     ]),
   ],
 };

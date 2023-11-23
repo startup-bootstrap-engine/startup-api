@@ -12,7 +12,7 @@ export const recipeWhiteRavenAxe: IUseWithCraftingRecipe = {
       qty: 20,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 10,
     },
     {
@@ -24,7 +24,7 @@ export const recipeWhiteRavenAxe: IUseWithCraftingRecipe = {
     CraftingSkill.Blacksmithing,
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.GreenIngot, 20],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 10],
+      [CraftingResourcesBlueprint.WoodenBoard, 10],
       [CraftingResourcesBlueprint.Eye, 15],
     ]),
   ],

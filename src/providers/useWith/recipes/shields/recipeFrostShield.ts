@@ -16,7 +16,7 @@ export const recipeFrostShield: IUseWithCraftingRecipe = {
       qty: 10,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 5,
     },
   ],
@@ -25,7 +25,7 @@ export const recipeFrostShield: IUseWithCraftingRecipe = {
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.IronIngot, 12],
       [CraftingResourcesBlueprint.BlueSapphire, 10],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 5],
+      [CraftingResourcesBlueprint.WoodenBoard, 5],
     ]),
   ],
 };

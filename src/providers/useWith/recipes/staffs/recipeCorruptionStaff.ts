@@ -12,7 +12,7 @@ export const recipeCorruptionStaff: IUseWithCraftingRecipe = {
       qty: 5,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 3,
     },
     {
@@ -24,7 +24,7 @@ export const recipeCorruptionStaff: IUseWithCraftingRecipe = {
     CraftingSkill.Alchemy,
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.Jade, 5],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 3],
+      [CraftingResourcesBlueprint.WoodenBoard, 3],
       [CraftingResourcesBlueprint.MagicRecipe, 6],
     ]),
   ],

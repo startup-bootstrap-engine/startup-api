@@ -16,7 +16,7 @@ export const recipeRoyalStaff: IUseWithCraftingRecipe = {
       qty: 10,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 10,
     },
     {
@@ -33,7 +33,7 @@ export const recipeRoyalStaff: IUseWithCraftingRecipe = {
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.RedSapphire, 10],
       [CraftingResourcesBlueprint.PhoenixFeather, 10],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 10],
+      [CraftingResourcesBlueprint.WoodenBoard, 10],
       [CraftingResourcesBlueprint.ObsidiumIngot, 5],
       [CraftingResourcesBlueprint.GreenIngot, 5],
     ]),

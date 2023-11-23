@@ -20,7 +20,7 @@ export const recipeCrimsonAegisShield: IUseWithCraftingRecipe = {
       qty: 10,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 5,
     },
     {
@@ -34,7 +34,7 @@ export const recipeCrimsonAegisShield: IUseWithCraftingRecipe = {
       [CraftingResourcesBlueprint.GoldenIngot, 50],
       [CraftingResourcesBlueprint.PhoenixFeather, 20],
       [CraftingResourcesBlueprint.ColoredFeather, 10],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 5],
+      [CraftingResourcesBlueprint.WoodenBoard, 5],
       [CraftingResourcesBlueprint.DragonHead, 2],
     ]),
   ],

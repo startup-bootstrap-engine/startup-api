@@ -16,7 +16,7 @@ export const recipeSilverAxe: IUseWithCraftingRecipe = {
       qty: 2,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 4,
     },
   ],
@@ -25,7 +25,7 @@ export const recipeSilverAxe: IUseWithCraftingRecipe = {
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.SilverIngot, 8],
       [CraftingResourcesBlueprint.Leather, 2],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 4],
+      [CraftingResourcesBlueprint.WoodenBoard, 4],
     ]),
   ],
 };

@@ -16,7 +16,7 @@ export const recipeAzureDagger: IUseWithCraftingRecipe = {
       qty: 5,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 10,
     },
   ],
@@ -25,7 +25,7 @@ export const recipeAzureDagger: IUseWithCraftingRecipe = {
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.IronIngot, 15],
       [CraftingResourcesBlueprint.BlueSapphire, 5],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 10],
+      [CraftingResourcesBlueprint.WoodenBoard, 10],
     ]),
   ],
 };

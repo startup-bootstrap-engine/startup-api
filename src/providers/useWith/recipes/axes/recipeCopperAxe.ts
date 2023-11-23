@@ -12,7 +12,7 @@ export const recipeCopperAxe: IUseWithCraftingRecipe = {
       qty: 5,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 3,
     },
   ],
@@ -20,7 +20,7 @@ export const recipeCopperAxe: IUseWithCraftingRecipe = {
     CraftingSkill.Blacksmithing,
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.CopperIngot, 5],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 3],
+      [CraftingResourcesBlueprint.WoodenBoard, 3],
     ]),
   ],
 };

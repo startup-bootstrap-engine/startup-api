@@ -24,7 +24,7 @@ export const recipeHolyShield: IUseWithCraftingRecipe = {
       qty: 10,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 5,
     },
     {
@@ -42,7 +42,7 @@ export const recipeHolyShield: IUseWithCraftingRecipe = {
       [CraftingResourcesBlueprint.GoldenIngot, 20],
       [CraftingResourcesBlueprint.PhoenixFeather, 10],
       [CraftingResourcesBlueprint.ColoredFeather, 10],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 5],
+      [CraftingResourcesBlueprint.WoodenBoard, 5],
       [CraftingResourcesBlueprint.MagicRecipe, 5],
       [CraftingResourcesBlueprint.DragonTooth, 2],
     ]),

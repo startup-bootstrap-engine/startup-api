@@ -1,15 +1,19 @@
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import {
+  ITEM_MIN_REQUIREMENT_LEVEL_MULTIPLIER,
+  ITEM_MIN_REQUIREMENT_SKILL_MULTIPLIER,
+} from "@providers/constants/ItemMinRequirementsConstants";
+import {
   BasicAttribute,
   CombatSkill,
   IEquippableWeaponBlueprint,
+  MinRequirements as IItemMinRequirements,
   ItemSubType,
   ItemType,
-  MinRequirements,
 } from "@rpg-engine/shared";
 import { itemsBlueprintIndex } from "./data";
 
-export function getMinRequirements(blueprintKey: string, skillName: string): MinRequirements {
+export function getMinRequirements(blueprintKey: string, skillName: string): IItemMinRequirements {
   const levelMultiplier = 1.5;
   const skillMultiplier = 0.45;
   const attackMultiplier = 0.5;
@@ -56,7 +60,7 @@ export function getMinRequirements(blueprintKey: string, skillName: string): Min
   const levelReq = Math.ceil(highestReq * levelMultiplier * finalMultiplier);
   const skillReq = Math.ceil(highestReq * skillMultiplier * finalMultiplier);
 
-  const minRequirements: MinRequirements = {
+  const minRequirements: IItemMinRequirements = {
     level: levelReq,
     skill: {
       name: skillName,
@@ -123,6 +127,9 @@ export const minItemLevelSkillRequirementsMiddleware = (data: IItem): IItem => {
   // else, automatically add minRequirements to all items tier 2+
   if (item.tier! >= 2) {
     const minRequirements = getMinRequirements(item.key, getMinRequiredSkill(item));
+
+    minRequirements.level = Math.ceil(minRequirements.level * ITEM_MIN_REQUIREMENT_LEVEL_MULTIPLIER);
+    minRequirements.skill.level = Math.ceil(minRequirements.skill.level * ITEM_MIN_REQUIREMENT_SKILL_MULTIPLIER);
 
     // @ts-ignore
     item.minRequirements = minRequirements;

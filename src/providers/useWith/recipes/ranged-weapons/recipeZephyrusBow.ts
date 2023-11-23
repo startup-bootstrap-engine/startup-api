@@ -16,7 +16,7 @@ export const recipeZephyrusBow: IUseWithCraftingRecipe = {
       qty: 20,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 5,
     },
     {
@@ -29,7 +29,7 @@ export const recipeZephyrusBow: IUseWithCraftingRecipe = {
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.Rope, 2],
       [CraftingResourcesBlueprint.PhoenixFeather, 20],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 5],
+      [CraftingResourcesBlueprint.WoodenBoard, 5],
       [CraftingResourcesBlueprint.DragonTooth, 2],
     ]),
   ],

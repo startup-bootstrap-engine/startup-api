@@ -12,7 +12,7 @@ export const recipeSpikedClub: IUseWithCraftingRecipe = {
       qty: 10,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 4,
     },
     {
@@ -24,7 +24,7 @@ export const recipeSpikedClub: IUseWithCraftingRecipe = {
     CraftingSkill.Blacksmithing,
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.IronNail, 10],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 4],
+      [CraftingResourcesBlueprint.WoodenBoard, 4],
       [CraftingResourcesBlueprint.Skull, 1],
     ]),
   ],

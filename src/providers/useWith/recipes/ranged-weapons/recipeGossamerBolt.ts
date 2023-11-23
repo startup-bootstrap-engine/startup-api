@@ -15,7 +15,7 @@ export const recipeGossamerBolt: IUseWithCraftingRecipe = {
       qty: 5,
     },
     {
-      key: CraftingResourcesBlueprint.SmallWoodenStick,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 4,
     },
     {

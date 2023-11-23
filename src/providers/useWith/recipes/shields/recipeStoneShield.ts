@@ -20,7 +20,7 @@ export const recipeStoneShield: IUseWithCraftingRecipe = {
       qty: 15,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 3,
     },
   ],
@@ -30,7 +30,7 @@ export const recipeStoneShield: IUseWithCraftingRecipe = {
       [CraftingResourcesBlueprint.SteelIngot, 5],
       [CraftingResourcesBlueprint.IronIngot, 3],
       [CraftingResourcesBlueprint.PolishedStone, 15],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 3],
+      [CraftingResourcesBlueprint.WoodenBoard, 3],
     ]),
   ],
 };

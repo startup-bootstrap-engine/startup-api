@@ -16,7 +16,7 @@ export const recipeGlacialHatchet: IUseWithCraftingRecipe = {
       qty: 2,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 3,
     },
   ],
@@ -25,7 +25,7 @@ export const recipeGlacialHatchet: IUseWithCraftingRecipe = {
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.SteelIngot, 5],
       [CraftingResourcesBlueprint.BlueSapphire, 2],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 3],
+      [CraftingResourcesBlueprint.WoodenBoard, 3],
     ]),
   ],
 };

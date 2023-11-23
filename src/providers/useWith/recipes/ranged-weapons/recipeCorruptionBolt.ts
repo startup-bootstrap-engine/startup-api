@@ -7,7 +7,7 @@ export const recipeCorruptionBolt: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 3],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.SmallWoodenStick,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 5,
     },
     {

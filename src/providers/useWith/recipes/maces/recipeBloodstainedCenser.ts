@@ -16,7 +16,7 @@ export const recipeBloodstainedCenser: IUseWithCraftingRecipe = {
       qty: 3,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 1,
     },
     {
@@ -29,7 +29,7 @@ export const recipeBloodstainedCenser: IUseWithCraftingRecipe = {
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.GoldenIngot, 4],
       [CraftingResourcesBlueprint.ObsidiumIngot, 3],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 1],
+      [CraftingResourcesBlueprint.WoodenBoard, 1],
       [CraftingResourcesBlueprint.Bone, 5],
     ]),
   ],

@@ -20,7 +20,7 @@ export const recipeRuneBow: IUseWithCraftingRecipe = {
       qty: 10,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 10,
     },
     {
@@ -33,7 +33,7 @@ export const recipeRuneBow: IUseWithCraftingRecipe = {
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.Rope, 10],
       [CraftingResourcesBlueprint.MagicRecipe, 10],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 10],
+      [CraftingResourcesBlueprint.WoodenBoard, 10],
       [CraftingResourcesBlueprint.BlueSapphire, 15],
     ]),
   ],

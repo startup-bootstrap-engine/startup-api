@@ -15,7 +15,7 @@ export const recipeFrostbiteBlade: IUseWithCraftingRecipe = {
       qty: 5,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 4,
     },
   ],

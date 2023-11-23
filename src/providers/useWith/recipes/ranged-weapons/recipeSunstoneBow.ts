@@ -16,7 +16,7 @@ export const recipeSunstoneBow: IUseWithCraftingRecipe = {
       qty: 3,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 5,
     },
     {
@@ -36,7 +36,7 @@ export const recipeSunstoneBow: IUseWithCraftingRecipe = {
     CraftingSkill.Lumberjacking,
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.Rope, 3],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 5],
+      [CraftingResourcesBlueprint.WoodenBoard, 5],
       [CraftingResourcesBlueprint.MagicRecipe, 10],
       [CraftingResourcesBlueprint.PolishedStone, 10],
       [CraftingResourcesBlueprint.DragonTooth, 2],

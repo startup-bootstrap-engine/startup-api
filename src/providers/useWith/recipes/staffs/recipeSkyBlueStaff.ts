@@ -16,7 +16,7 @@ export const recipeBlueSkyStaff: IUseWithCraftingRecipe = {
       qty: 8,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 4,
     },
     {
@@ -29,7 +29,7 @@ export const recipeBlueSkyStaff: IUseWithCraftingRecipe = {
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.BlueSapphire, 8],
       [CraftingResourcesBlueprint.BlueFeather, 8],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 4],
+      [CraftingResourcesBlueprint.WoodenBoard, 4],
       [CraftingResourcesBlueprint.BlueSilk, 3],
     ]),
   ],

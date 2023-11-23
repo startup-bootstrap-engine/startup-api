@@ -25,7 +25,7 @@ export const recipeMushroomSpear: IUseWithCraftingRecipe = {
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.GreenIngot, 5],
       [CraftingResourcesBlueprint.SteelIngot, 5],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 5],
+      [CraftingResourcesBlueprint.WoodenBoard, 5],
     ]),
   ],
 };

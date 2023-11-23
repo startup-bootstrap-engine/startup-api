@@ -8,7 +8,7 @@ export const recipeWoodenBoard: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 3],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 10,
     },
     {
@@ -22,6 +22,6 @@ export const recipeWoodenBoard: IUseWithCraftingRecipe = {
   ],
   minCraftingRequirements: [
     CraftingSkill.Lumberjacking,
-    calculateMinimumLevel([[CraftingResourcesBlueprint.GreaterWoodenLog, 20]]),
+    calculateMinimumLevel([[CraftingResourcesBlueprint.WoodenBoard, 20]]),
   ],
 };

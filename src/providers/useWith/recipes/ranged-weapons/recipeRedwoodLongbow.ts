@@ -8,7 +8,7 @@ export const recipeRedwoodLongbow: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 1],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 3,
     },
     {
@@ -23,7 +23,7 @@ export const recipeRedwoodLongbow: IUseWithCraftingRecipe = {
   minCraftingRequirements: [
     CraftingSkill.Lumberjacking,
     calculateMinimumLevel([
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 3],
+      [CraftingResourcesBlueprint.WoodenBoard, 3],
       [CraftingResourcesBlueprint.SteelIngot, 3],
       [CraftingResourcesBlueprint.RedSapphire, 5],
     ]),

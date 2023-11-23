@@ -8,7 +8,7 @@ export const recipeRusticFlail: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 1],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 10,
     },
     {
@@ -23,7 +23,7 @@ export const recipeRusticFlail: IUseWithCraftingRecipe = {
   minCraftingRequirements: [
     CraftingSkill.Blacksmithing,
     calculateMinimumLevel([
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 10],
+      [CraftingResourcesBlueprint.WoodenBoard, 10],
       [CraftingResourcesBlueprint.Leather, 5],
       [CraftingResourcesBlueprint.BatsWing, 2],
     ]),

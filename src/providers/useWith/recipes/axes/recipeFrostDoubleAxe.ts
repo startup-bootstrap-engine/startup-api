@@ -16,7 +16,7 @@ export const recipeFrostDoubleAxe: IUseWithCraftingRecipe = {
       qty: 6,
     },
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 10,
     },
   ],
@@ -25,7 +25,7 @@ export const recipeFrostDoubleAxe: IUseWithCraftingRecipe = {
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.IronIngot, 25],
       [CraftingResourcesBlueprint.BlueSapphire, 6],
-      [CraftingResourcesBlueprint.GreaterWoodenLog, 10],
+      [CraftingResourcesBlueprint.WoodenBoard, 10],
     ]),
   ],
 };

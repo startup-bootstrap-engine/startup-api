@@ -7,7 +7,7 @@ export const recipeMysticMeadowArrow: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 3],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.GreaterWoodenLog,
+      key: CraftingResourcesBlueprint.WoodenBoard,
       qty: 15,
     },
     {
