@@ -42,7 +42,7 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
     InventoryLossOnDeathReduction: 20,
     maxSpeed: MovementSpeed.Fast,
     XPBuff: 20,
-    lootDropBuff: 15,
+    lootDropBuff: 20,
     spellCooldownReduction: {
       defaultReduction: 0,
       customReduction: {
@@ -56,7 +56,7 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
     InventoryLossOnDeathReduction: 35, // 50% less chance to drop an item
     maxSpeed: MovementSpeed.Fast,
     XPBuff: 30,
-    lootDropBuff: 25,
+    lootDropBuff: 30,
     spellCooldownReduction: {
       defaultReduction: 0,
       customReduction: {
@@ -70,7 +70,7 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
     InventoryLossOnDeathReduction: 50, // Do not drop anything on death
     maxSpeed: MovementSpeed.Fast,
     XPBuff: 50,
-    lootDropBuff: 35,
+    lootDropBuff: 50,
     spellCooldownReduction: {
       defaultReduction: 0,
       customReduction: {
@@ -84,7 +84,7 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
     InventoryLossOnDeathReduction: 75, // Do not drop anything on death
     maxSpeed: MovementSpeed.Fast,
     XPBuff: 100,
-    lootDropBuff: 40,
+    lootDropBuff: 100,
     spellCooldownReduction: {
       defaultReduction: 0,
       customReduction: {
