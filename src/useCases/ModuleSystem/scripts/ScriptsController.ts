@@ -74,4 +74,13 @@ export class ScriptsController implements interfaces.Controller {
       message: "Character user cache cleaned up!",
     });
   }
+
+  @httpGet("/update-items-min-requirements")
+  public async updateItemsMinRequirements(@response() res): Promise<void> {
+    await this.scriptsUseCase.updateItemMinRequirementsToMatchBlueprint();
+
+    return res.status(200).send({
+      message: "Items min requirements updated!",
+    });
+  }
 }

@@ -8,7 +8,7 @@ export const recipeWoodenBoard: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 3],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.WoodenBoard,
+      key: CraftingResourcesBlueprint.GreaterWoodenLog,
       qty: 10,
     },
     {

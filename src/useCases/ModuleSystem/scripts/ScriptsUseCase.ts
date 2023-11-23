@@ -1,4 +1,6 @@
 import { Character } from "@entities/ModuleCharacter/CharacterModel";
+import { Item } from "@entities/ModuleInventory/ItemModel";
+import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { BadRequestError } from "@providers/errors/BadRequestError";
@@ -6,7 +8,7 @@ import { ItemContainerBodyCleaner } from "@providers/item/cleaner/ItemContainerB
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { ItemReportGenerator } from "@providers/item/ItemReportGenerator";
 import { MarketplaceCleaner } from "@providers/marketplace/MarketplaceCleaner";
-import { FromGridX, FromGridY } from "@rpg-engine/shared";
+import { FromGridX, FromGridY, IItem } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
 
@@ -17,8 +19,49 @@ export class ScriptsUseCase {
     private itemReportGenerator: ItemReportGenerator,
     private itemMissingReferenceCleaner: ItemMissingReferenceCleaner,
     private itemContainerBodyCleaner: ItemContainerBodyCleaner,
-    private inMemoryHashTable: InMemoryHashTable
+    private inMemoryHashTable: InMemoryHashTable,
+    private blueprintManager: BlueprintManager
   ) {}
+
+  public async updateItemMinRequirementsToMatchBlueprint(): Promise<void> {
+    try {
+      // Fetch all item keys that have minRequirements
+      const itemsWithMinReq = await Item.find({ minRequirements: { $exists: true } }, { key: 1 }).lean();
+
+      // Preparing bulk updates
+      const bulkOps = itemsWithMinReq.map(async (item) => {
+        try {
+          const itemBlueprint: IItem = await this.blueprintManager.getBlueprint("items", item.key);
+
+          if (!itemBlueprint || !itemBlueprint.minRequirements) {
+            console.warn(`Skipping update for item key: ${item.key} as blueprint or minRequirements is undefined`);
+            return null;
+          }
+
+          return {
+            updateOne: {
+              filter: { _id: item._id },
+              update: { $set: { minRequirements: itemBlueprint.minRequirements } },
+            },
+          };
+        } catch (error) {
+          console.log("Failed to process item ", item.key);
+          console.error(error);
+          return null;
+        }
+      });
+
+      // Resolving all promises and executing bulk write
+      const operations = (await Promise.all(bulkOps)).filter((op) => op != null);
+
+      // Executing bulk write with the successful operations
+      if (operations.length > 0) {
+        await Item.bulkWrite(operations);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   public async cleanupCharacterUserCache(characterId: string): Promise<void> {
     await clearCacheForKey(`character-${characterId}-user`);
