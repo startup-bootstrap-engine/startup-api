@@ -175,7 +175,7 @@ export class NPCLoot {
     const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(killer);
 
     if (premiumAccountData) {
-      return premiumAccountData.lootDropBuff / 100 + this.getBaseLootMultiplier(blueprintData);
+      return this.getBaseLootMultiplier(blueprintData) * (1 + premiumAccountData.lootDropBuff / 100);
     }
     return this.getBaseLootMultiplier(blueprintData);
   }

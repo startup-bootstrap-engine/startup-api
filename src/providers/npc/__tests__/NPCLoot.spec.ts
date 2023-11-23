@@ -103,7 +103,7 @@ describe("NPCLoot.spec.ts", () => {
       // @ts-ignore
       const result = await npcLoot.getLootMultiplier(premiumAccountCharacter, foodItem);
 
-      expect(result).toBe(1);
+      expect(result).toBe(0.75);
     });
   });
 });
