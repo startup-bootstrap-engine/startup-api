@@ -148,7 +148,7 @@ export class UseWithTile {
           cacheKey: `${character._id}-skills`,
         })) as ISkill;
 
-      if (skill[resource.type].level < resource.minLevel) {
+      if (skill[resource.type].level < resource.minLevel * resource.ratio) {
         this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, this tile cannot be used with your level.");
         return;
       }
