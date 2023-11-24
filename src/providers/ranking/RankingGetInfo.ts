@@ -13,14 +13,25 @@ import {
   LeaderboardSocketEvents,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import { RankingCache } from "./RankingCache";
 
 @provide(RankingGetInfo)
 export class RankingGetInfo {
-  constructor(private socketMessaging: SocketMessaging) {}
+  constructor(private socketMessaging: SocketMessaging, private rankingCache: RankingCache) {}
 
   @TrackNewRelicTransaction()
   public async topLevelGlobal(): Promise<IRankingTopCharacterEntry[]> {
+    const cachedTopLevelGlobal = await this.rankingCache.getTopLevelBy<IRankingTopCharacterEntry[]>("global");
+    if (cachedTopLevelGlobal) {
+      return cachedTopLevelGlobal;
+    }
+
     const topSkill = await Skill.aggregate([
+      {
+        $match: {
+          ownerType: "Character",
+        },
+      },
       {
         $lookup: {
           from: "characters",
@@ -33,40 +44,39 @@ export class RankingGetInfo {
       {
         $match: {
           "characterInfo.name": { $not: /^GM/ },
-          ownerType: "Character",
         },
       },
       { $sort: { level: -1 } },
       { $limit: 10 },
       {
         $project: {
-          owner: 1,
+          name: "$characterInfo.name",
           level: 1,
         },
       },
     ]).exec();
 
-    const result: IRankingTopCharacterEntry[] = [];
+    // Convert the aggregation result directly into the final structure
+    const result = topSkill.map((skill) => ({
+      name: skill.name || "Unknown",
+      level: skill.level,
+    }));
 
-    const characterIds = topSkill.map((characterSkill) => characterSkill.owner);
-    const characterPromises = characterIds.map((characterId) =>
-      Character.findById(characterId).lean().select("name").exec()
-    );
-
-    const characters = await Promise.all(characterPromises);
-
-    characters.forEach((character, index) => {
-      result.push({
-        name: character?.name || "Unknown",
-        level: topSkill[index].level,
-      });
-    });
+    await this.rankingCache.setTopLevelBy("global", result);
 
     return result;
   }
 
   @TrackNewRelicTransaction()
   public async topLevelClass(): Promise<Record<string, IRankingCharacterClass>> {
+    const cachedTopLevelByClass = await this.rankingCache.getTopLevelBy<Record<string, IRankingCharacterClass>>(
+      "class"
+    );
+
+    if (cachedTopLevelByClass) {
+      return cachedTopLevelByClass;
+    }
+
     const characterClasses = Object.values(CharacterClass);
 
     const characterInfo = await Character.aggregate([
@@ -101,11 +111,18 @@ export class RankingGetInfo {
       result[characterClass] = { class: characterClass, topPlayers: topPlayersForClass };
     });
 
+    await this.rankingCache.setTopLevelBy("class", result);
+
     return result;
   }
 
   @TrackNewRelicTransaction()
   public async topLevelBySkillType(): Promise<IRankingCharacterSkill[]> {
+    const cachedTopLevelBySkill = await this.rankingCache.getTopLevelBy<IRankingCharacterSkill[]>("skill");
+    if (cachedTopLevelBySkill) {
+      return cachedTopLevelBySkill;
+    }
+
     const skills = [
       "stamina",
       "magic",
@@ -128,40 +145,50 @@ export class RankingGetInfo {
       "blacksmithing",
     ];
 
-    const characterInfo = await Skill.aggregate([
-      {
-        $lookup: {
-          from: "characters",
-          localField: "owner",
-          foreignField: "_id",
-          as: "characterInfo",
+    const pipeline = skills.map((skill) => {
+      return [
+        {
+          $match: {
+            [skill]: { $exists: true, $ne: null },
+          },
         },
-      },
-      {
-        $unwind: "$characterInfo",
-      },
-      {
-        $match: {
-          "characterInfo.name": { $not: /GM/ },
+        {
+          $lookup: {
+            from: "characters",
+            localField: "owner",
+            foreignField: "_id",
+            as: "characterInfo",
+          },
         },
-      },
-    ]).exec();
-
-    const top10Promises = skills.map((skill) => {
-      const top10ForSkill = characterInfo
-        .map((char) => ({
-          name: char.characterInfo.name,
-          skill: skill,
-          level: char[skill].level,
-        }))
-        .filter((char) => char.level)
-        .sort((a, b) => b.level - a.level)
-        .slice(0, 10);
-
-      return { skill: skill, top10: top10ForSkill };
+        { $unwind: "$characterInfo" },
+        {
+          $match: {
+            "characterInfo.name": { $not: /GM/ },
+          },
+        },
+        {
+          $project: {
+            name: "$characterInfo.name",
+            skill: skill,
+            level: `$${skill}.level`,
+          },
+        },
+        { $sort: { level: -1 } },
+        { $limit: 10 },
+      ];
     });
 
-    return Promise.all(top10Promises);
+    const top10SkillsPromises = pipeline.map((skillPipeline) => Skill.aggregate(skillPipeline).exec());
+
+    const top10SkillsResults = await Promise.all(top10SkillsPromises);
+
+    const results = skills.map((skill, index) => {
+      return { skill: skill, top10: top10SkillsResults[index] };
+    });
+
+    await this.rankingCache.setTopLevelBy("skill", results);
+
+    return results;
   }
 
   @TrackNewRelicTransaction()
