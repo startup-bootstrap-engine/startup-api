@@ -185,7 +185,7 @@ export class NPCCycleQueue {
     npc.skills = npcSkills;
 
     if (await this.specialEffect.isStun(npc)) {
-      await this.stop(npc);
+      await this.add(npc, npcSkills);
 
       return;
     }
