@@ -12,7 +12,8 @@ import { IUseWithTile, MAP_LAYERS_TO_ID, ToGridX, ToGridY, UseWithSocketEvents }
 import { provide } from "inversify-binding-decorators";
 import { UseWithHelper } from "../libs/UseWithHelper";
 import { IItemUseWith, IUseWithTileValidationResponse } from "../useWithTypes";
-
+import { RESOURCE_LEVEL_REQUIREMENTS } from "@providers/constants/ResourceRequirementConstants";
+import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 @provide(UseWithTile)
 export class UseWithTile {
   constructor(
@@ -32,7 +33,6 @@ export class UseWithTile {
       async (useWithTileData: IUseWithTile, character) => {
         try {
           const useWithData = await this.validateData(character, useWithTileData);
-
           if (useWithData) {
             const { originItem, useWithTileEffect, targetName } = useWithData;
             await useWithTileEffect!(
@@ -136,6 +136,22 @@ export class UseWithTile {
       throw new Error(
         `UseWithTile > originItem '${originItem.baseKey}' does not have a useWithTileEffect function defined`
       );
+    }
+
+    // check if a character has a minimum level to gather a resource
+    if (useWithTargetName) {
+      const resource = RESOURCE_LEVEL_REQUIREMENTS[useWithTargetName];
+      const skill = (await Skill.findOne({ owner: character._id })
+        .select([resource.type])
+        .lean({})
+        .cacheQuery({
+          cacheKey: `${character._id}-skills`,
+        })) as ISkill;
+
+      if (skill[resource.type].level < resource.minLevel) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, this tile cannot be used with your level.");
+        return;
+      }
     }
 
     return { originItem, useWithTileEffect, targetName: useWithTargetName };
