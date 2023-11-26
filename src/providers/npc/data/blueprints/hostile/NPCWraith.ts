@@ -33,6 +33,7 @@ export const npcWraith: Partial<INPC> = {
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
+  isMagic: true,
   skills: {
     level: 45,
     strength: {
@@ -43,6 +44,12 @@ export const npcWraith: Partial<INPC> = {
     },
     resistance: {
       level: 30,
+    },
+    magic: {
+      level: 20,
+    },
+    magicResistance: {
+      level: 25,
     },
   },
   fleeOnLowHealth: true,

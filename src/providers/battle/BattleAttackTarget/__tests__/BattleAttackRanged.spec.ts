@@ -40,7 +40,7 @@ describe("BattleRangedAttack.spec.ts", () => {
 
   beforeEach(async () => {
     testNPC = await unitTestHelper.createMockNPC(
-      { attackType: EntityAttackType.Ranged, maxRangeAttack: 7 },
+      { attackType: EntityAttackType.Ranged, maxRangeAttack: 7, key: "rat" },
       { hasSkills: true }
     );
 

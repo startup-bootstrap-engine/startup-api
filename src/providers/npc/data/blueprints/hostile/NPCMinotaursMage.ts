@@ -35,6 +35,7 @@ export const npcMinotaurMage = {
   healthRandomizerDice: Dice.D4,
   skillRandomizerDice: Dice.D4,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
+  isMagic: true,
   skills: {
     level: 70,
     strength: {
@@ -47,6 +48,9 @@ export const npcMinotaurMage = {
       level: 30,
     },
     magicResistance: {
+      level: 50,
+    },
+    magic: {
       level: 50,
     },
   },

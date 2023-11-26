@@ -131,11 +131,18 @@ export class SkillFunctions {
       skill: skillData.skillName,
     };
 
+    let skillName = skillData.skillName;
+
+    if (skillData.skillName === "magicResistance") {
+      // fix on magic resistance name output
+      skillName = "Magic Resistance";
+    }
+
     this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId!, UISocketEvents.ShowMessage, {
       message: `You ${behavior} from level ${this.numberFormatter.formatNumber(
         skillData.skillLevelBefore
       )} to ${this.numberFormatter.formatNumber(skillData.skillLevelAfter)} in ${_.startCase(
-        _.toLower(skillData.skillName)
+        _.toLower(skillName)
       )} fighting.`,
       type: "info",
     });
