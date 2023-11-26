@@ -316,7 +316,6 @@ export class HitTarget {
           isCriticalHit: damage > baseDamage,
         };
 
-        console.log(attacker.type, target.type);
         if (attacker.type === EntityType.NPC && target.type === EntityType.Character) {
           const npc = await blueprintManager.getBlueprint<any>("npcs", (attacker as INPC).baseKey);
 
