@@ -297,7 +297,12 @@ describe("SpellCast.ts", () => {
     expect(await spellCast.castSpell({ magicWords: "talas faenya" }, testCharacter)).toBeTruthy();
 
     expect(increaseSPMock).toHaveBeenCalledTimes(1);
-    expect(increaseSPMock).toHaveBeenLastCalledWith(testCharacter, spellSelfHealing.manaCost!);
+    expect(increaseSPMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        _id: testCharacter._id,
+      }),
+      spellSelfHealing.manaCost!
+    );
 
     increaseSPMock.mockRestore();
   });

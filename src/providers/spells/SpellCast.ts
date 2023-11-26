@@ -162,14 +162,14 @@ export class SpellCast {
     await this.itemUsableEffect.apply(updatedCharacter, EffectableAttribute.Mana, -1 * spell.manaCost);
     await updatedCharacter.save();
 
-    await this.sendPostSpellCastEvents(character, spell, target);
+    await this.sendPostSpellCastEvents(updatedCharacter, spell, target);
 
-    await this.skillIncrease.increaseMagicSP(character, spell.manaCost);
+    await this.skillIncrease.increaseMagicSP(updatedCharacter, spell.manaCost);
     if (target?.type === EntityType.Character) {
       await this.skillIncrease.increaseMagicResistanceSP(target, spell.manaCost);
     }
 
-    await this.characterBonusPenalties.applyRaceBonusPenalties(character, BasicAttribute.Magic);
+    await this.characterBonusPenalties.applyRaceBonusPenalties(updatedCharacter, BasicAttribute.Magic);
 
     return true;
   }
