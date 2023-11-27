@@ -54,7 +54,7 @@ describe("Execution", () => {
     targetCharacter.health = 100;
     await Character.findByIdAndUpdate(targetCharacter._id, targetCharacter);
 
-    await executionSpell.handleBerserkerExecution(testCharacter, targetCharacter);
+    await executionSpell.handleExecution(testCharacter, targetCharacter);
 
     const characterBody = await Item.findOne({
       name: `${targetCharacter.name}'s body`,
@@ -75,7 +75,7 @@ describe("Execution", () => {
     expect(targetNPC.health).toBe(5);
     expect(targetNPC.isAlive).toBe(true);
 
-    await executionSpell.handleBerserkerExecution(testCharacter, targetNPC);
+    await executionSpell.handleExecution(testCharacter, targetNPC);
 
     const updateNPC = (await NPC.findById(targetNPC._id).lean()) as INPC;
 

@@ -25,10 +25,26 @@ export const rogueSpellExecution: Partial<ISpell> = {
   cooldown: 150,
   castingAnimationKey: AnimationEffectKeys.HitCorruption,
   projectileAnimationKey: AnimationEffectKeys.HitCorruption,
+  targetHitAnimationKey: AnimationEffectKeys.HitCorruption,
   maxDistanceGrid: RangeTypes.Short,
   characterClass: [CharacterClass.Rogue],
 
   usableEffect: async (character: ICharacter, target: ICharacter | INPC) => {
-    await container.get(Execution).handleBerserkerExecution(character, target);
+    const execution = container.get(Execution);
+
+    const executionPromise = (): Promise<boolean> =>
+      new Promise((resolve, reject) => {
+        try {
+          setTimeout(async () => {
+            const result = await execution.handleExecution(character, target);
+            resolve(result);
+          }, 350);
+        } catch (error) {
+          console.error(error);
+          reject(error);
+        }
+      });
+
+    return await executionPromise();
   },
 };

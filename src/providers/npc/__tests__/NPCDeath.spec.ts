@@ -73,6 +73,7 @@ describe("NPCDeath.ts", () => {
         quantityRange: [30, 40],
       },
     ];
+    await testNPC.save();
 
     await npcDeath.handleNPCDeath(testCharacter, testNPC);
 
@@ -109,6 +110,8 @@ describe("NPCDeath.ts", () => {
       // @ts-ignore
       { itemBlueprintKey: CraftingResourcesBlueprint.GoldenIngot, chance: 100, quantityRange: [1, 2] },
     ];
+
+    await testNPC.save();
 
     await npcDeath.handleNPCDeath(testCharacter, testNPC);
 

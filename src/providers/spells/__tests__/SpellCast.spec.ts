@@ -601,7 +601,7 @@ describe("SpellCast.ts", () => {
       const timerMock = jest.spyOn(TimerWrapper.prototype, "setTimeout");
       timerMock.mockImplementation();
 
-      await berserkerSpells.handleBerserkerExecution(testCharacter, testCharacter);
+      await berserkerSpells.handleExecution(testCharacter, testCharacter);
 
       const characterBody = await Item.findOne({
         name: `${testCharacter.name}'s body`,
@@ -626,7 +626,7 @@ describe("SpellCast.ts", () => {
       targetCharacter.health = 25;
       await Character.findByIdAndUpdate(targetCharacter._id, targetCharacter);
 
-      await berserkerSpells.handleBerserkerExecution(testCharacter, targetCharacter);
+      await berserkerSpells.handleExecution(testCharacter, targetCharacter);
 
       const characterBody = await Item.findOne({
         name: `${targetCharacter.name}'s body`,

@@ -143,19 +143,19 @@ export class SpellCast {
       }
     }
 
-    const hasSpellCooldown = await this.spellCoolDown.haveSpellCooldown(character, spell.magicWords);
-
-    if (!hasSpellCooldown) {
-      await this.spellCoolDown.setSpellCooldown(spell.key, character, spell.magicWords, spell.cooldown);
-    }
-    await this.spellCoolDown.getAllSpellCooldowns(character);
-
     const hasCastSucceeded = await spell.usableEffect(character, target);
 
     // if it fails, it will return explicitly false above. We prevent moving forward, so mana is not spent unnecessarily
     if (hasCastSucceeded === false) {
       return false;
     }
+
+    const hasSpellCooldown = await this.spellCoolDown.haveSpellCooldown(character, spell.magicWords);
+
+    if (!hasSpellCooldown) {
+      await this.spellCoolDown.setSpellCooldown(spell.key, character, spell.magicWords, spell.cooldown);
+    }
+    await this.spellCoolDown.getAllSpellCooldowns(character);
 
     const updatedCharacter = (await Character.findById(character._id)) as ICharacter;
 

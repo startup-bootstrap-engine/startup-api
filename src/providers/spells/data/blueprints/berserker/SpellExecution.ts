@@ -25,12 +25,26 @@ export const berserkerSpellExecution: Partial<ISpell> = {
   cooldown: 150,
   castingAnimationKey: AnimationEffectKeys.HitCorruption,
   projectileAnimationKey: AnimationEffectKeys.HitCorruption,
+  targetHitAnimationKey: AnimationEffectKeys.HitCorruption,
   maxDistanceGrid: RangeTypes.UltraShort,
   characterClass: [CharacterClass.Berserker],
 
   usableEffect: async (character: ICharacter, target: ICharacter | INPC) => {
     const execution = container.get(Execution);
 
-    await execution.handleBerserkerExecution(character, target);
+    const executionPromise = (): Promise<boolean> =>
+      new Promise((resolve, reject) => {
+        try {
+          setTimeout(async () => {
+            const result = await execution.handleExecution(character, target);
+            resolve(result);
+          }, 350);
+        } catch (error) {
+          console.error(error);
+          reject(error);
+        }
+      });
+
+    return await executionPromise();
   },
 };
