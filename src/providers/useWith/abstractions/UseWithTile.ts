@@ -143,18 +143,23 @@ export class UseWithTile {
     // check if a character has a minimum level to gather a resource
     if (useWithTargetName) {
       const resource = RESOURCE_LEVEL_REQUIREMENTS[useWithTargetName];
-      const skills = (await Skill.findOne({ owner: character._id })
-        .select([resource.type])
-        .lean({})
-        .cacheQuery({
-          cacheKey: `${character._id}-skills`,
-        })) as ISkill;
+      if (resource) {
+        const skills = (await Skill.findOne({ owner: character._id })
+          .select([resource.type])
+          .lean({})
+          .cacheQuery({
+            cacheKey: `${character._id}-skills`,
+          })) as ISkill;
 
-      const characterLevel = skills[resource.type] ? skills[resource.type].level : 1;
+        const characterLevel = skills[resource.type] ? skills[resource.type].level : 1;
 
-      if (characterLevel < resource.minLevel * resource.ratio) {
-        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, this tile cannot be used with your level.");
-        return;
+        if (characterLevel < resource.minLevel * resource.ratio) {
+          this.socketMessaging.sendErrorMessageToCharacter(
+            character,
+            "Sorry, this tile cannot be used with your level."
+          );
+          return;
+        }
       }
     }
 

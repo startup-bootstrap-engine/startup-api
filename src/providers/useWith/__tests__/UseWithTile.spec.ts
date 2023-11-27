@@ -121,45 +121,44 @@ describe("UseWithTile.ts", () => {
   });
 
   it("should fail validations | character doesn't have min level to access a resource", async () => {
-    const targetName = "brown-fish";
-    const resource = RESOURCE_LEVEL_REQUIREMENTS[targetName];
+    const testCases = Object.keys(RESOURCE_LEVEL_REQUIREMENTS);
+    for (const targetName of testCases) {
+      const resource = RESOURCE_LEVEL_REQUIREMENTS[targetName];
+      await Skill.deleteOne({ owner: testCharacter._id });
 
-    const skills = (await Skill.findOne({ _id: testCharacter._id })
-      .select([resource.type])
-      .lean({})
-      .cacheQuery({
-        cacheKey: `${testCharacter._id}-skills`,
-      })) as ISkill;
-
-    if (skills && skills[resource.type]) {
-      characterSkills = skills;
-      characterSkills[resource.type].level = 10;
-    } else {
       const newSkill = new Skill({
         owner: testCharacter._id,
         ownerType: "Character",
         level: 1,
         [resource.type]: {
           type: SkillType.Character,
-          level: 10,
+          level: resource.minLevel - 1,
         },
       });
       await newSkill.save();
-      characterSkills = newSkill;
+
+      testItem.key = resource.item;
+      testItem.baseKey = resource.item;
+      await testItem.save();
+
+      // @ts-ignore
+      jest
+        .spyOn(useWithTile.mapTiles, "getPropertyFromLayer" as any)
+        .mockImplementation((map: string, gridX: number, gridY: number, mapLayer: MapLayers, property: string) => {
+          if (property === "usewith_origin_item_key") {
+            return resource.item;
+          } else {
+            return targetName;
+          }
+        });
+      // @ts-ignore
+      const sendErrorMsg = jest.spyOn(useWithTile.socketMessaging, "sendErrorMessageToCharacter" as any);
+
+      // @ts-ignore
+      const response = await useWithTile.validateData(testCharacter, useWithTileData);
+
+      expect(response).toBeUndefined();
+      expect(sendErrorMsg).toHaveBeenCalled();
     }
-
-    (await Skill.findByIdAndUpdate(characterSkills._id, characterSkills).lean()) as ISkill;
-    testItem.baseKey = "fishing-rode";
-    await testItem.save();
-
-    // @ts-ignore
-    jest.spyOn(useWithTile.mapTiles, "getPropertyFromLayer" as any).mockImplementation(() => targetName);
-    // @ts-ignore
-    const sendErrorMsg = jest.spyOn(useWithTile.socketMessaging, "sendErrorMessageToCharacter" as any);
-
-    // @ts-ignore
-    const response = await useWithTile.validateData(testCharacter, useWithTileData);
-    expect(response).toBeUndefined();
-    expect(sendErrorMsg).toHaveBeenCalled();
   });
 });
