@@ -1,16 +1,18 @@
-import { CharacterTradeSocketEvents, ItemSocketEvents, ITradeRequestItem } from "@rpg-engine/shared";
+import { CharacterTradeSocketEvents, ItemSocketEvents, ITradeRequestItem, UserAccountTypes } from "@rpg-engine/shared";
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { container, unitTestHelper } from "@providers/inversify/container";
+import { BlueprintNamespaces } from "@providers/blueprint/BlueprintManager";
+import { blueprintManager, container, unitTestHelper } from "@providers/inversify/container";
 import {
   FoodsBlueprint,
   OthersBlueprint,
   PotionsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { IBlueprint } from "@providers/types/temp/BlueprintTypes";
 import { CharacterTradingNPCBuy } from "../CharacterTradingNPCBuy";
 
 describe("CharacterTradingValidation.ts", () => {
@@ -58,6 +60,9 @@ describe("CharacterTradingValidation.ts", () => {
         },
         {
           key: FoodsBlueprint.Apple,
+        },
+        {
+          key: FoodsBlueprint.Banana,
         },
       ],
     });
@@ -153,6 +158,86 @@ describe("CharacterTradingValidation.ts", () => {
           openInventoryOnUpdate: true,
         }
       );
+    });
+  });
+
+  interface ITransactionItem {
+    key: string;
+    qty: number;
+  }
+
+  describe("Premium accounts", () => {
+    let testBanana: IItem;
+    const key = FoodsBlueprint.Banana;
+
+    // Utility function to remove object field
+    const removeObjectField = <T extends object>(obj: T, fieldName: keyof T): Omit<T, keyof T> => {
+      const { [fieldName]: _, ...rest } = obj;
+      return rest;
+    };
+
+    const updateBlueprint = (namespace: BlueprintNamespaces, key: string, data: any): IBlueprint => {
+      const blueprintIndex = blueprintManager.getBlueprintIndex<IBlueprint>(namespace);
+
+      blueprintIndex[key] = data;
+
+      return blueprintIndex;
+    };
+
+    // General setup for tests
+
+    const setupTest = (accountType: UserAccountTypes | undefined) => {
+      jest
+        // @ts-ignore
+        .spyOn(characterTradingNPCBuy.characterTradingBuy.characterUser, "findUserByCharacter")
+        // @ts-ignore
+        .mockResolvedValue({ accountType });
+    };
+
+    // Test scenarios
+    const testScenarios = [
+      { accountType: UserAccountTypes.Free, expectSuccess: [true, false, false, false, false] },
+      { accountType: UserAccountTypes.PremiumBronze, expectSuccess: [false, true, false, false, false] },
+      { accountType: UserAccountTypes.PremiumSilver, expectSuccess: [false, false, true, false, false] },
+      { accountType: UserAccountTypes.PremiumGold, expectSuccess: [false, false, false, true, false] },
+      { accountType: UserAccountTypes.PremiumUltimate, expectSuccess: [false, false, false, false, true] },
+      { accountType: undefined, expectSuccess: [true, false, false, false, false] },
+    ];
+
+    beforeEach(async () => {
+      await prepareTransaction();
+      const goldCoins = await unitTestHelper.createMockItemFromBlueprint(OthersBlueprint.GoldCoin, {
+        stackQty: 100,
+      });
+      inventoryContainer.slotQty = 20;
+      inventoryContainer.slots = {
+        ...inventoryContainer.slots,
+        0: goldCoins.toJSON({ virtuals: true }),
+      };
+      inventoryContainer.markModified("slots");
+      await inventoryContainer.save();
+      testBanana = await unitTestHelper.createMockItemFromBlueprint(FoodsBlueprint.Banana);
+    });
+
+    testScenarios.forEach((scenario) => {
+      it(`should give access for ${scenario.accountType ?? "undefined"} user types to ${
+        scenario.accountType ?? "free"
+      } item types`, async () => {
+        // @ts-ignore
+        setupTest(scenario.accountType);
+
+        const accountTypes = Object.values(UserAccountTypes);
+        for (let i = 0; i < accountTypes.length; i++) {
+          const bananaWithoutId = removeObjectField(testBanana.toObject(), "_id");
+          // @ts-ignore
+          bananaWithoutId.canBePurchasedOnlyByPremiumPlans = [accountTypes[i]];
+          updateBlueprint("items", key, bananaWithoutId);
+
+          const transactionItems: ITransactionItem[] = [{ key: FoodsBlueprint.Banana, qty: 1 }];
+          const result = await characterTradingNPCBuy.buyItemsFromNPC(testCharacter, testNPCTrader, transactionItems);
+          expect(result).toBe(scenario.expectSuccess[i]);
+        }
+      });
     });
   });
 

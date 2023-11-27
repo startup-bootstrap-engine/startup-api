@@ -2,28 +2,31 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
+import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { TRADER_BUY_PRICE_MULTIPLIER } from "@providers/constants/ItemConstants";
 import { blueprintManager } from "@providers/inversify/container";
 import { AvailableBlueprints, OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import {
   IEquipmentAndInventoryUpdatePayload,
   IItemContainer,
   ITradeRequestItem,
   ItemSocketEvents,
   TradingEntity,
+  UserAccountTypes,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import { capitalize } from "lodash";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterInventory } from "./CharacterInventory";
 import { CharacterTradingBalance } from "./CharacterTradingBalance";
 import { CharacterTradingValidation } from "./CharacterTradingValidation";
+import { CharacterUser } from "./CharacterUser";
 import { CharacterItemContainer } from "./characterItems/CharacterItemContainer";
 import { CharacterItemInventory } from "./characterItems/CharacterItemInventory";
 import { CharacterWeight } from "./weight/CharacterWeight";
-import { NewRelic } from "@providers/analytics/NewRelic";
-import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 
 @provide(CharacterTradingBuy)
 export class CharacterTradingBuy {
@@ -35,7 +38,8 @@ export class CharacterTradingBuy {
     private characterWeight: CharacterWeight,
     private characterTradingValidation: CharacterTradingValidation,
     private characterInventory: CharacterInventory,
-    private newRelic: NewRelic
+    private newRelic: NewRelic,
+    private characterUser: CharacterUser
   ) {}
 
   @TrackNewRelicTransaction()
@@ -210,8 +214,11 @@ export class CharacterTradingBuy {
       return false;
     }
 
+    const user = await this.characterUser.findUserByCharacter(character.id);
+    const userAccountType = user?.accountType || "free";
+
     for (const item of itemsToPurchase) {
-      const itemBlueprint = await blueprintManager.getBlueprint<IItem>("items", item.key as AvailableBlueprints);
+      const itemBlueprint = await blueprintManager.getBlueprint<any>("items", item.key as AvailableBlueprints);
 
       if (!itemBlueprint) {
         this.socketMessaging.sendErrorMessageToCharacter(
@@ -219,6 +226,21 @@ export class CharacterTradingBuy {
           `Sorry, the item '${item.key}' is not available for purchase.`
         );
         return false;
+      }
+
+      const itemAccountTypes = itemBlueprint.canBePurchasedOnlyByPremiumPlans;
+
+      if (itemAccountTypes !== undefined) {
+        const isAvailable = itemAccountTypes.includes(userAccountType);
+        if (!isAvailable) {
+          this.socketMessaging.sendErrorMessageToCharacter(
+            character,
+            `Sorry, the item '${item.key}' is not available for your account type. Required : '${itemAccountTypes
+              .map((item) => `${capitalize(item)} PA`)
+              .join(" or ")}'`
+          );
+          return false;
+        }
       }
 
       const isStackable = itemBlueprint?.maxStackSize! > 1;
@@ -250,5 +272,17 @@ export class CharacterTradingBuy {
     }
 
     return true;
+  }
+
+  private hasAccess(userAccountType: string, itemAccountType: string): boolean {
+    const accountTypeHierarchy = {
+      [UserAccountTypes.Free]: 0,
+      [UserAccountTypes.PremiumBronze]: 1,
+      [UserAccountTypes.PremiumSilver]: 2,
+      [UserAccountTypes.PremiumGold]: 3,
+      [UserAccountTypes.PremiumUltimate]: 4,
+    };
+
+    return accountTypeHierarchy[userAccountType] >= accountTypeHierarchy[itemAccountType];
   }
 }
