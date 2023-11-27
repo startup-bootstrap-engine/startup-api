@@ -13,7 +13,7 @@ export const itemGreaterManaPotion: IConsumableItemBlueprint = {
   description: "A greater flask containing blue liquid of a mana potion.",
   weight: 0.5,
   basePrice: 40,
-  maxStackSize: 100,
+  maxStackSize: 999,
   canSell: false,
   usableEffectKey: UsableEffectsBlueprint.GreaterManaPotionUsableEffect,
 };

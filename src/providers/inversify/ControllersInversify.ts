@@ -3,12 +3,14 @@ import { CharacterController } from "@useCases/ModuleCharacter/character/Charact
 import { FactionController } from "@useCases/ModuleCharacter/faction/FactionController";
 import { NPCController } from "@useCases/ModuleNPC/NPCController";
 import { ABTestController } from "@useCases/ModuleSystem/abTests/ABTestController";
+import { BlueprintController } from "@useCases/ModuleSystem/blueprint/BlueprintController";
 import { CacheController } from "@useCases/ModuleSystem/cache/CacheController";
 import { ReadChatLogController } from "@useCases/ModuleSystem/chat/readChatLog/ReadChatLogController";
 import { IndustriesController } from "@useCases/ModuleSystem/industries/IndustriesController";
 import { MapController } from "@useCases/ModuleSystem/map/MapController";
 import { PushNotificationController } from "@useCases/ModuleSystem/operation/pushNotification/PushNotificationController";
 import { PlacesController } from "@useCases/ModuleSystem/places/PlacesController";
+import { PremiumAccountController } from "@useCases/ModuleSystem/premiumAccount/PremiumAccountController";
 import { ScriptsController } from "@useCases/ModuleSystem/scripts/ScriptsController";
 import { AppleOAuthController } from "@useCases/ModuleSystem/user/appleOAuth/AppleOAuthController";
 import { ChangePasswordController } from "@useCases/ModuleSystem/user/changePassword/ChangePasswordController";
@@ -24,7 +26,6 @@ import { SignUpController } from "@useCases/ModuleSystem/user/signup/SignUpContr
 import { UnsubscribeUsercontroller } from "@useCases/ModuleSystem/user/unsubscribe/UnsubscribeUsercontroller";
 import { UpdateUserController } from "@useCases/ModuleSystem/user/update/UpdateUserController";
 import { ContainerModule, interfaces } from "inversify";
-import { BlueprintController } from "@useCases/ModuleSystem/blueprint/BlueprintController";
 
 export const userControllerContainer = new ContainerModule((bind: interfaces.Bind, unbind: interfaces.Unbind) => {
   bind<UpdateUserController>(UpdateUserController).toSelf();
@@ -67,4 +68,5 @@ export const useCasesControllers = new ContainerModule((bind: interfaces.Bind, u
   bind<FactionController>(FactionController).toSelf();
   bind<CacheController>(CacheController).toSelf();
   bind<ScriptsController>(ScriptsController).toSelf();
+  bind<PremiumAccountController>(PremiumAccountController).toSelf();
 });

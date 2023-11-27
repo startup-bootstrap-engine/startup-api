@@ -1,0 +1,12 @@
+# Premium Account :: Create Items
+POST {{baseUrl}}/premium-account/create-item HTTP/1.1
+Authorization: Bearer {{authToken}}
+content-type: application/json
+
+{
+  "blueprintKey": "greater-life-potion",
+  "quantity": 999,
+  "characterId": "6461787ead84fe004dbcfd7d" 
+}
+
+###
