@@ -18,6 +18,7 @@ import {
   BattleEventType,
   BattleSocketEvents,
   CharacterClass,
+  EntityAttackType,
   EntityType,
   EnvType,
   IBattleEventFromServer,
@@ -27,6 +28,7 @@ import {
 import { appEnv } from "@providers/config/env";
 import { BONUS_DAMAGE_MULTIPLIER } from "@providers/constants/BattleConstants";
 import { RedisManager } from "@providers/database/RedisManager";
+import { blueprintManager } from "@providers/inversify/container";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Queue, Worker } from "bullmq";
 import random from "lodash/random";
@@ -314,8 +316,20 @@ export class HitTarget {
           isCriticalHit: damage > baseDamage,
         };
 
+        if (attacker.type === EntityType.NPC && target.type === EntityType.Character) {
+          const npc = await blueprintManager.getBlueprint<any>("npcs", (attacker as INPC).baseKey);
+
+          if (npc?.isMagic && (npc?.attackType === EntityAttackType.MeleeRanged || EntityAttackType.Ranged)) {
+            const npcMagicLevel = npc.skills?.magic?.level ?? 15;
+
+            const power = Math.max(15, npcMagicLevel);
+
+            damageRelatedPromises.push(this.skillIncrease.increaseMagicResistanceSP(target as ICharacter, power));
+          }
+        }
+
         let weapon;
-        if (target.type === "Character") {
+        if (target.type === EntityType.Character) {
           weapon = (await this.characterWeapon.getWeapon(attacker as ICharacter)) as unknown as ICharacterWeaponResult;
 
           if (

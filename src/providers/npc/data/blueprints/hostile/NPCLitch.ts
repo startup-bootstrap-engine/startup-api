@@ -36,6 +36,7 @@ export const npcLitch: Partial<INPC> = {
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
+  isMagic: true,
   skills: {
     level: 70,
     strength: {
@@ -49,6 +50,9 @@ export const npcLitch: Partial<INPC> = {
     },
     magicResistance: {
       level: 50,
+    },
+    magic: {
+      level: 45,
     },
   },
   fleeOnLowHealth: true,

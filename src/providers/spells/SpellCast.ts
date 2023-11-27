@@ -143,13 +143,6 @@ export class SpellCast {
       }
     }
 
-    const hasSpellCooldown = await this.spellCoolDown.haveSpellCooldown(character, spell.magicWords);
-
-    if (!hasSpellCooldown) {
-      await this.spellCoolDown.setSpellCooldown(spell.key, character, spell.magicWords, spell.cooldown);
-    }
-    await this.spellCoolDown.getAllSpellCooldowns(character);
-
     const hasCastSucceeded = await spell.usableEffect(character, target);
 
     // if it fails, it will return explicitly false above. We prevent moving forward, so mana is not spent unnecessarily
@@ -157,19 +150,26 @@ export class SpellCast {
       return false;
     }
 
+    const hasSpellCooldown = await this.spellCoolDown.haveSpellCooldown(character, spell.magicWords);
+
+    if (!hasSpellCooldown) {
+      await this.spellCoolDown.setSpellCooldown(spell.key, character, spell.magicWords, spell.cooldown);
+    }
+    await this.spellCoolDown.getAllSpellCooldowns(character);
+
     const updatedCharacter = (await Character.findById(character._id)) as ICharacter;
 
     await this.itemUsableEffect.apply(updatedCharacter, EffectableAttribute.Mana, -1 * spell.manaCost);
     await updatedCharacter.save();
 
-    await this.sendPostSpellCastEvents(character, spell, target);
+    await this.sendPostSpellCastEvents(updatedCharacter, spell, target);
 
-    await this.skillIncrease.increaseMagicSP(character, spell.manaCost);
+    await this.skillIncrease.increaseMagicSP(updatedCharacter, spell.manaCost);
     if (target?.type === EntityType.Character) {
       await this.skillIncrease.increaseMagicResistanceSP(target, spell.manaCost);
     }
 
-    await this.characterBonusPenalties.applyRaceBonusPenalties(character, BasicAttribute.Magic);
+    await this.characterBonusPenalties.applyRaceBonusPenalties(updatedCharacter, BasicAttribute.Magic);
 
     return true;
   }

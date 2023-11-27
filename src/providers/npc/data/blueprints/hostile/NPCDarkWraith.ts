@@ -19,6 +19,7 @@ import {
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment } from "@rpg-engine/shared";
 import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { EntityAttackType } from "@rpg-engine/shared";
 
 export const npcDarkWraith: Partial<INPC> = {
   ...generateMoveTowardsMovement(),
@@ -30,6 +31,8 @@ export const npcDarkWraith: Partial<INPC> = {
   baseHealth: 800,
   healthRandomizerDice: Dice.D12,
   canSwitchToRandomTarget: true,
+  isMagic: true,
+  attackType: EntityAttackType.MeleeRanged,
   skills: {
     level: 60,
     strength: {

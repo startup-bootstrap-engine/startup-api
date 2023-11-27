@@ -34,7 +34,12 @@ describe("HitTarget", () => {
   });
 
   beforeEach(async () => {
-    testNPC = await unitTestHelper.createMockNPC(null, { hasSkills: true });
+    testNPC = await unitTestHelper.createMockNPC(
+      {
+        key: "rat",
+      },
+      { hasSkills: true }
+    );
     targetCharacter = await unitTestHelper.createMockCharacter(null, {
       hasEquipment: true,
       hasSkills: true,
@@ -194,6 +199,36 @@ describe("HitTarget", () => {
       expect(charDeath).toHaveBeenCalled();
 
       expect(testNPC.targetCharacter).toBe(undefined);
+    });
+
+    it("should increase magic resistance when a isMagic npc attacks a character", async () => {
+      // we have to mock this part to simulate a successful hit
+      jest
+        // @ts-ignore
+        .spyOn(hitTarget.battleEvent, "calculateEvent" as any)
+        .mockImplementation(() => BattleEventType.Hit);
+      // @ts-ignore
+      jest.spyOn(hitTarget.battleDamageCalculator, "calculateHitDamage" as any).mockImplementation(() => 200);
+
+      // @ts-ignore
+      const increaseMagicResistSpy = jest.spyOn(hitTarget.skillIncrease, "increaseMagicResistanceSP");
+
+      const magicNPC = await unitTestHelper.createMockNPC(
+        {
+          key: "minotaur-mage", // this mob has a isMagic property on the blueprint
+        },
+        { hasSkills: true }
+      );
+
+      // move it close to the character
+      magicNPC.x = FromGridX(1);
+      magicNPC.y = FromGridX(1);
+
+      await magicNPC.save();
+
+      await hitTarget.hit(magicNPC, targetCharacter);
+
+      expect(increaseMagicResistSpy).toHaveBeenCalled();
     });
   });
 

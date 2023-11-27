@@ -47,11 +47,7 @@ export class NPCDeath {
     try {
       console.log("NPCDeath for npc: ", npc.key);
       if (npc.health !== 0) {
-        const setHealthToZero = NPC.updateOne({ _id: npc._id }, { $set: { health: 0 } });
-        npc.health = 0;
-        npc.isAlive = false;
-        const saveNPC = npc.save();
-        await Promise.all([setHealthToZero, saveNPC]);
+        npc = (await NPC.findOneAndUpdate({ _id: npc._id }, { $set: { health: 0 } }, { new: true })) as unknown as INPC;
       }
       const npcBody = await this.generateNPCBody(npc);
       if (!npcBody) {

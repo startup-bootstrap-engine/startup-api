@@ -16,7 +16,7 @@ export class Execution {
   ) {}
 
   @TrackNewRelicTransaction()
-  public async handleBerserkerExecution(attacker: ICharacter, target: ICharacter | INPC): Promise<void> {
+  public async handleExecution(attacker: ICharacter, target: ICharacter | INPC): Promise<boolean> {
     const targetId = target._id;
     const targetType = target.type as EntityType;
 
@@ -26,7 +26,7 @@ export class Execution {
       }
 
       if (attacker._id.toString() === targetId.toString()) {
-        return;
+        return false;
       }
 
       if (targetType !== EntityType.Character && targetType !== EntityType.NPC) {
@@ -38,15 +38,21 @@ export class Execution {
       if (healthPercent > 30) {
         this.socketMessaging.sendErrorMessageToCharacter(
           attacker,
-          "The target's health is above 30%, you can't execute target."
+          "The target's health is above 30%, you can't execute it."
         );
-      } else {
-        if (targetType === EntityType.Character) {
-          await this.characterDeath.handleCharacterDeath(attacker, target as ICharacter);
-        } else if (targetType === EntityType.NPC) {
-          await this.npcDeath.handleNPCDeath(attacker as ICharacter, target as INPC);
-        }
+        return false;
       }
+
+      switch (targetType) {
+        case EntityType.Character:
+          await this.characterDeath.handleCharacterDeath(attacker, target as ICharacter);
+          break;
+        case EntityType.NPC:
+          await this.npcDeath.handleNPCDeath(attacker as ICharacter, target as INPC);
+          break;
+      }
+
+      return false;
     } catch (error) {
       console.error(error);
       throw new Error(`Error executing attack: ${error.message}`);

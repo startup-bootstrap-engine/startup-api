@@ -13,7 +13,7 @@ export const itemLifePotion: IConsumableItemBlueprint = {
   description: "A flask containing an elixir of life.",
   weight: 0.5,
   basePrice: 20,
-  maxStackSize: 100,
+  maxStackSize: 999,
   canSell: false,
   usableEffectKey: UsableEffectsBlueprint.LifePotionUsableEffect,
 };

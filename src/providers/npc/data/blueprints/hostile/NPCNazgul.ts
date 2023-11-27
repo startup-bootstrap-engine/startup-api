@@ -30,6 +30,7 @@ export const npcNazgul: Partial<INPC> = {
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
+  isMagic: true,
   skills: {
     level: 150,
     strength: {
@@ -43,6 +44,9 @@ export const npcNazgul: Partial<INPC> = {
     },
     magicResistance: {
       level: 120,
+    },
+    magic: {
+      level: 80,
     },
   },
   loots: [

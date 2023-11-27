@@ -13,7 +13,7 @@ export const itemGreaterLifePotion: IConsumableItemBlueprint = {
   description: "A flask containing deep red liquid of a greater elixir of life.",
   weight: 0.5,
   basePrice: 50,
-  maxStackSize: 100,
+  maxStackSize: 999,
   canSell: false,
 
   usableEffectKey: UsableEffectsBlueprint.GreaterLifePotionUsableEffect,

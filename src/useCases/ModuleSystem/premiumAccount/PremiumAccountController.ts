@@ -1,0 +1,20 @@
+import { AuthMiddleware } from "@providers/middlewares/AuthMiddleware";
+import { isAdminMiddleware } from "@providers/middlewares/IsAdminMiddleware";
+import { controller, httpPost, interfaces, requestBody, response } from "inversify-express-utils";
+import { PremiumAccountUseCase } from "./PremiumAccountUseCase";
+
+@controller("/premium-account", AuthMiddleware, isAdminMiddleware)
+export class PremiumAccountController implements interfaces.Controller {
+  constructor(private premiumAccountUseCase: PremiumAccountUseCase) {}
+
+  @httpPost("/create-item")
+  public async createItem(@response() res, @requestBody() body): Promise<void> {
+    const { blueprintKey, characterId, quantity } = body;
+
+    await this.premiumAccountUseCase.createItemToCharacter(blueprintKey, characterId, quantity);
+
+    return res.status(200).send({
+      message: "Item generated successfully!",
+    });
+  }
+}

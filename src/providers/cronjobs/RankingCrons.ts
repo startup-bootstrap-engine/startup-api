@@ -3,6 +3,7 @@ import { RankingGetInfo } from "@providers/ranking/RankingGetInfo";
 
 import { Colors } from "discord.js";
 
+import { RankingCache } from "@providers/ranking/RankingCache";
 import { provide } from "inversify-binding-decorators";
 import { CronJobScheduler } from "./CronJobScheduler";
 
@@ -11,11 +12,14 @@ export class RankingCrons {
   constructor(
     private discordBot: DiscordBot,
     private cronJobScheduler: CronJobScheduler,
-    private rankingGetInfo: RankingGetInfo
+    private rankingGetInfo: RankingGetInfo,
+    private rankingCache: RankingCache
   ) {}
 
   public schedule(): void {
     this.cronJobScheduler.uniqueSchedule("ranking-crons", "0 2 */3 * *", async () => {
+      await this.rankingCache.clearCache();
+
       await this.topLevelGlobal();
       await this.topLevelClass();
       await this.topLevelBySkillType();

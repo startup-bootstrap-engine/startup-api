@@ -12,6 +12,6 @@ export const itemLightAntidote: IConsumableItemBlueprint = {
   description: "A small flask containing antidote against poison.",
   weight: 0.04,
   basePrice: 15,
-  maxStackSize: 100,
+  maxStackSize: 999,
   usableEffectKey: UsableEffectsBlueprint.AntidotePotionUsableEffect,
 };
