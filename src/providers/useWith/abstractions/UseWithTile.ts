@@ -33,6 +33,7 @@ export class UseWithTile {
       async (useWithTileData: IUseWithTile, character) => {
         try {
           const useWithData = await this.validateData(character, useWithTileData);
+
           if (useWithData) {
             const { originItem, useWithTileEffect, targetName } = useWithData;
             await useWithTileEffect!(
@@ -62,6 +63,7 @@ export class UseWithTile {
     data: IUseWithTile
   ): Promise<IUseWithTileValidationResponse | undefined> {
     // Check if character is alive and not banned
+
     this.useWithHelper.basicValidations(character, data);
 
     // Check if the character has the originItem
@@ -141,14 +143,16 @@ export class UseWithTile {
     // check if a character has a minimum level to gather a resource
     if (useWithTargetName) {
       const resource = RESOURCE_LEVEL_REQUIREMENTS[useWithTargetName];
-      const skill = (await Skill.findOne({ owner: character._id })
+      const skills = (await Skill.findOne({ owner: character._id })
         .select([resource.type])
         .lean({})
         .cacheQuery({
           cacheKey: `${character._id}-skills`,
         })) as ISkill;
 
-      if (skill[resource.type].level < resource.minLevel * resource.ratio) {
+      const characterLevel = skills[resource.type] ? skills[resource.type].level : 1;
+
+      if (characterLevel < resource.minLevel * resource.ratio) {
         this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, this tile cannot be used with your level.");
         return;
       }

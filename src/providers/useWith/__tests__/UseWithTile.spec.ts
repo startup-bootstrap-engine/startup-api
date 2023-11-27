@@ -8,8 +8,10 @@ import { ToolsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 
 import { ItemCraftable } from "@providers/item/ItemCraftable";
-import { FromGridX, FromGridY, IUseWithTile, MapLayers } from "@rpg-engine/shared";
+import { FromGridX, FromGridY, IUseWithTile, MapLayers, SkillType } from "@rpg-engine/shared";
 import { UseWithTile } from "../abstractions/UseWithTile";
+import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
+import { RESOURCE_LEVEL_REQUIREMENTS } from "@providers/constants/ResourceRequirementConstants";
 
 describe("UseWithTile.ts", () => {
   let testItem: IItem,
@@ -18,7 +20,8 @@ describe("UseWithTile.ts", () => {
     useWithTile: UseWithTile,
     useWithTileData: IUseWithTile,
     skillIncrease: SkillIncrease,
-    itemCraftable: ItemCraftable;
+    itemCraftable: ItemCraftable,
+    characterSkills: ISkill;
 
   beforeAll(async () => {
     useWithTile = container.get<UseWithTile>(UseWithTile);
@@ -108,11 +111,55 @@ describe("UseWithTile.ts", () => {
     try {
       testCharacterEquipment.leftHand = undefined;
       await testCharacterEquipment.save();
+
       // @ts-ignore
       await useWithTile.validateData(testCharacter, useWithTileData);
       throw new Error("This test should failed!");
     } catch (error: any) {
       expect(error.message).toEqual("UseWith > Character does not own the item that wants to use");
     }
+  });
+
+  it("should fail validations | character doesn't have min level to access a resource", async () => {
+    const targetName = "brown-fish";
+    const resource = RESOURCE_LEVEL_REQUIREMENTS[targetName];
+
+    const skills = (await Skill.findOne({ _id: testCharacter._id })
+      .select([resource.type])
+      .lean({})
+      .cacheQuery({
+        cacheKey: `${testCharacter._id}-skills`,
+      })) as ISkill;
+
+    if (skills && skills[resource.type]) {
+      characterSkills = skills;
+      characterSkills[resource.type].level = 10;
+    } else {
+      const newSkill = new Skill({
+        owner: testCharacter._id,
+        ownerType: "Character",
+        level: 1,
+        [resource.type]: {
+          type: SkillType.Character,
+          level: 10,
+        },
+      });
+      await newSkill.save();
+      characterSkills = newSkill;
+    }
+
+    (await Skill.findByIdAndUpdate(characterSkills._id, characterSkills).lean()) as ISkill;
+    testItem.baseKey = "fishing-rode";
+    await testItem.save();
+
+    // @ts-ignore
+    jest.spyOn(useWithTile.mapTiles, "getPropertyFromLayer" as any).mockImplementation(() => targetName);
+    // @ts-ignore
+    const sendErrorMsg = jest.spyOn(useWithTile.socketMessaging, "sendErrorMessageToCharacter" as any);
+
+    // @ts-ignore
+    const response = await useWithTile.validateData(testCharacter, useWithTileData);
+    expect(response).toBeUndefined();
+    expect(sendErrorMsg).toHaveBeenCalled();
   });
 });
