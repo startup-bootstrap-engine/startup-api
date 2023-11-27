@@ -141,8 +141,8 @@ describe("UseWithTile.ts", () => {
       testItem.baseKey = resource.item;
       await testItem.save();
 
-      // @ts-ignore
       jest
+        // @ts-ignore
         .spyOn(useWithTile.mapTiles, "getPropertyFromLayer" as any)
         .mockImplementation((map: string, gridX: number, gridY: number, mapLayer: MapLayers, property: string) => {
           if (property === "usewith_origin_item_key") {
