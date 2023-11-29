@@ -34,7 +34,7 @@ export class SocketAuth {
     private newRelic: NewRelic,
     private locker: Locker,
     private characterBan: CharacterBan
-  ) {}
+  ) { }
 
   @TrackNewRelicTransaction()
   public authCharacterOn(
@@ -118,8 +118,7 @@ export class SocketAuth {
 
   private logEvent(character: ICharacter, event: string): void {
     console.log(
-      `📝 ${character.name} (Id: ${character._id}) - (Channel: ${
-        character.channelId
+      `📝 ${character.name} (Id: ${character._id}) - (Channel: ${character.channelId
       }) => Event: ${event} at ${dayjs().toISOString()}`
     );
   }
@@ -146,9 +145,6 @@ export class SocketAuth {
         const diff = dayjs().diff(dayjs(lastActionExecution), "millisecond");
 
         if (diff < THROTTABLE_EVENTS_MS_THRESHOLD_DISCONNECT) {
-          setTimeout(async () => {
-            await this.characterBan.addPenalty(character);
-          }, 5000);
 
           this.socketMessaging.sendEventToUser(character.channelId!, CharacterSocketEvents.CharacterForceDisconnect, {
             reason: "You're disconnected for spamming the server with events.",

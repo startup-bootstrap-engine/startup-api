@@ -1,8 +1,8 @@
 import { SkillTimeoutDifficulty } from "@providers/skill/SkillTypes";
 import { CharacterClass, LifeBringerRaces, Modes, ShadowWalkerRaces } from "@rpg-engine/shared";
 
-export const DAMAGE_ATTRIBUTE_WEIGHT = 1;
-export const DAMAGE_COMBAT_SKILL_WEIGHT = 1.5;
+export const DAMAGE_ATTRIBUTE_WEIGHT = 1.25;
+export const DAMAGE_COMBAT_SKILL_WEIGHT = 2;
 
 export const EXP_RATIO = 1.75;
 
@@ -10,7 +10,7 @@ export const SP_INCREASE_BASE = 1;
 
 export const LOW_SKILL_LEVEL_SP_INCREASE_BONUS = 5;
 
-export const SP_CRAFTING_INCREASE_RATIO = SP_INCREASE_BASE * 35;
+export const SP_CRAFTING_INCREASE_RATIO = SP_INCREASE_BASE * 45;
 
 export const SP_MAGIC_INCREASE_TIMES_MANA = 0.17;
 
