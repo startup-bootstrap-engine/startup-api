@@ -26,7 +26,7 @@ export const spellMagicShuriken: Partial<ISpell> = {
   manaCost: 50,
   minLevelRequired: 5,
   minMagicLevelRequired: 5,
-  cooldown: 20,
+  cooldown: 10,
   castingAnimationKey: AnimationEffectKeys.SkillLevelUp,
   targetHitAnimationKey: AnimationEffectKeys.Hit,
   projectileAnimationKey: AnimationEffectKeys.Shuriken,

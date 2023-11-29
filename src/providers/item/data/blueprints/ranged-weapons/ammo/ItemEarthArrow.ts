@@ -1,3 +1,4 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableRangedAmmoBlueprint, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
 import { RangedWeaponsBlueprint } from "../../../types/itemsBlueprintTypes";
 
@@ -16,4 +17,6 @@ export const itemEarthArrow: IEquippableRangedAmmoBlueprint = {
   basePrice: 8,
   attack: 20,
   canSell: false,
+  entityEffects: [EntityEffectBlueprint.VineGrasp],
+  entityEffectChance: 70,
 };

@@ -22,7 +22,7 @@ export const rogueSpellExecution: Partial<ISpell> = {
   manaCost: 80,
   minLevelRequired: 6,
   minMagicLevelRequired: 6,
-  cooldown: 150,
+  cooldown: 120,
   castingAnimationKey: AnimationEffectKeys.HitCorruption,
   projectileAnimationKey: AnimationEffectKeys.HitCorruption,
   targetHitAnimationKey: AnimationEffectKeys.HitCorruption,
