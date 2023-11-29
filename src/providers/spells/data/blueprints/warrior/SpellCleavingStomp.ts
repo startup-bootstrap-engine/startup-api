@@ -2,7 +2,8 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { HitTarget } from "@providers/battle/HitTarget";
 import { SPELL_AREA_DIAMOND_BLAST_RADIUS } from "@providers/constants/SpellConstants";
-import { characterBuffActivator, container } from "@providers/inversify/container";
+import { entityEffectBleeding } from "@providers/entityEffects/data/blueprints/entityEffectBleeding";
+import { characterBuffActivator, container, entityEffectUse } from "@providers/inversify/container";
 import { SpellArea } from "@providers/spells/area-spells/SpellArea";
 import {
   AnimationEffectKeys,
@@ -51,6 +52,8 @@ export const spellCleavingStomp: Partial<ISpell> = {
         const hitTarget = container.get(HitTarget);
 
         await hitTarget.hit(caster, target, true, skillDamage + intensity, true);
+
+        await entityEffectUse.applyEntityEffects(target, caster, entityEffectBleeding);
 
         if (target.type === "Character") {
           const timeout = await spellCalculator.calculateBasedOnSkillLevel(caster, BasicAttribute.Strength, {
