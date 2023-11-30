@@ -1,4 +1,5 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
@@ -6,6 +7,10 @@ import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
 import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import {
+  RESOURCE_LEVEL_REQUIREMENTS,
+  RESOURCE_LEVEL_REQUIREMENTS_RATIO,
+} from "@providers/constants/ResourceRequirementConstants";
 import { itemsBlueprintIndex } from "@providers/item/data/index";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -13,11 +18,11 @@ import {
   AnimationEffectKeys,
   IEquipmentAndInventoryUpdatePayload,
   IItemContainer,
+  ISkill,
   ItemSocketEvents,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { isArray, isMap } from "lodash";
-import random from "lodash/random";
+import _, { isArray, isMap } from "lodash";
 import { IUseWithTargetTile } from "../useWithTypes";
 
 export interface IUseWithItemToTileReward {
@@ -178,7 +183,44 @@ export class UseWithItemToTile {
   }
 
   private sendRandomMessageToCharacter(character: ICharacter, randomMessages: string[]): void {
-    this.socketMessaging.sendErrorMessageToCharacter(character, randomMessages[random(0, randomMessages.length - 1)]);
+    this.socketMessaging.sendErrorMessageToCharacter(character, randomMessages[_.random(0, randomMessages.length - 1)]);
+  }
+
+  private async hasMinimumRequireLevelForReward(
+    character: ICharacter,
+    reward: IUseWithItemToTileReward,
+    rewardName: string
+  ): Promise<boolean> {
+    // check if a character has a minimum level to gather a reward
+
+    const resource = RESOURCE_LEVEL_REQUIREMENTS[reward.key];
+
+    if (resource) {
+      const skills = (await Skill.findOne({ owner: character._id })
+        .select([resource.type])
+        .lean()
+        .cacheQuery({
+          cacheKey: `${character._id}-skills`,
+        })) as unknown as ISkill;
+
+      if (!skills) {
+        throw new Error("UseWith > Character does not have skills");
+      }
+
+      const characterLevel = skills[resource.type].level ?? 1;
+
+      const minRequiredLevel = resource.minLevel * RESOURCE_LEVEL_REQUIREMENTS_RATIO;
+
+      if (characterLevel < minRequiredLevel) {
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          `You tried to get ${rewardName}, but it requires > ${minRequiredLevel} in ${resource.type}...`
+        );
+        return false;
+      }
+    }
+
+    return true;
   }
 
   private async addRewardToInventory(character: ICharacter, rewards: IUseWithItemToTileReward[]): Promise<boolean> {
@@ -190,16 +232,26 @@ export class UseWithItemToTile {
       if (typeof reward.chance === "function") {
         addReward = await reward.chance();
       } else {
-        const n = random(0, 100);
-        addReward = n < reward.chance;
+        const n = _.random(0, 100);
+        addReward = n <= reward.chance;
       }
 
       if (addReward) {
         const itemBlueprint = itemsBlueprintIndex[reward.key];
 
+        const hasMinimumRequireLevelForReward = await this.hasMinimumRequireLevelForReward(
+          character,
+          reward,
+          itemBlueprint.name
+        );
+
+        if (!hasMinimumRequireLevelForReward) {
+          return false;
+        }
+
         const item = new Item({
           ...itemBlueprint,
-          stackQty: isArray(reward.qty) ? random(reward.qty[0], reward.qty[1]) : reward.qty,
+          stackQty: isArray(reward.qty) ? _.random(reward.qty[0], reward.qty[1]) : reward.qty,
         });
         await item.save();
 

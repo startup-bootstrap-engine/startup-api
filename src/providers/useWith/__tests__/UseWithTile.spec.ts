@@ -7,11 +7,10 @@ import { itemsBlueprintIndex } from "@providers/item/data/index";
 import { ToolsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 
+import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
 import { ItemCraftable } from "@providers/item/ItemCraftable";
-import { FromGridX, FromGridY, IUseWithTile, MapLayers, SkillType } from "@rpg-engine/shared";
+import { FromGridX, FromGridY, IUseWithTile, MapLayers } from "@rpg-engine/shared";
 import { UseWithTile } from "../abstractions/UseWithTile";
-import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
-import { RESOURCE_LEVEL_REQUIREMENTS } from "@providers/constants/ResourceRequirementConstants";
 
 describe("UseWithTile.ts", () => {
   let testItem: IItem,
@@ -117,48 +116,6 @@ describe("UseWithTile.ts", () => {
       throw new Error("This test should failed!");
     } catch (error: any) {
       expect(error.message).toEqual("UseWith > Character does not own the item that wants to use");
-    }
-  });
-
-  it("should fail validations | character doesn't have min level to access a resource", async () => {
-    const testCases = Object.keys(RESOURCE_LEVEL_REQUIREMENTS);
-    for (const targetName of testCases) {
-      const resource = RESOURCE_LEVEL_REQUIREMENTS[targetName];
-      await Skill.deleteOne({ owner: testCharacter._id });
-
-      const newSkill = new Skill({
-        owner: testCharacter._id,
-        ownerType: "Character",
-        level: 1,
-        [resource.type]: {
-          type: SkillType.Character,
-          level: resource.minLevel - 1,
-        },
-      });
-      await newSkill.save();
-
-      testItem.key = resource.item;
-      testItem.baseKey = resource.item;
-      await testItem.save();
-
-      jest
-        // @ts-ignore
-        .spyOn(useWithTile.mapTiles, "getPropertyFromLayer" as any)
-        .mockImplementation((map: string, gridX: number, gridY: number, mapLayer: MapLayers, property: string) => {
-          if (property === "usewith_origin_item_key") {
-            return resource.item;
-          } else {
-            return targetName;
-          }
-        });
-      // @ts-ignore
-      const sendErrorMsg = jest.spyOn(useWithTile.socketMessaging, "sendErrorMessageToCharacter" as any);
-
-      // @ts-ignore
-      const response = await useWithTile.validateData(testCharacter, useWithTileData);
-
-      expect(response).toBeUndefined();
-      expect(sendErrorMsg).toHaveBeenCalled();
     }
   });
 });

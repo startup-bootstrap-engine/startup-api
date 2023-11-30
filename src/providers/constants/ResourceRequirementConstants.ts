@@ -3,42 +3,55 @@ import {
   FoodsBlueprint,
   ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { CraftingSkill } from "@rpg-engine/shared";
 
 // Minimum level for gathering resources
 
-export const RESOURCE_LEVEL_REQUIREMENTS = {
-  [CraftingResourcesBlueprint.PolishedStone]: { minLevel: 1, type: "mining", item: ToolsBlueprint.Pickaxe, ratio: 1 },
-  [CraftingResourcesBlueprint.IronOre]: { minLevel: 1, type: "mining", item: ToolsBlueprint.Pickaxe, ratio: 1 },
-  [CraftingResourcesBlueprint.CopperOre]: { minLevel: 10, type: "mining", item: ToolsBlueprint.Pickaxe, ratio: 1 },
-  [CraftingResourcesBlueprint.GoldenOre]: { minLevel: 30, type: "mining", item: ToolsBlueprint.Pickaxe, ratio: 1 },
-  [CraftingResourcesBlueprint.GreenOre]: { minLevel: 35, type: "mining", item: ToolsBlueprint.Pickaxe, ratio: 1 },
-  [CraftingResourcesBlueprint.ObsidiumOre]: { minLevel: 40, type: "mining", item: ToolsBlueprint.Pickaxe, ratio: 1 },
-  [CraftingResourcesBlueprint.CorruptionOre]: { minLevel: 45, type: "mining", item: ToolsBlueprint.Pickaxe, ratio: 1 },
-  [FoodsBlueprint.Tuna]: { minLevel: 1, type: "fishing", item: ToolsBlueprint.FishingRod, ratio: 1 },
-  [FoodsBlueprint.BrownFish]: { minLevel: 20, type: "fishing", item: ToolsBlueprint.FishingRod, ratio: 1 },
-  [FoodsBlueprint.WildSalmon]: { minLevel: 30, type: "fishing", item: ToolsBlueprint.FishingRod, ratio: 1 },
+interface IResourceLevelRequirement {
+  [key: string]: {
+    minLevel: number;
+    type: CraftingSkill;
+    item: string;
+  };
+}
+
+export const RESOURCE_LEVEL_REQUIREMENTS_RATIO = 1;
+
+export const RESOURCE_LEVEL_REQUIREMENTS: IResourceLevelRequirement = {
+  [CraftingResourcesBlueprint.PolishedStone]: { minLevel: 1, type: CraftingSkill.Mining, item: ToolsBlueprint.Pickaxe },
+  [CraftingResourcesBlueprint.IronOre]: { minLevel: 1, type: CraftingSkill.Mining, item: ToolsBlueprint.Pickaxe },
+  [CraftingResourcesBlueprint.CopperOre]: { minLevel: 5, type: CraftingSkill.Mining, item: ToolsBlueprint.Pickaxe },
+  [CraftingResourcesBlueprint.SilverOre]: { minLevel: 10, type: CraftingSkill.Mining, item: ToolsBlueprint.Pickaxe },
+  [CraftingResourcesBlueprint.GoldenOre]: { minLevel: 20, type: CraftingSkill.Mining, item: ToolsBlueprint.Pickaxe },
+  [CraftingResourcesBlueprint.GreenOre]: { minLevel: 30, type: CraftingSkill.Mining, item: ToolsBlueprint.Pickaxe },
+  [CraftingResourcesBlueprint.ObsidiumOre]: { minLevel: 40, type: CraftingSkill.Mining, item: ToolsBlueprint.Pickaxe },
+  [CraftingResourcesBlueprint.CorruptionOre]: {
+    minLevel: 45,
+    type: CraftingSkill.Mining,
+    item: ToolsBlueprint.Pickaxe,
+  },
+  [FoodsBlueprint.Tuna]: { minLevel: 1, type: CraftingSkill.Fishing, item: ToolsBlueprint.FishingRod },
+  [FoodsBlueprint.BrownFish]: { minLevel: 1, type: CraftingSkill.Fishing, item: ToolsBlueprint.FishingRod },
+  [FoodsBlueprint.WildSalmon]: { minLevel: 10, type: CraftingSkill.Fishing, item: ToolsBlueprint.FishingRod },
+  [FoodsBlueprint.Salmon]: { minLevel: 15, type: CraftingSkill.Fishing, item: ToolsBlueprint.FishingRod },
   [CraftingResourcesBlueprint.SmallWoodenStick]: {
     minLevel: 1,
-    type: "lumberjacking",
+    type: CraftingSkill.Lumberjacking,
     item: ToolsBlueprint.CarpentersAxe,
-    ratio: 1,
   },
   [CraftingResourcesBlueprint.WoodenSticks]: {
     minLevel: 1,
-    type: "lumberjacking",
+    type: CraftingSkill.Lumberjacking,
     item: ToolsBlueprint.CarpentersAxe,
-    ratio: 1,
   },
   [CraftingResourcesBlueprint.GreaterWoodenLog]: {
-    minLevel: 10,
-    type: "lumberjacking",
+    minLevel: 15,
+    type: CraftingSkill.Lumberjacking,
     item: ToolsBlueprint.CarpentersAxe,
-    ratio: 1,
   },
   [CraftingResourcesBlueprint.ElvenWood]: {
-    minLevel: 45,
-    type: "lumberjacking",
+    minLevel: 30,
+    type: CraftingSkill.Lumberjacking,
     item: ToolsBlueprint.CarpentersAxe,
-    ratio: 1,
   },
 };
