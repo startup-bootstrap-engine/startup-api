@@ -38,9 +38,9 @@ describe("UseWithItemToTile.ts", () => {
   });
 
   describe("Validation", () => {
-    it("should fail is required item os not available", async () => {
-      // @ts-ignore
+    it("should fail is required item is not available", async () => {
       const decrementRequiredItem = jest.spyOn(
+        // @ts-ignore
         useWithItemToTile.characterItemInventory,
         "decrementItemFromInventoryByKey"
       );
