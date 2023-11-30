@@ -19,6 +19,8 @@ export const USER_EXHAUST_TIMEOUT = 1500;
 export const EXHAUSTABLE_EVENTS = [
   ChatSocketEvents.GlobalChatMessageCreate,
   ChatSocketEvents.GlobalChatMessageRead,
+  ChatSocketEvents.PrivateChatMessageCreate,
+  ChatSocketEvents.PrivateChatMessageRead,
   ItemSocketEvents.UseWith,
   "CastSpell",
   "UseWithTile",
@@ -63,6 +65,7 @@ export const THROTTABLE_EVENTS = {
   [ItemSocketEvents.CraftItem]: 2000,
   [ChatSocketEvents.GlobalChatMessageCreate]: THROTTABLE_DEFAULT_MS_THRESHOLD,
   [SpellSocketEvents.CastSpell]: THROTTABLE_DEFAULT_MS_THRESHOLD,
+  [ChatSocketEvents.PrivateChatMessageCreate]: THROTTABLE_DEFAULT_MS_THRESHOLD,
 };
 
 export const PROMISE_DEFAULT_CONCURRENCY = os.cpus().length || 2;

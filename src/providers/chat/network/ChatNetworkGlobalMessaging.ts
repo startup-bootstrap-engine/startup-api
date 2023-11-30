@@ -1,4 +1,3 @@
-import { profanity } from "@2toad/profanity";
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ChatLog } from "@entities/ModuleSystem/ChatLogModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
@@ -19,7 +18,7 @@ import {
   SOCKET_TRANSMISSION_ZONE_WIDTH,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { AdminCommands } from "./AdminCommands";
+import { ChatUtils } from "./ChatUtils";
 
 @provide(ChatNetworkGlobalMessaging)
 export class ChatNetworkGlobalMessaging {
@@ -30,7 +29,7 @@ export class ChatNetworkGlobalMessaging {
     private socketTransmissionZone: SocketTransmissionZone,
     private spellCast: SpellCast,
     private characterValidation: CharacterValidation,
-    private adminCommands: AdminCommands
+    private chatUtils: ChatUtils
   ) {}
 
   @TrackNewRelicTransaction()
@@ -47,7 +46,7 @@ export class ChatNetworkGlobalMessaging {
           }
 
           if (data.message.startsWith("/")) {
-            await this.handleAdminCommand(data.message.substring(1), character);
+            await this.chatUtils.handleAdminCommand(data.message.substring(1), character);
             return;
           }
 
@@ -68,7 +67,7 @@ export class ChatNetworkGlobalMessaging {
           }
 
           if (data.message.length > 0) {
-            data = this.replaceProfanity(data);
+            data = this.chatUtils.replaceProfanity(data);
 
             const chatLog = new ChatLog({
               message: data.message,
@@ -84,7 +83,7 @@ export class ChatNetworkGlobalMessaging {
             const chatLogs = await this.getChatLogsInZone(character, data.limit);
 
             this.sendMessagesToNearbyCharacters(chatLogs, nearbyCharacters);
-            this.sendMessagesToCharacter(chatLogs, character);
+            this.chatUtils.sendMessagesToCharacter(chatLogs, character, ChatSocketEvents.GlobalChatMessageRead);
           }
         } catch (error) {
           console.error(error);
@@ -93,24 +92,9 @@ export class ChatNetworkGlobalMessaging {
     );
   }
 
-  private replaceProfanity<T extends IChatMessageCreatePayload>(data: T): T {
-    if (profanity.exists(data.message)) {
-      const words = data.message.split(" ");
-      let i = 0;
-      for (i = 0; i < words.length; i++) {
-        if (profanity.exists(words[i])) {
-          words[i] = words[i][0] + words[i].substring(1).replace(/[^\s]/g, "*");
-        }
-      }
-      data.message = words.join(" ");
-    }
-
-    return data;
-  }
-
   private sendMessagesToNearbyCharacters(chatLogs: IChatMessageReadPayload, nearbyCharacters: ICharacter[]): void {
     for (const nearbyCharacter of nearbyCharacters) {
-      const isValidCharacterTarget = this.shouldCharacterReceiveMessage(nearbyCharacter);
+      const isValidCharacterTarget = this.chatUtils.shouldCharacterReceiveMessage(nearbyCharacter);
 
       if (isValidCharacterTarget) {
         this.socketMessaging.sendEventToUser<IChatMessageReadPayload>(
@@ -119,18 +103,6 @@ export class ChatNetworkGlobalMessaging {
           chatLogs
         );
       }
-    }
-  }
-
-  private sendMessagesToCharacter(chatLogs: IChatMessageReadPayload, character: ICharacter): void {
-    const isValidCharacterTarget = this.shouldCharacterReceiveMessage(character);
-
-    if (isValidCharacterTarget) {
-      this.socketMessaging.sendEventToUser<IChatMessageReadPayload>(
-        character.channelId!,
-        ChatSocketEvents.GlobalChatMessageRead,
-        chatLogs
-      );
     }
   }
 
@@ -193,44 +165,5 @@ export class ChatNetworkGlobalMessaging {
     return {
       messages: chatLogs,
     };
-  }
-
-  private shouldCharacterReceiveMessage(target: ICharacter): boolean {
-    return target.isOnline && !target.isBanned;
-  }
-
-  private async handleAdminCommand(command: string, character: ICharacter): Promise<void> {
-    if (!character.isAdmin) {
-      return;
-    }
-
-    const [cmd, ...params] = command.split(" ");
-
-    switch (cmd) {
-      case "ban":
-        await this.adminCommands.handleBanCommand(params, character);
-        break;
-      case "sendtemple":
-        await this.adminCommands.handleSendTempleCommand(params, character);
-        break;
-      case "teleport":
-        await this.adminCommands.handleTeleportCommand(params, character);
-        break;
-      case "goto":
-        await this.adminCommands.handleGotoCommand(params, character);
-        break;
-      case "getpos":
-        await this.adminCommands.handleGetPosCommand(params, character);
-        break;
-      case "summon":
-        await this.adminCommands.handleSummonCommand(params, character);
-        break;
-      case "online":
-        await this.adminCommands.handleOnlineCommand(character);
-        break;
-      default:
-        // Invalid command
-        break;
-    }
   }
 }
