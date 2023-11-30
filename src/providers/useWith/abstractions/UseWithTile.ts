@@ -12,7 +12,6 @@ import { IUseWithTile, MAP_LAYERS_TO_ID, ToGridX, ToGridY, UseWithSocketEvents }
 import { provide } from "inversify-binding-decorators";
 import { UseWithHelper } from "../libs/UseWithHelper";
 import { IItemUseWith, IUseWithTileValidationResponse } from "../useWithTypes";
-
 @provide(UseWithTile)
 export class UseWithTile {
   constructor(
@@ -62,6 +61,7 @@ export class UseWithTile {
     data: IUseWithTile
   ): Promise<IUseWithTileValidationResponse | undefined> {
     // Check if character is alive and not banned
+
     this.useWithHelper.basicValidations(character, data);
 
     // Check if the character has the originItem

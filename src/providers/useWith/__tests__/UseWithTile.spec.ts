@@ -7,6 +7,7 @@ import { itemsBlueprintIndex } from "@providers/item/data/index";
 import { ToolsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 
+import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
 import { ItemCraftable } from "@providers/item/ItemCraftable";
 import { FromGridX, FromGridY, IUseWithTile, MapLayers } from "@rpg-engine/shared";
 import { UseWithTile } from "../abstractions/UseWithTile";
@@ -18,7 +19,8 @@ describe("UseWithTile.ts", () => {
     useWithTile: UseWithTile,
     useWithTileData: IUseWithTile,
     skillIncrease: SkillIncrease,
-    itemCraftable: ItemCraftable;
+    itemCraftable: ItemCraftable,
+    characterSkills: ISkill;
 
   beforeAll(async () => {
     useWithTile = container.get<UseWithTile>(UseWithTile);
@@ -108,6 +110,7 @@ describe("UseWithTile.ts", () => {
     try {
       testCharacterEquipment.leftHand = undefined;
       await testCharacterEquipment.save();
+
       // @ts-ignore
       await useWithTile.validateData(testCharacter, useWithTileData);
       throw new Error("This test should failed!");
