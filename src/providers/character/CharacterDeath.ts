@@ -31,6 +31,8 @@ import {
   CharacterBuffType,
   CharacterSkullType,
   EntityType,
+  FromGridX,
+  FromGridY,
   IBattleDeath,
   IEquipmentAndInventoryUpdatePayload,
   IUIShowMessage,
@@ -49,6 +51,7 @@ import { CharacterTarget } from "./CharacterTarget";
 import { CharacterBuffActivator } from "./characterBuff/CharacterBuffActivator";
 import { CharacterItemContainer } from "./characterItems/CharacterItemContainer";
 import { CharacterWeight } from "./weight/CharacterWeight";
+import { INITIAL_STARTING_POINTS } from "@providers/constants/CharacterConstants";
 
 export const DROPPABLE_EQUIPMENT = [
   "head",
@@ -195,6 +198,16 @@ export class CharacterDeath {
 
   @TrackNewRelicTransaction()
   public async respawnCharacter(character: ICharacter): Promise<void> {
+    let extraProps: Partial<ICharacter> = {};
+
+    const startingPoint = INITIAL_STARTING_POINTS[character.faction];
+
+    extraProps = {
+      x: FromGridX(startingPoint.gridX),
+      y: FromGridY(startingPoint.gridY),
+      scene: startingPoint.scene,
+    };
+
     await Character.updateOne(
       { _id: character._id },
       {
@@ -202,10 +215,8 @@ export class CharacterDeath {
           isOnline: false,
           health: character.maxHealth,
           mana: character.maxMana,
-          x: character.initialX,
-          y: character.initialY,
-          scene: character.initialScene,
           appliedEntityEffects: [],
+          ...extraProps,
         },
       }
     );
