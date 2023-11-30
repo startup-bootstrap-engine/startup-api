@@ -1,8 +1,8 @@
 import { SkillTimeoutDifficulty } from "@providers/skill/SkillTypes";
 import { CharacterClass, LifeBringerRaces, Modes, ShadowWalkerRaces } from "@rpg-engine/shared";
 
-export const DAMAGE_ATTRIBUTE_WEIGHT = 1.25;
-export const DAMAGE_COMBAT_SKILL_WEIGHT = 1.75;
+export const DAMAGE_ATTRIBUTE_WEIGHT = 1.15;
+export const DAMAGE_COMBAT_SKILL_WEIGHT = 1.6;
 
 export const EXP_RATIO = 1.75;
 
