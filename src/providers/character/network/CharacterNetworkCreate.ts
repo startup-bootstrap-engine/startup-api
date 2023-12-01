@@ -23,6 +23,7 @@ import {
   PeriodOfDay,
   ToGridX,
   ToGridY,
+  UserAccountTypes,
   WeatherSocketEvents,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -35,9 +36,9 @@ import { socketEventsBinderControl } from "@providers/inversify/container";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { Locker } from "@providers/locks/Locker";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
-import { NumberFormatter } from "@providers/text/NumberFormatter";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterDeath } from "../CharacterDeath";
+import { CharacterPremiumAccount } from "../CharacterPremiumAccount";
 import { CharacterBuffTracker } from "../characterBuff/CharacterBuffTracker";
 import { CharacterBuffValidation } from "../characterBuff/CharacterBuffValidation";
 import { CharacterBaseSpeed } from "../characterMovement/CharacterBaseSpeed";
@@ -70,7 +71,7 @@ export class CharacterNetworkCreate {
 
     private characterBaseSpeed: CharacterBaseSpeed,
     private characterBuffTracker: CharacterBuffTracker,
-    private numberFormatter: NumberFormatter
+    private characterPremiumAccount: CharacterPremiumAccount
   ) {}
 
   public onCharacterCreate(channel: SocketChannel): void {
@@ -142,9 +143,11 @@ export class CharacterNetworkCreate {
         }
 
         /*
-        Here we inject our server side character properties, 
+        Here we inject our server side character properties,
         to make sure the client is not hacking anything
         */
+
+        const accountType = await this.characterPremiumAccount.getPremiumAccountType(character);
 
         const dataFromServer: ICharacterCreateFromServer = {
           ...data,
@@ -165,6 +168,9 @@ export class CharacterNetworkCreate {
           isGiantForm: character.isGiantForm,
           hasSkull: character.hasSkull,
           skullType: character.skullType as CharacterSkullType,
+          owner: {
+            accountType: accountType ?? UserAccountTypes.Free,
+          },
         };
 
         void this.npcManager.startNearbyNPCsBehaviorLoop(character);
@@ -229,6 +235,8 @@ export class CharacterNetworkCreate {
           dataFromServer
         );
 
+        const accountType = await this.characterPremiumAccount.getPremiumAccountType(nearbyCharacter);
+
         const nearbyCharacterPayload = {
           id: nearbyCharacter.id.toString(),
           name: nearbyCharacter.name,
@@ -248,6 +256,9 @@ export class CharacterNetworkCreate {
           alpha: await this.specialEffect.getOpacity(nearbyCharacter),
           hasSkull: nearbyCharacter.hasSkull,
           skullType: nearbyCharacter.skullType as CharacterSkullType,
+          owner: {
+            accountType: accountType ?? UserAccountTypes.Free,
+          },
         };
 
         // tell the emitter about these other characters too

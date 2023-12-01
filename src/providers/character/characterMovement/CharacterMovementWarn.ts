@@ -13,8 +13,10 @@ import {
   ICharacterPositionUpdateFromClient,
   ICharacterPositionUpdateFromServer,
   IViewElement,
+  UserAccountTypes,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import { CharacterPremiumAccount } from "../CharacterPremiumAccount";
 import { CharacterView } from "../CharacterView";
 
 @provide(CharacterMovementWarn)
@@ -25,7 +27,8 @@ export class CharacterMovementWarn {
     private socketMessaging: SocketMessaging,
     private movementHelper: MovementHelper,
     private itemView: ItemView,
-    private specialEffect: SpecialEffect
+    private specialEffect: SpecialEffect,
+    private characterPremiumAccount: CharacterPremiumAccount
   ) {}
 
   @TrackNewRelicTransaction()
@@ -183,6 +186,11 @@ export class CharacterMovementWarn {
   ): Promise<ICharacterPositionUpdateFromServer> {
     const isMoving = this.movementHelper.isMoving(character.x, character.y, dataFromClient.newX, dataFromClient.newY);
 
+    const [accountType, alpha] = await Promise.all([
+      this.characterPremiumAccount.getPremiumAccountType(character),
+      this.specialEffect.getOpacity(character),
+    ]);
+
     return {
       ...dataFromClient,
       id: character.id,
@@ -200,7 +208,10 @@ export class CharacterMovementWarn {
       mana: character.mana,
       maxMana: character.maxMana,
       textureKey: character.textureKey,
-      alpha: await this.specialEffect.getOpacity(character),
+      owner: {
+        accountType: accountType ?? UserAccountTypes.Free,
+      },
+      alpha,
     };
   }
 }
