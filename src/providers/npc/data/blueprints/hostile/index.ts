@@ -64,6 +64,9 @@ import { npcRaccoon } from "./NPCRaccoon";
 import { npcRat } from "./NPCRat";
 import { npcRedCentipede } from "./NPCRedCentipede";
 import { npcRedDragon } from "./NPCRedDragon";
+import { npcBlueDragon } from "./NPCBlueDragon";
+import { npcPurpleDragon } from "./NPCPurpleDragon";
+import { npcYellowDragon } from "./NPCYellowDragon";
 import { npcScorpion } from "./NPCScorpion";
 import { npcSkeleton } from "./NPCSkeleton";
 import { npcSkeletonKnight } from "./NPCSkeletonKnight";
@@ -102,6 +105,9 @@ export const hostileNPCs = {
   [HostileNPCsBlueprint.Dwarf]: npcDwarf,
   [HostileNPCsBlueprint.DwarfGuard]: npcDwarfGuard,
   [HostileNPCsBlueprint.RedDragon]: npcRedDragon,
+  [HostileNPCsBlueprint.BlueDragon]: npcBlueDragon,
+  [HostileNPCsBlueprint.YellowDragon]: npcYellowDragon,
+  [HostileNPCsBlueprint.PurpleDragon]: npcPurpleDragon,
   [HostileNPCsBlueprint.Troll]: npcTroll,
   [HostileNPCsBlueprint.WildTroll]: npcWildTroll,
   [HostileNPCsBlueprint.TrollWarrior]: npcTrollWarrior,
