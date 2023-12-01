@@ -28,3 +28,4 @@ public/maps/**.zip
 pulbic/maps/unit-test-map.json
 
 .jest-cache
+libssl1.1_1.1.1f-1ubuntu2_amd64.deb
