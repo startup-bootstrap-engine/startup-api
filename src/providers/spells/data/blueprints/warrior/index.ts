@@ -1,5 +1,4 @@
 import { SpellsBlueprint } from "@rpg-engine/shared";
-import { spellCleavingStomp } from "../berserker-warrior/SpellCleavingStomp";
 import { spellBleedingEdge } from "./SpellBleedingEdge";
 import { spellFortifyDefense } from "./SpellFortifyDefense";
 import { spellPhysicalShield } from "./SpellPhysicalShield";
@@ -12,5 +11,4 @@ export const warriorSpellsIndex = {
   [SpellsBlueprint.FortifyDefense]: spellFortifyDefense,
   [SpellsBlueprint.PowerStrike]: spellPowerStrike,
   [SpellsBlueprint.BleedingEdge]: spellBleedingEdge,
-  [SpellsBlueprint.CleavingStomp]: spellCleavingStomp,
 };
