@@ -4,8 +4,8 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "blueprintKey": "greater-life-potion",
-  "quantity": 999,
+  "blueprintKey": "copper-ingot",
+  "quantity": 100,
   "characterId": "6461787ead84fe004dbcfd7d" 
 }
 

@@ -5,7 +5,7 @@ import { IUseWithCraftingRecipe } from "../../useWithTypes";
 
 export const recipeBread: IUseWithCraftingRecipe = {
   outputKey: FoodsBlueprint.Bread,
-  outputQtyRange: [1, 1],
+  outputQtyRange: [1, 2],
   requiredItems: [
     {
       key: CraftingResourcesBlueprint.Wheat,

@@ -7,8 +7,8 @@ export const recipeWoodenStaff: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 1],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.WoodenBoard,
-      qty: 5,
+      key: CraftingResourcesBlueprint.WoodenSticks,
+      qty: 10,
     },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 1],

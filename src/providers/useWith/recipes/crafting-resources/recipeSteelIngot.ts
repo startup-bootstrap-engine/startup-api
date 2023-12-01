@@ -5,7 +5,7 @@ import { CraftingSkill } from "@rpg-engine/shared";
 
 export const recipeSteelIngot: IUseWithCraftingRecipe = {
   outputKey: CraftingResourcesBlueprint.SteelIngot,
-  outputQtyRange: [1, 1],
+  outputQtyRange: [1, 2],
   requiredItems: [
     {
       key: CraftingResourcesBlueprint.IronIngot,
