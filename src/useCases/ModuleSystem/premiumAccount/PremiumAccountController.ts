@@ -17,4 +17,15 @@ export class PremiumAccountController implements interfaces.Controller {
       message: "Item generated successfully!",
     });
   }
+
+  @httpPost("/create-extra-depot-slots")
+  public async createExtraDepotSlots(@response() res, @requestBody() body): Promise<void> {
+    const { characterId, depotCity, slotQtyToAdd } = body;
+
+    await this.premiumAccountUseCase.createExtraDepotSlots(characterId, depotCity, slotQtyToAdd);
+
+    return res.status(200).send({
+      message: "Depot slots generated successfully!",
+    });
+  }
 }

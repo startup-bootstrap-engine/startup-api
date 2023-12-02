@@ -10,3 +10,16 @@ content-type: application/json
 }
 
 ###
+
+# Premium Account :: Create Extra Depot Slots
+POST {{baseUrl}}/premium-account/create-extra-depot-slots HTTP/1.1
+Authorization: Bearer {{authToken}}
+content-type: application/json
+
+{
+  "characterId": "656b7d35daf5f000350f2cd6",
+  "depotCity": "ilya",
+  "slotQtyToAdd": 5
+}
+
+###
