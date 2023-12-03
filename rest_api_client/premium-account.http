@@ -19,7 +19,7 @@ content-type: application/json
 {
   "characterId": "656b7d35daf5f000350f2cd6",
   "depotCity": "ilya",
-  "slotQtyToAdd": 5
+  "slotQtyToAdd": 10
 }
 
 ###
