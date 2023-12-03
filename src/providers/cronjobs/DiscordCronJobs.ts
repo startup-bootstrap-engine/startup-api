@@ -12,8 +12,12 @@ export class DiscordCronJobs {
       await this.sendBeginnersGuideCronJob();
     });
 
-    this.cronJobScheduler.uniqueSchedule("discord-paid-features-cron", "0 0 */3 * *", async () => {
-      await this.sendPaidFeaturesCronJob();
+    this.cronJobScheduler.uniqueSchedule("discord-premium-account-cron", "0 0 */3 * *", async () => {
+      await this.sendPremiumAccountCronJob();
+    });
+
+    this.cronJobScheduler.uniqueSchedule("discord-shop-cron", "0 0 */2 * *", async () => {
+      await this.sendShopCronJob();
     });
   }
 
@@ -29,11 +33,49 @@ export class DiscordCronJobs {
     }
   }
 
-  private async sendPaidFeaturesCronJob(): Promise<void> {
+  private async sendPremiumAccountCronJob(): Promise<void> {
     try {
       // Your message content
-      const message =
-        "⚔️ Want to support the server and get some cool perks? \nCheckout our Premium Plans: https://patreon.com/DefinyaMMORPG";
+      const message = `🌟 **Elevate Your Definya Adventure - Join the Premium League!** 🌟
+
+        🔗 Dive into the Elite: [Become a Premium Member Today](https://patreon.com/DefinyaMMORPG)
+        
+        **Why Go Premium? Unleash the Full Power of Definya!**
+        
+        ✨ **Enhanced Experience**: Boost your XP gain - Level up faster, outshine the rest!
+        
+        🔥 **Greater Loot Drops**: Increased chances for rare finds. Your next epic item awaits!
+        
+        🌈 **Colorful Identity**: Stand out with a custom-colored character name depending on your plan. Show your true colors!
+        
+        💀 **Reduced Penalties**: Fear less, venture more with lowered SP XP and inventory loss on death.
+        
+        ⚡ **Swift Travels**: Reduced teleport cooldowns. Be everywhere, miss nothing!
+        
+        🛠️ **Crafting Bonanza**: Get more with each craft. More the rewards, better the fun!
+        
+        🔔 **Priority Support**: Have a question? Direct access to DM support - because you're a VIP.
+        
+        Support the server, enhance your journey, and join the ranks of Definya's finest. Your adventure awaits, hero. Are you ready to step up? @everyone`;
+
+      await this.discordBot.sendMessageWithColor(message, "announcements", "Premium Account", "Gold");
+    } catch (error) {
+      console.error(`Failed to send Discord message: ${error}`);
+    }
+  }
+
+  private async sendShopCronJob(): Promise<void> {
+    try {
+      // Your message content
+      const message = `⚔️ **Explore Our Exclusive Item Shop!**
+
+        Discover a range of special items like:
+        - Extra depot slots
+        - Mana potions
+        - Life potions
+        - Character name change
+        
+        🛒 Access it here: [Definya Item Shop](https://www.patreon.com/definyammorpg/shop) @everyone`;
 
       await this.discordBot.sendMessageWithColor(message, "announcements", "Premium Account", "Gold");
     } catch (error) {

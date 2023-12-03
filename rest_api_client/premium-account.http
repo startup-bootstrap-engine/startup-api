@@ -17,9 +17,9 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "characterId": "656b7d35daf5f000350f2cd6",
+  "characterId": "6549765f4ce996004faaa311",
   "depotCity": "ilya",
-  "slotQtyToAdd": 10
+  "slotQtyToAdd": 40
 }
 
 ###
