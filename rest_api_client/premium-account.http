@@ -4,9 +4,9 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "blueprintKey": "copper-ingot",
+  "blueprintKey": "greater-mana-potion",
   "quantity": 100,
-  "characterId": "6461787ead84fe004dbcfd7d" 
+  "characterId": "6516df4e6f26650064cdee41" 
 }
 
 ###
