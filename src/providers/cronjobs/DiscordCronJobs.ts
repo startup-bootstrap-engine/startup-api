@@ -8,15 +8,15 @@ export class DiscordCronJobs {
 
   public schedule(): void {
     // Schedule the cron job to run every 3 days
-    this.cronJobScheduler.uniqueSchedule("discord-beginners-guide-cron", "0 0 */4 * *", async () => {
+    this.cronJobScheduler.uniqueSchedule("discord-beginners-guide-cron", "0 0 * * 1,3,5", async () => {
       await this.sendBeginnersGuideCronJob();
     });
 
-    this.cronJobScheduler.uniqueSchedule("discord-premium-account-cron", "0 0 */3 * *", async () => {
+    this.cronJobScheduler.uniqueSchedule("discord-premium-account-cron", "0 0 * * 2,4", async () => {
       await this.sendPremiumAccountCronJob();
     });
 
-    this.cronJobScheduler.uniqueSchedule("discord-shop-cron", "0 0 */2 * *", async () => {
+    this.cronJobScheduler.uniqueSchedule("discord-shop-cron", "0 0 * * 6,7", async () => {
       await this.sendShopCronJob();
     });
   }
