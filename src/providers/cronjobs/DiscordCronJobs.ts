@@ -72,6 +72,7 @@ export class DiscordCronJobs {
 
         Discover a range of special items like:
         - Extra depot slots
+        - Amulet of Death
         - Mana potions
         - Life potions
         - Character name change
