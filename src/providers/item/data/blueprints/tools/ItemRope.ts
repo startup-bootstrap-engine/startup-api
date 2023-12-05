@@ -11,7 +11,7 @@ export const itemRope: Partial<IItemUseWith> = {
   name: "Rope",
   description: "A simple rope used to escape dungeons.",
   weight: 0.7,
-  maxStackSize: 15,
+  maxStackSize: 999,
   basePrice: 0.8,
   canSell: false,
 };
