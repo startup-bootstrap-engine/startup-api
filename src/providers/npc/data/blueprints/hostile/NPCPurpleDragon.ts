@@ -36,7 +36,7 @@ export const npcPurpleDragon = {
   canSwitchToRandomTarget: true,
   isMagic: true,
   skills: {
-    level: 100,
+    level: 350,
     strength: {
       level: 300,
     },
