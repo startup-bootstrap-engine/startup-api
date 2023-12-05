@@ -1,5 +1,12 @@
 import { IEquippableAccessoryTier0Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  CharacterAttributes,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { AccessoriesBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemPendantOfMana: IEquippableAccessoryTier0Blueprint = {
@@ -15,6 +22,12 @@ export const itemPendantOfMana: IEquippableAccessoryTier0Blueprint = {
   defense: 0,
   tier: 0,
   weight: 0.1,
-  allowedEquipSlotType: [ItemSlotType.Ring],
+  allowedEquipSlotType: [ItemSlotType.Neck],
   basePrice: 5000,
+  equippedBuff: {
+    type: CharacterBuffType.CharacterAttribute,
+    trait: CharacterAttributes.MaxMana,
+    buffPercentage: 5,
+    durationType: CharacterBuffDurationType.Permanent,
+  },
 };

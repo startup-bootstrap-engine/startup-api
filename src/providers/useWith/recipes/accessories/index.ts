@@ -10,6 +10,7 @@ import { recipeEmeraldEleganceNecklace } from "./recipeEmeraldEleganceNecklace";
 import { recipeHasteRing } from "./recipeHasteRing";
 import { recipeOrcRing } from "./recipeOrcRing";
 import { recipePendantOfLife } from "./recipePendantOfLife";
+import { recipePendantOfMana } from "./recipePendantOfMana";
 
 export const recipeAccessoriesIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [AccessoriesBlueprint.Bandana]: [recipeBandana],
@@ -19,6 +20,7 @@ export const recipeAccessoriesIndex: Record<string, IUseWithCraftingRecipe[]> = 
   [AccessoriesBlueprint.HasteRing]: [recipeHasteRing],
   [AccessoriesBlueprint.OrcRing]: [recipeOrcRing],
   [AccessoriesBlueprint.PendantOfLife]: [recipePendantOfLife],
+  [AccessoriesBlueprint.PendantOfMana]: [recipePendantOfMana],
   [AccessoriesBlueprint.AmuletOfDeath]: [recipeAmuletOfDeath],
   [AccessoriesBlueprint.BloodstoneAmulet]: [recipeBloodstoneAmulet],
   [AccessoriesBlueprint.EmeraldEleganceNecklace]: [recipeEmeraldEleganceNecklace],

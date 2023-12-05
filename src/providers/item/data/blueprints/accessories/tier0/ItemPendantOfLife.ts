@@ -22,13 +22,13 @@ export const itemPendantOfLife: IEquippableAccessoryTier0Blueprint = {
   defense: 2,
   tier: 0,
   weight: 0.1,
-  allowedEquipSlotType: [ItemSlotType.Ring],
+  allowedEquipSlotType: [ItemSlotType.Neck],
   basePrice: 5000,
   equippedBuff: {
     type: CharacterBuffType.CharacterAttribute,
     trait: CharacterAttributes.MaxHealth,
-    buffPercentage: 2,
+    buffPercentage: 5,
     durationType: CharacterBuffDurationType.Permanent,
   },
-  equippedBuffDescription: "Increases maxHealth by 2%",
+  equippedBuffDescription: "Increases maxHealth by 5%",
 };

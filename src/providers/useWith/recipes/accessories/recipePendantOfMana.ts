@@ -3,12 +3,12 @@ import { AccessoriesBlueprint, CraftingResourcesBlueprint } from "@providers/ite
 import { IUseWithCraftingRecipe } from "@providers/useWith/useWithTypes";
 import { CraftingSkill } from "@rpg-engine/shared";
 
-export const recipePendantOfLife: IUseWithCraftingRecipe = {
+export const recipePendantOfMana: IUseWithCraftingRecipe = {
   outputKey: AccessoriesBlueprint.PendantOfLife,
   outputQtyRange: [1, 1],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.RedSapphire,
+      key: CraftingResourcesBlueprint.BlueFeather,
       qty: 30,
     },
     {
@@ -23,7 +23,7 @@ export const recipePendantOfLife: IUseWithCraftingRecipe = {
   minCraftingRequirements: [
     CraftingSkill.Blacksmithing,
     calculateMinimumLevel([
-      [CraftingResourcesBlueprint.RedSapphire, 30],
+      [CraftingResourcesBlueprint.BlueFeather, 30],
       [CraftingResourcesBlueprint.Rope, 5],
       [CraftingResourcesBlueprint.Skull, 25],
     ]),
