@@ -70,14 +70,17 @@ export class DiscordCronJobs {
       // Your message content
       const message = `⚔️ **Explore Our Exclusive Item Shop!**
 
-        Discover a range of special items like:
-        - Extra depot slots
-        - Amulet of Death
-        - Mana potions
-        - Life potions
-        - Character name change
-        
-        🛒 Access it here: [Definya Item Shop](https://www.patreon.com/definyammorpg/shop) @everyone`;
+      Discover a range of special items like:
+      
+      - Extra depot slots
+      - Amulet of Death
+      - Mana potions
+      - Life potions
+      - Character name change
+      
+      :shopping_cart: Access it here: [Definya Item Shop](https://www.patreon.com/definyammorpg/shop) @everyone
+      
+      @everyone`;
 
       await this.discordBot.sendMessageWithColor(message, "announcements", "Premium Account", "Gold");
     } catch (error) {
