@@ -515,6 +515,18 @@ export enum MagicsBlueprint {
   EnergyBoltRune = "energy-bolt-rune",
   FireBoltRune = "fire-bolt-rune",
   CorruptionRune = "corruption-rune",
+  WildwoodTeleport = "wildwood-teleport",
+  DungeonIlyaTeleport = "dungeon-ilya-teleport",
+  DwarfMinesTeleport = "dwarf-mines-teleport",
+  FrostIslandCavesTeleport = "frost-island-caves-teleport",
+  FrozenCastleDungeonTeleport = "frozen-castle-dungeon-teleport",
+  FrozenIslandTeleport = "frozen-island-teleport",
+  MinotaursIslandTeleport = "minotaurs-island-teleport",
+  RavenfallSanctuaryTeleport = "ravenfall-sanctuary-teleport",
+  ShadowlandsSewerTeleport = "shadowlands-sewer-teleport",
+  ShadowlandsTeleport = "shadowlands-teleport",
+  TrollsCavesTeleport = "trolls-caves-teleport",
+  WildwoodDungeonTeleport = "wildwood-dungeon-teleport",
 }
 
 export enum BooksBlueprint {

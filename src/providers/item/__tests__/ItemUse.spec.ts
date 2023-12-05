@@ -13,6 +13,7 @@ import {
   IConsumableItemBlueprint,
   ItemRarities,
   ItemSocketEvents,
+  ItemSubType,
 } from "@rpg-engine/shared";
 import { ItemUse } from "../ItemUse";
 import { FoodsBlueprint, PotionsBlueprint } from "../data/types/itemsBlueprintTypes";
@@ -272,6 +273,26 @@ describe("ItemUse.ts", () => {
     expect(applyItemUsageMock).toHaveBeenCalledWith(expect.any(Object), testCharacter.id, testItem.healthRecovery);
 
     applyItemUsageMock.mockRestore();
+  });
+
+  it("should find the character and call usableEffect if the item is of subtype Magic", async () => {
+    itemUsageMock.mockRestore();
+    const mockUsableEffect = jest.fn();
+
+    const bluePrintItem = {
+      subType: ItemSubType.Magic,
+      usableEffect: mockUsableEffect,
+    };
+
+    // @ts-ignore
+    await itemUse.applyItemUsage(bluePrintItem, testCharacter._id);
+
+    expect(mockUsableEffect).toHaveBeenCalledTimes(1);
+    expect(mockUsableEffect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _id: testCharacter._id,
+      })
+    );
   });
 
   it("should decrement item with same rarity", async () => {
