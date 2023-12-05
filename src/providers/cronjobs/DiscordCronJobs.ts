@@ -83,7 +83,7 @@ export class DiscordCronJobs {
       - Rope (100x)
       - Water (100x)
       
-      🛒 Access it here: [Definya Item Shop](https://www.patreon.com/definyammorpg/shop) @everyone
+      🛒 Access it here: [Definya Item Shop](https://www.patreon.com/definyammorpg/shop)
       
       @everyone`;
 
