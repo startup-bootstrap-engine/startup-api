@@ -43,7 +43,7 @@ export class DiscordCronJobs {
         
         **Why Go Premium? Unleash the Full Power of Definya!**
         
-        ✨ **Enhanced Experience**: Boost your XP gain - Level up faster, outshine the rest!
+        ✨ **Enhanced Experience**: Boost your XP gain - Level up faster!
         
         🔥 **Greater Loot Drops**: Increased chances for rare finds. Your next epic item awaits!
         
@@ -74,11 +74,16 @@ export class DiscordCronJobs {
       
       - Extra depot slots
       - Amulet of Death
-      - Mana potions
-      - Life potions
+      - Greater Mana potions (100x)
+      - Greater Life potions (100x)
       - Character name change
+
+      Ingredients:
+      - Gems Pack (100x Blue sapphire, 100x Red sapphire, 50x Jade)
+      - Rope (100x)
+      - Water (100x)
       
-      :shopping_cart: Access it here: [Definya Item Shop](https://www.patreon.com/definyammorpg/shop) @everyone
+      🛒 Access it here: [Definya Item Shop](https://www.patreon.com/definyammorpg/shop) @everyone
       
       @everyone`;
 
