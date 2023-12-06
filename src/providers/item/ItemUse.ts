@@ -129,6 +129,12 @@ export class ItemUse {
   ): Promise<void> {
     const iterations = bluePrintItem.subType === ItemSubType.Food ? 5 : 1;
 
+    if (bluePrintItem.subType === ItemSubType.Magic) {
+      const character = await Character.findOne({ _id: characterId });
+      if (character) await bluePrintItem.usableEffect?.(character);
+      return;
+    }
+
     await this.itemUseCycleQueue.start(characterId, bluePrintItem.key!, iterations, 10 * 1000, async () => {
       await this.newRelic.trackTransaction(NewRelicTransactionCategory.Interval, "ItemUseCycle", async () => {
         const character = await Character.findOne({ _id: characterId });

@@ -15,7 +15,6 @@ import {
   ITradeRequestItem,
   ItemSocketEvents,
   TradingEntity,
-  UserAccountTypes,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { capitalize } from "lodash";
@@ -214,7 +213,7 @@ export class CharacterTradingBuy {
       return false;
     }
 
-    const user = await this.characterUser.findUserByCharacter(character.id);
+    const user = await this.characterUser.findUserByCharacter(character);
     const userAccountType = user?.accountType || "free";
 
     for (const item of itemsToPurchase) {
@@ -272,17 +271,5 @@ export class CharacterTradingBuy {
     }
 
     return true;
-  }
-
-  private hasAccess(userAccountType: string, itemAccountType: string): boolean {
-    const accountTypeHierarchy = {
-      [UserAccountTypes.Free]: 0,
-      [UserAccountTypes.PremiumBronze]: 1,
-      [UserAccountTypes.PremiumSilver]: 2,
-      [UserAccountTypes.PremiumGold]: 3,
-      [UserAccountTypes.PremiumUltimate]: 4,
-    };
-
-    return accountTypeHierarchy[userAccountType] >= accountTypeHierarchy[itemAccountType];
   }
 }
