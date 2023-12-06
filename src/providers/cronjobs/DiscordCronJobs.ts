@@ -19,6 +19,31 @@ export class DiscordCronJobs {
     this.cronJobScheduler.uniqueSchedule("discord-shop-cron", "0 0 * * 6,7", async () => {
       await this.sendShopCronJob();
     });
+
+    this.cronJobScheduler.uniqueSchedule("discord-review-request-cron", "0 0 * * 1,3,6", async () => {
+      await this.sendReviewRequestCronJob();
+    });
+  }
+
+  private async sendReviewRequestCronJob(): Promise<void> {
+    try {
+      const message = `
+      🔥 Calling all Definya Champions for REVIEWS! 🔥
+      
+      Brave adventurers, your valor in the lands of Definya has been the stuff of legends. Now, we seek your aid in a noble quest beyond the battlefield: Share your tales of glory and might with the world! 🌟
+      
+      Your experiences, your battles, your victories... let them be known. Rate and review Definya on STEAM and Google Play, and let your voice guide future heroes on their journey!
+      
+      🔗 STEAM: [Definya 2D MMORPG](https://store.steampowered.com/app/2630100/Definya_2D_MMORPG/?beta=0)
+      🔗 Google Play: [Definya App](https://play.google.com/store/apps/details?id=com.definya.app)
+      
+      Together, we forge a legacy that will echo through the ages! ⚔️🛡️
+      `;
+
+      await this.discordBot.sendMessageWithColor(message, "announcements", "Review Request", "Green");
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   private async sendBeginnersGuideCronJob(): Promise<void> {
@@ -28,7 +53,7 @@ export class DiscordCronJobs {
         
         Checkout our BEGINNER'S GUIDE: https://defynia.gitbook.io/defynia-docs/how-it-works/guides/english/starterguide`;
 
-      await this.discordBot.sendMessageWithColor(message, "announcements", "TUTORIAL", "DarkAqua");
+      await this.discordBot.sendMessageWithColor(message, "announcements", "Tutorial", "DarkAqua");
     } catch (error) {
       console.error(`Failed to send Discord message: ${error}`);
     }
