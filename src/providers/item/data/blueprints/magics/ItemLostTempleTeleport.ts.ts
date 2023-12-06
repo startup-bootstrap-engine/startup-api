@@ -4,25 +4,25 @@ import { MapTransitionTeleport } from "@providers/map/MapTransition/MapTransitio
 import { IEquippableItemBlueprint, ItemSlotType, ItemSubType, ItemType, UserAccountTypes } from "@rpg-engine/shared";
 import { MagicsBlueprint } from "../../types/itemsBlueprintTypes";
 
-export const itemRavenfallSanctuaryTeleport: IEquippableItemBlueprint = {
-  key: MagicsBlueprint.RavenfallSanctuaryTeleport,
+export const itemLostTempleTeleport: IEquippableItemBlueprint = {
+  key: MagicsBlueprint.LostTempleTeleport,
   type: ItemType.Consumable,
   subType: ItemSubType.Magic,
   textureAtlas: "items",
-  texturePath: "magics/blue-scroll.png",
-  name: "Ravenfall Sanctuary Teleport",
-  description: "This will teleport you to ravenfall sanctuary. Good luck!",
+  texturePath: "magics/ancient-scroll.png",
+  name: "Lost Temple Teleport",
+  description: "This will teleport you to Lost Temple. Good luck!",
   allowedEquipSlotType: [ItemSlotType.Accessory],
-  weight: 1,
+  weight: 0.1,
   canSell: false,
-  basePrice: 8000,
+  basePrice: 10000,
   canBePurchasedOnlyByPremiumPlans: [UserAccountTypes.PremiumGold, UserAccountTypes.PremiumUltimate],
   usableEffect: async (character: ICharacter) => {
     const mapTransition = container.get(MapTransitionTeleport);
     await mapTransition.changeCharacterScene(character, {
-      map: "ravenfall-sanctuary",
-      gridX: 158,
-      gridY: 19,
+      map: "lost-temple",
+      gridX: 71,
+      gridY: 99,
     });
   },
 };

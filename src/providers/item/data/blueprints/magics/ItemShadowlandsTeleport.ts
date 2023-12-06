@@ -1,15 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { container } from "@providers/inversify/container";
 import { MapTransitionTeleport } from "@providers/map/MapTransition/MapTransitionTeleport";
-import {
-  IEquippableItemBlueprint,
-  ItemSlotType,
-  ItemSubType,
-  ItemType,
-  ToGridX,
-  ToGridY,
-  UserAccountTypes,
-} from "@rpg-engine/shared";
+import { IEquippableItemBlueprint, ItemSlotType, ItemSubType, ItemType, UserAccountTypes } from "@rpg-engine/shared";
 import { MagicsBlueprint } from "../../types/itemsBlueprintTypes";
 
 export const itemShadowlandsTeleport: IEquippableItemBlueprint = {
@@ -17,20 +9,25 @@ export const itemShadowlandsTeleport: IEquippableItemBlueprint = {
   type: ItemType.Consumable,
   subType: ItemSubType.Magic,
   textureAtlas: "items",
-  texturePath: "magics/shadowlands-teleport.png",
-  name: "shadowlands teleport",
+  texturePath: "magics/ancient-scroll.png",
+  name: "Shadowlands Teleport",
   description: "This will teleport you to shadowlands",
   allowedEquipSlotType: [ItemSlotType.Accessory],
   weight: 1,
   canSell: false,
-  basePrice: 60,
-  canBePurchasedOnlyByPremiumPlans: [UserAccountTypes.PremiumUltimate],
+  basePrice: 3000,
+  canBePurchasedOnlyByPremiumPlans: [
+    UserAccountTypes.PremiumBronze,
+    UserAccountTypes.PremiumSilver,
+    UserAccountTypes.PremiumGold,
+    UserAccountTypes.PremiumUltimate,
+  ],
   usableEffect: async (character: ICharacter) => {
     const mapTransition = container.get(MapTransitionTeleport);
     await mapTransition.changeCharacterScene(character, {
       map: "shadowlands",
-      gridX: ToGridX(3024),
-      gridY: ToGridY(2848),
+      gridX: 161,
+      gridY: 148,
     });
   },
 };
