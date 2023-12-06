@@ -2,8 +2,11 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { npcAssaultSpider } from "./NPCAssaultSpider";
 import { npcBandit } from "./NPCBandit";
 import { npcBat } from "./NPCBat";
+import { npcBattleCompanion } from "./NPCBattleCompanion";
+import { npcBattleCompanionMagic } from "./NPCBattleCompanionMagic";
 import { npcBlackEagle } from "./NPCBlackEagle";
 import { npcBlackSpider } from "./NPCBlackSpider";
+import { npcBlueDragon } from "./NPCBlueDragon";
 import { npcBrownBear } from "./NPCBrownBear";
 import { npcCaveBat } from "./NPCCaveBat";
 import { npcCaveCyclops } from "./NPCCaveCyclops";
@@ -60,13 +63,11 @@ import { npcOrcWarlord } from "./NPCOrcWarlord";
 import { npcOrcWarrior } from "./NPCOrcWarrior";
 import { npcPandaBear } from "./NPCPandaBear";
 import { npcPolarBear } from "./NPCPolarBear";
+import { npcPurpleDragon } from "./NPCPurpleDragon";
 import { npcRaccoon } from "./NPCRaccoon";
 import { npcRat } from "./NPCRat";
 import { npcRedCentipede } from "./NPCRedCentipede";
 import { npcRedDragon } from "./NPCRedDragon";
-import { npcBlueDragon } from "./NPCBlueDragon";
-import { npcPurpleDragon } from "./NPCPurpleDragon";
-import { npcYellowDragon } from "./NPCYellowDragon";
 import { npcScorpion } from "./NPCScorpion";
 import { npcSkeleton } from "./NPCSkeleton";
 import { npcSkeletonKnight } from "./NPCSkeletonKnight";
@@ -84,6 +85,7 @@ import { npcWildTroll } from "./NPCWildTroll";
 import { npcWinterWolf } from "./NPCWinterWolf";
 import { npcWolf } from "./NPCWolf";
 import { npcWraith } from "./NPCWraith";
+import { npcYellowDragon } from "./NPCYellowDragon";
 import { npcYeti } from "./bosses/NPCYeti";
 
 export const hostileNPCs = {
@@ -173,4 +175,6 @@ export const hostileNPCs = {
   [HostileNPCsBlueprint.NightFellbeast]: npcNightFellbeast,
   [HostileNPCsBlueprint.OrcWarlord]: npcOrcWarlord,
   [HostileNPCsBlueprint.WildCyclops]: npcWildCyclops,
+  [HostileNPCsBlueprint.BattleCompanion]: npcBattleCompanion,
+  [HostileNPCsBlueprint.BattleCompanionMagic]: npcBattleCompanionMagic,
 };

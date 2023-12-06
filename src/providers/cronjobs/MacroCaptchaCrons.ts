@@ -102,6 +102,11 @@ export class MacroCaptchaCrons {
       charactersWithCaptchaNotVerified.map(async (character) => {
         const n = _.random(1, 100);
 
+        // Skip anti macro on training rooms
+        if (character.scene.includes("training")) {
+          return;
+        }
+
         if (n <= ANTI_MACRO_PROBABILITY_TRIGGER) {
           await this.macroCaptchaSend.sendAndStartCaptchaVerification(character);
           sentTo++;

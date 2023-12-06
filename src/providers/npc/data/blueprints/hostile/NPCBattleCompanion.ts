@@ -1,0 +1,42 @@
+import { INPC } from "@entities/ModuleNPC/NPCModel";
+import { Dice } from "@providers/constants/DiceConstants";
+import { MovementSpeed } from "@providers/constants/MovementConstants";
+import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
+import { NPCAlignment } from "@rpg-engine/shared";
+import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
+import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+
+export const npcBattleCompanion: Partial<INPC> = {
+  ...generateMoveTowardsMovement(),
+  name: "Battle Companion",
+  key: HostileNPCsBlueprint.BattleCompanion,
+  textureKey: "elf-white-hair-1",
+  alignment: NPCAlignment.Hostile,
+  attackType: EntityAttackType.Melee,
+  speed: MovementSpeed.Fast,
+  baseHealth: 99999,
+  healthRandomizerDice: Dice.D6,
+  canSwitchToRandomTarget: false,
+  isGiantForm: false,
+  skills: {
+    level: 1,
+    strength: {
+      level: 1,
+    },
+    dexterity: {
+      level: 1,
+    },
+    resistance: {
+      level: 1,
+    },
+  },
+  fleeOnLowHealth: true,
+
+  loots: [
+    {
+      itemBlueprintKey: FoodsBlueprint.Cookie,
+      chance: 10,
+    },
+  ],
+};

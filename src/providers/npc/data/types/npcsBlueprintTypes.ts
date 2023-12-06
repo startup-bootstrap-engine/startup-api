@@ -158,4 +158,8 @@ export enum HostileNPCsBlueprint {
   NightFellbeast = "night-fellbeast",
   OrcWarlord = "orc-warlord",
   WildCyclops = "wild-cyclops",
+
+  // Trainer
+  BattleCompanion = "battle-companion",
+  BattleCompanionMagic = "battle-companion-magic",
 }
