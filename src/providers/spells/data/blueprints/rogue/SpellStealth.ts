@@ -30,8 +30,8 @@ export const spellStealth: Partial<ISpell> = {
     const stealth = container.get(Stealth);
     const spellCalculator = container.get(SpellCalculator);
     const timeout = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
-      min: 20,
-      max: 45,
+      min: 15,
+      max: 25,
     });
 
     return await stealth.turnInvisible(character, timeout);

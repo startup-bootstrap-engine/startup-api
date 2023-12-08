@@ -1,14 +1,22 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { STEALTH_DETECTION_THRESHOLD } from "@providers/constants/BattleConstants";
 import { NPC_CAN_ATTACK_IN_NON_PVP_ZONE } from "@providers/constants/NPCConstants";
 import { Locker } from "@providers/locks/Locker";
 import { MapNonPVPZone } from "@providers/map/MapNonPVPZone";
 import { MovementHelper } from "@providers/movement/MovementHelper";
+import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
-import { NPCAlignment, NPCTargetType, NPC_MAX_TALKING_DISTANCE_IN_GRID } from "@rpg-engine/shared";
+import {
+  IUIShowMessage,
+  NPCAlignment,
+  NPCTargetType,
+  NPC_MAX_TALKING_DISTANCE_IN_GRID,
+  UISocketEvents,
+} from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { NPCFreezer } from "../NPCFreezer";
 import { NPCView } from "../NPCView";
 import { NPCDirection } from "./NPCMovement";
 
@@ -20,7 +28,7 @@ export class NPCTarget {
     private mapNonPVPZone: MapNonPVPZone,
     private stealth: Stealth,
     private locker: Locker,
-    private npcFreeze: NPCFreezer
+    private socketMessaging: SocketMessaging
   ) {}
 
   @TrackNewRelicTransaction()
@@ -84,6 +92,8 @@ export class NPCTarget {
       if (!minDistanceCharacter) {
         return;
       }
+
+      await this.tryToDetectInvisibleCharacters(npc, minDistanceCharacter);
 
       if (await this.stealth.isInvisible(minDistanceCharacter)) {
         return;
@@ -203,5 +213,35 @@ export class NPCTarget {
     }
 
     return npc.maxRangeInGridCells;
+  }
+
+  private async tryToDetectInvisibleCharacters(npc: INPC, minDistanceCharacter: ICharacter): Promise<void> {
+    const isTargetInvisible = await this.stealth.isInvisible(minDistanceCharacter as ICharacter);
+    const npcLevel = (npc.skills as ISkill)?.level ?? 1;
+
+    if (isTargetInvisible) {
+      const wasDetected = await this.checkInvisibilityDetected(npcLevel);
+
+      if (wasDetected) {
+        await this.stealth.turnVisible(minDistanceCharacter as ICharacter);
+
+        this.socketMessaging.sendEventToUser<IUIShowMessage>(
+          (minDistanceCharacter as ICharacter).channelId!,
+          UISocketEvents.ShowMessage,
+          {
+            message: "Oops! You have been detected!",
+            type: "info",
+          }
+        );
+      }
+    }
+  }
+
+  private checkInvisibilityDetected(npcLevel: number): boolean {
+    const sigmoid = (x: number): number => 1 / (1 + Math.exp(-x));
+    const detectionThreshold = sigmoid(npcLevel - 5) * 100 * STEALTH_DETECTION_THRESHOLD;
+
+    const randomNumber = Math.random() * 100;
+    return randomNumber <= detectionThreshold;
   }
 }
