@@ -2,10 +2,10 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { PVP_MIN_REQUIRED_LV } from "@providers/constants/PVPConstants";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
 import { EntityAttackType } from "@rpg-engine/shared";
 import { BattleCharacterAttack } from "../BattleCharacterAttack";
 import { BattleCharacterAttackValidation } from "../BattleCharacterAttackValidation";
-import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 
 describe("BattleCharacterAttack.spec.ts", () => {
   let battleCharacterAttack: BattleCharacterAttack;
@@ -84,7 +84,7 @@ describe("BattleCharacterAttack.spec.ts", () => {
   });
 
   it("returns false if target is invisible", async () => {
-    const isInvisible = jest.spyOn(SpecialEffect.prototype, "isInvisible");
+    const isInvisible = jest.spyOn(Stealth.prototype, "isInvisible");
     isInvisible.mockImplementation(() => Promise.resolve(true));
 
     const result = await battleCharacterAttackValidation.canAttack(testCharacter, testNPC);

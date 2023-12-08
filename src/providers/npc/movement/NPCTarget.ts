@@ -2,10 +2,10 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { NPC_CAN_ATTACK_IN_NON_PVP_ZONE } from "@providers/constants/NPCConstants";
-import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { Locker } from "@providers/locks/Locker";
 import { MapNonPVPZone } from "@providers/map/MapNonPVPZone";
 import { MovementHelper } from "@providers/movement/MovementHelper";
+import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
 import { NPCAlignment, NPCTargetType, NPC_MAX_TALKING_DISTANCE_IN_GRID } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { NPCFreezer } from "../NPCFreezer";
@@ -18,7 +18,7 @@ export class NPCTarget {
     private npcView: NPCView,
     private movementHelper: MovementHelper,
     private mapNonPVPZone: MapNonPVPZone,
-    private specialEffect: SpecialEffect,
+    private stealth: Stealth,
     private locker: Locker,
     private npcFreeze: NPCFreezer
   ) {}
@@ -85,7 +85,7 @@ export class NPCTarget {
         return;
       }
 
-      if (await this.specialEffect.isInvisible(minDistanceCharacter)) {
+      if (await this.stealth.isInvisible(minDistanceCharacter)) {
         return;
       }
 

@@ -1,12 +1,12 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
-import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { Locker } from "@providers/locks/Locker";
 import { MapNonPVPZone } from "@providers/map/MapNonPVPZone";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
+import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
 import { Time } from "@providers/time/Time";
 import {
   BattleSocketEvents,
@@ -34,7 +34,7 @@ export class BattleNetworkInitTargeting {
     private movementHelper: MovementHelper,
     private battleCharacterManager: BattleCharacterAttack,
     private mapNonPVPZone: MapNonPVPZone,
-    private specialEffect: SpecialEffect,
+    private stealth: Stealth,
     private locker: Locker,
     private time: Time
   ) {}
@@ -210,7 +210,7 @@ export class BattleNetworkInitTargeting {
       }
     }
 
-    if (target && (await this.specialEffect.isInvisible(target))) {
+    if (target && (await this.stealth.isInvisible(target))) {
       return {
         isValid: false,
         reason: "Sorry, your target is invisible.",

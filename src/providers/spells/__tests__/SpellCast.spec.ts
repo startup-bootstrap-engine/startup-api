@@ -4,7 +4,6 @@ import { Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { ML_INCREASE_RATIO, SP_INCREASE_BASE, SP_MAGIC_INCREASE_TIMES_MANA } from "@providers/constants/SkillConstants";
-import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { TimerWrapper } from "@providers/helpers/TimerWrapper";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
@@ -38,6 +37,8 @@ import { rogueSpellExecution } from "../data/blueprints/rogue/SpellExecution";
 import { spellStealth } from "../data/blueprints/rogue/SpellStealth";
 import { spellStunTarget } from "../data/blueprints/warrior/SpellStunTarget";
 import SpellSilence from "../data/logic/mage/druid/SpellSilence";
+import { Stealth } from "../data/logic/rogue/Stealth";
+import { Stun } from "../data/logic/warrior/Stun";
 
 describe("SpellCast.ts", () => {
   let spellCast: SpellCast;
@@ -47,7 +48,8 @@ describe("SpellCast.ts", () => {
   let characterSkills: ISkill;
   let sendEventToUser: jest.SpyInstance;
   let level2Spells: Partial<ISpell>[] = [];
-  let specialEffect: SpecialEffect;
+  let stealth: Stealth;
+  let stun: Stun;
   let berserkerSpells: Execution;
 
   // let level3Spells: Partial<ISpell>[] = [];
@@ -57,7 +59,8 @@ describe("SpellCast.ts", () => {
   beforeAll(() => {
     spellCast = container.get<SpellCast>(SpellCast);
     spellLearn = container.get<SpellLearn>(SpellLearn);
-    specialEffect = container.get<SpecialEffect>(SpecialEffect);
+    stealth = container.get<Stealth>(Stealth);
+    stun = container.get<Stun>(Stun);
     berserkerSpells = container.get(Execution);
 
     level2Spells = [spellSelfHealing, spellArrowCreation, spellBlankRuneCreation, spellTeleport];
@@ -471,11 +474,11 @@ describe("SpellCast.ts", () => {
     const timerMock = jest.spyOn(TimerWrapper.prototype, "setTimeout");
     timerMock.mockImplementation();
 
-    expect(await specialEffect.isInvisible(testCharacter)).toBeFalsy();
+    expect(await stealth.isInvisible(testCharacter)).toBeFalsy();
 
     await spellStealth.usableEffect!(testCharacter);
 
-    expect(await specialEffect.isInvisible(testCharacter)).toBeTruthy();
+    expect(await stealth.isInvisible(testCharacter)).toBeTruthy();
 
     expect(timerMock).toHaveBeenCalled();
 
@@ -484,7 +487,7 @@ describe("SpellCast.ts", () => {
     expect(timerMock.mock.calls[0][1]).toBe(timeout * 2000);
 
     await timerMock.mock.calls[0][0]();
-    expect(await specialEffect.isInvisible(testCharacter)).toBeFalsy();
+    expect(await stealth.isInvisible(testCharacter)).toBeFalsy();
   });
 
   describe("ranged spells", () => {
@@ -575,14 +578,14 @@ describe("SpellCast.ts", () => {
         }
       );
 
-      expect(await specialEffect.isStun(targetCharacter)).toBeTruthy();
+      expect(await stun.isStun(targetCharacter)).toBeTruthy();
 
       expect(timerMock).toHaveBeenCalled();
 
       expect(timerMock.mock.calls[0][1]).toBe(11000);
 
       await timerMock.mock.calls[0][0]();
-      expect(await specialEffect.isStun(targetCharacter)).toBeFalsy();
+      expect(await stun.isStun(targetCharacter)).toBeFalsy();
     });
 
     it("should not be able stun itself", async () => {
@@ -592,7 +595,7 @@ describe("SpellCast.ts", () => {
       const spell = { magicWords: "talas tamb-eth", targetId: testCharacter._id, targetType: EntityType.Character };
       expect(await spellCast.castSpell(spell, testCharacter)).toBeFalsy();
 
-      expect(await specialEffect.isStun(targetCharacter)).toBeFalsy();
+      expect(await stun.isStun(targetCharacter)).toBeFalsy();
 
       expect(timerMock).not.toHaveBeenCalled();
     });

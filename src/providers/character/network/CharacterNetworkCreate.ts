@@ -3,7 +3,6 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { MapControlTimeModel } from "@entities/ModuleSystem/MapControlTimeModel";
 import { BattleNetworkStopTargeting } from "@providers/battle/network/BattleNetworkStopTargetting";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
-import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { ItemView } from "@providers/item/ItemView";
 import { GridManager } from "@providers/map/GridManager";
 import { NPCManager } from "@providers/npc/NPCManager";
@@ -36,6 +35,7 @@ import { socketEventsBinderControl } from "@providers/inversify/container";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { Locker } from "@providers/locks/Locker";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
+import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterDeath } from "../CharacterDeath";
 import { CharacterPremiumAccount } from "../CharacterPremiumAccount";
@@ -57,7 +57,7 @@ export class CharacterNetworkCreate {
     private gridManager: GridManager,
     private npcWarn: NPCWarn,
     private characterView: CharacterView,
-    private specialEffect: SpecialEffect,
+    private stealth: Stealth,
     private warriorPassiveHabilities: WarriorPassiveHabilities,
     private magePassiveHabilities: MagePassiveHabilities,
     private inMemoryHashTable: InMemoryHashTable,
@@ -164,7 +164,7 @@ export class CharacterNetworkCreate {
           mana: character.mana,
           maxMana: character.maxMana,
           textureKey: character.textureKey,
-          alpha: await this.specialEffect.getOpacity(character),
+          alpha: await this.stealth.getOpacity(character),
           isGiantForm: character.isGiantForm,
           hasSkull: character.hasSkull,
           skullType: character.skullType as CharacterSkullType,
@@ -253,7 +253,7 @@ export class CharacterNetworkCreate {
           mana: nearbyCharacter.mana,
           maxMana: nearbyCharacter.maxMana,
           textureKey: nearbyCharacter.textureKey,
-          alpha: await this.specialEffect.getOpacity(nearbyCharacter),
+          alpha: await this.stealth.getOpacity(nearbyCharacter),
           hasSkull: nearbyCharacter.hasSkull,
           skullType: nearbyCharacter.skullType as CharacterSkullType,
           owner: {

@@ -11,7 +11,6 @@ import { CharacterBonusPenalties } from "@providers/character/characterBonusPena
 import { CharacterItems } from "@providers/character/characterItems/CharacterItems";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { EntityUtil } from "@providers/entityEffects/EntityUtil";
-import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { blueprintManager } from "@providers/inversify/container";
 import { EffectableAttribute, ItemUsableEffect } from "@providers/item/helper/ItemUsableEffect";
 import { MapNonPVPZone } from "@providers/map/MapNonPVPZone";
@@ -36,6 +35,7 @@ import SpellCoolDown from "./SpellCooldown";
 import { SpellValidation } from "./SpellValidation";
 import { spellsBlueprints } from "./data/blueprints/index";
 import SpellSilence from "./data/logic/mage/druid/SpellSilence";
+import { Stealth } from "./data/logic/rogue/Stealth";
 
 @provide(SpellCast)
 export class SpellCast {
@@ -50,7 +50,7 @@ export class SpellCast {
     private spellValidation: SpellValidation,
     private inMemoryHashTable: InMemoryHashTable,
     private movementHelper: MovementHelper,
-    private specialEffect: SpecialEffect,
+    private stealth: Stealth,
     private spellCoolDown: SpellCoolDown,
     private spellSilencer: SpellSilence,
     private mapNonPVPZone: MapNonPVPZone,
@@ -201,7 +201,7 @@ export class SpellCast {
       return false;
     }
 
-    if (await this.specialEffect.isInvisible(target)) {
+    if (await this.stealth.isInvisible(target)) {
       this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, your target is invisible.");
       return false;
     }

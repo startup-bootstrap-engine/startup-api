@@ -7,14 +7,15 @@ import { BattleAttackTarget } from "@providers/battle/BattleAttackTarget/BattleA
 import { appEnv } from "@providers/config/env";
 import { NPC_BATTLE_CYCLE_INTERVAL, NPC_MIN_DISTANCE_TO_ACTIVATE } from "@providers/constants/NPCConstants";
 import { RedisManager } from "@providers/database/RedisManager";
-import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MovementHelper } from "@providers/movement/MovementHelper";
+import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
-import { EnvType, NPCAlignment } from "@rpg-engine/shared";
+import { EnvType, IUIShowMessage, NPCAlignment, UISocketEvents } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
-import _ from "lodash";
+import _, { random } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 import { NPCView } from "./NPCView";
 import { ICharacterHealth } from "./movement/NPCMovementMoveTowards";
@@ -32,11 +33,12 @@ export class NPCBattleCycleQueue {
     private newRelic: NewRelic,
     private locker: Locker,
     private npcTarget: NPCTarget,
-    private specialEffect: SpecialEffect,
+    private stealth: Stealth,
     private movementHelper: MovementHelper,
     private battleAttackTarget: BattleAttackTarget,
     private npcView: NPCView,
-    private redisManager: RedisManager
+    private redisManager: RedisManager,
+    private socketMessaging: SocketMessaging
   ) {}
 
   public init(): void {
@@ -221,7 +223,20 @@ export class NPCBattleCycleQueue {
 
       targetCharacter.skills = characterSkills;
 
-      const isTargetInvisible = await this.specialEffect.isInvisible(targetCharacter);
+      const isTargetInvisible = await this.stealth.isInvisible(targetCharacter);
+
+      if (isTargetInvisible) {
+        const n = random(1, 100);
+
+        if (n <= 20) {
+          await this.stealth.turnVisible(targetCharacter);
+
+          this.socketMessaging.sendEventToUser<IUIShowMessage>(targetCharacter.channelId!, UISocketEvents.ShowMessage, {
+            message: "Oops! You have been detected!",
+            type: "info",
+          });
+        }
+      }
 
       if (
         updatedNPC?.alignment === NPCAlignment.Hostile &&
@@ -317,7 +332,7 @@ export class NPCBattleCycleQueue {
     const chars = await this.npcView.getCharactersInView(npc);
     const visible: ICharacter[] = [];
     for (const c of chars) {
-      if (!(await this.specialEffect.isInvisible(c))) {
+      if (!(await this.stealth.isInvisible(c))) {
         visible.push(c);
       }
     }

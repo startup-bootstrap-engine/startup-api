@@ -1,5 +1,4 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { container } from "@providers/inversify/container";
 import {
   AnimationEffectKeys,
@@ -10,6 +9,7 @@ import {
   SpellsBlueprint,
 } from "@rpg-engine/shared";
 import { SpellCalculator } from "../../abstractions/SpellCalculator";
+import { Stealth } from "../../logic/rogue/Stealth";
 
 export const spellStealth: Partial<ISpell> = {
   key: SpellsBlueprint.RogueStealth,
@@ -27,13 +27,13 @@ export const spellStealth: Partial<ISpell> = {
   characterClass: [CharacterClass.Rogue],
 
   usableEffect: async (character: ICharacter) => {
-    const effect = container.get(SpecialEffect);
+    const stealth = container.get(Stealth);
     const spellCalculator = container.get(SpellCalculator);
     const timeout = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
       min: 20,
       max: 45,
     });
 
-    return await effect.turnInvisible(character, timeout);
+    return await stealth.turnInvisible(character, timeout);
   },
 };

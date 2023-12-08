@@ -5,10 +5,10 @@ import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { BattleAttackRanged } from "@providers/battle/BattleAttackTarget/BattleAttackRanged";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
-import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { ItemValidation } from "@providers/item/validation/ItemValidation";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
 import { EntityType, NPCAlignment } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { IUseWithItemSource } from "./UseWithEntity";
@@ -19,7 +19,7 @@ const StaticEntity = "Item"; // <--- should be added to the EntityType enum from
 export class UseWithEntityValidation {
   constructor(
     private battleRangedAttack: BattleAttackRanged,
-    private specialEffect: SpecialEffect,
+    private stealth: Stealth,
     private characterValidation: CharacterValidation,
     private movementHelper: MovementHelper,
     private itemValidation: ItemValidation,
@@ -80,7 +80,7 @@ export class UseWithEntityValidation {
         return "Sorry, your target is not valid.";
       }
     }
-    if (targetType !== EntityType.Item && (await this.specialEffect.isInvisible(target as ICharacter | INPC))) {
+    if (targetType !== EntityType.Item && (await this.stealth.isInvisible(target as ICharacter | INPC))) {
       return "Sorry, your target is invisible.";
     }
     if ("isAlive" in target && !target.isAlive && targetType !== (StaticEntity as EntityType)) {

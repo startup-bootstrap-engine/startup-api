@@ -2,7 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { container } from "@providers/inversify/container";
 import { BasicAttribute, ISpell, ShadowWalkerRaces, SpellCastingType, SpellsBlueprint } from "@rpg-engine/shared";
 import { SpellCalculator } from "../../abstractions/SpellCalculator";
-import { BullStrength } from "../../logic/minataur/BullStrength";
+import { BullStrength } from "../../logic/minotaur/BullStrength";
 
 export const spellBullStrength: Partial<ISpell> = {
   key: SpellsBlueprint.MinotaurBullStrength,

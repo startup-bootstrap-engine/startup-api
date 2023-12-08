@@ -1,9 +1,9 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
-import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { Locker } from "@providers/locks/Locker";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { Stun } from "@providers/spells/data/logic/warrior/Stun";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import {
   AnimationDirection,
@@ -25,9 +25,9 @@ export class CharacterMovementValidation {
     private characterValidation: CharacterValidation,
     private movementHelper: MovementHelper,
     private socketMessaging: SocketMessaging,
-    private specialEffect: SpecialEffect,
     private locker: Locker,
-    private newRelic: NewRelic
+    private newRelic: NewRelic,
+    private stun: Stun
   ) {}
 
   public async isValid(character: ICharacter, newX: number, newY: number, isMoving: boolean): Promise<boolean> {
@@ -48,7 +48,7 @@ export class CharacterMovementValidation {
       return false;
     }
 
-    if (await this.specialEffect.isStun(character)) {
+    if (await this.stun.isStun(character)) {
       this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId!, UISocketEvents.ShowMessage, {
         message: "Sorry, you can't move because you're stunned",
         type: "error",
