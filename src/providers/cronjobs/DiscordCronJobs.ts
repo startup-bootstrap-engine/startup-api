@@ -38,6 +38,8 @@ export class DiscordCronJobs {
       🔗 Google Play: [Definya App](https://play.google.com/store/apps/details?id=com.definya.app)
       
       Together, we forge a legacy that will echo through the ages! ⚔️🛡️
+
+      @everyone
       `;
 
       await this.discordBot.sendMessageWithColor(message, "announcements", "Review Request", "Green");
@@ -82,7 +84,9 @@ export class DiscordCronJobs {
         
         🔔 **Priority Support**: Have a question? Direct access to DM support - because you're a VIP.
         
-        Support the server, enhance your journey, and join the ranks of Definya's finest. Your adventure awaits, hero. Are you ready to step up? @everyone`;
+        Support the server, enhance your journey, and join the ranks of Definya's finest. Your adventure awaits, hero. Are you ready to step up? 
+        
+        @everyone`;
 
       await this.discordBot.sendMessageWithColor(message, "announcements", "Premium Account", "Gold");
     } catch (error) {

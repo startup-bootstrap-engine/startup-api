@@ -220,7 +220,7 @@ export class NPCTarget {
     const npcLevel = (npc.skills as ISkill)?.level ?? 1;
 
     if (isTargetInvisible) {
-      const wasDetected = await this.checkInvisibilityDetected(npcLevel);
+      const wasDetected = this.checkInvisibilityDetected(npcLevel);
 
       if (wasDetected) {
         await this.stealth.turnVisible(minDistanceCharacter as ICharacter);
