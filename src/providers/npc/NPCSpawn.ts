@@ -8,6 +8,7 @@ import { GRID_WIDTH } from "@rpg-engine/shared";
 import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 import { NPCGiantForm } from "./NPCGiantForm";
+import { NPCHealthManaCalculator } from "./NPCHealthManaCalculator";
 import { NPCWarn } from "./NPCWarn";
 import { NPCTarget } from "./movement/NPCTarget";
 
@@ -20,7 +21,8 @@ export class NPCSpawn {
     private npcWarn: NPCWarn,
     private npcGiantForm: NPCGiantForm,
     private locker: Locker,
-    private inMemoryHashTable: InMemoryRepository
+    private inMemoryHashTable: InMemoryRepository,
+    private npcHealthManaCalculator: NPCHealthManaCalculator
   ) {}
 
   public calculateSpawnTime(strengthLevel: number): Date {
@@ -39,11 +41,14 @@ export class NPCSpawn {
 
     await this.npcTarget.clearTarget(npc);
 
+    const maxHealth = this.npcHealthManaCalculator.getNPCMaxHealthRandomized(npc);
+
     await NPC.updateOne(
       { _id: npc._id },
       {
         $set: {
-          health: npc.maxHealth,
+          health: maxHealth,
+          maxHealth,
           mana: npc.maxMana,
           appliedEntityEffects: [],
           x: npc.initialX,

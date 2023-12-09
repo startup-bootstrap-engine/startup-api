@@ -18,6 +18,7 @@ import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
 import { clearCacheForKey } from "speedgoose";
 import { NPCGiantForm } from "./NPCGiantForm";
+import { NPCHealthManaCalculator } from "./NPCHealthManaCalculator";
 
 @provide(NPCSeeder)
 export class NPCSeeder {
@@ -26,7 +27,8 @@ export class NPCSeeder {
     private gridManager: GridManager,
     private npcGiantForm: NPCGiantForm,
     private locker: Locker,
-    private inMemoryHashTable: InMemoryHashTable
+    private inMemoryHashTable: InMemoryHashTable,
+    private npcHealthManaCalculator: NPCHealthManaCalculator
   ) {}
 
   @TrackNewRelicTransaction()
@@ -92,9 +94,11 @@ export class NPCSeeder {
 
       await this.inMemoryHashTable.delete("npc-force-pathfinding-calculation", npc._id);
 
-      const randomMaxHealth = this.setNPCRandomHealth(NPCData);
+      const randomMaxHealth = this.npcHealthManaCalculator.getNPCMaxHealthRandomized(npc);
 
       const updateParams = {
+        health: randomMaxHealth,
+        maxHealth: randomMaxHealth,
         mana: npc.maxMana,
         x: npc.initialX,
         y: npc.initialY,
@@ -163,7 +167,7 @@ export class NPCSeeder {
         skills.resistance.level = skills.resistance.level * NPC_SKILL_DEXTERITY_MULTIPLIER;
       }
 
-      const npcHealth = this.setNPCRandomHealth(NPCData);
+      const npcHealth = this.npcHealthManaCalculator.getNPCMaxHealthRandomized(NPCData as unknown as INPC);
 
       const newNPC = new NPC({
         ...NPCData,
@@ -226,14 +230,6 @@ export class NPCSeeder {
     }
 
     return clonedNPC.skills;
-  }
-
-  private setNPCRandomHealth(NPCData: INPCSeedData): number {
-    if (NPCData.healthRandomizerDice && NPCData.baseHealth) {
-      return NPCData.baseHealth + rollDice(NPCData.healthRandomizerDice);
-    }
-
-    return NPCData.maxHealth;
   }
 
   private async setInitialNPCPositionAsSolid(NPCData: INPCSeedData): Promise<void> {

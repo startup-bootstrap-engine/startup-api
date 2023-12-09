@@ -25,10 +25,10 @@ export const npcConde = {
   maxRangeAttack: 8,
   speed: MovementSpeed.Standard,
   canSwitchToRandomTarget: true,
-  baseHealth: 2000,
+  baseHealth: 3000,
   canSwitchToLowHealthTarget: true,
   skills: {
-    level: 70,
+    level: 85,
     strength: {
       level: 75,
     },
@@ -81,6 +81,11 @@ export const npcConde = {
       spellKey: SpellsBlueprint.VampiricStorm,
       probability: 10,
       power: MagicPower.Medium,
+    },
+    {
+      spellKey: SpellsBlueprint.Blizzard,
+      probability: 25,
+      power: MagicPower.UltraHigh,
     },
   ],
 } as Partial<INPC>;
