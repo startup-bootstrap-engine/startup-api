@@ -4,6 +4,7 @@ import { container, unitTestHelper } from "@providers/inversify/container";
 import { MathHelper } from "@providers/math/MathHelper";
 import { GRID_WIDTH } from "@rpg-engine/shared";
 import dayjs from "dayjs";
+import { NPCHealthManaCalculator } from "../NPCHealthManaCalculator";
 import { NPCSpawn } from "../NPCSpawn";
 import { NPCView } from "../NPCView";
 
@@ -13,11 +14,13 @@ describe("NPCSpawn", () => {
   let mathHelper: MathHelper;
   let characterView: CharacterView;
   let npcSpawn: NPCSpawn;
+  let npcHealthManaCalculator: NPCHealthManaCalculator;
 
   beforeEach(async () => {
     npc = await unitTestHelper.createMockNPC(null, {});
 
     npcSpawn = container.get<NPCSpawn>(NPCSpawn);
+    npcHealthManaCalculator = container.get<NPCHealthManaCalculator>(NPCHealthManaCalculator);
     npcView = {
       save: jest.fn(() => Promise.resolve()),
     } as unknown as NPCView;
@@ -57,7 +60,7 @@ describe("NPCSpawn", () => {
   });
 
   it("should reset the NPC's health and mana to their maximum values", async () => {
-    npc.maxHealth = 20;
+    npc.maxHealth = npcHealthManaCalculator.getNPCMaxHealthRandomized(npc);
     npc.maxMana = 10;
     npc.health = 10;
 
@@ -65,7 +68,7 @@ describe("NPCSpawn", () => {
 
     npc = await NPC.findById(npc._id).lean();
 
-    expect(npc.health).toEqual(20);
+    expect(npc.health).toEqual(101);
     expect(npc.mana).toEqual(10);
   });
 
