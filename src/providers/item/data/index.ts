@@ -57,8 +57,11 @@ const itemsBlueprintIndex: IBlueprint = {
 
 // auto calculate minRequirements on items tier 3 and above
 
-for (let data of Object.values(itemsBlueprintIndex)) {
-  data = minItemLevelSkillRequirementsMiddleware(data as IItem);
-}
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/no-floating-promises
+(async () => {
+  for (let data of Object.values(itemsBlueprintIndex)) {
+    data = await minItemLevelSkillRequirementsMiddleware(data as IItem);
+  }
+})();
 
 export { itemsBlueprintIndex };

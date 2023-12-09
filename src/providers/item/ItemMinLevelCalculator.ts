@@ -10,8 +10,10 @@ import {
   MinRequirements as IItemMinRequirements,
   ItemSubType,
   ItemType,
+  IEquippableItemBlueprint,
 } from "@rpg-engine/shared";
 import { itemsBlueprintIndex } from "./data";
+import { blueprintManager } from "@providers/inversify/container";
 
 export function getMinRequirements(blueprintKey: string, skillName: string): IItemMinRequirements {
   const levelMultiplier = 1.5;
@@ -71,8 +73,13 @@ export function getMinRequirements(blueprintKey: string, skillName: string): IIt
   return minRequirements;
 }
 
-export const getMinRequiredSkill = (item: IItem): BasicAttribute | CombatSkill => {
+export const getMinRequiredSkill = async (item: IItem): Promise<BasicAttribute | CombatSkill> => {
+  const itemBluePrint = await blueprintManager.getBlueprint<IEquippableItemBlueprint>("items", item.key);
   if (item.type === ItemType.Armor) {
+    // return magic level for mages
+    if (itemBluePrint.isMageGear) {
+      return BasicAttribute.Magic;
+    }
     if (item.subType === ItemSubType.Shield) {
       return CombatSkill.Shielding;
     }
@@ -115,7 +122,7 @@ export const getMinRequiredSkill = (item: IItem): BasicAttribute | CombatSkill =
   return BasicAttribute.Strength;
 };
 
-export const minItemLevelSkillRequirementsMiddleware = (data: IItem): IItem => {
+export const minItemLevelSkillRequirementsMiddleware = async (data: IItem): Promise<IItem> => {
   const item = data as IItem;
 
   // if the item already has min requirements, just return what we set.
@@ -126,7 +133,8 @@ export const minItemLevelSkillRequirementsMiddleware = (data: IItem): IItem => {
 
   // else, automatically add minRequirements to all items tier 2+
   if (item.tier! >= 2) {
-    const minRequirements = getMinRequirements(item.key, getMinRequiredSkill(item));
+    const minRequiredSkill = await getMinRequiredSkill(item);
+    const minRequirements = getMinRequirements(item.key, minRequiredSkill);
 
     minRequirements.level = Math.ceil(minRequirements.level * ITEM_MIN_REQUIREMENT_LEVEL_MULTIPLIER);
     minRequirements.skill.level = Math.ceil(minRequirements.skill.level * ITEM_MIN_REQUIREMENT_SKILL_MULTIPLIER);

@@ -50,4 +50,5 @@ export const itemSpellcastersCape: IEquippableArmorTier4Blueprint = {
     },
   ],
   equippedBuffDescription: "Increases resistance by 5% and max mana by 10% respectively",
+  isMageGear: true,
 };
