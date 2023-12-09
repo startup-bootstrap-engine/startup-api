@@ -1,7 +1,6 @@
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
-import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { AnimationEffectKeys, NPCAlignment } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
@@ -36,10 +35,5 @@ export const npcBattleCompanionMagic: Partial<INPC> = {
   },
   fleeOnLowHealth: true,
 
-  loots: [
-    {
-      itemBlueprintKey: FoodsBlueprint.Cookie,
-      chance: 10,
-    },
-  ],
+  loots: [],
 };

@@ -324,7 +324,7 @@ describe("NPCDeath.ts", () => {
     const spyAddLootInNPCBody = jest.spyOn(npcDeath.npcLoot, "addLootToNPCBody");
 
     // @ts-ignore
-    await npcDeath.npcLoot.addLootToNPCBody(testCharacter, npcBody, testNPC.loots);
+    await npcDeath.npcLoot.addLootToNPCBody(testCharacter, testNPC, npcBody, testNPC.loots);
 
     expect(spyAddLootInNPCBody).toHaveBeenCalled();
 
@@ -390,7 +390,7 @@ describe("NPCDeath.ts", () => {
     const spyAddLootInNPCBody = jest.spyOn(npcDeath.npcLoot, "addLootToNPCBody");
 
     // @ts-ignore
-    await npcDeath.npcLoot.addLootToNPCBody(testCharacter, npcBody, testNPC.loots);
+    await npcDeath.npcLoot.addLootToNPCBody(testCharacter, testNPC, npcBody, testNPC.loots);
 
     expect(spyAddLootInNPCBody).toHaveBeenCalled();
 
