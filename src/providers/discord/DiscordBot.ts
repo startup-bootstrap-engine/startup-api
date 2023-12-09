@@ -93,7 +93,8 @@ export class DiscordBot {
     message: string,
     channelName: DiscordChannelName,
     title?: string,
-    color?: ColorResolvable
+    color?: ColorResolvable,
+    imageUrl?: string
   ): Promise<void> {
     const embed = new EmbedBuilder()
       .setTitle(title || "")
@@ -104,6 +105,10 @@ export class DiscordBot {
         url: "https://play.definya.com/",
       })
       .setDescription(message);
+
+    if (imageUrl) {
+      embed.setImage(imageUrl);
+    }
 
     const channelId = DISCORD_CHANNEL_IDS[channelName];
 

@@ -23,6 +23,10 @@ export class DiscordCronJobs {
     this.cronJobScheduler.uniqueSchedule("discord-review-request-cron", "0 0 * * 1,3,6", async () => {
       await this.sendReviewRequestCronJob();
     });
+
+    this.cronJobScheduler.uniqueSchedule("discord-training-area-cron", "0 0 * * 7", async () => {
+      await this.sendTrainingAreaCronJob();
+    });
   }
 
   private async sendReviewRequestCronJob(): Promise<void> {
@@ -42,7 +46,13 @@ export class DiscordCronJobs {
       @everyone
       `;
 
-      await this.discordBot.sendMessageWithColor(message, "announcements", "Review Request", "Green");
+      await this.discordBot.sendMessageWithColor(
+        message,
+        "announcements",
+        "Review Request",
+        "Green",
+        "https://i.imgur.com/LGdrHYD.png"
+      );
     } catch (error) {
       console.error(error);
     }
@@ -55,9 +65,46 @@ export class DiscordCronJobs {
         
         Checkout our BEGINNER'S GUIDE: https://defynia.gitbook.io/defynia-docs/how-it-works/guides/english/starterguide`;
 
-      await this.discordBot.sendMessageWithColor(message, "announcements", "Tutorial", "DarkAqua");
+      await this.discordBot.sendMessageWithColor(
+        message,
+        "announcements",
+        "Tutorial",
+        "DarkAqua",
+        "https://i.imgur.com/DrZ060m.png"
+      );
     } catch (error) {
       console.error(`Failed to send Discord message: ${error}`);
+    }
+  }
+
+  private async sendTrainingAreaCronJob(): Promise<void> {
+    try {
+      const message = `⚔️ **Exclusive Training Room Access - Premium Members Only!**
+
+      Elevate your abilities with premium access to our advanced training rooms in Definya:
+      
+      - **Train Resistance / Magic Resistance**: Boost your defenses against powerful spells and attacks.
+      - **Train Your Offensive Skills**: Hone your combat abilities to master the art of war.
+      - **Teleport Scroll NPC**: Purchase teleport scrolls to swiftly navigate to crucial locations.
+      - **NPC Selling Training Equipment**: Acquire top-tier training gear specifically designed for skill development.
+      - **24/7 Availability**: Improve your skills anytime with round-the-clock access to our facilities.
+      
+      🌟 Your journey to becoming a legendary warrior starts in our exclusive training rooms!
+      
+      🔗 Take the leap to greatness. Become a Premium Member now: [Definya Premium](https://patreon.com/DefinyaMMORPG)
+      
+      @everyone
+      `;
+
+      await this.discordBot.sendMessageWithColor(
+        message,
+        "announcements",
+        "Training Room",
+        "Gold",
+        "https://i.imgur.com/LVm6okZ.png"
+      );
+    } catch (error) {
+      console.error(error);
     }
   }
 
@@ -70,6 +117,8 @@ export class DiscordCronJobs {
         
         **Why Go Premium? Unleash the Full Power of Definya!**
         
+        ⚔️ **Training Room Access**: You can train there 24/7 if you wish!
+
         ✨ **Enhanced Experience**: Boost your XP gain - Level up faster!
         
         🔥 **Greater Loot Drops**: Increased chances for rare finds. Your next epic item awaits!
@@ -88,7 +137,13 @@ export class DiscordCronJobs {
         
         @everyone`;
 
-      await this.discordBot.sendMessageWithColor(message, "announcements", "Premium Account", "Gold");
+      await this.discordBot.sendMessageWithColor(
+        message,
+        "announcements",
+        "Premium Account",
+        "Gold",
+        "https://i.imgur.com/1oqejn7.png"
+      );
     } catch (error) {
       console.error(`Failed to send Discord message: ${error}`);
     }
@@ -116,7 +171,13 @@ export class DiscordCronJobs {
       
       @everyone`;
 
-      await this.discordBot.sendMessageWithColor(message, "announcements", "Premium Account", "Gold");
+      await this.discordBot.sendMessageWithColor(
+        message,
+        "announcements",
+        "Premium Account",
+        "Gold",
+        "https://i.imgur.com/87eT8Rn.png"
+      );
     } catch (error) {
       console.error(`Failed to send Discord message: ${error}`);
     }
