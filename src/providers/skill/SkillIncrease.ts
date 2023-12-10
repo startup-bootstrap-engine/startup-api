@@ -8,7 +8,8 @@ import { CharacterBonusPenalties } from "@providers/character/characterBonusPena
 import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
 import {
   LOW_SKILL_LEVEL_SP_INCREASE_BONUS,
-  ML_INCREASE_RATIO,
+  ML_INCREASE_RATIO_MAGE,
+  ML_INCREASE_RATIO_OTHERS,
   SP_CRAFTING_INCREASE_RATIO,
   SP_INCREASE_BASE,
   SP_MAGIC_INCREASE_TIMES_MANA,
@@ -18,6 +19,7 @@ import { DiscordBot } from "@providers/discord/DiscordBot";
 import { NPCExperience } from "@providers/npc/NPCExperience/NPCExperience";
 import { NumberFormatter } from "@providers/text/NumberFormatter";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
+import { CharacterClass } from "@rpg-engine/shared";
 import { ItemSubType } from "@rpg-engine/shared/dist/types/item.types";
 import {
   BasicAttribute,
@@ -177,7 +179,11 @@ export class SkillIncrease {
 
   @TrackNewRelicTransaction()
   public async increaseMagicSP(character: ICharacter, power: number): Promise<void> {
-    await this.increaseBasicAttributeSP(character, BasicAttribute.Magic, this.getMagicSkillIncreaseCalculator(power));
+    await this.increaseBasicAttributeSP(
+      character,
+      BasicAttribute.Magic,
+      this.getMagicSkillIncreaseCalculator(power, character.class as CharacterClass, true)
+    );
   }
 
   @TrackNewRelicTransaction()
@@ -185,7 +191,7 @@ export class SkillIncrease {
     await this.increaseBasicAttributeSP(
       character,
       BasicAttribute.MagicResistance,
-      this.getMagicSkillIncreaseCalculator(power)
+      this.getMagicSkillIncreaseCalculator(power, character.class as CharacterClass, false)
     );
   }
 
@@ -358,10 +364,32 @@ export class SkillIncrease {
     return Math.round((skillDetails.skillPoints + SP_CRAFTING_INCREASE_RATIO) * 100) / 100;
   }
 
-  private getMagicSkillIncreaseCalculator(spellPower: number): Function {
+  private getMagicSkillIncreaseCalculator(
+    spellPower: number,
+    characterClass: CharacterClass,
+    isMagicLevelIncrease: boolean = true
+  ): Function {
+    // mages should increase ML faster
+
+    let ratio;
+
+    if (isMagicLevelIncrease) {
+      switch (characterClass) {
+        case CharacterClass.Druid:
+        case CharacterClass.Sorcerer:
+          ratio = ML_INCREASE_RATIO_MAGE;
+          break;
+        default:
+          ratio = ML_INCREASE_RATIO_OTHERS;
+
+          break;
+      }
+    }
+    console.log(ratio);
+
     return ((power: number, skillDetails: ISkillDetails): number => {
-      const manaSp = Math.round((spellPower * ML_INCREASE_RATIO + power) * SP_MAGIC_INCREASE_TIMES_MANA * 100) / 100;
-      return this.calculateNewSP(skillDetails) + manaSp;
+      const manaSp = Math.round((spellPower * ratio + power) * SP_MAGIC_INCREASE_TIMES_MANA * 100) / 100;
+      return this.calculateNewSP(skillDetails) + manaSp * ratio;
     }).bind(this, spellPower);
   }
 }
