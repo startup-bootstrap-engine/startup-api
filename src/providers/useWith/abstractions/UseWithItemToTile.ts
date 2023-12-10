@@ -24,7 +24,7 @@ import {
 import { provide } from "inversify-binding-decorators";
 import _, { isArray, isMap } from "lodash";
 import { IUseWithTargetTile } from "../useWithTypes";
-
+import { UseWithTileExhaustionControl } from "./UseWithTileExhaustionControl";
 export interface IUseWithItemToTileReward {
   key: string;
   qty: number[] | number;
@@ -55,7 +55,8 @@ export class UseWithItemToTile {
     private socketMessaging: SocketMessaging,
     private characterItemContainer: CharacterItemContainer,
     private characterWeight: CharacterWeight,
-    private characterInventory: CharacterInventory
+    private characterInventory: CharacterInventory,
+    private useWithTileExhaustionControl: UseWithTileExhaustionControl
   ) {}
 
   public async execute(
@@ -73,6 +74,16 @@ export class UseWithItemToTile {
       successMessages,
       errorAnimationEffectKey,
     } = options;
+
+    const areResourcesDepleted = await this.useWithTileExhaustionControl.areResourcesDepleted(targetTile);
+
+    if (areResourcesDepleted) {
+      this.socketMessaging.sendErrorMessageToCharacter(
+        character,
+        "The resources have been depleted here... Try looking for another spot!"
+      );
+      return;
+    }
 
     let resourceKey = "";
     if (requiredResource) {
@@ -178,6 +189,8 @@ export class UseWithItemToTile {
     if (successMessages) {
       this.sendRandomMessageToCharacter(character, successMessages);
     }
+
+    await this.useWithTileExhaustionControl.incrementResourceDepletion(targetTile);
 
     await this.refreshInventory(character);
   }

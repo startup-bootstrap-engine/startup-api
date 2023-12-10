@@ -34,6 +34,7 @@ export class UseWithTile {
 
           if (useWithData) {
             const { originItem, useWithTileEffect, targetName } = useWithData;
+
             await useWithTileEffect!(
               originItem,
               useWithTileData.targetTile,
