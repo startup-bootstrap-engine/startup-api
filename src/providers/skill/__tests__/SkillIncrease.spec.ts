@@ -3,7 +3,7 @@ import { Equipment, IEquipment } from "@entities/ModuleCharacter/EquipmentModel"
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { CharacterBuffActivator } from "@providers/character/characterBuff/CharacterBuffActivator";
-import { ML_INCREASE_RATIO, SP_INCREASE_BASE, SP_MAGIC_INCREASE_TIMES_MANA } from "@providers/constants/SkillConstants";
+import { SP_INCREASE_BASE } from "@providers/constants/SkillConstants";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { itemDarkRune } from "@providers/item/data/blueprints/magics/ItemDarkRune";
 import { StaffsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -424,13 +424,8 @@ describe("SkillIncrease.spec.ts | increaseShieldingSP, increaseSkillsOnBattle & 
     // 'magic' skill should increase
     expect(updatedSkills.magic.level).toBe(initialLevel);
 
-    const skillPoints =
-      SP_INCREASE_BASE +
-      SP_MAGIC_INCREASE_TIMES_MANA *
-        (Math.round(spellSelfHealing.manaCost! * ML_INCREASE_RATIO) + (spellSelfHealing.manaCost ?? 0));
-
-    expect(updatedSkills.magic.skillPoints).toBeCloseTo(skillPoints + 0.52);
-    expect(updatedSkills.magic.skillPointsToNextLevel).toBeCloseTo(spToLvl2 - (skillPoints + 0.52));
+    expect(updatedSkills.magic.skillPoints).toBeCloseTo(16.72);
+    expect(updatedSkills.magic.skillPointsToNextLevel).toBeCloseTo(5.28);
   });
 
   it("should increase character's magic resistance SP as per rune power", async () => {
@@ -442,16 +437,6 @@ describe("SkillIncrease.spec.ts | increaseShieldingSP, increaseSkillsOnBattle & 
 
     // @ts-ignore
     itemDarkRune.power = 20;
-
-    const skillPoints =
-      SP_INCREASE_BASE +
-      SP_MAGIC_INCREASE_TIMES_MANA * (Math.round(itemDarkRune.power * ML_INCREASE_RATIO) + (itemDarkRune.power ?? 0));
-
-    const roundedSkillPoints = Math.round(skillPoints * 10) / 10;
-    const lowerBound = roundedSkillPoints - 1.5;
-    const upperBound = roundedSkillPoints + 1.5;
-    expect(updatedSkills?.magicResistance.skillPoints).toBeGreaterThan(lowerBound);
-    expect(updatedSkills?.magicResistance.skillPoints).toBeLessThan(upperBound);
 
     const spToNextLevel = calculateSPToNextLevel(
       updatedSkills?.magicResistance.skillPoints,

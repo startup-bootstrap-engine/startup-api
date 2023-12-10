@@ -46,6 +46,8 @@ jest.mock("@providers/constants/SkillConstants", () => ({
   CLASS_BONUS_OR_PENALTIES,
   RACE_BONUS_OR_PENALTIES,
   ML_INCREASE_RATIO: 1.5,
+  ML_INCREASE_RATIO_MAGE: 1,
+  ML_INCREASE_RATIO_OTHERS: 1,
   MODE_EXP_MULTIPLIER,
   HEALTH_MANA_BASE_INCREASE_RATE: 10,
   DAMAGE_ATTRIBUTE_WEIGHT: 1,
@@ -136,6 +138,7 @@ jest.mock("@providers/constants/BattleConstants", () => ({
   DAMAGE_REDUCTION_MIN_DAMAGE: 1,
   DAMAGE_REDUCTION_MAX_REDUCTION_PERCENTAGE: 0.6,
   BATTLE_TOTAL_POTENTIAL_DAMAGE_MODIFIER: 1,
+  BATTLE_PVP_MELEE_DAMAGE_RATIO: 1,
 }));
 
 jest.mock("@providers/constants/LootConstants", () => ({

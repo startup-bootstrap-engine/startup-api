@@ -7,6 +7,7 @@ import { CharacterWeapon } from "@providers/character/CharacterWeapon";
 import {
   BATTLE_CRITICAL_HIT_CHANCE,
   BATTLE_CRITICAL_HIT_DAMAGE_MULTIPLIER,
+  BATTLE_PVP_MELEE_DAMAGE_RATIO,
   BATTLE_TOTAL_POTENTIAL_DAMAGE_MODIFIER,
   DAMAGE_REDUCTION_MAX_REDUCTION_PERCENTAGE,
   DAMAGE_REDUCTION_MIN_DAMAGE,
@@ -57,6 +58,8 @@ export class BattleDamageCalculator {
         attacker.class as CharacterClass,
         totalPotentialAttackerDamage
       );
+
+      totalPotentialAttackerDamage *= BATTLE_PVP_MELEE_DAMAGE_RATIO;
     }
 
     let damage;

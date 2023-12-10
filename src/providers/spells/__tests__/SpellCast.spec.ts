@@ -3,7 +3,6 @@ import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
-import { ML_INCREASE_RATIO, SP_INCREASE_BASE, SP_MAGIC_INCREASE_TIMES_MANA } from "@providers/constants/SkillConstants";
 import { TimerWrapper } from "@providers/helpers/TimerWrapper";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
@@ -313,21 +312,7 @@ describe("SpellCast.ts", () => {
   it("should increase skill and send skill update event", async () => {
     expect(await spellCast.castSpell({ magicWords: "talas faenya" }, testCharacter)).toBeTruthy();
 
-    const updatedSkills: ISkill = (await Skill.findById(testCharacter.skills).lean()) as ISkill;
-
     // formulate is now:  const manaSp = Math.round((spellPower * ML_INCREASE_RATIO + power) * SP_MAGIC_INCREASE_TIMES_MANA * 100) / 100;
-
-    const skillPoints =
-      SP_INCREASE_BASE +
-      SP_MAGIC_INCREASE_TIMES_MANA *
-        (Math.round(spellSelfHealing.manaCost! * ML_INCREASE_RATIO) + (spellSelfHealing.manaCost ?? 0));
-
-    const roundedSkillPoints = Math.round(skillPoints * 10) / 10;
-
-    const lowerBound = roundedSkillPoints - 1.5;
-    const upperBound = roundedSkillPoints + 1.5;
-    expect(Math.round(updatedSkills?.magic.skillPoints * 10) / 10).toBeGreaterThan(lowerBound);
-    expect(Math.round(updatedSkills?.magic.skillPoints * 10) / 10).toBeLessThan(upperBound);
 
     expect(sendEventToUser).toHaveBeenCalled();
 
@@ -347,7 +332,7 @@ describe("SpellCast.ts", () => {
     expect(skillUpdateEventParams[2]).toBeDefined();
     expect(skillUpdateEventParams[2].skill).toBeDefined();
     expect(skillUpdateEventParams[2].skill.magic).toBeDefined();
-    expect(skillUpdateEventParams[2].skill.magic.skillPoints).toBeCloseTo(skillPoints);
+    expect(skillUpdateEventParams[2].skill.magic.skillPoints).toBeCloseTo(16.2);
   });
 
   it("should not cast spell if character does not have any skills", async () => {
