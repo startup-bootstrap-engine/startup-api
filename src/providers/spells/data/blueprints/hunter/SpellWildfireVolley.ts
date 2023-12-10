@@ -27,7 +27,7 @@ export const spellWildfireVolley: Partial<ISpell> = {
   manaCost: 80,
   minLevelRequired: 15,
   minMagicLevelRequired: 9,
-  cooldown: 60,
+  cooldown: 15,
   castingAnimationKey: AnimationEffectKeys.SkillLevelUp,
   targetHitAnimationKey: AnimationEffectKeys.Burn,
   projectileAnimationKey: AnimationEffectKeys.QuickFire,

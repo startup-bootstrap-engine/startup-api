@@ -15,7 +15,7 @@ export const spellBullStrength: Partial<ISpell> = {
   manaCost: 25,
   minLevelRequired: 5,
   minMagicLevelRequired: 5,
-  cooldown: 160,
+  cooldown: 60,
   attribute: BasicAttribute.Strength,
   characterRace: [ShadowWalkerRaces.Minotaur],
 

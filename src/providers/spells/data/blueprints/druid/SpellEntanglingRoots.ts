@@ -24,7 +24,7 @@ export const spellEntanglingRoots: Partial<ISpell> = {
   manaCost: 40,
   minLevelRequired: 4,
   minMagicLevelRequired: 8,
-  cooldown: 35,
+  cooldown: 15,
   castingAnimationKey: AnimationEffectKeys.SkillLevelUp,
   targetHitAnimationKey: AnimationEffectKeys.Rooted,
   projectileAnimationKey: AnimationEffectKeys.Energy,

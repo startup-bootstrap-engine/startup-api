@@ -34,8 +34,8 @@ export const spellManaShield: Partial<ISpell> = {
     const spellCalculator = container.get(SpellCalculator);
 
     const timeout = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
-      min: 40,
-      max: 180,
+      min: 30,
+      max: 60,
     });
 
     const namespace = `${NamespaceRedisControl.CharacterSpell}:${character._id}`;

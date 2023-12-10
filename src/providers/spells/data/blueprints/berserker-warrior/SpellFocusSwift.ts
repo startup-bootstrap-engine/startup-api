@@ -25,7 +25,7 @@ export const spellFocusSwitft: Partial<ISpell> = {
   manaCost: 40,
   minLevelRequired: 25,
   minMagicLevelRequired: 10,
-  cooldown: 25,
+  cooldown: 10,
   castingAnimationKey: AnimationEffectKeys.SkillLevelUp,
   targetHitAnimationKey: AnimationEffectKeys.Dark,
   projectileAnimationKey: AnimationEffectKeys.Dark,

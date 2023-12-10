@@ -29,7 +29,7 @@ export const spellCorruptionBolt: Partial<ISpell> = {
   manaCost: 120,
   minLevelRequired: 20,
   minMagicLevelRequired: 20,
-  cooldown: 15,
+  cooldown: 10,
   castingAnimationKey: AnimationEffectKeys.SkillLevelUp,
   targetHitAnimationKey: AnimationEffectKeys.Corruption,
   projectileAnimationKey: AnimationEffectKeys.Dark,

@@ -80,13 +80,13 @@ export async function calculateItemUseEffectPoints(itemKey: string, caster: ICha
   // Function to generate a sigmoid-based value
   const sigmoidRandom = (min: number, max: number): number => {
     // Reduced range for x to decrease the spread
-    const range = 4; // You can adjust this value to control the spread
+    const range = 0.25; // You can adjust this value to control the spread
     const x = Math.random() * range - range / 2;
     // Adjust the sigmoid output to the range [min, max]
     return min + sigmoid(x) * (max - min);
   };
 
-  const maxPoints = meanPoints * 1.1; // Optionally adjust this to further limit the spread
+  const maxPoints = meanPoints; // Optionally adjust this to further limit the spread
   let effectPoints = sigmoidRandom(minPoints, maxPoints);
 
   // Ensure effect points are within the specified range

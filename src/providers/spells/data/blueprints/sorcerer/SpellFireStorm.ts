@@ -25,7 +25,7 @@ export const spellFireStorm: Partial<ISpell> = {
   manaCost: 80,
   minLevelRequired: 12,
   minMagicLevelRequired: 8,
-  cooldown: 30,
+  cooldown: 10,
   castingAnimationKey: AnimationEffectKeys.SkillLevelUp,
   targetHitAnimationKey: AnimationEffectKeys.Burn,
   projectileAnimationKey: AnimationEffectKeys.FireBall,
@@ -35,7 +35,7 @@ export const spellFireStorm: Partial<ISpell> = {
   usableEffect: async (character: ICharacter, target: ICharacter | INPC) => {
     const spellArea = container.get(SpellArea);
 
-    await spellArea.cast(character, target, MagicPower.Medium, {
+    await spellArea.cast(character, target, MagicPower.UltraHigh, {
       effectAnimationKey: AnimationEffectKeys.HitFire,
       entityEffect: entityEffectBurning,
       spellAreaGrid: SPELL_AREA_MEDIUM_BLAST_RADIUS,

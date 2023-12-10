@@ -28,7 +28,7 @@ export const spellPolymorph: Partial<ISpell> = {
   manaCost: 80,
   minLevelRequired: 8,
   minMagicLevelRequired: 5,
-  cooldown: 120,
+  cooldown: 60,
   targetHitAnimationKey: AnimationEffectKeys.HitBlue,
   castingAnimationKey: AnimationEffectKeys.ManaHeal,
   projectileAnimationKey: AnimationEffectKeys.Dark,

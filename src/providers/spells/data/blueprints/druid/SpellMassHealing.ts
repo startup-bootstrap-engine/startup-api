@@ -26,7 +26,7 @@ export const spellMassHealing: Partial<ISpell> = {
   manaCost: 200,
   minLevelRequired: 20,
   minMagicLevelRequired: 15,
-  cooldown: 40,
+  cooldown: 25,
   castingAnimationKey: AnimationEffectKeys.SkillLevelUp,
   targetHitAnimationKey: AnimationEffectKeys.Holy,
   projectileAnimationKey: AnimationEffectKeys.Green,

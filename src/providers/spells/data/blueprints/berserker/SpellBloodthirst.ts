@@ -23,7 +23,7 @@ export const spellBloodthirst: Partial<ISpell> = {
   manaCost: 120,
   minLevelRequired: 4,
   minMagicLevelRequired: 3,
-  cooldown: 200,
+  cooldown: 60,
   castingAnimationKey: AnimationEffectKeys.Holy,
   characterClass: [CharacterClass.Berserker],
 

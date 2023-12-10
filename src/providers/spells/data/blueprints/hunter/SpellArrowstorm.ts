@@ -25,7 +25,7 @@ export const spellArrowStorm: Partial<ISpell> = {
   manaCost: 70,
   minLevelRequired: 11,
   minMagicLevelRequired: 7,
-  cooldown: 30,
+  cooldown: 10,
   castingAnimationKey: AnimationEffectKeys.SkillLevelUp,
   targetHitAnimationKey: AnimationEffectKeys.Hit,
   projectileAnimationKey: AnimationEffectKeys.Arrow,

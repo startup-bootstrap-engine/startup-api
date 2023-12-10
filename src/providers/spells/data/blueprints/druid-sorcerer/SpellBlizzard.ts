@@ -33,7 +33,7 @@ export const spellBlizzard: Partial<ISpell> = {
   manaCost: 70,
   minLevelRequired: 12,
   minMagicLevelRequired: 10,
-  cooldown: 20,
+  cooldown: 15,
   castingAnimationKey: AnimationEffectKeys.SkillLevelUp,
   targetHitAnimationKey: AnimationEffectKeys.Freeze,
   projectileAnimationKey: AnimationEffectKeys.Freeze,
@@ -43,7 +43,7 @@ export const spellBlizzard: Partial<ISpell> = {
   usableEffect: async (character: ICharacter, target: ICharacter | INPC) => {
     const spellArea = container.get(SpellArea);
 
-    await spellArea.cast(character, target, MagicPower.High, {
+    await spellArea.cast(character, target, MagicPower.UltraHigh, {
       effectAnimationKey: AnimationEffectKeys.Freeze,
       spellAreaGrid: SPELL_AREA_DIAMOND_BLAST_RADIUS,
       entityEffect: entityEffectFreezing,
@@ -51,7 +51,7 @@ export const spellBlizzard: Partial<ISpell> = {
         const spellCalculator = container.get(SpellCalculator);
         const hitTarget = container.get(HitTarget);
 
-        await hitTarget.hit(character, target, true, MagicPower.High + intensity, true);
+        await hitTarget.hit(character, target, true, MagicPower.UltraHigh + intensity, true);
 
         if (target.type === "Character") {
           const timeout = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {

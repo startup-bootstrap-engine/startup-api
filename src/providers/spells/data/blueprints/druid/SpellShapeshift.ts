@@ -37,7 +37,7 @@ export const spellShapeshift: Partial<ISpell> = {
 
     const timeoutInSecs = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
       min: 15,
-      max: 30,
+      max: 60,
     });
 
     const buffPercentageOfHealth = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {

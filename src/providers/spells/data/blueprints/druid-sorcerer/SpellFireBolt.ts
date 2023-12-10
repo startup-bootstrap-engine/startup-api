@@ -25,7 +25,7 @@ export const spellFireBolt: Partial<ISpell> = {
   manaCost: 120,
   minLevelRequired: 8,
   minMagicLevelRequired: 12,
-  cooldown: 12,
+  cooldown: 5,
   castingAnimationKey: AnimationEffectKeys.SkillLevelUp,
   targetHitAnimationKey: AnimationEffectKeys.Burn,
   projectileAnimationKey: AnimationEffectKeys.FireBall,

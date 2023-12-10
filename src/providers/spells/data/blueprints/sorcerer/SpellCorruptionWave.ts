@@ -25,7 +25,7 @@ export const spellCorruptionWave: Partial<ISpell> = {
   manaCost: 130,
   minLevelRequired: 15,
   minMagicLevelRequired: 12,
-  cooldown: 40,
+  cooldown: 25,
   castingAnimationKey: AnimationEffectKeys.SkillLevelUp,
   targetHitAnimationKey: AnimationEffectKeys.Corruption,
   projectileAnimationKey: AnimationEffectKeys.Dark,
