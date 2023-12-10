@@ -17,6 +17,7 @@ import { ToGridX, ToGridY } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
 import { clearCacheForKey } from "speedgoose";
+import { NPCDuplicateCleaner } from "./NPCDuplicateCleaner";
 import { NPCGiantForm } from "./NPCGiantForm";
 import { NPCHealthManaCalculator } from "./NPCHealthManaCalculator";
 
@@ -28,7 +29,8 @@ export class NPCSeeder {
     private npcGiantForm: NPCGiantForm,
     private locker: Locker,
     private inMemoryHashTable: InMemoryHashTable,
-    private npcHealthManaCalculator: NPCHealthManaCalculator
+    private npcHealthManaCalculator: NPCHealthManaCalculator,
+    private npcDuplicateCleaner: NPCDuplicateCleaner
   ) {}
 
   @TrackNewRelicTransaction()
@@ -80,6 +82,8 @@ export class NPCSeeder {
         await this.npcGiantForm.randomlyTransformNPCIntoGiantForm(npcFound);
       }
     }
+
+    await this.npcDuplicateCleaner.cleanupDuplicateNPCs();
   }
 
   @TrackNewRelicTransaction()

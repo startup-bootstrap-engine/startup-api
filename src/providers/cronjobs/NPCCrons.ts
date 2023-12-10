@@ -7,6 +7,7 @@ import { NPCRaidSpawn } from "@providers/raid/NPCRaidSpawn";
 
 import { provide } from "inversify-binding-decorators";
 
+import { NPCDuplicateCleaner } from "@providers/npc/NPCDuplicateCleaner";
 import { CronJobScheduler } from "./CronJobScheduler";
 
 @provide(NPCCrons)
@@ -17,29 +18,13 @@ export class NPCCrons {
     private npcRaidSpawn: NPCRaidSpawn,
     private npcRaidActivator: NPCRaidActivator,
     private npcFreezer: NPCFreezer,
-    private cronJobScheduler: CronJobScheduler
+    private cronJobScheduler: CronJobScheduler,
+    private npcDuplicateChecker: NPCDuplicateCleaner
   ) {}
 
   public schedule(): void {
     this.cronJobScheduler.uniqueSchedule("npc-spawn-cron", "* * * * *", async () => {
-      // filter all dead npcs that have a nextSpawnTime > now
-
-      const deadNPCs = (await NPC.find({
-        health: 0,
-        isBehaviorEnabled: false,
-        nextSpawnTime: {
-          $exists: true,
-          $lte: new Date(),
-        },
-      }).lean()) as INPC[];
-
-      const deadRaidNPCs = await this.npcRaidSpawn.fetchDeadNPCsFromActiveRaids();
-
-      deadNPCs.push(...deadRaidNPCs);
-
-      for (const deadNPC of deadNPCs) {
-        await this.npcSpawn.spawn(deadNPC, !!deadNPC.raidKey);
-      }
+      await this.npcSpawnCron();
     });
 
     this.cronJobScheduler.uniqueSchedule("npc-raid-shutdown", "* * * * *", async () => {
@@ -53,5 +38,30 @@ export class NPCCrons {
     this.cronJobScheduler.uniqueSchedule("npc-freezer", "*/3 * * * *", async () => {
       await this.npcFreezer.freezeNPCsWithoutCharactersAround();
     });
+
+    this.cronJobScheduler.uniqueSchedule("npc-duplicate-checker", "0 0 * * *", async () => {
+      await this.npcDuplicateChecker.cleanupDuplicateNPCs();
+    });
+  }
+
+  private async npcSpawnCron(): Promise<void> {
+    // filter all dead npcs that have a nextSpawnTime > now
+
+    const deadNPCs = (await NPC.find({
+      health: 0,
+      isBehaviorEnabled: false,
+      nextSpawnTime: {
+        $exists: true,
+        $lte: new Date(),
+      },
+    }).lean()) as INPC[];
+
+    const deadRaidNPCs = await this.npcRaidSpawn.fetchDeadNPCsFromActiveRaids();
+
+    deadNPCs.push(...deadRaidNPCs);
+
+    for (const deadNPC of deadNPCs) {
+      await this.npcSpawn.spawn(deadNPC, !!deadNPC.raidKey);
+    }
   }
 }
