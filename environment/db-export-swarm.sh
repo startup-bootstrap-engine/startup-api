@@ -36,6 +36,6 @@ zip -r "db-dump.zip" "./db-dump"
 
 chmod 755 "./db-dump.zip"
 
-# Lets do some cleanup, so we don't mess up our importing later
+# Lets do some cleanup, so we don't mess up our importing later!
 echo "Finished, deleting db-dump folder..."
 rm -rf "./db-dump"
