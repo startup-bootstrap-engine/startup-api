@@ -17,8 +17,3 @@ docker service update --force --image definya/definya-team:api-latest --with-reg
 
 echo "🐳 Deployment complete."
 
-
-echo "🐳 Cleaning up..."
-docker container prune -f
-
-docker image prune -a -f
