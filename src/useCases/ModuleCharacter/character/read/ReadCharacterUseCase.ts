@@ -3,7 +3,7 @@ import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
 import { CharacterBaseSpeed } from "@providers/character/characterMovement/CharacterBaseSpeed";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
-import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
+import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
 import { CharacterRepository } from "@repositories/ModuleCharacter/CharacterRepository";
 import { UserAccountTypes } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -13,7 +13,7 @@ export class ReadCharacterUseCase {
   constructor(
     private characterRepository: CharacterRepository,
     private characterInventory: CharacterInventory,
-    private specialEffect: SpecialEffect,
+    private stealth: Stealth,
     private characterBaseSpeed: CharacterBaseSpeed,
     private characterPremiumAccount: CharacterPremiumAccount
   ) {}
@@ -44,7 +44,7 @@ export class ReadCharacterUseCase {
     const baseSpeed = (await this.characterBaseSpeed.getBaseSpeed(character)) ?? MovementSpeed.Standard;
 
     const [alpha, inventory, accountType] = await Promise.all([
-      this.specialEffect.getOpacity(character),
+      this.stealth.getOpacity(character),
       this.characterInventory.getInventory(character),
       this.characterPremiumAccount.getPremiumAccountType(character),
     ]);

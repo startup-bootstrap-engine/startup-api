@@ -23,6 +23,7 @@ export enum FriendlyNPCsBlueprint {
   TraderHerb = "trader-herb",
   TraderTavern = "trader-tavern",
   TraderJewelry = "trader-jewelry",
+  TraderTeleport = "trader-teleport",
   Blacksmith = "blacksmith",
 
   Banker = "banker",
@@ -157,4 +158,8 @@ export enum HostileNPCsBlueprint {
   NightFellbeast = "night-fellbeast",
   OrcWarlord = "orc-warlord",
   WildCyclops = "wild-cyclops",
+
+  // Trainer
+  BattleCompanion = "battle-companion",
+  BattleCompanionMagic = "battle-companion-magic",
 }

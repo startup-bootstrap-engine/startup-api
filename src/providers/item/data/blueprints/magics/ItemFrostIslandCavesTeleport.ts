@@ -1,15 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { container } from "@providers/inversify/container";
 import { MapTransitionTeleport } from "@providers/map/MapTransition/MapTransitionTeleport";
-import {
-  IEquippableItemBlueprint,
-  ItemSlotType,
-  ItemSubType,
-  ItemType,
-  ToGridX,
-  ToGridY,
-  UserAccountTypes,
-} from "@rpg-engine/shared";
+import { IEquippableItemBlueprint, ItemSlotType, ItemSubType, ItemType, UserAccountTypes } from "@rpg-engine/shared";
 import { MagicsBlueprint } from "../../types/itemsBlueprintTypes";
 
 export const itemFrostIslandCavesTeleport: IEquippableItemBlueprint = {
@@ -17,13 +9,13 @@ export const itemFrostIslandCavesTeleport: IEquippableItemBlueprint = {
   type: ItemType.Consumable,
   subType: ItemSubType.Magic,
   textureAtlas: "items",
-  texturePath: "magics/frost-island-caves-teleport.png",
-  name: "frost island caves teleport",
+  texturePath: "magics/ancient-scroll.png",
+  name: "Frost Island Caves Teleport",
   description: "This will teleport you to frost island caves",
   allowedEquipSlotType: [ItemSlotType.Accessory],
   weight: 1,
   canSell: false,
-  basePrice: 25,
+  basePrice: 2000,
   canBePurchasedOnlyByPremiumPlans: [
     UserAccountTypes.PremiumBronze,
     UserAccountTypes.PremiumSilver,
@@ -34,8 +26,8 @@ export const itemFrostIslandCavesTeleport: IEquippableItemBlueprint = {
     const mapTransition = container.get(MapTransitionTeleport);
     await mapTransition.changeCharacterScene(character, {
       map: "frost-island-caves",
-      gridX: ToGridX(912),
-      gridY: ToGridY(544),
+      gridX: 59,
+      gridY: 38,
     });
   },
 };

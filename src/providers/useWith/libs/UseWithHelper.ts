@@ -9,7 +9,6 @@ import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTy
 import { IMagicItemUseWithEntity } from "@providers/useWith/useWithTypes";
 import { ISkill, IUseWithItem, IUseWithTile } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import random from "lodash/random";
 
 @provide(UseWithHelper)
 export class UseWithHelper {
@@ -71,11 +70,28 @@ export async function calculateItemUseEffectPoints(itemKey: string, caster: ICha
 
   const minPoints = itemData.power ?? 1;
   const scalingFactor = ITEM_USE_WITH_BASE_EFFECT + magicLevel * ITEM_USE_WITH_BASE_SCALING_FACTOR;
-  const maxPoints = Math.round(minPoints + magicLevel * scalingFactor);
+  const meanPoints = Math.round(minPoints + magicLevel * scalingFactor);
 
-  // Adjust the minPoints and maxPoints to reduce the range
-  const adjustedMinPoints = minPoints + (maxPoints - minPoints) * 0.75; // Start from the 75% of the range
-  const adjustedMaxPoints = minPoints + (maxPoints - minPoints) * 1; // End at the 100% of the range
+  // Sigmoid function
+  const sigmoid = (x: number): number => {
+    return 1 / (1 + Math.exp(-x));
+  };
 
-  return random(adjustedMinPoints, adjustedMaxPoints);
+  // Function to generate a sigmoid-based value
+  const sigmoidRandom = (min: number, max: number): number => {
+    // Reduced range for x to decrease the spread
+    const range = 4; // You can adjust this value to control the spread
+    const x = Math.random() * range - range / 2;
+    // Adjust the sigmoid output to the range [min, max]
+    return min + sigmoid(x) * (max - min);
+  };
+
+  const maxPoints = meanPoints * 1.1; // Optionally adjust this to further limit the spread
+  let effectPoints = sigmoidRandom(minPoints, maxPoints);
+
+  // Ensure effect points are within the specified range
+  effectPoints = Math.max(minPoints, effectPoints);
+  effectPoints = Math.min(effectPoints, maxPoints);
+
+  return Math.round(effectPoints);
 }

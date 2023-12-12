@@ -1,6 +1,5 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { container } from "@providers/inversify/container";
 import {
   AnimationEffectKeys,
@@ -12,6 +11,7 @@ import {
   SpellsBlueprint,
 } from "@rpg-engine/shared";
 import { SpellCalculator } from "../../abstractions/SpellCalculator";
+import { Stun } from "../../logic/warrior/Stun";
 
 export const spellEntanglingRoots: Partial<ISpell> = {
   key: SpellsBlueprint.EntanglingRoots,
@@ -34,14 +34,14 @@ export const spellEntanglingRoots: Partial<ISpell> = {
   usableEffect: async (character: ICharacter, target: ICharacter | INPC) => {
     const spellCalculator = container.get(SpellCalculator);
 
-    const effect = container.get(SpecialEffect);
+    const stun = container.get(Stun);
 
     const timeout = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
       min: 5,
       max: 10,
     });
 
-    await effect.stun(target, timeout);
+    await stun.execStun(target, timeout);
 
     return true;
   },

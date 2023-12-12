@@ -35,4 +35,5 @@ export const itemSorcerersCape: IEquippableArmorTier3Blueprint = {
     },
   },
   equippedBuffDescription: "Increases max mana by 5%",
+  isMageGear: true,
 };

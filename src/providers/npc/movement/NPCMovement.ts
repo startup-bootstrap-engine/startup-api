@@ -11,7 +11,6 @@ import {
   PATHFINDING_POLLER_INTERVAL,
 } from "@providers/constants/PathfindingConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
-import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { GridManager } from "@providers/map/GridManager";
 import { MapNonPVPZone } from "@providers/map/MapNonPVPZone";
 import { Pathfinder } from "@providers/map/Pathfinder";
@@ -19,6 +18,7 @@ import { PathfindingQueue } from "@providers/map/PathfindingQueue";
 import { PathfindingResults } from "@providers/map/PathfindingResults";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
 import { INPCPositionUpdatePayload, NPCAlignment, NPCSocketEvents, ToGridX, ToGridY } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { NPCView } from "../NPCView";
@@ -44,7 +44,7 @@ export class NPCMovement {
     private npcTarget: NPCTarget,
     private characterView: CharacterView,
     private npcWarn: NPCWarn,
-    private specialEffect: SpecialEffect,
+    private stealth: Stealth,
     private inMemoryHashTable: InMemoryHashTable,
     private pathfindingQueue: PathfindingQueue,
     private pathfindingResults: PathfindingResults,
@@ -122,7 +122,7 @@ export class NPCMovement {
         }
 
         if (!clearTarget) {
-          clearTarget = await this.specialEffect.isInvisible(character);
+          clearTarget = await this.stealth.isInvisible(character);
         }
 
         if (clearTarget) {

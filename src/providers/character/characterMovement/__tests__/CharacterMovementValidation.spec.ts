@@ -1,7 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { container } from "@providers/inversify/container";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { Stun } from "@providers/spells/data/logic/warrior/Stun";
 import { UISocketEvents } from "@rpg-engine/shared";
 import { CharacterMovementValidation } from "../CharacterMovementValidation";
 
@@ -12,7 +12,7 @@ describe("CharacterMovementValidation", () => {
 
   const mockIsStun = (retValue: boolean): void => {
     isStunMock && isStunMock.mockRestore();
-    isStunMock = jest.spyOn(SpecialEffect.prototype, "isStun").mockImplementation(jest.fn().mockReturnValue(retValue));
+    isStunMock = jest.spyOn(Stun.prototype, "isStun").mockImplementation(jest.fn().mockReturnValue(retValue));
   };
 
   beforeEach(() => {

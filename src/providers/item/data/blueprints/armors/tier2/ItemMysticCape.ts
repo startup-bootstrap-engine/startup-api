@@ -36,4 +36,5 @@ export const itemMysticCape: IEquippableArmorTier2Blueprint = {
     },
   },
   equippedBuffDescription: "Increases max mana by 5%",
+  isMageGear: true,
 };

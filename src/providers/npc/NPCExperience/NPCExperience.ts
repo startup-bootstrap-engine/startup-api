@@ -75,6 +75,12 @@ export class NPCExperience {
    */
   @TrackNewRelicTransaction()
   public async releaseXP(target: INPC): Promise<void> {
+    // matches both melee and magic battle companions
+    // do not give XP for battle companions
+    if ((target as INPC).key.includes("battle-companion")) {
+      return;
+    }
+
     await this.time.waitForMilliseconds(random(0, 50)); // add artificial delay to avoid concurrency
 
     const hasLock = await this.locker.lock(`npc-${target._id}-release-xp`);
@@ -166,6 +172,12 @@ export class NPCExperience {
       }
       // For now, only supported increasing XP when target is NPC
       if (target.type === "NPC" && damage > 0) {
+        // matches both melee and magic battle companions
+        // do not give XP for battle companions
+        if ((target as INPC).key.includes("battle-companion")) {
+          return;
+        }
+
         target = target as INPC;
         target.xpToRelease = uniqBy(target.xpToRelease, "xpId");
         const party = (await this.partyManagement.getPartyByCharacterId(attacker.id)) as ICharacterParty;

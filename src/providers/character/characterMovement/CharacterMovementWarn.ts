@@ -6,6 +6,7 @@ import { ItemView } from "@providers/item/ItemView";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { NPCWarn } from "@providers/npc/NPCWarn";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
 import {
   AnimationDirection,
   CharacterSocketEvents,
@@ -28,7 +29,8 @@ export class CharacterMovementWarn {
     private movementHelper: MovementHelper,
     private itemView: ItemView,
     private specialEffect: SpecialEffect,
-    private characterPremiumAccount: CharacterPremiumAccount
+    private characterPremiumAccount: CharacterPremiumAccount,
+    private stealth: Stealth
   ) {}
 
   @TrackNewRelicTransaction()
@@ -78,7 +80,7 @@ export class CharacterMovementWarn {
       mana: targetCharacter.mana,
       maxMana: targetCharacter.maxMana,
       textureKey: targetCharacter.textureKey,
-      alpha: await this.specialEffect.getOpacity(targetCharacter),
+      alpha: await this.stealth.getOpacity(targetCharacter),
     });
   }
 
@@ -149,7 +151,7 @@ export class CharacterMovementWarn {
         mana: nearbyCharacter.mana,
         maxMana: nearbyCharacter.maxMana,
         textureKey: nearbyCharacter.textureKey,
-        alpha: await this.specialEffect.getOpacity(nearbyCharacter),
+        alpha: await this.stealth.getOpacity(nearbyCharacter),
       };
     });
 
@@ -188,7 +190,7 @@ export class CharacterMovementWarn {
 
     const [accountType, alpha] = await Promise.all([
       this.characterPremiumAccount.getPremiumAccountType(character),
-      this.specialEffect.getOpacity(character),
+      this.stealth.getOpacity(character),
     ]);
 
     return {

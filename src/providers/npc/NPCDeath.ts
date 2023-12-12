@@ -62,7 +62,13 @@ export class NPCDeath {
         chance: loot.chance + totalDropRatioFromParty || 0,
         quantityRange: loot.quantityRange || undefined,
       }));
-      const addLootToNPCBody = this.npcLoot.addLootToNPCBody(killer, npcBody, [...npcLoots, goldLoot], npc.isGiantForm);
+      const addLootToNPCBody = this.npcLoot.addLootToNPCBody(
+        killer,
+        npc,
+        npcBody,
+        [...npcLoots, goldLoot],
+        npc.isGiantForm
+      );
       const removeItemOwnership = this.itemOwnership.removeItemOwnership(npcBody.id);
       const clearNPCBehavior = this.clearNPCBehavior(npc);
       const updateNPCAfterDeath = this.updateNPCAfterDeath(npcWithSkills);

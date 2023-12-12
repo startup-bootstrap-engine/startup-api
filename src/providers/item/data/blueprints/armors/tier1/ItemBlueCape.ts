@@ -17,4 +17,5 @@ export const itemBlueCape: IEquippableArmorTier1Blueprint = {
   weight: 0.8,
   allowedEquipSlotType: [ItemSlotType.Torso],
   basePrice: 90,
+  isMageGear: true,
 };

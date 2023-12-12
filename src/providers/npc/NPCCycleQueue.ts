@@ -12,6 +12,7 @@ import { RedisManager } from "@providers/database/RedisManager";
 import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
+import { Stun } from "@providers/spells/data/logic/warrior/Stun";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { EnvType, NPCAlignment, NPCMovementType, NPCPathOrientation, ToGridX, ToGridY } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
@@ -44,7 +45,7 @@ export class NPCCycleQueue {
     private npcMovementMoveTowards: NPCMovementMoveTowards,
     private npcMovementStopped: NPCMovementStopped,
     private npcMovementMoveAway: NPCMovementMoveAway,
-
+    private stun: Stun,
     private newRelic: NewRelic,
     private locker: Locker,
     private redisManager: RedisManager
@@ -184,7 +185,7 @@ export class NPCCycleQueue {
 
     npc.skills = npcSkills;
 
-    if (await this.specialEffect.isStun(npc)) {
+    if (await this.stun.isStun(npc)) {
       await this.add(npc, npcSkills);
 
       return;

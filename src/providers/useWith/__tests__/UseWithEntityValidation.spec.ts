@@ -131,7 +131,7 @@ describe("UseWithEntityValidation", () => {
 
     it("returns false when the target is invisible", async () => {
       // @ts-ignore
-      jest.spyOn(useWithEntityValidation.specialEffect, "isInvisible").mockResolvedValueOnce(true);
+      jest.spyOn(useWithEntityValidation.stealth, "isInvisible").mockResolvedValueOnce(true);
       const result = await useWithEntityValidation.validateTargetRequest(
         testCharacter,
         testCharacter, // Assume the target character is the caster

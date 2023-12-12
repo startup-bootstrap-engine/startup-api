@@ -43,10 +43,15 @@ export class NPCLoot {
   @TrackNewRelicTransaction()
   public async addLootToNPCBody(
     killer: ICharacter,
+    target: INPC,
     npcBody: IItem,
     loots: INPCLoot[],
     wasNpcInGiantForm?: boolean
   ): Promise<void> {
+    if ((target as INPC).key.includes("battle-companion")) {
+      return;
+    }
+
     const itemContainer = await this.fetchItemContainer(npcBody);
     let isDeadBodyLootable = false;
 

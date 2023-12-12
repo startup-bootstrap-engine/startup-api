@@ -77,7 +77,7 @@ export class CharacterNetworkUpdateMapManager {
             character,
             `Sorry, a premium account of type '${allowedTypes
               .map((x) => `${capitalize(x)}`)
-              .join(" or ")}' is required to access this area.`
+              .join(", or ")}' is required to access this area.`
           );
           return;
         }

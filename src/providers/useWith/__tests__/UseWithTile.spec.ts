@@ -8,10 +8,10 @@ import { ToolsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 
 import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { ItemCraftable } from "@providers/item/ItemCraftable";
 import { FromGridX, FromGridY, IUseWithTile, MapLayers } from "@rpg-engine/shared";
 import { UseWithTile } from "../abstractions/UseWithTile";
-
 describe("UseWithTile.ts", () => {
   let testItem: IItem,
     testCharacter: ICharacter,
@@ -20,13 +20,14 @@ describe("UseWithTile.ts", () => {
     useWithTileData: IUseWithTile,
     skillIncrease: SkillIncrease,
     itemCraftable: ItemCraftable,
+    inMemoryHashTable: InMemoryHashTable,
     characterSkills: ISkill;
 
   beforeAll(async () => {
     useWithTile = container.get<UseWithTile>(UseWithTile);
     skillIncrease = container.get<SkillIncrease>(SkillIncrease);
     itemCraftable = container.get<ItemCraftable>(ItemCraftable);
-
+    inMemoryHashTable = container.get<InMemoryHashTable>(InMemoryHashTable);
     await unitTestHelper.initializeMapLoader();
   });
 
@@ -60,6 +61,10 @@ describe("UseWithTile.ts", () => {
     jest.spyOn(useWithTile.mapTiles, "getPropertyFromLayer" as any).mockImplementation(() => testItem.baseKey);
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("should pass all validations, run the useWithTileEffect and apply expected effect", async () => {
     // @ts-ignore
     const response = await useWithTile.validateData(testCharacter, useWithTileData);
@@ -79,9 +84,14 @@ describe("UseWithTile.ts", () => {
   });
 
   it("should fail validations | item without useWithTileEffect function defined", async () => {
+    const originalItemBlueprint = { ...itemsBlueprintIndex[testItem.baseKey] };
+    const testItemBlueprint = { ...originalItemBlueprint };
+    delete testItemBlueprint.useWithTileEffect;
+
     try {
-      const itemBlueprint = itemsBlueprintIndex[testItem.baseKey];
-      delete itemBlueprint.useWithTileEffect;
+      // Replace the original blueprint with the modified one just for this test
+      itemsBlueprintIndex[testItem.baseKey] = testItemBlueprint;
+
       // @ts-ignore
       await useWithTile.validateData(testCharacter, useWithTileData);
       throw new Error("This test should fail!");
@@ -89,9 +99,11 @@ describe("UseWithTile.ts", () => {
       expect(error.message).toEqual(
         `UseWithTile > originItem '${testItem.baseKey}' does not have a useWithTileEffect function defined`
       );
+    } finally {
+      // Restore the original item blueprint after the test
+      itemsBlueprintIndex[testItem.baseKey] = originalItemBlueprint;
     }
   });
-
   it("should fail validations | character too far away from tile", async () => {
     testCharacter.x = FromGridX(5);
     testCharacter.y = FromGridY(5);

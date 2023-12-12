@@ -5,6 +5,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { PVP_MIN_REQUIRED_LV } from "@providers/constants/PVPConstants";
 import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { MapNonPVPZone } from "@providers/map/MapNonPVPZone";
+import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
 import { EntityType, ISkill } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { BattleTargeting } from "../BattleTargeting";
@@ -14,7 +15,8 @@ export class BattleCharacterAttackValidation {
   constructor(
     private mapNonPVPZone: MapNonPVPZone,
     private battleTargeting: BattleTargeting,
-    private specialEffect: SpecialEffect
+    private specialEffect: SpecialEffect,
+    private stealth: Stealth
   ) {}
 
   @TrackNewRelicTransaction()
@@ -31,7 +33,7 @@ export class BattleCharacterAttackValidation {
       return false;
     }
 
-    if (await this.specialEffect.isInvisible(target)) {
+    if (await this.stealth.isInvisible(target)) {
       return false;
     }
 

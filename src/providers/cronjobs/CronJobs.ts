@@ -18,6 +18,7 @@ import { NPCCrons } from "./NPCCrons";
 import { RankingCrons } from "./RankingCrons";
 import { RedisCrons } from "./RedisCrons";
 import { RemoveInactivePartyMembersCron } from "./RemoveInactivePartyMembersCron";
+import { ResourceGatheringCrons } from "./ResourceGatheringCrons";
 import { TotalAvailableGold } from "./TotalAvailableGold";
 
 @provide(Cronjob)
@@ -40,7 +41,8 @@ export class Cronjob {
     private redisCrons: RedisCrons,
     private databaseMonitorCrons: DatabaseMonitorCrons,
     private removeInactivePartyMembersCron: RemoveInactivePartyMembersCron,
-    private discordCronJobs: DiscordCronJobs
+    private discordCronJobs: DiscordCronJobs,
+    private resourceGatheringCronJobs: ResourceGatheringCrons
   ) {}
 
   public start(): void {
@@ -68,6 +70,7 @@ export class Cronjob {
         this.databaseMonitorCrons.schedule();
         this.removeInactivePartyMembersCron.schedule();
         this.discordCronJobs.schedule();
+        this.resourceGatheringCronJobs.schedule();
         break;
       case EnvType.Staging:
       case EnvType.Production:
@@ -90,6 +93,7 @@ export class Cronjob {
           this.databaseMonitorCrons.schedule();
           this.removeInactivePartyMembersCron.schedule();
           this.discordCronJobs.schedule();
+          this.resourceGatheringCronJobs.schedule();
         }
         break;
     }

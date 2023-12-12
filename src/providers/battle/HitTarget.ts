@@ -28,6 +28,7 @@ import {
 import { appEnv } from "@providers/config/env";
 import { BONUS_DAMAGE_MULTIPLIER } from "@providers/constants/BattleConstants";
 import { RedisManager } from "@providers/database/RedisManager";
+import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { blueprintManager } from "@providers/inversify/container";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Queue, Worker } from "bullmq";
@@ -66,7 +67,8 @@ export class HitTarget {
     private socketMessaging: SocketMessaging,
     private entityEffectUse: EntityEffectUse,
     private battleDamageCalculator: BattleDamageCalculator,
-    private redisManager: RedisManager
+    private redisManager: RedisManager,
+    private specialEffect: SpecialEffect
   ) {}
 
   public init(): void {

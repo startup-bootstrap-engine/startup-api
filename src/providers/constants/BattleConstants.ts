@@ -14,3 +14,9 @@ export const DAMAGE_REDUCTION_MAX_REDUCTION_PERCENTAGE = 0.4;
 // Total potential damage
 
 export const BATTLE_TOTAL_POTENTIAL_DAMAGE_MODIFIER = 1.25;
+
+// Rogue
+
+export const STEALTH_DETECTION_THRESHOLD = 0.025;
+
+export const BATTLE_PVP_MELEE_DAMAGE_RATIO = 2.25;
