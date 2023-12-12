@@ -88,37 +88,65 @@ export class MapLoader {
 
   private async checkMapUpdated(mapPath: string, mapFileName: string, mapObject: object): Promise<boolean> {
     const mapChecksum = this.checksum(mapPath);
-    const fileName = mapFileName.replace(".json", "");
+    const fileName = this.extractFileName(mapFileName);
     const mapData = await MapModel.findOne({ name: fileName });
 
-    if (mapData) {
-      const map = mapData;
-      if (map?.checksum !== mapChecksum) {
-        console.log(`📦 Map ${fileName} is updated!`);
-        map.checksum = mapChecksum;
-        await map.save();
+    // Determine if zip file creation is necessary
+    const isZipCreationNeeded =
+      !this.doesMapHasCorrespondingZipFile(fileName) || (mapData && mapData.checksum !== mapChecksum);
 
-        // create zip
-
-        const pathToSave = `${STATIC_PATH}/maps`;
-        await createZipMap(fileName, mapObject, pathToSave);
-
-        return true;
-      }
-    } else {
-      console.log(`📦 Map ${fileName} is created!`);
-
-      await MapModel.create({ name: fileName, checksum: mapChecksum });
-
-      // create zip
-
-      const pathToSave = `${STATIC_PATH}/maps`;
-      await createZipMap(fileName, mapObject, pathToSave);
-
+    // Handle new map creation
+    if (!mapData) {
+      await this.handleNewMapCreation(fileName, mapChecksum, mapObject);
+      await this.createZipForMap(fileName, mapObject);
       return true;
     }
 
+    // Update existing map if checksum differs
+    const wasMapUpdated = await this.updateExistingMapIfChecksumDiffers(mapData, mapChecksum, fileName);
+
+    // Create or update zip if needed
+    if (isZipCreationNeeded || wasMapUpdated) {
+      await this.createZipForMap(fileName, mapObject);
+    }
+
+    return wasMapUpdated;
+  }
+
+  private async updateExistingMapIfChecksumDiffers(
+    mapData: any,
+    mapChecksum: string,
+    fileName: string
+  ): Promise<boolean> {
+    if (mapData.checksum !== mapChecksum) {
+      console.log(`📦 Map ${fileName} is updated!`);
+      mapData.checksum = mapChecksum;
+      await mapData.save();
+      return true;
+    }
     return false;
+  }
+
+  private doesMapHasCorrespondingZipFile(mapName: string): boolean {
+    const zipPath = `${STATIC_PATH}/maps/${mapName}.zip`;
+    return fs.existsSync(zipPath);
+  }
+
+  private extractFileName(filePath: string): string {
+    return filePath.replace(".json", "");
+  }
+
+  private async handleNewMapCreation(fileName: string, mapChecksum: string, mapObject: object): Promise<boolean> {
+    console.log(`📦 Map ${fileName} is created!`);
+    await MapModel.create({ name: fileName, checksum: mapChecksum });
+
+    return true;
+  }
+
+  private async createZipForMap(fileName: string, mapObject: object): Promise<void> {
+    console.log("📦 Creating zip for map...", fileName);
+    const pathToSave = `${STATIC_PATH}/maps`;
+    await createZipMap(fileName, mapObject, pathToSave);
   }
 
   public checksum(path): string {
