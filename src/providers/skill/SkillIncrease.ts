@@ -386,8 +386,6 @@ export class SkillIncrease {
       }
     }
 
-    console.log(ratio);
-
     return ((power: number, skillDetails: ISkillDetails): number => {
       const manaSp = Math.round((spellPower * ratio + power) * SP_MAGIC_INCREASE_TIMES_MANA * 100) / 100;
       return this.calculateNewSP(skillDetails) + manaSp * ratio;
