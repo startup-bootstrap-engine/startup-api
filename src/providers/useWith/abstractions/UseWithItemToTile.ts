@@ -19,7 +19,9 @@ import {
   IEquipmentAndInventoryUpdatePayload,
   IItemContainer,
   ISkill,
+  IUseWithTileValidation,
   ItemSocketEvents,
+  UseWithSocketEvents,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import _, { isArray, isMap } from "lodash";
@@ -114,6 +116,13 @@ export class UseWithItemToTile {
 
       if (hasRequiredItem.qty === 0) {
         this.socketMessaging.sendErrorMessageToCharacter(character, requiredResource.errorMessage);
+        this.socketMessaging.sendEventToUser<IUseWithTileValidation>(
+          character.channelId!,
+          UseWithSocketEvents.UseWithTileValidation,
+          {
+            status: false,
+          }
+        );
         return;
       }
 
