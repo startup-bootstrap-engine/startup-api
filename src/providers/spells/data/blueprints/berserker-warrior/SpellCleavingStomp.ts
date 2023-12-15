@@ -29,7 +29,7 @@ export const spellCleavingStomp: Partial<ISpell> = {
   manaCost: 50,
   minLevelRequired: 15,
   minMagicLevelRequired: 10,
-  cooldown: 10,
+  cooldown: 15,
   castingAnimationKey: AnimationEffectKeys.SkillLevelUp,
   targetHitAnimationKey: AnimationEffectKeys.HitEnergy,
   characterClass: [CharacterClass.Warrior, CharacterClass.Berserker],
