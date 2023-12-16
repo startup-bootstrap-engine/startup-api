@@ -39,6 +39,11 @@ export class ItemPickupValidator {
       return false;
     }
 
+    if (item.isStatic) {
+      this.sendErrorMessage(character, "Sorry, this item cannot be picked");
+      return false;
+    }
+
     const inventory = await this.characterInventory.getInventory(character);
 
     if (itemPickupData.toContainerId === "") {

@@ -115,6 +115,10 @@ const itemSchema = createLeanSchema(
 
     isBeingPickedUp: Type.boolean({ required: false }),
 
+    isPersistent: Type.boolean({ required: false }),
+
+    isStatic: Type.boolean({ required: false }),
+
     usableEffectDescription: Type.string({ required: false }),
 
     healthRecovery: Type.number({ required: false }),

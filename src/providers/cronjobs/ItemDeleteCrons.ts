@@ -62,6 +62,9 @@ export class ItemDeleteCrons {
         //* Are not equipped and not picked up
         isEquipped: { $ne: true },
 
+        //* Are not persistent
+        isPersistent: { $ne: true },
+
         name: { $ne: "Depot" },
         itemContainer: { $exists: false },
 
@@ -91,6 +94,10 @@ export class ItemDeleteCrons {
         }
 
         if (item.isEquipped) {
+          continue;
+        }
+
+        if (item.isPersistent) {
           continue;
         }
 
