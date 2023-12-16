@@ -271,4 +271,21 @@ describe("ItemPickupValidator.ts", () => {
     // After the test, remove the spy
     spyGetInventory.mockRestore();
   });
+
+  it("should block the item pickup, if the item is Static", async () => {
+    const StaticItem = await unitTestHelper.createMockItem({
+      isStatic: true,
+    });
+
+    const pickupValid = await itemPickupValidator.isItemPickupValid(
+      generatePickupData({
+        itemId: StaticItem.id,
+      }),
+      testCharacter
+    );
+
+    expect(pickupValid).toBeFalsy();
+
+    expect(sendErrorMessageToCharacter).toHaveBeenCalledWith(testCharacter, "Sorry, this item cannot be picked");
+  });
 });
