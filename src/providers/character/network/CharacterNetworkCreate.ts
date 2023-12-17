@@ -42,8 +42,8 @@ import { CharacterPremiumAccount } from "../CharacterPremiumAccount";
 import { CharacterBuffTracker } from "../characterBuff/CharacterBuffTracker";
 import { CharacterBuffValidation } from "../characterBuff/CharacterBuffValidation";
 import { CharacterBaseSpeed } from "../characterMovement/CharacterBaseSpeed";
-import { MagePassiveHabilities } from "../characterPassiveHabilities/MagePassiveHabilities";
 import { WarriorPassiveHabilities } from "../characterPassiveHabilities/WarriorPassiveHabilities";
+import { ManaRegen } from "../characterPassiveHabilities/ManaRegen";
 
 @provide(CharacterNetworkCreate)
 export class CharacterNetworkCreate {
@@ -59,7 +59,7 @@ export class CharacterNetworkCreate {
     private characterView: CharacterView,
     private stealth: Stealth,
     private warriorPassiveHabilities: WarriorPassiveHabilities,
-    private magePassiveHabilities: MagePassiveHabilities,
+    private manaRegen: ManaRegen,
     private inMemoryHashTable: InMemoryHashTable,
     private socketSessionControl: SocketSessionControl,
 
@@ -294,20 +294,11 @@ export class CharacterNetworkCreate {
     if (!character) {
       return;
     }
-
     try {
-      switch (character.class) {
-        case CharacterClass.Warrior:
-          await this.warriorPassiveHabilities.warriorAutoRegenHealthHandler(character);
-
-          break;
-
-        case CharacterClass.Druid:
-        case CharacterClass.Sorcerer:
-          await this.magePassiveHabilities.autoRegenManaHandler(character);
-
-          break;
+      if (character.class === CharacterClass.Warrior) {
+        await this.warriorPassiveHabilities.warriorAutoRegenHealthHandler(character);
       }
+      await this.manaRegen.autoRegenManaHandler(character);
     } catch (error) {
       console.error(`Error regenerating character ${character._id}: ${error}`);
     }
