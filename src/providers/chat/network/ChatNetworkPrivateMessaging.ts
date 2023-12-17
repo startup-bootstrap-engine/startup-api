@@ -17,6 +17,7 @@ import { provide } from "inversify-binding-decorators";
 import { IPrivateChatFindCharacterResponse } from "./ChatNetworkFindCharacter";
 import { ChatUtils } from "./ChatUtils";
 
+const MAX_MESSAGES_PER_CHARACTER = 20;
 @provide(ChatNetworkPrivateMessaging)
 export class ChatNetworkPrivateMessaging {
   constructor(
@@ -62,14 +63,7 @@ export class ChatNetworkPrivateMessaging {
           if (data.message.length > 0) {
             data = this.chatUtils.replaceProfanity(data);
 
-            const chatLog = new PrivateChatLog({
-              message: data.message,
-              emitter: character._id,
-              receiver: receiverCharacter._id,
-              status: ChatMessageStatus.Unseen,
-            });
-
-            await chatLog.save();
+            await this.saveChatLog(data.message, character._id, receiverCharacter._id);
 
             const chatLogs = await this.getPreviousChatLogs(character, receiverCharacter, data.limit);
 
@@ -130,6 +124,7 @@ export class ChatNetworkPrivateMessaging {
             .limit(10);
           const uniqueSenderIds = [...new Set(unseenMessages.map((message) => message.emitter))];
           const unseenSenders = await Character.find({ _id: { $in: uniqueSenderIds } }, "name");
+          console.log("unseenSenders", unseenSenders);
           this.socketMessaging.sendEventToUser<IPrivateChatFindCharacterResponse>(
             character.channelId!,
             ChatSocketEvents.PrivateChatMessageGetUnseenMessageCharacters,
@@ -176,7 +171,6 @@ export class ChatNetworkPrivateMessaging {
 
     const privateChatLogs = privatePreviousChatLogs.map((chatLog) => {
       const emitter = chatLog.emitter as unknown as ICharacter;
-      const receiver = chatLog.receiver as unknown as ICharacter;
 
       return {
         _id: chatLog._id,
@@ -197,5 +191,28 @@ export class ChatNetworkPrivateMessaging {
     return {
       messages: privateChatLogs,
     };
+  }
+
+  @TrackNewRelicTransaction()
+  private async saveChatLog(message, emitterId, receiverId): Promise<void> {
+    const chatLogs = await PrivateChatLog.find({
+      emitter: emitterId,
+    })
+      .sort({ createdAt: -1 })
+      .limit(MAX_MESSAGES_PER_CHARACTER);
+
+    if (chatLogs.length >= MAX_MESSAGES_PER_CHARACTER) {
+      const oldestMessage = chatLogs[chatLogs.length - 1];
+      await PrivateChatLog.findByIdAndDelete({ _id: oldestMessage._id });
+    }
+
+    const newChatLog = new PrivateChatLog({
+      message: message,
+      emitter: emitterId,
+      receiver: receiverId,
+      status: ChatMessageStatus.Unseen,
+    });
+
+    await newChatLog.save();
   }
 }

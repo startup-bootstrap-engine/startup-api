@@ -20,7 +20,6 @@ export const EXHAUSTABLE_EVENTS = [
   ChatSocketEvents.GlobalChatMessageCreate,
   ChatSocketEvents.GlobalChatMessageRead,
   ChatSocketEvents.PrivateChatMessageCreate,
-  ChatSocketEvents.PrivateChatMessageRead,
   ItemSocketEvents.UseWith,
   "CastSpell",
   "UseWithTile",
