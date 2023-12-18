@@ -136,9 +136,9 @@ export class CharacterBuffSkill {
       buffs,
     });
 
-    if (noMessage) {
-      this.sendCharacterActivationDeactivationMessage(character, buff, type);
-    }
+    if (noMessage) return;
+
+    this.sendCharacterActivationDeactivationMessage(character, buff, type);
   }
 
   @TrackNewRelicTransaction()
