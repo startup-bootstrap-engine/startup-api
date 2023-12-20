@@ -84,18 +84,18 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
     manaRagenPercent: 1.15,
   },
   [UserAccountTypes.PremiumUltimate]: {
-    SPXPLostOnDeathReduction: 75, // Do not lose any skill points or XP on death
-    InventoryLossOnDeathReduction: 75, // Do not drop anything on death
+    SPXPLostOnDeathReduction: 50, // only loses 50% of the regular skill loss
+    InventoryLossOnDeathReduction: 50, // Do not drop anything on death
     maxSpeed: MovementSpeed.Fast,
-    XPBuff: 100,
-    lootDropBuff: 100,
+    XPBuff: 50,
+    lootDropBuff: 50,
     spellCooldownReduction: {
       defaultReduction: 0,
       customReduction: {
-        ...generateCustomCooldownReduction(CUSTOM_COOLDOWN_REDUCTION_DEFAULT_ULTIMATE),
+        ...generateCustomCooldownReduction(CUSTOM_COOLDOWN_REDUCTION_DEFAULT_GOLD),
       },
     },
-    craftingQtyBuff: 100,
+    craftingQtyBuff: 50,
     manaRagenPercent: 1.2,
   },
 };

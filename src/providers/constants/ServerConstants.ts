@@ -56,7 +56,7 @@ export const LOCKABLE_EVENTS = [
   ViewSocketEvents.Destroy,
 ] as string[];
 
-export const THROTTABLE_EVENTS_MS_THRESHOLD_DISCONNECT = 70;
+export const THROTTABLE_EVENTS_MS_THRESHOLD_DISCONNECT = 20;
 
 export const THROTTABLE_DEFAULT_MS_THRESHOLD = 1000;
 
