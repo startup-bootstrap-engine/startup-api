@@ -9,7 +9,7 @@ export const itemJade: ICraftableItemBlueprint = {
   texturePath: "crafting-resources/jade.png",
   name: "Jade",
   description: "A piece of jade. The eye of Dursed Dragon.",
-  weight: 3,
+  weight: 0.01,
   maxStackSize: 999,
   basePrice: 20,
 };

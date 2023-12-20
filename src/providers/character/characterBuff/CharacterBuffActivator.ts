@@ -116,7 +116,7 @@ export class CharacterBuffActivator {
     noMessage?: boolean
   ): Promise<ICharacterBuff | undefined> {
     switch (buff.type) {
-      case "characterAttribute":
+      case CharacterBuffType.CharacterAttribute:
         const newCharBuff = await this.characterBuffCharacterAttribute.enableBuff(character, buff, noMessage);
 
         if (!newCharBuff) {
@@ -131,7 +131,7 @@ export class CharacterBuffActivator {
 
         return newCharBuff;
 
-      case "skill":
+      case CharacterBuffType.Skill:
         const newSkillBuff = await this.characterBuffSkill.enableBuff(character, buff, noMessage);
 
         if (!newSkillBuff) {
