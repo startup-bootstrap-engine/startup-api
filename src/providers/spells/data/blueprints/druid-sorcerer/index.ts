@@ -9,6 +9,7 @@ import { spellManaDrain } from "./SpellManaDrain";
 import { spellManaShield } from "./SpellManaShield";
 import { spellThunderRuneCreation } from "./SpellThunderRuneCreation";
 import { spellVampiricStorm } from "./SpellVampiricStorm";
+import { spellEnergyWave } from "./SpellEnergyWave";
 
 export const druidSorcererSpellsIndex = {
   [SpellsBlueprint.EnergyBoltRuneCreationSpell]: spellEnergyBoltRuneCreation,
@@ -21,4 +22,5 @@ export const druidSorcererSpellsIndex = {
   [SpellsBlueprint.FrostBolt]: spellFrostBolt,
   [SpellsBlueprint.Blizzard]: spellBlizzard,
   [SpellsBlueprint.VampiricStorm]: spellVampiricStorm,
+  [SpellsBlueprint.EnergyWave]: spellEnergyWave,
 };
