@@ -39,8 +39,8 @@ export class CharacterMonitorInterval {
       const hasCallback = await this.characterMonitorCallbackTracker.getCallback(character, callbackId);
 
       if (hasCallback) {
-        // avoid multi callbacks for the same id
-        return;
+        // just clear up the callback
+        await this.unwatch(callbackId, character);
       }
 
       await this.characterMonitorCallbackTracker.setCallback(character, callbackId);
@@ -94,6 +94,10 @@ export class CharacterMonitorInterval {
       console.error(error);
       await this.unwatch(callbackId, character);
     }
+  }
+
+  public async hasWatch(callbackId: string, character: ICharacter): Promise<boolean> {
+    return await this.characterMonitorCallbackTracker.hasCallback(character, callbackId);
   }
 
   @TrackNewRelicTransaction()

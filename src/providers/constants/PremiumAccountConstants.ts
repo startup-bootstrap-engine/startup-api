@@ -16,7 +16,7 @@ export interface IPremiumAccountData {
     customReduction: CustomSpellCooldown;
   };
   craftingQtyBuff: number;
-  manaRagenPercent: number;
+  manaRegenPercent: number;
 }
 
 export interface IPremiumAccountPlansData {
@@ -51,7 +51,7 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
       },
     },
     craftingQtyBuff: 20,
-    manaRagenPercent: 1.05,
+    manaRegenPercent: 1.05,
   },
   [UserAccountTypes.PremiumSilver]: {
     SPXPLostOnDeathReduction: 35, // only loses 60% of the regular skill loss
@@ -66,7 +66,7 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
       },
     },
     craftingQtyBuff: 35,
-    manaRagenPercent: 1.1,
+    manaRegenPercent: 1.1,
   },
   [UserAccountTypes.PremiumGold]: {
     SPXPLostOnDeathReduction: 50, // only loses 50% of the regular skill loss
@@ -81,7 +81,7 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
       },
     },
     craftingQtyBuff: 50,
-    manaRagenPercent: 1.15,
+    manaRegenPercent: 1.15,
   },
   [UserAccountTypes.PremiumUltimate]: {
     SPXPLostOnDeathReduction: 50, // only loses 50% of the regular skill loss
@@ -96,6 +96,6 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
       },
     },
     craftingQtyBuff: 50,
-    manaRagenPercent: 1.2,
+    manaRegenPercent: 1.2,
   },
 };

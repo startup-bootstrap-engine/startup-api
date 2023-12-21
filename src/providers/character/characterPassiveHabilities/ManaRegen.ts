@@ -36,25 +36,25 @@ export class ManaRegen {
   ) {}
 
   @TrackNewRelicTransaction()
-  public async autoRegenManaHandler(character: ICharacter): Promise<void> {
+  public async autoRegenManaHandler(targetCharacter: ICharacter): Promise<void> {
     try {
-      const skills = await this.getCharacterSkills(character);
+      const skills = await this.getCharacterSkills(targetCharacter);
       const [accountType, magicLvl] = (await Promise.all([
-        this.characterPremiumAccount.getPremiumAccountType(character),
+        this.characterPremiumAccount.getPremiumAccountType(targetCharacter),
         this.traitGetter.getSkillLevelWithBuffs(skills, BasicAttribute.Magic),
       ])) as [UserAccountTypes, number];
 
-      const skipManaRegen = await this.shouldSkipManaRegen(character, accountType);
+      const skipManaRegen = await this.shouldSkipManaRegen(targetCharacter, accountType);
       if (skipManaRegen) {
         return;
       }
 
-      const manaRegenAmount = this.calculateManaRegenAmount(character, magicLvl, accountType);
-      const intervalMs = await this.calculateRegenInterval(character, magicLvl);
+      const manaRegenAmount = this.calculateManaRegenAmount(targetCharacter, magicLvl, accountType);
+      const intervalMs = await this.calculateRegenInterval(targetCharacter); //! Readd this
 
       await this.characterMonitorInterval.watch(
         "mana-regen",
-        character,
+        targetCharacter,
         async (char) => {
           await this.processManaRegeneration(char, manaRegenAmount);
         },
@@ -88,6 +88,10 @@ export class ManaRegen {
           .lean()
           .select("_id mana channelId")) as ICharacter;
 
+        if (!updatedCharacter) {
+          return;
+        }
+
         if (updatedCharacter.mana === updatedCharacter.maxMana) {
           return;
         }
@@ -110,7 +114,7 @@ export class ManaRegen {
   }
 
   private async shouldSkipManaRegen(character: ICharacter, accountType: UserAccountTypes): Promise<boolean> {
-    const isFreeAccount = accountType === UserAccountTypes.Free;
+    const isFreeAccount = accountType === UserAccountTypes.Free || !accountType;
     const isNotMage = character.class !== CharacterClass.Sorcerer && character.class !== CharacterClass.Druid;
 
     if (isFreeAccount && isNotMage) {
@@ -127,7 +131,7 @@ export class ManaRegen {
   }
 
   private calculateManaRegenAmount(character: ICharacter, magicLvl: number, accountType: UserAccountTypes): number {
-    const manaRegenPercent = PREMIUM_ACCOUNT_METADATA[accountType].manaRagenPercent;
+    const manaRegenPercent = PREMIUM_ACCOUNT_METADATA[accountType].manaRegenPercent;
     let amountAdded = magicLvl / MANA_REGEN_MAGIC_LEVEL_DIVISOR;
 
     if (character.class === CharacterClass.Sorcerer || character.class === CharacterClass.Druid) {
@@ -139,11 +143,13 @@ export class ManaRegen {
     return Math.max(Math.floor(amountAdded), MANA_REGEN_MIN_MANA_REGEN);
   }
 
-  private async calculateRegenInterval(character: ICharacter, magicLvl: number): Promise<number> {
-    return await this.spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
+  private async calculateRegenInterval(character: ICharacter): Promise<number> {
+    const interval = await this.spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
       max: MANA_REGEN_MAX_REGEN_INTERVAL,
       min: MANA_REGEN_MIN_REGEN_INTERVAL,
       skillAssociation: "reverse",
     });
+
+    return Math.max(interval, 3000);
   }
 }

@@ -34,6 +34,15 @@ export class CharacterMonitorCallbackTracker {
     return callbacks[callbackId];
   }
 
+  public async hasCallback(character: ICharacter, callbackId: string): Promise<boolean> {
+    const namespaceKey = "character-monitor-callbacks";
+
+    const callbacks =
+      (await this.inMemoryHashTable.get(namespaceKey, character._id)) ?? ({} as ICharacterMonitorCallbacks);
+
+    return !!callbacks[callbackId];
+  }
+
   public async getCallbackIds(character: ICharacter): Promise<string[]> {
     const namespaceKey = "character-monitor-callbacks";
 

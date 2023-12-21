@@ -6,7 +6,7 @@ content-type: application/json
 {
   "blueprintKey": "greater-mana-potion",
   "quantity": 100,
-  "characterId": "6516df4e6f26650064cdee41" 
+  "characterId": "647e6d04cc5e350063722f2a" 
 }
 
 ###
