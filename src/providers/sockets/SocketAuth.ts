@@ -14,7 +14,6 @@ import {
   LOGGABLE_EVENTS,
   THROTTABLE_DEFAULT_MS_THRESHOLD,
   THROTTABLE_EVENTS,
-  THROTTABLE_EVENTS_MS_THRESHOLD_DISCONNECT,
 } from "@providers/constants/ServerConstants";
 import { ExhaustValidation } from "@providers/exhaust/ExhaustValidation";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
@@ -144,14 +143,6 @@ export class SocketAuth {
 
       if (lastActionExecution) {
         const diff = dayjs().diff(dayjs(lastActionExecution), "millisecond");
-
-        if (diff < THROTTABLE_EVENTS_MS_THRESHOLD_DISCONNECT) {
-          this.socketMessaging.sendEventToUser(character.channelId!, CharacterSocketEvents.CharacterForceDisconnect, {
-            reason: "You're disconnected for spamming the server with events.",
-          });
-
-          return true;
-        }
 
         if (diff < THROTTABLE_DEFAULT_MS_THRESHOLD) {
           this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId!, UISocketEvents.ShowMessage, {

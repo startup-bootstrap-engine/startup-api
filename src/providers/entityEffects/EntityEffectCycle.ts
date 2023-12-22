@@ -9,6 +9,7 @@ import { locker } from "@providers/inversify/container";
 import { NPCDeath } from "@providers/npc/NPCDeath";
 import { NPCExperience } from "@providers/npc/NPCExperience/NPCExperience";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { Time } from "@providers/time/Time";
 import { NewRelicTransactionCategory } from "@providers/types/NewRelicTypes";
 import { AnimationEffectKeys, CharacterSocketEvents, EntityType, ICharacterAttributeChanged } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -26,7 +27,8 @@ export class EntityEffectCycle {
     private animationEffect: AnimationEffect,
     private characterDeath: CharacterDeath,
     private npcDeath: NPCDeath,
-    private entityEffectDurationControl: EntityEffectDurationControl
+    private entityEffectDurationControl: EntityEffectDurationControl,
+    private time: Time
   ) {}
 
   @TrackNewRelicTransaction()
@@ -43,6 +45,9 @@ export class EntityEffectCycle {
       attackerId,
       entityEffect.totalDurationMs ?? -1
     );
+
+    // wait for 1 second before starting
+    await this.time.waitForSeconds(1);
 
     await this.execute(
       entityEffect,
@@ -78,11 +83,12 @@ export class EntityEffectCycle {
           const attacker = await this.getTarget(attackerId, attackerType, true);
           const damage = await this.calculateDamage(entityEffect, target, attacker!);
 
+          // this must happen right after the damage calculation, because if we record the XP here, it can cause a mismatch between state
+          await this.updateEffectsAndState(attacker!, target, entityEffect, attackerId);
+
           if (target.type === EntityType.NPC && attacker) {
             await this.recordNPCExperience(attacker, target, damage);
           }
-
-          await this.updateEffectsAndState(attacker!, target, entityEffect, attackerId);
         }
       );
     } catch (error) {
