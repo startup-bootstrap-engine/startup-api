@@ -2,15 +2,16 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { Locker } from "@providers/locks/Locker";
-import { provide } from "inversify-binding-decorators";
 
 // uniqueId
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { CharacterMonitorCallbackTracker } from "./CharacterMonitorCallbackTracker";
 
+import { provideSingleton } from "@providers/inversify/provideSingleton";
+
 type CharacterMonitorCallback = (character: ICharacter) => Promise<void>;
 
-@provide(CharacterMonitorInterval)
+@provideSingleton(CharacterMonitorInterval)
 export class CharacterMonitorInterval {
   constructor(
     private newRelic: NewRelic,
@@ -26,12 +27,10 @@ export class CharacterMonitorInterval {
     intervalMs: number = 7000
   ): Promise<void> {
     try {
-      const canProceed = await this.locker.lock(
-        `character-monitor-interval-${character._id}-callback-${callbackId}`,
-        3000
-      );
+      const canProceed = await this.locker.lock(`character-monitor-interval-${character._id}-callback-${callbackId}`);
 
       if (!canProceed) {
+        console.log("CharacterMonitorInterval - Lock not acquired");
         // concurrency control
         return;
       }
@@ -39,8 +38,8 @@ export class CharacterMonitorInterval {
       const hasCallback = await this.characterMonitorCallbackTracker.getCallback(character, callbackId);
 
       if (hasCallback) {
-        // just clear up the callback
-        await this.unwatch(callbackId, character);
+        // already watching
+        return;
       }
 
       await this.characterMonitorCallbackTracker.setCallback(character, callbackId);
@@ -65,7 +64,7 @@ export class CharacterMonitorInterval {
           })) as ICharacter;
 
           if (!updatedCharacter || !updatedCharacter?.isOnline) {
-            await this.unwatch(callbackId, character);
+            await this.unwatch(callbackId, character, "Character is not online or not found");
             return;
           }
 
@@ -92,7 +91,9 @@ export class CharacterMonitorInterval {
       }, intervalMs);
     } catch (error) {
       console.error(error);
-      await this.unwatch(callbackId, character);
+      await this.unwatch(callbackId, character, "Error on characterMonitorInterval.watch");
+    } finally {
+      await this.locker.unlock(`character-monitor-interval-${character._id}-callback-${callbackId}`);
     }
   }
 
@@ -101,7 +102,15 @@ export class CharacterMonitorInterval {
   }
 
   @TrackNewRelicTransaction()
-  public async unwatch(callbackId: string, character: ICharacter): Promise<void> {
+  public async unwatch(callbackId: string, character: ICharacter, reason: string): Promise<void> {
+    console.log(
+      "CharacterMonitorInterval - Unwatching",
+      character.name,
+      `(${character._id.toString()})`,
+      callbackId,
+      "Reason: ",
+      reason
+    );
     await this.characterMonitorCallbackTracker.removeCallback(character, callbackId);
   }
 

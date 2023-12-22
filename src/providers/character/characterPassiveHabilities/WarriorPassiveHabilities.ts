@@ -29,7 +29,7 @@ export class WarriorPassiveHabilities {
     const { _id, skills } = character;
 
     if (character.class !== CharacterClass.Warrior) {
-      await this.characterMonitorInterval.unwatch("health-regen", character);
+      await this.characterMonitorInterval.unwatch("health-regen", character, "Not a warrior");
       return;
     }
 
@@ -98,7 +98,11 @@ export class WarriorPassiveHabilities {
                 );
               } catch (err) {
                 console.error("Error during health regeneration interval:", err);
-                await this.characterMonitorInterval.unwatch("health-regen", character);
+                await this.characterMonitorInterval.unwatch(
+                  "health-regen",
+                  character,
+                  "Error during health regeneration interval"
+                );
               }
             }
           );

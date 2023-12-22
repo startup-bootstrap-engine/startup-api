@@ -50,7 +50,7 @@ export class ManaRegen {
       }
 
       const manaRegenAmount = this.calculateManaRegenAmount(targetCharacter, magicLvl, accountType);
-      const intervalMs = await this.calculateRegenInterval(targetCharacter); //! Readd this
+      const intervalMs = await this.calculateRegenInterval(targetCharacter);
 
       await this.characterMonitorInterval.watch(
         "mana-regen",
@@ -108,7 +108,7 @@ export class ManaRegen {
         );
       } catch (err) {
         console.error("Error during mana regeneration interval:", err);
-        await this.characterMonitorInterval.unwatch("mana-regen", character);
+        await this.characterMonitorInterval.unwatch("mana-regen", character, "Error during mana regeneration interval");
       }
     });
   }
@@ -118,7 +118,16 @@ export class ManaRegen {
     const isNotMage = character.class !== CharacterClass.Sorcerer && character.class !== CharacterClass.Druid;
 
     if (isFreeAccount && isNotMage) {
-      await this.characterMonitorInterval.unwatch("mana-regen", character);
+      const hasCallback = await this.characterMonitorInterval.hasWatch("mana-regen", character);
+
+      if (hasCallback) {
+        await this.characterMonitorInterval.unwatch(
+          "mana-regen",
+          character,
+          "Character is not mage and is free account"
+        );
+      }
+
       return true;
     }
     return false;
