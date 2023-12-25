@@ -26,6 +26,38 @@ export class DiscordCronJobs {
     this.cronJobScheduler.uniqueSchedule("discord-training-area-cron", "0 0 * * 7", async () => {
       await this.sendTrainingAreaCronJob();
     });
+
+    //! Special events
+
+    // christmas
+    this.cronJobScheduler.uniqueSchedule("discord-christmas-cron", "0 0 25 12 *", async () => {
+      await this.sendChristmasCronJob();
+    });
+
+    // happy new year
+    this.cronJobScheduler.uniqueSchedule("discord-happy-new-year-cron", "0 0 1 1 *", async () => {
+      await this.sendHappyNewYearCronJob();
+    });
+
+    // valentines
+    this.cronJobScheduler.uniqueSchedule("discord-valentines-day-cron", "0 0 14 2 *", async () => {
+      await this.sendValentinesDayCronJob();
+    });
+
+    // easter
+    this.cronJobScheduler.uniqueSchedule("discord-easter-cron", "0 0 4 4 *", async () => {
+      await this.sendEasterCronJob();
+    });
+
+    // summer
+    this.cronJobScheduler.uniqueSchedule("discord-summer-cron", "0 0 21 6 *", async () => {
+      await this.sendSummerCronJob();
+    });
+
+    // halloween
+    this.cronJobScheduler.uniqueSchedule("discord-halloween-cron", "0 0 31 10 *", async () => {
+      await this.sendHalloweenCronJob();
+    });
   }
 
   private async sendReviewRequestCronJob(): Promise<void> {
@@ -160,8 +192,9 @@ export class DiscordCronJobs {
       - Greater Mana potions (100x)
       - Greater Life potions (100x)
       - Character name change
-
+      
       Ingredients:
+      
       - Gems Pack (100x Blue sapphire, 100x Red sapphire, 50x Jade)
       - Rope (100x)
       - Water (100x)
@@ -179,6 +212,161 @@ export class DiscordCronJobs {
       );
     } catch (error) {
       console.error(`Failed to send Discord message: ${error}`);
+    }
+  }
+
+  private async sendChristmasCronJob(): Promise<void> {
+    try {
+      const message = `🎄 **Merry Christmas!**
+
+      As the snow settles over the mystical lands of Definya, we wanted to take a moment to spread some holiday cheer. May your quests be merry, your loot plentiful, and your adventures grand.
+      
+      Merry Christmas to you and your companions! May your day be filled with joy, laughter, and perhaps a festive quest or two. 🌟
+      
+      Stay safe, stay warm, and let's make some magical memories this holiday season.
+      
+      Happy Holidays!
+      - The Definya Team
+
+@everyone`;
+
+      await this.discordBot.sendMessageWithColor(
+        message,
+        "announcements",
+        "Merry Christmas",
+        "Purple",
+        "https://i.imgur.com/tut4teS.png"
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  private async sendHappyNewYearCronJob(): Promise<void> {
+    try {
+      const message = `🎉 **Happy New Year, Adventurers!**
+
+      As the clock strikes midnight, a new year unfolds in the enchanted realm of Definya. We're grateful to have journeyed through another year with all of you, brave and bold adventurers.
+
+      May the new year bring you closer to the fabled treasures you seek, the allies you cherish, and the quests that thrill your spirit. Let's raise our swords to new beginnings, uncharted lands, and legendary stories waiting to be told.
+      
+      Here's to health, happiness, and epic adventures in the coming year. Happy New Year, everyone! May it be as magical and rewarding as the realms we explore together.
+      
+      Cheers to a New Year!
+      - The Definya Team`;
+
+      await this.discordBot.sendMessageWithColor(
+        message,
+        "announcements",
+        "Happy New Year",
+        "Purple",
+        "https://i.imgur.com/1ZiJo15.png"
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  private async sendValentinesDayCronJob(): Promise<void> {
+    try {
+      const message = `💖 **Happy Valentine's Day, Brave Hearts of Definya!**
+
+      On this day of love and friendship, we celebrate the bonds that make our journeys worthwhile. Whether you're embarking on quests with your cherished partner or standing shoulder to shoulder with trusted allies, remember that the strongest magic of all is love.
+      
+      Share a potion, gift a rare item, or simply send a heartfelt message to those who make every adventure brighter. Let's spread love and camaraderie across the lands and dungeons far and wide.
+      
+      May your day be filled with joy, your battles be victorious, and your bonds stronger than the toughest armor. Happy Valentine's Day to all the valiant hearts!
+      
+      With love and admiration,
+      - The Definya Team
+      `;
+
+      await this.discordBot.sendMessageWithColor(
+        message,
+        "announcements",
+        "Happy Valentine's Day",
+        "Purple",
+        "https://i.imgur.com/NKCJCiX.png"
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  private async sendEasterCronJob(): Promise<void> {
+    const message = `🐣 **Happy Easter, Heroes of Definya!**
+
+    As the world blooms into the splendor of spring, we gather to celebrate Easter and the spirit of renewal and hope. It's a time for quests of rejuvenation, seeking out hidden eggs and mythical creatures born from the magic of the season.
+    
+    Gather your party and embark on springtime adventures, uncovering treasures and mysteries sprinkled throughout the land. May your baskets be filled with bountiful loot and your hearts with the joy of discovery and camaraderie.
+    
+    Join us in celebrating the wonder of new beginnings and the enduring strength of our community. Happy Easter, and may your journey be as bright and hopeful as the dawn of spring!
+    
+    Wishing you all a joyous and adventurous Easter!
+    - The Definya Team
+    
+    @everyone`;
+
+    await this.discordBot.sendMessageWithColor(
+      message,
+      "announcements",
+      "Happy Easter",
+      "Purple",
+      "https://i.imgur.com/V95swTB.png"
+    );
+  }
+
+  private async sendSummerCronJob(): Promise<void> {
+    try {
+      const message = `🌞 **Summer Greetings, Definya Adventurers!**
+
+      As the sun climbs high and the days stretch long, we welcome the vibrant season of summer. It's a time for grand explorations, epic quests under the sun, and forging lasting memories in the warmth of adventure.
+      
+      Gather your allies for summer festivals, partake in legendary beach battles, or seek the cooling shade of mysterious forests. Let the spirit of summer invigorate your quests with energy, laughter, and the thrill of discovery.
+      
+      Stay cool, stay hydrated, and dive into the multitude of adventures that await you under the summer sky. Whether you're battling sea monsters or lounging at a beachside tavern, make this summer a tale to remember!
+      
+      Wishing you sunny days and starlit nights,
+      - The Definya Team
+      
+      @everyone`;
+
+      await this.discordBot.sendMessageWithColor(
+        message,
+        "announcements",
+        "Happy Summer",
+        "Purple",
+        "https://i.imgur.com/Vq6k2q1.png"
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  private async sendHalloweenCronJob(): Promise<void> {
+    try {
+      const message = `🎃 **Happy Halloween, Denizens of Definya!**
+
+      As the moon rises on this eerie night, the realm of Definya transforms into a land of mystery and fright. Join us in celebrating the spookiest time of the year, where ghouls roam, witches fly, and the veil between worlds grows thin.
+      
+      Dress in your most terrifying attire and partake in ghostly quests and haunted expeditions. Collect cursed items, brew sinister potions, or venture into the darkest dungeons for a scream and a laugh.
+      
+      Share your spooky tales and creepy conquests with fellow adventurers. Let's revel in the thrills and chills, making this Halloween a night of frightful fun and delightful dread.
+      
+      Beware and be brave, for in the shadows lurk both tricks and treats!
+      
+      Happy Haunting,
+      - The Definya Team`;
+
+      await this.discordBot.sendMessageWithColor(
+        message,
+        "announcements",
+        "Happy Halloween",
+        "Purple",
+        "https://i.imgur.com/Hchoeii.png"
+      );
+    } catch (error) {
+      console.error(error);
     }
   }
 }
