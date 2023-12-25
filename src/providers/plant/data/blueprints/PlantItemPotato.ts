@@ -2,12 +2,13 @@ import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemSubType, ItemType, PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
 import { IPlantItem } from "./PlantItem";
 
-export const plantItemCarrot: IPlantItem = {
-  key: PlantItemBlueprint.Carrot,
+export const plantItemPotato: IPlantItem = {
+  key: PlantItemBlueprint.Potato,
   type: ItemType.Plant,
   subType: ItemSubType.Plant,
-  name: "Carrot",
-  description: "The carrot is a hardy, cool-season vegetable that thrives in fertile, well-drained soil.",
+  name: "Potato",
+  description:
+    "Potato is a versatile, carbohydrate-rich food highly popular worldwide and prepared and served in a variety of ways.",
   isStatic: true,
   isPersistent: true,
   stagesRequirements: {
@@ -19,19 +20,19 @@ export const plantItemCarrot: IPlantItem = {
     [PlantLifeCycle.Sprout]: {
       requiredGrowthPoints: 10,
       texturePath: "crops",
-      textureAtlas: "plants/food/carrot/carrot-sprout.png",
+      textureAtlas: "plants/food/potato/potato-sprout.png",
     },
     [PlantLifeCycle.Young]: {
       requiredGrowthPoints: 15,
       texturePath: "crops",
-      textureAtlas: "plants/food/carrot/carrot-young.png",
+      textureAtlas: "plants/food/potato/potato-young.png",
     },
     [PlantLifeCycle.Mature]: {
       requiredGrowthPoints: 20,
       texturePath: "crops",
-      textureAtlas: "plants/food/carrot/carrot-mature.png",
+      textureAtlas: "plants/food/potato/potato-mature.png",
     },
   },
-  harvestableItemKey: FoodsBlueprint.Carrot,
+  harvestableItemKey: FoodsBlueprint.Potato,
   regrowsAfterHarvest: false,
 };

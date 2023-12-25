@@ -2,17 +2,17 @@ import { IConsumableItemBlueprint, ItemSubType, ItemType } from "@rpg-engine/sha
 import { FoodsBlueprint } from "../../types/itemsBlueprintTypes";
 import { UsableEffectsBlueprint } from "../../usableEffects/types";
 
-export const itemWatermelon: IConsumableItemBlueprint = {
-  key: FoodsBlueprint.Watermelon,
+export const itemCarrot: IConsumableItemBlueprint = {
+  key: FoodsBlueprint.Carrot,
   type: ItemType.Consumable,
   subType: ItemSubType.Food,
   textureAtlas: "items",
-  texturePath: "foods/watermelon-2.png",
-  name: "Watermelon",
-  description: "A fruit that can be found in temperate areas.",
+  texturePath: "foods/carrot.png",
+  name: "Carrot",
+  description: "The carrot is a hardy, cool-season vegetable that thrives in fertile, well-drained soil.",
   weight: 0.5,
   maxStackSize: 999,
-  basePrice: 4,
+  basePrice: 12,
   canSell: true,
-  usableEffectKey: UsableEffectsBlueprint.StrongEatingEffect,
+  usableEffectKey: UsableEffectsBlueprint.ModerateEatingEffect,
 };

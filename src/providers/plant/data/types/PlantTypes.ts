@@ -1,10 +1,8 @@
 export enum PlantLifeCycle {
-  Seed,
-  Sprout,
-  YoungPlant,
-  MaturePlant,
-  Blooming,
-  Harvestable, // Indicates the stage where the plant can be harvested
+  Seed = "seed",
+  Sprout = "sprout",
+  Young = "young",
+  Mature = "mature",
 }
 
 export enum Season {
@@ -16,6 +14,16 @@ export enum Season {
 
 export enum PlantItemBlueprint {
   Carrot = "carrot",
+  Turnip = "turnip",
+  Tomato = "tomato",
+  Strawberry = "strawberry",
+  RedGrape = "red-grape",
+  GreenGrape = "green-grape",
+  Cabbage = "cabbage",
+  Eggplant = "eggplant",
+  Pumpkin = "pumpkin",
+  Watermelon = "watermelon",
+  Potato = "potato",
 }
 
 export enum ItemType {

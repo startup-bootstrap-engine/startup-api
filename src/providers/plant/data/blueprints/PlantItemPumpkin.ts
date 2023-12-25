@@ -2,36 +2,37 @@ import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemSubType, ItemType, PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
 import { IPlantItem } from "./PlantItem";
 
-export const plantItemCarrot: IPlantItem = {
-  key: PlantItemBlueprint.Carrot,
+export const plantItemPumpkin: IPlantItem = {
+  key: PlantItemBlueprint.Pumpkin,
   type: ItemType.Plant,
   subType: ItemSubType.Plant,
-  name: "Carrot",
-  description: "The carrot is a hardy, cool-season vegetable that thrives in fertile, well-drained soil.",
+  name: "Pumpkin",
+  description:
+    "Pumpkin is a cultivar of winter squash that is round with smooth, slightly ribbed skin, and is most often deep yellow to orange in coloration.",
   isStatic: true,
   isPersistent: true,
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
       requiredGrowthPoints: 5,
       texturePath: "crops",
-      textureAtlas: "seeds/seed-brown-1.png",
+      textureAtlas: "seeds/seed-orange-1.png",
     },
     [PlantLifeCycle.Sprout]: {
       requiredGrowthPoints: 10,
       texturePath: "crops",
-      textureAtlas: "plants/food/carrot/carrot-sprout.png",
+      textureAtlas: "plants/food/pumpkin/pumpkin-sprout.png",
     },
     [PlantLifeCycle.Young]: {
       requiredGrowthPoints: 15,
       texturePath: "crops",
-      textureAtlas: "plants/food/carrot/carrot-young.png",
+      textureAtlas: "plants/food/pumpkin/pumpkin-young.png",
     },
     [PlantLifeCycle.Mature]: {
       requiredGrowthPoints: 20,
       texturePath: "crops",
-      textureAtlas: "plants/food/carrot/carrot-mature.png",
+      textureAtlas: "plants/food/pumpkin/pumpkin-mature.png",
     },
   },
-  harvestableItemKey: FoodsBlueprint.Carrot,
+  harvestableItemKey: FoodsBlueprint.Pumpkin,
   regrowsAfterHarvest: false,
 };
