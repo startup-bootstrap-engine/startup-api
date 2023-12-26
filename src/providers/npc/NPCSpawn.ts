@@ -35,45 +35,49 @@ export class NPCSpawn {
 
   @TrackNewRelicTransaction()
   public async spawn(npc: INPC, isRaid?: boolean): Promise<void> {
-    if (!isRaid && !(await this.canSpawn(npc))) {
-      return;
-    }
-
-    await this.npcTarget.clearTarget(npc);
-
-    const maxHealth = this.npcHealthManaCalculator.getNPCMaxHealthRandomized(npc);
-
-    await NPC.updateOne(
-      { _id: npc._id },
-      {
-        $set: {
-          health: maxHealth,
-          maxHealth,
-          mana: npc.maxMana,
-          appliedEntityEffects: [],
-          x: npc.initialX,
-          y: npc.initialY,
-          nextSpawnTime: undefined,
-          isBehaviorEnabled: false,
-        },
+    try {
+      if (!isRaid && !(await this.canSpawn(npc))) {
+        return;
       }
-    );
 
-    await this.locker.unlock(`npc-death-${npc._id}`);
-    await this.locker.unlock(`npc-body-generation-${npc._id}`);
-    await this.locker.unlock(`npc-${npc._id}-release-xp`);
+      await this.npcTarget.clearTarget(npc);
 
-    await this.inMemoryHashTable.delete("npc-force-pathfinding-calculation", npc._id);
+      const maxHealth = this.npcHealthManaCalculator.getNPCMaxHealthRandomized(npc);
 
-    await this.npcGiantForm.resetNPCToNormalForm(npc);
-    await this.npcGiantForm.randomlyTransformNPCIntoGiantForm(npc);
+      await NPC.updateOne(
+        { _id: npc._id },
+        {
+          $set: {
+            health: maxHealth,
+            maxHealth,
+            mana: npc.maxMana,
+            appliedEntityEffects: [],
+            x: npc.initialX,
+            y: npc.initialY,
+            nextSpawnTime: undefined,
+            isBehaviorEnabled: false,
+          },
+        }
+      );
 
-    const nearbyCharacters = await this.characterView.getCharactersAroundXYPosition(npc.x, npc.y, npc.scene);
+      await this.npcGiantForm.resetNPCToNormalForm(npc);
+      await this.npcGiantForm.randomlyTransformNPCIntoGiantForm(npc);
 
-    for (const nearbyCharacter of nearbyCharacters) {
-      await this.npcWarn.warnCharacterAboutNPCsInView(nearbyCharacter, {
-        always: true,
-      });
+      const nearbyCharacters = await this.characterView.getCharactersAroundXYPosition(npc.x, npc.y, npc.scene);
+
+      for (const nearbyCharacter of nearbyCharacters) {
+        await this.npcWarn.warnCharacterAboutNPCsInView(nearbyCharacter, {
+          always: true,
+        });
+      }
+    } finally {
+      // Unlock and delete operations are placed in the finally block to ensure they are always executed
+      await Promise.all([
+        this.locker.unlock(`npc-death-${npc._id}`),
+        this.locker.unlock(`npc-body-generation-${npc._id}`),
+        this.locker.unlock(`npc-${npc._id}-release-xp`),
+        this.inMemoryHashTable.delete("npc-force-pathfinding-calculation", npc._id),
+      ]);
     }
   }
 

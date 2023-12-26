@@ -5,10 +5,14 @@ import { provide } from "inversify-binding-decorators";
 @provide(NPCHealthManaCalculator)
 export class NPCHealthManaCalculator {
   public getNPCMaxHealthRandomized(npc: INPC): number {
+    let maxHealth;
+
     if (npc.healthRandomizerDice && npc.baseHealth) {
-      return npc.baseHealth + rollDice(npc.healthRandomizerDice);
+      maxHealth = npc.baseHealth + rollDice(npc.healthRandomizerDice);
+    } else {
+      maxHealth = npc.maxHealth;
     }
 
-    return npc.maxHealth;
+    return maxHealth;
   }
 }
