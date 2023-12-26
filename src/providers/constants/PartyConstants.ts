@@ -1,1 +1,1 @@
-export const PARTY_BONUS_RATIO = 4;
+export const PARTY_BONUS_RATIO = 2;
