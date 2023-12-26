@@ -43,7 +43,11 @@ export class EquipmentTwoHanded {
           return true;
         }
 
-        if (character.class === CharacterClass.Berserker || character.class === CharacterClass.Rogue) {
+        if (
+          character.class === CharacterClass.Berserker ||
+          character.class === CharacterClass.Rogue ||
+          character.class === CharacterClass.Warrior
+        ) {
           return true;
         }
 

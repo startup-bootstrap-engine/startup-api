@@ -14,6 +14,7 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { Equipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 
+import { PlantLifeCycle } from "@providers/plant/data/types/PlantTypes";
 import { updateIfCurrentPlugin } from "mongoose-update-if-current";
 
 const itemSchema = createLeanSchema(
@@ -138,6 +139,14 @@ const itemSchema = createLeanSchema(
     entityEffectChance: Type.number({ default: 0 }),
 
     tier: Type.number({ default: 1 }),
+
+    growthPoints: Type.number({ required: false }),
+
+    currentPlantCycle: Type.string({ required: false, enum: TypeHelper.enumToStringArray(PlantLifeCycle) }),
+
+    lastPlantCycleRun: Type.date({ required: false }),
+
+    lastWatering: Type.date({ required: false }),
   },
   { timestamps: { createdAt: true, updatedAt: true } }
 ).plugin(updateIfCurrentPlugin);

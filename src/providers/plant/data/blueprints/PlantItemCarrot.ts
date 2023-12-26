@@ -1,5 +1,6 @@
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
-import { ItemSubType, ItemType, PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
+import { ItemSubType, ItemType } from "@rpg-engine/shared";
+import { PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
 import { IPlantItem } from "./PlantItem";
 
 export const plantItemCarrot: IPlantItem = {
@@ -10,6 +11,7 @@ export const plantItemCarrot: IPlantItem = {
   description: "The carrot is a hardy, cool-season vegetable that thrives in fertile, well-drained soil.",
   isStatic: true,
   isPersistent: true,
+  weight: 1,
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
       requiredGrowthPoints: 5,
@@ -32,6 +34,9 @@ export const plantItemCarrot: IPlantItem = {
       textureAtlas: "plants/food/carrot/carrot-mature.png",
     },
   },
-  harvestableItemKey: FoodsBlueprint.Carrot,
+  growthFactor: 2,
   regrowsAfterHarvest: false,
+  availableOnlyOnSeasons: [],
+  fasterGrowthOnSeasons: [],
+  harvestableItemKey: FoodsBlueprint.Carrot,
 };

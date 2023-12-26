@@ -4,9 +4,9 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "blueprintKey": "greater-mana-potion",
-  "quantity": 100,
-  "characterId": "647e6d04cc5e350063722f2a" 
+  "blueprintKey": "wooden-shield",
+  "quantity": 1,
+  "characterId": "658a45a606449b00345d8ee1" 
 }
 
 ###

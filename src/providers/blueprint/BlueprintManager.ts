@@ -2,12 +2,14 @@ import { itemsBlueprintIndex } from "@providers/item/data";
 import { usableEffectsIndex } from "@providers/item/data/usableEffects";
 import { IUsableEffect, IUsableEffectRune } from "@providers/item/data/usableEffects/types";
 import { npcsBlueprintIndex } from "@providers/npc/data";
+import { plantItemsBlueprintsIndex } from "@providers/plant/data";
 import { questsBlueprintIndex } from "@providers/quest/data";
 import { spellsBlueprintsIndex } from "@providers/spells/data";
 import { recipeBlueprintsIndex } from "@providers/useWith/blueprints";
+
 import { provide } from "inversify-binding-decorators";
 
-export type BlueprintNamespaces = "npcs" | "items" | "spells" | "quests" | "recipes";
+export type BlueprintNamespaces = "npcs" | "items" | "spells" | "quests" | "recipes" | "plants";
 
 type IBlueprint = Record<string, any>; //! Will be refactored later
 
@@ -62,6 +64,8 @@ export class BlueprintManager {
         return recipeBlueprintsIndex as T;
       case "spells":
         return spellsBlueprintsIndex as T;
+      case "plants":
+        return plantItemsBlueprintsIndex as T;
       default:
         throw new Error(`Unknown namespace ${namespace}`);
     }
@@ -79,6 +83,8 @@ export class BlueprintManager {
         return recipeBlueprintsIndex[key] as T;
       case "spells":
         return spellsBlueprintsIndex[key] as T;
+      case "plants":
+        return plantItemsBlueprintsIndex[key] as T;
       default:
         throw new Error(`Unknown namespace ${namespace}`);
     }

@@ -1,5 +1,6 @@
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
-import { ItemSubType, ItemType, PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
+import { ItemSubType, ItemType } from "@rpg-engine/shared";
+import { PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
 import { IPlantItem } from "./PlantItem";
 
 export const plantItemRedGrape: IPlantItem = {
@@ -34,4 +35,7 @@ export const plantItemRedGrape: IPlantItem = {
   },
   harvestableItemKey: FoodsBlueprint.RedGrape,
   regrowsAfterHarvest: true,
+  growthFactor: 5,
+  availableOnlyOnSeasons: [],
+  fasterGrowthOnSeasons: [],
 };

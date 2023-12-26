@@ -6,10 +6,10 @@ export enum PlantLifeCycle {
 }
 
 export enum Season {
-  Spring,
-  Summer,
-  Autumn,
-  Winter,
+  Spring = "Spring",
+  Summer = "Summer",
+  Autumn = "Autumn",
+  Winter = "Winter",
 }
 
 export enum PlantItemBlueprint {
@@ -24,13 +24,4 @@ export enum PlantItemBlueprint {
   Pumpkin = "pumpkin",
   Watermelon = "watermelon",
   Potato = "potato",
-}
-
-export enum ItemType {
-  Plant = "plant",
-}
-
-export enum ItemSubType {
-  Plant = "plant",
-  Seed = "seed",
 }

@@ -15,6 +15,7 @@ import { ItemDeleteCrons } from "./ItemDeleteCrons";
 import { MacroCaptchaCrons } from "./MacroCaptchaCrons";
 import { MarketplaceCrons } from "./MarketplaceCrons";
 import { NPCCrons } from "./NPCCrons";
+import { PlantCycleCrons } from "./PlantCycleCrons";
 import { RankingCrons } from "./RankingCrons";
 import { RedisCrons } from "./RedisCrons";
 import { RemoveInactivePartyMembersCron } from "./RemoveInactivePartyMembersCron";
@@ -42,7 +43,8 @@ export class Cronjob {
     private databaseMonitorCrons: DatabaseMonitorCrons,
     private removeInactivePartyMembersCron: RemoveInactivePartyMembersCron,
     private discordCronJobs: DiscordCronJobs,
-    private resourceGatheringCronJobs: ResourceGatheringCrons
+    private resourceGatheringCronJobs: ResourceGatheringCrons,
+    private plantCycleCrons: PlantCycleCrons
   ) {}
 
   public start(): void {
@@ -71,6 +73,7 @@ export class Cronjob {
         this.removeInactivePartyMembersCron.schedule();
         this.discordCronJobs.schedule();
         this.resourceGatheringCronJobs.schedule();
+        this.plantCycleCrons.schedule();
         break;
       case EnvType.Staging:
       case EnvType.Production:
@@ -94,6 +97,7 @@ export class Cronjob {
           this.removeInactivePartyMembersCron.schedule();
           this.discordCronJobs.schedule();
           this.resourceGatheringCronJobs.schedule();
+          this.plantCycleCrons.schedule();
         }
         break;
     }
