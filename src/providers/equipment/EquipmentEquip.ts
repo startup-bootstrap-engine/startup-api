@@ -34,6 +34,7 @@ import { clearCacheForKey } from "speedgoose";
 import { EquipmentCharacterClass } from "./ EquipmentCharacterClass";
 import { EquipmentSlots } from "./EquipmentSlots";
 import { EquipmentTwoHanded } from "./EquipmentTwoHanded";
+import { WarriorPassiveHabilities } from "@providers/character/characterPassiveHabilities/WarriorPassiveHabilities";
 
 export type SourceEquipContainerType = "inventory" | "container";
 
@@ -50,6 +51,7 @@ export class EquipmentEquip {
     private inMemoryHashTable: InMemoryHashTable,
     private itemView: ItemView,
     private berserkerPassiveHabilities: BerserkerPassiveHabilities,
+    private warriorPassiveHabilities: WarriorPassiveHabilities,
     private roguePassiveHabilities: RoguePassiveHabilities,
     private characterWeight: CharacterWeight,
     private itemPickupUpdater: ItemPickupUpdater,
@@ -399,6 +401,10 @@ export class EquipmentEquip {
     if (!validateItemsEquip) {
       if (character.class === CharacterClass.Berserker) {
         return await this.berserkerPassiveHabilities.canBerserkerEquipItem(character._id, item._id);
+      }
+
+      if (character.class === CharacterClass.Warrior) {
+        return await this.warriorPassiveHabilities.canWarriorEquipItem(character._id, item._id);
       }
 
       if (character.class === CharacterClass.Rogue) {

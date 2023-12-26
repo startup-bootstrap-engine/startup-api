@@ -160,7 +160,7 @@ describe("EquipmentEquip.spec.ts", () => {
     expect(updatedInventory?.slots[1]).toBeNull();
   });
 
-  it("should fail equip 2 sword Class Warrior", async () => {
+  it("should succeed when equipping 2 swords on a warrior (passive)", async () => {
     inventoryContainer.slots[0] = swordItem;
     inventoryContainer.slots[1] = swordItem2;
     inventoryContainer.markModified("slots");
@@ -178,13 +178,13 @@ describe("EquipmentEquip.spec.ts", () => {
     const equipAnotherHand = await equipmentEquip.equip(warrior, swordItem2._id, inventoryContainer.id);
 
     expect(equipOneHand).toBeTruthy();
-    expect(equipAnotherHand).toBeFalsy();
+    expect(equipAnotherHand).toBeTruthy();
 
     expect(sendEventToUser).toHaveBeenCalled();
 
     const updatedInventory = await ItemContainer.findById(inventory.itemContainer);
     expect(updatedInventory?.slots[0]).toBeNull();
-    expect(updatedInventory?.slots[1]._id).toEqual(swordItem2._id);
+    expect(updatedInventory?.slots[1]).toBeNull();
   });
 
   it("should fail equip 2 spear Class Hunter", async () => {
