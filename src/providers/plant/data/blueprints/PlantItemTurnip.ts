@@ -1,5 +1,6 @@
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
-import { ItemSubType, ItemType, PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
+import { ItemSubType, ItemType } from "@rpg-engine/shared";
+import { PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
 import { IPlantItem } from "./PlantItem";
 
 export const plantItemTurnip: IPlantItem = {
@@ -35,4 +36,7 @@ export const plantItemTurnip: IPlantItem = {
   },
   harvestableItemKey: FoodsBlueprint.Turnip,
   regrowsAfterHarvest: false,
+  growthFactor: 3,
+  availableOnlyOnSeasons: [],
+  fasterGrowthOnSeasons: [],
 };
