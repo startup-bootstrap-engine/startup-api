@@ -13,4 +13,5 @@ export const itemRune: IBaseItemBlueprint = {
   weight: 0.1,
   basePrice: 10,
   canSell: false,
+  maxStackSize: 999,
 };
