@@ -1,8 +1,8 @@
-import { IItem } from "@entities/ModuleInventory/ItemModel";
+import { IEquippableMeleeTier10WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import { EntityAttackType, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
-import { SwordsBlueprint } from "../../types/itemsBlueprintTypes";
+import { SwordsBlueprint } from "../../../types/itemsBlueprintTypes";
 
-export const itemRoyalSword: Partial<IItem> = {
+export const itemRoyalSword: IEquippableMeleeTier10WeaponBlueprint = {
   key: SwordsBlueprint.RoyalSword,
   type: ItemType.Weapon,
   subType: ItemSubType.Sword,
@@ -13,6 +13,7 @@ export const itemRoyalSword: Partial<IItem> = {
   weight: 1.5,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   attack: 75,
-  defense: 10,
+  defense: 50,
+  tier: 10,
   rangeType: EntityAttackType.Melee,
 };

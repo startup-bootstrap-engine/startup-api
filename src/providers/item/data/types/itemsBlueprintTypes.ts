@@ -118,6 +118,10 @@ export enum EffectsBlueprint {
 export enum ContainersBlueprint {
   Bag = "bag",
   Backpack = "backpack",
+  AzureBackpack = "azure-backpack",
+  CrimsonBackpack = "crimson-backpack",
+  EmeraldBackpack = "emerald-backpack",
+  HuntersBackpack = "hunters-backpack",
 }
 
 export enum BodiesBlueprint {
@@ -166,6 +170,7 @@ export enum ArmorsBlueprint {
   PlateArmor = "plate-armor",
   StuddedArmor = "studded-armor",
   MithrilArmor = "mithril-armor",
+  SamuraiArmor = "samurai-armor",
   BloodfireArmor = "bloodfire-armor",
   BlueCape = "blue-cape",
   BrassArmor = "brass-armor",
@@ -178,6 +183,9 @@ export enum ArmorsBlueprint {
   MysticCape = "mystic-cape",
   SorcerersCape = "sorcerers-cape",
   SpellcastersCape = "spellcasters-cape",
+  DarkArmor = "dark-armor",
+  TemplarsPlate = "templars-plate",
+  EtherealGuardianMail = "ethereal-guardian-mail",
 }
 
 export enum AxesBlueprint {
@@ -359,6 +367,22 @@ export enum ToolsBlueprint {
   Hammer = "hammer",
   UseWithItemTest = "use-with-item-test",
   UseWithTileTest = "use-with-tile-test",
+  Scythe = "scythe",
+  WateringCan = "watering-can",
+}
+
+export enum SeedsBlueprint {
+  CarrotSeed = "carrot-seed",
+  TurnipSeed = "turnip-seed",
+  TomatoSeed = "tomato-seed",
+  StrawberrySeed = "strawberry-seed",
+  RedGrapeSeed = "red-grape-seed",
+  GreenGrapeSeed = "green-grape-seed",
+  CabbageSeed = "cabbage-seed",
+  EggplantSeed = "eggplant-seed",
+  PumpkinSeed = "pumpkin-seed",
+  WatermelonSeed = "watermelon-seed",
+  PotatoSeed = "potato-seed",
 }
 
 export enum SpearsBlueprint {
@@ -625,6 +649,7 @@ export enum ShieldsBlueprint {
   WardenOfTheWoods = "warden-of-the-woods",
   BladeBarrier = "blade-barrier",
   PaladinsSafeguardShield = "paladins-safeguard-shield",
+  EmeraldShield = "emerald-shield",
 }
 
 export enum LegsBlueprint {

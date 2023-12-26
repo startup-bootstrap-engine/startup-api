@@ -9,6 +9,7 @@ import { booksBlueprintIndex } from "./blueprints/books";
 import { bootsBlueprintIndex } from "./blueprints/boots/index";
 import { containersBlueprintIndex } from "./blueprints/containers/index";
 import { craftingResourcesBlueprintIndex } from "./blueprints/crafting-resources/index";
+import { cropsBlueprintIndex } from "./blueprints/crops";
 import { daggersBlueprintIndex } from "./blueprints/daggers/index";
 import { effectsBlueprintsIndex } from "./blueprints/effects/index";
 import { foodsBlueprintIndex } from "./blueprints/foods/index";
@@ -53,6 +54,7 @@ const itemsBlueprintIndex: IBlueprint = {
   ...craftingResourcesBlueprintIndex,
   ...toolsBlueprintIndex,
   ...hammersBlueprintIndex,
+  ...cropsBlueprintIndex,
 };
 
 // auto calculate minRequirements on items tier 3 and above

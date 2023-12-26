@@ -28,7 +28,7 @@ export const npcBlueDragon = {
   ammoKey: AnimationEffectKeys.FireBall,
   maxRangeAttack: 8,
   speed: MovementSpeed.ExtraFast,
-  baseHealth: 30000,
+  baseHealth: 50000,
   healthRandomizerDice: Dice.D20,
   skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
@@ -36,9 +36,9 @@ export const npcBlueDragon = {
   canSwitchToRandomTarget: true,
   isMagic: true,
   skills: {
-    level: 300,
+    level: 350,
     strength: {
-      level: 250,
+      level: 300,
     },
     dexterity: {
       level: 250,
@@ -55,21 +55,21 @@ export const npcBlueDragon = {
   },
   loots: [
     {
-      itemBlueprintKey: SwordsBlueprint.DragonsSword,
+      itemBlueprintKey: SwordsBlueprint.LeviathanSword,
       chance: 20,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,
-      chance: 50,
+      chance: 100,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonTooth,
-      chance: 50,
+      chance: 80,
       quantityRange: [1, 3],
     },
     {
-      itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
-      chance: 20,
+      itemBlueprintKey: ArmorsBlueprint.DarkArmor,
+      chance: 5,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.DemonShield,
@@ -116,8 +116,28 @@ export const npcBlueDragon = {
       itemBlueprintKey: AxesBlueprint.GuardianAxe,
       chance: 10,
     },
+    {
+      itemBlueprintKey: HelmetsBlueprint.GlacialCrown,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.GlacialAxe,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: LegsBlueprint.GlacialLegs,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.GlacialSword,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: ShieldsBlueprint.EmeraldShield,
+      chance: 1,
+    },
   ],
-  entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],
+  entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],
   areaSpells: [
     {
       spellKey: SpellsBlueprint.FireStorm,
@@ -126,7 +146,12 @@ export const npcBlueDragon = {
     },
     {
       spellKey: SpellsBlueprint.Blizzard,
-      probability: 10,
+      probability: 70,
+      power: MagicPower.UltraHigh,
+    },
+    {
+      spellKey: SpellsBlueprint.VampiricStorm,
+      probability: 40,
       power: MagicPower.High,
     },
   ],

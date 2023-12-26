@@ -32,6 +32,7 @@ export class QuestLoader {
       const npcQuestKeys = getNpcKeysWithQuests(NPCs);
 
       const uniqueArrayKeys = Array.from(new Set(npcQuestKeys));
+
       checkIfQuestBlueprintsExists(uniqueArrayKeys, mapName);
       await getNPCsIds(uniqueArrayKeys);
 
@@ -78,7 +79,7 @@ async function getNPCsIds(keys: INPCQuestKeys[]): Promise<void> {
     const npcData = (await NPC.findOne({ key: keys[i].npcKey })) as INPC;
     if (!npcData) {
       throw new Error(
-        `❌ QuestLoader: Missing an NPC with Quest. NPC key ${keys[i].npcKey}. Please, double check if NPCs are created correctly before seeding quests`
+        `❌ QuestLoader: Missing an NPC with Quest ${keys[i].questKey}. NPC key ${keys[i].npcKey}. Please, double check if NPCs are created correctly before seeding quests. Did you update map where this NPC is located?`
       );
     }
     keys[i].npcId = npcData._id.toString();

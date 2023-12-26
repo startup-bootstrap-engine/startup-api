@@ -1,8 +1,9 @@
-import { IItem } from "@entities/ModuleInventory/ItemModel";
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
+import { IEquippableMeleeTier15WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import { EntityAttackType, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
-import { SwordsBlueprint } from "../../types/itemsBlueprintTypes";
+import { SwordsBlueprint } from "../../../types/itemsBlueprintTypes";
 
-export const itemYggdrasilTemplarSword: Partial<IItem> = {
+export const itemYggdrasilTemplarSword: IEquippableMeleeTier15WeaponBlueprint = {
   key: SwordsBlueprint.YggdrasilTemplarSword,
   type: ItemType.Weapon,
   subType: ItemSubType.Sword,
@@ -14,7 +15,8 @@ export const itemYggdrasilTemplarSword: Partial<IItem> = {
   weight: 6,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   attack: 110,
-  defense: 60,
+  defense: 80,
+  tier: 15,
   rangeType: EntityAttackType.Melee,
-  isTwoHanded: true,
+  entityEffects: [EntityEffectBlueprint.Bleeding],
 };

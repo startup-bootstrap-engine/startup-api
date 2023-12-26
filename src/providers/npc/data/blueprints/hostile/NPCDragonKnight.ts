@@ -23,20 +23,23 @@ export const npcDragonKnight: Partial<INPC> = {
   textureKey: HostileNPCsBlueprint.DragonKnight,
   alignment: NPCAlignment.Hostile,
   speed: MovementSpeed.Standard,
-  baseHealth: 800,
+  baseHealth: 1200,
   attackType: EntityAttackType.Melee,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
   skills: {
-    level: 65,
+    level: 80,
     strength: {
-      level: 70,
+      level: 80,
     },
     dexterity: {
       level: 60,
     },
     resistance: {
+      level: 40,
+    },
+    magicResistance: {
       level: 40,
     },
   },
@@ -79,6 +82,10 @@ export const npcDragonKnight: Partial<INPC> = {
     {
       itemBlueprintKey: SwordsBlueprint.CorruptionSword,
       chance: 5,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.RoyalSword,
+      chance: 10,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.RoyalKnightHelmet,

@@ -22,6 +22,10 @@ import { itemSpellcastersCape } from "./tier4/ItemSpellcastersCape";
 import { itemBloodfireArmor } from "./tier5/ItemBloodfireArmor";
 import { itemGoldenArmor } from "./tier5/ItemGoldenArmor";
 import { itemMithrilArmor } from "./tier5/ItemMithrilArmor";
+import { itemSamuraiArmor } from "./tier6/ItemSamuraiArmor";
+import { itemDarkArmor } from "./tier7/ItemDarkArmor";
+import { itemTemplarsPlate } from "./tier8/ItemTemplarsPlate";
+import { itemEtherealGuardianMail } from "./tier9/ItemEtherealGuardianMail";
 
 export const armorsBlueprintIndex = {
   [ArmorsBlueprint.BronzeArmor]: itemBronzeArmor,
@@ -46,4 +50,8 @@ export const armorsBlueprintIndex = {
   [ArmorsBlueprint.MysticCape]: itemMysticCape,
   [ArmorsBlueprint.SorcerersCape]: itemSorcerersCape,
   [ArmorsBlueprint.SpellcastersCape]: itemSpellcastersCape,
+  [ArmorsBlueprint.SamuraiArmor]: itemSamuraiArmor,
+  [ArmorsBlueprint.DarkArmor]: itemDarkArmor,
+  [ArmorsBlueprint.TemplarsPlate]: itemTemplarsPlate,
+  [ArmorsBlueprint.EtherealGuardianMail]: itemEtherealGuardianMail,
 };

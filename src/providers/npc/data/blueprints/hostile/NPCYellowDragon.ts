@@ -28,7 +28,7 @@ export const npcYellowDragon = {
   ammoKey: AnimationEffectKeys.FireBall,
   maxRangeAttack: 8,
   speed: MovementSpeed.ExtraFast,
-  baseHealth: 30000,
+  baseHealth: 70000,
   healthRandomizerDice: Dice.D20,
   skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
@@ -36,7 +36,7 @@ export const npcYellowDragon = {
   canSwitchToRandomTarget: true,
   isMagic: true,
   skills: {
-    level: 275,
+    level: 400,
     strength: {
       level: 150,
     },
@@ -117,10 +117,20 @@ export const npcYellowDragon = {
       chance: 10,
     },
   ],
-  entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing, EntityEffectBlueprint.Poison],
+  entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],
   areaSpells: [
     {
       spellKey: SpellsBlueprint.FireStorm,
+      probability: 40,
+      power: MagicPower.UltraHigh,
+    },
+    {
+      spellKey: SpellsBlueprint.EnergyWave,
+      probability: 70,
+      power: MagicPower.UltraHigh,
+    },
+    {
+      spellKey: SpellsBlueprint.VampiricStorm,
       probability: 40,
       power: MagicPower.Medium,
     },

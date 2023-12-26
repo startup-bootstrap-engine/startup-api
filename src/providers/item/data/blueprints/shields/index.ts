@@ -28,6 +28,7 @@ import { itemIronHeartShield } from "./tier6/ItemIronHeartShield";
 import { itemWardenOfTheWoods } from "./tier7/ItemWardenOfTheWoods";
 import { itemTemporalRoundShield } from "./tier8/ItemTemporalRoundShield";
 import { itemBladeBarrier } from "./tier9/ItemBladeBarrier";
+import { itemEmeraldShield } from "./tier9/ItemEmeraldShield";
 
 export const shieldsBlueprintIndex = {
   [ShieldsBlueprint.FrostShield]: itemFrostShield,
@@ -59,4 +60,5 @@ export const shieldsBlueprintIndex = {
   [ShieldsBlueprint.WardenOfTheWoods]: itemWardenOfTheWoods,
   [ShieldsBlueprint.BladeBarrier]: itemBladeBarrier,
   [ShieldsBlueprint.PaladinsSafeguardShield]: itemPaladinsSafeguardShield,
+  [ShieldsBlueprint.EmeraldShield]: itemEmeraldShield,
 };

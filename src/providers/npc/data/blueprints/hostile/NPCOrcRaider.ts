@@ -14,6 +14,7 @@ import {
   HelmetsBlueprint,
   RangedWeaponsBlueprint,
   StaffsBlueprint,
+  SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment } from "@rpg-engine/shared";
@@ -79,6 +80,10 @@ export const npcOrcRaider = {
     {
       itemBlueprintKey: DaggersBlueprint.RomanDagger,
       chance: 7,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.JianSword,
+      chance: 5,
     },
     {
       itemBlueprintKey: ContainersBlueprint.Backpack,

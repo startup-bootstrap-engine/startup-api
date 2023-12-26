@@ -9,8 +9,8 @@ import {
   ItemSubType,
   ItemType,
 } from "@rpg-engine/shared";
-import { IEquippableMeleeTier5WeaponBlueprint } from "../../types/TierBlueprintTypes";
-import { SwordsBlueprint } from "../../types/itemsBlueprintTypes";
+import { IEquippableMeleeTier5WeaponBlueprint } from "../../../types/TierBlueprintTypes";
+import { SwordsBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemTemplarSword: IEquippableMeleeTier5WeaponBlueprint = {
   key: SwordsBlueprint.TemplarSword,
@@ -23,8 +23,8 @@ export const itemTemplarSword: IEquippableMeleeTier5WeaponBlueprint = {
     "The blade of a Templar sword is typically made of high-quality steel and features a straight, double-edged shape that is ideal for thrusting and cutting",
   weight: 2.5,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
-  attack: 43,
-  defense: 12,
+  attack: 38,
+  defense: 38,
   rangeType: EntityAttackType.Melee,
   isTwoHanded: true,
   equippedBuff: [

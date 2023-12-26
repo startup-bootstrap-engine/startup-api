@@ -56,6 +56,10 @@ export const npcDragonServant: Partial<INPC> = {
       chance: 20,
     },
     {
+      itemBlueprintKey: SwordsBlueprint.YggdrasilGladius,
+      chance: 2,
+    },
+    {
       itemBlueprintKey: ArmorsBlueprint.MithrilArmor,
       chance: 20,
     },

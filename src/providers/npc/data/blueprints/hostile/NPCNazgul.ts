@@ -55,6 +55,10 @@ export const npcNazgul: Partial<INPC> = {
       chance: 5,
     },
     {
+      itemBlueprintKey: ArmorsBlueprint.DarkArmor,
+      chance: 1,
+    },
+    {
       itemBlueprintKey: DaggersBlueprint.PhoenixDagger,
       chance: 10,
     },

@@ -3,6 +3,7 @@ import { IUseWithCraftingRecipe } from "@providers/useWith/useWithTypes";
 import { recipeBladeBarrier } from "./recipeBladeBarrier";
 import { recipeCrimsonAegisShield } from "./recipeCrimsonAegisShield";
 import { recipeDarkShield } from "./recipeDarkShield";
+import { recipeEmeraldShield } from "./recipeEmeraldShield";
 import { recipeEnergyShield } from "./recipeEnergyShield";
 import { recipeForceShield } from "./recipeForceShield";
 import { recipeFrostShield } from "./recipeFrostShield";
@@ -34,4 +35,5 @@ export const recipeShieldsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [ShieldsBlueprint.PaladinsSafeguardShield]: [recipePaladinsSafeguardShield],
   [ShieldsBlueprint.TemporalRoundShield]: [recipeTemporalRoundShield],
   [ShieldsBlueprint.WardenOfTheWoods]: [recipeWardenOfTheWoods],
+  [ShieldsBlueprint.EmeraldShield]: [recipeEmeraldShield],
 };

@@ -36,9 +36,9 @@ export const npcRedDragon = {
   canSwitchToRandomTarget: true,
   isMagic: true,
   skills: {
-    level: 250,
+    level: 300,
     strength: {
-      level: 200,
+      level: 250,
     },
     dexterity: {
       level: 200,
@@ -57,6 +57,22 @@ export const npcRedDragon = {
     {
       itemBlueprintKey: SwordsBlueprint.DragonsSword,
       chance: 20,
+    },
+    {
+      itemBlueprintKey: ArmorsBlueprint.TemplarsPlate,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.YggdrasilJianSword,
+      chance: 1,
+    },
+    {
+      itemBlueprintKey: ShieldsBlueprint.TemporalRoundShield,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: ShieldsBlueprint.EmeraldShield,
+      chance: 1,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,
@@ -121,7 +137,12 @@ export const npcRedDragon = {
   areaSpells: [
     {
       spellKey: SpellsBlueprint.FireStorm,
-      probability: 40,
+      probability: 60,
+      power: MagicPower.UltraHigh,
+    },
+    {
+      spellKey: SpellsBlueprint.VampiricStorm,
+      probability: 30,
       power: MagicPower.Medium,
     },
   ],

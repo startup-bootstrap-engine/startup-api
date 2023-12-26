@@ -1,6 +1,7 @@
 import { QuestsBlueprint } from "../../questsBlueprintTypes";
 import { questKillDeers } from "./QuestKillDeers";
 import { questKillFrostSalamanders } from "./QuestKillFrostSalamanders";
+import { questKillGiantSpiders } from "./QuestKillGiantSpiders";
 import { questKillGoblins } from "./QuestKillGoblins";
 import { questKillNazgul } from "./QuestKillNazgul";
 import { questKillPolarBears } from "./QuestKillPolarBears";
@@ -21,4 +22,5 @@ export const killQuests = {
   [QuestsBlueprint.KillWinterWolves]: questKillWinterWolves,
   [QuestsBlueprint.KillYetis]: questKillYetis,
   [QuestsBlueprint.KillNazguls]: questKillNazgul,
+  [QuestsBlueprint.KillGiantSpiders]: questKillGiantSpiders,
 };

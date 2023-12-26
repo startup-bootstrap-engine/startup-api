@@ -1,8 +1,8 @@
-import { IItem } from "@entities/ModuleInventory/ItemModel";
+import { IEquippableMeleeTier10WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import { EntityAttackType, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
-import { SwordsBlueprint } from "../../types/itemsBlueprintTypes";
+import { SwordsBlueprint } from "../../../types/itemsBlueprintTypes";
 
-export const itemYggdrasilGladius: Partial<IItem> = {
+export const itemYggdrasilGladius: IEquippableMeleeTier10WeaponBlueprint = {
   key: SwordsBlueprint.YggdrasilGladius,
   type: ItemType.Weapon,
   subType: ItemSubType.Sword,
@@ -12,7 +12,8 @@ export const itemYggdrasilGladius: Partial<IItem> = {
   description: "Crafted from the sturdy wood of Yggdrasil, this gladius sword was unlike any other.",
   weight: 1.5,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
-  attack: 75,
-  defense: 20,
+  attack: 78,
+  tier: 10,
+  defense: 72,
   rangeType: EntityAttackType.Melee,
 };

@@ -4,21 +4,23 @@ import { recipeBloodfireArmor } from "./recipeBloodfireArmor";
 import { recipeBlueCape } from "./recipeBlueCape";
 import { recipeBrassArmor } from "./recipeBrassArmor";
 import { recipeBronzeArmor } from "./recipeBronzeArmor";
+import { recipeCoat } from "./recipeCoat";
 import { recipeCrownArmor } from "./recipeCrownArmor";
+import { recipeEtherealGuardianMail } from "./recipeEtherealGuardianMail";
 import { recipeFalconsArmor } from "./recipeFalconsArmor";
+import { recipeFarmersJacket } from "./recipeFarmersJacket";
 import { recipeGlacialArmor } from "./recipeGlacialArmor";
 import { recipeIronArmor } from "./recipeIronArmor";
 import { recipeIroncladArmor } from "./recipeIroncladArmor";
+import { recipeJacket } from "./recipeJacket";
 import { recipeKnightArmor } from "./recipeKnightArmor";
+import { recipeLeatherJacket } from "./recipeLeatherJacket";
 import { recipeMysticCape } from "./recipeMysticCape";
 import { recipePlateArmor } from "./recipePlateArmor";
+import { recipeSamuraiArmor } from "./recipeSamuraiArmor";
 import { recipeSorcerersCape } from "./recipeSorcerersCape";
 import { recipeSpellcastersCape } from "./recipeSpellCastersCape";
 import { recipeStuddedArmor } from "./recipeStuddedArmor";
-import { recipeCoat } from "./recipeCoat";
-import { recipeJacket } from "./recipeJacket";
-import { recipeFarmersJacket } from "./recipeFarmersJacket";
-import { recipeLeatherJacket } from "./recipeLeatherJacket";
 
 export const recipeArmorsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [ArmorsBlueprint.StuddedArmor]: [recipeStuddedArmor],
@@ -40,4 +42,6 @@ export const recipeArmorsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [ArmorsBlueprint.Jacket]: [recipeJacket],
   [ArmorsBlueprint.FarmersJacket]: [recipeFarmersJacket],
   [ArmorsBlueprint.LeatherJacket]: [recipeLeatherJacket],
+  [ArmorsBlueprint.SamuraiArmor]: [recipeSamuraiArmor],
+  [ArmorsBlueprint.EtherealGuardianMail]: [recipeEtherealGuardianMail],
 };

@@ -17,9 +17,9 @@ import {
   StaffsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+
+import { EntityAttackType, NPCAlignment } from "@rpg-engine/shared";
 import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
-import { EntityAttackType } from "@rpg-engine/shared";
 
 export const npcDarkWraith: Partial<INPC> = {
   ...generateMoveTowardsMovement(),

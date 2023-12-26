@@ -105,7 +105,10 @@ export const npcHighElf: Partial<INPC> = {
       itemBlueprintKey: SwordsBlueprint.ElvenSword,
       chance: 2.5,
     },
-
+    {
+      itemBlueprintKey: SwordsBlueprint.TemplarSword,
+      chance: 10,
+    },
     {
       itemBlueprintKey: AccessoriesBlueprint.ElvenRing,
       chance: 1,

@@ -1,3 +1,4 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableMeleeTier12WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import { EntityAttackType, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
 import { SwordsBlueprint } from "../../../types/itemsBlueprintTypes";
@@ -17,5 +18,6 @@ export const itemWarlordBroadsword: IEquippableMeleeTier12WeaponBlueprint = {
   weight: 1.5,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   rangeType: EntityAttackType.Melee,
+  entityEffects: [EntityEffectBlueprint.Bleeding],
   basePrice: 200,
 };

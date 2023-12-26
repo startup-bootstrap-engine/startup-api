@@ -7,6 +7,7 @@ export enum QuestsBlueprint {
   InteractionFather = "interaction-father",
   InteractionCraftSword = "interaction-craft-sword",
   InteractionsCraftIronArrow = "interaction-craft-iron-arrow",
+  InteractionCraftCrimsonBackpack = "interaction-craft-crimson-backpack",
   KillWolves = "kill-wolves",
   InteractionFisherman = "interaction-fisherman",
   InteractionStoryTeller = "interaction-story-teller",
@@ -19,4 +20,5 @@ export enum QuestsBlueprint {
   KillPolarBears = "kill-polar-bears",
   KillWinterWolves = "kill-winter-wolves",
   KillNazguls = "kill-nazguls",
+  KillGiantSpiders = "kill-giant-spiders",
 }

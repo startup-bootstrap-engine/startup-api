@@ -28,7 +28,7 @@ export const npcPurpleDragon = {
   ammoKey: AnimationEffectKeys.FireBall,
   maxRangeAttack: 8,
   speed: MovementSpeed.ExtraFast,
-  baseHealth: 30000,
+  baseHealth: 100000,
   healthRandomizerDice: Dice.D20,
   skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
@@ -36,21 +36,21 @@ export const npcPurpleDragon = {
   canSwitchToRandomTarget: true,
   isMagic: true,
   skills: {
-    level: 350,
+    level: 500,
     strength: {
-      level: 300,
+      level: 450,
     },
     dexterity: {
-      level: 200,
+      level: 330,
     },
     resistance: {
-      level: 250,
+      level: 350,
     },
     magicResistance: {
-      level: 300,
+      level: 350,
     },
     magic: {
-      level: 300,
+      level: 350,
     },
   },
   loots: [
@@ -60,16 +60,32 @@ export const npcPurpleDragon = {
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,
-      chance: 50,
+      chance: 100,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonTooth,
-      chance: 50,
-      quantityRange: [1, 3],
+      chance: 100,
+      quantityRange: [5, 10],
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.YggdrasilJianSword,
+      chance: 1,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
       chance: 20,
+    },
+    {
+      itemBlueprintKey: ArmorsBlueprint.DarkArmor,
+      chance: 20,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.LeviathanSword,
+      chance: 20,
+    },
+    {
+      itemBlueprintKey: ArmorsBlueprint.TemplarsPlate,
+      chance: 10,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.DemonShield,
@@ -116,16 +132,25 @@ export const npcPurpleDragon = {
       itemBlueprintKey: AxesBlueprint.GuardianAxe,
       chance: 10,
     },
+    {
+      itemBlueprintKey: SwordsBlueprint.YggdrasilTemplarSword,
+      chance: 10,
+    },
   ],
-  entityEffects: [EntityEffectBlueprint.VineGrasp, EntityEffectBlueprint.Poison],
+  entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
   areaSpells: [
     {
       spellKey: SpellsBlueprint.VampiricStorm,
-      probability: 10,
+      probability: 50,
       power: MagicPower.High,
     },
     {
-      spellKey: SpellsBlueprint.Blizzard,
+      spellKey: SpellsBlueprint.CorruptionWave,
+      probability: 70,
+      power: MagicPower.UltraHigh,
+    },
+    {
+      spellKey: SpellsBlueprint.FireStorm,
       probability: 40,
       power: MagicPower.Medium,
     },
