@@ -4,8 +4,12 @@ import { IChatMessageCreatePayload, IPrivateChatMessageCreatePayload } from "@rp
 import { AdminCommands } from "./AdminCommands";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { provide } from "inversify-binding-decorators";
+import type { ITradeChatMessageCreatePayload } from "./ChatNetworkTradeMessaging";
 
-type CommonChatMessagePayload = IChatMessageCreatePayload | IPrivateChatMessageCreatePayload;
+type CommonChatMessagePayload =
+  | IChatMessageCreatePayload
+  | IPrivateChatMessageCreatePayload
+  | ITradeChatMessageCreatePayload;
 
 @provide(ChatUtils)
 export class ChatUtils {

@@ -124,7 +124,6 @@ export class ChatNetworkPrivateMessaging {
             .limit(10);
           const uniqueSenderIds = [...new Set(unseenMessages.map((message) => message.emitter))];
           const unseenSenders = await Character.find({ _id: { $in: uniqueSenderIds } }, "name");
-          console.log("unseenSenders", unseenSenders);
           this.socketMessaging.sendEventToUser<IPrivateChatFindCharacterResponse>(
             character.channelId!,
             ChatSocketEvents.PrivateChatMessageGetUnseenMessageCharacters,
@@ -194,7 +193,7 @@ export class ChatNetworkPrivateMessaging {
   }
 
   @TrackNewRelicTransaction()
-  private async saveChatLog(message, emitterId, receiverId): Promise<void> {
+  private async saveChatLog(message: string, emitterId: string, receiverId: string): Promise<void> {
     const chatLogs = await PrivateChatLog.find({
       emitter: emitterId,
     })
