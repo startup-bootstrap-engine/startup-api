@@ -1,8 +1,5 @@
-# RPG Engine API
+# Definya
 
-[![CI](https://github.com/RPGOnlineNFT/rpg-api/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/RPGOnlineNFT/rpg-api/actions/workflows/main.yml)
+## Table of Contents
 
-[To get started, please check our docs.
-](https://developerremotejobs-docs.atlassian.net/)
-
-test
+- [Patreon Setup](./docs/PatreonSetup.md)

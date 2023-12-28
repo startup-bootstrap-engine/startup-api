@@ -73,4 +73,14 @@ export const appEnv = {
       SOCKET: Number(process.env.SOCKET_PORT),
     },
   },
+
+  patreon: {
+    clientId: process.env.PATREON_CLIENT_ID,
+    clientSecret: process.env.PATREON_CLIENT_SECRET,
+    redirectURI: process.env.PATREON_REDIRECT_URI,
+    campaignId: process.env.PATREON_CAMPAIGN_ID,
+    accessToken: process.env.PATREON_ACCESS_TOKEN,
+    refreshToken: process.env.PATREON_REFRESH_TOKEN,
+    accessTokenExpiration: process.env.PATREON_ACCESS_TOKEN_EXPIRATION,
+  },
 };

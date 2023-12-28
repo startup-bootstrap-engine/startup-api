@@ -23,3 +23,25 @@ content-type: application/json
 }
 
 ###
+
+# Activate Premium Account
+POST {{baseUrl}}/premium-account/activate HTTP/1.1
+Authorization: Bearer {{authToken}}
+content-type: application/json
+
+{
+  "email": "pepejhon35@hotmail.com",
+  "accountType": "gold"
+}
+
+###
+
+# Deactivate Premium Account
+POST {{baseUrl}}/premium-account/deactivate HTTP/1.1
+Authorization: Bearer {{authToken}}
+content-type: application/json
+
+{
+  "email": "user@example.com"
+}
+

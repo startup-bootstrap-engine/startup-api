@@ -47,6 +47,9 @@ const userSchema = createSchema(
       default: UserAccountTypes.Free,
       enum: TypeHelper.enumToStringArray(UserAccountTypes),
     }),
+
+    isManuallyControlledPremiumAccount: Type.boolean({ default: false }),
+
     // Static method types
     ...({} as {
       isValidPassword: (password: string) => Promise<boolean>;
