@@ -81,6 +81,6 @@ export const appEnv = {
     campaignId: process.env.PATREON_CAMPAIGN_ID,
     accessToken: process.env.PATREON_ACCESS_TOKEN,
     refreshToken: process.env.PATREON_REFRESH_TOKEN,
-    accessTokenExpiration: process.env.PATREON_ACCESS_TOKEN_EXPIRATION,
+    accessTokenExpiration: Number(process.env.PATREON_ACCESS_TOKEN_EXPIRATION),
   },
 };
