@@ -1,7 +1,9 @@
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
-import { ItemType } from "@rpg-engine/shared";
+import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { IItemUpdate, IItemUpdateAll, ItemSocketEvents, ItemSubType, ItemType } from "@rpg-engine/shared";
 import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 import { IPlantItem } from "./data/blueprints/PlantItem";
@@ -9,7 +11,7 @@ import { PlantLifeCycle } from "./data/types/PlantTypes";
 
 @provide(PlantGrowth)
 export class PlantGrowth {
-  constructor(private blueprintManager: BlueprintManager) {}
+  constructor(private blueprintManager: BlueprintManager, private socketMessaging: SocketMessaging) {}
 
   @TrackNewRelicTransaction()
   public async updatePlantGrowth(): Promise<void> {
@@ -43,15 +45,63 @@ export class PlantGrowth {
           updatedGrowthPoints = currentGrowthPoints;
         }
 
-        const now = new Date();
-        await Item.updateOne(
-          { _id: plant._id },
-          { $set: { growthPoints: updatedGrowthPoints, currentPlantCycle: nextCycle, lastPlantCycleRun: now } }
+        const updatedPlant = await Item.findByIdAndUpdate(
+          plant._id,
+          {
+            $set: {
+              growthPoints: updatedGrowthPoints,
+              currentPlantCycle: nextCycle,
+              lastPlantCycleRun: new Date(),
+              texturePath: blueprint.stagesRequirements[nextCycle]?.texturePath,
+            },
+          },
+          {
+            new: true,
+            lean: { virtuals: true, defaults: true },
+          }
         );
+
+        // Verifying if update was successful
+        if (!updatedPlant) {
+          console.error("Failed to update plant");
+          return;
+        }
+
+        const itemToUpdate = this.prepareItemToUpdate(updatedPlant);
+
+        if (plant.owner) {
+          const character = (await Character.findById(plant.owner).lean()) as ICharacter;
+          if (character) {
+            await this.socketMessaging.sendEventToCharactersAroundCharacter<IItemUpdateAll>(
+              character,
+              ItemSocketEvents.UpdateAll,
+              { items: [itemToUpdate] },
+              true
+            );
+          } else {
+            console.error("Character not found");
+          }
+        }
       }
     } catch (error) {
       console.error("Error updating plant growth:", error);
     }
+  }
+
+  private prepareItemToUpdate(item: IItem): IItemUpdate {
+    return {
+      id: item._id,
+      texturePath: item.texturePath,
+      textureAtlas: item.textureAtlas,
+      type: item.type as ItemType,
+      subType: item.subType as ItemSubType,
+      name: item.name,
+      x: item.x!,
+      y: item.y!,
+      layer: item.layer!,
+      stackQty: item.stackQty || 0,
+      isDeadBodyLootable: item.isDeadBodyLootable,
+    };
   }
 
   private getNextCycle(currentCycle: PlantLifeCycle): PlantLifeCycle {
