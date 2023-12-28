@@ -1,10 +1,13 @@
 import { profanity } from "@2toad/profanity";
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { IChatMessageCreatePayload, IPrivateChatMessageCreatePayload } from "@rpg-engine/shared";
-import { AdminCommands } from "./AdminCommands";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import {
+  IChatMessageCreatePayload,
+  IPrivateChatMessageCreatePayload,
+  ITradeChatMessageCreatePayload,
+} from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import type { ITradeChatMessageCreatePayload } from "./ChatNetworkTradeMessaging";
+import { AdminCommands } from "./AdminCommands";
 
 type CommonChatMessagePayload =
   | IChatMessageCreatePayload
