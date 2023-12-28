@@ -45,6 +45,9 @@ export class PremiumAccountActivator {
         $set: {
           accountType: UserAccountTypes.Free,
         },
+        $unset: {
+          isManuallyControlledPremiumAccount: "",
+        },
       });
     } catch (error) {
       console.error(error);
