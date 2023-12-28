@@ -42,9 +42,11 @@ export class PatreonAPI {
         `);
       }
 
+      console.log(appEnv.patreon);
+
       this.accessToken = appEnv.patreon.accessToken!;
       this.refreshToken = appEnv.patreon.refreshToken!;
-      const expiresIn = Number(appEnv.patreon.accessTokenExpiration)!;
+      const expiresIn = appEnv.patreon.accessTokenExpiration!;
 
       if (!this.accessToken || !this.refreshToken || !expiresIn) {
         throw new Error(`Failed to authenticate with Patreon API.
