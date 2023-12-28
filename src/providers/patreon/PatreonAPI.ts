@@ -194,7 +194,7 @@ export class PatreonAPI {
       const tierFields = encodeURIComponent("fields[tier]") + "=title,description,amount_cents";
       let nextPage: string | null = null;
       let allMembers: IPatreonMemberData[] = [];
-      let allTiers: any[] = [];
+      const allTiers: any[] = [];
 
       do {
         const response = await this.makeRequest(
@@ -204,7 +204,7 @@ export class PatreonAPI {
         );
 
         if (response?.data) {
-          let { data: members, included: tiers } = response.data;
+          const { data: members, included: tiers } = response.data;
           allMembers.push(...members);
           allTiers.push(...tiers);
           nextPage = response?.links?.next || null;

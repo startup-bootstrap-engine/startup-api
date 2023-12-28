@@ -18,8 +18,7 @@ export class PremiumAccountCrons {
       await this.activatePremiumAccounts();
     });
 
-    // this.cronJobScheduler.uniqueSchedule("premium-account-cron-deactivate", "0 */12 * * *", async () => {
-    this.cronJobScheduler.uniqueSchedule("premium-account-cron-deactivate", "* * * * *", async () => {
+    this.cronJobScheduler.uniqueSchedule("premium-account-cron-deactivate", "0 */12 * * *", async () => {
       await this.deactivatePremiumAccounts();
     });
   }
@@ -92,7 +91,10 @@ export class PremiumAccountCrons {
   private async deactivatePremiumAccounts(): Promise<void> {
     try {
       // Fetch all users with active premium accounts
-      const premiumUsers = (await User.find({ accountType: { $ne: UserAccountTypes.Free, $exists: true } })
+      const premiumUsers = (await User.find({
+        accountType: { $ne: UserAccountTypes.Free, $exists: true },
+        isManuallyControlledPremiumAccount: { $ne: true },
+      })
         .lean()
         .select("_id email accountType")) as IUser[];
 
@@ -101,13 +103,6 @@ export class PremiumAccountCrons {
       const activePatreonEmails = activePatreons?.map((patreon) => patreon.attributes.email);
 
       for (const user of premiumUsers) {
-        if (user.isManuallyControlledPremiumAccount) {
-          console.log(
-            `Patreon Deactivation: User ${user.email} has a manually controlled premium account. Skipping...`
-          );
-          continue;
-        }
-
         // If the user is not an active Patreon, deactivate their premium account
         if (!activePatreonEmails?.includes(user.email)) {
           // check if its already inactive

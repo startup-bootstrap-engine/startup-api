@@ -18,13 +18,18 @@ export class PremiumAccountActivator {
     return true;
   }
 
-  public async activateUserPremiumAccount(user: IUser, accountType: UserAccountTypes): Promise<void> {
+  public async activateUserPremiumAccount(
+    user: IUser,
+    accountType: UserAccountTypes,
+    data?: Partial<IUser>
+  ): Promise<void> {
     try {
       console.log("✨ Activating premium account for user", user.email, "with account type", accountType);
 
       await User.findByIdAndUpdate(user._id, {
         $set: {
           accountType: accountType,
+          ...data,
         },
       });
     } catch (error) {

@@ -1,3 +1,4 @@
+import { IUser, User } from "@entities/ModuleSystem/UserModel";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { AuthMiddleware } from "@providers/middlewares/AuthMiddleware";
 import { isAdminMiddleware } from "@providers/middlewares/IsAdminMiddleware";
@@ -37,12 +38,41 @@ export class PremiumAccountController implements interfaces.Controller {
 
   @httpPost("/activate")
   public async activatePremiumAccount(@response() res, @requestBody() body): Promise<void> {
-    const { email, accountType, patreonEmail } = body;
+    const { email, accountType } = body;
 
-    await this.premiumAccountActivator.activateUserPremiumAccount(email, accountType, patreonEmail);
+    const user = (await User.findOne({ email: email }).lean()) as IUser;
+
+    if (!user) {
+      return res.status(400).send({
+        message: "User not found!",
+      });
+    }
+
+    await this.premiumAccountActivator.activateUserPremiumAccount(user, accountType, {
+      isManuallyControlledPremiumAccount: true,
+    });
 
     return res.status(200).send({
       message: "Premium account activated successfully!",
+    });
+  }
+
+  @httpPost("/deactivate")
+  public async deactivatePremiumAccount(@response() res, @requestBody() body): Promise<void> {
+    const { email } = body;
+
+    const user = (await User.findOne({ email: email }).lean()) as IUser;
+
+    if (!user) {
+      return res.status(400).send({
+        message: "User not found!",
+      });
+    }
+
+    await this.premiumAccountActivator.deactivateUserPremiumAccount(email);
+
+    return res.status(200).send({
+      message: "Premium account deactivated successfully!",
     });
   }
 }
