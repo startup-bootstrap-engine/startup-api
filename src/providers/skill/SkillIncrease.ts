@@ -295,7 +295,13 @@ export class SkillIncrease {
     skillsMap: Map<string, string> = SKILLS_MAP,
     bonus?: number
   ): IIncreaseSPResult {
+    // Validate skillKey is not undefined, null, or an unexpected type
+    if (typeof skillKey !== "string" || !skillKey.trim()) {
+      throw new Error(`Invalid or empty skillKey provided: ${skillKey}`);
+    }
+
     let skillLevelUp = false;
+    // Ensure the skillKey exists in the skillsMap or can be mapped by the skillMapper
     const skillToUpdate = skillsMap.get(skillKey) ?? this.skillMapper.getCraftingSkillToUpdate(skillKey);
 
     if (!skillToUpdate) {
