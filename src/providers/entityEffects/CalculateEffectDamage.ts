@@ -4,7 +4,8 @@ import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import {
   ENTITY_EFFECT_DAMAGE_FROM_NPC_MODIFIER,
-  ENTITY_EFFECT_DAMAGE_LEVEL_MULTIPLIER,
+  ENTITY_EFFECT_DAMAGE_LEVEL_MULTIPLIER_NPC,
+  ENTITY_EFFECT_DAMAGE_LEVEL_MULTIPLIER_PVP,
 } from "@providers/constants/EntityEffectsConstants";
 import { TraitGetter } from "@providers/skill/TraitGetter";
 import { BasicAttribute, CharacterClass, EntityType } from "@rpg-engine/shared";
@@ -89,8 +90,19 @@ export class CalculateEffectDamage {
   ): number {
     const baseDamageSkillLevel = this.isMage(attacker) ? attackerMagicLevel : attackerStrengthLevel;
 
+    let baseDamage;
+
+    switch (attacker.type) {
+      case EntityType.NPC:
+        baseDamage = (attackerLevel + baseDamageSkillLevel) * ENTITY_EFFECT_DAMAGE_LEVEL_MULTIPLIER_NPC;
+        break;
+      case EntityType.Character:
+        baseDamage = (attackerLevel + baseDamageSkillLevel) * ENTITY_EFFECT_DAMAGE_LEVEL_MULTIPLIER_PVP;
+        break;
+    }
+
     // Unified approach for calculating maxDamage
-    const baseDamage = (attackerLevel + baseDamageSkillLevel) * ENTITY_EFFECT_DAMAGE_LEVEL_MULTIPLIER;
+
     const additionalDamage = attackerMagicLevel + 2 * attackerStrengthLevel;
     const maxDamage = Math.ceil(baseDamage + additionalDamage + (options?.maxBonusDamage ?? 0));
 

@@ -4,9 +4,9 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "blueprintKey": "wooden-shield",
+  "blueprintKey": "emerald-elegance-necklace",
   "quantity": 1,
-  "characterId": "658a45a606449b00345d8ee1" 
+  "characterId": "6558271dd45f73004f74ff2e" 
 }
 
 ###
