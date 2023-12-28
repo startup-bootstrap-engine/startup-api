@@ -31,7 +31,6 @@ PATREON_CLIENT_ID="Your Patreon Client ID"
 PATREON_CLIENT_SECRET="Your Patreon Client Secret"
 PATREON_REDIRECT_URI="Your Redirect URI"
 PATREON_CAMPAIGN_ID="Your Patreon Campaign ID"
-
 PATREON_ACCESS_TOKEN="Check the Authentication step"
 PATREON_REFRESH_TOKEN="Check the Authentication step"
 PATREON_ACCESS_TOKEN_EXPIRATION="Check the Authentication step"
