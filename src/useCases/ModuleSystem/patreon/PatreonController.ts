@@ -1,5 +1,6 @@
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
 import { PatreonStatus } from "@providers/patreon/PatreonTypes";
+import { UserAccountTypes } from "@rpg-engine/shared";
 import { controller, httpGet, interfaces, queryParam, requestParam, response } from "inversify-express-utils";
 
 @controller("/patreon")
@@ -25,11 +26,12 @@ export class PatreonController implements interfaces.Controller {
     });
   }
 
-  @httpGet("/campaigns/:campaignId/memberships/:status")
+  @httpGet("/campaigns/:campaignId/memberships")
   public async listCampaignMembers(
     @response() res,
     @requestParam("campaignId") campaignId: string,
-    @requestParam("status") status: PatreonStatus
+    @queryParam("status") status: PatreonStatus,
+    @queryParam("tier") tier: string
   ): Promise<void> {
     if (!campaignId) {
       return res.status(400).send({
@@ -37,7 +39,7 @@ export class PatreonController implements interfaces.Controller {
       });
     }
 
-    const members = await this.patreonAPI.getCampaignMemberships(campaignId, status);
+    const members = await this.patreonAPI.getCampaignMemberships(campaignId, status, tier as UserAccountTypes);
 
     return res.status(200).send({
       members: members,

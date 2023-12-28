@@ -32,8 +32,8 @@ interface ILinks {
 
 export interface ICampaignMembersResponse {
   data: IMemberData[];
-  links: ILinks;
-  meta: IMeta;
+  links?: ILinks;
+  meta?: IMeta;
 }
 
 interface ICampaignAttributes {

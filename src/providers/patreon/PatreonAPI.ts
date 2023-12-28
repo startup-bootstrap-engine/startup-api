@@ -188,7 +188,7 @@ export class PatreonAPI {
   public async getCampaignMemberships(
     campaignId: string,
     patreon_status: PatreonStatus = "all",
-    accountType: UserAccountTypes = UserAccountTypes.Free
+    accountType: UserAccountTypes | "all" = "all"
   ): Promise<ICampaignMembersResponse | undefined> {
     try {
       if (!campaignId) {
@@ -197,30 +197,43 @@ export class PatreonAPI {
 
       const fields = encodeURIComponent("fields[member]") + "=email,full_name,patron_status";
       const include = encodeURIComponent("include") + "=currently_entitled_tiers";
-      const tierFields = encodeURIComponent("fields[tier]") + "=title";
-      const response = await this.makeRequest(
-        "get",
-        `https://www.patreon.com/api/oauth2/v2/campaigns/${campaignId}/members?${fields}&${include}&${tierFields}`
-      );
+      const tierFields = encodeURIComponent("fields[tier]") + "=title,description,amount_cents";
+      let nextPage: string | null = null;
+      let allMembers: IMemberData[] = [];
+      let allTiers: any[] = [];
 
-      if (response?.data) {
-        let { data: members, included: tiers } = response.data;
+      do {
+        const response = await this.makeRequest(
+          "get",
+          nextPage ||
+            `https://www.patreon.com/api/oauth2/v2/campaigns/${campaignId}/members?${fields}&${include}&${tierFields}`
+        );
 
-        if (patreon_status !== "all") {
-          members = members.filter((member) => member.attributes.patron_status === patreon_status);
+        if (response?.data) {
+          let { data: members, included: tiers } = response.data;
+          allMembers.push(...members);
+          allTiers.push(...tiers);
+          nextPage = response?.links?.next || null;
         }
+      } while (nextPage);
 
-        if (accountType !== UserAccountTypes.Free) {
-          const tierName = patreonTierMapping[accountType];
-          members = members.filter((member) =>
-            member.relationships.currently_entitled_tiers.data.some((tier: any) => tier.title === tierName)
-          );
-        }
+      allMembers = this.addTierNamesToMembers(allMembers, allTiers);
 
-        const updatedMembers = this.addTierNamesToMembers(members, tiers);
-
-        return { ...response.data, data: updatedMembers };
+      if (patreon_status !== "all") {
+        allMembers = allMembers.filter((member) => member.attributes.patron_status === patreon_status);
       }
+
+      if (accountType !== "all") {
+        const tierName = patreonTierMapping[accountType];
+
+        console.log("fetching members with tier name:", tierName);
+
+        allMembers = allMembers.filter((member) =>
+          member.attributes.tier_name ? member.attributes.tier_name.includes(tierName) : false
+        );
+      }
+
+      return { data: allMembers };
     } catch (error) {
       if (error.response) {
         console.error(error.response.data);
