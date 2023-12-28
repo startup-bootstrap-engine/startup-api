@@ -7,7 +7,7 @@ interface IMemberAttributes {
   tier_name: string | null; // dynamically added by our API. This do not come from patreon
 }
 
-export interface IMemberData {
+export interface IPatreonMemberData {
   attributes: IMemberAttributes;
   id: string;
   type: string;
@@ -31,7 +31,7 @@ interface ILinks {
 }
 
 export interface ICampaignMembersResponse {
-  data: IMemberData[];
+  data: IPatreonMemberData[];
   links?: ILinks;
   meta?: IMeta;
 }

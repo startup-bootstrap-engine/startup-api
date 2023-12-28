@@ -48,13 +48,13 @@ const userSchema = createSchema(
       enum: TypeHelper.enumToStringArray(UserAccountTypes),
     }),
 
+    isManuallyControlledPremiumAccount: Type.boolean({ default: false }),
+
     // Static method types
     ...({} as {
       isValidPassword: (password: string) => Promise<boolean>;
       generateAccessToken: () => Promise<IAuthResponse>;
     }),
-    premiumAccountPatreonEmail: Type.string({ default: null }),
-
     pushNotificationToken: Type.string({ default: null }),
   },
   { timestamps: { createdAt: true, updatedAt: true } }

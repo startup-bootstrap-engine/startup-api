@@ -35,6 +35,16 @@ PATREON_CAMPAIGN_ID="Your Patreon Campaign ID"
 
 Replace "Your Patreon Client ID", "Your Patreon Client Secret", "Your Redirect URI", and "Your Patreon Campaign ID" with the actual values.
 
+### Authenticating
+
+Only on the first time, you will need to authenticate your application with Patreon. To do so, access the following route:
+
+```markdown
+/patreon/authenticate
+```
+
+This will automatically save the access token and refresh token on redis, for later usage.
+
 ### Getting the Campaign ID
 
 `Turn on the API` and access this route, so you can fetch this info to update the .env file:

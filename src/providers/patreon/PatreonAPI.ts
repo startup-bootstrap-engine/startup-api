@@ -4,7 +4,7 @@ import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { UserAccountTypes } from "@rpg-engine/shared";
 import axios from "axios";
 import qs from "qs";
-import { ICampaignMembersResponse, ICampaignsResponse, IMemberData, PatreonStatus } from "./PatreonTypes";
+import { ICampaignMembersResponse, ICampaignsResponse, IPatreonMemberData, PatreonStatus } from "./PatreonTypes";
 
 type PatreonTierMapping = {
   [key in UserAccountTypes]: string;
@@ -118,9 +118,12 @@ export class PatreonAPI {
     return false;
   }
 
-  public async getAllActivePatreons(): Promise<IMemberData[] | undefined> {
+  public async getPatreons(
+    status: PatreonStatus,
+    accountTypes: UserAccountTypes | "all"
+  ): Promise<IPatreonMemberData[] | undefined> {
     try {
-      const response = await this.getCampaignMemberships(this.campaignId);
+      const response = await this.getCampaignMemberships(this.campaignId, status, accountTypes);
 
       if (!response) {
         throw new Error("Failed to fetch campaign memberships");
@@ -176,15 +179,6 @@ export class PatreonAPI {
     }
   }
 
-  private addTierNamesToMembers(members: any[], tiers: any[]): any[] {
-    return members.map((member: any) => {
-      const tierId = member.relationships.currently_entitled_tiers.data[0]?.id;
-      const tier = tiers.find((tier: any) => tier.id === tierId);
-      member.attributes.tier_name = tier?.attributes.title;
-      return member;
-    });
-  }
-
   public async getCampaignMemberships(
     campaignId: string,
     patreon_status: PatreonStatus = "all",
@@ -199,7 +193,7 @@ export class PatreonAPI {
       const include = encodeURIComponent("include") + "=currently_entitled_tiers";
       const tierFields = encodeURIComponent("fields[tier]") + "=title,description,amount_cents";
       let nextPage: string | null = null;
-      let allMembers: IMemberData[] = [];
+      let allMembers: IPatreonMemberData[] = [];
       let allTiers: any[] = [];
 
       do {
@@ -224,12 +218,8 @@ export class PatreonAPI {
       }
 
       if (accountType !== "all") {
-        const tierName = patreonTierMapping[accountType];
-
-        console.log("fetching members with tier name:", tierName);
-
         allMembers = allMembers.filter((member) =>
-          member.attributes.tier_name ? member.attributes.tier_name.includes(tierName) : false
+          member.attributes.tier_name ? member.attributes.tier_name === accountType : false
         );
       }
 
@@ -243,6 +233,20 @@ export class PatreonAPI {
         console.error("Error", error.message);
       }
     }
+  }
+
+  private addTierNamesToMembers(members: any[], tiers: any[]): any[] {
+    return members.map((member: any) => {
+      const tierId = member.relationships.currently_entitled_tiers.data[0]?.id;
+      const tier = tiers.find((tier: any) => tier.id === tierId);
+      if (tier) {
+        const tierTitle = tier.attributes.title;
+        member.attributes.tier_name = Object.keys(patreonTierMapping).find(
+          (key) => patreonTierMapping[key] === tierTitle
+        );
+      }
+      return member;
+    });
   }
 
   private async makeRequest(
