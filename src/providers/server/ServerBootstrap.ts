@@ -23,6 +23,7 @@ import { NPCBattleCycleQueue } from "@providers/npc/NPCBattleCycleQueue";
 import { NPCCycleQueue } from "@providers/npc/NPCCycleQueue";
 import { NPCFreezer } from "@providers/npc/NPCFreezer";
 import PartyManagement from "@providers/party/PartyManagement";
+import { PatreonAPI } from "@providers/patreon/PatreonAPI";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import SpellSilence from "@providers/spells/data/logic/mage/druid/SpellSilence";
 import { EnvType } from "@rpg-engine/shared";
@@ -54,7 +55,8 @@ export class ServerBootstrap {
     private itemUseCycleQueue: ItemUseCycleQueue,
     private entityEffectDuration: EntityEffectDurationControl,
     private characterMonitorCallbackTracker: CharacterMonitorCallbackTracker,
-    private characterNetworkUpdateQueue: CharacterNetworkUpdateQueue
+    private characterNetworkUpdateQueue: CharacterNetworkUpdateQueue,
+    private patreonAPI: PatreonAPI
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -103,6 +105,8 @@ export class ServerBootstrap {
   }
 
   private async execOneTimeOperations(): Promise<void> {
+    await this.patreonAPI.initialize();
+
     await this.socketSessionControl.clearAllSessions();
 
     await this.npcManager.disableNPCBehaviors();

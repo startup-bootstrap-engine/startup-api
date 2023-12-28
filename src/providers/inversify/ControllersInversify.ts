@@ -9,6 +9,7 @@ import { ReadChatLogController } from "@useCases/ModuleSystem/chat/readChatLog/R
 import { IndustriesController } from "@useCases/ModuleSystem/industries/IndustriesController";
 import { MapController } from "@useCases/ModuleSystem/map/MapController";
 import { PushNotificationController } from "@useCases/ModuleSystem/operation/pushNotification/PushNotificationController";
+import { PatreonController } from "@useCases/ModuleSystem/patreon/PatreonController";
 import { PlacesController } from "@useCases/ModuleSystem/places/PlacesController";
 import { PremiumAccountController } from "@useCases/ModuleSystem/premiumAccount/PremiumAccountController";
 import { ScriptsController } from "@useCases/ModuleSystem/scripts/ScriptsController";
@@ -69,4 +70,5 @@ export const useCasesControllers = new ContainerModule((bind: interfaces.Bind, u
   bind<CacheController>(CacheController).toSelf();
   bind<ScriptsController>(ScriptsController).toSelf();
   bind<PremiumAccountController>(PremiumAccountController).toSelf();
+  bind<PatreonController>(PatreonController).toSelf();
 });

@@ -47,6 +47,7 @@ const userSchema = createSchema(
       default: UserAccountTypes.Free,
       enum: TypeHelper.enumToStringArray(UserAccountTypes),
     }),
+    premiumAccountExpirationDate: Type.date({ default: null }),
     // Static method types
     ...({} as {
       isValidPassword: (password: string) => Promise<boolean>;
