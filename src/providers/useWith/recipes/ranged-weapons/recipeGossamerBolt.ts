@@ -1,3 +1,4 @@
+import { calculateMinimumLevel } from "@providers/crafting/CraftingMinLevelCalculator";
 import { CraftingResourcesBlueprint, RangedWeaponsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { IUseWithCraftingRecipe } from "@providers/useWith/useWithTypes";
 import { CraftingSkill } from "@rpg-engine/shared";
@@ -8,20 +9,28 @@ export const recipeGossamerBolt: IUseWithCraftingRecipe = {
   requiredItems: [
     {
       key: CraftingResourcesBlueprint.Silk,
-      qty: 8,
+      qty: 20,
     },
     {
       key: CraftingResourcesBlueprint.BatsWing,
-      qty: 5,
+      qty: 25,
     },
     {
       key: CraftingResourcesBlueprint.WoodenBoard,
-      qty: 4,
+      qty: 14,
     },
     {
       key: CraftingResourcesBlueprint.CorruptionIngot,
-      qty: 3,
+      qty: 20,
     },
   ],
-  minCraftingRequirements: [CraftingSkill.Lumberjacking, 4],
+  minCraftingRequirements: [
+    CraftingSkill.Lumberjacking,
+    calculateMinimumLevel([
+      [CraftingResourcesBlueprint.Silk, 20],
+      [CraftingResourcesBlueprint.BatsWing, 25],
+      [CraftingResourcesBlueprint.WoodenBoard, 14],
+      [CraftingResourcesBlueprint.CorruptionIngot, 20],
+    ]),
+  ],
 };

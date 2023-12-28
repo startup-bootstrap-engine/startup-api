@@ -32,7 +32,7 @@ export const spellCleavingStomp: Partial<ISpell> = {
   cooldown: 15,
   castingAnimationKey: AnimationEffectKeys.SkillLevelUp,
   targetHitAnimationKey: AnimationEffectKeys.HitEnergy,
-  characterClass: [CharacterClass.Warrior, CharacterClass.Berserker],
+  characterClass: [CharacterClass.Warrior, CharacterClass.Berserker, CharacterClass.Rogue],
 
   usableEffect: async (caster: ICharacter, target: ICharacter | INPC) => {
     const spellArea = container.get(SpellArea);

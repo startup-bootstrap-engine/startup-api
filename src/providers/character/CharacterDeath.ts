@@ -9,6 +9,7 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { INITIAL_STARTING_POINTS } from "@providers/constants/CharacterConstants";
 import { DROP_EQUIPMENT_CHANCE } from "@providers/constants/DeathConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DiscordBot } from "@providers/discord/DiscordBot";
@@ -51,7 +52,6 @@ import { CharacterTarget } from "./CharacterTarget";
 import { CharacterBuffActivator } from "./characterBuff/CharacterBuffActivator";
 import { CharacterItemContainer } from "./characterItems/CharacterItemContainer";
 import { CharacterWeight } from "./weight/CharacterWeight";
-import { INITIAL_STARTING_POINTS } from "@providers/constants/CharacterConstants";
 
 export const DROPPABLE_EQUIPMENT = [
   "head",
@@ -100,6 +100,8 @@ export class CharacterDeath {
       }
 
       await this.locker.lock(`character-death-${character.id}`, 3);
+
+      await this.sendBattleDeathEvents(character);
 
       if (killer) {
         await this.clearAttackerTarget(killer);
@@ -166,8 +168,6 @@ export class CharacterDeath {
       await this.characterWeight.updateCharacterWeight(character);
 
       await this.sendRefreshEquipmentEvent(character);
-
-      await this.sendBattleDeathEvents(character);
     } catch (err) {
       console.error(err);
     } finally {

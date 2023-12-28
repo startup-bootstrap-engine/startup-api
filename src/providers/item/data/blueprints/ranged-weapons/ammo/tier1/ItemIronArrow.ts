@@ -1,7 +1,8 @@
+import { IEquippableAmmoTier1Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import { RangedWeaponsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
-import { IEquippableRangedAmmoBlueprint, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import { ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
 
-export const itemIronArrow: IEquippableRangedAmmoBlueprint = {
+export const itemIronArrow: IEquippableAmmoTier1Blueprint = {
   key: RangedWeaponsBlueprint.IronArrow,
   type: ItemType.Weapon,
   subType: ItemSubType.Ranged,
@@ -11,8 +12,9 @@ export const itemIronArrow: IEquippableRangedAmmoBlueprint = {
   description: "Description",
   weight: 0.06,
   maxStackSize: 999,
+  tier: 1,
   allowedEquipSlotType: [ItemSlotType.Accessory],
   basePrice: 3,
-  attack: 12,
+  attack: 11,
   canSell: false,
 };

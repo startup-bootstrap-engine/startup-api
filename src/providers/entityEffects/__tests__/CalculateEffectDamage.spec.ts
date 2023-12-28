@@ -60,7 +60,7 @@ describe("CalculateEffectDamage", () => {
 
     expect(spyGetTargetResistance).toHaveBeenCalledTimes(1);
 
-    expect(spyCalculateTotalEffectDamage).toHaveBeenCalledWith(50, 10, 1, 1, 2, 4, undefined);
+    expect(spyCalculateTotalEffectDamage).toHaveBeenCalledWith(testCharacterAttacker, 50, 1, 10, 1, 2, 4, undefined);
 
     expect(result).toBeLessThanOrEqual(50);
   });
@@ -87,7 +87,7 @@ describe("CalculateEffectDamage", () => {
 
     expect(spyGetTargetResistance).toHaveBeenCalledTimes(1);
 
-    expect(spyCalculateTotalEffectDamage).toHaveBeenCalledWith(50, 10, 1, 1, 2, 4, undefined);
+    expect(spyCalculateTotalEffectDamage).toHaveBeenCalledWith(testAttacker, 50, 1, 10, 1, 2, 4, undefined);
 
     expect(result).toBeLessThanOrEqual(15);
   });

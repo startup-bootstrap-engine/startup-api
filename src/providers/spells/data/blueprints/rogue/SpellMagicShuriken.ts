@@ -6,13 +6,14 @@ import { entityEffectBleeding } from "@providers/entityEffects/data/blueprints/e
 import { container } from "@providers/inversify/container";
 import {
   AnimationEffectKeys,
+  BasicAttribute,
   CharacterClass,
   ISpell,
-  MagicPower,
   RangeTypes,
   SpellCastingType,
   SpellsBlueprint,
 } from "@rpg-engine/shared";
+import { SpellCalculator } from "../../abstractions/SpellCalculator";
 
 export const spellMagicShuriken: Partial<ISpell> = {
   key: SpellsBlueprint.MagicShuriken,
@@ -23,10 +24,10 @@ export const spellMagicShuriken: Partial<ISpell> = {
   texturePath: "spell-icons/magic-shuriken.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "ithil celebatharth",
-  manaCost: 50,
+  manaCost: 30,
   minLevelRequired: 5,
   minMagicLevelRequired: 5,
-  cooldown: 10,
+  cooldown: 5,
   castingAnimationKey: AnimationEffectKeys.SkillLevelUp,
   targetHitAnimationKey: AnimationEffectKeys.Hit,
   projectileAnimationKey: AnimationEffectKeys.Shuriken,
@@ -37,7 +38,15 @@ export const spellMagicShuriken: Partial<ISpell> = {
     const entityEffectUse = container.get(EntityEffectUse);
     const hitTarget = container.get(HitTarget);
 
-    await hitTarget.hit(character, target, true, MagicPower.High, true);
+    const spellCalculator = container.get(SpellCalculator);
+
+    const skillDamage = await spellCalculator.spellDamageCalculator(character, BasicAttribute.Dexterity, {
+      level: true,
+      minLevelMultiplier: 0.2,
+      maxLevelMultiplier: 0.8,
+    });
+
+    await hitTarget.hit(character, target, true, skillDamage, true);
 
     await entityEffectUse.applyEntityEffects(target, character, entityEffectBleeding);
 

@@ -1,8 +1,9 @@
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
-import { IEquippableRangedAmmoBlueprint, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
-import { RangedWeaponsBlueprint } from "../../../types/itemsBlueprintTypes";
+import { IEquippableAmmoTier5Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
+import { ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import { RangedWeaponsBlueprint } from "../../../../types/itemsBlueprintTypes";
 
-export const itemEmeraldArrow: IEquippableRangedAmmoBlueprint = {
+export const itemEmeraldArrow: IEquippableAmmoTier5Blueprint = {
   key: RangedWeaponsBlueprint.EmeraldArrow,
   type: ItemType.Weapon,
   subType: ItemSubType.Ranged,
@@ -10,8 +11,9 @@ export const itemEmeraldArrow: IEquippableRangedAmmoBlueprint = {
   texturePath: "ranged-weapons/emerald-arrow.png",
   name: "Emerald Arrow",
   description: "An arrow adorned with a gleaming emerald gem.",
-  attack: 23,
+  attack: 37,
   weight: 0.1,
+  tier: 5,
   allowedEquipSlotType: [ItemSlotType.Accessory],
   maxStackSize: 999,
   basePrice: 8,

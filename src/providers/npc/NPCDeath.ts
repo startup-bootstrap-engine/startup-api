@@ -39,54 +39,57 @@ export class NPCDeath {
 
   @TrackNewRelicTransaction()
   public async handleNPCDeath(killer: ICharacter, npc: INPC): Promise<void> {
-    await this.npcFreezer.freezeNPC(npc, "NPCDeath");
-    const hasLocked = await this.locker.lock(`npc-death-${npc._id}`);
-    if (!hasLocked) {
-      return;
-    }
     try {
+      await this.npcFreezer.freezeNPC(npc, "NPCDeath");
+      const hasLocked = await this.locker.lock(`npc-death-${npc._id}`);
+      if (!hasLocked) {
+        return;
+      }
+      const npcWithSkills = await this.getNPCWithSkills(npc);
+
       console.log("NPCDeath for npc: ", npc.key);
       if (npc.health !== 0) {
         npc = (await NPC.findOneAndUpdate({ _id: npc._id }, { $set: { health: 0 } }, { new: true })) as unknown as INPC;
       }
+
       const npcBody = await this.generateNPCBody(npc);
       if (!npcBody) {
         return;
       }
-      const notifyCharactersOfNPCDeath = await this.notifyCharactersOfNPCDeath(npc);
-      const npcWithSkills = await this.getNPCWithSkills(npc);
+
+      await this.notifyCharactersOfNPCDeath(npc);
+
       const goldLoot = this.npcLoot.getGoldLoot(npcWithSkills);
       const totalDropRatioFromParty = await this.calculateTotalDropRatioFromParty(npc);
+
       const npcLoots: INPCLoot[] = (npc.loots as unknown as INPCLoot[]).map((loot) => ({
         itemBlueprintKey: loot.itemBlueprintKey,
         chance: loot.chance + totalDropRatioFromParty || 0,
         quantityRange: loot.quantityRange || undefined,
       }));
-      const addLootToNPCBody = this.npcLoot.addLootToNPCBody(
+
+      const addLootToNPCBodyPromise = this.npcLoot.addLootToNPCBody(
         killer,
         npc,
         npcBody,
         [...npcLoots, goldLoot],
         npc.isGiantForm
       );
-      const removeItemOwnership = this.itemOwnership.removeItemOwnership(npcBody.id);
-      const clearNPCBehavior = this.clearNPCBehavior(npc);
-      const updateNPCAfterDeath = this.updateNPCAfterDeath(npcWithSkills);
-      const releaseXP = this.npcExperience.releaseXP(npc as INPC);
+
+      const removeItemOwnershipPromise = this.itemOwnership.removeItemOwnership(npcBody.id);
+      const clearNPCBehaviorPromise = this.clearNPCBehavior(npc);
+      const releaseXPPromise = this.npcExperience.releaseXP(npc as INPC);
 
       this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.NPCs, "Death", 1);
 
       await Promise.all([
-        notifyCharactersOfNPCDeath,
-        npcWithSkills,
-        goldLoot,
-        totalDropRatioFromParty,
-        addLootToNPCBody,
-        removeItemOwnership,
-        clearNPCBehavior,
-        updateNPCAfterDeath,
-        releaseXP,
+        addLootToNPCBodyPromise,
+        removeItemOwnershipPromise,
+        clearNPCBehaviorPromise,
+        releaseXPPromise,
       ]);
+
+      await this.updateNPCAfterDeath(npcWithSkills);
     } catch (error) {
       console.error(error);
     }

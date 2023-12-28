@@ -1,8 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { CharacterBuffActivator } from "@providers/character/characterBuff/CharacterBuffActivator";
 import { container } from "@providers/inversify/container";
-import { TraitGetter } from "@providers/skill/TraitGetter";
 import {
   AnimationEffectKeys,
   BasicAttribute,
@@ -14,6 +12,7 @@ import {
   SpellCastingType,
   SpellsBlueprint,
 } from "@rpg-engine/shared";
+import { SpellCalculator } from "../../abstractions/SpellCalculator";
 
 export const spellFrenzy: Partial<ISpell> = {
   key: SpellsBlueprint.BerserkerFrenzy,
@@ -32,20 +31,12 @@ export const spellFrenzy: Partial<ISpell> = {
 
   usableEffect: async (character: ICharacter) => {
     const characterBuffActivator = container.get(CharacterBuffActivator);
-    const traitGetter = container.get(TraitGetter);
+    const spellCalculator = await container.get(SpellCalculator);
 
-    const skills = (await Skill.findById(character.skills)
-      .lean()
-      .cacheQuery({
-        cacheKey: `${character?._id}-skills`,
-      })) as ISkill;
-
-    const characterStrength = await traitGetter.getSkillLevelWithBuffs(skills, BasicAttribute.Strength);
-    const characterDexterity = await traitGetter.getSkillLevelWithBuffs(skills, BasicAttribute.Dexterity);
-
-    const timeoutWeightedAverage = characterStrength * 0.6 + characterDexterity * 0.4;
-    const timeout = Math.min(Math.max(timeoutWeightedAverage * 2, 20), 120);
-
+    const timeout = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Dexterity, {
+      min: 10,
+      max: 60,
+    });
     await characterBuffActivator.enableTemporaryBuff(character, {
       type: CharacterBuffType.CharacterAttribute,
       trait: CharacterAttributes.AttackIntervalSpeed,

@@ -7,7 +7,7 @@ import {
   ENTITY_EFFECT_DAMAGE_LEVEL_MULTIPLIER,
 } from "@providers/constants/EntityEffectsConstants";
 import { TraitGetter } from "@providers/skill/TraitGetter";
-import { BasicAttribute, EntityType } from "@rpg-engine/shared";
+import { BasicAttribute, CharacterClass, EntityType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
 
@@ -58,9 +58,10 @@ export class CalculateEffectDamage {
       const { attackerMagicLevel, attackerStrengthLevel } = await this.getAttackerMagicStrengthLevel(attackerSkills);
 
       const effectDamage = this.calculateTotalEffectDamage(
+        attacker,
         attackerLevel,
-        attackerMagicLevel,
         attackerStrengthLevel,
+        attackerMagicLevel,
         minRawDamage,
         resistanceLevel,
         magicResistanceLevel,
@@ -77,6 +78,7 @@ export class CalculateEffectDamage {
   }
 
   private calculateTotalEffectDamage(
+    attacker: ICharacter | INPC,
     attackerLevel: number,
     attackerStrengthLevel: number,
     attackerMagicLevel: number,
@@ -85,16 +87,20 @@ export class CalculateEffectDamage {
     magicResistanceLevel: number,
     options?: ICalculateDamageOptions
   ): number {
+    const baseDamageSkillLevel = this.isMage(attacker) ? attackerMagicLevel : attackerStrengthLevel;
+
     // Unified approach for calculating maxDamage
-    const baseDamage = attackerLevel * ENTITY_EFFECT_DAMAGE_LEVEL_MULTIPLIER;
-    const additionalDamage = Math.max(attackerMagicLevel, attackerStrengthLevel);
+    const baseDamage = (attackerLevel + baseDamageSkillLevel) * ENTITY_EFFECT_DAMAGE_LEVEL_MULTIPLIER;
+    const additionalDamage = attackerMagicLevel + 2 * attackerStrengthLevel;
     const maxDamage = Math.ceil(baseDamage + additionalDamage + (options?.maxBonusDamage ?? 0));
 
     // Min damage no longer relies on attackerLevel, making it constant
     const minDamage = minRawDamage;
 
     // Random number between min and max damage for attack and defense
-    const effectDamageRaw = _.random(minDamage, maxDamage);
+    const averageDamage = (minDamage + maxDamage) / 2;
+    const variance = averageDamage * 0.25; // 25% variance
+    const effectDamageRaw = _.random(averageDamage - variance, averageDamage + variance);
     const maxDefense = _.random(minRawDamage, resistanceLevel + magicResistanceLevel);
 
     // Final effect damage calculation
@@ -126,5 +132,12 @@ export class CalculateEffectDamage {
     );
 
     return { resistanceLevel, magicResistanceLevel };
+  }
+
+  private isMage(character: ICharacter | INPC): boolean {
+    return (
+      character.type === EntityType.Character &&
+      (character.class === CharacterClass.Druid || character.class === CharacterClass.Sorcerer)
+    );
   }
 }

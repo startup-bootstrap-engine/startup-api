@@ -20,7 +20,7 @@ export const spellBloodthirst: Partial<ISpell> = {
   texturePath: "spell-icons/berserker-bloodthirst.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "sanguis sitis",
-  manaCost: 120,
+  manaCost: 90,
   minLevelRequired: 4,
   minMagicLevelRequired: 3,
   cooldown: 60,
@@ -34,7 +34,7 @@ export const spellBloodthirst: Partial<ISpell> = {
 
     const timeout = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Strength, {
       min: 10,
-      max: 20,
+      max: 60,
     });
 
     const namespace = `${NamespaceRedisControl.CharacterSpell}:${character._id}`;

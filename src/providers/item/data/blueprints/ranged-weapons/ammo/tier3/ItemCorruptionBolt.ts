@@ -1,8 +1,9 @@
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
+import { IEquippableAmmoTier2Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import { RangedWeaponsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
-import { IEquippableRangedAmmoBlueprint, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import { ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
 
-export const itemCorruptionBolt: IEquippableRangedAmmoBlueprint = {
+export const itemCorruptionBolt: IEquippableAmmoTier2Blueprint = {
   key: RangedWeaponsBlueprint.CorruptionBolt,
   type: ItemType.Weapon,
   subType: ItemSubType.Ranged,
@@ -11,7 +12,8 @@ export const itemCorruptionBolt: IEquippableRangedAmmoBlueprint = {
   name: "Corruption Bolt",
   description:
     "An arrow imbued with dark, otherworldly energy. It is said to be able to ignite the air around it and to be capable of piercing even the toughest materials with ease.",
-  attack: 18,
+  attack: 22,
+  tier: 2,
   weight: 0.013,
   allowedEquipSlotType: [ItemSlotType.Accessory],
   maxStackSize: 999,

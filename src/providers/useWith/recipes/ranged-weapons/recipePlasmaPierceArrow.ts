@@ -1,10 +1,11 @@
+import { calculateMinimumLevel } from "@providers/crafting/CraftingMinLevelCalculator";
 import { CraftingResourcesBlueprint, RangedWeaponsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { IUseWithCraftingRecipe } from "@providers/useWith/useWithTypes";
 import { CraftingSkill } from "@rpg-engine/shared";
 
 export const recipePlasmaPierceArrow: IUseWithCraftingRecipe = {
   outputKey: RangedWeaponsBlueprint.PlasmaPierceArrow,
-  outputQtyRange: [1, 3],
+  outputQtyRange: [5, 10],
   requiredItems: [
     {
       key: CraftingResourcesBlueprint.IronOre,
@@ -23,5 +24,13 @@ export const recipePlasmaPierceArrow: IUseWithCraftingRecipe = {
       qty: 10,
     },
   ],
-  minCraftingRequirements: [CraftingSkill.Blacksmithing, 63],
+  minCraftingRequirements: [
+    CraftingSkill.Blacksmithing,
+    calculateMinimumLevel([
+      [CraftingResourcesBlueprint.IronOre, 12],
+      [CraftingResourcesBlueprint.BlueFeather, 15],
+      [CraftingResourcesBlueprint.PhoenixFeather, 15],
+      [CraftingResourcesBlueprint.CorruptionIngot, 10],
+    ]),
+  ],
 };

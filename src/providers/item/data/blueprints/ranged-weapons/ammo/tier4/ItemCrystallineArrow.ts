@@ -1,8 +1,9 @@
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
-import { IEquippableRangedAmmoBlueprint, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
-import { RangedWeaponsBlueprint } from "../../../types/itemsBlueprintTypes";
+import { IEquippableAmmoTier4Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
+import { ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import { RangedWeaponsBlueprint } from "../../../../types/itemsBlueprintTypes";
 
-export const itemCrystallineArrow: IEquippableRangedAmmoBlueprint = {
+export const itemCrystallineArrow: IEquippableAmmoTier4Blueprint = {
   key: RangedWeaponsBlueprint.CrystallineArrow,
   type: ItemType.Weapon,
   subType: ItemSubType.Ranged,
@@ -15,7 +16,8 @@ export const itemCrystallineArrow: IEquippableRangedAmmoBlueprint = {
   maxStackSize: 999,
   allowedEquipSlotType: [ItemSlotType.Accessory],
   basePrice: 6,
-  attack: 27,
+  attack: 35,
+  tier: 4,
   canSell: false,
   entityEffects: [EntityEffectBlueprint.Burning],
   entityEffectChance: 70,

@@ -29,7 +29,7 @@ export const spellStunTarget: Partial<ISpell> = {
   targetHitAnimationKey: AnimationEffectKeys.Rooted,
   projectileAnimationKey: AnimationEffectKeys.Energy,
   maxDistanceGrid: RangeTypes.Medium,
-  characterClass: [CharacterClass.Warrior, CharacterClass.Rogue],
+  characterClass: [CharacterClass.Warrior, CharacterClass.Rogue, CharacterClass.Berserker],
 
   usableEffect: async (character: ICharacter, target: ICharacter | INPC) => {
     const spellCalculator = container.get(SpellCalculator);

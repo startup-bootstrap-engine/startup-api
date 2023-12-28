@@ -178,10 +178,7 @@ export const npcDarkKnight: Partial<INPC> = {
       itemBlueprintKey: StaffsBlueprint.EagleEyeWand,
       chance: 1,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.WarlordBroadsword,
-      chance: 1,
-    },
+
     {
       itemBlueprintKey: HammersBlueprint.ThorHammer,
       chance: 1,

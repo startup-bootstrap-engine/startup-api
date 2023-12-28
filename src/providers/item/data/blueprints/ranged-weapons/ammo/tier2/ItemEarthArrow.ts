@@ -1,8 +1,9 @@
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
-import { IEquippableRangedAmmoBlueprint, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
-import { RangedWeaponsBlueprint } from "../../../types/itemsBlueprintTypes";
+import { IEquippableAmmoTier2Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
+import { ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import { RangedWeaponsBlueprint } from "../../../../types/itemsBlueprintTypes";
 
-export const itemEarthArrow: IEquippableRangedAmmoBlueprint = {
+export const itemEarthArrow: IEquippableAmmoTier2Blueprint = {
   key: RangedWeaponsBlueprint.EarthArrow,
   type: ItemType.Weapon,
   subType: ItemSubType.Ranged,
@@ -15,7 +16,8 @@ export const itemEarthArrow: IEquippableRangedAmmoBlueprint = {
   maxStackSize: 999,
   allowedEquipSlotType: [ItemSlotType.Accessory],
   basePrice: 8,
-  attack: 20,
+  attack: 22,
+  tier: 2,
   canSell: false,
   entityEffects: [EntityEffectBlueprint.VineGrasp],
   entityEffectChance: 70,

@@ -1,6 +1,7 @@
 import {
   IEquippableArmorBlueprint,
   IEquippableItemBlueprint,
+  IEquippableRangedAmmoBlueprint,
   IEquippableRangedWeaponOneHandedBlueprint,
   IEquippableRangedWeaponTwoHandedBlueprint,
   IEquippableStaffBlueprint,
@@ -745,6 +746,83 @@ export interface IEquippableOneHandedRangedTier4WeaponBlueprint extends IEquippa
 export interface IEquippableOneHandedRangedTier5WeaponBlueprint extends IEquippableRangedWeaponOneHandedBlueprint {
   tier: 5;
   attack: WeaponTier5Attack;
+}
+
+// Ammo ========================================
+
+export interface IEquippableAmmoTier0Blueprint extends IEquippableRangedAmmoBlueprint {
+  tier: 0;
+  attack: WeaponTier0Attack;
+}
+
+export interface IEquippableAmmoTier1Blueprint extends IEquippableRangedAmmoBlueprint {
+  tier: 1;
+  attack: WeaponTier1Attack;
+}
+
+export interface IEquippableAmmoTier2Blueprint extends IEquippableRangedAmmoBlueprint {
+  tier: 2;
+  attack: WeaponTier2Attack;
+}
+
+export interface IEquippableAmmoTier3Blueprint extends IEquippableRangedAmmoBlueprint {
+  tier: 3;
+  attack: WeaponTier3Attack;
+}
+
+export interface IEquippableAmmoTier4Blueprint extends IEquippableRangedAmmoBlueprint {
+  tier: 4;
+  attack: WeaponTier4Attack;
+}
+
+export interface IEquippableAmmoTier5Blueprint extends IEquippableRangedAmmoBlueprint {
+  tier: 5;
+  attack: WeaponTier5Attack;
+}
+
+export interface IEquippableAmmoTier6Blueprint extends IEquippableRangedAmmoBlueprint {
+  tier: 6;
+  attack: WeaponTier6Attack;
+}
+
+export interface IEquippableAmmoTier7Blueprint extends IEquippableRangedAmmoBlueprint {
+  tier: 7;
+  attack: WeaponTier7Attack;
+}
+
+export interface IEquippableAmmoTier8Blueprint extends IEquippableRangedAmmoBlueprint {
+  tier: 8;
+  attack: WeaponTier8Attack;
+}
+
+export interface IEquippableAmmoTier9Blueprint extends IEquippableRangedAmmoBlueprint {
+  tier: 9;
+  attack: WeaponTier9Attack;
+}
+
+export interface IEquippableAmmoTier10Blueprint extends IEquippableRangedAmmoBlueprint {
+  tier: 10;
+  attack: WeaponTier10Attack;
+}
+
+export interface IEquippableAmmoTier11Blueprint extends IEquippableRangedAmmoBlueprint {
+  tier: 11;
+  attack: WeaponTier11Attack;
+}
+
+export interface IEquippableAmmoTier12Blueprint extends IEquippableRangedAmmoBlueprint {
+  tier: 12;
+  attack: WeaponTier12Attack;
+}
+
+export interface IEquippableAmmoTier13Blueprint extends IEquippableRangedAmmoBlueprint {
+  tier: 13;
+  attack: WeaponTier13Attack;
+}
+
+export interface IEquippableAmmoTier14Blueprint extends IEquippableRangedAmmoBlueprint {
+  tier: 14;
+  attack: WeaponTier14Attack;
 }
 
 // Staffs ========================================

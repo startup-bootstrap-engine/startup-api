@@ -1,7 +1,8 @@
-import { IEquippableRangedAmmoBlueprint, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
-import { RangedWeaponsBlueprint } from "../../../types/itemsBlueprintTypes";
+import { IEquippableAmmoTier8Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
+import { ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import { RangedWeaponsBlueprint } from "../../../../types/itemsBlueprintTypes";
 
-export const itemWardenArrow: IEquippableRangedAmmoBlueprint = {
+export const itemWardenArrow: IEquippableAmmoTier8Blueprint = {
   key: RangedWeaponsBlueprint.WardenArrow,
   type: ItemType.Weapon,
   subType: ItemSubType.Ranged,
@@ -11,9 +12,10 @@ export const itemWardenArrow: IEquippableRangedAmmoBlueprint = {
   description:
     "Designed by skilled rangers, these arrows mark the target, making it easier for allies to focus their attacks.",
   weight: 0.08,
+  tier: 8,
   maxStackSize: 999,
   allowedEquipSlotType: [ItemSlotType.Accessory],
   basePrice: 5,
-  attack: 14,
+  attack: 58,
   canSell: false,
 };

@@ -37,6 +37,7 @@ import { recipeTitaniumBroadsword } from "./recipeTitaniumBroadsword";
 import { recipeTungstenSword } from "./recipeTungstenSword";
 import { recipeVenomStrikeSword } from "./recipeVenomStrikeSword";
 import { recipeVioletVenomSword } from "./recipeVioletVenomSword";
+import { recipeWarlordBroadsword } from "./recipeWarlordBroadsword";
 import { recipeWoodenSword } from "./recipeWoodenSword";
 import { recipeZenBroadsword } from "./recipeZenBroadsword";
 
@@ -80,4 +81,5 @@ export const recipeSwordsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [SwordsBlueprint.VioletVenomSword]: [recipeVioletVenomSword],
   [SwordsBlueprint.ZenBroadsword]: [recipeZenBroadsword],
   [SwordsBlueprint.YggdrasilBroadsword]: [recipeYggdrasilBroadsword],
+  [SwordsBlueprint.WarlordBroadsword]: [recipeWarlordBroadsword],
 };

@@ -5,7 +5,7 @@ import { CraftingSkill } from "@rpg-engine/shared";
 
 export const recipeGoldenArrow: IUseWithCraftingRecipe = {
   outputKey: RangedWeaponsBlueprint.GoldenArrow,
-  outputQtyRange: [1, 3],
+  outputQtyRange: [2, 7],
   requiredItems: [
     {
       key: CraftingResourcesBlueprint.Feather,
@@ -13,19 +13,24 @@ export const recipeGoldenArrow: IUseWithCraftingRecipe = {
     },
     {
       key: CraftingResourcesBlueprint.ElvenWood,
-      qty: 7,
+      qty: 10,
+    },
+    {
+      key: CraftingResourcesBlueprint.WoodenBoard,
+      qty: 10,
     },
     {
       key: CraftingResourcesBlueprint.GoldenIngot,
-      qty: 15,
+      qty: 25,
     },
   ],
   minCraftingRequirements: [
     CraftingSkill.Lumberjacking,
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.Feather, 10],
-      [CraftingResourcesBlueprint.ElvenWood, 7],
-      [CraftingResourcesBlueprint.GoldenIngot, 15],
+      [CraftingResourcesBlueprint.ElvenWood, 10],
+      [CraftingResourcesBlueprint.WoodenBoard, 10],
+      [CraftingResourcesBlueprint.GoldenIngot, 25],
     ]),
   ],
 };
