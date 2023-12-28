@@ -10,3 +10,11 @@ GET {{baseUrl}}/patreon/campaigns HTTP/1.1
 content-type: application/json
 
 ###
+
+
+# Patreon :: Get membership by patron status (active_patron, declined_patron, former_patron, all)
+
+GET {{baseUrl}}/patreon/campaigns/11354368/memberships/active_patron
+content-type: application/json
+
+###

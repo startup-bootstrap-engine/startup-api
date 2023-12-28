@@ -7,13 +7,25 @@ export class PremiumAccountActivator {
   public async activateUserPremiumAccount(
     user: IUser,
     accountType: UserAccountTypes,
-    expirationDate?: Date
+    patreonEmail?: string
   ): Promise<void> {
     try {
       await User.findByIdAndUpdate(user._id, {
         $set: {
           accountType: accountType,
-          premiumAccountExpirationDate: expirationDate,
+          premiumAccountPatreonEmail: patreonEmail,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  public async deactivateUserPremiumAccount(user: IUser): Promise<void> {
+    try {
+      await User.findByIdAndUpdate(user._id, {
+        $set: {
+          accountType: UserAccountTypes.Free,
         },
       });
     } catch (error) {

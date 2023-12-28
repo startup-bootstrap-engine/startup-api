@@ -1,10 +1,13 @@
+export type PatreonStatus = "active_patron" | "former_patron" | "declined_patron" | "all";
+
 interface IMemberAttributes {
   email: string;
   full_name: string;
   patron_status: string | null;
+  tier_name: string | null; // dynamically added by our API. This do not come from patreon
 }
 
-interface IMemberData {
+export interface IMemberData {
   attributes: IMemberAttributes;
   id: string;
   type: string;

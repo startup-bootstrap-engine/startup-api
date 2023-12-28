@@ -1,10 +1,22 @@
 import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { UserAccountTypes } from "@rpg-engine/shared";
 import axios from "axios";
 import qs from "qs";
-import { ICampaignMembersResponse, ICampaignsResponse } from "./PatreonTypes";
+import { ICampaignMembersResponse, ICampaignsResponse, IMemberData, PatreonStatus } from "./PatreonTypes";
 
+type PatreonTierMapping = {
+  [key in UserAccountTypes]: string;
+};
+
+const patreonTierMapping: PatreonTierMapping = {
+  [UserAccountTypes.Free]: "Free",
+  [UserAccountTypes.PremiumBronze]: "Bronze Tier",
+  [UserAccountTypes.PremiumSilver]: "Silver Tier",
+  [UserAccountTypes.PremiumGold]: "Gold Tier",
+  [UserAccountTypes.PremiumUltimate]: "Ultimate Tier",
+};
 @provideSingleton(PatreonAPI)
 export class PatreonAPI {
   private accessToken: string;
@@ -106,6 +118,25 @@ export class PatreonAPI {
     return false;
   }
 
+  public async getAllActivePatreons(): Promise<IMemberData[] | undefined> {
+    try {
+      const response = await this.getCampaignMemberships(this.campaignId);
+
+      if (!response) {
+        throw new Error("Failed to fetch campaign memberships");
+      }
+
+      const members = response.data;
+
+      // Filter the members to only include active patrons
+      const activePatrons = members.filter((member) => member.attributes.patron_status === "active_patron");
+
+      return activePatrons;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   public async validateReceiptOfOauthToken(code: string): Promise<void> {
     try {
       const data = qs.stringify({
@@ -145,28 +176,57 @@ export class PatreonAPI {
     }
   }
 
-  public async getCampaignMemberships(campaignId: string): Promise<ICampaignMembersResponse | undefined> {
+  private addTierNamesToMembers(members: any[], tiers: any[]): any[] {
+    return members.map((member: any) => {
+      const tierId = member.relationships.currently_entitled_tiers.data[0]?.id;
+      const tier = tiers.find((tier: any) => tier.id === tierId);
+      member.attributes.tier_name = tier?.attributes.title;
+      return member;
+    });
+  }
+
+  public async getCampaignMemberships(
+    campaignId: string,
+    patreon_status: PatreonStatus = "all",
+    accountType: UserAccountTypes = UserAccountTypes.Free
+  ): Promise<ICampaignMembersResponse | undefined> {
     try {
       if (!campaignId) {
         throw new Error("Missing campaignId");
       }
 
       const fields = encodeURIComponent("fields[member]") + "=email,full_name,patron_status";
+      const include = encodeURIComponent("include") + "=currently_entitled_tiers";
+      const tierFields = encodeURIComponent("fields[tier]") + "=title";
       const response = await this.makeRequest(
         "get",
-        `https://www.patreon.com/api/oauth2/v2/campaigns/${campaignId}/members?${fields}`
+        `https://www.patreon.com/api/oauth2/v2/campaigns/${campaignId}/members?${fields}&${include}&${tierFields}`
       );
-      return response?.data;
+
+      if (response?.data) {
+        let { data: members, included: tiers } = response.data;
+
+        if (patreon_status !== "all") {
+          members = members.filter((member) => member.attributes.patron_status === patreon_status);
+        }
+
+        if (accountType !== UserAccountTypes.Free) {
+          const tierName = patreonTierMapping[accountType];
+          members = members.filter((member) =>
+            member.relationships.currently_entitled_tiers.data.some((tier: any) => tier.title === tierName)
+          );
+        }
+
+        const updatedMembers = this.addTierNamesToMembers(members, tiers);
+
+        return { ...response.data, data: updatedMembers };
+      }
     } catch (error) {
       if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
         console.error(error.response.data);
       } else if (error.request) {
-        // The request was made but no response was received
         console.error(error.request);
       } else {
-        // Something happened in setting up the request that triggered an Error
         console.error("Error", error.message);
       }
     }

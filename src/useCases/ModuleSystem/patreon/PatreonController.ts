@@ -1,4 +1,5 @@
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
+import { PatreonStatus } from "@providers/patreon/PatreonTypes";
 import { controller, httpGet, interfaces, queryParam, requestParam, response } from "inversify-express-utils";
 
 @controller("/patreon")
@@ -24,15 +25,19 @@ export class PatreonController implements interfaces.Controller {
     });
   }
 
-  @httpGet("/campaigns/:campaignId/memberships")
-  public async listCampaignMembers(@response() res, @requestParam("campaignId") campaignId: string): Promise<void> {
+  @httpGet("/campaigns/:campaignId/memberships/:status")
+  public async listCampaignMembers(
+    @response() res,
+    @requestParam("campaignId") campaignId: string,
+    @requestParam("status") status: PatreonStatus
+  ): Promise<void> {
     if (!campaignId) {
       return res.status(400).send({
         message: "Missing campaignId",
       });
     }
 
-    const members = await this.patreonAPI.getCampaignMemberships(campaignId);
+    const members = await this.patreonAPI.getCampaignMemberships(campaignId, status);
 
     return res.status(200).send({
       members: members,
