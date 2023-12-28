@@ -42,8 +42,6 @@ export class PatreonAPI {
         `);
       }
 
-      console.log(appEnv.patreon);
-
       this.accessToken = appEnv.patreon.accessToken!;
       this.refreshToken = appEnv.patreon.refreshToken!;
       const expiresIn = appEnv.patreon.accessTokenExpiration!;
