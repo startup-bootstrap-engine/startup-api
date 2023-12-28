@@ -15,9 +15,6 @@ export class PatreonController implements interfaces.Controller {
     });
   }
 
-  // list campaigns
-  // list members
-
   @httpGet("/campaigns")
   public async listCampaigns(@response() res): Promise<void> {
     const campaigns = await this.patreonAPI.fetchCampaigns();

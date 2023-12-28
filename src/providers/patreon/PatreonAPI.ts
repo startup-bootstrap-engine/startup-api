@@ -138,12 +138,8 @@ export class PatreonAPI {
 
   public async fetchCampaigns(): Promise<ICampaignsResponse | undefined> {
     try {
-      const response = await axios.get("https://www.patreon.com/api/oauth2/v2/campaigns", {
-        headers: {
-          Authorization: `Bearer ${this.accessToken}`,
-        },
-      });
-      return response.data;
+      const response = await this.makeRequest("get", "https://www.patreon.com/api/oauth2/v2/campaigns");
+      return response?.data;
     } catch (error) {
       console.error(error);
     }
@@ -156,15 +152,11 @@ export class PatreonAPI {
       }
 
       const fields = encodeURIComponent("fields[member]") + "=email,full_name,patron_status";
-      const response = await axios.get(
-        `https://www.patreon.com/api/oauth2/v2/campaigns/${campaignId}/members?${fields}`,
-        {
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`,
-          },
-        }
+      const response = await this.makeRequest(
+        "get",
+        `https://www.patreon.com/api/oauth2/v2/campaigns/${campaignId}/members?${fields}`
       );
-      return response.data;
+      return response?.data;
     } catch (error) {
       if (error.response) {
         // The request was made and the server responded with a status code
@@ -180,13 +172,21 @@ export class PatreonAPI {
     }
   }
 
-  private async makeRequest(url: string, headers?: Record<string, unknown>): Promise<any> {
+  private async makeRequest(
+    method: "get" | "post",
+    url: string,
+    data?: any,
+    headers?: Record<string, unknown>
+  ): Promise<any> {
     if (!this.isAccessTokenValid()) {
       await this.refreshAccessToken();
     }
 
     try {
-      const response = await axios.get(url, {
+      const response = await axios({
+        method,
+        url,
+        data,
         headers: {
           Authorization: `Bearer ${this.accessToken}`,
           ...headers,

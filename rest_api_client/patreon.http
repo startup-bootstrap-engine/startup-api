@@ -1,0 +1,12 @@
+# Patreon :: Get authentication URL
+GET {{baseUrl}}/patreon/authenticate HTTP/1.1
+content-type: application/json
+
+###
+
+# Patreon :: Get campaign ID
+
+GET {{baseUrl}}/patreon/campaigns HTTP/1.1
+content-type: application/json
+
+###
