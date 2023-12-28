@@ -1,5 +1,4 @@
 import { appEnv } from "@providers/config/env";
-import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { UserAccountTypes } from "@rpg-engine/shared";
 import axios from "axios";
@@ -29,9 +28,9 @@ export class PatreonAPI {
 
   private scopes = ["identity", "identity[email]", "identity.memberships", "campaigns.members[email]"];
 
-  constructor(private inMemoryHashTable: InMemoryHashTable) {}
+  constructor() {}
 
-  public async initialize(): Promise<void> {
+  public initialize(): void {
     try {
       if (!this.clientId || !this.clientSecret || !this.redirectURI || !this.campaignId) {
         throw new Error(`Failed to authenticate with Patreon API.
@@ -43,17 +42,18 @@ export class PatreonAPI {
         `);
       }
 
-      const patreonCredentials = await this.inMemoryHashTable.get("patreon-api", "credentials");
+      this.accessToken = appEnv.patreon.accessToken!;
+      this.refreshToken = appEnv.patreon.refreshToken!;
+      const expiresIn = Number(appEnv.patreon.accessTokenExpiration)!;
 
-      if (!patreonCredentials) {
-        throw new Error(
-          "Failed to authenticate with Patreon API: Missing credentials. Please authenticate reaching the /patreon/authenticate endpoint"
-        );
+      if (!this.accessToken || !this.refreshToken || !expiresIn) {
+        throw new Error(`Failed to authenticate with Patreon API.
+          Some of these credentials are missing:
+          accessToken: ${this.accessToken}
+          refreshToken: ${this.refreshToken}
+          accessTokenExpiration: ${expiresIn}
+        `);
       }
-
-      this.accessToken = patreonCredentials.access_token;
-      this.refreshToken = patreonCredentials.refresh_token;
-      const expiresIn = patreonCredentials.expires_in;
 
       this.accessTokenExpiration = new Date(Date.now() + expiresIn * 1000);
     } catch (error) {
@@ -140,7 +140,9 @@ export class PatreonAPI {
     }
   }
 
-  public async validateReceiptOfOauthToken(code: string): Promise<void> {
+  public async validateReceiptOfOauthToken(
+    code: string
+  ): Promise<{ access_token: string; refresh_token: string; expires_in: number } | undefined> {
     try {
       const data = qs.stringify({
         grant_type: "authorization_code",
@@ -158,13 +160,7 @@ export class PatreonAPI {
 
       const { access_token, refresh_token, expires_in } = response.data;
 
-      await this.inMemoryHashTable.delete("patreon-api", "credentials");
-
-      await this.inMemoryHashTable.set("patreon-api", "credentials", {
-        access_token,
-        refresh_token,
-        expires_in,
-      });
+      return { access_token, refresh_token, expires_in };
     } catch (error) {
       console.error(error);
     }

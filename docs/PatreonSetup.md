@@ -31,6 +31,10 @@ PATREON_CLIENT_ID="Your Patreon Client ID"
 PATREON_CLIENT_SECRET="Your Patreon Client Secret"
 PATREON_REDIRECT_URI="Your Redirect URI"
 PATREON_CAMPAIGN_ID="Your Patreon Campaign ID"
+
+PATREON_ACCESS_TOKEN="Check the Authentication step"
+PATREON_REFRESH_TOKEN="Check the Authentication step"
+PATREON_ACCESS_TOKEN_EXPIRATION="Check the Authentication step"
 ```
 
 Replace "Your Patreon Client ID", "Your Patreon Client Secret", "Your Redirect URI", and "Your Patreon Campaign ID" with the actual values.
@@ -43,7 +47,7 @@ Only on the first time, you will need to authenticate your application with Patr
 /patreon/authenticate
 ```
 
-This will automatically save the access token and refresh token on redis, for later usage.
+This will return the access token, refresh token, and expiration time. You will need to update the `.env` file with these values.
 
 ### Getting the Campaign ID
 

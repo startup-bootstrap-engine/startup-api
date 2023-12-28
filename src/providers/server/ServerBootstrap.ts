@@ -105,7 +105,7 @@ export class ServerBootstrap {
   }
 
   private async execOneTimeOperations(): Promise<void> {
-    await this.patreonAPI.initialize();
+    this.patreonAPI.initialize();
 
     await this.socketSessionControl.clearAllSessions();
 

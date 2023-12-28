@@ -50,11 +50,11 @@ export class PatreonController implements interfaces.Controller {
   public async patreonCallback(@response() res, @queryParam("code") code: string): Promise<void> {
     // validate receipt of oauth token
 
-    await this.patreonAPI.validateReceiptOfOauthToken(code);
+    const result = await this.patreonAPI.validateReceiptOfOauthToken(code);
 
     return res.status(200).send({
-      message: "Patreon callback received successfully!",
-      code: code,
+      message: "Patreon callback received successfully! Please copy this info to your .env file",
+      ...result,
     });
   }
 }
