@@ -64,116 +64,136 @@ export class SkillIncrease {
     damage: number,
     spellHit?: boolean
   ): Promise<void> {
-    const skills = await this.fetchCharacterSkills(attacker);
+    try {
+      const skills = await this.fetchCharacterSkills(attacker);
 
-    const weapon = await this.characterWeapon.getWeapon(attacker);
-    const weaponSubType = weapon?.item ? weapon?.item.subType || "None" : "None";
-    const skillName = SKILLS_MAP.get(weaponSubType);
+      if (!skills) {
+        throw new Error(`skills not found for character ${attacker.id}`);
+      }
 
-    if (!skillName) {
-      throw new Error(`Skill not found for weapon ${weaponSubType}`);
+      const weapon = await this.characterWeapon.getWeapon(attacker);
+      const weaponSubType = weapon?.item ? weapon?.item.subType || "None" : "None";
+      const skillName = SKILLS_MAP.get(weaponSubType);
+
+      if (!skillName) {
+        throw new Error(`Skill not found for weapon ${weaponSubType}`);
+      }
+
+      await this.npcExperience.recordXPinBattle(attacker, target, damage);
+
+      if (spellHit) {
+        return;
+      }
+
+      const canIncreaseSP = await await this.skillGainValidation.canUpdateSkills(attacker, skills, skillName);
+      if (!canIncreaseSP) return;
+
+      const targetSkills = target.skills as ISkill;
+
+      const increasedWeaponSP = this.increaseSP(
+        skills,
+        weaponSubType,
+        undefined,
+        SKILLS_MAP,
+        this.skillFunctions.calculateBonus(targetSkills?.level)
+      );
+
+      let increasedStrengthSP;
+      if (weaponSubType !== ItemSubType.Magic && weaponSubType !== ItemSubType.Staff) {
+        increasedStrengthSP = this.increaseSP(skills, BasicAttribute.Strength);
+      }
+
+      await this.skillFunctions.updateSkills(skills, attacker);
+      await this.characterBonusPenalties.applyRaceBonusPenalties(attacker, weaponSubType);
+
+      if (weaponSubType !== ItemSubType.Magic && weaponSubType !== ItemSubType.Staff) {
+        await this.characterBonusPenalties.applyRaceBonusPenalties(attacker, BasicAttribute.Strength);
+      }
+
+      if (increasedStrengthSP?.skillLevelUp && attacker.channelId) {
+        await this.skillFunctions.sendSkillLevelUpEvents(increasedStrengthSP, attacker, target);
+        void this.characterWeight.updateCharacterWeight(attacker);
+      }
+
+      if (increasedWeaponSP?.skillLevelUp && attacker.channelId) {
+        await this.skillFunctions.sendSkillLevelUpEvents(increasedWeaponSP, attacker, target);
+      }
+
+      if (increasedStrengthSP?.skillLevelUp || increasedWeaponSP?.skillLevelUp) {
+        const skillData = increasedStrengthSP?.skillLevelUp ? increasedStrengthSP : increasedWeaponSP;
+        const isMultipleOfTen = skillData.skillLevelAfter % 10 === 0;
+
+        if (skillData && isMultipleOfTen) {
+          const message = this.discordBot.getRandomLevelUpMessage(
+            attacker.name,
+            skillData.skillLevelAfter,
+            skillData.skillName
+          );
+          const channel = "achievements";
+          const title = "Skill Level Up!";
+
+          await this.discordBot.sendMessageWithColor(message, channel, title);
+        }
+      }
+    } catch (error) {
+      console.error(error);
     }
+  }
 
-    await this.npcExperience.recordXPinBattle(attacker, target, damage);
+  @TrackNewRelicTransaction()
+  public async increaseShieldingSP(character: ICharacter): Promise<void> {
+    try {
+      const hasShield = await this.characterWeapon.hasShield(character);
 
-    if (spellHit) {
-      return;
-    }
+      if (!hasShield) {
+        return;
+      }
 
-    const canIncreaseSP = this.skillGainValidation.canUpdateSkills(attacker, skills, skillName);
-    if (!canIncreaseSP) return;
+      let skills = character.skills as ISkill;
 
-    const targetSkills = target.skills as ISkill;
+      if (!skills.level) {
+        skills = (await this.fetchCharacterSkills(character)) as ISkill;
+      }
 
-    const increasedWeaponSP = this.increaseSP(
-      skills,
-      weaponSubType,
-      undefined,
-      SKILLS_MAP,
-      this.skillFunctions.calculateBonus(targetSkills?.level)
-    );
+      if (!skills) {
+        throw new Error(`skills not found for character ${character.id}`);
+      }
 
-    let increasedStrengthSP;
-    if (weaponSubType !== ItemSubType.Magic && weaponSubType !== ItemSubType.Staff) {
-      increasedStrengthSP = this.increaseSP(skills, BasicAttribute.Strength);
-    }
+      if (!character) {
+        throw new Error("character not found");
+      }
+      const canIncreaseSP = await this.skillGainValidation.canUpdateSkills(character, skills as ISkill, "shielding");
 
-    await this.skillFunctions.updateSkills(skills, attacker);
-    await this.characterBonusPenalties.applyRaceBonusPenalties(attacker, weaponSubType);
+      if (!canIncreaseSP) {
+        return;
+      }
 
-    if (weaponSubType !== ItemSubType.Magic && weaponSubType !== ItemSubType.Staff) {
-      await this.characterBonusPenalties.applyRaceBonusPenalties(attacker, BasicAttribute.Strength);
-    }
+      const result = this.increaseSP(skills, ItemSubType.Shield) as IIncreaseSPResult;
 
-    if (increasedStrengthSP?.skillLevelUp && attacker.channelId) {
-      await this.skillFunctions.sendSkillLevelUpEvents(increasedStrengthSP, attacker, target);
-      void this.characterWeight.updateCharacterWeight(attacker);
-    }
-
-    if (increasedWeaponSP?.skillLevelUp && attacker.channelId) {
-      await this.skillFunctions.sendSkillLevelUpEvents(increasedWeaponSP, attacker, target);
-    }
-
-    if (increasedStrengthSP?.skillLevelUp || increasedWeaponSP?.skillLevelUp) {
-      const skillData = increasedStrengthSP?.skillLevelUp ? increasedStrengthSP : increasedWeaponSP;
-      const isMultipleOfTen = skillData.skillLevelAfter % 10 === 0;
-
-      if (skillData && isMultipleOfTen) {
+      const isMultipleOfTen = result.skillLevelAfter % 10 === 0;
+      if (result.skillLevelUp && isMultipleOfTen) {
         const message = this.discordBot.getRandomLevelUpMessage(
-          attacker.name,
-          skillData.skillLevelAfter,
-          skillData.skillName
+          character.name,
+          result.skillLevelAfter,
+          result.skillName
         );
         const channel = "achievements";
         const title = "Skill Level Up!";
 
         await this.discordBot.sendMessageWithColor(message, channel, title);
       }
-    }
-  }
 
-  @TrackNewRelicTransaction()
-  public async increaseShieldingSP(character: ICharacter): Promise<void> {
-    const hasShield = await this.characterWeapon.hasShield(character);
+      await this.skillFunctions.updateSkills(skills, character);
 
-    if (!hasShield) {
-      return;
-    }
+      if (!_.isEmpty(result)) {
+        if (result.skillLevelUp && character.channelId) {
+          await this.skillFunctions.sendSkillLevelUpEvents(result, character);
+        }
 
-    let skills = character.skills as ISkill;
-
-    if (!skills.level) {
-      skills = await this.fetchCharacterSkills(character);
-    }
-
-    if (!character) {
-      throw new Error("character not found");
-    }
-    const canIncreaseSP = this.skillGainValidation.canUpdateSkills(character, skills as ISkill, "shielding");
-
-    if (!canIncreaseSP) {
-      return;
-    }
-
-    const result = this.increaseSP(skills, ItemSubType.Shield) as IIncreaseSPResult;
-
-    const isMultipleOfTen = result.skillLevelAfter % 10 === 0;
-    if (result.skillLevelUp && isMultipleOfTen) {
-      const message = this.discordBot.getRandomLevelUpMessage(character.name, result.skillLevelAfter, result.skillName);
-      const channel = "achievements";
-      const title = "Skill Level Up!";
-
-      await this.discordBot.sendMessageWithColor(message, channel, title);
-    }
-
-    await this.skillFunctions.updateSkills(skills, character);
-
-    if (!_.isEmpty(result)) {
-      if (result.skillLevelUp && character.channelId) {
-        await this.skillFunctions.sendSkillLevelUpEvents(result, character);
+        await this.characterBonusPenalties.applyRaceBonusPenalties(character, ItemSubType.Shield);
       }
-
-      await this.characterBonusPenalties.applyRaceBonusPenalties(character, ItemSubType.Shield);
+    } catch (error) {
+      console.error(error);
     }
   }
 
@@ -201,91 +221,116 @@ export class SkillIncrease {
     attribute: BasicAttribute,
     skillPointsCalculator?: Function
   ): Promise<void> {
-    if (!character.skills) {
-      throw new Error(`skills not found for character ${character.id}`);
-    }
-
-    const skills = await this.fetchCharacterSkills(character);
-
-    const canIncreaseSP = this.skillGainValidation.canUpdateSkills(character, skills as ISkill, attribute);
-
-    if (!canIncreaseSP) {
-      return;
-    }
-
-    const result = this.increaseSP(skills, attribute, skillPointsCalculator);
-    await this.skillFunctions.updateSkills(skills, character);
-
-    if (result.skillLevelUp && character.channelId) {
-      // If BasicAttribute(except dexterity) level up we clean the data from Redis
-      if (attribute !== BasicAttribute.Dexterity && skills.owner) {
-        await this.inMemoryHashTable.delete(skills.owner.toString(), "totalAttack");
-        await this.inMemoryHashTable.delete(skills.owner.toString(), "totalDefense");
+    try {
+      if (!character.skills) {
+        throw new Error(`skills not found for character ${character.id}`);
       }
 
-      await this.skillFunctions.sendSkillLevelUpEvents(result, character);
+      const skills = await this.fetchCharacterSkills(character);
 
-      const isMultipleOfTen = result.skillLevelAfter % 10 === 0;
-      if (isMultipleOfTen) {
-        const message = this.discordBot.getRandomLevelUpMessage(
-          character.name,
-          result.skillLevelAfter,
-          result.skillName
-        );
-        const channel = "achievements";
-        const title = "Skill Level Up!";
-
-        await this.discordBot.sendMessageWithColor(message, channel, title);
+      if (!skills) {
+        throw new Error(`skills not found for character ${character.id}`);
       }
-    }
 
-    await this.characterBonusPenalties.applyRaceBonusPenalties(character, attribute);
+      const canIncreaseSP = await this.skillGainValidation.canUpdateSkills(character, skills as ISkill, attribute);
+
+      if (!canIncreaseSP) {
+        return;
+      }
+
+      const result = this.increaseSP(skills, attribute, skillPointsCalculator);
+
+      if (!result) {
+        throw new Error(`increaseSP result not found for character ${character.id}`);
+      }
+
+      await this.skillFunctions.updateSkills(skills, character);
+
+      if (result.skillLevelUp && character.channelId) {
+        // If BasicAttribute(except dexterity) level up we clean the data from Redis
+        if (attribute !== BasicAttribute.Dexterity && skills.owner) {
+          await this.inMemoryHashTable.delete(skills.owner.toString(), "totalAttack");
+          await this.inMemoryHashTable.delete(skills.owner.toString(), "totalDefense");
+        }
+
+        await this.skillFunctions.sendSkillLevelUpEvents(result, character);
+
+        const isMultipleOfTen = result.skillLevelAfter % 10 === 0;
+        if (isMultipleOfTen) {
+          const message = this.discordBot.getRandomLevelUpMessage(
+            character.name,
+            result.skillLevelAfter,
+            result.skillName
+          );
+          const channel = "achievements";
+          const title = "Skill Level Up!";
+
+          await this.discordBot.sendMessageWithColor(message, channel, title);
+        }
+      }
+
+      await this.characterBonusPenalties.applyRaceBonusPenalties(character, attribute);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   @TrackNewRelicTransaction()
   public async increaseCraftingSP(character: ICharacter, craftedItemKey: string, isSuccess: boolean): Promise<void> {
-    const skillToUpdate = this.skillMapper.getCraftingSkillToUpdate(craftedItemKey);
+    try {
+      const skillToUpdate = this.skillMapper.getCraftingSkillToUpdate(craftedItemKey);
 
-    if (!skillToUpdate) {
-      throw new Error(`skill not found for item ${craftedItemKey}`);
-    }
+      if (!skillToUpdate) {
+        throw new Error(`skill not found for item ${craftedItemKey}`);
+      }
 
-    const skills = (await Skill.findById(character.skills)) as unknown as ISkill;
-    if (!skills) {
-      throw new Error(`skills not found for character ${character.id}`);
-    }
+      const skills = (await Skill.findById(character.skills)) as unknown as ISkill;
+      if (!skills) {
+        throw new Error(`skills not found for character ${character.id}`);
+      }
 
-    const canIncreaseSP = this.skillGainValidation.canUpdateSkills(character, skills as ISkill, skillToUpdate);
+      const canIncreaseSP = await this.skillGainValidation.canUpdateSkills(character, skills as ISkill, skillToUpdate);
 
-    if (!canIncreaseSP) {
-      return;
-    }
+      if (!canIncreaseSP) {
+        return;
+      }
 
-    const craftSkillPointsCalculator = (skillDetails: ISkillDetails): number => {
-      return this.calculateNewCraftSP(skillDetails);
-    };
+      const craftSkillPointsCalculator = (skillDetails: ISkillDetails): number => {
+        return this.calculateNewCraftSP(skillDetails);
+      };
 
-    const result = this.increaseSP(skills, craftedItemKey, craftSkillPointsCalculator, CraftingSkillsMap);
-    await this.skillFunctions.updateSkills(skills, character);
+      const result = this.increaseSP(skills, craftedItemKey, craftSkillPointsCalculator, CraftingSkillsMap);
+      await this.skillFunctions.updateSkills(skills, character);
 
-    await this.characterBonusPenalties.applyRaceBonusPenalties(character, skillToUpdate);
+      await this.characterBonusPenalties.applyRaceBonusPenalties(character, skillToUpdate);
 
-    if (result.skillLevelUp && character.channelId) {
-      await this.skillFunctions.sendSkillLevelUpEvents(result, character);
+      if (!result) {
+        throw new Error(`increaseSP result not found for character ${character.id}`);
+      }
+
+      if (result.skillLevelUp && character.channelId) {
+        await this.skillFunctions.sendSkillLevelUpEvents(result, character);
+      }
+    } catch (error) {
+      console.error(error);
     }
   }
 
   @TrackNewRelicTransaction()
-  private async fetchCharacterSkills(character: ICharacter): Promise<ISkill> {
-    const skills = (await Skill.findById(character.skills)
-      .lean({ virtuals: true, defaults: true })
-      .cacheQuery({ cacheKey: `${character._id}-skills` })) as unknown as ISkill;
+  private async fetchCharacterSkills(character: ICharacter): Promise<ISkill | undefined> {
+    try {
+      const skills = (await Skill.findById(character.skills)
+        .lean({ virtuals: true, defaults: true })
+        .cacheQuery({ cacheKey: `${character._id}-skills` })) as unknown as ISkill;
 
-    if (!skills) {
-      throw new Error(`skills not found for character ${character.id}`);
+      if (!skills) {
+        throw new Error(`skills not found for character ${character.id}`);
+      }
+
+      return skills;
+    } catch (error) {
+      console.error(error);
     }
-
-    return skills;
   }
 
   private increaseSP(
@@ -294,76 +339,90 @@ export class SkillIncrease {
     skillPointsCalculator?: Function,
     skillsMap: Map<string, string> = SKILLS_MAP,
     bonus?: number
-  ): IIncreaseSPResult {
-    // Validate skillKey is not undefined, null, or an unexpected type
-    if (typeof skillKey !== "string" || !skillKey.trim()) {
-      throw new Error(`Invalid or empty skillKey provided: ${skillKey}`);
-    }
+  ): IIncreaseSPResult | undefined {
+    try {
+      // Validate skillKey is not undefined, null, or an unexpected type
+      if (typeof skillKey !== "string" || !skillKey.trim()) {
+        throw new Error(`Invalid or empty skillKey provided: ${skillKey}`);
+      }
 
-    let skillLevelUp = false;
-    // Ensure the skillKey exists in the skillsMap or can be mapped by the skillMapper
-    const skillToUpdate = skillsMap.get(skillKey) ?? this.skillMapper.getCraftingSkillToUpdate(skillKey);
+      let skillLevelUp = false;
+      // Ensure the skillKey exists in the skillsMap or can be mapped by the skillMapper
+      const skillToUpdate = skillsMap.get(skillKey) ?? this.skillMapper.getCraftingSkillToUpdate(skillKey);
 
-    if (!skillToUpdate) {
-      throw new Error(`skill not found for item subtype ${skillKey}`);
-    }
+      if (!skillToUpdate) {
+        throw new Error(`skill not found for item subtype ${skillKey}`);
+      }
 
-    if (!skillPointsCalculator) {
-      skillPointsCalculator = (skillDetails: ISkillDetails, bonus?: number): number => {
-        return this.calculateNewSP(skillDetails, bonus);
-      };
-    }
+      if (!skillPointsCalculator) {
+        skillPointsCalculator = (skillDetails: ISkillDetails, bonus?: number): number => {
+          const newSP = this.calculateNewSP(skillDetails, bonus);
 
-    const updatedSkillDetails = skills[skillToUpdate] as ISkillDetails;
+          if (!newSP) {
+            throw new Error(`newSP not found for skill ${skillKey}`);
+          }
 
-    updatedSkillDetails.skillPoints = skillPointsCalculator(updatedSkillDetails, bonus);
-    updatedSkillDetails.skillPointsToNextLevel = this.skillCalculator.calculateSPToNextLevel(
-      updatedSkillDetails.skillPoints,
-      updatedSkillDetails.level + 1
-    );
+          return newSP;
+        };
+      }
 
-    if (updatedSkillDetails.skillPointsToNextLevel <= 0) {
-      skillLevelUp = true;
+      const updatedSkillDetails = skills[skillToUpdate] as ISkillDetails;
 
-      updatedSkillDetails.level++;
-
+      updatedSkillDetails.skillPoints = skillPointsCalculator(updatedSkillDetails, bonus);
       updatedSkillDetails.skillPointsToNextLevel = this.skillCalculator.calculateSPToNextLevel(
         updatedSkillDetails.skillPoints,
         updatedSkillDetails.level + 1
       );
 
-      this.newRelic.trackMetric(
-        NewRelicMetricCategory.Count,
-        NewRelicSubCategory.Characters,
-        `${skillToUpdate}-SkillUp`,
-        1
-      );
+      if (updatedSkillDetails.skillPointsToNextLevel <= 0) {
+        skillLevelUp = true;
+
+        updatedSkillDetails.level++;
+
+        updatedSkillDetails.skillPointsToNextLevel = this.skillCalculator.calculateSPToNextLevel(
+          updatedSkillDetails.skillPoints,
+          updatedSkillDetails.level + 1
+        );
+
+        this.newRelic.trackMetric(
+          NewRelicMetricCategory.Count,
+          NewRelicSubCategory.Characters,
+          `${skillToUpdate}-SkillUp`,
+          1
+        );
+      }
+
+      skills[skillToUpdate] = updatedSkillDetails;
+
+      return {
+        skillName: skillToUpdate,
+        skillLevelBefore: this.numberFormatter.formatNumber(updatedSkillDetails.level - 1),
+        skillLevelAfter: this.numberFormatter.formatNumber(updatedSkillDetails.level),
+        skillLevelUp,
+        skillPoints: Math.round(updatedSkillDetails.skillPoints),
+        skillPointsToNextLevel: Math.round(updatedSkillDetails.skillPointsToNextLevel),
+      };
+    } catch (error) {
+      console.error(error);
     }
-
-    skills[skillToUpdate] = updatedSkillDetails;
-
-    return {
-      skillName: skillToUpdate,
-      skillLevelBefore: this.numberFormatter.formatNumber(updatedSkillDetails.level - 1),
-      skillLevelAfter: this.numberFormatter.formatNumber(updatedSkillDetails.level),
-      skillLevelUp,
-      skillPoints: Math.round(updatedSkillDetails.skillPoints),
-      skillPointsToNextLevel: Math.round(updatedSkillDetails.skillPointsToNextLevel),
-    };
   }
 
-  private calculateNewSP(skillDetails: ISkillDetails, bonus?: number): number {
-    let spIncreaseRatio = SP_INCREASE_BASE;
+  private calculateNewSP(skillDetails: ISkillDetails, bonus?: number): number | undefined {
+    try {
+      let spIncreaseRatio = SP_INCREASE_BASE;
 
-    // increase combat related skills faster
-    if (skillDetails.level < 10) {
-      spIncreaseRatio += LOW_SKILL_LEVEL_SP_INCREASE_BONUS;
-    }
+      // increase combat related skills faster
+      if (skillDetails.level < 10) {
+        spIncreaseRatio += LOW_SKILL_LEVEL_SP_INCREASE_BONUS;
+      }
 
-    if (typeof bonus === "number") {
-      spIncreaseRatio += bonus;
+      if (typeof bonus === "number") {
+        spIncreaseRatio += bonus;
+      }
+      return Math.round((skillDetails.skillPoints + spIncreaseRatio) * 100) / 100;
+    } catch (error) {
+      console.error(error);
     }
-    return Math.round((skillDetails.skillPoints + spIncreaseRatio) * 100) / 100;
   }
 
   private calculateNewCraftSP(skillDetails: ISkillDetails): number {
@@ -374,27 +433,31 @@ export class SkillIncrease {
     spellPower: number,
     characterClass: CharacterClass,
     isMagicLevelIncrease: boolean = true
-  ): Function {
-    // mages should increase ML faster
+  ): Function | undefined {
+    try {
+      // mages should increase ML faster
 
-    let ratio = 1;
+      let ratio = 1;
 
-    if (isMagicLevelIncrease) {
-      switch (characterClass) {
-        case CharacterClass.Druid:
-        case CharacterClass.Sorcerer:
-          ratio = ML_INCREASE_RATIO_MAGE;
-          break;
-        default:
-          ratio = ML_INCREASE_RATIO_OTHERS;
+      if (isMagicLevelIncrease) {
+        switch (characterClass) {
+          case CharacterClass.Druid:
+          case CharacterClass.Sorcerer:
+            ratio = ML_INCREASE_RATIO_MAGE;
+            break;
+          default:
+            ratio = ML_INCREASE_RATIO_OTHERS;
 
-          break;
+            break;
+        }
       }
-    }
 
-    return ((power: number, skillDetails: ISkillDetails): number => {
-      const manaSp = Math.round((spellPower * ratio + power) * SP_MAGIC_INCREASE_TIMES_MANA * 100) / 100;
-      return this.calculateNewSP(skillDetails) + manaSp * ratio;
-    }).bind(this, spellPower);
+      return ((power: number, skillDetails: ISkillDetails): number => {
+        const manaSp = Math.round((spellPower * ratio + power) * SP_MAGIC_INCREASE_TIMES_MANA * 100) / 100;
+        return (this.calculateNewSP(skillDetails) ?? 0) + manaSp * ratio;
+      }).bind(this, spellPower);
+    } catch (error) {
+      console.error(error);
+    }
   }
 }

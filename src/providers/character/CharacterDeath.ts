@@ -163,8 +163,6 @@ export class CharacterDeath {
 
       this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Characters, "Death", 1);
 
-      await this.clearCache(character);
-
       await this.characterWeight.updateCharacterWeight(character);
 
       await this.sendRefreshEquipmentEvent(character);
@@ -172,6 +170,8 @@ export class CharacterDeath {
       console.error(err);
     } finally {
       await entityEffectUse.clearAllEntityEffects(character); // make sure to clear all entity effects before respawn
+
+      await this.clearCache(character);
 
       await this.respawnCharacter(character);
     }
@@ -288,6 +288,8 @@ export class CharacterDeath {
     await clearCacheForKey(`${character._id}-inventory`);
     await this.inMemoryHashTable.delete("equipment-slots", character._id);
     await this.inMemoryHashTable.deleteAll(`${character._id}-skill-level-with-buff`);
+    await clearCacheForKey(`characterBuffs_${character._id}`);
+    await clearCacheForKey(`${character._id}-skills`);
   }
 
   private async sendRefreshEquipmentEvent(character: ICharacter): Promise<void> {
