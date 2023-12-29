@@ -14,6 +14,7 @@ import { npcClimber } from "./NPCClimber";
 import { npcDurganIronVein } from "./NPCDurganIronVein";
 import { npcDynastyWoman1 } from "./NPCDynastyWoman1";
 import { npcDynastyWoman2 } from "./NPCDynastyWoman2";
+import { npcEldenTimberheart } from "./NPCEldenTimberheart";
 import { npcFatBaldMan } from "./NPCFatBaldMan";
 import { npcFather } from "./NPCFather";
 import { npcFelicia } from "./NPCFelicia";
@@ -28,6 +29,7 @@ import { npcMaleNobleBlackHair } from "./NPCMaleNobleBlackHair";
 import { npcMaria } from "./NPCMaria";
 import { npcMarlinTheFisherman } from "./NPCMarlinFisherman";
 import { npcMother } from "./NPCMother";
+import { npcRagnokHornbreaker } from "./NPCRagnokHornbreaker";
 import { npcSeniorKnight } from "./NPCSeniorKnight1";
 import { npcShaman } from "./NPCShaman";
 import { npcStoryTeller } from "./NPCStoryTeller";
@@ -72,6 +74,8 @@ export const friendlyNPCs = {
   [FriendlyNPCsBlueprint.Climber]: npcClimber,
   [FriendlyNPCsBlueprint.MarlinFisherman]: npcMarlinTheFisherman,
   [FriendlyNPCsBlueprint.DurganIronVein]: npcDurganIronVein,
+  [FriendlyNPCsBlueprint.EldenTimberheart]: npcEldenTimberheart,
+  [FriendlyNPCsBlueprint.RagnokHornbreaker]: npcRagnokHornbreaker,
 
   // Market
   [FriendlyNPCsBlueprint.Banker]: npcBanker,
