@@ -9,12 +9,13 @@ export class ItemContainerBodyCleaner {
   @TrackNewRelicTransaction()
   public async cleanupBodies(): Promise<void> {
     try {
-      const charBodyItems = await this.findCharBodiesToBeDeleted();
+      const bodyItems = await this.findBodiesToBeDeleted();
+
       const itemContainerIds: string[] = [];
       const itemIds: string[] = [];
 
       // Create an array of promises to be resolved
-      const charBodyRemovals = charBodyItems.map(async (charBodyItem) => {
+      const charBodyRemovals = bodyItems.map(async (charBodyItem) => {
         const itemContainer = await ItemContainer.findOne({ _id: charBodyItem.itemContainer });
 
         if (itemContainer) {
@@ -37,14 +38,26 @@ export class ItemContainerBodyCleaner {
     }
   }
 
-  private async findCharBodiesToBeDeleted(): Promise<IItem[]> {
+  private async findBodiesToBeDeleted(): Promise<IItem[]> {
     const oneHourAgo = new Date();
     oneHourAgo.setHours(oneHourAgo.getHours() - 1);
 
-    return await Item.find({
+    const fiveMinutesAgo = new Date();
+    fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
+
+    const npcBodies = await Item.find({
+      createdAt: { $lt: fiveMinutesAgo },
+      subType: ItemSubType.DeadBody,
+      key: { $exists: true },
+    });
+
+    const characterBodies = await Item.find({
       createdAt: { $lt: oneHourAgo },
       subType: ItemSubType.DeadBody,
+      key: { $exists: false },
     });
+
+    return [...npcBodies, ...characterBodies];
   }
 
   private async deleteBatchItems(itemIds: string[]): Promise<void> {
