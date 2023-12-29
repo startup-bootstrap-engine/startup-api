@@ -11,8 +11,10 @@ import { npcBlackKnight3 } from "./NPCBlackKnight3";
 import { npcBlackKnight4 } from "./NPCBlackKnight4";
 import { npcCarpenter } from "./NPCCarpenter";
 import { npcClimber } from "./NPCClimber";
+import { npcDurganIronVein } from "./NPCDurganIronVein";
 import { npcDynastyWoman1 } from "./NPCDynastyWoman1";
 import { npcDynastyWoman2 } from "./NPCDynastyWoman2";
+import { npcEldenTimberheart } from "./NPCEldenTimberheart";
 import { npcFatBaldMan } from "./NPCFatBaldMan";
 import { npcFather } from "./NPCFather";
 import { npcFelicia } from "./NPCFelicia";
@@ -25,7 +27,9 @@ import { npcHumanMale1 } from "./NPCHumanMale1";
 import { npcHumanMale2 } from "./NPCHumanMale2";
 import { npcMaleNobleBlackHair } from "./NPCMaleNobleBlackHair";
 import { npcMaria } from "./NPCMaria";
+import { npcMarlinTheFisherman } from "./NPCMarlinFisherman";
 import { npcMother } from "./NPCMother";
+import { npcRagnokHornbreaker } from "./NPCRagnokHornbreaker";
 import { npcSeniorKnight } from "./NPCSeniorKnight1";
 import { npcShaman } from "./NPCShaman";
 import { npcStoryTeller } from "./NPCStoryTeller";
@@ -68,6 +72,10 @@ export const friendlyNPCs = {
   [FriendlyNPCsBlueprint.Carpenter]: npcCarpenter,
   [FriendlyNPCsBlueprint.Shaman]: npcShaman,
   [FriendlyNPCsBlueprint.Climber]: npcClimber,
+  [FriendlyNPCsBlueprint.MarlinFisherman]: npcMarlinTheFisherman,
+  [FriendlyNPCsBlueprint.DurganIronVein]: npcDurganIronVein,
+  [FriendlyNPCsBlueprint.EldenTimberheart]: npcEldenTimberheart,
+  [FriendlyNPCsBlueprint.RagnokHornbreaker]: npcRagnokHornbreaker,
 
   // Market
   [FriendlyNPCsBlueprint.Banker]: npcBanker,

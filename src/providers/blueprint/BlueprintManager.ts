@@ -15,8 +15,6 @@ type IBlueprint = Record<string, any>; //! Will be refactored later
 
 @provide(BlueprintManager)
 export class BlueprintManager {
-  constructor() {}
-
   public getBlueprint<T>(namespace: BlueprintNamespaces, key: string): T {
     const blueprint = this.getBlueprintFromKey<IBlueprint>(namespace, key);
 

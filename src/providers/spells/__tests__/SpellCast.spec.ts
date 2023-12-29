@@ -26,7 +26,6 @@ import {
 } from "@rpg-engine/shared";
 import { SpellCast } from "../SpellCast";
 import { SpellLearn } from "../SpellLearn";
-import { spellArrowCreation } from "../data/blueprints/all/SpellArrowCreation";
 import { spellBlankRuneCreation } from "../data/blueprints/all/SpellBlankRuneCreation";
 import { spellGreaterHealing } from "../data/blueprints/all/SpellGreaterHealing";
 import { spellSelfHealing } from "../data/blueprints/all/SpellSelfHealing";
@@ -62,7 +61,7 @@ describe("SpellCast.ts", () => {
     stun = container.get<Stun>(Stun);
     berserkerSpells = container.get(Execution);
 
-    level2Spells = [spellSelfHealing, spellArrowCreation, spellBlankRuneCreation, spellTeleport];
+    level2Spells = [spellSelfHealing, spellBlankRuneCreation, spellTeleport];
     // level3Spells = [spellBoltCreation, spellFoodCreation];
     // level4Spells = [
     //   spellDarkRuneCreation,
@@ -191,7 +190,7 @@ describe("SpellCast.ts", () => {
     expect(sendEventToUser).toBeCalledTimes(1);
 
     expect(sendEventToUser).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: "Sorry, you do not have mana to cast this spell.",
+      message: `Sorry, this spell requires ${spellSelfHealing.manaCost} of mana to be casted.`,
       type: "error",
     });
   });
@@ -205,7 +204,7 @@ describe("SpellCast.ts", () => {
     expect(sendEventToUser).toBeCalledTimes(1);
 
     expect(sendEventToUser).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: "Sorry, you can not cast this spell at this character level.",
+      message: `You can't cast spell because it requires level ${spellSelfHealing.minLevelRequired}.`,
       type: "error",
     });
   });
@@ -219,7 +218,7 @@ describe("SpellCast.ts", () => {
     expect(sendEventToUser).toBeCalledTimes(1);
 
     expect(sendEventToUser).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
-      message: "Sorry, you can not cast this spell at this character magic level.",
+      message: `You can't cast spell because it requires magic level ${spellSelfHealing.minMagicLevelRequired}.`,
       type: "error",
     });
   });
@@ -425,7 +424,7 @@ describe("SpellCast.ts", () => {
       expect([...character.learnedSpells!]).toEqual(level2Spells.map((spell) => spell.key));
     };
 
-    testCharacter.learnedSpells = [spellSelfHealing.key!, spellArrowCreation.key!, spellBlankRuneCreation.key!];
+    testCharacter.learnedSpells = [spellSelfHealing.key!, spellBlankRuneCreation.key!];
     await Character.findByIdAndUpdate(testCharacter._id, { ...testCharacter });
     await runTest();
   });

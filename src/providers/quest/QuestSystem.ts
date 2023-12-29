@@ -168,6 +168,8 @@ export class QuestSystem {
     npcKey: string,
     character: ICharacter
   ): Promise<IQuestModel | undefined> {
+    npcKey = this.stripTrailingNumbers(npcKey);
+
     // check for each objective if the npc key is the correspondiong npc
     // If many cases, only update the first one
     for (const i in data.objectives) {
@@ -181,19 +183,27 @@ export class QuestSystem {
         throw new Error("Character hasn't started this quest");
       }
 
-      if (obj.targetNPCkey! === npcKey.split("-")[0]) {
+      if (obj.targetNPCkey! === npcKey) {
         objCompleted = true;
       }
       // check if the obj has 'items' field defined
       // then check if character has the required items to complete the quest
+
       if (!_.isEmpty(obj.items)) {
         const foundItems: IConsumeCharacterItem[] = [];
         for (const i of obj.items!) {
           // if does not have all items, no update is done
+
           const foundItem = (await this.characterItems.hasItemByKey(i.itemKey, character, "both")) as
             | IConsumeCharacterItem
             | undefined;
           if (!foundItem) {
+            const itemBlueprint = await blueprintManager.getBlueprint<IItem>("items", i.itemKey as AvailableBlueprints);
+
+            this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId!, UISocketEvents.ShowMessage, {
+              message: `You don't have the required items to complete this quest. Required items: ${i.qty}x - ${itemBlueprint.name}`,
+              type: "info",
+            });
             return;
           }
           const item = await Item.findById(foundItem.itemId);
@@ -244,6 +254,10 @@ export class QuestSystem {
       }
     }
     return undefined;
+  }
+
+  private stripTrailingNumbers(npcKey: string): string {
+    return npcKey.replace(/-\d+$/, "");
   }
 
   private async releaseRewards(quest: IQuest, character: ICharacter): Promise<void> {

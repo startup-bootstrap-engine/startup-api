@@ -66,10 +66,12 @@ function getNpcKeysWithQuests(NPCs: any[]): INPCQuestKeys[] {
 function checkIfQuestBlueprintsExists(keys: INPCQuestKeys[], mapName: string): void {
   const missingQuests = keys.filter((key) => !questsBlueprintIndex[key.questKey]);
   if (missingQuests.length > 0) {
+    console.log(JSON.stringify(missingQuests, null, 2));
+
     throw new Error(
-      `❌ QuestLoader: Missing Quest blueprints for keys ${missingQuests.join(
-        ", "
-      )}. Please, double check the map ${mapName}`
+      `❌ QuestLoader: Missing Quest blueprints for keys ${missingQuests
+        .map((quest) => quest.questKey)
+        .join(", ")}. Please, double check the map ${mapName}`
     );
   }
 }

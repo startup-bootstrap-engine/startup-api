@@ -287,7 +287,10 @@ export class SpellCast {
     }
 
     if (character.mana < spell.manaCost) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you do not have mana to cast this spell.");
+      this.socketMessaging.sendErrorMessageToCharacter(
+        character,
+        `Sorry, this spell requires ${spell.manaCost} of mana to be casted.`
+      );
       return false;
     }
 
@@ -330,7 +333,7 @@ export class SpellCast {
     if (skills.level < spell.minLevelRequired) {
       this.socketMessaging.sendErrorMessageToCharacter(
         character,
-        "Sorry, you can not cast this spell at this character level."
+        `You can't cast spell because it requires level ${spell.minLevelRequired}.`
       );
       return false;
     }
@@ -338,7 +341,7 @@ export class SpellCast {
     if (skills.magic.level < spell.minMagicLevelRequired) {
       this.socketMessaging.sendErrorMessageToCharacter(
         character,
-        "Sorry, you can not cast this spell at this character magic level."
+        `You can't cast spell because it requires magic level ${spell.minMagicLevelRequired}.`
       );
       return false;
     }
