@@ -167,10 +167,10 @@ describe("SkillIncrease x Buffs edge case", () => {
     // @ts-ignore
     const increasedSkills = skillIncrease.increaseSP(skills, ItemSubType.Sword);
 
-    expect(increasedSkills.skillLevelUp).toBe(false);
-    expect(increasedSkills.skillName).toBe("sword");
-    expect(increasedSkills.skillLevelBefore).toBe(0);
-    expect(increasedSkills.skillLevelAfter).toBe(1);
+    expect(increasedSkills?.skillLevelUp).toBe(false);
+    expect(increasedSkills?.skillName).toBe("sword");
+    expect(increasedSkills?.skillLevelBefore).toBe(0);
+    expect(increasedSkills?.skillLevelAfter).toBe(1);
 
     skills = (await Skill.findById(testCharacter.skills).lean()) as ISkill;
 
