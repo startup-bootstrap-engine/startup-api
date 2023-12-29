@@ -11,6 +11,7 @@ export const npcTraderFarm = {
   textureKey: FriendlyNPCsBlueprint.Trader,
   gender: CharacterGender.Male,
   isTrader: true,
+  hasDepot: true,
   traderItems: [
     {
       key: ToolsBlueprint.WateringCan,

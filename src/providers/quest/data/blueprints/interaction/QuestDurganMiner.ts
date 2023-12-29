@@ -3,9 +3,9 @@ import { IQuest, QuestType } from "@rpg-engine/shared";
 import { QuestsBlueprint } from "../../questsBlueprintTypes";
 
 export const questInteractionDurganMiner = {
-  title: "Craft an item using ingots",
+  title: "Iron Ingot Craftsmanship",
   description:
-    "Use your pickaxe to extract ore, then your blacksmith hammer to craft an item using the ingots. Give me 10x Iron Ingot and I will craft an Iron Armor to you!",
+    "Employ your pickaxe to mine ore, followed by utilizing your blacksmith hammer. Select 'Use with,' then target an anvil to forge ingots. Provide me with 10 Iron Ingots, and I shall craft you an Iron Armor!",
   key: QuestsBlueprint.InteractionDurganMiner,
   rewards: [
     {
