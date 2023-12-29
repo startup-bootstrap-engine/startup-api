@@ -4,7 +4,7 @@ import { CharacterPvPKillLog } from "@entities/ModuleCharacter/CharacterPvPKillL
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { CharacterSkullType, CharacterSocketEvents, ICharacterAttributeChanged } from "@rpg-engine/shared";
+import { CharacterSkullType, CharacterSocketEvents, ICharacterAttributeChanged, Modes } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
 @provide(CharacterSkull)
@@ -82,17 +82,22 @@ export class CharacterSkull {
     }
   }
 
-  private getSkullText(skull: string | undefined): string {
+  private getSkullText(character: ICharacter, skull: string | undefined): string {
+    const modeText =
+      character.mode === Modes.SoftMode
+        ? "Even in Soft Mode, you'll now incur HARDCORE mode penalties upon death."
+        : "";
+
     if (!skull) return "";
     switch (skull as CharacterSkullType) {
       case CharacterSkullType.WhiteSkull:
-        return "You got a White Skull. It expires in 15 mins.";
+        return `White Skull: Expires in 15 mins. ${modeText}`;
       case CharacterSkullType.YellowSkull:
-        return "You got a Yellow Skull. It expires in 1 week.";
+        return "Yellow Skull: 1-week expiry, 30% more XP/SP loss, 30% loot drop increase on death.";
       case CharacterSkullType.RedSkull:
-        return "You got a Red Skull. It expires in 2 weeks.";
+        return "Red Skull: 2-weeks expiry, 2x XP/SP loss, full loot drop on death.";
       default:
-        throw new Error("Skull is invalid");
+        throw new Error("Invalid Skull");
     }
   }
 
@@ -109,7 +114,7 @@ export class CharacterSkull {
       payload,
       true
     );
-    this.socketMessaging.sendMessageToCharacter(character, this.getSkullText(character.skullType));
+    this.socketMessaging.sendMessageToCharacter(character, this.getSkullText(character, character.skullType));
   }
 
   private async checkLastPvPTargetId(characterId: string): Promise<string | null> {
@@ -141,6 +146,8 @@ export class CharacterSkull {
     character.skullExpiredAt = timeExpired;
     await character.save();
     await this.sendSkullEventToUser(character);
+
+    // send skull warning
   }
 
   @TrackNewRelicTransaction()
