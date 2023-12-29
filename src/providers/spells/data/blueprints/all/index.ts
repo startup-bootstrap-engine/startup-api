@@ -1,5 +1,5 @@
 import { SpellsBlueprint } from "@rpg-engine/shared";
-import { spellArrowCreation } from "./SpellArrowCreation";
+import { spellArrowCreation } from "../hunter/SpellArrowCreation";
 import { spellBlankRuneCreation } from "./SpellBlankRuneCreation";
 import { spellFireRuneCreation } from "./SpellFireRuneCreation";
 import { spellFoodCreation } from "./SpellFoodCreation";

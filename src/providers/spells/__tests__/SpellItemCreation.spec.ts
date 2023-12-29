@@ -8,13 +8,13 @@ import { MagicsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes"
 
 import { SpellItemCreation } from "../data/abstractions/SpellItemCreation";
 
-import { spellArrowCreation } from "../data/blueprints/all/SpellArrowCreation";
 import { spellBlankRuneCreation } from "../data/blueprints/all/SpellBlankRuneCreation";
 import { spellFireRuneCreation } from "../data/blueprints/all/SpellFireRuneCreation";
 import { spellFoodCreation } from "../data/blueprints/all/SpellFoodCreation";
 import { spellPoisonRuneCreation } from "../data/blueprints/all/SpellPoisonRuneCreation";
 import { spellSelfHealing } from "../data/blueprints/all/SpellSelfHealing";
 import { spellHealRuneCreation } from "../data/blueprints/druid/SpellHealRuneCreation";
+import { spellArrowCreation } from "../data/blueprints/hunter/SpellArrowCreation";
 import { spellBoltCreation } from "../data/blueprints/hunter/SpellBoltCreation";
 import { spellDarkRuneCreation } from "../data/blueprints/sorcerer/SpellDarkRuneCreation";
 

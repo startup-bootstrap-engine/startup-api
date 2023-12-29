@@ -14,5 +14,5 @@ export const itemStone: IEquippableRangedAmmoBlueprint = {
   allowedEquipSlotType: [ItemSlotType.Accessory],
   maxStackSize: 999,
   basePrice: 1,
-  canSell: false,
+  canSell: true,
 };
