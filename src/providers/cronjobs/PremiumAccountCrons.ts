@@ -19,7 +19,8 @@ export class PremiumAccountCrons {
     });
 
     this.cronJobScheduler.uniqueSchedule("premium-account-cron-deactivate", "0 */12 * * *", async () => {
-      await this.deactivatePremiumAccounts();
+      // await this.deactivatePremiumAccounts();
+      //! temp disabled
     });
   }
 
