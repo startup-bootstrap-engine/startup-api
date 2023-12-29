@@ -4,6 +4,7 @@ import { questInteractionCrimsonBackpack } from "./QuestInteractionCraftCrimsonB
 import { questInteractionCraftSword } from "./QuestInteractionCraftSword";
 import { questInteractionFather } from "./QuestInteractionFather";
 import { questInteractionFisherman } from "./QuestInteractionFisherman";
+import { questInteractionFishermanFarmland } from "./QuestInteractionFishermanFarmland";
 import { questInteractionCraftIronArrow } from "./QuestInteractionIronArrow";
 import { questInteractionShaman } from "./QuestInteractionShaman";
 import { questInteractionStoryTeller } from "./QuestInteractionStoryTeller";
@@ -19,4 +20,5 @@ export const interactionQuests = {
   [QuestsBlueprint.InteractionClimber]: questInteractionClimber,
   [QuestsBlueprint.InteractionShaman]: questInteractionShaman,
   [QuestsBlueprint.InteractionCraftCrimsonBackpack]: questInteractionCrimsonBackpack,
+  [QuestsBlueprint.InteractionFishermanFarmland]: questInteractionFishermanFarmland,
 };
