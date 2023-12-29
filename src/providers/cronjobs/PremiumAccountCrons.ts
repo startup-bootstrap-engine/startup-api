@@ -93,7 +93,7 @@ export class PremiumAccountCrons {
       // Fetch all users with active premium accounts
       const premiumUsers = (await User.find({
         accountType: { $ne: UserAccountTypes.Free, $exists: true },
-        isManuallyControlledPremiumAccount: { $ne: true },
+        isManuallyControlledPremiumAccount: { $not: { $eq: true } },
       })
         .lean()
         .select("_id email accountType")) as IUser[];
