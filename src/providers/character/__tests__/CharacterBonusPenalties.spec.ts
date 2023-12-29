@@ -38,6 +38,10 @@ describe("Case CharacterBonusPenalties", () => {
     sendEventToUser = jest.spyOn(SocketMessaging.prototype, "sendEventToUser");
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("applyRaceBonusPenalties should return the correct value", async () => {
     const skills = (await Skill.findById(testCharacter.skills).lean()) as ISkill;
 
@@ -95,7 +99,7 @@ describe("Case CharacterBonusPenalties", () => {
 
     expect(sendSkillLevelUpEvents).toHaveBeenCalled();
     expect(sendEventToUser).toHaveBeenCalledWith(testCharacter.channelId!, UISocketEvents.ShowMessage, {
-      message: "You advanced from level 2 to 3 in Magic fighting.",
+      message: "You advanced from level 2 to 3 in Magic.",
       type: "info",
     });
   });

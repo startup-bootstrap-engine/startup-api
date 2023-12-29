@@ -19,6 +19,7 @@ import {
   IUIShowMessage,
   SkillEventType,
   SkillSocketEvents,
+  SkillType,
   UISocketEvents,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -109,48 +110,12 @@ export class SkillFunctions {
     character: ICharacter,
     target?: INPC | ICharacter
   ): Promise<void> {
-    let behavior = "";
+    const behavior = skillData.skillLevelBefore > skillData.skillLevelAfter ? "regressed" : "advanced";
+    const skillName = skillData.skillName === "magicResistance" ? "Magic Resistance" : skillData.skillName;
 
-    if (skillData.skillLevelBefore > skillData.skillLevelAfter) {
-      behavior = "regressed";
-    } else {
-      behavior = "advanced";
-    }
-
-    // now we need to clear up caching
-    await clearCacheForKey(`characterBuffs_${character._id}`);
-    await clearCacheForKey(`${character._id}-skills`);
-    await this.inMemoryHashTable.delete("load-craftable-items", character._id);
-
-    const levelUpEventPayload: ISkillEventFromServer = {
-      characterId: character.id,
-      targetId: target?.id,
-      targetType: target?.type as "Character" | "NPC",
-      eventType: SkillEventType.SkillLevelUp,
-      level: skillData.skillLevelBefore,
-      skill: skillData.skillName,
-    };
-
-    let skillName = skillData.skillName;
-
-    if (skillData.skillName === "magicResistance") {
-      // fix on magic resistance name output
-      skillName = "Magic Resistance";
-    }
-
-    this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId!, UISocketEvents.ShowMessage, {
-      message: `You ${behavior} from level ${this.numberFormatter.formatNumber(
-        skillData.skillLevelBefore
-      )} to ${this.numberFormatter.formatNumber(skillData.skillLevelAfter)} in ${_.startCase(
-        _.toLower(skillName)
-      )} fighting.`,
-      type: "info",
-    });
-
-    await this.inMemoryHashTable.delete(`${character._id}-skill-level-with-buff`, skillData.skillName);
-
-    this.socketMessaging.sendEventToUser(character.channelId!, SkillSocketEvents.SkillGain, levelUpEventPayload);
-
+    await this.clearCharacterCache(character);
+    await this.sendLevelUpMessage(skillData, character, behavior, skillName);
+    await this.sendSkillGainEvent(skillData, character, target);
     await this.animationEffect.sendAnimationEventToCharacter(character, AnimationEffectKeys.SkillLevelUp);
   }
 
@@ -162,5 +127,64 @@ export class SkillFunctions {
 
   public calculateBonus(level: number): number {
     return Number(((level - 1) / 50).toFixed(2));
+  }
+
+  private async clearCharacterCache(character: ICharacter): Promise<void> {
+    await Promise.all([
+      clearCacheForKey(`characterBuffs_${character._id}`),
+      clearCacheForKey(`${character._id}-skills`),
+      this.inMemoryHashTable.delete("load-craftable-items", character._id),
+    ]);
+  }
+
+  private async sendLevelUpMessage(
+    skillData: IIncreaseSPResult,
+    character: ICharacter,
+    behavior: string,
+    skillName: string
+  ): Promise<void> {
+    const skills = (await Skill.findById(character.skills)
+      .lean({ virtuals: true, defaults: true })
+      .cacheQuery({
+        cacheKey: `${character._id}-skills`,
+      })) as ISkill;
+
+    const isFighting = this.isFightingSkill(skills, skillData.skillName);
+    const message = `You ${behavior} from level ${this.numberFormatter.formatNumber(
+      skillData.skillLevelBefore
+    )} to ${this.numberFormatter.formatNumber(skillData.skillLevelAfter)} in ${_.startCase(_.toLower(skillName))}${
+      isFighting ? " fighting" : ""
+    }.`;
+
+    this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId!, UISocketEvents.ShowMessage, {
+      message,
+      type: "info",
+    });
+
+    await this.inMemoryHashTable.delete(`${character._id}-skill-level-with-buff`, skillData.skillName);
+  }
+
+  private sendSkillGainEvent(skillData: IIncreaseSPResult, character: ICharacter, target?: INPC | ICharacter): void {
+    const levelUpEventPayload: ISkillEventFromServer = {
+      characterId: character.id,
+      targetId: target?.id,
+      targetType: target?.type as "Character" | "NPC",
+      eventType: SkillEventType.SkillLevelUp,
+      level: skillData.skillLevelBefore,
+      skill: skillData.skillName,
+    };
+
+    this.socketMessaging.sendEventToUser(character.channelId!, SkillSocketEvents.SkillGain, levelUpEventPayload);
+  }
+
+  private isFightingSkill(skills: ISkill, skillName: string): boolean {
+    try {
+      const skill = skills[skillName] as ISkillDetails;
+
+      return skill.type === SkillType.Combat;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
   }
 }
