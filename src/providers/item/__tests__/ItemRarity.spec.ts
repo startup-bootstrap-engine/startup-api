@@ -123,6 +123,24 @@ describe("ItemRarity", () => {
         expect(result.healthRecovery).toBeGreaterThan(0);
         expect(result.usableEffectDescription).toBeDefined();
       });
+
+      describe("setItemRarityOnCraft - canAddRarity", () => {
+        it("should return true if item is valid for adding rarity", async () => {
+          const validItem: IItem = { key: "validItemKey" } as IItem;
+          const result = await itemRarity.setItemRarityOnCraft(testCharacter, validItem, mockSkillId);
+          expect(result.rarity).toBeDefined();
+          expect(result.attack).toBeDefined();
+          expect(result.defense).toBeDefined();
+        });
+
+        it("should return default values if item is not valid for adding rarity", async () => {
+          const invalidItem: IItem = { key: "runeItemKey" } as IItem;
+          const result = await itemRarity.setItemRarityOnCraft(testCharacter, invalidItem, mockSkillId);
+          expect(result.rarity).toBe(ItemRarities.Common);
+          expect(result.attack).toBe(0);
+          expect(result.defense).toBe(0);
+        });
+      });
     });
   });
 });
