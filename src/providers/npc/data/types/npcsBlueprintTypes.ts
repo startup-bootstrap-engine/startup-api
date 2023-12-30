@@ -33,6 +33,8 @@ export enum FriendlyNPCsBlueprint {
   EldenTimberheart = "elden-timberheart",
   RagnokHornbreaker = "ragnok-hornbreaker",
   DurganIronVein = "durgan-iron-vein",
+  RogueDragonServant = "rogue-dragon-servant",
+
   FatBaldMan = "fat-bald-man",
   BlackKnight = "black-knight",
   BlackKnight2 = "black-knight-2",
