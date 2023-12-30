@@ -147,7 +147,7 @@ export class CharacterDeath {
           break;
         case Modes.SoftMode:
           // If character has Skull => auto Hardcore mode/Permadeath penalty
-          if (character.hasSkull) {
+          if (character.hasSkull && character.skullType) {
             await this.applyPenalties(character, characterBody);
           }
           break;
