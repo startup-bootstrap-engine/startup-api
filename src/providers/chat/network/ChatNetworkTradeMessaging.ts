@@ -140,7 +140,12 @@ export class ChatNetworkTradeMessaging {
               previousTradeChatLogs
             );
 
-            await this.discordBot.sendMessage(`${character.name}: ${data.message}`, "trade");
+            await this.discordBot.sendMessage(
+              `${character.name}: ${data.message}.
+            
+            * Send me a private in-game message to reply.`,
+              "trade"
+            );
           }
         } catch (error) {
           this.socketMessaging.sendErrorMessageToCharacter(character, "Error sending message");
