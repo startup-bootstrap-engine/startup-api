@@ -18,6 +18,7 @@ import { npcCondessa } from "./NPCCondessa";
 import { npcCorruptedCyclops } from "./NPCCorruptedCyclops";
 import { npcCyclops } from "./NPCCyclops";
 import { npcCyclopsWarrior } from "./NPCCyclopsWarrior";
+import { npcDarkElf } from "./NPCDarkElf";
 import { npcDarkKnight } from "./NPCDarkKnight";
 import { npcDarkWraith } from "./NPCDarkWraith";
 import { npcDragonKnight } from "./NPCDragonKnight";
@@ -177,4 +178,5 @@ export const hostileNPCs = {
   [HostileNPCsBlueprint.WildCyclops]: npcWildCyclops,
   [HostileNPCsBlueprint.BattleCompanion]: npcBattleCompanion,
   [HostileNPCsBlueprint.BattleCompanionMagic]: npcBattleCompanionMagic,
+  [HostileNPCsBlueprint.DarkElf]: npcDarkElf,
 };

@@ -94,6 +94,7 @@ export enum HostileNPCsBlueprint {
   Wolf = "wolf",
   Ghoul = "ghoul",
   Spider = "spider",
+  DarkElf = "dark-elf",
   Dwarf = "dwarf",
   DwarfGuard = "dwarf-guard",
   RedDragon = "red-dragon-01",
