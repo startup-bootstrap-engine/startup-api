@@ -45,7 +45,7 @@ export const npcPurpleDragon = {
 
   isMagic: true,
   skills: {
-    level: 450,
+    level: 500,
     strength: {
       level: 400,
     },
