@@ -9,6 +9,7 @@ import {
   INPCPositionCreatePayload,
   INPCPositionUpdatePayload,
   NPCAlignment,
+  NPCCustomDeathPenalties,
   NPCSocketEvents,
 } from "@rpg-engine/shared";
 import { Promise } from "bluebird";
@@ -100,6 +101,7 @@ export class NPCWarn {
         isTrader: npc.isTrader,
         traderItems: npc.traderItems,
         isGiantForm: npc.isGiantForm,
+        hasCustomDeathPenalty: npc.hasCustomDeathPenalty as NPCCustomDeathPenalties,
       }
     );
   }

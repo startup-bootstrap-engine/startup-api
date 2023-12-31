@@ -24,6 +24,7 @@ export class SpellHeal {
       (await this.spellCalculator.calculateBasedOnSkillLevel(caster, BasicAttribute.Magic, {
         min,
         max,
+        formulaType: "sigmoid",
       })) / 100;
 
     const healthBoost = round(target.maxHealth * healingModifier);

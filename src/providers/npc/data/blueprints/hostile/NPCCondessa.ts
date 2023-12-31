@@ -10,7 +10,13 @@ import {
   StaffsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { AnimationEffectKeys, MagicPower, NPCAlignment, SpellsBlueprint } from "@rpg-engine/shared";
+import {
+  AnimationEffectKeys,
+  MagicPower,
+  NPCAlignment,
+  NPCCustomDeathPenalties,
+  SpellsBlueprint,
+} from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
 
@@ -27,6 +33,7 @@ export const npcCondessa = {
   baseHealth: 2200,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
+  hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
   skills: {
     level: 80,
     strength: {

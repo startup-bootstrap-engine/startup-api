@@ -30,6 +30,7 @@ import { npcMaria } from "./NPCMaria";
 import { npcMarlinTheFisherman } from "./NPCMarlinFisherman";
 import { npcMother } from "./NPCMother";
 import { npcRagnokHornbreaker } from "./NPCRagnokHornbreaker";
+import { npcRogueDragonServant } from "./NPCRogueDragonServant";
 import { npcSeniorKnight } from "./NPCSeniorKnight1";
 import { npcShaman } from "./NPCShaman";
 import { npcStoryTeller } from "./NPCStoryTeller";
@@ -76,6 +77,7 @@ export const friendlyNPCs = {
   [FriendlyNPCsBlueprint.DurganIronVein]: npcDurganIronVein,
   [FriendlyNPCsBlueprint.EldenTimberheart]: npcEldenTimberheart,
   [FriendlyNPCsBlueprint.RagnokHornbreaker]: npcRagnokHornbreaker,
+  [FriendlyNPCsBlueprint.RogueDragonServant]: npcRogueDragonServant,
 
   // Market
   [FriendlyNPCsBlueprint.Banker]: npcBanker,

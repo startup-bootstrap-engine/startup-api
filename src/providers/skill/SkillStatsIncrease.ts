@@ -88,27 +88,27 @@ export class SkillStatsIncrease {
     const classHealthManaIncreaseRate = {
       [CharacterClass.Warrior]: {
         health: baseIncreaseRate * 2,
-        mana: baseIncreaseRate * 0.5,
+        mana: baseIncreaseRate * 0.5, // Strong health, lower mana reflecting their physical prowess.
       },
       [CharacterClass.Berserker]: {
-        health: baseIncreaseRate * 2,
-        mana: baseIncreaseRate * 0.5,
+        health: baseIncreaseRate * 2.1,
+        mana: baseIncreaseRate * 0.4, // Slightly stronger and less reliant on mana than warriors.
       },
       [CharacterClass.Druid]: {
-        health: baseIncreaseRate * 0.75,
-        mana: baseIncreaseRate * 1.75,
+        health: baseIncreaseRate * 0.8,
+        mana: baseIncreaseRate * 1.8, // Balanced towards mana but with slightly more health than a sorcerer.
       },
       [CharacterClass.Sorcerer]: {
-        health: baseIncreaseRate * 0.5,
-        mana: baseIncreaseRate * 2,
+        health: baseIncreaseRate * 0.6,
+        mana: baseIncreaseRate * 2.2, // Highest mana pool, with a bit more survivability than before.
       },
       [CharacterClass.Hunter]: {
-        health: baseIncreaseRate * 1.25,
-        mana: baseIncreaseRate * 1.25,
+        health: baseIncreaseRate * 1.3,
+        mana: baseIncreaseRate * 1.2, // Balanced, but with a slight edge towards health for endurance.
       },
       [CharacterClass.Rogue]: {
-        health: baseIncreaseRate * 1.25,
-        mana: baseIncreaseRate * 1.25,
+        health: baseIncreaseRate * 1.2,
+        mana: baseIncreaseRate * 1.3, // Similar to hunters but slightly more agile with mana.
       },
     };
 

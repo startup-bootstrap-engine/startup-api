@@ -1,10 +1,12 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
+import { SigmoidCalculation } from "@providers/math/SigmoidCalculation";
 import { TraitGetter } from "@providers/skill/TraitGetter";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { BasicAttribute, CharacterClass, SpellsBlueprint } from "@rpg-engine/shared";
+import { AnimationEffectKeys, BasicAttribute, CharacterClass, SpellsBlueprint } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { NamespaceRedisControl } from "../../types/SpellsBlueprintTypes";
 
@@ -13,7 +15,9 @@ export class Bloodthirst {
   constructor(
     private socketMessaging: SocketMessaging,
     private inMemoryHashTable: InMemoryHashTable,
-    private traitGetter: TraitGetter
+    private traitGetter: TraitGetter,
+    private sigmoidCalculation: SigmoidCalculation,
+    private animationEffect: AnimationEffect
   ) {}
 
   @TrackNewRelicTransaction()
@@ -52,7 +56,9 @@ export class Bloodthirst {
       const characterLevel = skills?.level;
       const strengthLevel = await this.traitGetter.getSkillLevelWithBuffs(skills, BasicAttribute.Strength);
 
-      const healingFactor = (magicLevel + characterLevel + strengthLevel) / 6;
+      const averageLevel = (magicLevel + characterLevel + strengthLevel) / 3;
+      const healingFactor = this.sigmoidCalculation.sigmoid(averageLevel);
+
       const calculatedHealing = Math.round(damage * berserkerMultiplier * healingFactor);
 
       const cappedHealing = Math.min(character.health + calculatedHealing, character.maxHealth);
@@ -60,6 +66,8 @@ export class Bloodthirst {
       await Character.findByIdAndUpdate(character._id, { health: cappedHealing }).lean();
 
       await this.socketMessaging.sendEventAttributeChange(character._id);
+
+      await this.animationEffect.sendAnimationEventToCharacter(character, AnimationEffectKeys.Lifedrain);
     } catch (error) {
       console.error(`Failed to apply berserker bloodthirst: ${error} - ${character._id}`);
     }

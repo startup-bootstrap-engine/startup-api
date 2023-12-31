@@ -39,6 +39,7 @@ import {
   IUIShowMessage,
   ItemSocketEvents,
   Modes,
+  NPCCustomDeathPenalties,
   UISocketEvents,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -147,7 +148,7 @@ export class CharacterDeath {
           break;
         case Modes.SoftMode:
           // If character has Skull => auto Hardcore mode/Permadeath penalty
-          if (character.hasSkull) {
+          if (character.hasSkull && character.skullType) {
             await this.applyPenalties(character, characterBody);
           }
           break;
@@ -159,6 +160,19 @@ export class CharacterDeath {
         default:
           await this.applyPenalties(character, characterBody);
           break;
+      }
+
+      if (killer?.type === EntityType.NPC) {
+        const killerNPC = killer as INPC;
+
+        switch (killerNPC.hasCustomDeathPenalty) {
+          case NPCCustomDeathPenalties.Hardcore:
+            await this.applyPenalties(character, characterBody);
+            break;
+          case NPCCustomDeathPenalties.FullLootDrop:
+            await this.applyPenalties(character, characterBody, true);
+            break;
+        }
       }
 
       this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Characters, "Death", 1);

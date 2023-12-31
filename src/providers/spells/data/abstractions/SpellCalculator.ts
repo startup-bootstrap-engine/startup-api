@@ -6,6 +6,7 @@ import {
   SPELL_CALCULATOR_DEFAULT_MIN_SKILL_MULTIPLIER,
 } from "@providers/constants/SkillConstants";
 import { LinearInterpolation } from "@providers/math/LinearInterpolation";
+import { SigmoidCalculation } from "@providers/math/SigmoidCalculation";
 import { SkillsAvailable } from "@providers/skill/SkillTypes";
 import { TraitGetter } from "@providers/skill/TraitGetter";
 import { provide } from "inversify-binding-decorators";
@@ -17,9 +18,12 @@ interface IOptions {
   difficulty?: 2 | 3 | 4 | 5 | 6;
 }
 
+type SpellCalculationFormulaType = "linear" | "sigmoid";
+
 export interface IRequiredOptions {
   max: number;
   min: number;
+  formulaType?: SpellCalculationFormulaType;
   skillAssociation?: "default" | "reverse"; // reverse = higher skill, lower the value. default = higher skill, higher the value
 }
 
@@ -34,7 +38,11 @@ interface ISpellDamageOptions {
 
 @provide(SpellCalculator)
 export class SpellCalculator {
-  constructor(private linearInterpolation: LinearInterpolation, private traitGetter: TraitGetter) {}
+  constructor(
+    private linearInterpolation: LinearInterpolation,
+    private traitGetter: TraitGetter,
+    private sigmoidCalculation: SigmoidCalculation
+  ) {}
 
   @TrackNewRelicTransaction()
   public async getQuantityBasedOnSkillLevel(
@@ -65,19 +73,34 @@ export class SpellCalculator {
     skillName: SkillsAvailable,
     options: IRequiredOptions
   ): Promise<number> {
+    if (!options.formulaType) {
+      options.formulaType = "linear";
+    }
+
     const skills = await this.getCharacterSkill(character);
 
     const skillLevel = await this.traitGetter.getSkillLevelWithBuffs(skills, skillName);
 
-    const buffPercentage = await this.linearInterpolation.calculateLinearInterpolation(
-      skillLevel,
-      options.min,
-      options.max,
-      options.skillAssociation
-    );
+    let buffPercentage: number;
 
-    // Verificar se o valor interpolado é maior que o valor máximo (max).
-    // Se for maior, definir o valor interpolado como o valor máximo (max).
+    switch (options.formulaType) {
+      case "linear":
+        buffPercentage = this.linearInterpolation.calculateLinearInterpolation(
+          skillLevel,
+          options.min,
+          options.max,
+          options.skillAssociation
+        );
+        break;
+      case "sigmoid":
+        buffPercentage = this.sigmoidCalculation.sigmoidMinMax(skillLevel, options.min, options.max);
+        break;
+      default:
+        throw new Error(`Unsupported formula type: ${options.formulaType}`);
+    }
+
+    // Check if the interpolated value is greater than the maximum value (max).
+    // If it is greater, set the interpolated value as the maximum value (max).
     const maxInterpolatedValue = Math.min(buffPercentage, options.max);
 
     return maxInterpolatedValue;

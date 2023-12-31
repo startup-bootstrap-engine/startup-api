@@ -13,7 +13,14 @@ import {
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { AnimationEffectKeys, MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
+import {
+  AnimationEffectKeys,
+  MagicPower,
+  NPCAlignment,
+  NPCCustomDeathPenalties,
+  NPCSubtype,
+  SpellsBlueprint,
+} from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
 
@@ -26,6 +33,8 @@ export const npcYellowDragon = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: AnimationEffectKeys.FireBall,
+  hasCustomDeathPenalty: NPCCustomDeathPenalties.FullLootDrop,
+
   maxRangeAttack: 8,
   speed: MovementSpeed.ExtraFast,
   baseHealth: 70000,
