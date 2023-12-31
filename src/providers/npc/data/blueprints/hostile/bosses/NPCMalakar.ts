@@ -12,7 +12,7 @@ import {
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { NPCAlignment, NPCCustomDeathPenalties } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
@@ -31,6 +31,8 @@ export const npcMalakarLichKing: Partial<INPC> = {
   canSwitchToRandomTarget: true,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   canSwitchToLowHealthTarget: true,
+  hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
+
   skills: {
     level: 250,
     strength: {

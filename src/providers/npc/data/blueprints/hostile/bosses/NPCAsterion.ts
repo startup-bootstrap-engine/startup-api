@@ -15,7 +15,7 @@ import {
 import { generateMoveTowardsMovement } from "@providers/npc/data/abstractions/BaseNeutralNPC";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 
-import { NPCAlignment } from "@rpg-engine/shared";
+import { NPCAlignment, NPCCustomDeathPenalties } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 
 export const npcAsterion = {
@@ -27,12 +27,14 @@ export const npcAsterion = {
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Fast,
   canSwitchToLowHealthTarget: true,
-  baseHealth: 1000,
+  baseHealth: 2500,
   healthRandomizerDice: Dice.D20,
+  hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
+
   skills: {
     level: 70,
     strength: {
-      level: 55,
+      level: 70,
     },
     dexterity: {
       level: 30,
@@ -41,7 +43,7 @@ export const npcAsterion = {
       level: 40,
     },
     magicResistance: {
-      level: 40,
+      level: 80,
     },
   },
   fleeOnLowHealth: true,

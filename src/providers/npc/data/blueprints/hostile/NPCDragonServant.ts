@@ -15,7 +15,14 @@ import {
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { AnimationEffectKeys, MagicPower, MagicsBlueprint, NPCAlignment, SpellsBlueprint } from "@rpg-engine/shared";
+import {
+  AnimationEffectKeys,
+  MagicPower,
+  MagicsBlueprint,
+  NPCAlignment,
+  NPCCustomDeathPenalties,
+  SpellsBlueprint,
+} from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
 
@@ -33,6 +40,7 @@ export const npcDragonServant: Partial<INPC> = {
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
+  hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
   skills: {
     level: 145,
     strength: {
@@ -96,8 +104,8 @@ export const npcDragonServant: Partial<INPC> = {
       chance: 1,
     },
     {
-      itemBlueprintKey: BooksBlueprint.Book,
-      chance: 10,
+      itemBlueprintKey: BooksBlueprint.EmberSageScripture,
+      chance: 2,
     },
     {
       itemBlueprintKey: MagicsBlueprint.Rune,

@@ -6,7 +6,7 @@ import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { DROP_EQUIPMENT_CHANCE } from "@providers/constants/DeathConstants";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { AccessoriesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
-import { CharacterSkullType, Modes } from "@rpg-engine/shared";
+import { CharacterSkullType, Modes, NPCCustomDeathPenalties } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import _ from "lodash";
 import { CharacterDeath } from "../CharacterDeath";
@@ -29,15 +29,6 @@ describe("CharacterDeath.ts", () => {
     characterDeath = container.get<CharacterDeath>(CharacterDeath);
   });
 
-  beforeEach(async () => {
-    testNPC = await unitTestHelper.createMockNPC();
-    testCharacter = await unitTestHelper.createMockCharacter(null, {
-      hasEquipment: true,
-      hasInventory: true,
-      hasSkills: true,
-    });
-  });
-
   describe("Soft mode", () => {
     let characterDeath: CharacterDeath;
     let testCharacter: ICharacter;
@@ -47,9 +38,15 @@ describe("CharacterDeath.ts", () => {
     });
 
     beforeEach(async () => {
-      testCharacter = await unitTestHelper.createMockCharacter({
-        mode: Modes.SoftMode,
-      });
+      testCharacter = await unitTestHelper.createMockCharacter(
+        {
+          mode: Modes.SoftMode,
+        },
+        {
+          hasEquipment: true,
+          hasSkills: true,
+        }
+      );
     });
 
     it("should not apply penalties for character on soft mode", async () => {
@@ -75,11 +72,17 @@ describe("CharacterDeath.ts", () => {
     });
 
     beforeEach(async () => {
-      testCharacter = await unitTestHelper.createMockCharacter({
-        mode: Modes.SoftMode,
-        hasSkull: true,
-        skullType: CharacterSkullType.WhiteSkull,
-      });
+      testCharacter = await unitTestHelper.createMockCharacter(
+        {
+          mode: Modes.SoftMode,
+          hasSkull: true,
+          skullType: CharacterSkullType.WhiteSkull,
+        },
+        {
+          hasEquipment: true,
+          hasSkills: true,
+        }
+      );
     });
 
     it("should apply penalties for character even on soft mode", async () => {
@@ -107,10 +110,16 @@ describe("CharacterDeath.ts", () => {
 
     beforeEach(async () => {
       testNPC = await unitTestHelper.createMockNPC();
-      testCharacter = await unitTestHelper.createMockCharacter({
-        mode: Modes.PermadeathMode,
-        isSoftDeleted: false,
-      });
+      testCharacter = await unitTestHelper.createMockCharacter(
+        {
+          mode: Modes.PermadeathMode,
+          isSoftDeleted: false,
+        },
+        {
+          hasEquipment: true,
+          hasSkills: true,
+        }
+      );
     });
 
     afterEach(() => {
@@ -242,8 +251,8 @@ describe("CharacterDeath.ts", () => {
 
       const updatedBackpackContainer = await ItemContainer.findById(droppedBackpack.itemContainer).lean();
 
-      const droppedItem1 = await Item.findById(updatedBackpackContainer?.slots[0]._id).lean();
-      const droppedItem2 = await Item.findById(updatedBackpackContainer?.slots[1]._id).lean();
+      const droppedItem1 = await Item.findById(updatedBackpackContainer?.slots?.[0]._id).lean();
+      const droppedItem2 = await Item.findById(updatedBackpackContainer?.slots?.[1]._id).lean();
       const droppedBPItem = await Item.findById(droppedBackpack?._id).lean();
 
       expect(droppedItem1?.owner).toBeUndefined();
@@ -375,6 +384,37 @@ describe("CharacterDeath.ts", () => {
         await characterDeath.handleCharacterDeath(testNPC, testCharacter);
 
         expect(dropCharacterItemsOnBodySpy).toHaveBeenCalled();
+      });
+    });
+
+    describe("hasCustomDeathPenalty", () => {
+      it("should apply hardcore penalty if NPC hasCustomDeathPenalty is set to hardcore", async () => {
+        testNPC.hasCustomDeathPenalty = NPCCustomDeathPenalties.Hardcore;
+        await testNPC.save();
+
+        // @ts-ignore
+        const spyDropCharacterItemsOnBody = jest.spyOn(characterDeath, "dropCharacterItemsOnBody");
+        // @ts-ignore
+        const spyPenalties = jest.spyOn(characterDeath, "applyPenalties");
+
+        // character dies
+        await characterDeath.handleCharacterDeath(testNPC, testCharacter);
+
+        expect(spyDropCharacterItemsOnBody).toHaveBeenCalled();
+        expect(spyPenalties).toHaveBeenCalled();
+      });
+
+      it("should apply FULL LOOT DROP penalty if NPC hasCustomDeathPenalty is set to full loot drop", async () => {
+        testNPC.hasCustomDeathPenalty = NPCCustomDeathPenalties.FullLootDrop;
+        await testNPC.save();
+
+        // @ts-ignore
+        const spyPenalties = jest.spyOn(characterDeath, "applyPenalties");
+
+        // character dies
+        await characterDeath.handleCharacterDeath(testNPC, testCharacter);
+
+        expect(spyPenalties).toHaveBeenCalledWith(testCharacter, expect.anything(), true);
       });
     });
   });

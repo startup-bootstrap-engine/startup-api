@@ -6,12 +6,14 @@ import {
   CharacterGender,
   MapLayers,
   NPCAlignment,
+  NPCCustomDeathPenalties,
   NPCMovementType,
   NPCPathOrientation,
   NPCSubtype,
   NPCTargetType,
   TypeHelper,
 } from "@rpg-engine/shared";
+
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { ExtractDoc, Type, typedModel } from "ts-mongoose";
 import { v4 as uuidv4 } from "uuid";
@@ -188,6 +190,11 @@ const npcSchema = createLeanSchema(
     isGiantForm: Type.boolean({
       default: false,
     }),
+
+    hasCustomDeathPenalty: Type.string({
+      enum: TypeHelper.enumToStringArray(NPCCustomDeathPenalties),
+    }),
+
     ...({} as {
       isAlive: boolean;
       type: string;

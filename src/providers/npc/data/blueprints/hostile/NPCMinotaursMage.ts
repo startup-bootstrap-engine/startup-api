@@ -16,7 +16,14 @@ import {
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
-import { AnimationEffectKeys, MagicPower, NPCAlignment, RangeTypes, SpellsBlueprint } from "@rpg-engine/shared";
+import {
+  AnimationEffectKeys,
+  MagicPower,
+  NPCAlignment,
+  NPCCustomDeathPenalties,
+  RangeTypes,
+  SpellsBlueprint,
+} from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
 
@@ -31,13 +38,14 @@ export const npcMinotaurMage = {
   maxRangeAttack: RangeTypes.High,
   speed: MovementSpeed.Standard,
   canSwitchToLowHealthTarget: true,
+  hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
   baseHealth: 750,
   healthRandomizerDice: Dice.D4,
   skillRandomizerDice: Dice.D4,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   isMagic: true,
   skills: {
-    level: 70,
+    level: 80,
     strength: {
       level: 75,
     },

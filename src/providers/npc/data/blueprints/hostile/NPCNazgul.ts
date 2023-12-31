@@ -12,7 +12,14 @@ import {
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { AnimationEffectKeys, MagicPower, NPCAlignment, RangeTypes, SpellsBlueprint } from "@rpg-engine/shared";
+import {
+  AnimationEffectKeys,
+  MagicPower,
+  NPCAlignment,
+  NPCCustomDeathPenalties,
+  RangeTypes,
+  SpellsBlueprint,
+} from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
 
@@ -30,6 +37,7 @@ export const npcNazgul: Partial<INPC> = {
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
+  hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
   isMagic: true,
   skills: {
     level: 150,
