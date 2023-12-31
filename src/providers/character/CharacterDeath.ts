@@ -169,7 +169,7 @@ export class CharacterDeath {
           case NPCCustomDeathPenalties.Hardcore:
             await this.applyPenalties(character, characterBody);
             break;
-          case NPCCustomDeathPenalties.FullLootDrop:
+          case NPCCustomDeathPenalties.Hardcore:
             await this.applyPenalties(character, characterBody, true);
             break;
         }

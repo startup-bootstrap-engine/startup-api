@@ -41,7 +41,7 @@ export const npcRedDragon = {
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   canSwitchToLowHealthTarget: true,
   canSwitchToRandomTarget: true,
-  hasCustomDeathPenalty: NPCCustomDeathPenalties.FullLootDrop,
+  hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
 
   isMagic: true,
   skills: {

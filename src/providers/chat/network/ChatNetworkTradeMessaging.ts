@@ -2,6 +2,7 @@ import { Character, type ICharacter } from "@entities/ModuleCharacter/CharacterM
 import { TradeChatLog } from "@entities/ModuleSystem/TradeChatLogModal";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
+import { DiscordBot } from "@providers/discord/DiscordBot";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
@@ -17,7 +18,8 @@ export class ChatNetworkTradeMessaging {
     private socketMessaging: SocketMessaging,
     private spellCast: SpellCast,
     private characterValidation: CharacterValidation,
-    private chatUtils: ChatUtils
+    private chatUtils: ChatUtils,
+    private discordBot: DiscordBot
   ) {}
 
   @TrackNewRelicTransaction()
@@ -137,6 +139,8 @@ export class ChatNetworkTradeMessaging {
               ChatSocketEvents.TradeChatMessageRead,
               previousTradeChatLogs
             );
+
+            await this.discordBot.sendMessage(`${character.name}: ${data.message}`, "trade");
           }
         } catch (error) {
           this.socketMessaging.sendErrorMessageToCharacter(character, "Error sending message");

@@ -33,7 +33,7 @@ export const npcYellowDragon = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: AnimationEffectKeys.FireBall,
-  hasCustomDeathPenalty: NPCCustomDeathPenalties.FullLootDrop,
+  hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
 
   maxRangeAttack: 8,
   speed: MovementSpeed.ExtraFast,

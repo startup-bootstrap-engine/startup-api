@@ -33,7 +33,7 @@ export const npcBlueDragon = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: AnimationEffectKeys.FireBall,
-  hasCustomDeathPenalty: NPCCustomDeathPenalties.FullLootDrop,
+  hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
   maxRangeAttack: 8,
   speed: MovementSpeed.ExtraFast,
   baseHealth: 50000,
