@@ -2,7 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { TraitGetter } from "@providers/skill/TraitGetter";
-import { ItemRarities } from "@rpg-engine/shared";
+import { ItemRarities, MagicsBlueprint } from "@rpg-engine/shared";
 import _ from "lodash";
 import { ItemRarity } from "../ItemRarity";
 import { FoodsBlueprint } from "../data/types/itemsBlueprintTypes";
@@ -21,7 +21,7 @@ describe("ItemRarity", () => {
   });
 
   beforeEach(async () => {
-    testCharacter = await unitTestHelper.createMockCharacter();
+    testCharacter = await unitTestHelper.createMockCharacter(null, { hasSkills: true });
   });
 
   describe("setItemRarityOnLootDrop", () => {
@@ -122,6 +122,29 @@ describe("ItemRarity", () => {
         // @ts-ignore
         expect(result.healthRecovery).toBeGreaterThan(0);
         expect(result.usableEffectDescription).toBeDefined();
+      });
+
+      describe("Items that have no rarity set", () => {
+        it("should not add rarity if item is an ingot or rune", async () => {
+          const itemWithoutRarity: IItem = await unitTestHelper.createMockItemFromBlueprint(
+            MagicsBlueprint.CorruptionRune
+          );
+
+          const result = await itemRarity.setItemRarityOnCraft(testCharacter, itemWithoutRarity, testCharacter.skills!);
+
+          expect(result.rarity).toBe(ItemRarities.Common);
+        });
+
+        it("should add rarity if item is NOT an ingot or rune", async () => {
+          // @ts-ignore
+          jest.spyOn(itemRarity, "randomizeRarity").mockReturnValue(ItemRarities.Legendary);
+
+          const validItem: IItem = await unitTestHelper.createMockItemFromBlueprint(FoodsBlueprint.Apple);
+
+          const result = await itemRarity.setItemRarityOnCraft(testCharacter, validItem, testCharacter.skills!);
+
+          expect(result.rarity).not.toBe(ItemRarities.Common);
+        });
       });
     });
   });

@@ -123,12 +123,20 @@ export class ItemRarity {
     return rarityBuff;
   }
 
+  private canAddRarity(item: IItem): boolean {
+    return !(item && item.key && (item.key.includes("rune") || item.key.includes("ingot")));
+  }
+
   @TrackNewRelicTransaction()
   public async setItemRarityOnCraft(
     character: ICharacter,
     item: IItem,
     skillId: Types.ObjectId
   ): Promise<{ attack: number; defense: number; rarity: ItemRarities }> {
+    if (!this.canAddRarity(item)) {
+      return { attack: item.attack || 0, defense: item.defense || 0, rarity: ItemRarities.Common };
+    }
+
     const skills = (await Skill.findById(skillId)
       .lean()
       .cacheQuery({
