@@ -10,7 +10,7 @@ export class MacroNetworkCheck {
 
   public onMacroCaptchaCheck(channel: SocketChannel): void {
     this.socketAuth.authCharacterOn(channel, MacroSocketEvents.CheckIfMacroInProgess, async (_, character) => {
-      this.macroCaptchaCheck.checkIfCharacterHasCaptchaVerification(character);
+      await this.macroCaptchaCheck.checkIfCharacterHasCaptchaVerification(character);
     });
   }
 }

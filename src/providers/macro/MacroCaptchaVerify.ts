@@ -47,7 +47,7 @@ export class MacroCaptchaVerify {
 
   private async handleVerifyBan(character: ICharacter): Promise<void> {
     await this.removeCaptchaFromCharacter(character);
-    await this.characterBan.banWithCustomPenalty(character, 1);
+    await this.characterBan.banAntiMacroCharacters(character, 1);
   }
 
   private async handleDecreaseCaptchaTries(character: ICharacter): Promise<void> {

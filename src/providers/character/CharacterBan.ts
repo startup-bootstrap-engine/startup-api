@@ -54,7 +54,11 @@ export class CharacterBan {
   }
 
   @TrackNewRelicTransaction()
-  public async banWithCustomPenalty(character: ICharacter, penalty: number): Promise<void> {
+  public async banAntiMacroCharacters(character: ICharacter, penalty: number): Promise<void> {
+    const updatedCharacter = await Character.findById(character._id).lean();
+
+    if (!updatedCharacter || !updatedCharacter.isOnline) return;
+
     await this.discordBot.sendMessage(
       `Character ${character.name} has been banned for not answering the anti-macro properly.`,
       "bans"

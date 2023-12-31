@@ -69,7 +69,7 @@ export class MacroCaptchaCrons {
 
     await Promise.all(
       charactersWithCaptchaNotVerified.map(async (character) => {
-        if (character.isOnline) await this.characterBan.banWithCustomPenalty(character, 1);
+        if (character.isOnline) await this.characterBan.banAntiMacroCharacters(character, 1);
       })
     );
   }

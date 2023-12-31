@@ -70,7 +70,7 @@ describe("CharacterBan.ts", () => {
   });
 
   it("should ban with custom penalty", async () => {
-    await characterBan.banWithCustomPenalty(testCharacter, 1);
+    await characterBan.banAntiMacroCharacters(testCharacter, 1);
 
     testCharacter = (await Character.findById(testCharacter._id)
       .lean()
