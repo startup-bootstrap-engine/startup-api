@@ -8,7 +8,8 @@ export const itemSocialCrystal: ICraftableItemBlueprint = {
   textureAtlas: "items",
   texturePath: "crafting-resources/tile049.png",
   name: "Social Crystal",
-  description: "A crystal that's earned for bringing more people to Definya's world.",
+  description:
+    "A crystal that's earned for bringing more people to Definya's world. Click on the 'Colored Diamond' button to get started.",
   weight: 0.01,
   maxStackSize: 999,
   basePrice: 50,
