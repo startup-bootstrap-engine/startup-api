@@ -2,6 +2,7 @@ import { ITSDecorator, TsDefaultDecorator } from "@providers/constants/Validatio
 import { CharacterController } from "@useCases/ModuleCharacter/character/CharacterController";
 import { FactionController } from "@useCases/ModuleCharacter/faction/FactionController";
 import { NPCController } from "@useCases/ModuleNPC/NPCController";
+import { ReferralRewardController } from "@useCases/ModuleReferral/ReferralRewardController";
 import { ABTestController } from "@useCases/ModuleSystem/abTests/ABTestController";
 import { BlueprintController } from "@useCases/ModuleSystem/blueprint/BlueprintController";
 import { CacheController } from "@useCases/ModuleSystem/cache/CacheController";
@@ -64,10 +65,12 @@ export const useCasesControllers = new ContainerModule((bind: interfaces.Bind, u
   bind<ITSDecorator>("ITSDecorator").to(TsDefaultDecorator);
   bind<CharacterController>(CharacterController).toSelf();
   bind<NPCController>(NPCController).toSelf();
+  bind<ReferralRewardController>(ReferralRewardController).toSelf();
   bind<ReadChatLogController>(ReadChatLogController).toSelf();
   bind<MapController>(MapController).toSelf();
   bind<FactionController>(FactionController).toSelf();
   bind<CacheController>(CacheController).toSelf();
+
   bind<ScriptsController>(ScriptsController).toSelf();
   bind<PremiumAccountController>(PremiumAccountController).toSelf();
   bind<PatreonController>(PatreonController).toSelf();
