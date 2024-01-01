@@ -51,6 +51,7 @@ import { itemSilverOre } from "./ItemSilverOre";
 import { itemSkull } from "./ItemSkull";
 import { itemSmallWoodenStick } from "./itemSmallWoodenStick";
 import { itemSmallWorm } from "./itemSmallWorm";
+import { itemSocialCrystal } from "./ItemSocialCrystal";
 import { itemSteelIngot } from "./itemSteelIngot";
 import { itemWaterBottle } from "./itemWaterBottle";
 import { itemWeaponRecipe } from "./ItemWeaponRecipe";
@@ -116,4 +117,5 @@ export const craftingResourcesBlueprintIndex = {
   [CraftingResourcesBlueprint.Bandage]: itemBandage,
   [CraftingResourcesBlueprint.DragonHead]: itemDragonHead,
   [CraftingResourcesBlueprint.DragonTooth]: itemDragonTooth,
+  [CraftingResourcesBlueprint.SocialCrystal]: itemSocialCrystal,
 };

@@ -302,6 +302,7 @@ export enum FoodsBlueprint {
   Pumpkin = "pumpkin",
 }
 export enum CraftingResourcesBlueprint {
+  SocialCrystal = "social-crystal",
   Rope = "rope",
   BlueSapphire = "blue-sapphire",
   BlueFeather = "blue-feather",
