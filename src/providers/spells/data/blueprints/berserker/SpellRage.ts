@@ -42,13 +42,13 @@ export const spellRage: Partial<ISpell> = {
     await characterBuffActivator.enableTemporaryBuff(character, {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Strength,
-      buffPercentage: 150,
+      buffPercentage: 200,
       durationSeconds: timeout,
       durationType: CharacterBuffDurationType.Temporary,
       options: {
         messages: {
           activation:
-            "Berserker's rage has been activated! Your strength has been increased (but your resistance was reduced)!",
+            "Berserker's Rage has been activated! Your strength has been increased by 200% (but your resistance was reduced by -25%)!",
           deactivation: "Berserker's Rage has been deactivated!",
         },
       },
@@ -59,7 +59,7 @@ export const spellRage: Partial<ISpell> = {
     await characterBuffActivator.enableTemporaryBuff(character, {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Resistance,
-      buffPercentage: -50, // reduce resistance by 50%
+      buffPercentage: -25, // reduce resistance by 50%
       durationSeconds: timeout,
       durationType: CharacterBuffDurationType.Temporary,
       options: {

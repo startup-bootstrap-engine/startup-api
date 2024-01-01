@@ -2,6 +2,7 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
+import { BERSERKER_BLOODTHIRST_HEALING_FACTOR } from "@providers/constants/BattleConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SigmoidCalculation } from "@providers/math/SigmoidCalculation";
 import { TraitGetter } from "@providers/skill/TraitGetter";
@@ -57,7 +58,7 @@ export class Bloodthirst {
       const strengthLevel = await this.traitGetter.getSkillLevelWithBuffs(skills, BasicAttribute.Strength);
 
       const averageLevel = (magicLevel + characterLevel + strengthLevel) / 3;
-      const healingFactor = this.sigmoidCalculation.sigmoid(averageLevel);
+      const healingFactor = this.sigmoidCalculation.sigmoid(averageLevel) * BERSERKER_BLOODTHIRST_HEALING_FACTOR;
 
       const calculatedHealing = Math.round(damage * berserkerMultiplier * healingFactor);
 

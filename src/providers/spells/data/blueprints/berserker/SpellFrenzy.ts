@@ -40,13 +40,13 @@ export const spellFrenzy: Partial<ISpell> = {
     await characterBuffActivator.enableTemporaryBuff(character, {
       type: CharacterBuffType.CharacterAttribute,
       trait: CharacterAttributes.AttackIntervalSpeed,
-      buffPercentage: -20, // reduce attack interval speed by 20%
+      buffPercentage: -30, // reduce attack interval speed by 20%
       durationSeconds: timeout,
       durationType: CharacterBuffDurationType.Temporary,
       options: {
         messages: {
           activation:
-            "Berserker's Frenzy has been activated! Your attack speed has been increased (but your resistance was reduced)!",
+            "Berserker's Frenzy has been activated! Your attack speed has been increased 30% (but your resistance was reduced -25%)!",
           deactivation: "Berserker's Frenzy has been deactivated!",
         },
       },
@@ -57,7 +57,7 @@ export const spellFrenzy: Partial<ISpell> = {
     await characterBuffActivator.enableTemporaryBuff(character, {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Resistance,
-      buffPercentage: -50, // reduce resistance by 50%
+      buffPercentage: -25, // reduce resistance by 25%
       durationSeconds: timeout,
       durationType: CharacterBuffDurationType.Temporary,
       options: {

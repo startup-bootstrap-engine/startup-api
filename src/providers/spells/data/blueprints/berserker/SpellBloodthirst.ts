@@ -20,7 +20,7 @@ export const spellBloodthirst: Partial<ISpell> = {
   texturePath: "spell-icons/berserker-bloodthirst.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "sanguis sitis",
-  manaCost: 90,
+  manaCost: 70,
   minLevelRequired: 4,
   minMagicLevelRequired: 3,
   cooldown: 60,
