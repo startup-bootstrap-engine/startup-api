@@ -3,6 +3,7 @@ import {
   SOCIAL_CRYSTAL_MIN_TIER_REQUIREMENT,
   SOCIAL_CRYSTAL_REQUIREMENT_RATIO,
 } from "@providers/constants/CraftingConstants";
+import { RECIPE_REQUIREMENTS_RATIO } from "@providers/constants/RecipeConstants";
 import { itemsBlueprintIndex } from "@providers/item/data";
 import { CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemSubType } from "@rpg-engine/shared";
@@ -51,12 +52,11 @@ const recipeBlueprintsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   ...recipeHammersIndex,
 };
 
-// eslint-disable-next-line @typescript-eslint/no-floating-promises, @typescript-eslint/explicit-function-return-type
-for (const recipe of Object.values(recipeBlueprintsIndex).flat()) {
+function addSocialCrystalAsRequirements(recipe: IUseWithCraftingRecipe, itemsBlueprintIndex: any): void {
   const itemBlueprint = itemsBlueprintIndex[recipe.outputKey] as IItem;
 
   if (!itemBlueprint) {
-    continue;
+    return;
   }
 
   if (
@@ -64,7 +64,7 @@ for (const recipe of Object.values(recipeBlueprintsIndex).flat()) {
     itemBlueprint.subType === ItemSubType.Food ||
     itemBlueprint.subType === ItemSubType.Potion
   ) {
-    continue;
+    return;
   }
 
   // Add social crystal as requirement to strong items
@@ -74,5 +74,23 @@ for (const recipe of Object.values(recipeBlueprintsIndex).flat()) {
       qty: Math.floor(itemBlueprint.tier * SOCIAL_CRYSTAL_REQUIREMENT_RATIO) ?? 1,
     });
   }
+}
+
+function adjustItemRequirements(recipe: IUseWithCraftingRecipe): void {
+  recipe.requiredItems.forEach((item) => {
+    let qty = Math.floor(item.qty * RECIPE_REQUIREMENTS_RATIO);
+
+    if (qty < 1) {
+      qty = 1;
+    }
+
+    item.qty = qty;
+  });
+}
+
+for (const recipe of Object.values(recipeBlueprintsIndex).flat()) {
+  addSocialCrystalAsRequirements(recipe, itemsBlueprintIndex);
+
+  adjustItemRequirements(recipe);
 }
 export { recipeBlueprintsIndex };
