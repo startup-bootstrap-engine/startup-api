@@ -42,7 +42,7 @@ export class CreateReferralRewardUseCase {
 
       const newItem = new Item({
         ...socialCrystalItemBlueprint,
-        quantity: amount,
+        stackQty: amount,
       });
 
       await newItem.save();
