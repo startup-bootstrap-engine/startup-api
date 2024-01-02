@@ -22,10 +22,10 @@ export const spellDivineProtection: Partial<ISpell> = {
   texturePath: "spell-icons/spell-divine-protection.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "divinum praesidium",
-  manaCost: 60,
+  manaCost: 50,
   minLevelRequired: 8,
   minMagicLevelRequired: 8,
-  cooldown: 30,
+  cooldown: 35,
   castingAnimationKey: AnimationEffectKeys.MagicShield,
   attribute: BasicAttribute.MagicResistance,
   characterClass: [CharacterClass.Druid],
@@ -35,8 +35,8 @@ export const spellDivineProtection: Partial<ISpell> = {
     const spellCalculator = container.get(SpellCalculator);
 
     const timeout = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
-      min: 30,
-      max: 60,
+      min: 40,
+      max: 80,
     });
 
     const buffPercentage = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
