@@ -29,7 +29,7 @@ export class CreateReferralRewardUseCase {
         throw new Error("Inventory not found");
       }
 
-      const inventoryContainer = await ItemContainer.findById(inventory._id).lean();
+      const inventoryContainer = await ItemContainer.findById(inventory.itemContainer).lean();
 
       if (!inventoryContainer) {
         throw new Error("Inventory container not found");

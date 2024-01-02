@@ -18,6 +18,8 @@ export class ReferralRewardController implements interfaces.Controller {
         throw new BadRequestError("CharacterId field is required.");
       }
 
+      console.log(characterId);
+
       await this.createReferralRewardUseCase.awardReferralBonusToCharacter(characterId, 1);
 
       return response.status(HttpStatus.OK).json({ message: "Referral bonus added." });
