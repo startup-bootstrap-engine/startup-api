@@ -4,7 +4,9 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { Request } from "express";
 import { provide } from "inversify-binding-decorators";
 
 @provide(CreateReferralRewardUseCase)
@@ -12,7 +14,8 @@ export class CreateReferralRewardUseCase {
   constructor(
     private characterItemContainer: CharacterItemContainer,
     private characterInventory: CharacterInventory,
-    private blueprintManager: BlueprintManager
+    private blueprintManager: BlueprintManager,
+    private inMemoryHashTable: InMemoryHashTable
   ) {}
 
   public async awardReferralBonusToCharacter(characterId: string, amount: number): Promise<void> {
@@ -53,5 +56,33 @@ export class CreateReferralRewardUseCase {
 
       throw error;
     }
+  }
+
+  public async isReferralBonusAlreadyAdded(request: Request, deviceFingerprint: string): Promise<boolean> {
+    if (deviceFingerprint) {
+      const isDeviceFingerprintAdded = Boolean(
+        await this.inMemoryHashTable.get("referral-bonus-device-fingerprint", deviceFingerprint)
+      );
+
+      if (isDeviceFingerprintAdded) {
+        return true;
+      }
+
+      await this.inMemoryHashTable.set("referral-bonus-device-fingerprint", deviceFingerprint, true);
+    }
+
+    const ip = String(request.ip || request.headers["x-forwarded-for"] || request.connection.remoteAddress);
+
+    if (ip) {
+      const referralBonusIPs = Boolean(await this.inMemoryHashTable.get("referral-bonus-ips", ip));
+
+      if (referralBonusIPs) {
+        return true;
+      }
+
+      await this.inMemoryHashTable.set("referral-bonus-ips", ip, true);
+    }
+
+    return false;
   }
 }

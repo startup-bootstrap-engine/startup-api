@@ -20,21 +20,22 @@ export class ReferralRewardController implements interfaces.Controller {
     @request() request
   ): Promise<INPC> {
     try {
-      const characterId = body.characterId;
+      const { characterId, deviceFingerprint } = body;
 
       if (!characterId) {
         throw new BadRequestError("CharacterId field is required.");
       }
 
-      const ip = request.ip || request.headers["x-forwarded-for"] || request.connection.remoteAddress;
+      const isReferralBonusAlreadyAdded = await this.createReferralRewardUseCase.isReferralBonusAlreadyAdded(
+        request,
+        deviceFingerprint!
+      );
 
-      const referralBonusIPs = Boolean(await this.inMemoryHashTable.get("referral-bonus-ips", ip));
+      if (isReferralBonusAlreadyAdded) {
+        console.log(`Character ${characterId} is trying to add a referral bonus, but failed.`);
 
-      if (referralBonusIPs) {
-        return response.status(HttpStatus.OK).json({ message: "Referral bonus already added, skipping." });
+        return response.status(HttpStatus.OK).json({ message: "Referral bonus already added." });
       }
-
-      await this.inMemoryHashTable.set("referral-bonus-ips", ip, true);
 
       await this.createReferralRewardUseCase.awardReferralBonusToCharacter(characterId, 1);
 
