@@ -163,6 +163,11 @@ jest.mock("@providers/constants/CraftingConstants", () => ({
   CRAFTING_OUTPUT_QTY_RATIO: 1,
   SOCIAL_CRYSTAL_REQUIREMENT_RATIO: 1.5,
   SOCIAL_CRYSTAL_MIN_TIER_REQUIREMENT: 3,
+  SOCIAL_CRYSTAL_MAX_CAP_REQUIREMENT: 7,
+}));
+
+jest.mock("@providers/constants/RecipeConstants", () => ({
+  RECIPE_REQUIREMENTS_RATIO: 1,
 }));
 
 jest.mock("@providers/constants/ItemConstants", () => ({

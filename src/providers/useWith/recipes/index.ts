@@ -1,5 +1,6 @@
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import {
+  SOCIAL_CRYSTAL_MAX_CAP_REQUIREMENT,
   SOCIAL_CRYSTAL_MIN_TIER_REQUIREMENT,
   SOCIAL_CRYSTAL_REQUIREMENT_RATIO,
 } from "@providers/constants/CraftingConstants";
@@ -67,11 +68,17 @@ function addSocialCrystalAsRequirements(recipe: IUseWithCraftingRecipe, itemsBlu
     return;
   }
 
+  let socialCrystalBaseRequirement = itemBlueprint.tier! * SOCIAL_CRYSTAL_REQUIREMENT_RATIO;
+
+  if (socialCrystalBaseRequirement > SOCIAL_CRYSTAL_MAX_CAP_REQUIREMENT) {
+    socialCrystalBaseRequirement = SOCIAL_CRYSTAL_MAX_CAP_REQUIREMENT;
+  }
+
   // Add social crystal as requirement to strong items
   if (itemBlueprint.tier && itemBlueprint.tier >= SOCIAL_CRYSTAL_MIN_TIER_REQUIREMENT) {
     recipe.requiredItems.push({
       key: CraftingResourcesBlueprint.SocialCrystal,
-      qty: Math.floor(itemBlueprint.tier * SOCIAL_CRYSTAL_REQUIREMENT_RATIO) ?? 1,
+      qty: Math.floor(socialCrystalBaseRequirement) ?? 1,
     });
   }
 }
