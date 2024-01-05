@@ -5,7 +5,6 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   AxesBlueprint,
-  BootsBlueprint,
   DaggersBlueprint,
   RangedWeaponsBlueprint,
   SpearsBlueprint,
@@ -64,10 +63,6 @@ export const npcIceCyclops = {
       itemBlueprintKey: RangedWeaponsBlueprint.FrostArrow,
       chance: 50,
       quantityRange: [5, 10],
-    },
-    {
-      itemBlueprintKey: BootsBlueprint.WindstriderBoots,
-      chance: 10,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],
