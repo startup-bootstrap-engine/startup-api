@@ -28,5 +28,5 @@ export const itemWindstriderBoots: IEquippableLightArmorTier9Blueprint = {
     buffPercentage: 10,
     durationType: CharacterBuffDurationType.Permanent,
   },
-  equippedBuffDescription: "Increases maxHealth by 10%",
+  equippedBuffDescription: "Increases Speed by 10%",
 };
