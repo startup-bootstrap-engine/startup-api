@@ -19,6 +19,7 @@ import { PlantCycleCrons } from "./PlantCycleCrons";
 import { PremiumAccountCrons } from "./PremiumAccountCrons";
 import { RankingCrons } from "./RankingCrons";
 import { RedisCrons } from "./RedisCrons";
+import { ReferralBonusCrons } from "./ReferralBonusCrons";
 import { RemoveInactivePartyMembersCron } from "./RemoveInactivePartyMembersCron";
 import { ResourceGatheringCrons } from "./ResourceGatheringCrons";
 import { TotalAvailableGold } from "./TotalAvailableGold";
@@ -46,7 +47,8 @@ export class Cronjob {
     private discordCronJobs: DiscordCronJobs,
     private resourceGatheringCronJobs: ResourceGatheringCrons,
     private plantCycleCrons: PlantCycleCrons,
-    private premiumAccountCrons: PremiumAccountCrons
+    private premiumAccountCrons: PremiumAccountCrons,
+    private referralBonusCrons: ReferralBonusCrons
   ) {}
 
   public start(): void {
@@ -77,6 +79,7 @@ export class Cronjob {
         this.resourceGatheringCronJobs.schedule();
         this.plantCycleCrons.schedule();
         this.premiumAccountCrons.schedule();
+        this.referralBonusCrons.schedule();
         break;
       case EnvType.Staging:
       case EnvType.Production:
@@ -102,6 +105,7 @@ export class Cronjob {
           this.resourceGatheringCronJobs.schedule();
           this.plantCycleCrons.schedule();
           this.premiumAccountCrons.schedule();
+          this.referralBonusCrons.schedule();
         }
         break;
     }
