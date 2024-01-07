@@ -42,7 +42,7 @@ export const appEnv = {
   },
   encryption: {
     genericHash: process.env.GENERIC_ENCRYPTION_HASH,
-    rsaPrivateKey: process.env.RSA_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    rsaBase64PrivateKey: process.env.RSA_BASE_64_PRIVATE_KEY,
   },
   authentication: {
     JWT_SECRET: process.env.JWT_SECRET,

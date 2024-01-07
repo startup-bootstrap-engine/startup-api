@@ -17,6 +17,8 @@ const limiter = rateLimit({
 });
 
 expressServer.setConfig((app) => {
+  app.set("trust proxy", true);
+
   app.use(compression());
   app.use("*", cors());
   app.use(express.json());
