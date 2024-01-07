@@ -82,7 +82,7 @@ export class ReferralBonusVerifier {
 
       console.log(`Client IP ${clientIp} does not exist. Proceeding...`);
 
-      await this.inMemoryHashTable.set("referral-bonus-ip", clientIp, true);
+      await this.inMemoryHashTable.set("referral-bonus-ip-list", clientIp, true);
 
       return false;
     } catch (error) {
