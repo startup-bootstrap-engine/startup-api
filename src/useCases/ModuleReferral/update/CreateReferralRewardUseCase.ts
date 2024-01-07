@@ -5,6 +5,7 @@ import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
+import { RSAEncryption } from "@providers/encryption/RSAEncryption";
 import { CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { Request } from "express";
 import { provide } from "inversify-binding-decorators";
@@ -15,7 +16,8 @@ export class CreateReferralRewardUseCase {
     private characterItemContainer: CharacterItemContainer,
     private characterInventory: CharacterInventory,
     private blueprintManager: BlueprintManager,
-    private inMemoryHashTable: InMemoryHashTable
+    private inMemoryHashTable: InMemoryHashTable,
+    private rsaEncryption: RSAEncryption
   ) {}
 
   public async awardReferralBonusToCharacter(characterId: string, amount: number): Promise<void> {
@@ -75,7 +77,7 @@ export class CreateReferralRewardUseCase {
       return false;
     } catch (error) {
       console.error(error);
-      throw error;
+      return true;
     }
   }
 
@@ -84,8 +86,20 @@ export class CreateReferralRewardUseCase {
       throw new Error("Invalid or missing device fingerprint");
     }
 
+    console.log(`Encrypted Device fingerprint: ${deviceFingerprint}`);
+
+    const decryptedDeviceFingerprint = this.rsaEncryption.decryptWithPrivateKey(deviceFingerprint);
+
+    if (!decryptedDeviceFingerprint) {
+      throw new Error("Failed to decrypt device fingerprint");
+    }
+
+    console.log(`Decrypted Device fingerprint: ${decryptedDeviceFingerprint}`);
+
+    deviceFingerprint = decryptedDeviceFingerprint;
+
     if (!this.isValidFingerprint(Number(deviceFingerprint))) {
-      throw new Error(`Invalid device fingerprint ${deviceFingerprint}.`);
+      throw new Error(`Invalid device fingerprint pattern ${deviceFingerprint}.`);
     }
 
     const isDeviceFingerprintAdded = Boolean(
@@ -111,14 +125,14 @@ export class CreateReferralRewardUseCase {
         throw new Error("Invalid or missing client IP");
       }
 
-      const isClientIpAdded = Boolean(await this.inMemoryHashTable.get("referral-bonus-ip", clientIp));
+      const isClientIpAdded = Boolean(await this.inMemoryHashTable.get("referral-bonus-ip-list", clientIp));
 
       if (isClientIpAdded) {
         console.log(`Client IP ${clientIp} already exists`);
         return true;
       }
 
-      console.log(`Client IP ${clientIp} does not exist. Adding referral bonus`);
+      console.log(`Client IP ${clientIp} does not exist. Proceeding...`);
 
       await this.inMemoryHashTable.set("referral-bonus-ip", clientIp, true);
 
