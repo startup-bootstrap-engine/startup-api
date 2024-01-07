@@ -30,7 +30,6 @@ export class ReferralRewardController implements interfaces.Controller {
       }
 
       const isReferralBonusAlreadyAdded = await this.createReferralRewardUseCase.isReferralBonusAlreadyAdded(
-        request,
         String(deviceFingerprint)!
       );
 
