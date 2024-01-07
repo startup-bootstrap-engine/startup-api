@@ -191,6 +191,21 @@ jest.mock("@providers/constants/PVPConstants", () => ({
   PVP_ROGUE_ATTACK_DAMAGE_INCREASE_MULTIPLIER: 0.1,
 }));
 
+jest.mock("@providers/constants/CharacterConstants", () => ({
+  INITIAL_STARTING_POINTS: {
+    "Life Bringer": {
+      gridX: 26,
+      gridY: 17,
+      scene: "ilya-village-sewer",
+    },
+    "Shadow Walker": {
+      gridX: 100,
+      gridY: 15,
+      scene: "shadowlands-sewer",
+    },
+  },
+}));
+
 jest.mock("mongoose-update-if-current", () => ({
   updateIfCurrentPlugin: jest.fn(), // mock the plugin because otherwise it will break many tests
 }));

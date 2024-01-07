@@ -32,4 +32,5 @@ export enum QuestsBlueprint {
   KillNazguls = "kill-nazguls",
   KillGiantSpiders = "kill-giant-spiders",
   KillWolves = "kill-wolves",
+  KillOrcWarlord = "kill-orc-warlord",
 }

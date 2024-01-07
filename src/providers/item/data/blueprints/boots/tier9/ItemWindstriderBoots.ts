@@ -1,5 +1,12 @@
 import { IEquippableLightArmorTier9Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  CharacterAttributes,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { BootsBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemWindstriderBoots: IEquippableLightArmorTier9Blueprint = {
@@ -15,4 +22,11 @@ export const itemWindstriderBoots: IEquippableLightArmorTier9Blueprint = {
   weight: 0.4,
   allowedEquipSlotType: [ItemSlotType.Feet],
   basePrice: 118,
+  equippedBuff: {
+    type: CharacterBuffType.CharacterAttribute,
+    trait: CharacterAttributes.Speed,
+    buffPercentage: 10,
+    durationType: CharacterBuffDurationType.Permanent,
+  },
+  equippedBuffDescription: "Increases speed by 10%",
 };

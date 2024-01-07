@@ -12,6 +12,7 @@ import { recipePlateBoots } from "./recipePlateBoots";
 import { recipeSandals } from "./recipeSandals";
 import { recipeStuddedBoots } from "./recipeStuddedBoots";
 import { recipeVoltstepBoots } from "./recipeVoltstepBoots";
+import { recipeWindstriderBoots } from "./recipeWindstriderBoots";
 
 export const recipeBootsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [BootsBlueprint.StuddedBoots]: [recipeStuddedBoots],
@@ -26,4 +27,5 @@ export const recipeBootsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [BootsBlueprint.FalconBoots]: [recipeFalconBoots],
   [BootsBlueprint.GaiasSoleplate]: [recipeGaiasSoleplate],
   [BootsBlueprint.VoltstepBoots]: [recipeVoltstepBoots],
+  [BootsBlueprint.WindstriderBoots]: [recipeWindstriderBoots],
 };

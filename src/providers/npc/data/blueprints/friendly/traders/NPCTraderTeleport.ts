@@ -1,6 +1,6 @@
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { ContainersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
-import { FriendlyNPCsBlueprint, HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
+import { FriendlyNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { CharacterGender, MagicsBlueprint } from "@rpg-engine/shared";
 import { generateRandomMovement } from "../../../abstractions/BaseNeutralNPC";
 
@@ -8,7 +8,7 @@ export const npcTraderTeleport = {
   ...generateRandomMovement(),
   key: FriendlyNPCsBlueprint.TraderTeleport,
   name: "Mythic Merchant",
-  textureKey: HostileNPCsBlueprint.CaveCyclops,
+  textureKey: "shadow-assassin",
   gender: CharacterGender.Male,
   isTrader: true,
   traderItems: [
