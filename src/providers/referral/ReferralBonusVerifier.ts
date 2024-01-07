@@ -10,7 +10,9 @@ export class ReferralBonusVerifier {
 
   public async isReferralBonusAlreadyAdded(request: Request, deviceFingerprint: string): Promise<boolean> {
     try {
-      const wasRequestIPAlreadyUsed = await this.wasRequestIPAlreadyUsed(request);
+      const clientIp = requestIp.getClientIp(request);
+
+      const wasRequestIPAlreadyUsed = await this.wasRequestIPAlreadyUsed(clientIp);
 
       if (wasRequestIPAlreadyUsed) {
         return true;
@@ -21,6 +23,9 @@ export class ReferralBonusVerifier {
       if (wasDeviceFingerprintAlreadyUsed) {
         return true;
       }
+
+      // only lock the IP if the device fingerprint is not already used
+      await this.inMemoryHashTable.set("referral-bonus-ips-list", clientIp, true);
 
       return false;
     } catch (error) {
@@ -65,15 +70,13 @@ export class ReferralBonusVerifier {
     return false;
   }
 
-  private async wasRequestIPAlreadyUsed(request: Request): Promise<boolean> {
+  private async wasRequestIPAlreadyUsed(clientIp: string): Promise<boolean> {
     try {
-      const clientIp = requestIp.getClientIp(request);
-
       if (!clientIp) {
         throw new Error("Invalid or missing client IP");
       }
 
-      const isClientIpAdded = Boolean(await this.inMemoryHashTable.get("referral-bonus-ip-list", clientIp));
+      const isClientIpAdded = Boolean(await this.inMemoryHashTable.get("referral-bonus-ips-list", clientIp));
 
       if (isClientIpAdded) {
         console.log(`Client IP ${clientIp} already exists`);
@@ -81,8 +84,6 @@ export class ReferralBonusVerifier {
       }
 
       console.log(`Client IP ${clientIp} does not exist. Proceeding...`);
-
-      await this.inMemoryHashTable.set("referral-bonus-ip-list", clientIp, true);
 
       return false;
     } catch (error) {
