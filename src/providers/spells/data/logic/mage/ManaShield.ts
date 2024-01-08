@@ -17,9 +17,11 @@ export class ManaShield {
         return false;
       }
 
-      return await this.applyManaShield(character, damage);
+      const absorbed = await this.applyManaShield(character, damage);
+
+      return absorbed;
     } catch (error) {
-      console.error(`Failed to handle sorcerer mana shieldk: ${error}`);
+      console.error(`Failed to handle sorcerer mana shield: ${error}`);
       return false;
     }
   }
@@ -41,7 +43,7 @@ export class ManaShield {
       }
 
       const newMana = character.mana - damage;
-      const newHealth = character.health + (newMana < 0 ? newMana : 0);
+      const newHealth = character.health - (newMana < 0 ? Math.abs(newMana) : 0);
 
       if (newMana <= 0 && newHealth <= 0) {
         return false;
@@ -53,9 +55,13 @@ export class ManaShield {
         await this.inMemoryHashTable.delete(namespace, key);
       }
 
+      const updatedMana = newMana > 0 ? newMana : 0;
+
+      const updatedHealth = newMana < 0 ? Math.max(newHealth, 0) : character.health;
+
       (await Character.findByIdAndUpdate(character._id, {
-        mana: newMana > 0 ? newMana : 0,
-        health: newMana < 0 ? Math.max(newHealth, 0) : character.health,
+        mana: updatedMana,
+        health: updatedHealth,
       }).lean()) as ICharacter;
 
       await this.socketMessaging.sendEventAttributeChange(character._id);
