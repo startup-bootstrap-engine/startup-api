@@ -171,6 +171,9 @@ export class ItemDrop {
           droppedBy: character._id,
           isInContainer: false,
         },
+        $unset: {
+          carrier: 1,
+        },
       }
     );
 

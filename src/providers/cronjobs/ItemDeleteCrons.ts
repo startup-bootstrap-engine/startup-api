@@ -57,8 +57,7 @@ export class ItemDeleteCrons {
         scene: { $exists: true, $ne: null },
 
         //* And also without an owner
-        owner: { $in: [null, undefined] },
-
+        $or: [{ owner: null }, { owner: { $exists: false } }],
         //* Are not equipped and not picked up
         isEquipped: { $ne: true },
 
