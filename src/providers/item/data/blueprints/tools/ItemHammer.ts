@@ -24,7 +24,7 @@ import { CraftingResourcesBlueprint, ToolsBlueprint } from "../../types/itemsBlu
 export const itemHammer: IToolItemBlueprint = {
   key: ToolsBlueprint.Hammer,
   type: ItemType.Tool,
-  subType: ItemSubType.Other,
+  subType: ItemSubType.Tool,
   textureAtlas: "items",
   texturePath: "hammers/hammer.png",
   name: "Blacksmith's Hammer",

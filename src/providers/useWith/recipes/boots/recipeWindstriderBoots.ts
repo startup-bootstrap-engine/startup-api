@@ -18,6 +18,10 @@ export const recipeWindstriderBoots: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.SewingThread,
       qty: 30,
     },
+    {
+      key: CraftingResourcesBlueprint.BlueFeather,
+      qty: 10,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Blacksmithing, 28],
 };

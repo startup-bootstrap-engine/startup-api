@@ -79,7 +79,7 @@ export class DiscordCronJobs {
 
       await this.discordBot.sendMessageWithColor(
         message,
-        "announcements",
+        "importantNotices",
         "Review Request",
         "Green",
         "https://i.imgur.com/LGdrHYD.png"
@@ -98,7 +98,7 @@ export class DiscordCronJobs {
 
       await this.discordBot.sendMessageWithColor(
         message,
-        "announcements",
+        "importantNotices",
         "Tutorial",
         "DarkAqua",
         "https://i.imgur.com/DrZ060m.png"
@@ -129,7 +129,7 @@ export class DiscordCronJobs {
 
       await this.discordBot.sendMessageWithColor(
         message,
-        "announcements",
+        "importantNotices",
         "Training Room",
         "Gold",
         "https://i.imgur.com/LVm6okZ.png"
@@ -170,7 +170,7 @@ export class DiscordCronJobs {
 
       await this.discordBot.sendMessageWithColor(
         message,
-        "announcements",
+        "importantNotices",
         "Premium Account",
         "Gold",
         "https://i.imgur.com/1oqejn7.png"
@@ -205,7 +205,7 @@ export class DiscordCronJobs {
 
       await this.discordBot.sendMessageWithColor(
         message,
-        "announcements",
+        "importantNotices",
         "Premium Account",
         "Gold",
         "https://i.imgur.com/87eT8Rn.png"
@@ -232,7 +232,7 @@ export class DiscordCronJobs {
 
       await this.discordBot.sendMessageWithColor(
         message,
-        "announcements",
+        "importantNotices",
         "Merry Christmas",
         "Purple",
         "https://i.imgur.com/tut4teS.png"
@@ -257,7 +257,7 @@ export class DiscordCronJobs {
 
       await this.discordBot.sendMessageWithColor(
         message,
-        "announcements",
+        "importantNotices",
         "Happy New Year",
         "Purple",
         "https://i.imgur.com/1ZiJo15.png"
@@ -283,7 +283,7 @@ export class DiscordCronJobs {
 
       await this.discordBot.sendMessageWithColor(
         message,
-        "announcements",
+        "importantNotices",
         "Happy Valentine's Day",
         "Purple",
         "https://i.imgur.com/NKCJCiX.png"
@@ -309,7 +309,7 @@ export class DiscordCronJobs {
 
     await this.discordBot.sendMessageWithColor(
       message,
-      "announcements",
+      "importantNotices",
       "Happy Easter",
       "Purple",
       "https://i.imgur.com/V95swTB.png"
@@ -333,7 +333,7 @@ export class DiscordCronJobs {
 
       await this.discordBot.sendMessageWithColor(
         message,
-        "announcements",
+        "importantNotices",
         "Happy Summer",
         "Purple",
         "https://i.imgur.com/Vq6k2q1.png"
@@ -360,7 +360,7 @@ export class DiscordCronJobs {
 
       await this.discordBot.sendMessageWithColor(
         message,
-        "announcements",
+        "importantNotices",
         "Happy Halloween",
         "Purple",
         "https://i.imgur.com/Hchoeii.png"
