@@ -12,8 +12,8 @@ export const CRAFTING_OUTPUT_QTY_RATIO = 1.5; // higher than 1 means more output
 
 // Marketing
 
-export const SOCIAL_CRYSTAL_REQUIREMENT_RATIO = 1; // higher than 1 means more social cristals required to craft items
+export const SOCIAL_CRYSTAL_REQUIREMENT_RATIO = 2; // higher than 1 means more social cristals required to craft items
 
 export const SOCIAL_CRYSTAL_MIN_TIER_REQUIREMENT = 3; // minimum tier to require social cristals to craft items
 
-export const SOCIAL_CRYSTAL_MAX_CAP_REQUIREMENT = 7; // max cap of social cristals required to craft items
+export const SOCIAL_CRYSTAL_MAX_CAP_REQUIREMENT = 12; // max cap of social cristals required to craft items

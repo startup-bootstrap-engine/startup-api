@@ -12,7 +12,11 @@ export class CreateReferralRewardUseCase {
     return this.referralBonusAwarder.awardReferralBonusToCharacter(characterId, amount);
   }
 
-  public async isReferralBonusAlreadyAdded(deviceFingerprint: string): Promise<boolean> {
-    return await this.referralBonusVerifier.isReferralBonusAlreadyAdded(deviceFingerprint);
+  public async wasReferralBonusAlreadyAdded(deviceFingerprint: string): Promise<boolean> {
+    return await this.referralBonusVerifier.wasReferralBonusAlreadyAdded(deviceFingerprint);
+  }
+
+  public async wasReferralBonusAlreadyAddedToday(deviceFingerprint: string): Promise<boolean> {
+    return await this.referralBonusVerifier.wasReferralBonusAlreadyAddedToday(deviceFingerprint);
   }
 }

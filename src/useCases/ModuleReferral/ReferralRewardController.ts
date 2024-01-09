@@ -29,7 +29,7 @@ export class ReferralRewardController implements interfaces.Controller {
         throw new BadRequestError("CharacterId field is required.");
       }
 
-      const isReferralBonusAlreadyAdded = await this.createReferralRewardUseCase.isReferralBonusAlreadyAdded(
+      const isReferralBonusAlreadyAdded = await this.createReferralRewardUseCase.wasReferralBonusAlreadyAdded(
         String(deviceFingerprint)!
       );
 
@@ -44,6 +44,41 @@ export class ReferralRewardController implements interfaces.Controller {
       await this.createReferralRewardUseCase.awardReferralBonusToCharacter(characterId, 1);
 
       return response.status(HttpStatus.OK).json({ message: "Referral bonus added." });
+    } catch (error) {
+      console.error(error);
+
+      throw new BadRequestError("Error while trying to add referral bonus.");
+    }
+  }
+
+  @httpPost("/add-daily-reward", rateLimiter)
+  private async addDailyReward(
+    @requestBody() body: CreateReferralRewardDTO,
+    @response() response,
+    @request() request
+  ): Promise<INPC> {
+    try {
+      const { characterId, deviceFingerprint } = body;
+
+      if (!characterId) {
+        throw new BadRequestError("CharacterId field is required.");
+      }
+
+      const isReferralBonusAlreadyAddedToday = await this.createReferralRewardUseCase.wasReferralBonusAlreadyAddedToday(
+        String(deviceFingerprint)!
+      );
+
+      if (isReferralBonusAlreadyAddedToday) {
+        console.log(`Character ${characterId} is trying to add a referral bonus TODAY, but failed.`);
+
+        return response.status(HttpStatus.OK).json({ message: "Failed to add daily referral bonus." });
+      }
+
+      console.log("✨ Adding daily referral bonus to character: ", characterId);
+
+      await this.createReferralRewardUseCase.awardReferralBonusToCharacter(characterId, 1);
+
+      return response.status(HttpStatus.OK).json({ message: "Daily referral bonus added." });
     } catch (error) {
       console.error(error);
 

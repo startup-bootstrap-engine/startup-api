@@ -1,12 +1,33 @@
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RSAEncryption } from "@providers/encryption/RSAEncryption";
+import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 
 @provide(ReferralBonusVerifier)
 export class ReferralBonusVerifier {
   constructor(private inMemoryHashTable: InMemoryHashTable, private rsaEncryption: RSAEncryption) {}
 
-  public async isReferralBonusAlreadyAdded(deviceFingerprint: string): Promise<boolean> {
+  public async wasReferralBonusAlreadyAddedToday(deviceFingerprint: string): Promise<boolean> {
+    const today = dayjs().format("YYYY-MM-DD");
+    const dailyRewardDeviceControl = await this.inMemoryHashTable.get("referral-bonus-daily-reward", today);
+
+    deviceFingerprint = this.getDecryptedDeviceFingerprint(deviceFingerprint)!;
+
+    if (dailyRewardDeviceControl && dailyRewardDeviceControl[deviceFingerprint]) {
+      return true;
+    }
+
+    const updatedDailyRewardDeviceControl = {
+      ...dailyRewardDeviceControl,
+      [deviceFingerprint]: true,
+    };
+
+    await this.inMemoryHashTable.set("referral-bonus-daily-reward", today, updatedDailyRewardDeviceControl);
+
+    return false;
+  }
+
+  public async wasReferralBonusAlreadyAdded(deviceFingerprint: string): Promise<boolean> {
     try {
       const wasDeviceFingerprintAlreadyUsed = await this.wasDeviceFingerprintAlreadyUsed(deviceFingerprint);
 
@@ -21,14 +42,8 @@ export class ReferralBonusVerifier {
     }
   }
 
-  private async wasDeviceFingerprintAlreadyUsed(deviceFingerprint: string): Promise<boolean> {
-    if (!deviceFingerprint) {
-      throw new Error("Invalid or missing device fingerprint");
-    }
-
-    console.log(`Encrypted Device fingerprint: ${deviceFingerprint}`);
-
-    const decryptedDeviceFingerprint = this.rsaEncryption.decryptWithPrivateKey(deviceFingerprint);
+  private getDecryptedDeviceFingerprint(encryptedDeviceFingerprint: string): string | undefined {
+    const decryptedDeviceFingerprint = this.rsaEncryption.decryptWithPrivateKey(encryptedDeviceFingerprint);
 
     if (!decryptedDeviceFingerprint) {
       throw new Error("Failed to decrypt device fingerprint");
@@ -36,7 +51,17 @@ export class ReferralBonusVerifier {
 
     console.log(`Decrypted Device fingerprint: ${decryptedDeviceFingerprint}`);
 
-    deviceFingerprint = decryptedDeviceFingerprint;
+    return decryptedDeviceFingerprint;
+  }
+
+  private async wasDeviceFingerprintAlreadyUsed(deviceFingerprint: string): Promise<boolean> {
+    if (!deviceFingerprint) {
+      throw new Error("Invalid or missing device fingerprint");
+    }
+
+    deviceFingerprint = this.getDecryptedDeviceFingerprint(deviceFingerprint)!;
+
+    console.log(`Decrypted Device fingerprint: ${deviceFingerprint}`);
 
     if (!this.isValidFingerprint(Number(deviceFingerprint))) {
       throw new Error(`Invalid device fingerprint pattern ${deviceFingerprint}.`);
