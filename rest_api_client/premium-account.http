@@ -4,9 +4,9 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "blueprintKey": "emerald-elegance-necklace",
-  "quantity": 1,
-  "characterId": "6558271dd45f73004f74ff2e" 
+  "blueprintKey": "greater-mana-potion",
+  "quantity": 1500,
+  "characterId": "6549765f4ce996004faaa311" 
 }
 
 ###

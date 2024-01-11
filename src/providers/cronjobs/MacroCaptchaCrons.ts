@@ -17,17 +17,17 @@ export class MacroCaptchaCrons {
   ) {}
 
   public schedule(): void {
-    this.cronJobScheduler.uniqueSchedule("macro-captcha-cron-ban-macro-characters", "*/2 * * * *", async () => {
-      await this.banMacroCharacters();
-    });
-
-    this.cronJobScheduler.uniqueSchedule(
-      "macro-captcha-cron-send-macro-captcha-to-active-characters",
-      "*/5 * * * *",
-      async () => {
-        await this.sendMacroCaptchaToActiveCharacters();
-      }
-    );
+    //! Disabled because this shit only gives me headaches and turn off players.
+    // this.cronJobScheduler.uniqueSchedule("macro-captcha-cron-ban-macro-characters", "*/2 * * * *", async () => {
+    //   await this.banMacroCharacters();
+    // });
+    // this.cronJobScheduler.uniqueSchedule(
+    //   "macro-captcha-cron-send-macro-captcha-to-active-characters",
+    //   "*/5 * * * *",
+    //   async () => {
+    //     await this.sendMacroCaptchaToActiveCharacters();
+    //   }
+    // );
   }
 
   private async banMacroCharacters(): Promise<void> {
