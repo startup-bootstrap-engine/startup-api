@@ -4,9 +4,9 @@ import { CharacterClass, LifeBringerRaces, Modes, ShadowWalkerRaces } from "@rpg
 export const DAMAGE_ATTRIBUTE_WEIGHT = 1.15;
 export const DAMAGE_COMBAT_SKILL_WEIGHT = 1.6;
 
-export const EXP_RATIO = 1.75;
+export const EXP_RATIO = 1.5;
 
-export const SP_INCREASE_BASE = 1;
+export const SP_INCREASE_BASE = 0.8;
 
 export const LOW_SKILL_LEVEL_SP_INCREASE_BONUS = 5;
 
@@ -22,7 +22,7 @@ export const HEALTH_MANA_BASE_INCREASE_RATE = 15;
 
 export const ML_INCREASE_RATIO = 0.8;
 export const ML_INCREASE_RATIO_MAGE = 1;
-export const ML_INCREASE_RATIO_OTHERS = 0.05;
+export const ML_INCREASE_RATIO_OTHERS = 0.025;
 
 export const SPELL_CALCULATOR_DEFAULT_MIN_SKILL_MULTIPLIER = 0.5;
 export const SPELL_CALCULATOR_DEFAULT_MAX_SKILL_MULTIPLIER = 1.5;

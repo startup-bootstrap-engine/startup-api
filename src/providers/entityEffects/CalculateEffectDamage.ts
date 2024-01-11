@@ -2,6 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import {
   ENTITY_EFFECT_DAMAGE_FROM_NPC_MODIFIER,
   ENTITY_EFFECT_DAMAGE_LEVEL_MULTIPLIER_NPC,
@@ -19,7 +20,7 @@ interface ICalculateDamageOptions {
 
 @provide(CalculateEffectDamage)
 export class CalculateEffectDamage {
-  constructor(private skillGetter: TraitGetter) {}
+  constructor(private skillGetter: TraitGetter, private blueprintManager: BlueprintManager) {}
 
   @TrackNewRelicTransaction()
   public async calculateEffectDamage(
@@ -103,7 +104,7 @@ export class CalculateEffectDamage {
 
     // Unified approach for calculating maxDamage
 
-    const additionalDamage = attackerMagicLevel + 2 * attackerStrengthLevel;
+    const additionalDamage = this.getAdditionalDamage(attacker, attackerMagicLevel, attackerStrengthLevel);
     const maxDamage = Math.ceil(baseDamage + additionalDamage + (options?.maxBonusDamage ?? 0));
 
     // Min damage no longer relies on attackerLevel, making it constant
@@ -119,6 +120,34 @@ export class CalculateEffectDamage {
     const effectDamage = effectDamageRaw - maxDefense + (options?.finalBonusDamage ?? 0);
 
     return Math.max(effectDamage, minDamage);
+  }
+
+  private getAdditionalDamage(
+    entity: ICharacter | INPC,
+    attackerMagicLevel: number,
+    attackerStrengthLevel: number
+  ): number {
+    let isMagicEntity: boolean;
+
+    switch (entity.type) {
+      case EntityType.NPC:
+        const entityBlueprint = this.blueprintManager.getBlueprint("npcs", (entity as INPC).key) as any;
+        isMagicEntity = entityBlueprint.isMagic;
+        break;
+
+      case EntityType.Character:
+        isMagicEntity = [CharacterClass.Sorcerer, CharacterClass.Druid].includes(
+          (entity as ICharacter).class as CharacterClass
+        );
+        break;
+
+      default:
+        isMagicEntity = false;
+    }
+
+    return isMagicEntity
+      ? attackerStrengthLevel + 2 * attackerMagicLevel
+      : attackerMagicLevel + 2 * attackerStrengthLevel;
   }
 
   private async getAttackerMagicStrengthLevel(attackerSkills: ISkill): Promise<{
