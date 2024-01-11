@@ -99,8 +99,8 @@ export class SkillStatsIncrease {
         mana: baseIncreaseRate * 1.8, // Balanced towards mana but with slightly more health than a sorcerer.
       },
       [CharacterClass.Sorcerer]: {
-        health: baseIncreaseRate * 0.6,
-        mana: baseIncreaseRate * 2.2, // Highest mana pool, with a bit more survivability than before.
+        health: baseIncreaseRate * 0.7,
+        mana: baseIncreaseRate * 2.3, // Highest mana pool, with a bit more survivability than before.
       },
       [CharacterClass.Hunter]: {
         health: baseIncreaseRate * 1.3,
