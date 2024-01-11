@@ -151,7 +151,7 @@ export class BattleDamageCalculator {
       switch (target.class) {
         case CharacterClass.Druid:
         case CharacterClass.Sorcerer:
-          DEFENDER_LEVEL_MODIFIER = 0;
+          DEFENDER_LEVEL_MODIFIER = 0.25;
           break;
         case CharacterClass.Hunter:
           DEFENDER_LEVEL_MODIFIER = 0.5;
