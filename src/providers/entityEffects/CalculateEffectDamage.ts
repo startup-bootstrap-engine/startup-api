@@ -2,12 +2,12 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import {
   ENTITY_EFFECT_DAMAGE_FROM_NPC_MODIFIER,
   ENTITY_EFFECT_DAMAGE_LEVEL_MULTIPLIER_NPC,
   ENTITY_EFFECT_DAMAGE_LEVEL_MULTIPLIER_PVP,
 } from "@providers/constants/EntityEffectsConstants";
+import { blueprintManager } from "@providers/inversify/container";
 import { TraitGetter } from "@providers/skill/TraitGetter";
 import { BasicAttribute, CharacterClass, EntityType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -20,7 +20,7 @@ interface ICalculateDamageOptions {
 
 @provide(CalculateEffectDamage)
 export class CalculateEffectDamage {
-  constructor(private skillGetter: TraitGetter, private blueprintManager: BlueprintManager) {}
+  constructor(private skillGetter: TraitGetter) {}
 
   @TrackNewRelicTransaction()
   public async calculateEffectDamage(
@@ -131,7 +131,7 @@ export class CalculateEffectDamage {
 
     switch (entity.type) {
       case EntityType.NPC:
-        const entityBlueprint = this.blueprintManager.getBlueprint("npcs", (entity as INPC).key) as any;
+        const entityBlueprint = blueprintManager.getBlueprint("npcs", (entity as INPC).key) as any;
         isMagicEntity = entityBlueprint.isMagic;
         break;
 

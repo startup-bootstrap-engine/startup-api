@@ -1,6 +1,6 @@
 import { appEnv } from "@providers/config/env";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { UserAccountTypes } from "@rpg-engine/shared";
+import { EnvType, UserAccountTypes } from "@rpg-engine/shared";
 import axios from "axios";
 import qs from "qs";
 import { ICampaignMembersResponse, ICampaignsResponse, IPatreonMemberData, PatreonStatus } from "./PatreonTypes";
@@ -32,6 +32,10 @@ export class PatreonAPI {
 
   public initialize(): void {
     try {
+      if (appEnv.general.ENV === EnvType.Development) {
+        return;
+      }
+
       if (!this.clientId || !this.clientSecret || !this.redirectURI || !this.campaignId) {
         throw new Error(`Failed to authenticate with Patreon API.
           Some of these credentials are missing:
