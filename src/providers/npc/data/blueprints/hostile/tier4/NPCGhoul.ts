@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -10,12 +9,13 @@ import {
   RangedWeaponsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcGhoul = {
+export const npcGhoul: INPCTierBlueprint<4> = {
   ...generateMoveTowardsMovement(),
   name: "Ghoul",
   key: HostileNPCsBlueprint.Ghoul,
@@ -25,20 +25,24 @@ export const npcGhoul = {
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Slow,
   canSwitchToRandomTarget: true,
-  baseHealth: 97,
+  baseHealth: 180,
+  tier: 4,
   healthRandomizerDice: Dice.D4,
   skillRandomizerDice: Dice.D4,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   skills: {
-    level: 6,
+    level: 11,
     strength: {
-      level: 6,
+      level: 12,
     },
     dexterity: {
-      level: 1,
+      level: 12,
     },
     resistance: {
-      level: 5,
+      level: 14,
+    },
+    magicResistance: {
+      level: 14,
     },
   },
   loots: [
@@ -105,4 +109,4 @@ export const npcGhoul = {
       quantityRange: [1, 3],
     },
   ],
-} as Partial<INPC>;
+};

@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -7,12 +6,13 @@ import {
   FoodsBlueprint,
   RangedWeaponsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcCentipede: Partial<INPC> = {
+export const npcCentipede: INPCTierBlueprint<2> = {
   ...generateMoveTowardsMovement(),
   name: "Centipede",
   key: HostileNPCsBlueprint.Centipede,
@@ -21,18 +21,22 @@ export const npcCentipede: Partial<INPC> = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Standard,
-  baseHealth: 30,
+  baseHealth: 100,
+  tier: 2,
   healthRandomizerDice: Dice.D6,
   canSwitchToRandomTarget: true,
   skills: {
     level: 5,
     strength: {
-      level: 7,
+      level: 5,
     },
     dexterity: {
       level: 5,
     },
     resistance: {
+      level: 5,
+    },
+    magicResistance: {
       level: 5,
     },
   },

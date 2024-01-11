@@ -1,38 +1,37 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
-import {
-  AccessoriesBlueprint,
-  CraftingResourcesBlueprint,
-  DaggersBlueprint,
-  FoodsBlueprint,
-} from "@providers/item/data/types/itemsBlueprintTypes";
+import { CraftingResourcesBlueprint, FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcWolf = {
+export const npcWinterWolf: INPCTierBlueprint<2> = {
   ...generateMoveTowardsMovement(),
-  name: "Wolf",
-  key: HostileNPCsBlueprint.Wolf,
+  name: "Winter Wolf",
+  key: HostileNPCsBlueprint.WinterWolf,
   subType: NPCSubtype.Animal,
-  textureKey: HostileNPCsBlueprint.Wolf,
+  textureKey: HostileNPCsBlueprint.WinterWolf,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Fast,
-  baseHealth: 55,
+  baseHealth: 100,
   healthRandomizerDice: Dice.D4,
+  tier: 2,
   skills: {
-    level: 2,
+    level: 4.5,
     strength: {
-      level: 2,
+      level: 4.5,
     },
     dexterity: {
-      level: 1,
+      level: 6,
     },
     resistance: {
-      level: 1,
+      level: 4.5,
+    },
+    magicResistance: {
+      level: 4.5,
     },
   },
   fleeOnLowHealth: true,
@@ -45,18 +44,11 @@ export const npcWolf = {
       itemBlueprintKey: FoodsBlueprint.Bread,
       chance: 30,
     },
-    {
-      itemBlueprintKey: DaggersBlueprint.Dagger,
-      chance: 30,
-    },
-    {
-      itemBlueprintKey: AccessoriesBlueprint.WolfToothChain,
-      chance: 10,
-    },
+
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WolfTooth,
       chance: 50,
-      quantityRange: [1, 2],
+      quantityRange: [3, 5],
     },
   ],
-} as Partial<INPC>;
+};

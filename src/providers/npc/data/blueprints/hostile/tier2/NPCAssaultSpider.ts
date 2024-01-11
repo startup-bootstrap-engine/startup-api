@@ -1,84 +1,85 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
+
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   AccessoriesBlueprint,
-  AxesBlueprint,
-  BootsBlueprint,
   CraftingResourcesBlueprint,
+  DaggersBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
   StaffsBlueprint,
-  SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcCaveSpider: Partial<INPC> = {
+export const npcAssaultSpider: INPCTierBlueprint<2> = {
   ...generateMoveTowardsMovement(),
-  name: "Cave Spider",
-  key: HostileNPCsBlueprint.CaveSpider,
+  name: "Assault Spider",
+  key: HostileNPCsBlueprint.AssaultSpider,
+  textureKey: HostileNPCsBlueprint.AssaultSpider,
   subType: NPCSubtype.Insect,
-  textureKey: HostileNPCsBlueprint.CaveSpider,
+
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Fast,
-  baseHealth: 80,
+  tier: 2,
+  baseHealth: 100,
   healthRandomizerDice: Dice.D6,
   skills: {
-    level: 20,
+    level: 5.5,
     strength: {
-      level: 9,
+      level: 4.5,
     },
     dexterity: {
       level: 6,
     },
     resistance: {
-      level: 5,
+      level: 4.5,
+    },
+    magicResistance: {
+      level: 4.5,
     },
   },
   fleeOnLowHealth: true,
   loots: [
     {
-      itemBlueprintKey: CraftingResourcesBlueprint.Herb,
-      chance: 30,
-      quantityRange: [5, 10],
-    },
-    {
       itemBlueprintKey: LegsBlueprint.StuddedLegs,
       chance: 5,
     },
     {
-      itemBlueprintKey: SwordsBlueprint.BroadSword,
-      chance: 15,
-    },
-    {
-      itemBlueprintKey: StaffsBlueprint.CorruptionStaff,
-      chance: 10,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.Bardiche,
-      chance: 5,
-    },
-    {
-      itemBlueprintKey: BootsBlueprint.Sandals,
+      itemBlueprintKey: HelmetsBlueprint.DarkWizardHat,
       chance: 20,
     },
     {
-      itemBlueprintKey: HelmetsBlueprint.DeathsHelmet,
+      itemBlueprintKey: StaffsBlueprint.CorruptionStaff,
       chance: 5,
     },
     {
-      itemBlueprintKey: AccessoriesBlueprint.DeathNecklace,
-      chance: 5,
+      itemBlueprintKey: DaggersBlueprint.CorruptionDagger,
+      chance: 15,
+    },
+
+    {
+      itemBlueprintKey: AccessoriesBlueprint.CorruptionNecklace,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.StarNecklace,
+      chance: 6,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.SewingThread,
       chance: 10,
       quantityRange: [3, 5],
+    },
+    {
+      itemBlueprintKey: CraftingResourcesBlueprint.MagicRecipe,
+      chance: 10,
+      quantityRange: [1, 5],
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],

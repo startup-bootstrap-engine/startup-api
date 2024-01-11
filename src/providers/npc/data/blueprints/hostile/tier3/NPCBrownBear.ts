@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -7,12 +6,13 @@ import {
   CraftingResourcesBlueprint,
   FoodsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcBrownBear = {
+export const npcBrownBear: INPCTierBlueprint<3> = {
   ...generateMoveTowardsMovement(),
   name: "Brown Bear",
   key: HostileNPCsBlueprint.BrownBear,
@@ -21,7 +21,8 @@ export const npcBrownBear = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Standard,
-  baseHealth: 80,
+  baseHealth: 140,
+  tier: 3,
   healthRandomizerDice: Dice.D6,
   canSwitchToRandomTarget: true,
   skills: {
@@ -30,10 +31,13 @@ export const npcBrownBear = {
       level: 9,
     },
     dexterity: {
-      level: 6,
+      level: 7,
     },
     resistance: {
-      level: 5,
+      level: 10,
+    },
+    magicResistance: {
+      level: 7,
     },
   },
   fleeOnLowHealth: true,
@@ -66,4 +70,4 @@ export const npcBrownBear = {
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
-} as Partial<INPC>;
+};

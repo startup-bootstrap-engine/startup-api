@@ -1,4 +1,4 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
+import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
   AccessoriesBlueprint,
@@ -11,31 +11,38 @@ import {
   SwordsBlueprint,
   ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcDwarf = {
+export const npcDwarf: INPCTierBlueprint<4> = {
   ...generateMoveTowardsMovement(),
   name: "Dwarf",
   key: HostileNPCsBlueprint.Dwarf,
+  subType: NPCSubtype.Humanoid,
   textureKey: HostileNPCsBlueprint.Dwarf,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Standard,
   canSwitchToRandomTarget: true,
-  baseHealth: 120,
+  healthRandomizerDice: Dice.D6,
+  tier: 4,
+  baseHealth: 180,
   skills: {
-    level: 12,
+    level: 14,
     strength: {
-      level: 8,
+      level: 13,
     },
     dexterity: {
-      level: 6,
+      level: 12,
     },
     resistance: {
-      level: 6,
+      level: 13,
+    },
+    magicResistance: {
+      level: 11,
     },
   },
   fleeOnLowHealth: true,
@@ -88,4 +95,4 @@ export const npcDwarf = {
       chance: 5,
     },
   ],
-} as Partial<INPC>;
+};

@@ -1,50 +1,53 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { CraftingResourcesBlueprint, FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcWinterWolf: Partial<INPC> = {
+export const npcBat: INPCTierBlueprint<1> = {
   ...generateMoveTowardsMovement(),
-  name: "Winter Wolf",
-  key: HostileNPCsBlueprint.WinterWolf,
+  name: "Bat",
+  tier: 1,
+  key: HostileNPCsBlueprint.Bat,
   subType: NPCSubtype.Animal,
-  textureKey: HostileNPCsBlueprint.WinterWolf,
+  textureKey: HostileNPCsBlueprint.Bat,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
-  speed: MovementSpeed.Fast,
-  baseHealth: 60,
+  speed: MovementSpeed.ExtraFast,
   healthRandomizerDice: Dice.D4,
+  baseHealth: 60,
   skills: {
     level: 3,
     strength: {
       level: 3,
     },
     dexterity: {
-      level: 2,
+      level: 4,
     },
     resistance: {
-      level: 2,
+      level: 2.5,
+    },
+    magicResistance: {
+      level: 2.5,
     },
   },
-  fleeOnLowHealth: true,
   loots: [
     {
-      itemBlueprintKey: FoodsBlueprint.Salmon,
-      chance: 20,
-    },
-    {
-      itemBlueprintKey: FoodsBlueprint.Bread,
+      itemBlueprintKey: FoodsBlueprint.Banana,
       chance: 30,
+      quantityRange: [1, 3],
     },
-
     {
-      itemBlueprintKey: CraftingResourcesBlueprint.WolfTooth,
+      itemBlueprintKey: CraftingResourcesBlueprint.BatsWing,
       chance: 50,
-      quantityRange: [3, 5],
+      quantityRange: [1, 3],
+    },
+    {
+      itemBlueprintKey: CraftingResourcesBlueprint.Eye,
+      chance: 15,
     },
   ],
 };

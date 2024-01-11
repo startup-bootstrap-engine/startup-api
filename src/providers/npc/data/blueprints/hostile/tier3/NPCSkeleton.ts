@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -9,12 +8,13 @@ import {
   MacesBlueprint,
   RangedWeaponsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcSkeleton = {
+export const npcSkeleton: INPCTierBlueprint<3> = {
   ...generateMoveTowardsMovement(),
   name: "Skeleton",
   key: HostileNPCsBlueprint.Skeleton,
@@ -23,18 +23,22 @@ export const npcSkeleton = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Slow,
-  baseHealth: 58,
+  tier: 3,
+  baseHealth: 140,
   healthRandomizerDice: Dice.D4,
   skills: {
-    level: 5,
+    level: 9,
     strength: {
-      level: 3,
+      level: 10,
     },
     dexterity: {
-      level: 2,
+      level: 7,
     },
     resistance: {
-      level: 1,
+      level: 7,
+    },
+    magicResistance: {
+      level: 7,
     },
   },
   fleeOnLowHealth: true,
@@ -94,4 +98,4 @@ export const npcSkeleton = {
       quantityRange: [2, 3],
     },
   ],
-} as Partial<INPC>;
+};

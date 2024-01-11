@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -10,12 +9,13 @@ import {
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcSkeletonKnight = {
+export const npcSkeletonKnight: INPCTierBlueprint<5> = {
   ...generateMoveTowardsMovement(),
   name: "Skeleton Knight",
   key: HostileNPCsBlueprint.SkeletonKnight,
@@ -24,21 +24,25 @@ export const npcSkeletonKnight = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Fast,
-  baseHealth: 137,
+  baseHealth: 220,
+  tier: 5,
   healthRandomizerDice: Dice.D4,
   skillRandomizerDice: Dice.D4,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   canSwitchToLowHealthTarget: true,
   skills: {
-    level: 12,
+    level: 15,
     strength: {
-      level: 12,
+      level: 17,
     },
     dexterity: {
-      level: 6,
+      level: 15,
     },
     resistance: {
-      level: 5,
+      level: 18,
+    },
+    magicResistance: {
+      level: 18,
     },
   },
   loots: [
@@ -91,4 +95,4 @@ export const npcSkeletonKnight = {
       chance: 2,
     },
   ],
-} as Partial<INPC>;
+};

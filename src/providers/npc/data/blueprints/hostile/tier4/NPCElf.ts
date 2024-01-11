@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -12,34 +11,40 @@ import {
   SwordsBlueprint,
   ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcElf: Partial<INPC> = {
+export const npcElf: INPCTierBlueprint<4> = {
   ...generateMoveTowardsMovement(),
   name: "Elf",
   key: HostileNPCsBlueprint.Elf,
+  // @ts-ignore
   textureKey: "elf-white-hair-1",
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: RangedWeaponsBlueprint.Arrow,
   maxRangeAttack: 6,
   speed: MovementSpeed.Fast,
-  baseHealth: 64,
+  tier: 4,
+  baseHealth: 180,
   healthRandomizerDice: Dice.D12,
   canSwitchToRandomTarget: true,
   skills: {
-    level: 7,
+    level: 11,
     strength: {
-      level: 7,
+      level: 12,
     },
     dexterity: {
-      level: 7,
+      level: 12,
     },
     resistance: {
-      level: 3,
+      level: 11,
+    },
+    magicResistance: {
+      level: 14,
     },
   },
   fleeOnLowHealth: true,

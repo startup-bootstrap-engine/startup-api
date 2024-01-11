@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -7,21 +6,23 @@ import {
   GlovesBlueprint,
   LegsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcSpider = {
+export const npcSpider: INPCTierBlueprint<0> = {
   ...generateMoveTowardsMovement(),
   name: "Spider",
+  tier: 0,
   subType: NPCSubtype.Insect,
   key: HostileNPCsBlueprint.Spider,
   textureKey: HostileNPCsBlueprint.Spider,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Standard,
-  baseHealth: 49,
+  baseHealth: 50,
   healthRandomizerDice: Dice.D4,
   skills: {
     level: 0.5,
@@ -32,6 +33,9 @@ export const npcSpider = {
       level: 2,
     },
     resistance: {
+      level: 1,
+    },
+    magicResistance: {
       level: 1,
     },
   },
@@ -54,4 +58,4 @@ export const npcSpider = {
       quantityRange: [3, 5],
     },
   ],
-} as Partial<INPC>;
+};

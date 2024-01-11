@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -6,12 +5,13 @@ import {
   FoodsBlueprint,
   RangedWeaponsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcBlackEagle = {
+export const npcBlackEagle: INPCTierBlueprint<3> = {
   ...generateMoveTowardsMovement(),
   name: "Black Eagle",
   key: HostileNPCsBlueprint.BlackEagle,
@@ -20,20 +20,24 @@ export const npcBlackEagle = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.ExtraFast,
-  baseHealth: 55,
+  baseHealth: 140,
   healthRandomizerDice: Dice.D12,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
+  tier: 3,
   skills: {
-    level: 4,
+    level: 7,
     strength: {
-      level: 3,
+      level: 7,
     },
     dexterity: {
       level: 8,
     },
     resistance: {
-      level: 3,
+      level: 7,
+    },
+    magicResistance: {
+      level: 7,
     },
   },
   fleeOnLowHealth: true,
@@ -67,4 +71,4 @@ export const npcBlackEagle = {
       chance: 5,
     },
   ],
-} as Partial<INPC>;
+};

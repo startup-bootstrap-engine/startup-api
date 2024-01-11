@@ -1,12 +1,13 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
+import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { CraftingResourcesBlueprint, FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcCaveBat = {
+export const npcCaveBat: INPCTierBlueprint<2> = {
   ...generateMoveTowardsMovement(),
   name: "Cave Bat",
   key: HostileNPCsBlueprint.CaveBat,
@@ -15,17 +16,22 @@ export const npcCaveBat = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.ExtraFast,
-  baseHealth: 50,
+  healthRandomizerDice: Dice.D4,
+  tier: 2,
+  baseHealth: 100,
   skills: {
-    level: 10,
+    level: 6,
     strength: {
-      level: 25,
+      level: 6,
     },
     dexterity: {
-      level: 10,
+      level: 6,
     },
     resistance: {
-      level: 20,
+      level: 6,
+    },
+    magicResistance: {
+      level: 6,
     },
   },
   loots: [
@@ -52,4 +58,4 @@ export const npcCaveBat = {
       chance: 10,
     },
   ],
-} as Partial<INPC>;
+};

@@ -1,13 +1,13 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { CraftingResourcesBlueprint, RangedWeaponsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcGhost = {
+export const npcGhost: INPCTierBlueprint<3> = {
   ...generateMoveTowardsMovement(),
   name: "Ghost",
   key: HostileNPCsBlueprint.Ghost,
@@ -17,20 +17,24 @@ export const npcGhost = {
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Standard,
   canSwitchToRandomTarget: true,
-  baseHealth: 50,
+  tier: 3,
+  baseHealth: 140,
   healthRandomizerDice: Dice.D4,
   skillRandomizerDice: Dice.D4,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   skills: {
-    level: 5,
+    level: 7,
     strength: {
-      level: 4,
+      level: 7,
     },
     dexterity: {
-      level: 3,
+      level: 7,
     },
     resistance: {
-      level: 5,
+      level: 7,
+    },
+    magicResistance: {
+      level: 7,
     },
   },
   fleeOnLowHealth: true,
@@ -68,4 +72,4 @@ export const npcGhost = {
       quantityRange: [5, 10],
     },
   ],
-} as Partial<INPC>;
+};
