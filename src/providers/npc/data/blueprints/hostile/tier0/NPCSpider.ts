@@ -35,9 +35,6 @@ export const npcSpider: INPCTierBlueprint<0> = {
     resistance: {
       level: 1,
     },
-    magicResistance: {
-      level: 1,
-    },
   },
   loots: [
     {

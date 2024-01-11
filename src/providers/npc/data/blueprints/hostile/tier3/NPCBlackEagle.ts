@@ -36,9 +36,6 @@ export const npcBlackEagle: INPCTierBlueprint<3> = {
     resistance: {
       level: 7,
     },
-    magicResistance: {
-      level: 7,
-    },
   },
   fleeOnLowHealth: true,
   loots: [

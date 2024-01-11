@@ -14,7 +14,6 @@ import { npcDarkKnight } from "./NPCDarkKnight";
 import { npcDarkWraith } from "./NPCDarkWraith";
 import { npcDragonKnight } from "./NPCDragonKnight";
 import { npcDragonServant } from "./NPCDragonServant";
-import { npcDwarfArcher } from "./NPCDwarfArcher";
 import { npcDwarfGuard } from "./NPCDwarfGuard";
 import { npcDwarfGuardian } from "./NPCDwarfGuardian";
 import { npcDwarfMage } from "./NPCDwarfMage";
@@ -42,13 +41,10 @@ import { npcMinotaurMage } from "./NPCMinotaursMage";
 import { npcMudGolem } from "./NPCMudGolem";
 import { npcNazgul } from "./NPCNazgul";
 import { npcNightFellbeast } from "./NPCNightFellbeast";
-import { npcOrc } from "./NPCOrc";
-import { npcOrcArcher } from "./NPCOrcArcher";
 import { npcOrcBerserker } from "./NPCOrcBerserker";
 import { npcOrcMage } from "./NPCOrcMage";
 import { npcOrcRaider } from "./NPCOrcRaider";
 import { npcOrcWarlord } from "./NPCOrcWarlord";
-import { npcOrcWarrior } from "./NPCOrcWarrior";
 import { npcPandaBear } from "./NPCPandaBear";
 import { npcPolarBear } from "./NPCPolarBear";
 import { npcPurpleDragon } from "./NPCPurpleDragon";
@@ -87,7 +83,11 @@ import { npcBandit } from "./tier4/NPCBandit";
 import { npcDwarf } from "./tier4/NPCDwarf";
 import { npcElf } from "./tier4/NPCElf";
 import { npcGhoul } from "./tier4/NPCGhoul";
+import { npcOrc } from "./tier4/NPCOrc";
+import { npcOrcWarrior } from "./tier5/NPCOrcWarrior";
 import { npcSkeletonKnight } from "./tier5/NPCSkeletonKnight";
+import { npcDwarfArcher } from "./tier6/NPCDwarfArcher";
+import { npcOrcArcher } from "./tier6/NPCOrcArcher";
 
 export const hostileNPCs = {
   [HostileNPCsBlueprint.Orc]: npcOrc,

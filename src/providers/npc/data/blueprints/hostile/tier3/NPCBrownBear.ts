@@ -36,9 +36,6 @@ export const npcBrownBear: INPCTierBlueprint<3> = {
     resistance: {
       level: 10,
     },
-    magicResistance: {
-      level: 7,
-    },
   },
   fleeOnLowHealth: true,
   loots: [

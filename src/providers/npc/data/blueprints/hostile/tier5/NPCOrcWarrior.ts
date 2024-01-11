@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -17,34 +16,37 @@ import {
   SwordsBlueprint,
   ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcOrcWarrior = {
+export const npcOrcWarrior: INPCTierBlueprint<5> = {
   ...generateMoveTowardsMovement(),
   name: "Orc Warrior",
   key: HostileNPCsBlueprint.OrcWarrior,
+  subType: NPCSubtype.Humanoid,
   textureKey: HostileNPCsBlueprint.OrcWarrior,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Fast,
-  baseHealth: 120,
+  tier: 5,
+  baseHealth: 250,
   healthRandomizerDice: Dice.D8,
   skillRandomizerDice: Dice.D4,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   canSwitchToLowHealthTarget: true,
   skills: {
-    level: 14,
+    level: 17,
     strength: {
-      level: 12,
+      level: 15,
     },
     dexterity: {
-      level: 10,
+      level: 15,
     },
     resistance: {
-      level: 12,
+      level: 17,
     },
   },
   fleeOnLowHealth: true,
@@ -162,4 +164,4 @@ export const npcOrcWarrior = {
       chance: 20,
     },
   ],
-} as Partial<INPC>;
+};

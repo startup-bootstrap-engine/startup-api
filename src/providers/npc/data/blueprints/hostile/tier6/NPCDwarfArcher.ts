@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -9,34 +8,43 @@ import {
   RangedWeaponsBlueprint,
   ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { NPCAlignment, NPCSubtype, RangeTypes } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcDwarfArcher: Partial<INPC> = {
+export const npcDwarfArcher: INPCTierBlueprint<6> = {
   ...generateMoveTowardsMovement(),
   name: "Dwarf Archer",
   key: HostileNPCsBlueprint.DwarfArcher,
+  subType: NPCSubtype.Humanoid,
   textureKey: HostileNPCsBlueprint.DwarfArcher,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: RangedWeaponsBlueprint.Arrow,
-  maxRangeAttack: 10,
+  maxRangeAttack: RangeTypes.High,
   speed: MovementSpeed.Fast,
-  baseHealth: 140,
+  baseHealth: 280,
+  tier: 6,
   healthRandomizerDice: Dice.D12,
   canSwitchToRandomTarget: true,
   skills: {
     level: 20,
     strength: {
-      level: 14,
+      level: 20,
     },
     dexterity: {
-      level: 8,
+      level: 20,
     },
     resistance: {
-      level: 10,
+      level: 19,
+    },
+    magicResistance: {
+      level: 19,
+    },
+    distance: {
+      level: 20,
     },
   },
   fleeOnLowHealth: true,

@@ -35,9 +35,6 @@ export const npcWolf: INPCTierBlueprint<1> = {
     resistance: {
       level: 2.5,
     },
-    magicResistance: {
-      level: 2.5,
-    },
   },
   fleeOnLowHealth: true,
   loots: [

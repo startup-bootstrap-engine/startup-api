@@ -36,9 +36,6 @@ export const npcCentipede: INPCTierBlueprint<2> = {
     resistance: {
       level: 5,
     },
-    magicResistance: {
-      level: 5,
-    },
   },
   fleeOnLowHealth: true,
 

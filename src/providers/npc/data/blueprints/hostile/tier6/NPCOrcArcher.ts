@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -12,14 +11,16 @@ import {
   StaffsBlueprint,
   ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcOrcArcher: Partial<INPC> = {
+export const npcOrcArcher: INPCTierBlueprint<6> = {
   ...generateMoveTowardsMovement(),
   name: "Orc Archer",
+  subType: NPCSubtype.Humanoid,
   key: HostileNPCsBlueprint.OrcArcher,
   textureKey: HostileNPCsBlueprint.OrcArcher,
   alignment: NPCAlignment.Hostile,
@@ -27,26 +28,27 @@ export const npcOrcArcher: Partial<INPC> = {
   ammoKey: RangedWeaponsBlueprint.Arrow,
   maxRangeAttack: 6,
   speed: MovementSpeed.Fast,
-  baseHealth: 100,
+  tier: 6,
+  baseHealth: 280,
   healthRandomizerDice: Dice.D12,
   canSwitchToRandomTarget: true,
   skillRandomizerDice: Dice.D12,
   skills: {
-    level: 14,
+    level: 20,
     strength: {
-      level: 10,
+      level: 20,
     },
     dexterity: {
-      level: 7,
+      level: 20,
     },
     resistance: {
-      level: 4,
+      level: 19,
     },
     magicResistance: {
-      level: 3,
+      level: 19,
     },
     distance: {
-      level: 7,
+      level: 20,
     },
   },
   fleeOnLowHealth: true,

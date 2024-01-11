@@ -30,9 +30,6 @@ export const npcCaveBat: INPCTierBlueprint<2> = {
     resistance: {
       level: 6,
     },
-    magicResistance: {
-      level: 6,
-    },
   },
   loots: [
     {

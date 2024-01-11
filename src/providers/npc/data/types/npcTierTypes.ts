@@ -105,7 +105,10 @@ export interface INPCTierBlueprint<T extends Tier> extends IBaseNPCBlueprint {
     resistance: {
       level: TierProperties<T>["skillLevel"];
     };
-    magicResistance: {
+    magicResistance?: {
+      level: TierProperties<T>["skillLevel"];
+    };
+    distance?: {
       level: TierProperties<T>["skillLevel"];
     };
   };

@@ -30,9 +30,6 @@ export const npcBat: INPCTierBlueprint<1> = {
     resistance: {
       level: 2.5,
     },
-    magicResistance: {
-      level: 2.5,
-    },
   },
   loots: [
     {
