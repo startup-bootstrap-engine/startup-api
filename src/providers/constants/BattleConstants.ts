@@ -24,3 +24,7 @@ export const BATTLE_PVP_MELEE_DAMAGE_RATIO = 3;
 // Berserker
 
 export const BERSERKER_BLOODTHIRST_HEALING_FACTOR = 1.5;
+
+// Mages
+
+export const MAGE_MANA_SHIELD_DAMAGE_REDUCTION = 2; // 50% damage reduction

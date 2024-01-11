@@ -1,5 +1,6 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { MAGE_MANA_SHIELD_DAMAGE_REDUCTION } from "@providers/constants/BattleConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SpellsBlueprint } from "@rpg-engine/shared";
@@ -40,7 +41,7 @@ export class ManaShield {
         throw new Error(`Invalid damage value: ${damage}`);
       }
 
-      const newMana = character.mana - damage;
+      const newMana = character.mana - damage / MAGE_MANA_SHIELD_DAMAGE_REDUCTION;
       const newHealth = character.health + (newMana < 0 ? newMana : 0);
 
       if (newMana <= 0 && newHealth <= 0) {

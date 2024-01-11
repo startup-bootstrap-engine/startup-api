@@ -140,6 +140,7 @@ jest.mock("@providers/constants/BattleConstants", () => ({
   BATTLE_TOTAL_POTENTIAL_DAMAGE_MODIFIER: 1,
   BATTLE_PVP_MELEE_DAMAGE_RATIO: 1,
   BERSERKER_BLOODTHIRST_HEALING_FACTOR: 1,
+  MAGE_MANA_SHIELD_DAMAGE_REDUCTION: 1,
 }));
 
 jest.mock("@providers/constants/LootConstants", () => ({

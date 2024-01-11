@@ -15,15 +15,15 @@ import { NamespaceRedisControl } from "../../types/SpellsBlueprintTypes";
 export const spellManaShield: Partial<ISpell> = {
   key: SpellsBlueprint.ManaShield,
   name: "Mana Shield",
-  description: "A spell designed for a sorcerer to takes damage but damage is reduced from mana.",
+  description: "A spell specifically designed for mages that redirects damage from health to mana.",
   textureAtlas: "icons",
   texturePath: "spell-icons/mana-shield.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "mana scutum",
-  manaCost: 70,
+  manaCost: 40,
   minLevelRequired: 5,
   minMagicLevelRequired: 7,
-  cooldown: 60,
+  cooldown: 120,
   castingAnimationKey: AnimationEffectKeys.MagicShield,
   projectileAnimationKey: AnimationEffectKeys.Energy,
   characterClass: [CharacterClass.Sorcerer, CharacterClass.Druid],
@@ -34,8 +34,8 @@ export const spellManaShield: Partial<ISpell> = {
     const spellCalculator = container.get(SpellCalculator);
 
     const timeout = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
-      min: 30,
-      max: 60,
+      min: 40,
+      max: 120,
     });
 
     const namespace = `${NamespaceRedisControl.CharacterSpell}:${character._id}`;
