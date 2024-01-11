@@ -69,9 +69,7 @@ export class NPCGiantForm {
   }
 
   private async increaseNPCStatsForGiantForm(npc: INPC): Promise<void> {
-    const skills = await Skill.findOne({ owner: npc._id, ownerType: "NPC" }).cacheQuery({
-      cacheKey: `${npc._id}-skills`,
-    });
+    const skills = await Skill.findOne({ owner: npc._id, ownerType: "NPC" }).lean();
     if (!skills) return;
 
     const normalFormStats: INPCNormalFormStats = {
