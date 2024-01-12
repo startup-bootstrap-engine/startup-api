@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -17,33 +16,39 @@ import {
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
+import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcMinotaur = {
+export const npcMinotaur: INPCTierBlueprint<6> = {
   ...generateMoveTowardsMovement(),
   name: "Minotaur",
   key: HostileNPCsBlueprint.Minotaur,
+  subType: NPCSubtype.Humanoid,
   textureKey: HostileNPCsBlueprint.Minotaur,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Standard,
   canSwitchToLowHealthTarget: true,
-  baseHealth: 330,
+  baseHealth: 310,
+  tier: 6,
   healthRandomizerDice: Dice.D4,
   skillRandomizerDice: Dice.D4,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   skills: {
-    level: 25,
+    level: 22,
     strength: {
       level: 20,
     },
     dexterity: {
-      level: 14,
+      level: 20,
     },
     resistance: {
-      level: 28,
+      level: 22,
+    },
+    magicResistance: {
+      level: 22,
     },
   },
   fleeOnLowHealth: true,
@@ -136,4 +141,4 @@ export const npcMinotaur = {
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
-} as Partial<INPC>;
+};

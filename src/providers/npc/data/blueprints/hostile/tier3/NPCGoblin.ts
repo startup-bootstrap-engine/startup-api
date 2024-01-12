@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -13,14 +12,16 @@ import {
   SwordsBlueprint,
   ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcGoblin = {
+export const npcGoblin: INPCTierBlueprint<3> = {
   ...generateMoveTowardsMovement(),
   name: "Goblin",
+  subType: NPCSubtype.Humanoid,
   key: HostileNPCsBlueprint.Goblin,
   textureKey: HostileNPCsBlueprint.Goblin,
   alignment: NPCAlignment.Hostile,
@@ -28,10 +29,12 @@ export const npcGoblin = {
   ammoKey: RangedWeaponsBlueprint.Stone,
   maxRangeAttack: 6,
   speed: MovementSpeed.Fast,
-  baseHealth: 80,
+  baseHealth: 140,
+
   healthRandomizerDice: Dice.D12,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
+  tier: 3,
   skills: {
     level: 10,
     strength: {
@@ -41,7 +44,10 @@ export const npcGoblin = {
       level: 8,
     },
     resistance: {
-      level: 5,
+      level: 8,
+    },
+    magicResistance: {
+      level: 8,
     },
   },
   fleeOnLowHealth: true,
@@ -137,4 +143,4 @@ export const npcGoblin = {
       quantityRange: [1, 5],
     },
   ],
-} as Partial<INPC>;
+};

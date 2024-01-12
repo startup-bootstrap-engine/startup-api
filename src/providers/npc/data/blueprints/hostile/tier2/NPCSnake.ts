@@ -1,36 +1,36 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { CraftingResourcesBlueprint, PotionsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcSnake: Partial<INPC> = {
+export const npcSnake: INPCTierBlueprint<2> = {
   ...generateMoveTowardsMovement(),
   name: "Snake",
   key: HostileNPCsBlueprint.Snake,
-  // eslint-disable-next-line no-undef
   subType: NPCSubtype.Animal,
   textureKey: HostileNPCsBlueprint.Snake,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Fast,
-  baseHealth: 40,
+  baseHealth: 100,
+  tier: 2,
   healthRandomizerDice: Dice.D6,
   canSwitchToRandomTarget: true,
   skills: {
-    level: 3,
+    level: 5,
     strength: {
-      level: 3,
+      level: 5,
     },
     dexterity: {
-      level: 3,
+      level: 5,
     },
     resistance: {
-      level: 2,
+      level: 6,
     },
   },
   fleeOnLowHealth: true,

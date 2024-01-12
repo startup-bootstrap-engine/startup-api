@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -7,12 +6,13 @@ import {
   CraftingResourcesBlueprint,
   FoodsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcPolarBear = {
+export const npcPolarBear: INPCTierBlueprint<4> = {
   ...generateMoveTowardsMovement(),
   name: "Polar Bear",
   key: HostileNPCsBlueprint.PolarBear,
@@ -21,19 +21,20 @@ export const npcPolarBear = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Fast,
-  baseHealth: 100,
+  baseHealth: 210,
+  tier: 4,
   healthRandomizerDice: Dice.D6,
   canSwitchToRandomTarget: true,
   skills: {
-    level: 10,
+    level: 14,
     strength: {
-      level: 10,
+      level: 14,
     },
     dexterity: {
-      level: 8,
+      level: 11,
     },
     resistance: {
-      level: 8,
+      level: 11,
     },
   },
   fleeOnLowHealth: true,
@@ -60,6 +61,21 @@ export const npcPolarBear = {
       itemBlueprintKey: AccessoriesBlueprint.SapphireNecklace,
       chance: 5,
     },
+    {
+      itemBlueprintKey: CraftingResourcesBlueprint.Wheat,
+      quantityRange: [3, 5],
+      chance: 25,
+    },
+
+    {
+      itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
+      quantityRange: [2, 4],
+      chance: 25,
+    },
+    {
+      itemBlueprintKey: CraftingResourcesBlueprint.BlueSapphire,
+      chance: 10,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
-} as Partial<INPC>;
+};

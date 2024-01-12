@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -11,20 +10,32 @@ import {
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { MagicPower, NPCAlignment, SpellsBlueprint } from "@rpg-engine/shared";
+import {
+  AnimationEffectKeys,
+  MagicPower,
+  NPCAlignment,
+  NPCSubtype,
+  RangeTypes,
+  SpellsBlueprint,
+} from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcForestWalker: Partial<INPC> = {
+export const npcForestWalker: INPCTierBlueprint<8> = {
   ...generateMoveTowardsMovement(),
   name: "Forest Walker",
   key: HostileNPCsBlueprint.ForestWalker,
+  subType: NPCSubtype.Elemental,
   textureKey: HostileNPCsBlueprint.ForestWalker,
   alignment: NPCAlignment.Hostile,
-  attackType: EntityAttackType.Melee,
+  attackType: EntityAttackType.MeleeRanged,
+  ammoKey: AnimationEffectKeys.Green,
+  maxRangeAttack: RangeTypes.High,
   speed: MovementSpeed.Slow,
-  baseHealth: 350,
+  baseHealth: 390,
+  tier: 8,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   skillRandomizerDice: Dice.D4,
@@ -35,10 +46,10 @@ export const npcForestWalker: Partial<INPC> = {
       level: 30,
     },
     dexterity: {
-      level: 10,
+      level: 30,
     },
     resistance: {
-      level: 50,
+      level: 29,
     },
   },
   fleeOnLowHealth: true,

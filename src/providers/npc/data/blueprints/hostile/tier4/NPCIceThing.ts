@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -9,35 +8,41 @@ import {
   RangedWeaponsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcIceThing = {
+export const npcIceThing: INPCTierBlueprint<4> = {
   ...generateMoveTowardsMovement(),
   name: "Ice Thing",
   key: HostileNPCsBlueprint.IceThing,
+  subType: NPCSubtype.Elemental,
   textureKey: HostileNPCsBlueprint.IceThing,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: RangedWeaponsBlueprint.FrostBow,
   maxRangeAttack: 6,
+  tier: 4,
   speed: MovementSpeed.Standard,
-  baseHealth: 80,
+  baseHealth: 180,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
   skills: {
     level: 12,
     strength: {
-      level: 10,
+      level: 11,
     },
     dexterity: {
-      level: 7,
+      level: 12,
     },
     resistance: {
-      level: 8,
+      level: 12,
+    },
+    magicResistance: {
+      level: 12,
     },
   },
   fleeOnLowHealth: true,
@@ -100,4 +105,4 @@ export const npcIceThing = {
       quantityRange: [10, 30],
     },
   ],
-} as Partial<INPC>;
+};

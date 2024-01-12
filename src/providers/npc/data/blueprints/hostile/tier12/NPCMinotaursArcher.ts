@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -12,35 +11,38 @@ import {
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
-import { NPCAlignment, RangeTypes } from "@rpg-engine/shared";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
+import { MagicPower, NPCAlignment, NPCSubtype, RangeTypes, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcMinotaurArcher = {
+export const npcMinotaurArcher: INPCTierBlueprint<12> = {
   ...generateMoveTowardsMovement(),
   name: "Minotaur Archer",
   key: HostileNPCsBlueprint.MinotaurArcher,
+  subType: NPCSubtype.Humanoid,
   textureKey: HostileNPCsBlueprint.MinotaurArcher,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Ranged,
-  ammoKey: RangedWeaponsBlueprint.FireBolt,
+  ammoKey: RangedWeaponsBlueprint.Arrow,
   maxRangeAttack: RangeTypes.High,
   speed: MovementSpeed.Fast,
+  tier: 12,
   canSwitchToLowHealthTarget: true,
-  baseHealth: 500,
+  baseHealth: 720,
   healthRandomizerDice: Dice.D8,
   skillRandomizerDice: Dice.D8,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   skills: {
-    level: 45,
+    level: 53,
     strength: {
-      level: 40,
+      level: 53,
     },
     dexterity: {
-      level: 24,
+      level: 53,
     },
     resistance: {
-      level: 38,
+      level: 53,
     },
   },
   fleeOnLowHealth: true,
@@ -93,4 +95,11 @@ export const npcMinotaurArcher = {
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning],
-} as Partial<INPC>;
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.WildfireVolley,
+      probability: 50,
+      power: MagicPower.High,
+    },
+  ],
+};

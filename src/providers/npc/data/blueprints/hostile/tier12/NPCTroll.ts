@@ -1,11 +1,10 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
@@ -20,30 +19,36 @@ import {
   RangedWeaponsBlueprint,
   StaffsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 
-export const npcTroll = {
+export const npcTroll: INPCTierBlueprint<12> = {
   ...generateMoveTowardsMovement(),
   name: "Troll",
+  tier: 12,
+  subType: NPCSubtype.Humanoid,
   key: HostileNPCsBlueprint.Troll,
   textureKey: HostileNPCsBlueprint.Troll,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Slow,
-  baseHealth: 600,
+  baseHealth: 820,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   skills: {
-    level: 50,
+    level: 59,
     strength: {
-      level: 45,
+      level: 62,
     },
     dexterity: {
-      level: 40,
+      level: 56,
     },
     resistance: {
-      level: 50,
+      level: 59,
+    },
+    magicResistance: {
+      level: 59,
     },
   },
   fleeOnLowHealth: true,
@@ -115,4 +120,4 @@ export const npcTroll = {
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
-} as Partial<INPC>;
+};

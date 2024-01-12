@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -7,55 +6,69 @@ import {
   AxesBlueprint,
   BooksBlueprint,
   BootsBlueprint,
+  ContainersBlueprint,
   CraftingResourcesBlueprint,
   GlovesBlueprint,
   HelmetsBlueprint,
   MacesBlueprint,
   MagicsBlueprint,
   RangedWeaponsBlueprint,
-  StaffsBlueprint,
+  ShieldsBlueprint,
+  SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { MagicPower, NPCAlignment, SpellsBlueprint } from "@rpg-engine/shared";
+import {
+  AnimationEffectKeys,
+  MagicPower,
+  NPCAlignment,
+  NPCSubtype,
+  RangeTypes,
+  SpellsBlueprint,
+} from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcOrcMage = {
+export const npcDwarfMage: INPCTierBlueprint<9> = {
   ...generateMoveTowardsMovement(),
-  name: "Orc Mage",
-  key: HostileNPCsBlueprint.OrcMage,
-  textureKey: HostileNPCsBlueprint.OrcMage,
+  name: "Dwarf Mage",
+  subType: NPCSubtype.Humanoid,
+  key: HostileNPCsBlueprint.DwarfMage,
+  textureKey: HostileNPCsBlueprint.DwarfMage,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Ranged,
-  ammoKey: "fireball",
-  maxRangeAttack: 8,
-  speed: MovementSpeed.Standard,
-  baseHealth: 120,
+  ammoKey: AnimationEffectKeys.FireBall,
+  maxRangeAttack: RangeTypes.High,
+  speed: MovementSpeed.Slow,
+  baseHealth: 400,
+  tier: 9,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   canSwitchToLowHealthTarget: true,
   isMagic: true,
   skills: {
-    level: 22,
+    level: 34,
     strength: {
-      level: 25,
+      level: 32,
     },
     dexterity: {
-      level: 8,
+      level: 32,
     },
     resistance: {
-      level: 4,
-    },
-    magic: {
-      level: 15,
+      level: 33,
     },
     magicResistance: {
-      level: 15,
+      level: 34,
     },
   },
   fleeOnLowHealth: true,
   loots: [
+    {
+      itemBlueprintKey: ContainersBlueprint.Backpack,
+      chance: 10,
+    },
+
     {
       itemBlueprintKey: BootsBlueprint.Boots,
       chance: 30,
@@ -64,29 +77,14 @@ export const npcOrcMage = {
       itemBlueprintKey: AxesBlueprint.Axe,
       chance: 30,
     },
-    {
-      itemBlueprintKey: CraftingResourcesBlueprint.BlueSapphire,
-      chance: 30,
-      quantityRange: [1, 3],
-    },
 
     {
-      itemBlueprintKey: CraftingResourcesBlueprint.RedSapphire,
-      chance: 30,
-      quantityRange: [1, 3],
+      itemBlueprintKey: AxesBlueprint.HellishAxe,
+      chance: 7,
     },
-
     {
       itemBlueprintKey: HelmetsBlueprint.StuddedHelmet,
       chance: 15,
-    },
-    {
-      itemBlueprintKey: StaffsBlueprint.AquaStaff,
-      chance: 15,
-    },
-    {
-      itemBlueprintKey: StaffsBlueprint.Emberward,
-      chance: 5,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.StuddedArmor,
@@ -121,30 +119,22 @@ export const npcOrcMage = {
       chance: 10,
     },
     {
-      itemBlueprintKey: StaffsBlueprint.PoisonWand,
-      chance: 15,
+      itemBlueprintKey: SwordsBlueprint.EldensSword,
+      chance: 2,
     },
     {
-      itemBlueprintKey: StaffsBlueprint.FireStaff,
-      chance: 5,
+      itemBlueprintKey: CraftingResourcesBlueprint.Wheat,
+      chance: 20,
+      quantityRange: [5, 10],
     },
     {
-      itemBlueprintKey: HelmetsBlueprint.AmethystHelmet,
-      chance: 5,
-    },
-    {
-      itemBlueprintKey: StaffsBlueprint.CorruptionStaff,
-      chance: 5,
-    },
-    {
-      itemBlueprintKey: CraftingResourcesBlueprint.Jade,
-      chance: 10,
+      itemBlueprintKey: MagicsBlueprint.FireRune,
+      chance: 20,
       quantityRange: [1, 5],
     },
     {
-      itemBlueprintKey: CraftingResourcesBlueprint.Herb,
-      chance: 40,
-      quantityRange: [5, 10],
+      itemBlueprintKey: ShieldsBlueprint.IronHeartShield,
+      chance: 3,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning],
@@ -152,12 +142,17 @@ export const npcOrcMage = {
     {
       spellKey: SpellsBlueprint.FireStorm,
       probability: 5,
-      power: MagicPower.Medium,
+      power: MagicPower.Low,
     },
     {
       spellKey: SpellsBlueprint.Blizzard,
+      probability: 5,
+      power: MagicPower.Low,
+    },
+    {
+      spellKey: SpellsBlueprint.VampiricStorm,
       probability: 10,
       power: MagicPower.Medium,
     },
   ],
-} as Partial<INPC>;
+};

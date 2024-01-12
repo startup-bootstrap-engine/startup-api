@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -7,62 +6,62 @@ import {
   AxesBlueprint,
   BooksBlueprint,
   BootsBlueprint,
-  ContainersBlueprint,
   CraftingResourcesBlueprint,
   GlovesBlueprint,
   HelmetsBlueprint,
   MacesBlueprint,
   MagicsBlueprint,
   RangedWeaponsBlueprint,
-  ShieldsBlueprint,
-  SwordsBlueprint,
+  StaffsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { MagicPower, NPCAlignment, SpellsBlueprint } from "@rpg-engine/shared";
+import {
+  AnimationEffectKeys,
+  MagicPower,
+  NPCAlignment,
+  NPCSubtype,
+  RangeTypes,
+  SpellsBlueprint,
+} from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcDwarfMage: Partial<INPC> = {
+export const npcOrcMage: INPCTierBlueprint<7> = {
   ...generateMoveTowardsMovement(),
-  name: "Dwarf Mage",
-  key: HostileNPCsBlueprint.DwarfMage,
-  textureKey: HostileNPCsBlueprint.DwarfMage,
+  name: "Orc Mage",
+  key: HostileNPCsBlueprint.OrcMage,
+  textureKey: HostileNPCsBlueprint.OrcMage,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Ranged,
-  ammoKey: "fireball",
-  maxRangeAttack: 10,
-  speed: MovementSpeed.Slow,
-  baseHealth: 140,
+  ammoKey: AnimationEffectKeys.FireBall,
+  maxRangeAttack: RangeTypes.High,
+  speed: MovementSpeed.Standard,
+  tier: 7,
+  subType: NPCSubtype.Humanoid,
+  baseHealth: 320,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   canSwitchToLowHealthTarget: true,
   isMagic: true,
   skills: {
-    level: 45,
+    level: 23,
     strength: {
-      level: 32,
+      level: 25,
     },
     dexterity: {
-      level: 12,
+      level: 23,
     },
     resistance: {
-      level: 7,
+      level: 24,
     },
     magicResistance: {
-      level: 10,
-    },
-    magic: {
-      level: 15,
+      level: 23,
     },
   },
   fleeOnLowHealth: true,
   loots: [
-    {
-      itemBlueprintKey: ContainersBlueprint.Backpack,
-      chance: 10,
-    },
-
     {
       itemBlueprintKey: BootsBlueprint.Boots,
       chance: 30,
@@ -71,14 +70,29 @@ export const npcDwarfMage: Partial<INPC> = {
       itemBlueprintKey: AxesBlueprint.Axe,
       chance: 30,
     },
+    {
+      itemBlueprintKey: CraftingResourcesBlueprint.BlueSapphire,
+      chance: 30,
+      quantityRange: [1, 3],
+    },
 
     {
-      itemBlueprintKey: AxesBlueprint.HellishAxe,
-      chance: 7,
+      itemBlueprintKey: CraftingResourcesBlueprint.RedSapphire,
+      chance: 30,
+      quantityRange: [1, 3],
     },
+
     {
       itemBlueprintKey: HelmetsBlueprint.StuddedHelmet,
       chance: 15,
+    },
+    {
+      itemBlueprintKey: StaffsBlueprint.AquaStaff,
+      chance: 15,
+    },
+    {
+      itemBlueprintKey: StaffsBlueprint.Emberward,
+      chance: 5,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.StuddedArmor,
@@ -113,38 +127,41 @@ export const npcDwarfMage: Partial<INPC> = {
       chance: 10,
     },
     {
-      itemBlueprintKey: SwordsBlueprint.EldensSword,
-      chance: 2,
+      itemBlueprintKey: StaffsBlueprint.PoisonWand,
+      chance: 15,
     },
     {
-      itemBlueprintKey: CraftingResourcesBlueprint.Wheat,
-      chance: 20,
-      quantityRange: [5, 10],
+      itemBlueprintKey: StaffsBlueprint.FireStaff,
+      chance: 5,
     },
     {
-      itemBlueprintKey: MagicsBlueprint.FireRune,
-      chance: 20,
+      itemBlueprintKey: HelmetsBlueprint.AmethystHelmet,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: StaffsBlueprint.CorruptionStaff,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: CraftingResourcesBlueprint.Jade,
+      chance: 10,
       quantityRange: [1, 5],
     },
     {
-      itemBlueprintKey: ShieldsBlueprint.IronHeartShield,
-      chance: 3,
+      itemBlueprintKey: CraftingResourcesBlueprint.Herb,
+      chance: 40,
+      quantityRange: [5, 10],
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning],
   areaSpells: [
     {
       spellKey: SpellsBlueprint.FireStorm,
-      probability: 5,
-      power: MagicPower.Low,
+      probability: 25,
+      power: MagicPower.Medium,
     },
     {
       spellKey: SpellsBlueprint.Blizzard,
-      probability: 5,
-      power: MagicPower.Low,
-    },
-    {
-      spellKey: SpellsBlueprint.VampiricStorm,
       probability: 10,
       power: MagicPower.Medium,
     },

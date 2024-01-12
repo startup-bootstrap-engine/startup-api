@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -6,12 +5,13 @@ import {
   FoodsBlueprint,
   HelmetsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcRedCentipede: Partial<INPC> = {
+export const npcRedCentipede: INPCTierBlueprint<3> = {
   ...generateMoveTowardsMovement(),
   name: "Red Centipede",
   key: HostileNPCsBlueprint.RedCentipede,
@@ -20,7 +20,7 @@ export const npcRedCentipede: Partial<INPC> = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Slow,
-  baseHealth: 45,
+  baseHealth: 140,
   healthRandomizerDice: Dice.D6,
   canSwitchToRandomTarget: true,
   skills: {
@@ -29,10 +29,10 @@ export const npcRedCentipede: Partial<INPC> = {
       level: 7,
     },
     dexterity: {
-      level: 5,
+      level: 9,
     },
     resistance: {
-      level: 2,
+      level: 9,
     },
   },
   fleeOnLowHealth: true,

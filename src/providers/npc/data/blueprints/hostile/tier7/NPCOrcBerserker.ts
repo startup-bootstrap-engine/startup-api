@@ -1,68 +1,76 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
-  AccessoriesBlueprint,
   ArmorsBlueprint,
+  AxesBlueprint,
   BootsBlueprint,
-  ContainersBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
   GlovesBlueprint,
   HammersBlueprint,
   HelmetsBlueprint,
-  RangedWeaponsBlueprint,
+  LegsBlueprint,
   StaffsBlueprint,
-  SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcOrcRaider = {
+export const npcOrcBerserker: INPCTierBlueprint<7> = {
   ...generateMoveTowardsMovement(),
-  name: "Orc Raider",
-  key: HostileNPCsBlueprint.OrcRaider,
-  textureKey: HostileNPCsBlueprint.OrcRaider,
+  name: "Orc Berserker",
+  key: HostileNPCsBlueprint.OrcBerserker,
+  subType: NPCSubtype.Humanoid,
+  textureKey: HostileNPCsBlueprint.OrcBerserker,
   alignment: NPCAlignment.Hostile,
-  attackType: EntityAttackType.MeleeRanged,
-  ammoKey: RangedWeaponsBlueprint.Arrow,
+  attackType: EntityAttackType.Melee,
   speed: MovementSpeed.ExtraFast,
-  maxRangeAttack: 6,
-  baseHealth: 600,
+  baseHealth: 350,
+  tier: 7,
   healthRandomizerDice: Dice.D6,
   skillRandomizerDice: Dice.D4,
   skillsToBeRandomized: ["level", "strength", "dexterity"],
-  canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
   skills: {
-    level: 55,
+    level: 26,
     strength: {
-      level: 45,
+      level: 26,
     },
     dexterity: {
-      level: 50,
+      level: 23,
     },
     resistance: {
-      level: 40,
+      level: 26,
+    },
+    magicResistance: {
+      level: 26,
     },
   },
   loots: [
     {
-      itemBlueprintKey: CraftingResourcesBlueprint.GreenOre,
+      itemBlueprintKey: BootsBlueprint.IronBoots,
       chance: 10,
+    },
+    {
+      itemBlueprintKey: CraftingResourcesBlueprint.BlueSapphire,
+      chance: 30,
       quantityRange: [1, 3],
     },
     {
-      itemBlueprintKey: AccessoriesBlueprint.OrcRing,
-      chance: 20,
+      itemBlueprintKey: LegsBlueprint.BronzeLegs,
+      chance: 2,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.RedSapphire,
-      chance: 20,
+      chance: 30,
       quantityRange: [1, 3],
+    },
+    {
+      itemBlueprintKey: ArmorsBlueprint.BronzeArmor,
+      chance: 10,
     },
     {
       itemBlueprintKey: HammersBlueprint.WarHammer,
@@ -73,6 +81,30 @@ export const npcOrcRaider = {
       chance: 10,
     },
     {
+      itemBlueprintKey: AxesBlueprint.Axe,
+      chance: 30,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.Hatchet,
+      chance: 7,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.BerserkersHelmet,
+      chance: 15,
+    },
+    {
+      itemBlueprintKey: ArmorsBlueprint.StuddedArmor,
+      chance: 15,
+    },
+    {
+      itemBlueprintKey: BootsBlueprint.StuddedBoots,
+      chance: 30,
+    },
+    {
+      itemBlueprintKey: GlovesBlueprint.StuddedGloves,
+      chance: 15,
+    },
+    {
       itemBlueprintKey: StaffsBlueprint.AirWand,
       chance: 10,
     },
@@ -81,27 +113,6 @@ export const npcOrcRaider = {
       itemBlueprintKey: DaggersBlueprint.RomanDagger,
       chance: 7,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.JianSword,
-      chance: 5,
-    },
-    {
-      itemBlueprintKey: ContainersBlueprint.Backpack,
-      chance: 10,
-    },
-
-    {
-      itemBlueprintKey: BootsBlueprint.CopperBoots,
-      chance: 20,
-    },
-    {
-      itemBlueprintKey: GlovesBlueprint.PlateGloves,
-      chance: 10,
-    },
-    {
-      itemBlueprintKey: ArmorsBlueprint.PlateArmor,
-      chance: 5,
-    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
-} as Partial<INPC>;
+};

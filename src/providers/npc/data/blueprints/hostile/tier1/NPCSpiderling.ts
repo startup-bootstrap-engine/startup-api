@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -6,12 +5,13 @@ import {
   FoodsBlueprint,
   GlovesBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcSpiderling: Partial<INPC> = {
+export const npcSpiderling: INPCTierBlueprint<1> = {
   ...generateMoveTowardsMovement(),
   name: "Spiderling",
   subType: NPCSubtype.Insect,
@@ -22,6 +22,7 @@ export const npcSpiderling: Partial<INPC> = {
   speed: MovementSpeed.Standard,
   baseHealth: 60,
   healthRandomizerDice: Dice.D4,
+  tier: 1,
   skills: {
     level: 3,
     strength: {
@@ -31,7 +32,7 @@ export const npcSpiderling: Partial<INPC> = {
       level: 4,
     },
     resistance: {
-      level: 1,
+      level: 4,
     },
   },
   fleeOnLowHealth: true,

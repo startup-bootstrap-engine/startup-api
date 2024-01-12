@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -8,12 +7,13 @@ import {
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
+import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcFrostSalamander: Partial<INPC> = {
+export const npcFrostSalamander: INPCTierBlueprint<5> = {
   ...generateMoveTowardsMovement(),
   name: "Frost Salamander",
   key: HostileNPCsBlueprint.FrostSalamander,
@@ -22,20 +22,24 @@ export const npcFrostSalamander: Partial<INPC> = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Fast,
-  baseHealth: 110,
+  baseHealth: 220,
+  tier: 5,
   healthRandomizerDice: Dice.D12,
   skillRandomizerDice: Dice.D4,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   skills: {
     level: 15,
     strength: {
-      level: 7,
+      level: 15,
     },
     dexterity: {
-      level: 5,
+      level: 15,
     },
     resistance: {
-      level: 8,
+      level: 15,
+    },
+    magicResistance: {
+      level: 15,
     },
   },
   fleeOnLowHealth: true,
@@ -78,4 +82,11 @@ export const npcFrostSalamander: Partial<INPC> = {
     },
   ],
   entityEffects: [EntityEffectBlueprint.Freezing],
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.Blizzard,
+      probability: 5,
+      power: MagicPower.High,
+    },
+  ],
 };

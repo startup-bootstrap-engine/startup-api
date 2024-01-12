@@ -3,10 +3,24 @@ import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { RangedWeaponsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
-import { EntityAttackType, NPCAlignment, NPCSubtype, RangeTypes } from "@rpg-engine/shared";
+import {
+  AnimationEffectKeys,
+  EntityAttackType,
+  MagicPower,
+  NPCAlignment,
+  NPCSubtype,
+  RangeTypes,
+  SpellsBlueprint,
+} from "@rpg-engine/shared";
 import { FriendlyNPCsBlueprint, HostileNPCsBlueprint, NeutralNPCsBlueprint } from "./npcsBlueprintTypes";
 
 type NPCKeys = HostileNPCsBlueprint | FriendlyNPCsBlueprint | NeutralNPCsBlueprint;
+
+interface INPCBlueprintSpellArea {
+  spellKey: SpellsBlueprint;
+  probability: number;
+  power: MagicPower;
+}
 
 export interface IBaseNPCBlueprint {
   name: string;
@@ -16,7 +30,7 @@ export interface IBaseNPCBlueprint {
   textureKey: NPCKeys;
   alignment: NPCAlignment;
   attackType: EntityAttackType;
-  ammoKey?: RangedWeaponsBlueprint;
+  ammoKey?: RangedWeaponsBlueprint | AnimationEffectKeys;
   maxRangeAttack?: RangeTypes;
   speed: MovementSpeed;
   baseHealth: number;
@@ -28,6 +42,7 @@ export interface IBaseNPCBlueprint {
   canSwitchToRandomTarget?: boolean;
   canSwitchToLowHealthTarget?: boolean;
   entityEffects?: EntityEffectBlueprint[];
+  areaSpells?: INPCBlueprintSpellArea[];
   loots: {
     itemBlueprintKey: string;
     chance: number;
@@ -79,6 +94,46 @@ const tierProperties = {
   10: {
     baseHealth: [440, 450, 460, 470] as const,
     skillLevel: [35, 36, 37, 38] as const,
+  },
+  11: {
+    baseHealth: [520, 570, 620, 670] as const,
+    skillLevel: [41, 44, 47, 50] as const,
+  },
+  12: {
+    baseHealth: [720, 770, 820, 870] as const,
+    skillLevel: [53, 56, 59, 62] as const,
+  },
+  13: {
+    baseHealth: [920, 970, 1020, 1070] as const,
+    skillLevel: [65, 68, 71, 74] as const,
+  },
+  14: {
+    baseHealth: [1120, 1170, 1220, 1270] as const,
+    skillLevel: [77, 80, 83, 86] as const,
+  },
+  15: {
+    baseHealth: [1320, 1370, 1420, 1470] as const,
+    skillLevel: [89, 92, 95, 98] as const,
+  },
+  16: {
+    baseHealth: [1670, 1770, 1870, 1970] as const,
+    skillLevel: [108, 118, 128, 138] as const,
+  },
+  17: {
+    baseHealth: [2070, 2170, 2270, 2370] as const,
+    skillLevel: [148, 158, 168, 178] as const,
+  },
+  18: {
+    baseHealth: [2470, 2570, 2670, 2770] as const,
+    skillLevel: [188, 198, 208, 218] as const,
+  },
+  19: {
+    baseHealth: [2870, 2970, 3070, 3170] as const,
+    skillLevel: [228, 238, 248, 258] as const,
+  },
+  20: {
+    baseHealth: [3270, 3370, 3470, 3570] as const,
+    skillLevel: [268, 278, 288, 298] as const,
   },
 };
 

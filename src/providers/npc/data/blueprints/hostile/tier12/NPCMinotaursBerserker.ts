@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -15,33 +14,39 @@ import {
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
+import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcMinotaurBerserker = {
+export const npcMinotaurBerserker: INPCTierBlueprint<12> = {
   ...generateMoveTowardsMovement(),
   name: "Minotaur Berserker",
+  subType: NPCSubtype.Humanoid,
   key: HostileNPCsBlueprint.MinotaurBerserker,
   textureKey: HostileNPCsBlueprint.MinotaurBerserker,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Fast,
+  tier: 12,
   canSwitchToLowHealthTarget: true,
-  baseHealth: 650,
+  baseHealth: 720,
   healthRandomizerDice: Dice.D20,
   skillRandomizerDice: Dice.D8,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   skills: {
-    level: 45,
+    level: 53,
     strength: {
-      level: 40,
+      level: 53,
     },
     dexterity: {
-      level: 24,
+      level: 56,
     },
     resistance: {
-      level: 38,
+      level: 56,
+    },
+    magicResistance: {
+      level: 56,
     },
   },
   fleeOnLowHealth: true,
@@ -115,4 +120,16 @@ export const npcMinotaurBerserker = {
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
-} as Partial<INPC>;
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.CleavingStomp,
+      probability: 50,
+      power: MagicPower.High,
+    },
+    {
+      spellKey: SpellsBlueprint.VampiricStorm,
+      probability: 10,
+      power: MagicPower.Medium,
+    },
+  ],
+};

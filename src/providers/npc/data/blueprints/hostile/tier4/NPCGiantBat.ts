@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -7,12 +6,13 @@ import {
   FoodsBlueprint,
   HelmetsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcGiantBat: Partial<INPC> = {
+export const npcGiantBat: INPCTierBlueprint<4> = {
   ...generateMoveTowardsMovement(),
   name: "Giant Bat",
   key: HostileNPCsBlueprint.GiantBat,
@@ -21,19 +21,20 @@ export const npcGiantBat: Partial<INPC> = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Standard,
-  baseHealth: 64,
+  tier: 4,
+  baseHealth: 180,
   healthRandomizerDice: Dice.D6,
   canSwitchToRandomTarget: true,
   skills: {
-    level: 7,
+    level: 11,
     strength: {
-      level: 7,
+      level: 12,
     },
     dexterity: {
-      level: 5,
+      level: 11,
     },
     resistance: {
-      level: 7,
+      level: 11,
     },
   },
   fleeOnLowHealth: true,

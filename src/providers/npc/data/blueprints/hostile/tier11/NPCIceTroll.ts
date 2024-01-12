@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -16,34 +15,40 @@ import {
   StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcIceTroll: Partial<INPC> = {
+export const npcIceTroll: INPCTierBlueprint<10> = {
   ...generateMoveTowardsMovement(),
   name: "Ice Troll",
   key: HostileNPCsBlueprint.IceTroll,
+  subType: NPCSubtype.Humanoid,
   textureKey: HostileNPCsBlueprint.IceTroll,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Standard,
-  baseHealth: 350,
+  baseHealth: 460,
+  tier: 10,
   healthRandomizerDice: Dice.D20,
   skillRandomizerDice: Dice.D4,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   canSwitchToRandomTarget: true,
   skills: {
-    level: 40,
+    level: 38,
     strength: {
-      level: 30,
+      level: 38,
     },
     dexterity: {
-      level: 15,
+      level: 35,
     },
     resistance: {
-      level: 30,
+      level: 35,
+    },
+    magicResistance: {
+      level: 35,
     },
   },
   fleeOnLowHealth: true,
@@ -124,4 +129,11 @@ export const npcIceTroll: Partial<INPC> = {
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.Blizzard,
+      probability: 10,
+      power: MagicPower.High,
+    },
+  ],
 };

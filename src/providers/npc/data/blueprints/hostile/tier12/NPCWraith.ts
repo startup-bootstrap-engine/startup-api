@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -16,40 +15,40 @@ import {
   StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcWraith: Partial<INPC> = {
+export const npcWraith: INPCTierBlueprint<12> = {
   ...generateMoveTowardsMovement(),
   name: "Wraith",
   key: HostileNPCsBlueprint.Wraith,
+  tier: 12,
+  subType: NPCSubtype.Undead,
   textureKey: HostileNPCsBlueprint.Wraith,
   alignment: NPCAlignment.Hostile,
   speed: MovementSpeed.Fast,
-  baseHealth: 650,
+  baseHealth: 820,
   attackType: EntityAttackType.Melee,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
   isMagic: true,
   skills: {
-    level: 45,
+    level: 62,
     strength: {
-      level: 45,
+      level: 62,
     },
     dexterity: {
-      level: 60,
+      level: 62,
     },
     resistance: {
-      level: 30,
-    },
-    magic: {
-      level: 20,
+      level: 62,
     },
     magicResistance: {
-      level: 25,
+      level: 62,
     },
   },
   fleeOnLowHealth: true,
@@ -125,5 +124,17 @@ export const npcWraith: Partial<INPC> = {
       chance: 1,
     },
   ],
-  entityEffects: [EntityEffectBlueprint.Bleeding],
+  entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.CorruptionWave,
+      probability: 50,
+      power: MagicPower.High,
+    },
+    {
+      spellKey: SpellsBlueprint.VampiricStorm,
+      probability: 10,
+      power: MagicPower.Medium,
+    },
+  ],
 };
