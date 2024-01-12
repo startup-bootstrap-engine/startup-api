@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -11,36 +10,40 @@ import {
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { SpellsBlueprint } from "@providers/spells/data/types/SpellsBlueprintTypes";
+import { MagicPower, NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcDragonKnight: Partial<INPC> = {
+export const npcDragonKnight: INPCTierBlueprint<16> = {
   ...generateMoveTowardsMovement(),
   name: "Dragon Knight",
   key: HostileNPCsBlueprint.DragonKnight,
   textureKey: HostileNPCsBlueprint.DragonKnight,
   alignment: NPCAlignment.Hostile,
   speed: MovementSpeed.Standard,
-  baseHealth: 1200,
+  baseHealth: 1670,
+  tier: 16,
+  subType: NPCSubtype.Humanoid,
   attackType: EntityAttackType.Melee,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
   skills: {
-    level: 80,
+    level: 108,
     strength: {
-      level: 80,
+      level: 108,
     },
     dexterity: {
-      level: 60,
+      level: 108,
     },
     resistance: {
-      level: 40,
+      level: 108,
     },
     magicResistance: {
-      level: 40,
+      level: 108,
     },
   },
   fleeOnLowHealth: true,
@@ -105,4 +108,11 @@ export const npcDragonKnight: Partial<INPC> = {
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.CleavingStomp,
+      probability: 10,
+      power: MagicPower.High,
+    },
+  ],
 };

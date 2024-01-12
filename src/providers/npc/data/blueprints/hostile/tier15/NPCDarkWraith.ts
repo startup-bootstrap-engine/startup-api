@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -18,37 +17,37 @@ import {
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 
-import { EntityAttackType, NPCAlignment } from "@rpg-engine/shared";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
+import { EntityAttackType, MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcDarkWraith: Partial<INPC> = {
+export const npcDarkWraith: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
   name: "Dark Wraith",
   key: HostileNPCsBlueprint.DarkWraith,
   textureKey: HostileNPCsBlueprint.Wraith,
   alignment: NPCAlignment.Hostile,
   speed: MovementSpeed.Fast,
-  baseHealth: 800,
+  baseHealth: 1320,
+  tier: 15,
+  subType: NPCSubtype.Undead,
   healthRandomizerDice: Dice.D12,
   canSwitchToRandomTarget: true,
   isMagic: true,
   attackType: EntityAttackType.MeleeRanged,
   skills: {
-    level: 60,
+    level: 89,
     strength: {
-      level: 60,
+      level: 89,
     },
     dexterity: {
-      level: 100,
+      level: 89,
     },
     resistance: {
-      level: 20,
+      level: 89,
     },
     magicResistance: {
-      level: 70,
-    },
-    magic: {
-      level: 60,
+      level: 89,
     },
   },
   fleeOnLowHealth: true,
@@ -122,5 +121,17 @@ export const npcDarkWraith: Partial<INPC> = {
       chance: 2,
     },
   ],
-  entityEffects: [EntityEffectBlueprint.Corruption],
+  entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.CorruptionWave,
+      probability: 5,
+      power: MagicPower.UltraHigh,
+    },
+    {
+      spellKey: SpellsBlueprint.VampiricStorm,
+      probability: 10,
+      power: MagicPower.High,
+    },
+  ],
 };

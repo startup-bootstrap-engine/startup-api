@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -11,28 +10,32 @@ import {
   SpearsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import {
   AnimationEffectKeys,
   MagicPower,
   NPCAlignment,
   NPCCustomDeathPenalties,
+  NPCSubtype,
   RangeTypes,
   SpellsBlueprint,
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcNazgul: Partial<INPC> = {
+export const npcNazgul: INPCTierBlueprint<18> = {
   ...generateMoveTowardsMovement(),
   name: "Nazgul",
   key: HostileNPCsBlueprint.Nazgul,
+  subType: NPCSubtype.Undead,
   textureKey: HostileNPCsBlueprint.Nazgul,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,
   speed: MovementSpeed.Fast,
   ammoKey: AnimationEffectKeys.Dark,
   maxRangeAttack: RangeTypes.High,
+  // @ts-ignore
   baseHealth: 6000,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
@@ -40,21 +43,18 @@ export const npcNazgul: Partial<INPC> = {
   hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
   isMagic: true,
   skills: {
-    level: 150,
+    level: 188,
     strength: {
-      level: 150,
+      level: 188,
     },
     dexterity: {
-      level: 70,
+      level: 188,
     },
     resistance: {
-      level: 110,
+      level: 188,
     },
     magicResistance: {
-      level: 120,
-    },
-    magic: {
-      level: 80,
+      level: 188,
     },
   },
   loots: [

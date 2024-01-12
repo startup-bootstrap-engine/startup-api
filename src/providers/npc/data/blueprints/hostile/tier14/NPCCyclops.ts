@@ -1,76 +1,75 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
-  AxesBlueprint,
   DaggersBlueprint,
-  RangedWeaponsBlueprint,
-  SpearsBlueprint,
+  HelmetsBlueprint,
+  LegsBlueprint,
+  MacesBlueprint,
+  ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { MagicPower, NPCAlignment, SpellsBlueprint } from "@rpg-engine/shared";
+import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcIceCyclops = {
+export const npcCyclops: INPCTierBlueprint<14> = {
   ...generateMoveTowardsMovement(),
-  name: "Ice Cyclops",
-  key: HostileNPCsBlueprint.IceCyclops,
-  textureKey: HostileNPCsBlueprint.IceCyclops,
+  name: "Cyclops",
+  key: HostileNPCsBlueprint.Cyclops,
+  textureKey: HostileNPCsBlueprint.Cyclops,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Slow,
-  baseHealth: 1800,
+  baseHealth: 1220,
+  tier: 14,
+  subType: NPCSubtype.Humanoid,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   skills: {
-    level: 75,
+    level: 77,
     strength: {
-      level: 45,
+      level: 77,
     },
     dexterity: {
-      level: 45,
+      level: 77,
     },
     resistance: {
-      level: 90,
+      level: 77,
     },
   },
   fleeOnLowHealth: true,
   loots: [
     {
-      itemBlueprintKey: DaggersBlueprint.FrostDagger,
+      itemBlueprintKey: MacesBlueprint.HellishKingMace,
       chance: 25,
     },
     {
-      itemBlueprintKey: SpearsBlueprint.PoseidonTrident,
+      itemBlueprintKey: HelmetsBlueprint.CrownHelmet,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: ShieldsBlueprint.FalconsShield,
       chance: 15,
     },
 
     {
-      itemBlueprintKey: SwordsBlueprint.LightingSword,
+      itemBlueprintKey: SwordsBlueprint.EnchantedSword,
       chance: 15,
     },
     {
-      itemBlueprintKey: AxesBlueprint.GlacialAxe,
+      itemBlueprintKey: DaggersBlueprint.VerdantDagger,
       chance: 10,
     },
     {
-      itemBlueprintKey: RangedWeaponsBlueprint.FrostArrow,
-      chance: 50,
-      quantityRange: [5, 10],
+      itemBlueprintKey: LegsBlueprint.PlatinumTintLegs,
+      chance: 5,
     },
   ],
-  entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],
-  areaSpells: [
-    {
-      spellKey: SpellsBlueprint.Blizzard,
-      probability: 10,
-      power: MagicPower.High,
-    },
-  ],
-} as Partial<INPC>;
+  entityEffects: [EntityEffectBlueprint.Bleeding],
+};

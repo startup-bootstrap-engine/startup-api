@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 
@@ -12,12 +11,13 @@ import {
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { MagicPower, NPCAlignment, SpellsBlueprint } from "@rpg-engine/shared";
+import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcForestCyclops = {
+export const npcForestCyclops: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
   name: "Forest Cyclops",
   key: HostileNPCsBlueprint.ForestCyclops,
@@ -26,22 +26,27 @@ export const npcForestCyclops = {
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: RangedWeaponsBlueprint.Stone,
   maxRangeAttack: 6,
+  tier: 15,
+  subType: NPCSubtype.Humanoid,
   speed: MovementSpeed.Slow,
-  baseHealth: 1200,
+  baseHealth: 1320,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   skills: {
-    level: 75,
+    level: 89,
     strength: {
-      level: 50,
+      level: 89,
     },
     dexterity: {
-      level: 50,
+      level: 89,
     },
     resistance: {
-      level: 60,
+      level: 89,
+    },
+    magicResistance: {
+      level: 89,
     },
   },
   fleeOnLowHealth: true,
@@ -75,8 +80,8 @@ export const npcForestCyclops = {
   areaSpells: [
     {
       spellKey: SpellsBlueprint.NaturesRevenge,
-      probability: 5,
+      probability: 10,
       power: MagicPower.Medium,
     },
   ],
-} as Partial<INPC>;
+};

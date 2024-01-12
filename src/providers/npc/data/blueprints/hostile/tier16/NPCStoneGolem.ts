@@ -1,6 +1,7 @@
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
+  AccessoriesBlueprint,
   ArmorsBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
@@ -8,6 +9,7 @@ import {
   GlovesBlueprint,
   HammersBlueprint,
   HelmetsBlueprint,
+  LegsBlueprint,
   MacesBlueprint,
   RangedWeaponsBlueprint,
   ShieldsBlueprint,
@@ -26,7 +28,7 @@ export const npcStoneGolem: INPCTierBlueprint<16> = {
   textureKey: HostileNPCsBlueprint.StoneGolem,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,
-  speed: MovementSpeed.Slow,
+  speed: MovementSpeed.ExtraSlow,
   baseHealth: 1970,
   ammoKey: RangedWeaponsBlueprint.Stone,
   maxRangeAttack: RangeTypes.High,
@@ -110,6 +112,51 @@ export const npcStoneGolem: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: GlovesBlueprint.PyroclasmGloves,
       chance: 1,
+    },
+    {
+      itemBlueprintKey: BootsBlueprint.SilverBoots,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: ShieldsBlueprint.PlateShield,
+      chance: 5,
+    },
+
+    {
+      itemBlueprintKey: HammersBlueprint.SilverHammer,
+      chance: 10,
+    },
+
+    {
+      itemBlueprintKey: ShieldsBlueprint.SilverShield,
+      chance: 1,
+    },
+
+    {
+      itemBlueprintKey: CraftingResourcesBlueprint.Rock,
+      chance: 30,
+      quantityRange: [1, 10],
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SkullCrusherMace,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: GlovesBlueprint.PyroclasmGloves,
+      chance: 1,
+    },
+    {
+      itemBlueprintKey: CraftingResourcesBlueprint.RedSapphire,
+      chance: 50,
+      quantityRange: [1, 10],
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.RubyRing,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: LegsBlueprint.KingsGuardLegs,
+      chance: 5,
     },
   ],
   areaSpells: [

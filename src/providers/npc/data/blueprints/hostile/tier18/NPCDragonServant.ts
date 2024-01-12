@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -14,6 +13,7 @@ import {
   StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import {
   AnimationEffectKeys,
@@ -21,36 +21,40 @@ import {
   MagicsBlueprint,
   NPCAlignment,
   NPCCustomDeathPenalties,
+  NPCSubtype,
+  RangeTypes,
   SpellsBlueprint,
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcDragonServant: Partial<INPC> = {
+export const npcDragonServant: INPCTierBlueprint<18> = {
   ...generateMoveTowardsMovement(),
   name: "Dragon's Servant",
   key: HostileNPCsBlueprint.DragonServant,
   textureKey: HostileNPCsBlueprint.Kobold,
   alignment: NPCAlignment.Hostile,
   speed: MovementSpeed.Standard,
-  baseHealth: 4000,
+  baseHealth: 2770,
+  tier: 18,
+  subType: NPCSubtype.Humanoid,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: AnimationEffectKeys.FireBall,
-  maxRangeAttack: 8,
+  maxRangeAttack: RangeTypes.High,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
   hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
   skills: {
-    level: 145,
+    level: 208,
     strength: {
-      level: 140,
+      level: 208,
     },
     dexterity: {
-      level: 140,
+      level: 208,
     },
     resistance: {
-      level: 150,
+      level: 208,
     },
   },
   fleeOnLowHealth: true,

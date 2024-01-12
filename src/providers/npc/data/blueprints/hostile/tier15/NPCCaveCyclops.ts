@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 
@@ -10,12 +9,13 @@ import {
   DaggersBlueprint,
   RangedWeaponsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcCaveCyclops = {
+export const npcCaveCyclops: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
   name: "Cave Cyclops",
   key: HostileNPCsBlueprint.CaveCyclops,
@@ -23,21 +23,23 @@ export const npcCaveCyclops = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Slow,
-  baseHealth: 1400,
+  baseHealth: 1420,
+  tier: 15,
+  subType: NPCSubtype.Humanoid,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   skills: {
-    level: 75,
+    level: 89,
     strength: {
-      level: 50,
+      level: 89,
     },
     dexterity: {
-      level: 45,
+      level: 89,
     },
     resistance: {
-      level: 70,
+      level: 89,
     },
   },
   fleeOnLowHealth: true,
@@ -66,4 +68,11 @@ export const npcCaveCyclops = {
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
-} as Partial<INPC>;
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.CleavingStomp,
+      probability: 50,
+      power: MagicPower.High,
+    },
+  ],
+};

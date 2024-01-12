@@ -25,7 +25,7 @@ export const npcMudGolem: INPCTierBlueprint<10> = {
   textureKey: HostileNPCsBlueprint.MudGolem,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
-  speed: MovementSpeed.Slow,
+  speed: MovementSpeed.ExtraSlow,
   // @ts-ignore
   baseHealth: 1500,
   healthRandomizerDice: Dice.D6,

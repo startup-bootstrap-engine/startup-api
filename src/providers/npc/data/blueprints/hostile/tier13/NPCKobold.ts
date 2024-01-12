@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -7,39 +6,51 @@ import {
   CraftingResourcesBlueprint,
   FoodsBlueprint,
   LegsBlueprint,
-  RangedWeaponsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import {
+  AnimationEffectKeys,
+  MagicPower,
+  NPCAlignment,
+  NPCSubtype,
+  RangeTypes,
+  SpellsBlueprint,
+} from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcKobold: Partial<INPC> = {
+export const npcKobold: INPCTierBlueprint<13> = {
   ...generateMoveTowardsMovement(),
   name: "Kobold",
   key: HostileNPCsBlueprint.Kobold,
   textureKey: HostileNPCsBlueprint.Kobold,
+  tier: 13,
+  subType: NPCSubtype.Humanoid,
   alignment: NPCAlignment.Hostile,
   speed: MovementSpeed.Standard,
-  baseHealth: 600,
+  baseHealth: 920,
   attackType: EntityAttackType.MeleeRanged,
-  ammoKey: RangedWeaponsBlueprint.Stone,
-  maxRangeAttack: 8,
+  ammoKey: AnimationEffectKeys.FireBall,
+  maxRangeAttack: RangeTypes.High,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
   skills: {
-    level: 45,
+    level: 65,
     strength: {
-      level: 40,
+      level: 65,
     },
     dexterity: {
-      level: 40,
+      level: 65,
     },
     resistance: {
-      level: 50,
+      level: 65,
+    },
+    magicResistance: {
+      level: 65,
     },
   },
   fleeOnLowHealth: true,
@@ -84,4 +95,11 @@ export const npcKobold: Partial<INPC> = {
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.FireStorm,
+      probability: 5,
+      power: MagicPower.Low,
+    },
+  ],
 };

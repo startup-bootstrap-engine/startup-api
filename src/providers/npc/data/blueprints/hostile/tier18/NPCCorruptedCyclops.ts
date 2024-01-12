@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 
@@ -10,12 +9,13 @@ import {
   LegsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { AnimationEffectKeys, MagicPower, NPCAlignment, SpellsBlueprint } from "@rpg-engine/shared";
+import { AnimationEffectKeys, MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcCorruptedCyclops = {
+export const npcCorruptedCyclops: INPCTierBlueprint<18> = {
   ...generateMoveTowardsMovement(),
   name: "Corrupted Cyclops",
   key: HostileNPCsBlueprint.CorruptedCyclops,
@@ -25,21 +25,26 @@ export const npcCorruptedCyclops = {
   ammoKey: AnimationEffectKeys.Dark,
   maxRangeAttack: 6,
   speed: MovementSpeed.Slow,
-  baseHealth: 1500,
+  baseHealth: 2470,
+  tier: 18,
+  subType: NPCSubtype.Humanoid,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   skills: {
-    level: 100,
+    level: 188,
     strength: {
-      level: 80,
+      level: 188,
     },
     dexterity: {
-      level: 60,
+      level: 188,
     },
     resistance: {
-      level: 100,
+      level: 188,
+    },
+    magicResistance: {
+      level: 188,
     },
   },
   fleeOnLowHealth: true,
@@ -85,4 +90,4 @@ export const npcCorruptedCyclops = {
       power: MagicPower.Medium,
     },
   ],
-} as Partial<INPC>;
+};

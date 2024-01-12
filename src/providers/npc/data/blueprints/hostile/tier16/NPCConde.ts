@@ -1,4 +1,4 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
+import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
@@ -9,44 +9,50 @@ import {
   ShieldsBlueprint,
   StaffsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import {
   AnimationEffectKeys,
   MagicPower,
   NPCAlignment,
   NPCCustomDeathPenalties,
+  NPCSubtype,
+  RangeTypes,
   SpellsBlueprint,
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcCondessa = {
+export const npcConde: INPCTierBlueprint<16> = {
   ...generateMoveTowardsMovement(),
-  name: "Condessa",
-  key: HostileNPCsBlueprint.Condessa,
-  textureKey: HostileNPCsBlueprint.Condessa,
+  name: "Conde",
+  tier: 16,
+  subType: NPCSubtype.Humanoid,
+  key: HostileNPCsBlueprint.Conde,
+  textureKey: HostileNPCsBlueprint.Conde,
   alignment: NPCAlignment.Hostile,
-  speed: MovementSpeed.Fast,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: AnimationEffectKeys.Dark,
-  maxRangeAttack: 8,
-  baseHealth: 2200,
+  maxRangeAttack: RangeTypes.High,
+  speed: MovementSpeed.Standard,
   canSwitchToRandomTarget: true,
+  baseHealth: 1970,
   canSwitchToLowHealthTarget: true,
+  healthRandomizerDice: Dice.D12,
   hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
   skills: {
-    level: 80,
+    level: 108,
     strength: {
-      level: 75,
+      level: 108,
     },
     dexterity: {
-      level: 60,
+      level: 108,
     },
     resistance: {
-      level: 30,
+      level: 108,
     },
     magicResistance: {
-      level: 50,
+      level: 108,
     },
   },
   fleeOnLowHealth: true,
@@ -70,7 +76,7 @@ export const npcCondessa = {
       quantityRange: [1, 10],
     },
     {
-      itemBlueprintKey: DaggersBlueprint.CorruptionDagger,
+      itemBlueprintKey: DaggersBlueprint.HellishDagger,
       chance: 5,
     },
     {
@@ -82,12 +88,17 @@ export const npcCondessa = {
       chance: 1,
     },
   ],
-  entityEffects: [EntityEffectBlueprint.Bleeding],
+  entityEffects: [EntityEffectBlueprint.Freezing],
   areaSpells: [
     {
       spellKey: SpellsBlueprint.VampiricStorm,
       probability: 10,
       power: MagicPower.Medium,
     },
+    {
+      spellKey: SpellsBlueprint.Blizzard,
+      probability: 25,
+      power: MagicPower.UltraHigh,
+    },
   ],
-} as Partial<INPC>;
+};

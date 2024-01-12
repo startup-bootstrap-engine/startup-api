@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -11,33 +10,38 @@ import {
   SpearsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
+import { AnimationEffectKeys, MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcNightFellbeast = {
+export const npcFellbeast: INPCTierBlueprint<17> = {
   ...generateMoveTowardsMovement(),
-  name: "Night Fellbeast",
-  key: HostileNPCsBlueprint.NightFellbeast,
+  name: "FellBeast",
+  key: HostileNPCsBlueprint.Fellbeast,
   subType: NPCSubtype.Animal,
-  textureKey: HostileNPCsBlueprint.NightFellbeast,
+  textureKey: HostileNPCsBlueprint.Fellbeast,
   alignment: NPCAlignment.Hostile,
-  attackType: EntityAttackType.Melee,
   speed: MovementSpeed.ExtraFast,
-  baseHealth: 3000,
+  baseHealth: 2070,
+  tier: 17,
   healthRandomizerDice: Dice.D6,
+  attackType: EntityAttackType.MeleeRanged,
+  ammoKey: AnimationEffectKeys.Green,
+  maxRangeAttack: 6,
+  canSwitchToLowHealthTarget: true,
   canSwitchToRandomTarget: true,
   skills: {
-    level: 99,
+    level: 148,
     strength: {
-      level: 80,
+      level: 148,
     },
     dexterity: {
-      level: 60,
+      level: 148,
     },
     resistance: {
-      level: 60,
+      level: 148,
     },
   },
   fleeOnLowHealth: true,
@@ -48,10 +52,6 @@ export const npcNightFellbeast = {
       quantityRange: [1, 2],
     },
     {
-      itemBlueprintKey: DaggersBlueprint.PhoenixDagger,
-      chance: 5,
-    },
-    {
       itemBlueprintKey: CraftingResourcesBlueprint.Silk,
       chance: 35,
       quantityRange: [1, 6],
@@ -59,10 +59,6 @@ export const npcNightFellbeast = {
     {
       itemBlueprintKey: HelmetsBlueprint.BerserkersHelmet,
       chance: 10,
-    },
-    {
-      itemBlueprintKey: DaggersBlueprint.CorruptionDagger,
-      chance: 5,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.RubyRing,
@@ -77,7 +73,7 @@ export const npcNightFellbeast = {
       chance: 15,
     },
     {
-      itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
+      itemBlueprintKey: DaggersBlueprint.CorruptionDagger,
       chance: 5,
     },
     {
@@ -91,17 +87,12 @@ export const npcNightFellbeast = {
       chance: 5,
     },
   ],
-  entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
+  entityEffects: [EntityEffectBlueprint.Poison],
   areaSpells: [
     {
-      spellKey: SpellsBlueprint.CorruptionWave,
-      probability: 5,
-      power: MagicPower.High,
-    },
-    {
-      spellKey: SpellsBlueprint.VampiricStorm,
+      spellKey: SpellsBlueprint.NaturesRevenge,
       probability: 10,
-      power: MagicPower.Medium,
+      power: MagicPower.Low,
     },
   ],
-} as Partial<INPC>;
+};

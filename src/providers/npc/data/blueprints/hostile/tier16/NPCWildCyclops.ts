@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 
@@ -11,12 +10,13 @@ import {
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcWildCyclops = {
+export const npcWildCyclops: INPCTierBlueprint<16> = {
   ...generateMoveTowardsMovement(),
   name: "Wild Cyclops",
   key: HostileNPCsBlueprint.WildCyclops,
@@ -24,21 +24,23 @@ export const npcWildCyclops = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Slow,
-  baseHealth: 800,
+  tier: 16,
+  subType: NPCSubtype.Humanoid,
+  baseHealth: 1770,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   skills: {
-    level: 70,
+    level: 108,
     strength: {
-      level: 50,
+      level: 108,
     },
     dexterity: {
-      level: 40,
+      level: 108,
     },
     resistance: {
-      level: 75,
+      level: 108,
     },
   },
   fleeOnLowHealth: true,
@@ -81,4 +83,4 @@ export const npcWildCyclops = {
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
-} as Partial<INPC>;
+};

@@ -1,4 +1,4 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
+import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
@@ -9,44 +9,50 @@ import {
   ShieldsBlueprint,
   StaffsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import {
   AnimationEffectKeys,
   MagicPower,
   NPCAlignment,
   NPCCustomDeathPenalties,
+  NPCSubtype,
+  RangeTypes,
   SpellsBlueprint,
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcConde = {
+export const npcCondessa: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
-  name: "Conde",
-  key: HostileNPCsBlueprint.Conde,
-  textureKey: HostileNPCsBlueprint.Conde,
+  name: "Condessa",
+  key: HostileNPCsBlueprint.Condessa,
+  textureKey: HostileNPCsBlueprint.Condessa,
   alignment: NPCAlignment.Hostile,
+  speed: MovementSpeed.Fast,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: AnimationEffectKeys.Dark,
-  maxRangeAttack: 8,
-  speed: MovementSpeed.Standard,
+  maxRangeAttack: RangeTypes.High,
+  baseHealth: 1470,
+  tier: 15,
+  subType: NPCSubtype.Humanoid,
+  healthRandomizerDice: Dice.D12,
   canSwitchToRandomTarget: true,
-  baseHealth: 3000,
   canSwitchToLowHealthTarget: true,
   hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
   skills: {
-    level: 85,
+    level: 92,
     strength: {
-      level: 75,
+      level: 92,
     },
     dexterity: {
-      level: 60,
+      level: 92,
     },
     resistance: {
-      level: 30,
+      level: 92,
     },
     magicResistance: {
-      level: 50,
+      level: 92,
     },
   },
   fleeOnLowHealth: true,
@@ -70,7 +76,7 @@ export const npcConde = {
       quantityRange: [1, 10],
     },
     {
-      itemBlueprintKey: DaggersBlueprint.HellishDagger,
+      itemBlueprintKey: DaggersBlueprint.CorruptionDagger,
       chance: 5,
     },
     {
@@ -89,10 +95,5 @@ export const npcConde = {
       probability: 10,
       power: MagicPower.Medium,
     },
-    {
-      spellKey: SpellsBlueprint.Blizzard,
-      probability: 25,
-      power: MagicPower.UltraHigh,
-    },
   ],
-} as Partial<INPC>;
+};

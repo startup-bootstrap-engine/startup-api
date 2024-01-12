@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -10,12 +9,13 @@ import {
   LegsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { MagicPower, NPCAlignment, NPCCustomDeathPenalties, SpellsBlueprint } from "@rpg-engine/shared";
+import { MagicPower, NPCAlignment, NPCCustomDeathPenalties, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcOrcWarlord: Partial<INPC> = {
+export const npcOrcWarlord: INPCTierBlueprint<16> = {
   ...generateMoveTowardsMovement(),
   name: "Orc Warlord",
   key: HostileNPCsBlueprint.OrcWarlord,
@@ -23,24 +23,26 @@ export const npcOrcWarlord: Partial<INPC> = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.ExtraFast,
-  baseHealth: 2000,
+  baseHealth: 1970,
+  tier: 16,
+  subType: NPCSubtype.Humanoid,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
   hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
   skills: {
-    level: 100,
+    level: 118,
     strength: {
-      level: 120,
+      level: 118,
     },
     dexterity: {
-      level: 90,
+      level: 118,
     },
     resistance: {
-      level: 130,
+      level: 118,
     },
     magicResistance: {
-      level: 120,
+      level: 118,
     },
   },
   loots: [
@@ -74,7 +76,7 @@ export const npcOrcWarlord: Partial<INPC> = {
   entityEffects: [EntityEffectBlueprint.Bleeding],
   areaSpells: [
     {
-      spellKey: SpellsBlueprint.Arrowstorm,
+      spellKey: SpellsBlueprint.CleavingStomp,
       probability: 10,
       power: MagicPower.High,
     },

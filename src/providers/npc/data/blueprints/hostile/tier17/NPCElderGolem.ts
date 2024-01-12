@@ -1,6 +1,4 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
-import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
   ArmorsBlueprint,
   BootsBlueprint,
@@ -10,12 +8,14 @@ import {
   ShieldsBlueprint,
   StaffsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
+import { SpellsBlueprint } from "@providers/spells/data/types/SpellsBlueprintTypes";
+import { MagicPower, NPCAlignment, NPCSubtype, RangeTypes } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcElderGolem: Partial<INPC> = {
+export const npcElderGolem: INPCTierBlueprint<17> = {
   ...generateMoveTowardsMovement(),
   name: "Elder Golem",
   key: HostileNPCsBlueprint.ElderGolem,
@@ -23,22 +23,23 @@ export const npcElderGolem: Partial<INPC> = {
   textureKey: HostileNPCsBlueprint.ElderGolem,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
-  speed: MovementSpeed.Slow,
-  baseHealth: 120,
+  maxRangeAttack: RangeTypes.High,
+  tier: 17,
+  baseHealth: 2370,
   healthRandomizerDice: Dice.D6,
   skillRandomizerDice: Dice.D4,
   skillsToBeRandomized: ["level", "strength", "dexterity"],
   canSwitchToLowHealthTarget: true,
   skills: {
-    level: 35,
+    level: 158,
     strength: {
-      level: 25,
+      level: 158,
     },
     dexterity: {
-      level: 10,
+      level: 158,
     },
     resistance: {
-      level: 25,
+      level: 158,
     },
   },
   loots: [
@@ -75,6 +76,13 @@ export const npcElderGolem: Partial<INPC> = {
       itemBlueprintKey: CraftingResourcesBlueprint.PolishedStone,
       chance: 30,
       quantityRange: [5, 20],
+    },
+  ],
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.CleavingStomp,
+      probability: 50,
+      power: MagicPower.High,
     },
   ],
 };

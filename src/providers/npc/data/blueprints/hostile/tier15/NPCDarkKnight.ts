@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -18,38 +17,41 @@ import {
   StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { MagicPower, NPCAlignment, RangeTypes, SpellsBlueprint } from "@rpg-engine/shared";
+import { MagicPower, NPCAlignment, NPCCustomDeathPenalties, RangeTypes, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcDarkKnight: Partial<INPC> = {
+export const npcDarkKnight: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
   name: "Dark Knight",
   key: HostileNPCsBlueprint.DarkKnight,
+  // @ts-ignore
   textureKey: "superior-knight",
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,
   speed: MovementSpeed.ExtraFast,
   ammoKey: RangedWeaponsBlueprint.Bolt,
   maxRangeAttack: RangeTypes.High,
-  baseHealth: 1200,
+  baseHealth: 1320,
+  hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
   skills: {
-    level: 85,
+    level: 89,
     strength: {
-      level: 100,
+      level: 98,
     },
     dexterity: {
-      level: 60,
+      level: 98,
     },
     resistance: {
-      level: 100,
+      level: 98,
     },
     magicResistance: {
-      level: 100,
+      level: 98,
     },
   },
   loots: [
