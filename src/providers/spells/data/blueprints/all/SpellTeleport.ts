@@ -1,6 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { container } from "@providers/inversify/container";
-import { MapTransitionTeleport } from "@providers/map/MapTransition/MapTransitionTeleport";
+import { MapTransition } from "@providers/map/MapTransition/MapTransition";
 import { AnimationEffectKeys, ISpell, SpellCastingType, SpellsBlueprint, ToGridX, ToGridY } from "@rpg-engine/shared";
 
 export const spellTeleport: Partial<ISpell> = {
@@ -18,7 +18,7 @@ export const spellTeleport: Partial<ISpell> = {
   castingAnimationKey: AnimationEffectKeys.Holy,
 
   usableEffect: async (character: ICharacter) => {
-    const mapTransition = container.get(MapTransitionTeleport);
+    const mapTransition = container.get(MapTransition);
 
     await mapTransition.changeCharacterScene(character, {
       map: character.initialScene,

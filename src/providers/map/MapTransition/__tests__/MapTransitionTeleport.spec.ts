@@ -2,10 +2,10 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { BattleSocketEvents, FromGridX, MapSocketEvents } from "@rpg-engine/shared";
 import { EntityType } from "@rpg-engine/shared/dist/types/entity.types";
-import { MapTransitionTeleport } from "../MapTransitionTeleport";
+import { MapTransition } from "../MapTransition";
 
 describe("MapTransitionTeleport", () => {
-  let mapTransitionTeleport: MapTransitionTeleport;
+  let mapTransitionTeleport: MapTransition;
   let testCharacter: ICharacter;
   let destination;
 
@@ -18,7 +18,7 @@ describe("MapTransitionTeleport", () => {
 
     testCharacter = await unitTestHelper.createMockCharacter(null, {});
 
-    mapTransitionTeleport = container.get<MapTransitionTeleport>(MapTransitionTeleport);
+    mapTransitionTeleport = container.get<MapTransition>(MapTransition);
 
     await unitTestHelper.initializeMapLoader();
   });
