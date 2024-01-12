@@ -1,3 +1,4 @@
+import { MAP_TRANSITION_SOCIAL_CRYSTAL_REQUIREMENT } from "@providers/constants/MarketingReferralConstants";
 import { ITiledObject } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { MapLoader } from "../MapLoader";
@@ -6,6 +7,10 @@ import { MapObjectsLoader } from "../MapObjectsLoader";
 @provide(MapTransitionInfo)
 export class MapTransitionInfo {
   constructor(private mapObjectsLoader: MapObjectsLoader) {}
+
+  public getTransitionSocialCrystalPrice(mapName: string): number {
+    return MAP_TRANSITION_SOCIAL_CRYSTAL_REQUIREMENT[mapName] || 0;
+  }
 
   public getTransitionAtXY(mapName: string, x: number, y: number): ITiledObject | undefined {
     try {

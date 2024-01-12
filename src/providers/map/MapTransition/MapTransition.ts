@@ -4,6 +4,8 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { BattleNetworkStopTargeting } from "@providers/battle/network/BattleNetworkStopTargetting";
 import { CharacterUser } from "@providers/character/CharacterUser";
 import { CharacterView } from "@providers/character/CharacterView";
+import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
+import { CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { Locker } from "@providers/locks/Locker";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
@@ -15,6 +17,7 @@ import {
   IViewDestroyElementPayload,
   MapSocketEvents,
   NPCAlignment,
+  UserAccountTypes,
   ViewSocketEvents,
 } from "@rpg-engine/shared";
 import { EntityType } from "@rpg-engine/shared/dist/types/entity.types";
@@ -38,13 +41,14 @@ export class MapTransition {
     private locker: Locker,
     private mapTransitionInfo: MapTransitionInfo,
     private characterUser: CharacterUser,
-    private mapNonPVPZone: MapNonPVPZone
+    private mapNonPVPZone: MapNonPVPZone,
+    private characterItemInventory: CharacterItemInventory
   ) {}
 
   public async handleMapTransition(character: ICharacter, newX: number, newY: number): Promise<void> {
-    const frozenCharacter = Object.freeze(character);
+    character = Object.freeze(character);
 
-    const transition = this.mapTransitionInfo.getTransitionAtXY(frozenCharacter.scene, newX, newY);
+    const transition = this.mapTransitionInfo.getTransitionAtXY(character.scene, newX, newY);
     if (!transition) return;
 
     const destination = this.getDestinationFromTransition(transition);
@@ -53,21 +57,55 @@ export class MapTransition {
       return;
     }
 
-    if (this.isPremiumAccountRequired(transition)) {
-      const user = await this.characterUser.findUserByCharacter(character);
-      const userAccountType = user?.accountType || "free";
+    const user = await this.characterUser.findUserByCharacter(character);
+    const userAccountType = user?.accountType || "free";
+    const isFreeAccount = userAccountType === UserAccountTypes.Free;
 
+    const socialCrystalsDestinationPrice = this.mapTransitionInfo.getTransitionSocialCrystalPrice(destination.map);
+    const areSocialCrystalsRequired = socialCrystalsDestinationPrice > 0;
+
+    if (areSocialCrystalsRequired && !isFreeAccount) {
+      const hasEnoughCrystals = await this.doesCharacterHasEnoughCrystals(character, socialCrystalsDestinationPrice);
+
+      if (!hasEnoughCrystals) {
+        return;
+      }
+    }
+
+    if (this.isPremiumAccountRequired(transition)) {
       if (!this.isUserAllowedAccess(transition, userAccountType)) {
         this.sendAccessErrorMessage(character, transition);
         return;
       }
     }
 
-    if (destination.map === frozenCharacter.scene) {
-      await this.sameMapTeleport(frozenCharacter, destination);
+    if (destination.map === character.scene) {
+      await this.sameMapTeleport(character, destination);
     } else {
-      await this.changeCharacterScene(frozenCharacter, destination);
+      await this.changeCharacterScene(character, destination);
     }
+  }
+
+  private async doesCharacterHasEnoughCrystals(
+    character: ICharacter,
+    socialCrystalsDestinationPrice: number
+  ): Promise<boolean> {
+    // tries to decrement...
+    const result = await this.characterItemInventory.decrementItemFromNestedInventoryByKey(
+      CraftingResourcesBlueprint.SocialCrystal,
+      character,
+      socialCrystalsDestinationPrice
+    );
+
+    if (!result.success) {
+      this.socketMessaging.sendErrorMessageToCharacter(
+        character,
+        `Sorry! You need ${socialCrystalsDestinationPrice} social crystals to teleport to this area, or a premium account.`
+      );
+      return false;
+    }
+
+    return true;
   }
 
   private getDestinationFromTransition(transitionTiledObject: ITiledObject): IDestination | null {
