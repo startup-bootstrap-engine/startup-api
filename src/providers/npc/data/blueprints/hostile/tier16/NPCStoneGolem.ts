@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -13,12 +12,13 @@ import {
   RangedWeaponsBlueprint,
   ShieldsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment, NPCSubtype, RangeTypes } from "@rpg-engine/shared";
+import { MagicPower, NPCAlignment, NPCSubtype, RangeTypes, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcStoneGolem: Partial<INPC> = {
+export const npcStoneGolem: INPCTierBlueprint<16> = {
   ...generateMoveTowardsMovement(),
   name: "Stone Golem",
   key: HostileNPCsBlueprint.StoneGolem,
@@ -27,7 +27,7 @@ export const npcStoneGolem: Partial<INPC> = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,
   speed: MovementSpeed.Slow,
-  baseHealth: 1500,
+  baseHealth: 1970,
   ammoKey: RangedWeaponsBlueprint.Stone,
   maxRangeAttack: RangeTypes.High,
   healthRandomizerDice: Dice.D20,
@@ -35,18 +35,19 @@ export const npcStoneGolem: Partial<INPC> = {
   skillRandomizerDice: Dice.D4,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   skills: {
-    level: 120,
+    level: 138,
     strength: {
-      level: 100,
+      level: 138,
     },
     dexterity: {
-      level: 10,
+      // @ts-ignore
+      level: 30,
     },
     resistance: {
-      level: 100,
+      level: 138,
     },
     magicResistance: {
-      level: 80,
+      level: 138,
     },
   },
   fleeOnLowHealth: true,
@@ -109,6 +110,13 @@ export const npcStoneGolem: Partial<INPC> = {
     {
       itemBlueprintKey: GlovesBlueprint.PyroclasmGloves,
       chance: 1,
+    },
+  ],
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.CleavingStomp,
+      probability: 50,
+      power: MagicPower.High,
     },
   ],
 };

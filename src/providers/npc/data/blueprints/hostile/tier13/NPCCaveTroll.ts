@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 
@@ -15,12 +14,13 @@ import {
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcCaveTroll = {
+export const npcCaveTroll: INPCTierBlueprint<13> = {
   ...generateMoveTowardsMovement(),
   name: "Cave Troll",
   key: HostileNPCsBlueprint.CaveTroll,
@@ -28,21 +28,26 @@ export const npcCaveTroll = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Standard,
-  baseHealth: 600,
+  baseHealth: 920,
+  tier: 13,
+  subType: NPCSubtype.Humanoid,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   skills: {
-    level: 70,
+    level: 74,
     strength: {
-      level: 45,
+      level: 74,
     },
     dexterity: {
-      level: 40,
+      level: 74,
     },
     resistance: {
-      level: 60,
+      level: 74,
+    },
+    magicResistance: {
+      level: 74,
     },
   },
   fleeOnLowHealth: true,
@@ -115,4 +120,4 @@ export const npcCaveTroll = {
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
-} as Partial<INPC>;
+};

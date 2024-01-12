@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -14,16 +13,26 @@ import {
   HammersBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
+  MacesBlueprint,
   ShieldsBlueprint,
   SpearsBlueprint,
   StaffsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { AnimationEffectKeys, NPCAlignment, NPCCustomDeathPenalties, NPCSubtype } from "@rpg-engine/shared";
+import {
+  AnimationEffectKeys,
+  MagicPower,
+  NPCAlignment,
+  NPCCustomDeathPenalties,
+  NPCSubtype,
+  RangeTypes,
+  SpellsBlueprint,
+} from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcGiantSpider: Partial<INPC> = {
+export const npcGiantSpider: INPCTierBlueprint<16> = {
   ...generateMoveTowardsMovement(),
   name: "Giant Spider",
   key: HostileNPCsBlueprint.GiantSpider,
@@ -31,27 +40,28 @@ export const npcGiantSpider: Partial<INPC> = {
   textureKey: HostileNPCsBlueprint.GiantSpider,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,
-  speed: MovementSpeed.ExtraFast,
+  speed: MovementSpeed.Standard,
   ammoKey: AnimationEffectKeys.Green,
-  maxRangeAttack: 6,
-  baseHealth: 1500,
+  maxRangeAttack: RangeTypes.High,
+  baseHealth: 1970,
+  tier: 16,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
   hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
   skills: {
-    level: 100,
+    level: 118,
     strength: {
-      level: 85,
+      level: 118,
     },
     dexterity: {
-      level: 80,
+      level: 138,
     },
     resistance: {
-      level: 60,
+      level: 108,
     },
     magicResistance: {
-      level: 50,
+      level: 108,
     },
   },
   fleeOnLowHealth: true,
@@ -152,6 +162,47 @@ export const npcGiantSpider: Partial<INPC> = {
       quantityRange: [1, 10],
     },
     {
+      itemBlueprintKey: HelmetsBlueprint.WingHelmet,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: ArmorsBlueprint.FalconsArmor,
+      chance: 1,
+    },
+
+    {
+      itemBlueprintKey: BootsBlueprint.SilverBoots,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: ShieldsBlueprint.PlateShield,
+      chance: 5,
+    },
+
+    {
+      itemBlueprintKey: HammersBlueprint.SilverHammer,
+      chance: 10,
+    },
+
+    {
+      itemBlueprintKey: ShieldsBlueprint.SilverShield,
+      chance: 1,
+    },
+
+    {
+      itemBlueprintKey: CraftingResourcesBlueprint.Rock,
+      chance: 30,
+      quantityRange: [1, 10],
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SkullCrusherMace,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: GlovesBlueprint.PyroclasmGloves,
+      chance: 1,
+    },
+    {
       itemBlueprintKey: CraftingResourcesBlueprint.RedSapphire,
       chance: 50,
       quantityRange: [1, 10],
@@ -166,4 +217,11 @@ export const npcGiantSpider: Partial<INPC> = {
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.NaturesRevenge,
+      probability: 10,
+      power: MagicPower.High,
+    },
+  ],
 };

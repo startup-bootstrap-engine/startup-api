@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -17,12 +16,20 @@ import {
   StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { AnimationEffectKeys, MagicPower, NPCAlignment, SpellsBlueprint } from "@rpg-engine/shared";
+import {
+  AnimationEffectKeys,
+  MagicPower,
+  NPCAlignment,
+  NPCSubtype,
+  RangeTypes,
+  SpellsBlueprint,
+} from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcLitch: Partial<INPC> = {
+export const npcLitch: INPCTierBlueprint<14> = {
   ...generateMoveTowardsMovement(),
   name: "Litch",
   key: HostileNPCsBlueprint.Litch,
@@ -30,29 +37,31 @@ export const npcLitch: Partial<INPC> = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: AnimationEffectKeys.FireBall,
-  maxRangeAttack: 8,
+  maxRangeAttack: RangeTypes.High,
   speed: MovementSpeed.Fast,
-  baseHealth: 800,
+  baseHealth: 1120,
+  tier: 14,
+  subType: NPCSubtype.Undead,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
   isMagic: true,
   skills: {
-    level: 70,
+    level: 77,
     strength: {
-      level: 75,
+      level: 77,
     },
     dexterity: {
-      level: 60,
+      level: 77,
     },
     resistance: {
-      level: 30,
+      level: 77,
     },
     magicResistance: {
-      level: 50,
+      level: 77,
     },
     magic: {
-      level: 45,
+      level: 77,
     },
   },
   fleeOnLowHealth: true,
@@ -147,7 +156,7 @@ export const npcLitch: Partial<INPC> = {
       chance: 1,
     },
   ],
-  entityEffects: [EntityEffectBlueprint.Burning],
+  entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Corruption],
   areaSpells: [
     {
       spellKey: SpellsBlueprint.FireStorm,

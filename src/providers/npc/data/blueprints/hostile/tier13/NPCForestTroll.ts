@@ -1,11 +1,10 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
@@ -23,8 +22,9 @@ import {
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 
-export const npcForestTroll = {
+export const npcForestTroll: INPCTierBlueprint<14> = {
   ...generateMoveTowardsMovement(),
   name: "Forest Troll",
   key: HostileNPCsBlueprint.ForestTroll,
@@ -32,21 +32,23 @@ export const npcForestTroll = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Standard,
-  baseHealth: 600,
+  baseHealth: 1220,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
+  tier: 14,
+  subType: NPCSubtype.Humanoid,
   skills: {
-    level: 60,
+    level: 80,
     strength: {
-      level: 45,
+      level: 86,
     },
     dexterity: {
-      level: 40,
+      level: 86,
     },
     resistance: {
-      level: 50,
+      level: 83,
     },
   },
   fleeOnLowHealth: true,
@@ -124,5 +126,12 @@ export const npcForestTroll = {
       quantityRange: [5, 10],
     },
   ],
-  entityEffects: [EntityEffectBlueprint.Bleeding],
-} as Partial<INPC>;
+  entityEffects: [EntityEffectBlueprint.Poison],
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.NaturesRevenge,
+      probability: 25,
+      power: MagicPower.Medium,
+    },
+  ],
+};

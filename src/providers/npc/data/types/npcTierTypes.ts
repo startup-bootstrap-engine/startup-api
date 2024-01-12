@@ -8,6 +8,7 @@ import {
   EntityAttackType,
   MagicPower,
   NPCAlignment,
+  NPCCustomDeathPenalties,
   NPCSubtype,
   RangeTypes,
   SpellsBlueprint,
@@ -37,6 +38,7 @@ export interface IBaseNPCBlueprint {
   healthRandomizerDice: Dice;
   skillRandomizerDice?: Dice;
   skillsToBeRandomized?: Array<keyof ISkill>;
+  hasCustomDeathPenalty?: NPCCustomDeathPenalties;
   skills: Partial<ISkill>;
   fleeOnLowHealth?: boolean;
   canSwitchToRandomTarget?: boolean;
@@ -135,6 +137,26 @@ const tierProperties = {
     baseHealth: [3270, 3370, 3470, 3570] as const,
     skillLevel: [268, 278, 288, 298] as const,
   },
+  21: {
+    baseHealth: [3770, 3970, 4170, 4370] as const,
+    skillLevel: [318, 338, 358, 378] as const,
+  },
+  22: {
+    baseHealth: [4570, 4770, 4970, 5170] as const,
+    skillLevel: [398, 418, 438, 458] as const,
+  },
+  23: {
+    baseHealth: [5370, 5570, 5770, 5970] as const,
+    skillLevel: [478, 498, 518, 538] as const,
+  },
+  24: {
+    baseHealth: [6170, 6370, 6570, 6770] as const,
+    skillLevel: [558, 578, 598, 618] as const,
+  },
+  25: {
+    baseHealth: [6970, 7170, 7370, 7570] as const,
+    skillLevel: [638, 658, 678, 698] as const,
+  },
 };
 
 type Tier = keyof typeof tierProperties;
@@ -164,6 +186,9 @@ export interface INPCTierBlueprint<T extends Tier> extends IBaseNPCBlueprint {
       level: TierProperties<T>["skillLevel"];
     };
     distance?: {
+      level: TierProperties<T>["skillLevel"];
+    };
+    magic?: {
       level: TierProperties<T>["skillLevel"];
     };
   };

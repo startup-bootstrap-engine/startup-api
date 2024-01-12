@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -11,12 +10,13 @@ import {
   StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
+import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcFireFox: Partial<INPC> = {
+export const npcFireFox: INPCTierBlueprint<11> = {
   ...generateMoveTowardsMovement(),
   name: "Fire Fox",
   key: HostileNPCsBlueprint.FireFox,
@@ -25,19 +25,23 @@ export const npcFireFox: Partial<INPC> = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.ExtraFast,
-  baseHealth: 150,
+  baseHealth: 520,
+  tier: 11,
   healthRandomizerDice: Dice.D6,
   canSwitchToRandomTarget: true,
   skills: {
-    level: 30,
+    level: 50,
     strength: {
-      level: 25,
+      level: 44,
     },
     dexterity: {
-      level: 25,
+      level: 50,
     },
     resistance: {
-      level: 20,
+      level: 44,
+    },
+    magicResistance: {
+      level: 44,
     },
   },
   fleeOnLowHealth: true,
@@ -84,4 +88,11 @@ export const npcFireFox: Partial<INPC> = {
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning],
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.FireStorm,
+      probability: 25,
+      power: MagicPower.UltraHigh,
+    },
+  ],
 };

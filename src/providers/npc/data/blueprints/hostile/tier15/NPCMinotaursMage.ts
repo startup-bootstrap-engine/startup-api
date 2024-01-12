@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -16,18 +15,20 @@ import {
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import {
   AnimationEffectKeys,
   MagicPower,
   NPCAlignment,
   NPCCustomDeathPenalties,
+  NPCSubtype,
   RangeTypes,
   SpellsBlueprint,
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcMinotaurMage = {
+export const npcMinotaurMage: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
   name: "Minotaur Mage",
   key: HostileNPCsBlueprint.MinotaurMage,
@@ -37,29 +38,29 @@ export const npcMinotaurMage = {
   ammoKey: AnimationEffectKeys.FireBall,
   maxRangeAttack: RangeTypes.High,
   speed: MovementSpeed.Standard,
+  tier: 15,
+  subType: NPCSubtype.Humanoid,
   canSwitchToLowHealthTarget: true,
+  canSwitchToRandomTarget: true,
   hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
-  baseHealth: 750,
+  baseHealth: 1370,
   healthRandomizerDice: Dice.D4,
   skillRandomizerDice: Dice.D4,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   isMagic: true,
   skills: {
-    level: 80,
+    level: 95,
     strength: {
-      level: 75,
+      level: 95,
     },
     dexterity: {
-      level: 60,
+      level: 89,
     },
     resistance: {
-      level: 30,
+      level: 95,
     },
     magicResistance: {
-      level: 50,
-    },
-    magic: {
-      level: 50,
+      level: 98,
     },
   },
   fleeOnLowHealth: true,
@@ -165,7 +166,7 @@ export const npcMinotaurMage = {
       chance: 10,
     },
   ],
-  entityEffects: [EntityEffectBlueprint.Burning],
+  entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Freezing],
   areaSpells: [
     {
       spellKey: SpellsBlueprint.FireStorm,
@@ -183,4 +184,4 @@ export const npcMinotaurMage = {
       power: MagicPower.Medium,
     },
   ],
-} as Partial<INPC>;
+};

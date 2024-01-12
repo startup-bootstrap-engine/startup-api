@@ -1,11 +1,17 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment, NPCCustomDeathPenalties } from "@rpg-engine/shared";
+import {
+  MagicPower,
+  NPCAlignment,
+  NPCCustomDeathPenalties,
+  NPCSubtype,
+  RangeTypes,
+  SpellsBlueprint,
+} from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
@@ -21,18 +27,21 @@ import {
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 
-export const npcTrollBerserker = {
+export const npcTrollBerserker: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
   name: "Troll Berserker",
   key: HostileNPCsBlueprint.TrollBerserker,
+  tier: 15,
+  subType: NPCSubtype.Humanoid,
   textureKey: HostileNPCsBlueprint.TrollBerserker,
   alignment: NPCAlignment.Hostile,
   speed: MovementSpeed.Standard,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: RangedWeaponsBlueprint.Stone,
-  maxRangeAttack: 8,
-  baseHealth: 1000,
+  maxRangeAttack: RangeTypes.High,
+  baseHealth: 1470,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   skillRandomizerDice: Dice.D20,
@@ -40,15 +49,18 @@ export const npcTrollBerserker = {
   hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
 
   skills: {
-    level: 70,
+    level: 92,
     strength: {
-      level: 100,
+      level: 98,
     },
     dexterity: {
-      level: 40,
+      level: 89,
     },
     resistance: {
-      level: 800,
+      level: 89,
+    },
+    magicResistance: {
+      level: 89,
     },
   },
   loots: [
@@ -143,4 +155,11 @@ export const npcTrollBerserker = {
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
-} as Partial<INPC>;
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.VampiricStorm,
+      probability: 10,
+      power: MagicPower.Medium,
+    },
+  ],
+};
