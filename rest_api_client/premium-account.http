@@ -30,8 +30,8 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "email": "strike96380@gmail.com",
-  "accountType": "gold"
+  "email": "paulo.sergio.sales150915@hotmail.com",
+  "accountType": "bronze"
 }
 
 ###
