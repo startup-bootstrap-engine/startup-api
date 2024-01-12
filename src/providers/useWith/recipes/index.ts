@@ -1,9 +1,9 @@
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import {
-  SOCIAL_CRYSTAL_MAX_CAP_REQUIREMENT,
-  SOCIAL_CRYSTAL_MIN_TIER_REQUIREMENT,
-  SOCIAL_CRYSTAL_REQUIREMENT_RATIO,
-} from "@providers/constants/CraftingConstants";
+  CRAFTING_SOCIAL_CRYSTAL_MAX_CAP_REQUIREMENT,
+  CRAFTING_SOCIAL_CRYSTAL_MIN_TIER_REQUIREMENT,
+  CRAFTING_SOCIAL_CRYSTAL_REQUIREMENT_RATIO,
+} from "@providers/constants/MarketingReferralConstants";
 import { RECIPE_REQUIREMENTS_RATIO } from "@providers/constants/RecipeConstants";
 import { itemsBlueprintIndex } from "@providers/item/data";
 import { CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -68,14 +68,14 @@ function addSocialCrystalAsRequirements(recipe: IUseWithCraftingRecipe, itemsBlu
     return;
   }
 
-  let socialCrystalBaseRequirement = itemBlueprint.tier! * SOCIAL_CRYSTAL_REQUIREMENT_RATIO;
+  let socialCrystalBaseRequirement = itemBlueprint.tier! * CRAFTING_SOCIAL_CRYSTAL_REQUIREMENT_RATIO;
 
-  if (socialCrystalBaseRequirement > SOCIAL_CRYSTAL_MAX_CAP_REQUIREMENT) {
-    socialCrystalBaseRequirement = SOCIAL_CRYSTAL_MAX_CAP_REQUIREMENT;
+  if (socialCrystalBaseRequirement > CRAFTING_SOCIAL_CRYSTAL_MAX_CAP_REQUIREMENT) {
+    socialCrystalBaseRequirement = CRAFTING_SOCIAL_CRYSTAL_MAX_CAP_REQUIREMENT;
   }
 
   // Add social crystal as requirement to strong items
-  if (itemBlueprint.tier && itemBlueprint.tier >= SOCIAL_CRYSTAL_MIN_TIER_REQUIREMENT) {
+  if (itemBlueprint.tier && itemBlueprint.tier >= CRAFTING_SOCIAL_CRYSTAL_MIN_TIER_REQUIREMENT) {
     recipe.requiredItems.push({
       key: CraftingResourcesBlueprint.SocialCrystal,
       qty: Math.floor(socialCrystalBaseRequirement) ?? 1,

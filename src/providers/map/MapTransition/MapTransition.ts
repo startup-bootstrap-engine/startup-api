@@ -1,6 +1,8 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { BattleNetworkStopTargeting } from "@providers/battle/network/BattleNetworkStopTargetting";
+import { CharacterUser } from "@providers/character/CharacterUser";
 import { CharacterView } from "@providers/character/CharacterView";
 import { Locker } from "@providers/locks/Locker";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -9,30 +11,121 @@ import {
   FromGridX,
   IBattleCancelTargeting,
   IMapTransitionChangeMapPayload,
+  ITiledObject,
   IViewDestroyElementPayload,
   MapSocketEvents,
+  NPCAlignment,
   ViewSocketEvents,
 } from "@rpg-engine/shared";
 import { EntityType } from "@rpg-engine/shared/dist/types/entity.types";
 import { provide } from "inversify-binding-decorators";
+import { capitalize } from "lodash";
+import { MapNonPVPZone } from "../MapNonPVPZone";
+import { MapTransitionInfo } from "./MapTransitionInfo";
 
-type TransitionDestination = {
+interface IDestination {
   map: string;
   gridX: number;
   gridY: number;
-};
+}
 
-@provide(MapTransitionTeleport)
-export class MapTransitionTeleport {
+@provide(MapTransition)
+export class MapTransition {
   constructor(
     private socketMessaging: SocketMessaging,
     private battleNetworkStopTargeting: BattleNetworkStopTargeting,
     private characterView: CharacterView,
-    private locker: Locker
+    private locker: Locker,
+    private mapTransitionInfo: MapTransitionInfo,
+    private characterUser: CharacterUser,
+    private mapNonPVPZone: MapNonPVPZone
   ) {}
 
+  public async handleMapTransition(character: ICharacter, newX: number, newY: number): Promise<void> {
+    const frozenCharacter = Object.freeze(character);
+
+    const transition = this.mapTransitionInfo.getTransitionAtXY(frozenCharacter.scene, newX, newY);
+    if (!transition) return;
+
+    const destination = this.getDestinationFromTransition(transition);
+    if (!destination) {
+      console.error("Failed to fetch required destination properties.");
+      return;
+    }
+
+    if (this.isPremiumAccountRequired(transition)) {
+      const user = await this.characterUser.findUserByCharacter(character);
+      const userAccountType = user?.accountType || "free";
+
+      if (!this.isUserAllowedAccess(transition, userAccountType)) {
+        this.sendAccessErrorMessage(character, transition);
+        return;
+      }
+    }
+
+    if (destination.map === frozenCharacter.scene) {
+      await this.sameMapTeleport(frozenCharacter, destination);
+    } else {
+      await this.changeCharacterScene(frozenCharacter, destination);
+    }
+  }
+
+  private getDestinationFromTransition(transitionTiledObject: ITiledObject): IDestination | null {
+    const map = this.mapTransitionInfo.getTransitionProperty(transitionTiledObject, "map");
+    const gridX = Number(this.mapTransitionInfo.getTransitionProperty(transitionTiledObject, "gridX"));
+    const gridY = Number(this.mapTransitionInfo.getTransitionProperty(transitionTiledObject, "gridY"));
+
+    return map && gridX && gridY ? { map, gridX, gridY } : null;
+  }
+
+  private isPremiumAccountRequired(transitionTiledObj: ITiledObject): boolean {
+    return Boolean(this.mapTransitionInfo.getTransitionProperty(transitionTiledObj, "accountType"));
+  }
+
+  private isUserAllowedAccess(transition: ITiledObject, userAccountType: string): boolean {
+    const allowOnlyPremiumAccountType = this.mapTransitionInfo.getTransitionProperty(transition, "accountType");
+    const allowedTypes = allowOnlyPremiumAccountType?.split(",").map((type) => type.trim());
+
+    return allowedTypes?.includes(userAccountType) || false;
+  }
+
+  private sendAccessErrorMessage(character: ICharacter, transitionTiledObj: ITiledObject): void {
+    const allowOnlyPremiumAccountType = this.mapTransitionInfo.getTransitionProperty(transitionTiledObj, "accountType");
+    const allowedTypes = allowOnlyPremiumAccountType?.split(",").map((type) => type.trim());
+
+    this.socketMessaging.sendErrorMessageToCharacter(
+      character,
+      `Sorry, a premium account of type '${allowedTypes
+        ?.map((x) => `${capitalize(x)}`)
+        .join(", or ")}' is required to access this area.`
+    );
+  }
+
+  public async handleNonPVPZone(character: ICharacter, newX: number, newY: number): Promise<void> {
+    if (!character.target?.id) {
+      return;
+    }
+
+    if (String(character.target.type) === "NPC") {
+      const npc = await NPC.findById(character.target.id).lean();
+
+      if (npc?.alignment !== NPCAlignment.Friendly) {
+        return;
+      }
+    }
+
+    /* 
+          Verify if we're in a non pvp zone. If so, we need to trigger 
+          an attack stop event in case player was in a pvp combat
+          */
+    const nonPVPZone = this.mapNonPVPZone.isNonPVPZoneAtXY(character.scene, newX, newY);
+    if (nonPVPZone) {
+      this.mapNonPVPZone.stopCharacterAttack(character);
+    }
+  }
+
   @TrackNewRelicTransaction()
-  public async changeCharacterScene(character: ICharacter, destination: TransitionDestination): Promise<void> {
+  public async changeCharacterScene(character: ICharacter, destination: IDestination): Promise<void> {
     try {
       const canProceed = await this.locker.lock(`character-changing-scene-${character._id}`, 1);
 
@@ -86,7 +179,7 @@ export class MapTransitionTeleport {
   }
 
   @TrackNewRelicTransaction()
-  public async sameMapTeleport(character: ICharacter, destination: TransitionDestination): Promise<void> {
+  public async sameMapTeleport(character: ICharacter, destination: IDestination): Promise<void> {
     try {
       const canProceed = await this.locker.lock(`character-changing-scene-${character._id}`, 1);
 

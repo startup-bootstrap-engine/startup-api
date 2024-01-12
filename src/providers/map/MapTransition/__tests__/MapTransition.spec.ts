@@ -1,14 +1,14 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import { MapTransition } from "@providers/map/MapTransition/MapTransition";
 import { ITiledObject } from "@rpg-engine/shared";
-import { CharacterNetworkUpdateMapManager } from "../network/CharacterNetworkUpdate/CharacterNetworkUpdateMap";
 
 describe("CharacterLastAction", () => {
-  let characterNetworkUpdateMapManager: CharacterNetworkUpdateMapManager;
+  let mapTransition: MapTransition;
   let testCharacter: ICharacter;
 
   beforeAll(() => {
-    characterNetworkUpdateMapManager = container.get(CharacterNetworkUpdateMapManager);
+    mapTransition = container.get(MapTransition);
   });
 
   beforeEach(async () => {
@@ -46,7 +46,7 @@ describe("CharacterLastAction", () => {
     } required`, async () => {
       jest
         // @ts-ignore
-        .spyOn(characterNetworkUpdateMapManager.characterUser, "findUserByCharacter")
+        .spyOn(mapTransition.characterUser, "findUserByCharacter")
         // @ts-ignore
         .mockResolvedValue({ accountType: testData.userAccountType });
 
@@ -62,17 +62,17 @@ describe("CharacterLastAction", () => {
 
       jest
         // @ts-ignore
-        .spyOn(characterNetworkUpdateMapManager.mapTransitionInfo, "getTransitionAtXY")
+        .spyOn(mapTransition.mapTransitionInfo, "getTransitionAtXY")
         .mockReturnValue(mockReturnValue);
 
       const sendMessageSpy = jest.spyOn(
         // @ts-ignore
-        characterNetworkUpdateMapManager.socketMessaging,
+        mapTransition.socketMessaging,
         "sendErrorMessageToCharacter"
       );
 
       // Act
-      await characterNetworkUpdateMapManager.handleMapTransition(testCharacter, 10, 20);
+      await mapTransition.handleMapTransition(testCharacter, 10, 20);
 
       // Assert
       if (testData.shouldAccess) {

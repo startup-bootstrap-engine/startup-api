@@ -1,6 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { container } from "@providers/inversify/container";
-import { MapTransitionTeleport } from "@providers/map/MapTransition/MapTransitionTeleport";
+import { MapTransition } from "@providers/map/MapTransition/MapTransition";
 import { IEquippableItemBlueprint, ItemSlotType, ItemSubType, ItemType, UserAccountTypes } from "@rpg-engine/shared";
 import { MagicsBlueprint } from "../../types/itemsBlueprintTypes";
 
@@ -23,7 +23,7 @@ export const itemShadowlandsSewerTeleport: IEquippableItemBlueprint = {
     UserAccountTypes.PremiumUltimate,
   ],
   usableEffect: async (character: ICharacter) => {
-    const mapTransition = container.get(MapTransitionTeleport);
+    const mapTransition = container.get(MapTransition);
     await mapTransition.changeCharacterScene(character, {
       map: "shadowlands-sewer",
       gridX: 101,

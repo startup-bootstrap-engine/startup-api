@@ -25,6 +25,7 @@ import { MAX_PING_TRACKING_THRESHOLD } from "@providers/constants/ServerConstant
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
+import { MapTransition } from "@providers/map/MapTransition/MapTransition";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { Queue, Worker } from "bullmq";
 import dayjs from "dayjs";
@@ -33,7 +34,7 @@ import { v4 as uuidv4 } from "uuid";
 import { CharacterView } from "../../CharacterView";
 import { CharacterMovementValidation } from "../../characterMovement/CharacterMovementValidation";
 import { CharacterMovementWarn } from "../../characterMovement/CharacterMovementWarn";
-import { CharacterNetworkUpdateMapManager } from "./CharacterNetworkUpdateMap";
+
 @provideSingleton(CharacterNetworkUpdateQueue)
 export class CharacterNetworkUpdateQueue {
   private queue: Queue<any, any, string> | null = null;
@@ -55,7 +56,7 @@ export class CharacterNetworkUpdateQueue {
     private characterView: CharacterView,
     private newRelic: NewRelic,
     private locker: Locker,
-    private characterNetworkUpdateMapManager: CharacterNetworkUpdateMapManager,
+    private mapTransition: MapTransition,
     private redisManager: RedisManager
   ) {}
 
@@ -207,8 +208,8 @@ export class CharacterNetworkUpdateQueue {
     this.characterMovementWarn.warn(character, data);
     void this.npcManager.startNearbyNPCsBehaviorLoop(character);
     await this.updateServerSideEmitterInfo(character, data.newX, data.newY, isMoving, data.direction);
-    void this.characterNetworkUpdateMapManager.handleNonPVPZone(character, data.newX, data.newY);
-    void this.characterNetworkUpdateMapManager.handleMapTransition(character, data.newX, data.newY);
+    void this.mapTransition.handleNonPVPZone(character, data.newX, data.newY);
+    void this.mapTransition.handleMapTransition(character, data.newX, data.newY);
     void this.characterView.clearAllOutOfViewElements(character._id, character.x, character.y);
     this.sendConfirmation(character, data.direction, true);
   }
