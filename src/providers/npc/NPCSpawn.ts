@@ -26,15 +26,20 @@ export class NPCSpawn {
   ) {}
 
   public calculateSpawnTime(strengthLevel: number): Date {
-    if (typeof strengthLevel !== "number" || strengthLevel < 0) {
-      return dayjs(new Date()).add(1, "minutes").toDate(); // Default to 1 minute if strengthLevel is not a number or negative
+    try {
+      if (typeof strengthLevel !== "number" || strengthLevel < 0) {
+        return dayjs(new Date()).add(1, "minutes").toDate(); // Default to 1 minute if strengthLevel is not a number or negative
+      }
+
+      let spawnTime = Math.round(strengthLevel / 10);
+      spawnTime = Math.max(1, spawnTime); // ensure it's at least 1
+      spawnTime = Math.min(3, spawnTime); // ensure it's at most 3
+
+      return dayjs(new Date()).add(spawnTime, "minutes").toDate();
+    } catch (error) {
+      // If any error occurs, default to 1 minute
+      return dayjs(new Date()).add(1, "minutes").toDate();
     }
-
-    let spawnTime = Math.round(strengthLevel / 10);
-    spawnTime = Math.max(1, spawnTime); // ensure it's at least 1
-    spawnTime = Math.min(3, spawnTime); // ensure it's at most 3
-
-    return dayjs(new Date()).add(spawnTime, "minutes").toDate();
   }
 
   @TrackNewRelicTransaction()
@@ -58,8 +63,10 @@ export class NPCSpawn {
             appliedEntityEffects: [],
             x: npc.initialX,
             y: npc.initialY,
-            nextSpawnTime: undefined,
             isBehaviorEnabled: false,
+          },
+          $unset: {
+            nextSpawnTime: "",
           },
         }
       );
