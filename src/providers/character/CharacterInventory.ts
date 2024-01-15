@@ -48,6 +48,24 @@ export class CharacterInventory {
     return null; //! some areas of the codebase strictly check for null, so return it instead of undefined
   }
 
+  public async getInventoryItemContainer(character: ICharacter): Promise<IItemContainerModel | null> {
+    const inventory = await this.getInventory(character);
+
+    if (!inventory) {
+      return null;
+    }
+
+    const inventoryContainer = (await ItemContainer.findOne({
+      _id: inventory?.itemContainer,
+    }).lean()) as unknown as IItemContainerModel;
+
+    if (!inventoryContainer) {
+      return null;
+    }
+
+    return inventoryContainer;
+  }
+
   @TrackNewRelicTransaction()
   public async getAllItemsFromContainer(itemContainerId: Types.ObjectId): Promise<IItem[]> {
     try {
