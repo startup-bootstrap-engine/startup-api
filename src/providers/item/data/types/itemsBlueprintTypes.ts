@@ -618,6 +618,7 @@ export enum StaffsBlueprint {
   EagleEyeWand = "eagle-eye-wand",
   FrostbiteWand = "frostbite-wand",
   ElysianEyeStaff = "elysian-eye-staff",
+  AshwoodStaff = "ashwood-staff",
 }
 
 export enum ShieldsBlueprint {
