@@ -1,8 +1,10 @@
 import { INPC } from "@entities/ModuleNPC/NPCModel";
+import { CRAFTING_SOCIAL_CRYSTAL_DAILY_REWARD_CHANCE } from "@providers/constants/MarketingReferralConstants";
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { HttpStatus } from "@rpg-engine/shared";
 import rateLimit from "express-rate-limit";
 import { controller, httpPost, interfaces, request, requestBody, response } from "inversify-express-utils";
+import { random } from "lodash";
 import { CreateReferralRewardDTO } from "./update/CreateReferralRewardDTO";
 import { CreateReferralRewardUseCase } from "./update/CreateReferralRewardUseCase";
 
@@ -76,9 +78,15 @@ export class ReferralRewardController implements interfaces.Controller {
 
       console.log("✨ Adding daily referral bonus to character: ", characterId);
 
-      await this.createReferralRewardUseCase.awardReferralBonusToCharacter(characterId, 1);
+      const n = random(1, 100);
 
-      return response.status(HttpStatus.OK).json({ message: "Daily referral bonus added." });
+      if (n <= CRAFTING_SOCIAL_CRYSTAL_DAILY_REWARD_CHANCE) {
+        await this.createReferralRewardUseCase.awardReferralBonusToCharacter(characterId, 1);
+
+        return response.status(HttpStatus.OK).json({ message: "Daily referral bonus added." });
+      } else {
+        return response.status(HttpStatus.OK).json({ message: "Failed to add daily referral bonus." });
+      }
     } catch (error) {
       console.error(error);
 
