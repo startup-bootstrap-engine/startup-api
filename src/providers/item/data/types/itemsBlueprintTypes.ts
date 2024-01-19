@@ -538,6 +538,20 @@ export enum MacesBlueprint {
   SkullCrusherMace = "skull-crusher-mace",
   BronzeFistMace = "bronze-fist-mace",
   SilverFistMace = "silver-fist-mace",
+  BoneBreakerClub = "bonebreaker-club",
+  IronWoodCrusherClub = "ironwood-crusher-club",
+  MetalMasherClub = "metal-masher-club",
+  ShatterSpikeClub = "shatterspike-club",
+  StonefangCleaverClub = "stonefang-cleaver-club",
+  DragonScalCleaverClub = "dragonscale-cleaver-club",
+  GrimHarbingerClub = "grim-harbinger-club",
+  MetalStoneScepter = "metalstone-scepter",
+  SkullCrusherClub = "skull-crusher-club",
+  StarfirMaulClub = "starfir-maul-club",
+  SunderingClub = "sundering-club",
+  ThunderStrikeClub = "thunder-strike-club",
+  TwinFangClub = "twin-fang-club",
+  WhirlWindCrusherClub = "whirl-wind-crusher-club",
 }
 
 export enum MagicsBlueprint {
