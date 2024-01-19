@@ -120,15 +120,10 @@ export class NPCDeath {
 
     const npcSkills = (await Skill.findOne({
       _id: npcFound.skills,
-      owner: npcFound._id,
-    })
-      .lean({
-        virtuals: true,
-        defaults: true,
-      })
-      .cacheQuery({
-        cacheKey: `${npc._id}-skills`,
-      })) as ISkill;
+    }).lean({
+      virtuals: true,
+      defaults: true,
+    })) as ISkill;
 
     npcFound.skills = npcSkills;
 
@@ -138,7 +133,7 @@ export class NPCDeath {
   private async updateNPCAfterDeath(npc: INPC): Promise<void> {
     const skills = npc.skills as ISkill;
 
-    const strengthLevel = skills.strength.level;
+    const strengthLevel = skills?.strength?.level ?? 1;
 
     const nextSpawnTime = this.npcSpawn.calculateSpawnTime(strengthLevel);
     const currentMovementType = npc.originalMovementType;
