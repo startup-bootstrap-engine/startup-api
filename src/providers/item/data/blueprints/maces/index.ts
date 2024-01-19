@@ -50,7 +50,7 @@ export const macesBlueprintIndex = {
   [MacesBlueprint.BoneBreakerClub]: itemBoneBreakerClub,
   [MacesBlueprint.IronWoodCrusherClub]: itemIronWoodCrusherClub,
   [MacesBlueprint.MetalMasherClub]: itemMetalMasherClub,
-  [MacesBlueprint.ShatterSpikeClub]: itemMetalMasherClub,
+  [MacesBlueprint.ShatterSpikeClub]: itemShatterSpikeClub,
   [MacesBlueprint.DragonScalCleaverClub]: itemDragonScalCleaverClub,
   [MacesBlueprint.GrimHarbingerClub]: itemGrimHarbingerClub,
   [MacesBlueprint.MetalStoneScepter]: itemMetalStoneScepter,
@@ -61,5 +61,4 @@ export const macesBlueprintIndex = {
   [MacesBlueprint.ThunderStrikeClub]: itemThunderStrikeClub,
   [MacesBlueprint.TwinFangClub]: itemTwinFangClub,
   [MacesBlueprint.WhirlWindCrusherClub]: itemWhirlWindCrusherClub,
-  [MacesBlueprint.ShatterSpikeClub]: itemShatterSpikeClub,
 };
