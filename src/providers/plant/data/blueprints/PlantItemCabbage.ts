@@ -12,6 +12,7 @@ export const plantItemCabbage: IPlantItem = {
     "Cabbage is a leafy green, red, or white biennial plant grown as an annual vegetable crop for its dense-leaved heads.",
   isStatic: true,
   isPersistent: true,
+  weight: 1,
   textureAtlas: "crops",
   texturePath: "seeds/seed-green-1.png",
   stagesRequirements: {
