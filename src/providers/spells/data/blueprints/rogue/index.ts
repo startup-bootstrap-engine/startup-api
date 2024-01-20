@@ -1,4 +1,5 @@
 import { SpellsBlueprint } from "@rpg-engine/shared";
+import { spellBombCreation } from "./SpellBombRuneCreation";
 import { rogueSpellExecution } from "./SpellExecution";
 import { spellMagicShuriken } from "./SpellMagicShuriken";
 import { spellPickPocket } from "./SpellPickPocket";
@@ -9,4 +10,5 @@ export const rogueSpellsIndex = {
   [SpellsBlueprint.RogueExecution]: rogueSpellExecution,
   [SpellsBlueprint.PickPocket]: spellPickPocket,
   [SpellsBlueprint.MagicShuriken]: spellMagicShuriken,
+  [SpellsBlueprint.BombCreation]: spellBombCreation,
 };
