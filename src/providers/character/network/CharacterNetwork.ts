@@ -5,6 +5,7 @@ import { CharacterNetworkLogout } from "./CharacterNetworkLogout";
 import { CharacterNetworkPing } from "./CharacterNetworkPing";
 import { CharacterNetworkTrading } from "./CharacterNetworkTrading";
 import { CharacterNetworkUpdateQueue } from "./CharacterNetworkUpdate/CharacterNetworkUpdateQueue";
+import { CharacterNetworkSearch } from "./CharacterNetworkSearch";
 
 @provide(CharacterNetwork)
 export class CharacterNetwork {
@@ -13,7 +14,8 @@ export class CharacterNetwork {
     private characterLogout: CharacterNetworkLogout,
     private characterUpdate: CharacterNetworkUpdateQueue,
     private characterPing: CharacterNetworkPing,
-    private characterTrading: CharacterNetworkTrading
+    private characterTrading: CharacterNetworkTrading,
+    private characterSearch: CharacterNetworkSearch
   ) {}
 
   public onAddEventListeners(channel: SocketChannel): void {
@@ -22,5 +24,6 @@ export class CharacterNetwork {
     this.characterUpdate.onCharacterUpdatePosition(channel);
     this.characterPing.onCharacterPing(channel);
     this.characterTrading.onCharacterNPCTrade(channel);
+    this.characterSearch.onFindCharacter(channel);
   }
 }
