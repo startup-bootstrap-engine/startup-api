@@ -7,6 +7,16 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { FriendsSocketEvents, IFriendActionCreatePayload, ISendFriendRequestReadPayload } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
+/**
+ * Validates the friend request between characters, ensuring:
+ * - character is valid
+ * - character is not sending a friend request to himself
+ * - character is already friends with the other character
+ * - character already sent a friend request to the other character
+ * - character already received a friend request from the other character
+ * - Adds the friend request to the other character
+ */
+
 @provide(FriendsNetworkSendFriendRequest)
 export class FriendsNetworkSendFriendRequest {
   constructor(
@@ -32,6 +42,17 @@ export class FriendsNetworkSendFriendRequest {
   ): Promise<ISendFriendRequestReadPayload | undefined> {
     const characterValid = this.characterValidation.hasBasicValidation(me);
     if (!characterValid) {
+      return;
+    }
+
+    if (characterId === me._id) {
+      this.socketMessaging.sendEventToUser<ISendFriendRequestReadPayload>(
+        me.channelId!,
+        FriendsSocketEvents.SendFriendRequest,
+        {
+          error: "You can't send a friend request to yourself.",
+        }
+      );
       return;
     }
 
@@ -77,6 +98,7 @@ export class FriendsNetworkSendFriendRequest {
       return;
     }
 
+    // adding myId to character friend requests
     character.friendRequests?.push(myCharacter._id);
 
     await character.save();

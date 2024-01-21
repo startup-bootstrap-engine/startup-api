@@ -7,6 +7,12 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { FriendsSocketEvents, IFriendsNetworkAcceptFriendRequestPayload, ICharacter } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
+/**
+ * Since on sending request checks the mismatches
+ * - at this point the request is valid
+ * - so it removes the request from my friend requests
+ * - and adds ids to each other friends
+ */
 @provide(FriendsNetworkAcceptFriendRequest)
 export class FriendsNetworkAcceptFriendRequest {
   constructor(
