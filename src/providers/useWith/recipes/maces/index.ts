@@ -13,7 +13,7 @@ import { recipeWoodenMace } from "./recipeWoodenMace";
 import { recipeBoneBreakerClub } from "./recipeBoneBreakerClub";
 import { recipeIronWoodCrusherClub } from "./recipeIronwoodCrusherClub";
 import { recipeMetalMasherClub } from "./recipeMetalMasherClub";
-import { recipeStarfirMaulClub } from "./recipeStarfirMaulclub";
+import { recipeStarfirMaulClub } from "./recipeStarfirMaulClub";
 import { recipeStonefangCleaverClub } from "./recipeStoneFangCleaverClub";
 
 export const recipeMacesIndex: Record<string, IUseWithCraftingRecipe[]> = {
