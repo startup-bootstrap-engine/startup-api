@@ -9,6 +9,7 @@ import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import {
+  IRefillableItem,
   IUseWithTile,
   IUseWithTileValidation,
   ItemSubType,
@@ -52,8 +53,11 @@ export class UseWithTile {
               this.skillIncrease
             );
           }
-
-          if (!useWithData || useWithData.originItem.subType !== ItemSubType.Tool) {
+          if (
+            !useWithData ||
+            useWithData.originItem.subType !== ItemSubType.Tool ||
+            useWithData.originItem.isRefillable
+          ) {
             this.socketMessaging.sendEventToUser<IUseWithTileValidation>(
               character.channelId!,
               UseWithSocketEvents.UseWithTileValidation,
@@ -111,20 +115,56 @@ export class UseWithTile {
       return;
     }
 
-    // Check if tile has useWithKey defined
-    const useWithKey = this.mapTiles.getPropertyFromLayer(
-      data.targetTile.map,
-      ToGridX(data.targetTile.x),
-      ToGridY(data.targetTile.y),
-      MAP_LAYERS_TO_ID[data.targetTile.layer],
-      "usewith_origin_item_key"
-    );
-    if (!useWithKey) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        "Sorry, this tile cannot be used with the item provided"
+    if (originItem.isRefillable) {
+      const useWithRefill = this.mapTiles.getPropertyFromLayer(
+        data.targetTile.map,
+        ToGridX(data.targetTile.x),
+        ToGridY(data.targetTile.y),
+        MAP_LAYERS_TO_ID[data.targetTile.layer],
+        "refill_resource"
       );
-      return;
+
+      if (!useWithRefill) {
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          "Sorry, this tile cannot be used with the refill item provided"
+        );
+        return;
+      }
+
+      const blueprintRefill = itemBlueprint as IRefillableItem;
+
+      if (useWithRefill !== blueprintRefill.refillResourceKey) {
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          `Invalid refill resource. Expected ${blueprintRefill.refillResourceKey}, got ${useWithRefill}`
+        );
+        return;
+      }
+    } else {
+      // Check if tile has useWithKey defined
+      const useWithKey = this.mapTiles.getPropertyFromLayer(
+        data.targetTile.map,
+        ToGridX(data.targetTile.x),
+        ToGridY(data.targetTile.y),
+        MAP_LAYERS_TO_ID[data.targetTile.layer],
+        "usewith_origin_item_key"
+      );
+      if (!useWithKey) {
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          "Sorry, this tile cannot be used with the item provided"
+        );
+        return;
+      }
+
+      if (originItem.baseKey !== useWithKey) {
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          `Invalid item to use with tile. It should be a '${useWithKey}', but the selected item is a '${originItem.baseKey}'!`
+        );
+        return;
+      }
     }
 
     const useWithTargetName = this.mapTiles.getPropertyFromLayer(
@@ -134,14 +174,6 @@ export class UseWithTile {
       MAP_LAYERS_TO_ID[data.targetTile.layer],
       "usewith_target_item_key"
     );
-
-    if (originItem.baseKey !== useWithKey) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        `Invalid item to use with tile. It should be a '${useWithKey}', but the selected item is a '${originItem.baseKey}'!`
-      );
-      return;
-    }
 
     const useWithTileEffect = itemBlueprint.useWithTileEffect;
 

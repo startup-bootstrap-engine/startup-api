@@ -147,6 +147,10 @@ const itemSchema = createLeanSchema(
     lastPlantCycleRun: Type.date({ required: false }),
 
     lastWatering: Type.date({ required: false }),
+
+    isRefillable: Type.boolean({ required: false }),
+
+    remainingUses: Type.number({ required: false }),
   },
   { timestamps: { createdAt: true, updatedAt: true } }
 ).plugin(updateIfCurrentPlugin);

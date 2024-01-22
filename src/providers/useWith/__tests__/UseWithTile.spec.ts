@@ -2,25 +2,32 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Equipment, IEquipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
-import { container, unitTestHelper } from "@providers/inversify/container";
+import { blueprintManager, container, unitTestHelper } from "@providers/inversify/container";
 import { itemsBlueprintIndex } from "@providers/item/data/index";
 import { ToolsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 
 import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
+import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { ItemCraftable } from "@providers/item/ItemCraftable";
-import { FromGridX, FromGridY, IUseWithTile, MapLayers } from "@rpg-engine/shared";
+import { FromGridX, FromGridY, IRefillableItem, IUseWithTile, MapLayers } from "@rpg-engine/shared";
 import { UseWithTile } from "../abstractions/UseWithTile";
 describe("UseWithTile.ts", () => {
   let testItem: IItem,
+    testRefillItem: IItem,
+    testRefillItemBlueprint: IRefillableItem,
     testCharacter: ICharacter,
     testCharacterEquipment: IEquipment,
     useWithTile: UseWithTile,
     useWithTileData: IUseWithTile,
+    useWithTileDataRefill: IUseWithTile,
     skillIncrease: SkillIncrease,
     itemCraftable: ItemCraftable,
     inMemoryHashTable: InMemoryHashTable,
+    inventory: IItem,
+    inventoryContainer: IItemContainer,
+    sendErrorMessageToCharacter: jest.SpyInstance,
     characterSkills: ISkill;
 
   beforeAll(async () => {
@@ -38,6 +45,8 @@ describe("UseWithTile.ts", () => {
       .exec()) as unknown as IEquipment;
     testItem = await unitTestHelper.createMockItemFromBlueprint(ToolsBlueprint.UseWithTileTest);
 
+    testRefillItem = await unitTestHelper.createMockItemFromBlueprint(ToolsBlueprint.WateringCan);
+
     // Locate character close to the tile
     testCharacter.x = FromGridX(0);
     testCharacter.y = FromGridY(1);
@@ -53,9 +62,30 @@ describe("UseWithTile.ts", () => {
       },
     };
 
+    useWithTileDataRefill = {
+      originItemId: testRefillItem.id,
+      targetTile: {
+        x: FromGridX(0),
+        y: FromGridY(0),
+        map: "example",
+        layer: "ground" as unknown as MapLayers,
+      },
+    };
+
     // equip character with item
     testCharacterEquipment.leftHand = testItem._id;
     await testCharacterEquipment.save();
+
+    inventory = await testCharacter.inventory;
+
+    inventoryContainer = (await ItemContainer.findById(inventory.itemContainer)) as unknown as IItemContainer;
+
+    await unitTestHelper.addItemsToContainer(inventoryContainer, 1, [testRefillItem]);
+
+    testRefillItemBlueprint = await blueprintManager.getBlueprint<IRefillableItem>("items", testRefillItem.baseKey);
+
+    // @ts-ignore
+    sendErrorMessageToCharacter = jest.spyOn(useWithTile.socketMessaging, "sendErrorMessageToCharacter");
 
     // @ts-ignore
     jest.spyOn(useWithTile.mapTiles, "getPropertyFromLayer" as any).mockImplementation(() => testItem.baseKey);
@@ -129,5 +159,48 @@ describe("UseWithTile.ts", () => {
     } catch (error: any) {
       expect(error.message).toEqual("UseWith > Character does not own the item that wants to use");
     }
+  });
+
+  it("should handles refillable items correctly", async () => {
+    jest
+      // @ts-ignore
+      .spyOn(useWithTile.mapTiles, "getPropertyFromLayer" as any)
+      .mockImplementation(() => testRefillItemBlueprint.refillResourceKey);
+
+    // @ts-ignore
+    const response = await useWithTile.validateData(testCharacter, useWithTileDataRefill);
+    expect(response).toBeDefined();
+    expect(response!.originItem.id).toEqual(testRefillItem.id);
+  });
+
+  it("should handles refillable items with missing refill resource property", async () => {
+    jest
+      // @ts-ignore
+      .spyOn(useWithTile.mapTiles, "getPropertyFromLayer" as any)
+      .mockImplementation(() => undefined);
+
+    // @ts-ignore
+    const response = await useWithTile.validateData(testCharacter, useWithTileDataRefill);
+    expect(response).not.toBeDefined();
+    expect(sendErrorMessageToCharacter).toHaveBeenCalledWith(
+      testCharacter,
+      "Sorry, this tile cannot be used with the refill item provided"
+    );
+  });
+
+  it("should handles refillable items with incorrect refill resource", async () => {
+    const resource = "incorrect-refill-resource";
+    jest
+      // @ts-ignore
+      .spyOn(useWithTile.mapTiles, "getPropertyFromLayer" as any)
+      .mockImplementation(() => resource);
+
+    // @ts-ignore
+    const response = await useWithTile.validateData(testCharacter, useWithTileDataRefill);
+    expect(response).not.toBeDefined();
+    expect(sendErrorMessageToCharacter).toHaveBeenCalledWith(
+      testCharacter,
+      `Invalid refill resource. Expected ${testRefillItemBlueprint.refillResourceKey}, got ${resource}`
+    );
   });
 });
