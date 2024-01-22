@@ -7,7 +7,7 @@ import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { blueprintManager, container, unitTestHelper } from "@providers/inversify/container";
 import { itemDarkRune } from "@providers/item/data/blueprints/magics/ItemDarkRune";
-import { FoodsBlueprint, MagicsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { FoodsBlueprint, MagicsBlueprint, ToolsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemValidation } from "@providers/item/validation/ItemValidation";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
@@ -21,6 +21,7 @@ import {
   UISocketEvents,
 } from "@rpg-engine/shared";
 import { EntityType } from "@rpg-engine/shared/dist/types/entity.types";
+import mongoose from "mongoose";
 import { IUseWithItemSource, UseWithEntity } from "../abstractions/UseWithEntity";
 
 describe("UseWithEntity.ts", () => {
@@ -35,6 +36,7 @@ describe("UseWithEntity.ts", () => {
   let inventory: IItem;
   let inventoryContainer: IItemContainer;
   let sendEventToUserMock: jest.SpyInstance;
+  let sendErrorMessageToCharacter: jest.SpyInstance;
   let executeEffectMock: jest.SpyInstance;
   let onHitTargetMock: jest.SpyInstance;
   let useWithEntityBaseValidationSpy: jest.SpyInstance;
@@ -917,7 +919,9 @@ describe("UseWithEntity.ts", () => {
     let testCharacter: ICharacter;
     let testNPC: INPC;
     let testItem: IItem;
+    let testRefillItem: IItem;
     let testItemBlueprint: IUseWithItemSource;
+    let testRefillItemBlueprint: any;
 
     beforeAll(() => {
       useWithEntity = container.get(UseWithEntity);
@@ -932,7 +936,16 @@ describe("UseWithEntity.ts", () => {
 
       testItem = await unitTestHelper.createMockItemFromBlueprint(MagicsBlueprint.HealRune);
 
+      testRefillItem = await unitTestHelper.createMockItemFromBlueprint(ToolsBlueprint.WateringCan);
+
       testItemBlueprint = await blueprintManager.getBlueprint<IUseWithItemSource>("items", testItem.baseKey);
+
+      // @ts-ignore
+      sendErrorMessageToCharacter = jest.spyOn(useWithEntity.socketMessaging, "sendErrorMessageToCharacter");
+
+      testRefillItemBlueprint = {
+        usableEffect: jest.fn().mockResolvedValue({}),
+      };
     });
 
     afterEach(() => {
@@ -1021,6 +1034,52 @@ describe("UseWithEntity.ts", () => {
       await useWithEntity.execute(payload, testCharacter);
 
       expect(executeEffectSpy).toHaveBeenCalled();
+    });
+
+    it("should execute usableEffect if item is refillable and entity type is item", async () => {
+      // @ts-ignore
+      jest.spyOn(useWithEntity.blueprintManager, "getBlueprint").mockResolvedValueOnce(testRefillItemBlueprint);
+
+      const payload = { entityId: testItem._id, itemId: testRefillItem._id, entityType: EntityType.Item };
+
+      await useWithEntity.execute(payload, testCharacter);
+      expect(testRefillItemBlueprint.usableEffect).toHaveBeenCalled();
+    });
+
+    it("should not execute usableEffect if item is refillable and entity type is NPC", async () => {
+      // @ts-ignore
+      jest.spyOn(useWithEntity.blueprintManager, "getBlueprint").mockResolvedValueOnce(testRefillItemBlueprint);
+
+      const payload = { entityId: testItem._id, itemId: testRefillItem._id, entityType: EntityType.NPC };
+
+      await useWithEntity.execute(payload, testCharacter);
+      expect(testRefillItemBlueprint.usableEffect).not.toHaveBeenCalled();
+    });
+
+    it("should not execute usableEffect if blueprint is not found", async () => {
+      // @ts-ignore
+      jest.spyOn(useWithEntity.blueprintManager, "getBlueprint").mockResolvedValueOnce(undefined);
+      const payload = { entityId: testItem._id, itemId: testRefillItem._id, entityType: EntityType.Item };
+
+      await useWithEntity.execute(payload, testCharacter);
+
+      expect(sendErrorMessageToCharacter).toBeCalledWith(
+        testCharacter,
+        "Refill blueprint is not found or usableEffect is not defined"
+      );
+    });
+
+    it("should not execute if target is not found", async () => {
+      const objectId = new mongoose.Types.ObjectId();
+
+      // @ts-ignore
+      jest.spyOn(useWithEntity.blueprintManager, "getBlueprint").mockResolvedValueOnce(testRefillItemBlueprint);
+
+      const payload = { entityId: objectId as string, itemId: testRefillItem._id, entityType: EntityType.Item };
+
+      await useWithEntity.execute(payload, testCharacter);
+
+      expect(sendErrorMessageToCharacter).toBeCalledWith(testCharacter, "Target item is not found");
     });
   });
 });

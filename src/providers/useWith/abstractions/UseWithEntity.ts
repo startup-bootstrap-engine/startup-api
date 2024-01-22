@@ -23,6 +23,7 @@ import {
   ICharacterAttributeChanged,
   IEquipmentAndInventoryUpdatePayload,
   IItemContainer,
+  IRefillableItem,
   IRuneItemBlueprint,
   IUseWithEntity,
   ItemSocketEvents,
@@ -68,6 +69,30 @@ export class UseWithEntity {
   @TrackNewRelicTransaction()
   public async execute(payload: IUseWithEntity, character: ICharacter): Promise<void> {
     const item = payload.itemId ? ((await Item.findById(payload.itemId)) as unknown as IItem) : null;
+
+    if (payload.entityType === EntityType.Item && item && item.isRefillable) {
+      const targetItem = await Item.findById(payload.entityId);
+
+      if (!targetItem) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Target item is not found");
+        return;
+      }
+
+      const blueprintRefill = (await this.blueprintManager.getBlueprint("items", item.baseKey!)) as IRefillableItem;
+
+      if (!blueprintRefill || !blueprintRefill.usableEffect) {
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          "Refill blueprint is not found or usableEffect is not defined"
+        );
+        return;
+      }
+
+      await blueprintRefill.usableEffect!(character, targetItem, this.skillIncrease, item);
+
+      return;
+    }
+
     const blueprint = (await this.blueprintManager.getBlueprint("items", item?.baseKey!)) as IUseWithItemSource;
 
     if (!payload.entityId && blueprint.hasSelfAutoTarget) {
