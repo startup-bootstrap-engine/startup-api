@@ -9,8 +9,6 @@ import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterBuffValidation } from "@providers/character/characterBuff/CharacterBuffValidation";
 import { CharacterItemBuff } from "@providers/character/characterBuff/CharacterItemBuff";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
-import { BerserkerPassiveHabilities } from "@providers/character/characterPassiveHabilities/BerserkerPassiveHabilities";
-import { RoguePassiveHabilities } from "@providers/character/characterPassiveHabilities/RoguePassiveHabilities";
 import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { blueprintManager } from "@providers/inversify/container";
@@ -20,7 +18,6 @@ import { ItemView } from "@providers/item/ItemView";
 import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
-  CharacterClass,
   IBaseItemBlueprint,
   IEquipmentAndInventoryUpdatePayload,
   ISkill,
@@ -32,9 +29,8 @@ import {
 import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
 import { EquipmentCharacterClass } from "./ EquipmentCharacterClass";
+import { EquipmentEquipValidator } from "./EquipmentEquipValidator";
 import { EquipmentSlots } from "./EquipmentSlots";
-import { EquipmentTwoHanded } from "./EquipmentTwoHanded";
-import { WarriorPassiveHabilities } from "@providers/character/characterPassiveHabilities/WarriorPassiveHabilities";
 
 export type SourceEquipContainerType = "inventory" | "container";
 
@@ -45,14 +41,11 @@ export class EquipmentEquip {
     private characterItemInventory: CharacterItemInventory,
     private equipmentSlots: EquipmentSlots,
     private characterValidation: CharacterValidation,
-    private equipmentTwoHanded: EquipmentTwoHanded,
+    private equipmentEquipValidator: EquipmentEquipValidator,
     private itemOwnership: ItemOwnership,
     private characterInventory: CharacterInventory,
     private inMemoryHashTable: InMemoryHashTable,
     private itemView: ItemView,
-    private berserkerPassiveHabilities: BerserkerPassiveHabilities,
-    private warriorPassiveHabilities: WarriorPassiveHabilities,
-    private roguePassiveHabilities: RoguePassiveHabilities,
     private characterWeight: CharacterWeight,
     private itemPickupUpdater: ItemPickupUpdater,
     private characterItemBuff: CharacterItemBuff,
@@ -147,40 +140,6 @@ export class EquipmentEquip {
       if (!equipment) {
         this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, equipment not found.");
         return false;
-      }
-
-      const leftHandItem = await Item.findById(equipment.leftHand);
-      const rightHandItem = await Item.findById(equipment.rightHand);
-
-      if (item.type === "Weapon") {
-        if (
-          leftHandItem &&
-          rightHandItem &&
-          leftHandItem.subType !== rightHandItem.subType &&
-          leftHandItem.subType !== "Shield"
-        ) {
-          this.socketMessaging.sendErrorMessageToCharacter(
-            character,
-            "Sorry, you cannot equip one-handed items with different subtypes."
-          );
-          return false;
-        }
-
-        if (leftHandItem && leftHandItem.subType !== item.subType && leftHandItem.subType !== "Shield") {
-          this.socketMessaging.sendErrorMessageToCharacter(
-            character,
-            "Sorry, you cannot equip this item in the left hand."
-          );
-          return false;
-        }
-
-        if (rightHandItem && rightHandItem.subType !== item.subType && rightHandItem.subType !== "Shield") {
-          this.socketMessaging.sendErrorMessageToCharacter(
-            character,
-            "Sorry, you cannot equip this item in the right hand."
-          );
-          return false;
-        }
       }
 
       const equipItem = await this.equipmentSlots.addItemToEquipmentSlot(character, item, equipment, itemContainer);
@@ -396,24 +355,12 @@ export class EquipmentEquip {
       character.equipment as unknown as string
     );
 
-    const validateItemsEquip = await this.equipmentTwoHanded.validateHandsItemEquip(equipmentSlots, item, character);
-
-    if (!validateItemsEquip) {
-      if (character.class === CharacterClass.Berserker) {
-        return await this.berserkerPassiveHabilities.canBerserkerEquipItem(character._id, item._id);
-      }
-
-      if (character.class === CharacterClass.Warrior) {
-        return await this.warriorPassiveHabilities.canWarriorEquipItem(character._id, item._id);
-      }
-
-      if (character.class === CharacterClass.Rogue) {
-        return await this.roguePassiveHabilities.rogueWeaponHandler(character._id, item._id);
-      }
-
-      return false;
+    if (
+      item.allowedEquipSlotType?.includes(ItemSlotType.LeftHand) ||
+      item.allowedEquipSlotType?.includes(ItemSlotType.RightHand)
+    ) {
+      return await this.equipmentEquipValidator.validateHandsItemEquip(equipmentSlots, item, character);
     }
-
     return true;
   }
 

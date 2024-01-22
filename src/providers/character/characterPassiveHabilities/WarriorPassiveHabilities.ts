@@ -1,15 +1,12 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
-import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { ItemEquipValidator } from "@providers/item/ItemPickup/ItemEquipValidator";
 import { TraitGetter } from "@providers/skill/TraitGetter";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SpellCalculator } from "@providers/spells/data/abstractions/SpellCalculator";
 import { NewRelicTransactionCategory } from "@providers/types/NewRelicTypes";
 import { BasicAttribute, CharacterClass, CharacterSocketEvents, ICharacterAttributeChanged } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { Types } from "mongoose";
 import { CharacterMonitorInterval } from "../CharacterMonitorInterval/CharacterMonitorInterval";
 
 @provide(WarriorPassiveHabilities)
@@ -19,21 +16,8 @@ export class WarriorPassiveHabilities {
     private characterMonitorInterval: CharacterMonitorInterval,
     private traitGetter: TraitGetter,
     private newRelic: NewRelic,
-    private spellCalculator: SpellCalculator,
-    private itemEquipValidator: ItemEquipValidator
+    private spellCalculator: SpellCalculator
   ) {}
-
-  @TrackNewRelicTransaction()
-  public async canWarriorEquipItem(characterId: Types.ObjectId, itemId: Types.ObjectId): Promise<boolean> {
-    const character = (await Character.findById(characterId).lean()) as ICharacter;
-
-    if (character.class !== CharacterClass.Warrior) {
-      return false;
-    }
-
-    const canEquip = await this.itemEquipValidator.canEquipItem(characterId, itemId);
-    return canEquip;
-  }
 
   public async warriorAutoRegenHealthHandler(character: ICharacter): Promise<void> {
     if (!character) {
