@@ -1,4 +1,4 @@
-import { Skill } from "@entities/ModuleCharacter/SkillsModel";
+import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import {
@@ -68,10 +68,7 @@ export class NPCGiantForm {
     }
   }
 
-  private async increaseNPCStatsForGiantForm(npc: INPC): Promise<void> {
-    const skills = await Skill.findOne({ owner: npc._id, ownerType: "NPC" }).lean();
-    if (!skills) return;
-
+  public async setNormalFormStats(npc: INPC, skills: ISkill): Promise<void> {
     const normalFormStats: INPCNormalFormStats = {
       npc: {
         maxHealth: npc.maxHealth,
@@ -80,17 +77,24 @@ export class NPCGiantForm {
       skills: {
         level: skills.level,
         strength: {
-          level: skills.strength.level,
+          level: skills.strength?.level,
         },
         dexterity: {
-          level: skills.dexterity.level,
+          level: skills.dexterity?.level,
         },
         resistance: {
-          level: skills.resistance.level,
+          level: skills.resistance?.level,
         },
       },
     };
     await this.inMemoryHashTable.set("npc-normal-form-stats", npc.key, normalFormStats);
+  }
+
+  private async increaseNPCStatsForGiantForm(npc: INPC): Promise<void> {
+    const skills = await Skill.findOne({ owner: npc._id, ownerType: "NPC" }).lean();
+    if (!skills) return;
+
+    await this.setNormalFormStats(npc, skills as ISkill);
 
     await NPC.updateOne(
       { _id: npc._id },
