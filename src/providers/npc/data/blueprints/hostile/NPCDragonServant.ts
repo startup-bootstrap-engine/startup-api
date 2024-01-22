@@ -9,6 +9,7 @@ import {
   GlovesBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
+  MacesBlueprint,
   OthersBlueprint,
   ShieldsBlueprint,
   StaffsBlueprint,
@@ -134,6 +135,26 @@ export const npcDragonServant: Partial<INPC> = {
     {
       itemBlueprintKey: LegsBlueprint.DragonScaleLegs,
       chance: 5,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.BoneBreakerClub,
+      chance: 26,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.DragonScalCleaverClub,
+      chance: 18,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
+      chance: 20,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.StonefangCleaverClub,
+      chance: 17,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.IronWoodCrusherClub,
+      chance: 28,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],

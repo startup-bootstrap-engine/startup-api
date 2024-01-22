@@ -11,6 +11,7 @@ import {
   LegsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
+  MacesBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import {
@@ -82,6 +83,42 @@ export const npcRedDragon = {
     {
       itemBlueprintKey: ShieldsBlueprint.EmeraldShield,
       chance: 1,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
+      chance: 50,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.DragonScalCleaverClub,
+      chance: 60,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
+      chance: 55,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.MetalMasherClub,
+      chance: 30,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SunderingClub,
+      chance: 30,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
+      chance: 48,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.TwinFangClub,
+      chance: 38,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
+      chance: 38,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.MetalStoneScepter,
+      chance: 28,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,

@@ -5,6 +5,7 @@ import {
   AccessoriesBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
+  MacesBlueprint,
   RangedWeaponsBlueprint,
   ShieldsBlueprint,
   StaffsBlueprint,
@@ -80,6 +81,15 @@ export const npcCondessa = {
     {
       itemBlueprintKey: RangedWeaponsBlueprint.RuneCrossbow,
       chance: 1,
+    },
+
+    {
+      itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.StonefangCleaverClub,
+      chance: 6,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

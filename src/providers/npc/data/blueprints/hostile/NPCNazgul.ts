@@ -8,6 +8,7 @@ import {
   DaggersBlueprint,
   HammersBlueprint,
   HelmetsBlueprint,
+  MacesBlueprint,
   SpearsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -89,6 +90,22 @@ export const npcNazgul: Partial<INPC> = {
     {
       itemBlueprintKey: HelmetsBlueprint.RoyalHelmet,
       chance: 30,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.BoneBreakerClub,
+      chance: 25,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.MetalStoneScepter,
+      chance: 30,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.GrimHarbingerClub,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.IronWoodCrusherClub,
+      chance: 20,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],

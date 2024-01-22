@@ -8,6 +8,7 @@ import {
   FoodsBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
+  MacesBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
@@ -69,6 +70,22 @@ export const npcOrcWarlord: Partial<INPC> = {
     {
       itemBlueprintKey: LegsBlueprint.KingsGuardLegs,
       chance: 5,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.StonefangCleaverClub,
+      chance: 6,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.MetalMasherClub,
+      chance: 8,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.MetalStoneScepter,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.GrimHarbingerClub,
+      chance: 12,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

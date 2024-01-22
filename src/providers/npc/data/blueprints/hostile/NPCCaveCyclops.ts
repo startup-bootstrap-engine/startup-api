@@ -8,6 +8,7 @@ import {
   AxesBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
+  MacesBlueprint,
   RangedWeaponsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
@@ -63,6 +64,14 @@ export const npcCaveCyclops = {
     {
       itemBlueprintKey: AccessoriesBlueprint.SapphireRing,
       chance: 10,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.TwinFangClub,
+      chance: 6,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.IronWoodCrusherClub,
+      chance: 8,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

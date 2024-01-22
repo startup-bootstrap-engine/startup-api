@@ -6,6 +6,7 @@ import {
   AccessoriesBlueprint,
   CraftingResourcesBlueprint,
   FoodsBlueprint,
+  MacesBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
@@ -63,6 +64,14 @@ export const npcBrownBear = {
     {
       itemBlueprintKey: AccessoriesBlueprint.SapphireNecklace,
       chance: 5,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
+      chance: 10,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

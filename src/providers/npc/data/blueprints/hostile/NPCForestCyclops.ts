@@ -70,6 +70,14 @@ export const npcForestCyclops = {
       itemBlueprintKey: LegsBlueprint.AzureFrostLegs,
       chance: 5,
     },
+    {
+      itemBlueprintKey: MacesBlueprint.TwinFangClub,
+      chance: 6,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.IronWoodCrusherClub,
+      chance: 8,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Poison, EntityEffectBlueprint.Bleeding],
   areaSpells: [

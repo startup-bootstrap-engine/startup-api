@@ -7,6 +7,7 @@ import {
   CraftingResourcesBlueprint,
   FoodsBlueprint,
   HelmetsBlueprint,
+  MacesBlueprint,
   OthersBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
@@ -102,6 +103,14 @@ export const npcDragonKnight: Partial<INPC> = {
     {
       itemBlueprintKey: SwordsBlueprint.GuardianSword,
       chance: 2,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
+      chance: 6,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
+      chance: 8,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

@@ -6,6 +6,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AxesBlueprint,
   DaggersBlueprint,
+  MacesBlueprint,
   RangedWeaponsBlueprint,
   SpearsBlueprint,
   SwordsBlueprint,
@@ -63,6 +64,14 @@ export const npcIceCyclops = {
       itemBlueprintKey: RangedWeaponsBlueprint.FrostArrow,
       chance: 50,
       quantityRange: [5, 10],
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.MetalMasherClub,
+      chance: 3,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.StarfirMaulClub,
+      chance: 5,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],

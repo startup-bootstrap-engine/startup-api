@@ -14,6 +14,7 @@ import {
   HammersBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
+  MacesBlueprint,
   ShieldsBlueprint,
   SpearsBlueprint,
   StaffsBlueprint,
@@ -163,6 +164,22 @@ export const npcGiantSpider: Partial<INPC> = {
     {
       itemBlueprintKey: LegsBlueprint.KingsGuardLegs,
       chance: 5,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.MetalStoneScepter,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.DragonScalCleaverClub,
+      chance: 12,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
+      chance: 14,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
+      chance: 18,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],
