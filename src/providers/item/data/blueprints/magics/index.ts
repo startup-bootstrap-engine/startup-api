@@ -1,4 +1,5 @@
 import { MagicsBlueprint } from "../../types/itemsBlueprintTypes";
+import { itemBomb } from "./ItemBomb";
 import { itemCorruptionRune } from "./ItemCorruptionRune";
 import { itemDarkRune } from "./ItemDarkRune";
 import { itemDungeonIlyaTeleport } from "./ItemDungeonIlyaTeleport";
@@ -43,4 +44,5 @@ export const magicsBlueprintIndex = {
   [MagicsBlueprint.ShadowlandsTeleport]: itemShadowlandsTeleport,
   [MagicsBlueprint.TrollsCavesTeleport]: itemTrollsCavesTeleport,
   [MagicsBlueprint.WildwoodDungeonTeleport]: itemWildwoodDungeonTeleport,
+  [MagicsBlueprint.Bomb]: itemBomb,
 };

@@ -17,12 +17,20 @@ export class Seeder {
   ) {}
 
   public async start(): Promise<void> {
-    console.time("🌱 Seeding");
-    await this.npcSeeder.seed();
-    await this.itemSeeder.seed();
-    await this.questSeeder.seed();
-    await this.npcRaidSeeder.seed();
-    await this.redisCleanup.cleanup();
-    console.timeEnd("🌱 Seeding");
+    console.time("🌱 Total Seeding");
+
+    await this.timeSeeder(this.npcSeeder, "NPC Seeding");
+    await this.timeSeeder(this.itemSeeder, "Item Seeding");
+    await this.timeSeeder(this.questSeeder, "Quest Seeding");
+    await this.timeSeeder(this.npcRaidSeeder, "NPC Raid Seeding");
+    await this.timeSeeder(this.redisCleanup, "Redis Cleanup");
+
+    console.timeEnd("🌱 Total Seeding");
+  }
+
+  private async timeSeeder(seeder: { seed: () => Promise<void> }, label: string): Promise<void> {
+    console.time(`🌱 ${label}`);
+    await seeder.seed();
+    console.timeEnd(`🌱 ${label}`);
   }
 }

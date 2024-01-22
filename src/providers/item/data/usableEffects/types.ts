@@ -31,6 +31,9 @@ export enum UsableEffectsBlueprint {
   PoisonRuneUsableEffect = "PoisonRuneUsableEffect",
   ThunderRuneUsableEffect = "ThunderRuneUsableEffect",
 
+  // Other
+  BombUsableEffect = "BombUsableEffect",
+
   // Potions
   LightPoisonVialUsableEffect = "LightPoisonVialUsableEffect",
   ModeratePoisonVialUsableEffect = "ModeratePoisonVialUsableEffect",
