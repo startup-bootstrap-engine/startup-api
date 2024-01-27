@@ -149,11 +149,7 @@ export class DiscordCronJobs {
         **Why Go Premium? Unleash the Full Power of Definya!**
         
         ⚔️ **Training Room Access**: You can train there 24/7 if you wish!
-
-        ✨ **Enhanced Experience**: Boost your XP gain - Level up faster!
-        
-        🔥 **Greater Loot Drops**: Increased chances for rare finds. Your next epic item awaits!
-        
+ 
         🌈 **Colorful Identity**: Stand out with a custom-colored character name depending on your plan. Show your true colors!
         
         💀 **Reduced Penalties**: Fear less, venture more with lowered SP XP and inventory loss on death.
