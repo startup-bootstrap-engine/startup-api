@@ -38,8 +38,9 @@ export const plantItemTurnip: IPlantItem = {
     },
   },
   harvestableItemKey: FoodsBlueprint.Turnip,
-  regrowsAfterHarvest: false,
+  regrowsAfterHarvest: true,
   growthFactor: 3,
+  maxHarvestablePerPlant: 3,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
 };

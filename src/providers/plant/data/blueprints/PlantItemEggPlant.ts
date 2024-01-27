@@ -40,6 +40,7 @@ export const plantItemEggPlant: IPlantItem = {
   harvestableItemKey: FoodsBlueprint.Eggplant,
   regrowsAfterHarvest: true,
   growthFactor: 4,
+  maxHarvestablePerPlant: 4,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
 };

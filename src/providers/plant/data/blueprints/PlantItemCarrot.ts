@@ -38,6 +38,7 @@ export const plantItemCarrot: IPlantItem = {
   },
   growthFactor: 2,
   regrowsAfterHarvest: false,
+  maxHarvestablePerPlant: 3,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
   harvestableItemKey: FoodsBlueprint.Carrot,

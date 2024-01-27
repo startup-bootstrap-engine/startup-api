@@ -40,6 +40,7 @@ export const plantItemCabbage: IPlantItem = {
   harvestableItemKey: FoodsBlueprint.Cabbage,
   regrowsAfterHarvest: false,
   growthFactor: 3,
+  maxHarvestablePerPlant: 2,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
 };

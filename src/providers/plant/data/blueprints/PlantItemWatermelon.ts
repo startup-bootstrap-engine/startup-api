@@ -39,6 +39,7 @@ export const plantItemWatermelon: IPlantItem = {
   harvestableItemKey: FoodsBlueprint.Watermelon,
   regrowsAfterHarvest: true,
   growthFactor: 3,
+  maxHarvestablePerPlant: 2,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
 };

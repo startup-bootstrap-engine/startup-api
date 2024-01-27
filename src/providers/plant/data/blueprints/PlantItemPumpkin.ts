@@ -40,6 +40,7 @@ export const plantItemPumpkin: IPlantItem = {
   harvestableItemKey: FoodsBlueprint.Pumpkin,
   regrowsAfterHarvest: false,
   growthFactor: 3,
+  maxHarvestablePerPlant: 2,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
 };
