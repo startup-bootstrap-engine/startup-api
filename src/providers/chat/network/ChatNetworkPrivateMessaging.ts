@@ -12,10 +12,14 @@ import {
   IPrivateChatMessageCreatePayload,
   IPrivateChatMessageReadPayload,
   IPrivateChatMessageReadResponse,
+  ICharacter as ISharedCharacter,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { IPrivateChatFindCharacterResponse } from "./ChatNetworkFindCharacter";
 import { ChatUtils } from "./ChatUtils";
+
+interface IUnseenSendersResponse {
+  characters: ICharacter[];
+}
 
 const MAX_MESSAGES_PER_CHARACTER = 20;
 @provide(ChatNetworkPrivateMessaging)
@@ -124,7 +128,7 @@ export class ChatNetworkPrivateMessaging {
             .limit(10);
           const uniqueSenderIds = [...new Set(unseenMessages.map((message) => message.emitter))];
           const unseenSenders = await Character.find({ _id: { $in: uniqueSenderIds } }, "name");
-          this.socketMessaging.sendEventToUser<IPrivateChatFindCharacterResponse>(
+          this.socketMessaging.sendEventToUser<IUnseenSendersResponse>(
             character.channelId!,
             ChatSocketEvents.PrivateChatMessageGetUnseenMessageCharacters,
             {

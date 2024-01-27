@@ -256,6 +256,17 @@ const characterSchema = createLeanSchema(
       movementIntervalMs: number;
       attackType: Promise<EntityAttackType>;
     }),
+
+    friends: Type.array().of(
+      Type.objectId({
+        ref: "Character",
+      })
+    ),
+    friendRequests: Type.array().of(
+      Type.objectId({
+        ref: "Character",
+      })
+    ),
   },
   {
     timestamps: { createdAt: true, updatedAt: true },

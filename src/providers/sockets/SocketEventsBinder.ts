@@ -17,6 +17,7 @@ import { SocketChannel } from "./SocketsTypes";
 import { MarketplaceNetwork } from "@providers/marketplace/network/MarketplaceNetwork";
 import { PartyNetwork } from "@providers/party/network/PartyNetwork";
 import { RankingNetwork } from "@providers/ranking/network/RankingNetwork";
+import { FriendsNetwork } from "@providers/friends/network/FriendsNetwork";
 
 @provide(SocketEventsBinder)
 export class SocketEventsBinder {
@@ -37,7 +38,8 @@ export class SocketEventsBinder {
     private macroNetwork: MacroNetwork,
     private marketplaceNetwork: MarketplaceNetwork,
     private partyNetwork: PartyNetwork,
-    private rankingNetwork: RankingNetwork
+    private rankingNetwork: RankingNetwork,
+    private friendsNetwork: FriendsNetwork
   ) {}
 
   public bindEvents(channel: SocketChannel): void {
@@ -58,5 +60,6 @@ export class SocketEventsBinder {
     this.marketplaceNetwork.onAddEventListeners(channel);
     this.partyNetwork.onAddEventListeners(channel);
     this.rankingNetwork.onAddEventListeners(channel);
+    this.friendsNetwork.onAddEventListeners(channel);
   }
 }
