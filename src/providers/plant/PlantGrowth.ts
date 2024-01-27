@@ -2,6 +2,7 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
+import { container } from "@providers/inversify/container";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IItemUpdate, IItemUpdateAll, ItemSocketEvents, ItemSubType, ItemType } from "@rpg-engine/shared";
 import dayjs from "dayjs";
@@ -9,82 +10,99 @@ import { provide } from "inversify-binding-decorators";
 import { IPlantItem } from "./data/blueprints/PlantItem";
 import { PlantLifeCycle } from "./data/types/PlantTypes";
 
+export const MAXIMUM_HOURS_FOR_GROW: number = 24;
+export const MINIMUM_HOURS_FOR_WATERING: number = 3;
+
+interface IPlantGrowthStatus {
+  canGrow: boolean;
+  canWater: boolean;
+}
+
 @provide(PlantGrowth)
 export class PlantGrowth {
-  constructor(private blueprintManager: BlueprintManager, private socketMessaging: SocketMessaging) {}
+  constructor(private socketMessaging: SocketMessaging) {}
 
   @TrackNewRelicTransaction()
-  public async updatePlantGrowth(): Promise<void> {
+  public async updatePlantGrowth(plant: IItem, character: ICharacter): Promise<boolean> {
     try {
-      // Fetch all plants
-      const plants = (await Item.find({ type: ItemType.Plant }).lean({
-        virtuals: true,
-        defaults: true,
-      })) as IItem[];
+      const blueprintManager = container.get<BlueprintManager>(BlueprintManager);
 
-      for (const plant of plants) {
-        const blueprint = (await this.blueprintManager.getBlueprint("plants", plant.baseKey)) as IPlantItem;
+      const blueprint = (await blueprintManager.getBlueprint("plants", plant.baseKey)) as IPlantItem;
 
-        if (!this.canPlantGrow(plant, blueprint)) {
-          continue; // Skip to the next iteration if the plant cannot grow
-        }
+      const { canGrow, canWater }: IPlantGrowthStatus = this.canPlantGrow(plant);
 
-        const currentGrowthPoints = plant.growthPoints ?? 0;
-        const requiredGrowthPoints =
-          blueprint.stagesRequirements[plant.currentPlantCycle ?? PlantLifeCycle.Seed].requiredGrowthPoints;
+      if (!canGrow && canWater) {
+        await Item.updateOne({ _id: plant._id }, { $set: { lastWatering: new Date() } });
+        return true;
+      } else if (!canWater) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, the plant is not ready to be watered.");
+        return false;
+      } else if (!canGrow) {
+        return false;
+      }
 
-        if (currentGrowthPoints < requiredGrowthPoints) {
-          await Item.updateOne({ _id: plant._id }, { $set: { growthPoints: currentGrowthPoints + 1 } });
-          continue;
-        }
+      const currentGrowthPoints = plant.growthPoints ?? 0;
+      const requiredGrowthPoints =
+        blueprint.stagesRequirements[plant.currentPlantCycle ?? PlantLifeCycle.Seed].requiredGrowthPoints;
 
-        const nextCycle = this.getNextCycle((plant.currentPlantCycle as PlantLifeCycle) ?? PlantLifeCycle.Seed);
-
-        let updatedGrowthPoints = currentGrowthPoints + 1;
-        if (plant.currentPlantCycle === PlantLifeCycle.Mature && !blueprint.regrowsAfterHarvest) {
-          updatedGrowthPoints = currentGrowthPoints;
-        }
-
-        const updatedPlant = await Item.findByIdAndUpdate(
-          plant._id,
-          {
-            $set: {
-              growthPoints: updatedGrowthPoints,
-              currentPlantCycle: nextCycle,
-              lastPlantCycleRun: new Date(),
-              texturePath: blueprint.stagesRequirements[nextCycle]?.texturePath,
-            },
-          },
-          {
-            new: true,
-            lean: { virtuals: true, defaults: true },
-          }
+      if (currentGrowthPoints < requiredGrowthPoints) {
+        await Item.updateOne(
+          { _id: plant._id },
+          { $set: { growthPoints: currentGrowthPoints + 1, lastWatering: new Date() } }
         );
+        return true;
+      }
 
-        // Verifying if update was successful
-        if (!updatedPlant) {
-          console.error("Failed to update plant");
-          return;
+      const nextCycle = this.getNextCycle((plant.currentPlantCycle as PlantLifeCycle) ?? PlantLifeCycle.Seed);
+
+      let updatedGrowthPoints = currentGrowthPoints + 1;
+      if (plant.currentPlantCycle === PlantLifeCycle.Mature && !blueprint.regrowsAfterHarvest) {
+        updatedGrowthPoints = currentGrowthPoints;
+      }
+
+      const updatedPlant = await Item.findByIdAndUpdate(
+        plant._id,
+        {
+          $set: {
+            growthPoints: updatedGrowthPoints,
+            currentPlantCycle: nextCycle,
+            lastPlantCycleRun: new Date(),
+            lastWatering: new Date(),
+            texturePath: blueprint.stagesRequirements[nextCycle]?.texturePath,
+          },
+        },
+        {
+          new: true,
+          lean: { virtuals: true, defaults: true },
         }
+      );
 
-        const itemToUpdate = this.prepareItemToUpdate(updatedPlant);
+      // Verifying if update was successful
+      if (!updatedPlant) {
+        console.error("Failed to update plant");
+        return false;
+      }
 
-        if (plant.owner) {
-          const character = (await Character.findById(plant.owner).lean()) as ICharacter;
-          if (character) {
-            await this.socketMessaging.sendEventToCharactersAroundCharacter<IItemUpdateAll>(
-              character,
-              ItemSocketEvents.UpdateAll,
-              { items: [itemToUpdate] },
-              true
-            );
-          } else {
-            console.error("Character not found");
-          }
+      const itemToUpdate = this.prepareItemToUpdate(updatedPlant);
+
+      if (plant.owner) {
+        const character = (await Character.findById(plant.owner).lean()) as ICharacter;
+        if (character) {
+          await this.socketMessaging.sendEventToCharactersAroundCharacter<IItemUpdateAll>(
+            character,
+            ItemSocketEvents.UpdateAll,
+            { items: [itemToUpdate] },
+            true
+          );
+        } else {
+          console.error("Character not found");
         }
       }
+
+      return true;
     } catch (error) {
       console.error("Error updating plant growth:", error);
+      return false;
     }
   }
 
@@ -117,34 +135,37 @@ export class PlantGrowth {
     return cycleOrder[currentIndex + 1] || currentCycle;
   }
 
-  private canPlantGrow(plant: IItem, blueprint: IPlantItem): boolean {
+  private canPlantGrow(plant: IItem): IPlantGrowthStatus {
     const now = dayjs();
 
-    // Check if the plant has been watered at least once
     if (!plant.lastWatering) {
-      return false;
+      return this.checkPlantGrowthSincePlanted(now, plant);
     }
 
-    const minutesSinceLastWatering = now.diff(dayjs(plant.lastWatering), "minute");
+    return this.checkPlantGrowthSinceLastWatering(now, plant);
+  }
 
-    // Check if the last watering was more than 30 minutes ago
-    if (minutesSinceLastWatering > 30) {
-      return false;
+  private checkPlantGrowthSincePlanted(now: dayjs.Dayjs, plant: IItem): IPlantGrowthStatus {
+    const hoursSincePlanted = now.diff(dayjs(plant.createdAt), "hour");
+
+    if (hoursSincePlanted <= MAXIMUM_HOURS_FOR_GROW) {
+      return { canGrow: true, canWater: true };
     }
 
-    // Check if the last plant cycle run was less than 15 minutes ago
-    const minutesSinceLastRun = now.diff(dayjs(plant.lastPlantCycleRun), "minute");
-    if (plant.lastPlantCycleRun && minutesSinceLastRun < 15) {
-      return false;
+    return { canGrow: false, canWater: true };
+  }
+
+  private checkPlantGrowthSinceLastWatering(now: dayjs.Dayjs, plant: IItem): IPlantGrowthStatus {
+    const hoursSinceLastWatering = now.diff(dayjs(plant.lastWatering), "hour");
+
+    if (hoursSinceLastWatering > MAXIMUM_HOURS_FOR_GROW) {
+      return { canGrow: false, canWater: true };
     }
 
-    // Check if the plant was watered after the last update
-    const lastPlantCycleRunDate = dayjs(plant.lastPlantCycleRun);
-    const lastWateringDate = dayjs(plant.lastWatering);
-    if (plant.lastPlantCycleRun && lastWateringDate.isBefore(lastPlantCycleRunDate)) {
-      return false;
+    if (hoursSinceLastWatering <= MAXIMUM_HOURS_FOR_GROW && hoursSinceLastWatering > MINIMUM_HOURS_FOR_WATERING) {
+      return { canGrow: true, canWater: true };
     }
 
-    return true;
+    return { canGrow: false, canWater: false };
   }
 }

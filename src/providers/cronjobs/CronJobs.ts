@@ -15,7 +15,7 @@ import { ItemDeleteCrons } from "./ItemDeleteCrons";
 import { MacroCaptchaCrons } from "./MacroCaptchaCrons";
 import { MarketplaceCrons } from "./MarketplaceCrons";
 import { NPCCrons } from "./NPCCrons";
-import { PlantCycleCrons } from "./PlantCycleCrons";
+
 import { PremiumAccountCrons } from "./PremiumAccountCrons";
 import { RankingCrons } from "./RankingCrons";
 import { RedisCrons } from "./RedisCrons";
@@ -46,7 +46,6 @@ export class Cronjob {
     private removeInactivePartyMembersCron: RemoveInactivePartyMembersCron,
     private discordCronJobs: DiscordCronJobs,
     private resourceGatheringCronJobs: ResourceGatheringCrons,
-    private plantCycleCrons: PlantCycleCrons,
     private premiumAccountCrons: PremiumAccountCrons,
     private referralBonusCrons: ReferralBonusCrons
   ) {}
@@ -77,7 +76,6 @@ export class Cronjob {
         this.removeInactivePartyMembersCron.schedule();
         this.discordCronJobs.schedule();
         this.resourceGatheringCronJobs.schedule();
-        this.plantCycleCrons.schedule();
         this.premiumAccountCrons.schedule();
         this.referralBonusCrons.schedule();
         break;
@@ -103,7 +101,6 @@ export class Cronjob {
           this.removeInactivePartyMembersCron.schedule();
           this.discordCronJobs.schedule();
           this.resourceGatheringCronJobs.schedule();
-          this.plantCycleCrons.schedule();
           this.premiumAccountCrons.schedule();
           this.referralBonusCrons.schedule();
         }

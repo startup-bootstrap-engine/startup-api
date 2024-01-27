@@ -1,9 +1,10 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
-import { blueprintManager, container, unitTestHelper } from "@providers/inversify/container";
+import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
+import { container, unitTestHelper } from "@providers/inversify/container";
 import { ItemSocketEvents, ItemSubType, ItemType } from "@rpg-engine/shared";
 import dayjs from "dayjs";
-import { PlantGrowth } from "../PlantGrowth";
+import { MAXIMUM_HOURS_FOR_GROW, MINIMUM_HOURS_FOR_WATERING, PlantGrowth } from "../PlantGrowth";
 import { IPlantItem } from "../data/blueprints/PlantItem";
 import { PlantItemBlueprint, PlantLifeCycle } from "../data/types/PlantTypes";
 
@@ -14,13 +15,16 @@ describe("PlantGrowth.ts", () => {
   let mockItemUpdateOne: jest.Mock;
   let mockItemFindByIdAndUpdate: jest.Mock;
   let testCharacter: ICharacter;
+  let blueprintManager: BlueprintManager;
 
   const mockSocketMessaging = {
     sendEventToCharactersAroundCharacter: jest.fn(),
+    sendErrorMessageToCharacter: jest.fn(),
   };
 
   beforeAll(() => {
     plantGrowth = container.get<PlantGrowth>(PlantGrowth);
+    blueprintManager = container.get<BlueprintManager>(BlueprintManager);
 
     mockItemUpdateOne = jest.fn();
     Item.updateOne = mockItemUpdateOne;
@@ -32,10 +36,9 @@ describe("PlantGrowth.ts", () => {
     blueprint = (await blueprintManager.getBlueprint("plants", PlantItemBlueprint.Carrot)) as IPlantItem;
     plant = await unitTestHelper.createMockItem(blueprint);
 
-    // @ts-ignore
-    plant.lastWatering = dayjs().subtract(10, "minute").toISOString();
-    // @ts-ignore
-    plant.lastPlantCycleRun = dayjs().subtract(20, "minute").toISOString();
+    const now = dayjs();
+    plant.lastWatering = now.subtract(MAXIMUM_HOURS_FOR_GROW - MINIMUM_HOURS_FOR_WATERING, "hour").toDate();
+
     plant.owner = testCharacter._id;
     await plant.save();
 
@@ -48,68 +51,105 @@ describe("PlantGrowth.ts", () => {
     jest.restoreAllMocks();
   });
 
-  it("should return false if the plant has not been watered", () => {
+  it("should return canGrow true and canWater true if plant is watered within MAXIMUM_HOURS_FOR_GROW hours from plant", () => {
+    const now = dayjs();
+    plant.createdAt = now.subtract(MAXIMUM_HOURS_FOR_GROW, "hour").toDate();
     plant.lastWatering = undefined;
 
     // @ts-ignore
-    expect(plantGrowth.canPlantGrow(plant, blueprint)).toBeFalsy();
+    expect(plantGrowth.canPlantGrow(plant, blueprint)).toMatchObject({ canGrow: true, canWater: true });
   });
 
-  it("should return false if the plant was watered too long ago", () => {
+  it("should return canGrow false and canWater true if plant is watered after MAXIMUM_HOURS_FOR_GROW hours from plant", () => {
+    const now = dayjs();
+    plant.createdAt = now.subtract(MAXIMUM_HOURS_FOR_GROW + 1, "hour").toDate();
+    plant.lastWatering = undefined;
+
     // @ts-ignore
-    plant.lastWatering = dayjs().subtract(40, "minute").toISOString(); // simulate last watering was 40 minutes ago
-    // @ts-ignore
-    expect(plantGrowth.canPlantGrow(plant, blueprint)).toBeFalsy();
+    expect(plantGrowth.canPlantGrow(plant, blueprint)).toMatchObject({ canGrow: false, canWater: true });
   });
 
-  it("should return false if the last plant cycle run was too recent", () => {
+  it("should return canGrow true and canWater true if plant is watered within range of MAXIMUM_HOURS_FOR_GROW and MINIMUM_HOURS_FOR_WATERING ", () => {
+    const now = dayjs();
+    plant.lastWatering = now.subtract(MAXIMUM_HOURS_FOR_GROW - MINIMUM_HOURS_FOR_WATERING, "hour").toDate();
+
     // @ts-ignore
-    plant.lastWatering = dayjs().subtract(25, "minute").toISOString();
-    // @ts-ignore
-    plant.lastPlantCycleRun = dayjs().subtract(10, "minute").toISOString();
-    // @ts-ignore
-    expect(plantGrowth.canPlantGrow(plant, blueprint)).toBeFalsy();
+    expect(plantGrowth.canPlantGrow(plant, blueprint)).toMatchObject({ canGrow: true, canWater: true });
   });
 
-  it("should return false if the plant was not watered after the last update", () => {
+  it("should return canGrow false and canWater true if plant is watered more than MAXIMUM_HOURS_FOR_GROW", () => {
+    const now = dayjs();
+    plant.lastWatering = now.subtract(MAXIMUM_HOURS_FOR_GROW + 1, "hour").toDate();
+
     // @ts-ignore
-    plant.lastWatering = dayjs().subtract(25, "minute").toISOString();
-    // @ts-ignore
-    plant.lastPlantCycleRun = dayjs().subtract(20, "minute").toISOString();
-    // @ts-ignore
-    expect(plantGrowth.canPlantGrow(plant, blueprint)).toBeFalsy();
+    expect(plantGrowth.canPlantGrow(plant, blueprint)).toMatchObject({ canGrow: false, canWater: true });
   });
 
-  it("should return true if all conditions are met", () => {
+  it("should return canGrow false and canWater false if plant is watered less than MINIMUM_HOURS_FOR_WATERING ", () => {
+    const now = dayjs();
+    plant.lastWatering = now.subtract(MINIMUM_HOURS_FOR_WATERING, "hour").toDate();
+
     // @ts-ignore
-    expect(plantGrowth.canPlantGrow(plant, blueprint)).toBeTruthy();
+    expect(plantGrowth.canPlantGrow(plant, blueprint)).toMatchObject({ canGrow: false, canWater: false });
   });
 
-  it("should not update plants if none are found", async () => {
-    // set type that other thant plant
-    plant.type = ItemType.Other;
-    await plant.save();
-    await plantGrowth.updatePlantGrowth();
-    expect(Item.updateOne).not.toHaveBeenCalled();
+  it("should sendErrorMessageToCharacter if canWater is false  ", async () => {
+    const now = dayjs();
+    plant.lastWatering = now.subtract(MINIMUM_HOURS_FOR_WATERING, "hour").toDate();
+
+    // @ts-ignore
+    expect(plantGrowth.canPlantGrow(plant, blueprint)).toMatchObject({ canGrow: false, canWater: false });
+
+    await plantGrowth.updatePlantGrowth(plant, testCharacter);
+
+    expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
+      testCharacter,
+      "Sorry, the plant is not ready to be watered."
+    );
   });
 
-  it("should not update growth for plants that cannot grow", async () => {
-    // set plant has not been watered.
+  it("should plantGrowth return false if canGrow and canWater is false ", async () => {
+    const now = dayjs();
+    plant.lastWatering = now.subtract(MINIMUM_HOURS_FOR_WATERING, "hour").toDate();
+
     // @ts-ignore
-    plant.lastWatering = null;
-    await plant.save();
+    expect(plantGrowth.canPlantGrow(plant, blueprint)).toMatchObject({ canGrow: false, canWater: false });
 
-    await plantGrowth.updatePlantGrowth();
+    const result = await plantGrowth.updatePlantGrowth(plant, testCharacter);
 
-    expect(Item.updateOne).not.toHaveBeenCalled();
+    expect(result).toBeFalsy();
+  });
+
+  it("should plantGrowth return true and update lastWatering if canGrow is false and canWater is true ", async () => {
+    const now = dayjs();
+    plant.lastWatering = now.subtract(MAXIMUM_HOURS_FOR_GROW + 1, "hour").toDate();
+
+    // @ts-ignore
+    expect(plantGrowth.canPlantGrow(plant, blueprint)).toMatchObject({ canGrow: false, canWater: true });
+
+    const result = await plantGrowth.updatePlantGrowth(plant, testCharacter);
+
+    expect(Item.updateOne).toHaveBeenCalledWith(
+      { _id: plant._id },
+      {
+        $set: {
+          lastWatering: expect.anything(),
+        },
+      }
+    );
+
+    expect(result).toBeTruthy();
   });
 
   it("should update growth points of plants if necessary", async () => {
     const growthPoints = 0;
     plant.growthPoints = growthPoints;
     await plant.save();
-    await plantGrowth.updatePlantGrowth();
-    expect(Item.updateOne).toHaveBeenCalledWith({ _id: plant._id }, { $set: { growthPoints: growthPoints + 1 } });
+    await plantGrowth.updatePlantGrowth(plant, testCharacter);
+    expect(Item.updateOne).toHaveBeenCalledWith(
+      { _id: plant._id },
+      { $set: { growthPoints: growthPoints + 1, lastWatering: expect.anything() } }
+    );
   });
 
   it("should send socketMessaging to characters around character when advance to new plant cycle", async () => {
@@ -119,7 +159,7 @@ describe("PlantGrowth.ts", () => {
     plant.currentPlantCycle = PlantLifeCycle.Young;
     await plant.save();
 
-    await plantGrowth.updatePlantGrowth();
+    await plantGrowth.updatePlantGrowth(plant, testCharacter);
 
     const character = (await Character.findById(plant.owner).lean()) as ICharacter;
     expect(mockSocketMessaging.sendEventToCharactersAroundCharacter).toBeCalledWith(
@@ -155,7 +195,7 @@ describe("PlantGrowth.ts", () => {
     plant.currentPlantCycle = PlantLifeCycle.Young;
     await plant.save();
 
-    await plantGrowth.updatePlantGrowth();
+    await plantGrowth.updatePlantGrowth(plant, testCharacter);
     expect(Item.findByIdAndUpdate).toHaveBeenCalledWith(
       plant._id,
       {
@@ -163,6 +203,7 @@ describe("PlantGrowth.ts", () => {
           growthPoints: growthPoints + 1,
           currentPlantCycle: PlantLifeCycle.Mature,
           lastPlantCycleRun: expect.anything(),
+          lastWatering: expect.anything(),
           texturePath: blueprint.stagesRequirements[PlantLifeCycle.Mature]?.texturePath,
         },
       },
@@ -182,7 +223,7 @@ describe("PlantGrowth.ts", () => {
     plant.growthPoints = growthPoints;
     await plant.save();
 
-    await plantGrowth.updatePlantGrowth();
+    await plantGrowth.updatePlantGrowth(plant, testCharacter);
     expect(Item.findByIdAndUpdate).toHaveBeenCalledWith(
       plant._id,
       {
@@ -190,6 +231,7 @@ describe("PlantGrowth.ts", () => {
           growthPoints: growthPoints + 1,
           currentPlantCycle: PlantLifeCycle.Mature,
           lastPlantCycleRun: expect.anything(),
+          lastWatering: expect.anything(),
           texturePath: blueprint.stagesRequirements[PlantLifeCycle.Mature]?.texturePath,
         },
       },
@@ -205,7 +247,7 @@ describe("PlantGrowth.ts", () => {
     Item.findByIdAndUpdate = mockItemFindByIdAndUpdate;
 
     // @ts-ignore
-    jest.spyOn(plantGrowth.blueprintManager, "getBlueprint").mockResolvedValueOnce({
+    jest.spyOn(blueprintManager, "getBlueprint").mockResolvedValueOnce({
       ...blueprint,
       regrowsAfterHarvest: false,
     });
@@ -215,7 +257,7 @@ describe("PlantGrowth.ts", () => {
     plant.growthPoints = growthPoints;
     await plant.save();
 
-    await plantGrowth.updatePlantGrowth();
+    await plantGrowth.updatePlantGrowth(plant, testCharacter);
     expect(Item.findByIdAndUpdate).toHaveBeenCalledWith(
       plant._id,
       {
@@ -223,6 +265,7 @@ describe("PlantGrowth.ts", () => {
           growthPoints: growthPoints,
           currentPlantCycle: PlantLifeCycle.Mature,
           lastPlantCycleRun: expect.anything(),
+          lastWatering: expect.anything(),
           texturePath: blueprint.stagesRequirements[PlantLifeCycle.Mature]?.texturePath,
         },
       },
