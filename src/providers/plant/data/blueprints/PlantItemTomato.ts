@@ -11,6 +11,7 @@ export const plantItemTomato: IPlantItem = {
   description: "The tomato is a warm-season vegetable that is grown in every state, most commonly in home gardens.",
   isStatic: true,
   isPersistent: true,
+  weight: 1,
   textureAtlas: "crops",
   texturePath: "seeds/seed-red-1.png",
   stagesRequirements: {

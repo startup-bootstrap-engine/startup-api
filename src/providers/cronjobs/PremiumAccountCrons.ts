@@ -1,7 +1,8 @@
 import { IUser, User } from "@entities/ModuleSystem/UserModel";
+import { appEnv } from "@providers/config/env";
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
 import { PremiumAccountActivator } from "@providers/premiumAccount/PremiumAccountActivator";
-import { UserAccountTypes } from "@rpg-engine/shared";
+import { EnvType, UserAccountTypes } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { CronJobScheduler } from "./CronJobScheduler";
 
@@ -14,6 +15,10 @@ export class PremiumAccountCrons {
   ) {}
 
   public schedule(): void {
+    if (appEnv.general.ENV === EnvType.Development) {
+      return;
+    }
+
     this.cronJobScheduler.uniqueSchedule("premium-account-cron-activate", "0 */15 * * *", async () => {
       await this.activatePremiumAccounts();
     });

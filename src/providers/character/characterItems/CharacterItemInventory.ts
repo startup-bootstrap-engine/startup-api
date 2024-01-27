@@ -192,6 +192,13 @@ export class CharacterItemInventory {
   }
 
   @TrackNewRelicTransaction()
+  public async countItemInNestedContainers(container: IItemContainer, itemKey: string): Promise<number> {
+    const items = await this.getAllItemsFromContainer(container);
+    const filteredItems = items.filter((item) => isSameKey(item.key, itemKey));
+    return filteredItems.reduce((count, item) => count + item.stackQty!, 0);
+  }
+
+  @TrackNewRelicTransaction()
   public async decrementItemFromInventoryByKey(
     itemKey: string,
     character: ICharacter,

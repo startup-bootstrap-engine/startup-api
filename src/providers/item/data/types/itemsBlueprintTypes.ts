@@ -577,6 +577,7 @@ export enum MagicsBlueprint {
   TrollsCavesTeleport = "trolls-caves-teleport",
   WildwoodDungeonTeleport = "wildwood-dungeon-teleport",
   LostTempleTeleport = "lost-temple-teleport",
+  Bomb = "bomb",
 }
 
 export enum BooksBlueprint {

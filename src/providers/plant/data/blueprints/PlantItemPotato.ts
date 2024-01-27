@@ -12,6 +12,7 @@ export const plantItemPotato: IPlantItem = {
     "Potato is a versatile, carbohydrate-rich food highly popular worldwide and prepared and served in a variety of ways.",
   isStatic: true,
   isPersistent: true,
+  weight: 1,
   textureAtlas: "crops",
   texturePath: "seeds/seed-brown-1.png",
   stagesRequirements: {

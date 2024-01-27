@@ -7,6 +7,9 @@ import { ABTestController } from "@useCases/ModuleSystem/abTests/ABTestControlle
 import { BlueprintController } from "@useCases/ModuleSystem/blueprint/BlueprintController";
 import { CacheController } from "@useCases/ModuleSystem/cache/CacheController";
 import { ReadChatLogController } from "@useCases/ModuleSystem/chat/readChatLog/ReadChatLogController";
+import { ReadFriendRequestsController } from "@useCases/ModuleSystem/friends/ReadFriendRequests";
+import { ReadFriendsController } from "@useCases/ModuleSystem/friends/ReadFriends";
+import { RejectFriendRequestsController } from "@useCases/ModuleSystem/friends/RejectFriendRequest";
 import { IndustriesController } from "@useCases/ModuleSystem/industries/IndustriesController";
 import { MapController } from "@useCases/ModuleSystem/map/MapController";
 import { PushNotificationController } from "@useCases/ModuleSystem/operation/pushNotification/PushNotificationController";
@@ -74,4 +77,7 @@ export const useCasesControllers = new ContainerModule((bind: interfaces.Bind, u
   bind<ScriptsController>(ScriptsController).toSelf();
   bind<PremiumAccountController>(PremiumAccountController).toSelf();
   bind<PatreonController>(PatreonController).toSelf();
+  bind<ReadFriendRequestsController>(ReadFriendRequestsController).toSelf();
+  bind<RejectFriendRequestsController>(RejectFriendRequestsController).toSelf();
+  bind<ReadFriendsController>(ReadFriendsController).toSelf();
 });

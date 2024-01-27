@@ -85,6 +85,10 @@ function addSocialCrystalAsRequirements(recipe: IUseWithCraftingRecipe, itemsBlu
 
 function adjustItemRequirements(recipe: IUseWithCraftingRecipe): void {
   recipe.requiredItems.forEach((item) => {
+    if (item.key === CraftingResourcesBlueprint.SocialCrystal) {
+      return;
+    }
+
     let qty = Math.floor(item.qty * RECIPE_REQUIREMENTS_RATIO);
 
     if (qty < 1) {

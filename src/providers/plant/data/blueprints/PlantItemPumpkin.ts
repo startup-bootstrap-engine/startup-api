@@ -12,6 +12,7 @@ export const plantItemPumpkin: IPlantItem = {
     "Pumpkin is a cultivar of winter squash that is round with smooth, slightly ribbed skin, and is most often deep yellow to orange in coloration.",
   isStatic: true,
   isPersistent: true,
+  weight: 1,
   textureAtlas: "crops",
   texturePath: "seeds/seed-orange-1.png",
   stagesRequirements: {

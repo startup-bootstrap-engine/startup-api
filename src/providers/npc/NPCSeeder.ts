@@ -10,6 +10,7 @@ import {
   NPC_SPEED_MULTIPLIER,
 } from "@providers/constants/NPCConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
+import { blueprintManager } from "@providers/inversify/container";
 import { Locker } from "@providers/locks/Locker";
 import { GridManager } from "@providers/map/GridManager";
 import { INPCSeedData, NPCLoader } from "@providers/npc/NPCLoader";
@@ -36,58 +37,103 @@ export class NPCSeeder {
   @TrackNewRelicTransaction()
   public async seed(): Promise<void> {
     const npcSeedData = await this.npcLoader.loadNPCSeedData();
+    const npcDataArray = Array.from(npcSeedData.values());
+    const existingNPCs = await this.fetchExistingNPCs(npcDataArray);
 
-    for (const [key, NPCData] of npcSeedData.entries()) {
-      const npcFound = (await NPC.findOne({ tiledId: NPCData.tiledId, scene: NPCData.scene }).lean({
-        virtuals: true,
-        defaults: true,
-      })) as unknown as INPC;
-
-      NPCData.targetCharacter = undefined; // reset any targets
-
+    for (const NPCData of npcDataArray) {
+      const npcFound = this.findExistingNPC(existingNPCs, NPCData);
       await this.setInitialNPCPositionAsSolid(NPCData);
-
-      const multipliedNPCData = this.getNPCDataWithMultipliers(NPCData);
+      const customizedNPC = this.getNPCDataWithMultipliers(NPCData);
 
       if (!npcFound) {
-        await this.createNewNPCWithSkills(multipliedNPCData);
+        await this.createNewNPCWithSkills(customizedNPC);
       } else {
-        if (npcFound.isBehaviorEnabled) {
-          continue; // skip if already active...
-        }
-
-        // if npc already exists, restart initial position
-
-        // console.log(`🧍 Updating NPC ${NPCData.key} database data...`);
-
-        const updateData = _.omit(multipliedNPCData, ["skills"]);
-
-        if (!_.isEqual(npcFound, updateData)) {
-          await clearCacheForKey(`${npcFound.id}-skills`);
-
-          await NPC.updateOne(
-            { key: key },
-            {
-              // @ts-ignore
-              $set: {
-                ...updateData,
-              },
-            }
-          );
-        }
-
-        await this.resetNPC(npcFound, multipliedNPCData);
-        await this.updateNPCSkills(multipliedNPCData, npcFound);
-        await this.npcGiantForm.resetNPCToNormalForm(npcFound);
-        await this.npcGiantForm.randomlyTransformNPCIntoGiantForm(npcFound);
+        await this.handleExistingNPC(npcFound);
       }
     }
 
     await this.npcDuplicateCleaner.cleanupDuplicateNPCs();
   }
 
+  private async fetchExistingNPCs(npcDataArray: INPCSeedData[]): Promise<INPC[]> {
+    return (await NPC.find({
+      tiledId: { $in: npcDataArray.map((data) => data.tiledId) },
+      scene: { $in: npcDataArray.map((data) => data.scene) },
+    }).lean({ virtuals: true, defaults: true })) as unknown as INPC[];
+  }
+
+  private findExistingNPC(existingNPCs: INPC[], NPCData: INPCSeedData): INPC | undefined {
+    return existingNPCs.find((npc) => npc.tiledId === NPCData.tiledId && npc.scene === NPCData.scene);
+  }
+
+  private async handleExistingNPC(npcFound: INPC): Promise<void> {
+    if (npcFound.isBehaviorEnabled) {
+      return; // skip if already active...
+    }
+
+    await this.resetNPC(npcFound);
+
+    await this.npcGiantForm.resetNPCToNormalForm(npcFound);
+
+    await this.tryToUpdateSkills(npcFound);
+
+    await this.npcGiantForm.randomlyTransformNPCIntoGiantForm(npcFound);
+  }
+
+  private async tryToUpdateSkills(npcFound: INPC): Promise<void> {
+    const cachedNPCSkills = await this.fetchCachedSkills(npcFound);
+    const npcBlueprintSkills = this.fetchNPCBlueprint(npcFound)?.skills as ISkill;
+
+    if (npcBlueprintSkills) {
+      // note that not all NPC has blueprint skills. Friendly ones do not need this info specified on the blueprint, although they do have skills on the database
+
+      if (!cachedNPCSkills || !npcBlueprintSkills || !_.isMatch(cachedNPCSkills, npcBlueprintSkills)) {
+        const blueprintSkills = this.createBlueprintSkills(npcBlueprintSkills);
+
+        await clearCacheForKey(`${npcFound._id}-skills`);
+
+        await Skill.findOneAndUpdate({ _id: npcFound.skills }, { $set: blueprintSkills }, { new: true })
+          .lean()
+          .cacheQuery({
+            cacheKey: `${npcFound._id}-skills`,
+          });
+
+        console.log(`⚠️ Updated skills for NPC ${npcFound.key}`);
+
+        if (npcFound.isGiantForm) {
+          await this.npcGiantForm.setNormalFormStats(npcFound, blueprintSkills as ISkill);
+        }
+      }
+    }
+  }
+
+  private createBlueprintSkills(npcBlueprintSkills): Partial<ISkill> {
+    return Object.entries(npcBlueprintSkills).reduce((acc, [key, value]) => {
+      if (typeof value === "object" && value !== null) {
+        Object.entries(value).forEach(([subKey, subValue]) => {
+          acc[`${key}.${subKey}`] = subValue;
+        });
+      } else {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
+  }
+
+  private async fetchCachedSkills(npcFound: INPC): Promise<ISkill> {
+    return (await Skill.findOne({ _id: npcFound.skills })
+      .lean()
+      .cacheQuery({
+        cacheKey: `${npcFound._id}-skills`,
+      })) as unknown as ISkill;
+  }
+
+  private fetchNPCBlueprint(npcFound: INPC): INPC | undefined {
+    return blueprintManager.getBlueprint<INPC>("npcs", npcFound.baseKey);
+  }
+
   @TrackNewRelicTransaction()
-  private async resetNPC(npc: INPC, NPCData: INPCSeedData): Promise<void> {
+  private async resetNPC(npc: INPC): Promise<void> {
     try {
       await this.locker.unlock(`npc-death-${npc._id}`);
       await this.locker.unlock(`npc-body-generation-${npc._id}`);
@@ -106,7 +152,6 @@ export class NPCSeeder {
         mana: npc.maxMana,
         x: npc.initialX,
         y: npc.initialY,
-        targetCharacter: undefined,
         currentMovementType: npc.originalMovementType,
         xpToRelease: [],
         isBehaviorEnabled: false,
@@ -119,38 +164,19 @@ export class NPCSeeder {
         updateParams.health = npc.maxHealth;
       }
 
-      await NPC.updateOne({ _id: npc._id }, updateParams);
-    } catch (error) {
-      console.log(`❌ Failed to reset NPC ${NPCData.key}`);
-      console.error(error);
-    }
-  }
-
-  private async updateNPCSkills(NPCData: INPCSeedData, npc: INPC): Promise<void> {
-    const skills = this.setNPCRandomSkillLevel(NPCData) as unknown as ISkill;
-
-    if (skills?.level) {
-      skills.level = skills.level * NPC_SKILL_LEVEL_MULTIPLIER;
-    }
-    if (skills?.strength?.level) {
-      skills.strength.level = skills.strength.level * NPC_SKILL_STRENGTH_MULTIPLIER;
-    }
-    if (skills?.dexterity?.level) {
-      skills.dexterity.level = skills.dexterity.level * NPC_SKILL_DEXTERITY_MULTIPLIER;
-    }
-    if (skills?.resistance?.level) {
-      skills.resistance.level = skills.resistance.level * NPC_SKILL_DEXTERITY_MULTIPLIER;
-    }
-    if (NPCData.skills) {
-      await Skill.updateOne(
+      await NPC.updateOne(
+        { _id: npc._id },
         {
-          owner: npc._id,
-          ownerType: "NPC",
-        },
-        {
-          ...skills,
+          $set: updateParams,
+          $unset: {
+            nextSpawnTime: "",
+            targetCharacter: "",
+          },
         }
       );
+    } catch (error) {
+      console.log(`❌ Failed to reset NPC ${npc.key}`);
+      console.error(error);
     }
   }
 

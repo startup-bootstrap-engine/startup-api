@@ -42,30 +42,30 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
     SPXPLostOnDeathReduction: 20,
     InventoryLossOnDeathReduction: 20,
     maxSpeed: MovementSpeed.Fast,
-    XPBuff: 20,
-    lootDropBuff: 20,
+    XPBuff: 10,
+    lootDropBuff: 10,
     spellCooldownReduction: {
       defaultReduction: 0,
       customReduction: {
         ...generateCustomCooldownReduction(CUSTOM_COOLDOWN_REDUCTION_DEFAULT_BRONZE),
       },
     },
-    craftingQtyBuff: 20,
+    craftingQtyBuff: 10,
     manaRegenPercent: 1.05,
   },
   [UserAccountTypes.PremiumSilver]: {
     SPXPLostOnDeathReduction: 35, // only loses 60% of the regular skill loss
     InventoryLossOnDeathReduction: 35, // 50% less chance to drop an item
     maxSpeed: MovementSpeed.Fast,
-    XPBuff: 30,
-    lootDropBuff: 30,
+    XPBuff: 25,
+    lootDropBuff: 25,
     spellCooldownReduction: {
       defaultReduction: 0,
       customReduction: {
         ...generateCustomCooldownReduction(CUSTOM_COOLDOWN_REDUCTION_DEFAULT_SILVER),
       },
     },
-    craftingQtyBuff: 35,
+    craftingQtyBuff: 30,
     manaRegenPercent: 1.1,
   },
   [UserAccountTypes.PremiumGold]: {
@@ -87,15 +87,15 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
     SPXPLostOnDeathReduction: 50, // only loses 50% of the regular skill loss
     InventoryLossOnDeathReduction: 50, // Do not drop anything on death
     maxSpeed: MovementSpeed.Fast,
-    XPBuff: 50,
-    lootDropBuff: 50,
+    XPBuff: 100,
+    lootDropBuff: 100,
     spellCooldownReduction: {
       defaultReduction: 0,
       customReduction: {
-        ...generateCustomCooldownReduction(CUSTOM_COOLDOWN_REDUCTION_DEFAULT_GOLD),
+        ...generateCustomCooldownReduction(CUSTOM_COOLDOWN_REDUCTION_DEFAULT_ULTIMATE),
       },
     },
-    craftingQtyBuff: 50,
+    craftingQtyBuff: 100,
     manaRegenPercent: 1.2,
   },
 };

@@ -12,6 +12,7 @@ export const plantItemStrawberry: IPlantItem = {
     "The garden strawberry is a widely grown hybrid species of the genus Fragaria, collectively known as the strawberries.",
   isStatic: true,
   isPersistent: true,
+  weight: 1,
   textureAtlas: "crops",
   texturePath: "seeds/seed-green-1.png",
   stagesRequirements: {
