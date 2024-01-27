@@ -10,13 +10,14 @@ export const CRAFTING_SOCIAL_CRYSTAL_DAILY_REWARD_CHANCE = 25; // chance to get 
 
 // MapTransitions that requires crystals
 
-const MAP_TRANSITION_SOCIAL_CRYSTAL_REQUIREMENT_RATIO = 1;
+//! Removed map transition requirements for now
+// const MAP_TRANSITION_SOCIAL_CRYSTAL_REQUIREMENT_RATIO = 1;
 
-const multiplyByRatio = (value: number): number =>
-  Math.round(value * MAP_TRANSITION_SOCIAL_CRYSTAL_REQUIREMENT_RATIO) || 1;
+// const multiplyByRatio = (value: number): number =>
+//   Math.round(value * MAP_TRANSITION_SOCIAL_CRYSTAL_REQUIREMENT_RATIO) || 1;
 
 export const MAP_TRANSITION_SOCIAL_CRYSTAL_REQUIREMENT = {
-  "lost-temple": multiplyByRatio(1),
-  "dragons-lair": multiplyByRatio(1),
-  "ravenfall-sanctuary": multiplyByRatio(1),
+  // "lost-temple": multiplyByRatio(1),
+  // "dragons-lair": multiplyByRatio(1),
+  // "ravenfall-sanctuary": multiplyByRatio(1),
 };
