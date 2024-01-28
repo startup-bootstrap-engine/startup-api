@@ -182,6 +182,11 @@ jest.mock("@providers/constants/ItemConstants", () => ({
   ITEM_PICKUP_DISTANCE_THRESHOLD: 2,
 }));
 
+jest.mock("@providers/constants/MarketplaceConstants", () => ({
+  BLOCKED_ITEMS_KEY_FOR_MARKETPLACE: ["gold-coin"],
+  MARKETPLACE_ITEM_MAX_WEEKS_LENGTH: 1,
+}));
+
 jest.mock("@providers/constants/NPCConstants", () => ({
   ...jest.requireActual("@providers/constants/NPCConstants"),
   NPC_TRADER_INTERACTION_DISTANCE: 2,
