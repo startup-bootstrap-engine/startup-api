@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -9,10 +8,11 @@ import {
   CraftingResourcesBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
+  MacesBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
-  MacesBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import {
   AnimationEffectKeys,
@@ -20,105 +20,55 @@ import {
   NPCAlignment,
   NPCCustomDeathPenalties,
   NPCSubtype,
+  RangeTypes,
   SpellsBlueprint,
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcRedDragon = {
+export const npcYellowDragon: INPCTierBlueprint<23> = {
   ...generateMoveTowardsMovement(),
-  name: "Red Dragon",
-  key: HostileNPCsBlueprint.RedDragon,
+  name: "Yellow Dragon",
+  key: HostileNPCsBlueprint.YellowDragon,
   subType: NPCSubtype.Animal,
-  textureKey: HostileNPCsBlueprint.RedDragon,
+  textureKey: HostileNPCsBlueprint.YellowDragon,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: AnimationEffectKeys.FireBall,
-  maxRangeAttack: 8,
+  hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
+
+  maxRangeAttack: RangeTypes.High,
   speed: MovementSpeed.ExtraFast,
-  baseHealth: 30000,
+  // @ts-ignore
+  baseHealth: 70000,
   healthRandomizerDice: Dice.D20,
   skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   canSwitchToLowHealthTarget: true,
   canSwitchToRandomTarget: true,
-  hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
-
   isMagic: true,
   skills: {
-    level: 300,
+    level: 478,
     strength: {
-      level: 250,
+      level: 478,
     },
     dexterity: {
-      level: 200,
+      level: 478,
     },
     resistance: {
-      level: 200,
+      level: 478,
     },
     magicResistance: {
-      level: 200,
+      level: 478,
     },
     magic: {
-      level: 200,
+      level: 478,
     },
   },
   loots: [
     {
       itemBlueprintKey: SwordsBlueprint.DragonsSword,
       chance: 20,
-    },
-    {
-      itemBlueprintKey: ArmorsBlueprint.TemplarsPlate,
-      chance: 2,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.YggdrasilJianSword,
-      chance: 1,
-    },
-    {
-      itemBlueprintKey: ShieldsBlueprint.TemporalRoundShield,
-      chance: 2,
-    },
-    {
-      itemBlueprintKey: ShieldsBlueprint.EmeraldShield,
-      chance: 1,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
-      chance: 50,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.DragonScalCleaverClub,
-      chance: 60,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
-      chance: 55,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.MetalMasherClub,
-      chance: 30,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.SunderingClub,
-      chance: 30,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
-      chance: 48,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.TwinFangClub,
-      chance: 38,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
-      chance: 38,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.MetalStoneScepter,
-      chance: 28,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,
@@ -128,6 +78,34 @@ export const npcRedDragon = {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonTooth,
       chance: 50,
       quantityRange: [1, 3],
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
+      chance: 60,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.DragonScalCleaverClub,
+      chance: 70,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
+      chance: 65,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
+      chance: 68,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.TwinFangClub,
+      chance: 78,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
+      chance: 38,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.MetalStoneScepter,
+      chance: 48,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
@@ -183,13 +161,18 @@ export const npcRedDragon = {
   areaSpells: [
     {
       spellKey: SpellsBlueprint.FireStorm,
-      probability: 60,
+      probability: 40,
+      power: MagicPower.UltraHigh,
+    },
+    {
+      spellKey: SpellsBlueprint.EnergyWave,
+      probability: 70,
       power: MagicPower.UltraHigh,
     },
     {
       spellKey: SpellsBlueprint.VampiricStorm,
-      probability: 30,
+      probability: 40,
       power: MagicPower.Medium,
     },
   ],
-} as Partial<INPC>;
+};

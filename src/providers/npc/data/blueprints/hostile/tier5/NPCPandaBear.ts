@@ -1,14 +1,14 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { CraftingResourcesBlueprint, FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcPandaBear = {
+export const npcPandaBear: INPCTierBlueprint<5> = {
   ...generateMoveTowardsMovement(),
   name: "Panda Bear",
   key: HostileNPCsBlueprint.PandaBear,
@@ -17,19 +17,20 @@ export const npcPandaBear = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Slow,
-  baseHealth: 95,
+  baseHealth: 220,
+  tier: 5,
   healthRandomizerDice: Dice.D6,
   canSwitchToRandomTarget: true,
   skills: {
-    level: 9,
+    level: 17,
     strength: {
-      level: 9,
+      level: 17,
     },
     dexterity: {
-      level: 6,
+      level: 17,
     },
     resistance: {
-      level: 6,
+      level: 17,
     },
   },
   fleeOnLowHealth: true,
@@ -63,4 +64,4 @@ export const npcPandaBear = {
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
-} as Partial<INPC>;
+};

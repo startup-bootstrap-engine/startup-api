@@ -1,4 +1,4 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
+import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
@@ -10,44 +10,53 @@ import {
   ShieldsBlueprint,
   StaffsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import {
   AnimationEffectKeys,
   MagicPower,
   NPCAlignment,
   NPCCustomDeathPenalties,
+  NPCSubtype,
+  RangeTypes,
   SpellsBlueprint,
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcDarkElf = {
+export const npcDarkElf: INPCTierBlueprint<16> = {
   ...generateMoveTowardsMovement(),
   name: "Dark Elf",
+  subType: NPCSubtype.Humanoid,
   key: HostileNPCsBlueprint.DarkElf,
   textureKey: HostileNPCsBlueprint.DarkElf,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: AnimationEffectKeys.Dark,
-  maxRangeAttack: 8,
+  maxRangeAttack: RangeTypes.High,
   speed: MovementSpeed.Standard,
   canSwitchToRandomTarget: true,
-  baseHealth: 4500,
+  baseHealth: 1970,
+  tier: 16,
+  healthRandomizerDice: Dice.D12,
   canSwitchToLowHealthTarget: true,
   hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
   skills: {
-    level: 125,
+    level: 108,
     strength: {
-      level: 105,
+      level: 118,
     },
     dexterity: {
-      level: 120,
+      level: 118,
     },
     resistance: {
-      level: 70,
+      level: 108,
     },
     magicResistance: {
-      level: 100,
+      level: 128,
+    },
+    magic: {
+      level: 128,
     },
   },
   fleeOnLowHealth: true,
@@ -109,4 +118,4 @@ export const npcDarkElf = {
       power: MagicPower.UltraHigh,
     },
   ],
-} as Partial<INPC>;
+};

@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -9,10 +8,11 @@ import {
   CraftingResourcesBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
+  MacesBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
-  MacesBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import {
   AnimationEffectKeys,
@@ -20,23 +20,26 @@ import {
   NPCAlignment,
   NPCCustomDeathPenalties,
   NPCSubtype,
+  RangeTypes,
   SpellsBlueprint,
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcPurpleDragon = {
+export const npcRedDragon: INPCTierBlueprint<21> = {
   ...generateMoveTowardsMovement(),
-  name: "Purple Dragon",
-  key: HostileNPCsBlueprint.PurpleDragon,
+  name: "Red Dragon",
+  key: HostileNPCsBlueprint.RedDragon,
   subType: NPCSubtype.Animal,
-  textureKey: HostileNPCsBlueprint.PurpleDragon,
+  textureKey: HostileNPCsBlueprint.RedDragon,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: AnimationEffectKeys.FireBall,
-  maxRangeAttack: 8,
+  maxRangeAttack: RangeTypes.High,
+  tier: 21,
   speed: MovementSpeed.ExtraFast,
-  baseHealth: 100000,
+  // @ts-ignore
+  baseHealth: 30000,
   healthRandomizerDice: Dice.D20,
   skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
@@ -46,21 +49,21 @@ export const npcPurpleDragon = {
 
   isMagic: true,
   skills: {
-    level: 500,
+    level: 338,
     strength: {
-      level: 400,
+      level: 338,
     },
     dexterity: {
-      level: 330,
+      level: 378,
     },
     resistance: {
-      level: 350,
+      level: 378,
     },
     magicResistance: {
-      level: 350,
+      level: 338,
     },
     magic: {
-      level: 350,
+      level: 338,
     },
   },
   loots: [
@@ -69,33 +72,69 @@ export const npcPurpleDragon = {
       chance: 20,
     },
     {
-      itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,
-      chance: 100,
-    },
-    {
-      itemBlueprintKey: CraftingResourcesBlueprint.DragonTooth,
-      chance: 100,
-      quantityRange: [5, 10],
+      itemBlueprintKey: ArmorsBlueprint.TemplarsPlate,
+      chance: 2,
     },
     {
       itemBlueprintKey: SwordsBlueprint.YggdrasilJianSword,
       chance: 1,
     },
     {
+      itemBlueprintKey: ShieldsBlueprint.TemporalRoundShield,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: ShieldsBlueprint.EmeraldShield,
+      chance: 1,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
+      chance: 50,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.DragonScalCleaverClub,
+      chance: 60,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
+      chance: 55,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.MetalMasherClub,
+      chance: 30,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SunderingClub,
+      chance: 30,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
+      chance: 48,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.TwinFangClub,
+      chance: 38,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
+      chance: 38,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.MetalStoneScepter,
+      chance: 28,
+    },
+    {
+      itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,
+      chance: 50,
+    },
+    {
+      itemBlueprintKey: CraftingResourcesBlueprint.DragonTooth,
+      chance: 50,
+      quantityRange: [1, 3],
+    },
+    {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
       chance: 20,
-    },
-    {
-      itemBlueprintKey: ArmorsBlueprint.DarkArmor,
-      chance: 20,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.LeviathanSword,
-      chance: 20,
-    },
-    {
-      itemBlueprintKey: ArmorsBlueprint.TemplarsPlate,
-      chance: 10,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.DemonShield,
@@ -142,59 +181,18 @@ export const npcPurpleDragon = {
       itemBlueprintKey: AxesBlueprint.GuardianAxe,
       chance: 10,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.YggdrasilTemplarSword,
-      chance: 10,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.SunderingClub,
-      chance: 45,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.BoneBreakerClub,
-      chance: 78,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
-      chance: 50,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
-      chance: 84,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.GrimHarbingerClub,
-      chance: 40,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.TwinFangClub,
-      chance: 55,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
-      chance: 65,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.MetalMasherClub,
-      chance: 65,
-    },
   ],
-  entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
+  entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],
   areaSpells: [
     {
-      spellKey: SpellsBlueprint.VampiricStorm,
-      probability: 50,
-      power: MagicPower.High,
-    },
-    {
-      spellKey: SpellsBlueprint.CorruptionWave,
-      probability: 70,
+      spellKey: SpellsBlueprint.FireStorm,
+      probability: 60,
       power: MagicPower.UltraHigh,
     },
     {
-      spellKey: SpellsBlueprint.FireStorm,
-      probability: 40,
+      spellKey: SpellsBlueprint.VampiricStorm,
+      probability: 30,
       power: MagicPower.Medium,
     },
   ],
-} as Partial<INPC>;
+};
