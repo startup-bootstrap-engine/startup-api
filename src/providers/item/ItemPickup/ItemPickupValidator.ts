@@ -11,8 +11,9 @@ import { ITEM_PICKUP_DISTANCE_THRESHOLD } from "@providers/constants/ItemConstan
 import { EquipmentEquip } from "@providers/equipment/EquipmentEquip";
 import { MapHelper } from "@providers/map/MapHelper";
 import { MovementHelper } from "@providers/movement/MovementHelper";
+import { PlantHarvest } from "@providers/plant/PlantHarvest";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { IItemPickup } from "@rpg-engine/shared";
+import { IItemPickup, ItemType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { isEmpty } from "lodash";
 
@@ -27,7 +28,8 @@ export class ItemPickupValidator {
     private characterItems: CharacterItems,
     private characterValidation: CharacterValidation,
     private characterInventory: CharacterInventory,
-    private equipmentEquip: EquipmentEquip
+    private equipmentEquip: EquipmentEquip,
+    private plantHarvest: PlantHarvest
   ) {}
 
   @TrackNewRelicTransaction()
@@ -40,6 +42,10 @@ export class ItemPickupValidator {
     }
 
     if (item.isStatic) {
+      if (item.type === ItemType.Plant) {
+        await this.plantHarvest.harvestPlant(item, character);
+        return false;
+      }
       this.sendErrorMessage(character, "Sorry, this item cannot be picked");
       return false;
     }

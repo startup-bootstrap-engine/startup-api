@@ -40,6 +40,7 @@ export const plantItemPotato: IPlantItem = {
   harvestableItemKey: FoodsBlueprint.Potato,
   regrowsAfterHarvest: false,
   growthFactor: 4,
+  maxHarvestablePerPlant: 3,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
 };

@@ -6,6 +6,7 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { container } from "@providers/inversify/container";
+import { PlantGrowth } from "@providers/plant/PlantGrowth";
 import { IRefillableItem } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import _, { random } from "lodash";
@@ -26,7 +27,11 @@ export interface IUseWithRefill {
 
 @provide(UseWithRefill)
 export class UseWithRefill {
-  constructor(private socketMessaging: SocketMessaging, private movementHelper: MovementHelper) {}
+  constructor(
+    private socketMessaging: SocketMessaging,
+    private movementHelper: MovementHelper,
+    private plantGrowth: PlantGrowth
+  ) {}
 
   public async executeUse(character: ICharacter, options: IUseWithRefill, skillIncrease: SkillIncrease): Promise<void> {
     const { targetItem, originItem, decrementQty, targetType, successMessages, errorMessages } = options;
@@ -91,28 +96,24 @@ export class UseWithRefill {
         return;
       }
 
+      let isSuccess = false;
+
       if (resourceKey === "water") {
-        targetItem.lastWatering = new Date();
+        isSuccess = await this.plantGrowth.updatePlantGrowth(targetItem, character);
       }
 
-      originItem.remainingUses -= decrementQty ?? 1;
+      if (isSuccess) {
+        originItem.remainingUses -= decrementQty ?? 1;
 
-      await this.saveItems([targetItem, originItem]);
+        await originItem.save();
 
-      if (successMessages) {
-        this.sendRandomMessageToCharacter(character, successMessages, true);
+        if (successMessages) {
+          this.sendRandomMessageToCharacter(character, successMessages, true);
+        }
       }
     } catch (error) {
       console.log(error);
     }
-  }
-
-  private async saveItems(items: IItem[]): Promise<void> {
-    const promises = items.map(async (item) => {
-      await item.save();
-    });
-
-    await Promise.all(promises);
   }
 
   private sendRandomMessageToCharacter(character: ICharacter, randomMessages: string[], isSuccess: boolean): void {

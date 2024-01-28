@@ -5,7 +5,7 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { BodiesBlueprint, OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { itemMock } from "@providers/unitTests/mock/itemMock";
-import { FromGridX, FromGridY, IItemPickup } from "@rpg-engine/shared";
+import { FromGridX, FromGridY, IItemPickup, ItemType } from "@rpg-engine/shared";
 import { Types } from "mongoose";
 import { ItemPickupValidator } from "../ItemPickupValidator";
 
@@ -287,5 +287,27 @@ describe("ItemPickupValidator.ts", () => {
     expect(pickupValid).toBeFalsy();
 
     expect(sendErrorMessageToCharacter).toHaveBeenCalledWith(testCharacter, "Sorry, this item cannot be picked");
+  });
+
+  it("should execute harvestPlant if item is static and item type is plant", async () => {
+    const StaticItem = await unitTestHelper.createMockItem({
+      isStatic: true,
+    });
+
+    StaticItem.type = ItemType.Plant;
+    await StaticItem.save();
+
+    // @ts-ignore
+    const mockHarvestPlant = jest.spyOn(itemPickupValidator.plantHarvest, "harvestPlant");
+
+    const pickupValid = await itemPickupValidator.isItemPickupValid(
+      generatePickupData({
+        itemId: StaticItem.id,
+      }),
+      testCharacter
+    );
+
+    expect(pickupValid).toBeFalsy();
+    expect(mockHarvestPlant).toHaveBeenCalled();
   });
 });

@@ -40,6 +40,7 @@ export const plantItemStrawberry: IPlantItem = {
   harvestableItemKey: FoodsBlueprint.Strawberry,
   regrowsAfterHarvest: true,
   growthFactor: 4,
+  maxHarvestablePerPlant: 5,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
 };

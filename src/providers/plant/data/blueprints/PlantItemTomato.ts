@@ -39,6 +39,7 @@ export const plantItemTomato: IPlantItem = {
   harvestableItemKey: FoodsBlueprint.Tomato,
   regrowsAfterHarvest: true,
   growthFactor: 3,
+  maxHarvestablePerPlant: 5,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
 };
