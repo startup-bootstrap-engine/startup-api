@@ -5,6 +5,7 @@ import {
   AccessoriesBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
+  MacesBlueprint,
   RangedWeaponsBlueprint,
   ShieldsBlueprint,
   StaffsBlueprint,
@@ -80,6 +81,14 @@ export const npcDarkElf = {
     {
       itemBlueprintKey: RangedWeaponsBlueprint.RuneCrossbow,
       chance: 1,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.BoneBreakerClub,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.StonefangCleaverClub,
+      chance: 8,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],

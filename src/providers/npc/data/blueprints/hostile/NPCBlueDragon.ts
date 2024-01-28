@@ -9,6 +9,7 @@ import {
   CraftingResourcesBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
+  MacesBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -143,6 +144,30 @@ export const npcBlueDragon = {
     {
       itemBlueprintKey: ShieldsBlueprint.EmeraldShield,
       chance: 1,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
+      chance: 30,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.DragonScalCleaverClub,
+      chance: 40,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
+      chance: 35,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
+      chance: 48,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.TwinFangClub,
+      chance: 50,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
+      chance: 28,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],

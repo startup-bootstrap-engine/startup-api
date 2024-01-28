@@ -119,7 +119,7 @@ describe("MarketplaceCleaner.spec.ts", () => {
       });
       await newMarketplaceEntry.save();
 
-      const rolledBackItems = await marketplaceCleaner.rollbackItemsMoreThan1WeekOld();
+      const rolledBackItems = await marketplaceCleaner.rollbackItemsAfterCertainPeriod();
 
       expect(rolledBackItems).toBe(1);
     });
@@ -137,7 +137,7 @@ describe("MarketplaceCleaner.spec.ts", () => {
       });
       await newMarketplaceEntry.save();
 
-      const rolledBackItems = await marketplaceCleaner.rollbackItemsMoreThan1WeekOld();
+      const rolledBackItems = await marketplaceCleaner.rollbackItemsAfterCertainPeriod();
 
       expect(rolledBackItems).toBe(0);
     });

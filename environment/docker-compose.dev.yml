@@ -4,10 +4,6 @@ services:
     container_name: rpg-api
     restart: always
     build: .
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "3"
     env_file: .env
     ports:
       - "$SERVER_PORT:$SERVER_PORT"

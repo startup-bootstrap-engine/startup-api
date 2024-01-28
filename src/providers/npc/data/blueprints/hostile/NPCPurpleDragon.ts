@@ -11,6 +11,7 @@ import {
   LegsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
+  MacesBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import {
@@ -144,6 +145,38 @@ export const npcPurpleDragon = {
     {
       itemBlueprintKey: SwordsBlueprint.YggdrasilTemplarSword,
       chance: 10,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SunderingClub,
+      chance: 45,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.BoneBreakerClub,
+      chance: 78,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
+      chance: 50,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
+      chance: 84,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.GrimHarbingerClub,
+      chance: 40,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.TwinFangClub,
+      chance: 55,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
+      chance: 65,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.MetalMasherClub,
+      chance: 65,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],

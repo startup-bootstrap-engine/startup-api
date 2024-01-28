@@ -7,6 +7,7 @@ import {
   CraftingResourcesBlueprint,
   DaggersBlueprint,
   HelmetsBlueprint,
+  MacesBlueprint,
   SpearsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -85,6 +86,14 @@ export const npcFellbeast: INPCTierBlueprint<17> = {
     {
       itemBlueprintKey: ArmorsBlueprint.MithrilArmor,
       chance: 5,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SunderingClub,
+      chance: 6,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],

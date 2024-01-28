@@ -3,6 +3,7 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { MarketplaceItem } from "@entities/ModuleMarketplace/MarketplaceItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
+import { MARKETPLACE_ITEM_MAX_WEEKS_LENGTH } from "@providers/constants/MarketplaceConstants";
 import { DepotFinder } from "@providers/depot/DepotFinder";
 import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
@@ -15,7 +16,7 @@ export class MarketplaceCleaner {
   public async clean(): Promise<void> {
     console.log("Cleaning marketplace junk...");
     const totalCleaned1 = await this.deleteItemsFromInactiveCharacters();
-    const totalCleaned2 = await this.rollbackItemsMoreThan1WeekOld();
+    const totalCleaned2 = await this.rollbackItemsAfterCertainPeriod();
 
     const total = totalCleaned1 + totalCleaned2;
 
@@ -86,11 +87,11 @@ export class MarketplaceCleaner {
   }
 
   @TrackNewRelicTransaction()
-  public async rollbackItemsMoreThan1WeekOld(): Promise<number> {
+  public async rollbackItemsAfterCertainPeriod(): Promise<number> {
     try {
-      const moreThan1WeekAgo = dayjs().subtract(1, "week").toDate();
+      const moreThanXWeekAgo = dayjs().subtract(MARKETPLACE_ITEM_MAX_WEEKS_LENGTH, "week").toDate();
       const marketplaceEntries = await MarketplaceItem.find({
-        createdAt: { $lt: moreThan1WeekAgo },
+        createdAt: { $lt: moreThanXWeekAgo },
       }).lean();
 
       let rolledBackItems = 0;

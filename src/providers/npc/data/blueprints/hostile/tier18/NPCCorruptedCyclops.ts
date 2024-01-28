@@ -7,6 +7,7 @@ import {
   DaggersBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
+  MacesBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -80,6 +81,14 @@ export const npcCorruptedCyclops: INPCTierBlueprint<18> = {
     {
       itemBlueprintKey: LegsBlueprint.PridelandsLegs,
       chance: 5,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.BoneBreakerClub,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.StonefangCleaverClub,
+      chance: 8,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],

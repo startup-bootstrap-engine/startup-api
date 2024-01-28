@@ -11,6 +11,7 @@ export const plantItemWatermelon: IPlantItem = {
   description: "Watermelon is a juicy, refreshing fruit often consumed in the summer. It's high in vitamins A and C.",
   isStatic: true,
   isPersistent: true,
+  weight: 1,
   textureAtlas: "crops",
   texturePath: "seeds/seed-green-1.png",
   stagesRequirements: {

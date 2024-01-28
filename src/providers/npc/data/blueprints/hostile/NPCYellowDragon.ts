@@ -11,6 +11,7 @@ import {
   LegsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
+  MacesBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import {
@@ -75,6 +76,34 @@ export const npcYellowDragon = {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonTooth,
       chance: 50,
       quantityRange: [1, 3],
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
+      chance: 60,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.DragonScalCleaverClub,
+      chance: 70,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
+      chance: 65,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
+      chance: 68,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.TwinFangClub,
+      chance: 78,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
+      chance: 38,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.MetalStoneScepter,
+      chance: 48,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,

@@ -10,6 +10,7 @@ import {
   DaggersBlueprint,
   GlovesBlueprint,
   LegsBlueprint,
+  MacesBlueprint,
   OthersBlueprint,
   RangedWeaponsBlueprint,
   ShieldsBlueprint,
@@ -154,6 +155,14 @@ export const npcLitch: INPCTierBlueprint<14> = {
     {
       itemBlueprintKey: GlovesBlueprint.CrimsonCrestWraps,
       chance: 1,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
+      chance: 3,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.IronWoodCrusherClub,
+      chance: 5,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Corruption],

@@ -11,6 +11,7 @@ export const plantItemGreenGrape: IPlantItem = {
   description: "The green grape is a warm-season fruit that thrives in fertile, well-drained soil.",
   isStatic: true,
   isPersistent: true,
+  weight: 1,
   textureAtlas: "crops",
   texturePath: "seeds/seed-green-1.png",
   stagesRequirements: {

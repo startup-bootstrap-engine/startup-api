@@ -1,9 +1,10 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { IItem } from "@entities/ModuleInventory/ItemModel";
+import { container } from "@providers/inversify/container";
 import { ItemCraftable } from "@providers/item/ItemCraftable";
 import { SeedsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
-import { IUseWithTargetTile } from "@providers/useWith/useWithTypes";
+import { IUseWithItemToSeedOptions, UseWithItemToSeed } from "@providers/useWith/abstractions/UseWithItemToSeed";
+import { IUseWithTargetSeed } from "@providers/useWith/useWithTypes";
 import { EntityAttackType, IUseWithItemBlueprint, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
 
 export const itemRedGrapeSeed: IUseWithItemBlueprint = {
@@ -21,14 +22,25 @@ export const itemRedGrapeSeed: IUseWithItemBlueprint = {
   useWithMaxDistanceGrid: RangeTypes.Short,
   canSell: true,
   useWithTileEffect: async (
-    originItem: IItem,
-    targetTile: IUseWithTargetTile,
+    originItemKey: string,
+    targetTile: IUseWithTargetSeed,
     targetName: string,
     character: ICharacter,
     itemCraftable: ItemCraftable,
     skillIncrease: SkillIncrease
   ): Promise<void> => {
-    //! Not implemented yet
+    const useWithItemToSeed = container.get<UseWithItemToSeed>(UseWithItemToSeed);
+
+    const options: IUseWithItemToSeedOptions = {
+      map: targetTile.map,
+      coordinates: targetTile.coordinates,
+      key: targetName,
+      originItemKey,
+      successMessage: "Planting Success",
+      errorMessage: "Planting Failed!",
+    };
+
+    await useWithItemToSeed.execute(character, options, skillIncrease);
   },
   usableEffectDescription: "Use it on a fertile soil to plant a red grape vine",
 };

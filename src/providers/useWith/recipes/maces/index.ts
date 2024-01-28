@@ -10,6 +10,11 @@ import { recipeSilverFistMace } from "./recipeSilverFistMace";
 import { recipeSpectralMace } from "./recipeSpectralMace";
 import { recipeSpikedClub } from "./recipeSpikedClub";
 import { recipeWoodenMace } from "./recipeWoodenMace";
+import { recipeBoneBreakerClub } from "./recipeBoneBreakerClub";
+import { recipeIronWoodCrusherClub } from "./recipeIronwoodCrusherClub";
+import { recipeMetalMasherClub } from "./recipeMetalMasherClub";
+import { recipeStarfirMaulClub } from "./recipeStarfirMaulClub";
+import { recipeStonefangCleaverClub } from "./recipeStoneFangCleaverClub";
 
 export const recipeMacesIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [MacesBlueprint.SpikedClub]: [recipeSpikedClub],
@@ -22,4 +27,9 @@ export const recipeMacesIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [MacesBlueprint.BronzeFistMace]: [recipeBronzeFistMace],
   [MacesBlueprint.SilverFistMace]: [recipeSilverFistMace],
   [MacesBlueprint.SpectralMace]: [recipeSpectralMace],
+  [MacesBlueprint.BoneBreakerClub]: [recipeBoneBreakerClub],
+  [MacesBlueprint.IronWoodCrusherClub]: [recipeIronWoodCrusherClub],
+  [MacesBlueprint.MetalMasherClub]: [recipeMetalMasherClub],
+  [MacesBlueprint.StarfirMaulClub]: [recipeStarfirMaulClub],
+  [MacesBlueprint.StonefangCleaverClub]: [recipeStonefangCleaverClub],
 };

@@ -12,6 +12,6 @@ export const itemSocialCrystal: ICraftableItemBlueprint = {
     "A crystal that's earned for bringing more people to Definya's world. Click on the 'Colored Diamond' button to get started.",
   weight: 0.01,
   maxStackSize: 999,
-  basePrice: 50,
-  canSell: false,
+  basePrice: 5000,
+  canSell: true,
 };

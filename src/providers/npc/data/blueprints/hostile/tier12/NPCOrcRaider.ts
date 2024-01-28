@@ -11,6 +11,7 @@ import {
   GlovesBlueprint,
   HammersBlueprint,
   HelmetsBlueprint,
+  MacesBlueprint,
   RangedWeaponsBlueprint,
   StaffsBlueprint,
   SwordsBlueprint,
@@ -94,7 +95,14 @@ export const npcOrcRaider: INPCTierBlueprint<12> = {
       itemBlueprintKey: ContainersBlueprint.Backpack,
       chance: 10,
     },
-
+    {
+      itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
+      chance: 10,
+    },
     {
       itemBlueprintKey: BootsBlueprint.CopperBoots,
       chance: 20,

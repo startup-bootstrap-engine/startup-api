@@ -9,7 +9,7 @@ export class MarketplaceCrons {
   public schedule(): void {
     // once per week, monday at midnight
     this.cronJobScheduler.uniqueSchedule("marketplace-cron-rollback-items", "0 0 * * 1", async () => {
-      await this.marketplaceCleaner.rollbackItemsMoreThan1WeekOld();
+      await this.marketplaceCleaner.rollbackItemsAfterCertainPeriod();
     });
 
     // once per week, friday, at midnight

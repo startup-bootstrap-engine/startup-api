@@ -76,7 +76,11 @@ export class MapTransition {
 
   private getTransition(character: ICharacter, newX: number, newY: number): ITiledObject | undefined {
     const transition = this.mapTransitionInfo.getTransitionAtXY(character.scene, newX, newY);
-    if (!transition) console.error("Failed to fetch transition.");
+
+    if (!transition) {
+      return;
+    }
+
     return transition;
   }
 

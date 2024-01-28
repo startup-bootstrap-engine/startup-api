@@ -12,6 +12,7 @@ export const plantItemTurnip: IPlantItem = {
     "The turnip or white turnip is a root vegetable commonly grown in temperate climates worldwide for its white, fleshy taproot.",
   isStatic: true,
   isPersistent: true,
+  weight: 1,
   textureAtlas: "crops",
   texturePath: "seeds/seed-brown-2.png",
   stagesRequirements: {

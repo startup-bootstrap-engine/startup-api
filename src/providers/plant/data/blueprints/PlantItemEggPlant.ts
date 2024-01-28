@@ -12,6 +12,7 @@ export const plantItemEggPlant: IPlantItem = {
     "The eggplant, aubergine, or brinjal is a plant species in the nightshade family Solanaceae. Its fruit is high in fiber and low in calories.",
   isStatic: true,
   isPersistent: true,
+  weight: 1,
   textureAtlas: "crops",
   texturePath: "seeds/seed-purple-1.png",
   stagesRequirements: {

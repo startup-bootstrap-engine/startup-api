@@ -1,37 +1,35 @@
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { CharacterValidation } from "@providers/character/CharacterValidation";
-import { provide } from "inversify-binding-decorators";
-import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
-import { ChatSocketEvents } from "@rpg-engine/shared";
+import { SocketChannel } from "@providers/sockets/SocketsTypes";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { CharacterSocketEvents } from "@rpg-engine/shared";
+import { CharacterValidation } from "../CharacterValidation";
+import { provide } from "inversify-binding-decorators";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 
-export interface IPrivateChatFindCharacterResponse {
+interface ICharacterSearchByNameResponse {
   characters: ICharacter[];
 }
 
-@provide(ChatNetworkFindCharacter)
-export class ChatNetworkFindCharacter {
+@provide(CharacterNetworkSearch)
+export class CharacterNetworkSearch {
   constructor(
     private characterValidation: CharacterValidation,
     private socketMessaging: SocketMessaging,
     private socketAuth: SocketAuth
   ) {}
 
+  @TrackNewRelicTransaction()
   public onFindCharacter(channel: SocketChannel): void {
-    this.socketAuth.authCharacterOn(
-      channel,
-      ChatSocketEvents.PrivateChatMessageFindCharacter,
-      async (data, character) => {
-        await this.findCharacter(data.name, character);
-      }
-    );
+    this.socketAuth.authCharacterOn(channel, CharacterSocketEvents.CharacterSearchByName, async (data, character) => {
+      await this.findCharacter(data.name, character);
+    });
   }
 
   private async findCharacter(
     name: string,
     character: ICharacter
-  ): Promise<IPrivateChatFindCharacterResponse | undefined> {
+  ): Promise<ICharacterSearchByNameResponse | undefined> {
     const characterValid = this.characterValidation.hasBasicValidation(character);
     if (!characterValid || !name) {
       return;
@@ -43,9 +41,9 @@ export class ChatNetworkFindCharacter {
       return;
     }
 
-    this.socketMessaging.sendEventToUser<IPrivateChatFindCharacterResponse>(
+    this.socketMessaging.sendEventToUser<ICharacterSearchByNameResponse>(
       character.channelId!,
-      ChatSocketEvents.PrivateChatMessageFindCharacter,
+      CharacterSocketEvents.CharacterSearchByName,
       {
         characters: charactersFound,
       }

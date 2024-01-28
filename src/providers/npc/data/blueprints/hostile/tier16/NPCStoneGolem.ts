@@ -110,6 +110,14 @@ export const npcStoneGolem: INPCTierBlueprint<16> = {
       chance: 2,
     },
     {
+      itemBlueprintKey: MacesBlueprint.BoneBreakerClub,
+      chance: 6,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.DragonScalCleaverClub,
+      chance: 8,
+    },
+    {
       itemBlueprintKey: GlovesBlueprint.PyroclasmGloves,
       chance: 1,
     },

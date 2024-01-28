@@ -1,6 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { ItemCraftable } from "@providers/item/ItemCraftable";
+import { IPosition } from "@providers/movement/MovementHelper";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { MapLayers } from "@rpg-engine/shared";
 
@@ -8,6 +9,17 @@ export interface IUseWithTileEffect {
   (
     item: IItem,
     targetTile: IUseWithTargetTile,
+    targetName: string | undefined,
+    character: ICharacter,
+    itemCraftable: ItemCraftable,
+    skillIncrease: SkillIncrease
+  ): Promise<void> | void;
+}
+
+export interface IUseWithSeedEffect {
+  (
+    originItemKey: string,
+    targetTile: IUseWithTargetSeed,
     targetName: string | undefined,
     character: ICharacter,
     itemCraftable: ItemCraftable,
@@ -35,6 +47,13 @@ export interface IUseWithTileValidationResponse {
   originItem: IItem;
   useWithTileEffect?: IUseWithTileEffect;
   targetName?: string;
+}
+
+export interface IUseWithSeedValidationResponse {
+  itemKey: string;
+  targetSeed: IUseWithTargetSeed;
+  plantKey: string;
+  useWithTileEffect?: IUseWithSeedEffect;
 }
 
 export interface IMagicItemUseWithEntity extends IItem {
@@ -66,4 +85,9 @@ export interface IUseWithCraftingRecipe {
   outputQtyRange: [number, number];
   requiredItems: IUseWithCraftingRecipeItem[];
   minCraftingRequirements: [string, number];
+}
+
+export interface IUseWithTargetSeed {
+  coordinates: IPosition;
+  map: string;
 }

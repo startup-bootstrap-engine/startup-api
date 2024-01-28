@@ -5,6 +5,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   BootsBlueprint,
   DaggersBlueprint,
+  MacesBlueprint,
   PotionsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
@@ -74,6 +75,18 @@ export const npcCyclopsWarrior: INPCTierBlueprint<17> = {
     {
       itemBlueprintKey: BootsBlueprint.SolarflareBoots,
       chance: 10,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.StarfirMaulClub,
+      chance: 12,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SpikedClub,
+      chance: 14,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

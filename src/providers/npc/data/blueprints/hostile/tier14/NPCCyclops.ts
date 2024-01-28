@@ -70,6 +70,14 @@ export const npcCyclops: INPCTierBlueprint<14> = {
       itemBlueprintKey: LegsBlueprint.PlatinumTintLegs,
       chance: 5,
     },
+    {
+      itemBlueprintKey: MacesBlueprint.StarfirMaulClub,
+      chance: 12,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SpikedClub,
+      chance: 14,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
 };

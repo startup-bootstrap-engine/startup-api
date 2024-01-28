@@ -4,9 +4,9 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "blueprintKey": "greater-mana-potion",
-  "quantity": 1500,
-  "characterId": "6549765f4ce996004faaa311" 
+  "blueprintKey": "bonebreaker-club",
+  "quantity": 1,
+  "characterId": "65aadb3d2d5d93006ba518d5" 
 }
 
 ###

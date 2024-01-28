@@ -538,6 +538,20 @@ export enum MacesBlueprint {
   SkullCrusherMace = "skull-crusher-mace",
   BronzeFistMace = "bronze-fist-mace",
   SilverFistMace = "silver-fist-mace",
+  BoneBreakerClub = "bonebreaker-club",
+  IronWoodCrusherClub = "ironwood-crusher-club",
+  MetalMasherClub = "metal-masher-club",
+  ShatterSpikeClub = "shatterspike-club",
+  StonefangCleaverClub = "stonefang-cleaver-club",
+  DragonScalCleaverClub = "dragonscale-cleaver-club",
+  GrimHarbingerClub = "grim-harbinger-club",
+  MetalStoneScepter = "metalstone-scepter",
+  SkullCrusherClub = "skull-crusher-club",
+  StarfirMaulClub = "starfir-maul-club",
+  SunderingClub = "sundering-club",
+  ThunderStrikeClub = "thunder-strike-club",
+  TwinFangClub = "twin-fang-club",
+  WhirlWindCrusherClub = "whirl-wind-crusher-club",
 }
 
 export enum MagicsBlueprint {
@@ -563,6 +577,7 @@ export enum MagicsBlueprint {
   TrollsCavesTeleport = "trolls-caves-teleport",
   WildwoodDungeonTeleport = "wildwood-dungeon-teleport",
   LostTempleTeleport = "lost-temple-teleport",
+  Bomb = "bomb",
 }
 
 export enum BooksBlueprint {
@@ -618,6 +633,7 @@ export enum StaffsBlueprint {
   EagleEyeWand = "eagle-eye-wand",
   FrostbiteWand = "frostbite-wand",
   ElysianEyeStaff = "elysian-eye-staff",
+  AshwoodStaff = "ashwood-staff",
 }
 
 export enum ShieldsBlueprint {

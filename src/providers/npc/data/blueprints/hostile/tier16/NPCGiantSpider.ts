@@ -215,6 +215,22 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
       itemBlueprintKey: LegsBlueprint.KingsGuardLegs,
       chance: 5,
     },
+    {
+      itemBlueprintKey: MacesBlueprint.MetalStoneScepter,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.DragonScalCleaverClub,
+      chance: 12,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
+      chance: 14,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
+      chance: 18,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],
   areaSpells: [
