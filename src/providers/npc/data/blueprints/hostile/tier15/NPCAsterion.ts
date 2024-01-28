@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -13,12 +12,13 @@ import {
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { generateMoveTowardsMovement } from "@providers/npc/data/abstractions/BaseNeutralNPC";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 
 import { NPCAlignment, NPCCustomDeathPenalties } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 
-export const npcAsterion = {
+export const npcAsterion: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
   name: "Asterion",
   key: HostileNPCsBlueprint.Asterion,
@@ -27,23 +27,24 @@ export const npcAsterion = {
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Fast,
   canSwitchToLowHealthTarget: true,
+  // @ts-ignore
   baseHealth: 2500,
   healthRandomizerDice: Dice.D20,
   hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
 
   skills: {
-    level: 70,
+    level: 95,
     strength: {
-      level: 70,
+      level: 95,
     },
     dexterity: {
-      level: 30,
+      level: 95,
     },
     resistance: {
-      level: 40,
+      level: 95,
     },
     magicResistance: {
-      level: 80,
+      level: 95,
     },
   },
   fleeOnLowHealth: true,
@@ -108,4 +109,4 @@ export const npcAsterion = {
       chance: 1,
     },
   ],
-} as Partial<INPC>;
+};

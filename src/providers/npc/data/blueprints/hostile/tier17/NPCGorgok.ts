@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
@@ -16,39 +15,42 @@ import {
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { generateMoveTowardsMovement } from "@providers/npc/data/abstractions/BaseNeutralNPC";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment, NPCCustomDeathPenalties, RangeTypes } from "@rpg-engine/shared";
+import { NPCAlignment, NPCCustomDeathPenalties, NPCSubtype, RangeTypes } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 
-export const npcGorgok = {
+export const npcGorgok: INPCTierBlueprint<17> = {
   ...generateMoveTowardsMovement(),
   name: "Gorgok, the Chief",
   key: HostileNPCsBlueprint.Gorgok,
+  tier: 17,
+  subType: NPCSubtype.Humanoid,
   textureKey: HostileNPCsBlueprint.Goblin,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: RangedWeaponsBlueprint.IronArrow,
   maxRangeAttack: RangeTypes.High,
   speed: MovementSpeed.Fast,
-  baseHealth: 1500,
+  baseHealth: 2370,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
   hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
 
   skills: {
-    level: 150,
+    level: 178,
     strength: {
-      level: 45,
+      level: 178,
     },
     dexterity: {
-      level: 50,
+      level: 178,
     },
     resistance: {
-      level: 35,
+      level: 178,
     },
     magicResistance: {
-      level: 35,
+      level: 178,
     },
   },
   fleeOnLowHealth: true,
@@ -133,4 +135,4 @@ export const npcGorgok = {
       chance: 1,
     },
   ],
-} as Partial<INPC>;
+};

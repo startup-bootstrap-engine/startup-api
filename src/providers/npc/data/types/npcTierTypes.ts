@@ -33,6 +33,7 @@ export interface IBaseNPCBlueprint {
   attackType: EntityAttackType;
   ammoKey?: RangedWeaponsBlueprint | AnimationEffectKeys;
   maxRangeAttack?: RangeTypes;
+  isGiantForm?: boolean;
   speed: MovementSpeed;
   baseHealth: number;
   healthRandomizerDice: Dice;

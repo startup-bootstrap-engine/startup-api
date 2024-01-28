@@ -1,7 +1,6 @@
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { npcBattleCompanion } from "./NPCBattleCompanion";
-import { npcBattleCompanionMagic } from "./NPCBattleCompanionMagic";
-import { npcYeti } from "./bosses/NPCYeti";
+import { npcBattleCompanion } from "./other/NPCBattleCompanion";
+import { npcBattleCompanionMagic } from "./other/NPCBattleCompanionMagic";
 import { npcRat } from "./tier0/NPCRat";
 import { npcSpider } from "./tier0/NPCSpider";
 import { npcBat } from "./tier1/NPCBat";
@@ -40,6 +39,7 @@ import { npcGiantSpider } from "./tier16/NPCGiantSpider";
 import { npcOrcWarlord } from "./tier16/NPCOrcWarlord";
 import { npcStoneGolem } from "./tier16/NPCStoneGolem";
 import { npcWildCyclops } from "./tier16/NPCWildCyclops";
+import { npcYeti } from "./tier16/NPCYeti";
 import { npcCyclopsWarrior } from "./tier17/NPCCyclopsWarrior";
 import { npcElderGolem } from "./tier17/NPCElderGolem";
 import { npcFellbeast } from "./tier17/NPCFellbeast";

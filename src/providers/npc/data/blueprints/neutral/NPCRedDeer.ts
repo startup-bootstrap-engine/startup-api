@@ -1,15 +1,16 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { CraftingResourcesBlueprint, FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { NeutralNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveAwayMovement } from "../../abstractions/BaseNeutralNPC";
+import { IBaseNPCBlueprint } from "../../types/npcTierTypes";
 
-export const npcRedDeer: Partial<INPC> = {
+export const npcRedDeer: IBaseNPCBlueprint = {
   ...generateMoveAwayMovement(),
   name: "Red Deer",
+  subType: NPCSubtype.Animal,
   key: NeutralNPCsBlueprint.RedDeer,
   textureKey: NeutralNPCsBlueprint.RedDeer,
   alignment: NPCAlignment.Neutral,

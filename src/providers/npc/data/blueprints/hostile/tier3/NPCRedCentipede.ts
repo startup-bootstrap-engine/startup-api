@@ -16,6 +16,7 @@ export const npcRedCentipede: INPCTierBlueprint<3> = {
   name: "Red Centipede",
   key: HostileNPCsBlueprint.RedCentipede,
   subType: NPCSubtype.Insect,
+  tier: 3,
   textureKey: HostileNPCsBlueprint.RedCentipede,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,

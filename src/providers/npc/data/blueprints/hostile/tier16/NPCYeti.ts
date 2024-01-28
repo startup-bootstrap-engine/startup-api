@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -19,19 +18,22 @@ import {
   StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment, NPCCustomDeathPenalties, RangeTypes } from "@rpg-engine/shared";
+import { NPCAlignment, NPCCustomDeathPenalties, NPCSubtype, RangeTypes } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcYeti: Partial<INPC> = {
+export const npcYeti: INPCTierBlueprint<16> = {
   ...generateMoveTowardsMovement(),
   name: "Yeti",
+  tier: 16,
+  subType: NPCSubtype.Humanoid,
   key: HostileNPCsBlueprint.Yeti,
   textureKey: HostileNPCsBlueprint.Yeti,
   alignment: NPCAlignment.Hostile,
   speed: MovementSpeed.Fast,
-  baseHealth: 1200,
+  baseHealth: 1670,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: RangedWeaponsBlueprint.Stone,
   maxRangeAttack: RangeTypes.High,
@@ -41,18 +43,18 @@ export const npcYeti: Partial<INPC> = {
   hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
 
   skills: {
-    level: 100,
+    level: 128,
     strength: {
-      level: 50,
+      level: 128,
     },
     dexterity: {
-      level: 40,
+      level: 128,
     },
     resistance: {
-      level: 90,
+      level: 128,
     },
     magicResistance: {
-      level: 80,
+      level: 128,
     },
   },
   fleeOnLowHealth: true,

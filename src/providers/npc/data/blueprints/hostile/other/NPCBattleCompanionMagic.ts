@@ -1,21 +1,22 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { AnimationEffectKeys, NPCAlignment } from "@rpg-engine/shared";
+import { AnimationEffectKeys, NPCAlignment, NPCSubtype, RangeTypes } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { generateMoveTowardsMovement } from "../../abstractions/BaseNeutralNPC";
+import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { IBaseNPCBlueprint } from "../../../types/npcTierTypes";
 
-export const npcBattleCompanionMagic: Partial<INPC> = {
+export const npcBattleCompanionMagic: IBaseNPCBlueprint = {
   ...generateMoveTowardsMovement(),
   name: "Magic Battle Companion",
+  subType: NPCSubtype.Humanoid,
   key: HostileNPCsBlueprint.BattleCompanionMagic,
   textureKey: HostileNPCsBlueprint.DwarfMage,
   isMagic: true,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Ranged,
   ammoKey: AnimationEffectKeys.Blue,
-  maxRangeAttack: 8,
+  maxRangeAttack: RangeTypes.High,
   speed: MovementSpeed.Standard,
   baseHealth: 99999,
   healthRandomizerDice: Dice.D6,

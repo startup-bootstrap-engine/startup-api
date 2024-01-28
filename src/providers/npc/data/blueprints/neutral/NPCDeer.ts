@@ -1,15 +1,16 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { CraftingResourcesBlueprint, FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { NeutralNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveAwayMovement } from "../../abstractions/BaseNeutralNPC";
+import { IBaseNPCBlueprint } from "../../types/npcTierTypes";
 
-export const npcDeer = {
+export const npcDeer: IBaseNPCBlueprint = {
   ...generateMoveAwayMovement(),
   name: "Deer",
+  subType: NPCSubtype.Animal,
   key: NeutralNPCsBlueprint.Deer,
   textureKey: NeutralNPCsBlueprint.Deer,
   alignment: NPCAlignment.Neutral,
@@ -46,4 +47,4 @@ export const npcDeer = {
       quantityRange: [1, 3],
     },
   ],
-} as Partial<INPC>;
+};

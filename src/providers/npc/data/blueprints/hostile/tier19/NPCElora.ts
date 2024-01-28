@@ -1,4 +1,3 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
@@ -11,21 +10,25 @@ import {
   StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment, NPCCustomDeathPenalties } from "@rpg-engine/shared";
+import { AnimationEffectKeys, NPCAlignment, NPCCustomDeathPenalties, RangeTypes } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcEloraTheQueen: Partial<INPC> = {
+export const npcEloraTheQueen: INPCTierBlueprint<19> = {
   ...generateMoveTowardsMovement(),
   name: "Elora, the Queen",
   key: HostileNPCsBlueprint.EloraTheQueen,
+  // @ts-ignore
   textureKey: "green-druid",
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Ranged,
-  ammoKey: "fireball",
-  maxRangeAttack: 8,
+
+  ammoKey: AnimationEffectKeys.Green,
+  maxRangeAttack: RangeTypes.High,
   speed: MovementSpeed.ExtraFast,
+  // @ts-ignore
   baseHealth: 50000,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
@@ -34,21 +37,21 @@ export const npcEloraTheQueen: Partial<INPC> = {
   hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
 
   skills: {
-    level: 250,
+    level: 258,
     strength: {
-      level: 200,
+      level: 258,
     },
     dexterity: {
-      level: 200,
+      level: 258,
     },
     resistance: {
-      level: 200,
+      level: 258,
     },
     magicResistance: {
-      level: 200,
+      level: 258,
     },
     magic: {
-      level: 200,
+      level: 258,
     },
   },
   fleeOnLowHealth: true,

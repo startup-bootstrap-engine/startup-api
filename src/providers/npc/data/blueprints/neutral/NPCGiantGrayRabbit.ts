@@ -1,12 +1,12 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { NeutralNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { generateMoveAwayMovement } from "../../abstractions/BaseNeutralNPC";
+import { IBaseNPCBlueprint } from "../../types/npcTierTypes";
 import { npcGiantBrownRabbit } from "./NPCGiantBrownRabbit";
 
-export const npcGiantGrayRabbit = {
+export const npcGiantGrayRabbit: IBaseNPCBlueprint = {
   ...generateMoveAwayMovement(),
-  name: "Giant Rabbit",
   ...npcGiantBrownRabbit,
+  name: "Giant Rabbit",
   key: NeutralNPCsBlueprint.GiantGrayRabbit,
   textureKey: NeutralNPCsBlueprint.GiantGrayRabbit,
-} as Partial<INPC>;
+};

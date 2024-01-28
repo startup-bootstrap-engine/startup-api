@@ -1,9 +1,9 @@
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { npcAsterion } from "./NPCAsterion";
+import { npcAsterion } from "../tier15/NPCAsterion";
 
-import { npcEloraTheQueen } from "./NPCElora";
-import { npcGorgok } from "./NPCGorgok";
-import { npcMalakarLichKing } from "./NPCMalakar";
+import { npcGorgok } from "../tier17/NPCGorgok";
+import { npcEloraTheQueen } from "../tier19/NPCElora";
+import { npcMalakarLichKing } from "../tier19/NPCMalakar";
 
 export const bossesNPCs = {
   asterion: npcAsterion,
