@@ -43,7 +43,7 @@ export class ReferralRewardController implements interfaces.Controller {
 
       console.log("✨ Adding referral bonus to character: ", characterId);
 
-      await this.createReferralRewardUseCase.awardReferralBonusToCharacter(characterId, 1);
+      await this.createReferralRewardUseCase.awardReferralBonusToCharacter(characterId, 10);
 
       return response.status(HttpStatus.OK).json({ message: "Referral bonus added." });
     } catch (error) {
