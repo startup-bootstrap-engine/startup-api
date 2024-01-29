@@ -82,6 +82,32 @@ services:
           - node.role == manager
     networks:
       - rpg-network
+  rpg-docs:
+    image: definya/definya-team:docs-latest
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:3000"]
+      interval: 120s
+      timeout: 10s
+      retries: 3
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.rpg-client.rule=Host(`docs.definya.com`) || Host(`definya.com`)"
+        - "traefik.http.routers.rpg-client.entrypoints=websecure"
+        - "traefik.http.routers.rpg-client.tls.certresolver=myresolver"
+        - "traefik.http.services.rpg-client.loadbalancer.server.port=3000"
+      placement:
+        constraints:
+          - node.role == manager
+    networks:
+      - rpg-network
 
   rpg-db:
     image: mongo:7.0.0
