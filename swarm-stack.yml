@@ -99,10 +99,10 @@ services:
         condition: on-failure
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.rpg-client.rule=Host(`docs.definya.com`) || Host(`definya.com`)"
-        - "traefik.http.routers.rpg-client.entrypoints=websecure"
-        - "traefik.http.routers.rpg-client.tls.certresolver=myresolver"
-        - "traefik.http.services.rpg-client.loadbalancer.server.port=3000"
+        - "traefik.http.routers.rpg-docs.rule=Host(`docs.definya.com`) || Host(`definya.com`)"
+        - "traefik.http.routers.rpg-docs.entrypoints=websecure"
+        - "traefik.http.routers.rpg-docs.tls.certresolver=myresolver"
+        - "traefik.http.services.rpg-docs.loadbalancer.server.port=3000"
       placement:
         constraints:
           - node.role == manager
