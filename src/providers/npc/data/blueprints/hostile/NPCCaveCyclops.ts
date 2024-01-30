@@ -73,6 +73,18 @@ export const npcCaveCyclops = {
       itemBlueprintKey: MacesBlueprint.IronWoodCrusherClub,
       chance: 8,
     },
+    {
+      itemBlueprintKey: AxesBlueprint.CleaverAxe,
+      chance: 9,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.MaulAxe,
+      chance: 13,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.SpikeToppedAxe,
+      chance: 16,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
 } as Partial<INPC>;

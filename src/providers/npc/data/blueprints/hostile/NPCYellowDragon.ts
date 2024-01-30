@@ -154,6 +154,26 @@ export const npcYellowDragon = {
       itemBlueprintKey: AxesBlueprint.GuardianAxe,
       chance: 10,
     },
+    {
+      itemBlueprintKey: AxesBlueprint.BattleAxe,
+      chance: 12,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.CleaverAxe,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.HammerCleaveAxe,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.DualImpactAxe,
+      chance: 15,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.SpikeToppedAxe,
+      chance: 20,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],
   areaSpells: [

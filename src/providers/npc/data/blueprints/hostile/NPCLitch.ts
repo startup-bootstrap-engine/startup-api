@@ -5,6 +5,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
+  AxesBlueprint,
   BootsBlueprint,
   ContainersBlueprint,
   CraftingResourcesBlueprint,
@@ -154,6 +155,18 @@ export const npcLitch: Partial<INPC> = {
     {
       itemBlueprintKey: MacesBlueprint.IronWoodCrusherClub,
       chance: 5,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.BoneReaperAxe,
+      chance: 3,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.TwinEdgeAxe,
+      chance: 6,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning],

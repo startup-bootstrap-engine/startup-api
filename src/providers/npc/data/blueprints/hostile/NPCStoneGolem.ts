@@ -3,6 +3,7 @@ import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
   ArmorsBlueprint,
+  AxesBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
   FoodsBlueprint,
@@ -117,6 +118,26 @@ export const npcStoneGolem: Partial<INPC> = {
     {
       itemBlueprintKey: GlovesBlueprint.PyroclasmGloves,
       chance: 1,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.BoneReaperAxe,
+      chance: 3,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.TwinEdgeAxe,
+      chance: 6,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.BrutalChopperAxe,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.ExecutionersAxe,
+      chance: 6,
     },
   ],
 };

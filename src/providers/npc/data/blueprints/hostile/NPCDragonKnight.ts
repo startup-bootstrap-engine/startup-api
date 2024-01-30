@@ -112,6 +112,14 @@ export const npcDragonKnight: Partial<INPC> = {
       itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
       chance: 8,
     },
+    {
+      itemBlueprintKey: AxesBlueprint.DanishAxe,
+      chance: 9,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.SpikeToppedAxe,
+      chance: 10,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
 };

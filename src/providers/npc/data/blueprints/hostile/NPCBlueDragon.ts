@@ -169,6 +169,26 @@ export const npcBlueDragon = {
       itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
       chance: 28,
     },
+    {
+      itemBlueprintKey: AxesBlueprint.BoneReaperAxe,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
+      chance: 30,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.IroncladCleaver,
+      chance: 40,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.MaulAxe,
+      chance: 39,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.ExecutionersAxe,
+      chance: 42,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],
   areaSpells: [

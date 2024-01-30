@@ -40,6 +40,28 @@ import { itemRustBreakerAxe } from "./tier8/ItemRustBreakerAxe";
 import { itemGloriousAxe } from "./tier9/ItemGloriousAxe";
 import { itemGuardianAxe } from "./tier9/ItemGuardianAxe";
 import { itemHydraSlayerAxe } from "./tier9/ItemHydraSlayerAxe";
+import { itemBattleAxe } from "./tier11/itemBattleAxe";
+import { itemMinecraftAxe } from "./tier11/itemMinecraftAxe";
+import { itemChaosAxe } from "./tier12/itemChaosAxe";
+import { itemCleaverAxe } from "./tier12/itemCleaverAxe";
+import { itemHammerCleaveAxe } from "./tier12/itemHammerCleaveAxe";
+import { itemWarAxe } from "./tier12/itemWarAxe";
+import { itemDanishAxe } from "./tier13/itemDanishAxe";
+import { itemExecutionersAxe } from "./tier13/itemExecutionersAxe";
+import { itemSpikedCleaverAxe } from "./tier13/itemSpikedCleaverAxe";
+import { itemDualImpactAxe } from "./tier14/itemDualImpactAxe";
+import { itemMaulAxe } from "./tier14/itemMaulAxe";
+import { itemSpikeToppedAxe } from "./tier14/itemSpikeToppedAxe";
+import { itemBrutalChopperAxe } from "./tier15/itemBrutalChopperAxe";
+import { itemCrownedAxe } from "./tier15/itemCrownedAxe";
+import { itemTwinEdgeAxe } from "./tier15/itemTwinEdgeAxe";
+import { itemIroncladCleaver } from "./tier16/itemIroncladCleaver";
+import { itemRoyalChopperAxe } from "./tier16/itemRoyalChopperAxe";
+import { itemTimberSplitterAxe } from "./tier16/itemTimberSplitterAxe";
+import { itemBoneReaperAxe } from "./tier17/itemBoneReaperAxe";
+import { itemButterflierAxe } from "./tier17/itemButterflierAxe";
+import { itemSavageSmasher } from "./tier17/itemSavageSmasher";
+import { itemCrownSplitterAxe } from "./tier18/itemCrownSplitterAxe";
 
 export const axesBlueprintIndex = {
   [AxesBlueprint.Axe]: itemAxe,
@@ -83,4 +105,26 @@ export const axesBlueprintIndex = {
   [AxesBlueprint.GoldenReaverAxe]: itemGoldenReaverAxe,
   [AxesBlueprint.DaramianWaraxe]: itemDaramianWaraxe,
   [AxesBlueprint.CelestialArcAxe]: itemCelestialArcAxe,
+  [AxesBlueprint.BattleAxe]: itemBattleAxe,
+  [AxesBlueprint.MinecraftAxe]: itemMinecraftAxe,
+  [AxesBlueprint.ChaosAxe]: itemChaosAxe,
+  [AxesBlueprint.CleaverAxe]: itemCleaverAxe,
+  [AxesBlueprint.HammerCleaveAxe]: itemHammerCleaveAxe,
+  [AxesBlueprint.WarAxe]: itemWarAxe,
+  [AxesBlueprint.DanishAxe]: itemDanishAxe,
+  [AxesBlueprint.ExecutionersAxe]: itemExecutionersAxe,
+  [AxesBlueprint.SpikedCleaverAxe]: itemSpikedCleaverAxe,
+  [AxesBlueprint.DualImpactAxe]: itemDualImpactAxe,
+  [AxesBlueprint.MaulAxe]: itemMaulAxe,
+  [AxesBlueprint.SpikeToppedAxe]: itemSpikeToppedAxe,
+  [AxesBlueprint.BrutalChopperAxe]: itemBrutalChopperAxe,
+  [AxesBlueprint.CrownedAxe]: itemCrownedAxe,
+  [AxesBlueprint.TwinEdgeAxe]: itemTwinEdgeAxe,
+  [AxesBlueprint.IroncladCleaver]: itemIroncladCleaver,
+  [AxesBlueprint.RoyalChopperAxe]: itemRoyalChopperAxe,
+  [AxesBlueprint.TimberSplitterAxe]: itemTimberSplitterAxe,
+  [AxesBlueprint.BoneReaperAxe]: itemBoneReaperAxe,
+  [AxesBlueprint.ButterflierAxe]: itemButterflierAxe,
+  [AxesBlueprint.SavageSmasher]: itemSavageSmasher,
+  [AxesBlueprint.CrownSplitterAxe]: itemCrownSplitterAxe,
 };

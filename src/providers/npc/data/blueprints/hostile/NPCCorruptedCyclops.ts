@@ -4,6 +4,7 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
+  AxesBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
   HelmetsBlueprint,
@@ -84,6 +85,14 @@ export const npcCorruptedCyclops = {
     {
       itemBlueprintKey: MacesBlueprint.StonefangCleaverClub,
       chance: 8,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.DualImpactAxe,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.BrutalChopperAxe,
+      chance: 11,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],

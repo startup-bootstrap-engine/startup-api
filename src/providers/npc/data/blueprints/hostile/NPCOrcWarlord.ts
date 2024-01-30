@@ -4,6 +4,7 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   AccessoriesBlueprint,
+  AxesBlueprint,
   DaggersBlueprint,
   FoodsBlueprint,
   HelmetsBlueprint,
@@ -86,6 +87,18 @@ export const npcOrcWarlord: Partial<INPC> = {
     {
       itemBlueprintKey: MacesBlueprint.GrimHarbingerClub,
       chance: 12,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.DualImpactAxe,
+      chance: 14,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.MaulAxe,
+      chance: 16,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.CrownSplitterAxe,
+      chance: 18,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

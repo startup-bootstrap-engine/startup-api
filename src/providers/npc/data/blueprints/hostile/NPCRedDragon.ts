@@ -157,7 +157,6 @@ export const npcRedDragon = {
       itemBlueprintKey: HelmetsBlueprint.RoyalHelmet,
       chance: 30,
     },
-
     {
       itemBlueprintKey: HelmetsBlueprint.SaviorsHelmet,
       chance: 5,
@@ -177,6 +176,26 @@ export const npcRedDragon = {
     {
       itemBlueprintKey: AxesBlueprint.GuardianAxe,
       chance: 10,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.MinecraftAxe,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.CleaverAxe,
+      chance: 20,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.MaulAxe,
+      chance: 15,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.CrownedAxe,
+      chance: 14,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.IroncladCleaver,
+      chance: 15,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],

@@ -4,6 +4,7 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   ArmorsBlueprint,
+  AxesBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
   HammersBlueprint,
@@ -106,6 +107,18 @@ export const npcNazgul: Partial<INPC> = {
     {
       itemBlueprintKey: MacesBlueprint.IronWoodCrusherClub,
       chance: 20,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.DualImpactAxe,
+      chance: 22,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.MaulAxe,
+      chance: 24,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.CrownSplitterAxe,
+      chance: 26,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],

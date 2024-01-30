@@ -5,6 +5,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
+  AxesBlueprint,
   BootsBlueprint,
   ContainersBlueprint,
   CraftingResourcesBlueprint,
@@ -109,6 +110,14 @@ export const npcOrcRaider = {
     {
       itemBlueprintKey: ArmorsBlueprint.PlateArmor,
       chance: 5,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.HammerCleaveAxe,
+      chance: 6,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.RoyalChopperAxe,
+      chance: 7,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
