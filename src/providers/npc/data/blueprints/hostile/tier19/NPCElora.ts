@@ -3,6 +3,7 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   ArmorsBlueprint,
+  AxesBlueprint,
   BootsBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
@@ -112,6 +113,22 @@ export const npcEloraTheQueen: INPCTierBlueprint<19> = {
     {
       itemBlueprintKey: StaffsBlueprint.TartarusStaff,
       chance: 30,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.DualImpactAxe,
+      chance: 28,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.MaulAxe,
+      chance: 32,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.HammerCleaveAxe,
+      chance: 30,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.RoyalChopperAxe,
+      chance: 34,
     },
   ],
   entityEffects: [EntityEffectBlueprint.VineGrasp],

@@ -181,6 +181,34 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
       itemBlueprintKey: MacesBlueprint.MetalMasherClub,
       chance: 65,
     },
+    {
+      itemBlueprintKey: AxesBlueprint.CleaverAxe,
+      chance: 40,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.WarAxe,
+      chance: 50,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.DanishAxe,
+      chance: 60,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.SpikedCleaverAxe,
+      chance: 65,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.TimberSplitterAxe,
+      chance: 70,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
+      chance: 75,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.BrutalChopperAxe,
+      chance: 80,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
   areaSpells: [

@@ -115,6 +115,14 @@ export const npcDragonKnight: INPCTierBlueprint<16> = {
       itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
       chance: 8,
     },
+    {
+      itemBlueprintKey: AxesBlueprint.DanishAxe,
+      chance: 9,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.SpikeToppedAxe,
+      chance: 10,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
   areaSpells: [

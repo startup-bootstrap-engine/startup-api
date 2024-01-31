@@ -172,6 +172,26 @@ export const npcBlueDragon: INPCTierBlueprint<21> = {
       itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
       chance: 5,
     },
+    {
+      itemBlueprintKey: AxesBlueprint.BoneReaperAxe,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
+      chance: 30,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.IroncladCleaver,
+      chance: 40,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.MaulAxe,
+      chance: 39,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.ExecutionersAxe,
+      chance: 42,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],
   areaSpells: [

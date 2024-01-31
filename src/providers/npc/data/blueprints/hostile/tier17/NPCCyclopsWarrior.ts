@@ -3,6 +3,7 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
+  AxesBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
   MacesBlueprint,
@@ -87,6 +88,18 @@ export const npcCyclopsWarrior: INPCTierBlueprint<17> = {
     {
       itemBlueprintKey: MacesBlueprint.SpikedClub,
       chance: 14,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.CleaverAxe,
+      chance: 16,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.MaulAxe,
+      chance: 18,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.CrownedAxe,
+      chance: 20,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

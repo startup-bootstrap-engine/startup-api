@@ -3,6 +3,7 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   AccessoriesBlueprint,
+  AxesBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
   MacesBlueprint,
@@ -98,6 +99,14 @@ export const npcDarkElf: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: MacesBlueprint.StonefangCleaverClub,
       chance: 8,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.CleaverAxe,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.MaulAxe,
+      chance: 12,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],

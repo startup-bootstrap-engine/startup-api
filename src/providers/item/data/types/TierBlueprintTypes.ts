@@ -228,6 +228,12 @@ export type WeaponTier15Defense = WeaponTier14Defense | 107 | 108 | 109 | 110 | 
 export type WeaponTier16Attack = WeaponTier15Attack | 114 | 115 | 116 | 117 | 118 | 119 | 120;
 export type WeaponTier16Defense = WeaponTier15Defense | 114 | 115 | 116 | 117 | 118 | 119 | 120;
 
+export type WeaponTier17Attack = WeaponTier16Attack | 121 | 122 | 123 | 124 | 125 | 126 | 127;
+export type WeaponTier17Defense = WeaponTier16Defense | 121 | 122 | 123 | 124 | 125 | 126 | 127;
+
+export type WeaponTier18Attack = WeaponTier17Attack | 128 | 129 | 130 | 131 | 132 | 133 | 134;
+export type WeaponTier18Defense = WeaponTier17Defense | 128 | 129 | 130 | 131 | 132 | 133 | 134;
+
 export interface IEquippableMeleeTier0WeaponBlueprint extends IEquippableWeaponBlueprint {
   tier: 0;
   attack: WeaponTier0Attack;
@@ -322,6 +328,23 @@ export interface IEquippableMeleeTier15WeaponBlueprint extends IEquippableWeapon
   tier: 15;
   attack: WeaponTier15Attack;
   defense: WeaponTier15Defense;
+}
+export interface IEquippableMeleeTier16WeaponBlueprint extends IEquippableWeaponBlueprint {
+  tier: 16;
+  attack: WeaponTier16Attack;
+  defense: WeaponTier16Defense;
+}
+
+export interface IEquippableMeleeTier17WeaponBlueprint extends IEquippableWeaponBlueprint {
+  tier: 17;
+  attack: WeaponTier17Attack;
+  defense: WeaponTier17Defense;
+}
+
+export interface IEquippableMeleeTier18WeaponBlueprint extends IEquippableWeaponBlueprint {
+  tier: 18;
+  attack: WeaponTier18Attack;
+  defense: WeaponTier18Defense;
 }
 
 // 2 handed ========================================

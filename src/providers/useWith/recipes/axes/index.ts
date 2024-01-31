@@ -20,10 +20,16 @@ import { recipeSilverAxe } from "./recipeSilverAxe";
 import { recipeVikingBattleAxe } from "./recipeVikingBattleAxe";
 import { recipeWhiteRavenAxe } from "./recipeWhiteRavenAxe";
 import { recipeWoodenAxe } from "./recipeWoodenAxe";
+import { recipeCrownedAxe } from "./recipeCrownedAxe";
+import { recipeCrownSplitterAxe } from "./recipeCrownSplitterAxe";
+import { recipeDanishAxe } from "./recipeDanishAxe";
+import { recipeMaulAxe } from "./recipeMaulAxe";
+import { recipeMinecraftAxe } from "./recipeMinecraftAxe";
+import { recipeRoyalChopperAxe } from "./recipeRoyalChopperAxe";
+import { recipeWarAxe } from "./recipeWarAxe";
 
 export const recipeAxesIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [AxesBlueprint.Axe]: [recipeAxe],
-
   [AxesBlueprint.DoubleAxe]: [recipeDoubleAxe],
   [AxesBlueprint.FrostDoubleAxe]: [recipeFrostDoubleAxe],
   [AxesBlueprint.RuneAxe]: [recipeRuneAxe],
@@ -43,4 +49,11 @@ export const recipeAxesIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [AxesBlueprint.PhoenixWingAxe]: [recipePhoenixWingAxe],
   [AxesBlueprint.RustBreakerAxe]: [recipeRustBreakerAxe],
   [AxesBlueprint.SilentScreamAxe]: [recipeSilentScreamAxe],
+  [AxesBlueprint.CrownedAxe]: [recipeCrownedAxe],
+  [AxesBlueprint.CrownSplitterAxe]: [recipeCrownSplitterAxe],
+  [AxesBlueprint.DanishAxe]: [recipeDanishAxe],
+  [AxesBlueprint.MaulAxe]: [recipeMaulAxe],
+  [AxesBlueprint.MinecraftAxe]: [recipeMinecraftAxe],
+  [AxesBlueprint.RoyalChopperAxe]: [recipeRoyalChopperAxe],
+  [AxesBlueprint.WarAxe]: [recipeWarAxe],
 };

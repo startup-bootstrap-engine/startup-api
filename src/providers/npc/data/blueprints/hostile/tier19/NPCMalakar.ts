@@ -3,6 +3,7 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   ArmorsBlueprint,
+  AxesBlueprint,
   BootsBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
@@ -111,6 +112,26 @@ export const npcMalakarLichKing: INPCTierBlueprint<19> = {
     {
       itemBlueprintKey: SwordsBlueprint.LeviathanSword,
       chance: 20,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
+      chance: 30,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.IroncladCleaver,
+      chance: 40,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.MaulAxe,
+      chance: 39,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.TwinEdgeAxe,
+      chance: 40,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.SavageSmasher,
+      chance: 42,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Corruption],

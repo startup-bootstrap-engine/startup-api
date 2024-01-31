@@ -231,6 +231,18 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
       itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
       chance: 18,
     },
+    {
+      itemBlueprintKey: AxesBlueprint.SpikedCleaverAxe,
+      chance: 20,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.TimberSplitterAxe,
+      chance: 22,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
+      chance: 22,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],
   areaSpells: [

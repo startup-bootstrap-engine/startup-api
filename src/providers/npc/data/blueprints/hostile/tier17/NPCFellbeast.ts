@@ -4,6 +4,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
+  AxesBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
   HelmetsBlueprint,
@@ -94,6 +95,14 @@ export const npcFellbeast: INPCTierBlueprint<17> = {
     {
       itemBlueprintKey: MacesBlueprint.SunderingClub,
       chance: 6,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
+      chance: 7,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.BrutalChopperAxe,
+      chance: 8,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],

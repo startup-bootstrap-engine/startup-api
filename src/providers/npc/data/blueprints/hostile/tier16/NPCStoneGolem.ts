@@ -3,6 +3,7 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
+  AxesBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
   FoodsBlueprint,
@@ -165,6 +166,26 @@ export const npcStoneGolem: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: LegsBlueprint.KingsGuardLegs,
       chance: 5,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.BoneReaperAxe,
+      chance: 3,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.TwinEdgeAxe,
+      chance: 6,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.BrutalChopperAxe,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.ExecutionersAxe,
+      chance: 6,
     },
   ],
   areaSpells: [

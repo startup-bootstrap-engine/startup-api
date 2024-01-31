@@ -3,6 +3,7 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   ArmorsBlueprint,
+  AxesBlueprint,
   BooksBlueprint,
   CraftingResourcesBlueprint,
   GlovesBlueprint,
@@ -159,6 +160,18 @@ export const npcDragonServant: INPCTierBlueprint<18> = {
     {
       itemBlueprintKey: MacesBlueprint.IronWoodCrusherClub,
       chance: 28,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.BoneReaperAxe,
+      chance: 30,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
+      chance: 32,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.TwinEdgeAxe,
+      chance: 34,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],
