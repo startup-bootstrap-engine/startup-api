@@ -26,102 +26,50 @@ import {
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcRedDragon: INPCTierBlueprint<21> = {
+export const npcYellowDragon: INPCTierBlueprint<22> = {
   ...generateMoveTowardsMovement(),
-  name: "Red Dragon",
-  key: HostileNPCsBlueprint.RedDragon,
+  name: "Yellow Dragon",
+  key: HostileNPCsBlueprint.YellowDragon,
   subType: NPCSubtype.Animal,
-  textureKey: HostileNPCsBlueprint.RedDragon,
+  textureKey: HostileNPCsBlueprint.YellowDragon,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: AnimationEffectKeys.FireBall,
+  hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
+
   maxRangeAttack: RangeTypes.High,
-  tier: 21,
   speed: MovementSpeed.ExtraFast,
   // @ts-ignore
-  baseHealth: 30000,
+  baseHealth: 70000,
   healthRandomizerDice: Dice.D20,
   skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   canSwitchToLowHealthTarget: true,
   canSwitchToRandomTarget: true,
-  hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
-
   isMagic: true,
+  tier: 22,
   skills: {
-    level: 338,
+    level: 418,
     strength: {
-      level: 338,
+      level: 418,
     },
     dexterity: {
-      level: 378,
+      level: 418,
     },
     resistance: {
-      level: 378,
+      level: 418,
     },
     magicResistance: {
-      level: 338,
+      level: 418,
     },
     magic: {
-      level: 338,
+      level: 418,
     },
   },
   loots: [
     {
       itemBlueprintKey: SwordsBlueprint.DragonsSword,
       chance: 20,
-    },
-    {
-      itemBlueprintKey: ArmorsBlueprint.TemplarsPlate,
-      chance: 2,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.YggdrasilJianSword,
-      chance: 1,
-    },
-    {
-      itemBlueprintKey: ShieldsBlueprint.TemporalRoundShield,
-      chance: 2,
-    },
-    {
-      itemBlueprintKey: ShieldsBlueprint.EmeraldShield,
-      chance: 1,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
-      chance: 50,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.DragonScalCleaverClub,
-      chance: 60,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
-      chance: 55,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.MetalMasherClub,
-      chance: 30,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.SunderingClub,
-      chance: 30,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
-      chance: 48,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.TwinFangClub,
-      chance: 38,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
-      chance: 38,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.MetalStoneScepter,
-      chance: 28,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,
@@ -131,6 +79,34 @@ export const npcRedDragon: INPCTierBlueprint<21> = {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonTooth,
       chance: 50,
       quantityRange: [1, 3],
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.DragonScalCleaverClub,
+      chance: 7,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
+      chance: 6,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
+      chance: 6,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.TwinFangClub,
+      chance: 7,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
+      chance: 3,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.MetalStoneScepter,
+      chance: 4,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
@@ -186,12 +162,17 @@ export const npcRedDragon: INPCTierBlueprint<21> = {
   areaSpells: [
     {
       spellKey: SpellsBlueprint.FireStorm,
-      probability: 60,
+      probability: 40,
+      power: MagicPower.UltraHigh,
+    },
+    {
+      spellKey: SpellsBlueprint.EnergyWave,
+      probability: 70,
       power: MagicPower.UltraHigh,
     },
     {
       spellKey: SpellsBlueprint.VampiricStorm,
-      probability: 30,
+      probability: 40,
       power: MagicPower.Medium,
     },
   ],

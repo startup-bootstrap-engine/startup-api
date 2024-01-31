@@ -26,47 +26,49 @@ import {
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcBlueDragon: INPCTierBlueprint<22> = {
+export const npcPurpleDragon: INPCTierBlueprint<23> = {
   ...generateMoveTowardsMovement(),
-  name: "Blue Dragon",
-  key: HostileNPCsBlueprint.BlueDragon,
+  name: "Purple Dragon",
+  key: HostileNPCsBlueprint.PurpleDragon,
   subType: NPCSubtype.Animal,
-  textureKey: HostileNPCsBlueprint.BlueDragon,
+  textureKey: HostileNPCsBlueprint.PurpleDragon,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: AnimationEffectKeys.FireBall,
-  hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
+  tier: 23,
   maxRangeAttack: RangeTypes.High,
   speed: MovementSpeed.ExtraFast,
   // @ts-ignore
-  baseHealth: 50000,
+  baseHealth: 100000,
   healthRandomizerDice: Dice.D20,
   skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   canSwitchToLowHealthTarget: true,
   canSwitchToRandomTarget: true,
+  hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
+
   isMagic: true,
   skills: {
-    level: 398,
+    level: 498,
     strength: {
-      level: 398,
+      level: 498,
     },
     dexterity: {
-      level: 398,
+      level: 498,
     },
     resistance: {
-      level: 398,
+      level: 498,
     },
     magicResistance: {
-      level: 398,
+      level: 498,
     },
     magic: {
-      level: 398,
+      level: 498,
     },
   },
   loots: [
     {
-      itemBlueprintKey: SwordsBlueprint.LeviathanSword,
+      itemBlueprintKey: SwordsBlueprint.DragonsSword,
       chance: 20,
     },
     {
@@ -75,12 +77,28 @@ export const npcBlueDragon: INPCTierBlueprint<22> = {
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonTooth,
-      chance: 80,
-      quantityRange: [1, 3],
+      chance: 100,
+      quantityRange: [5, 10],
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.YggdrasilJianSword,
+      chance: 1,
+    },
+    {
+      itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
+      chance: 20,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.DarkArmor,
-      chance: 5,
+      chance: 20,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.LeviathanSword,
+      chance: 20,
+    },
+    {
+      itemBlueprintKey: ArmorsBlueprint.TemplarsPlate,
+      chance: 10,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.DemonShield,
@@ -128,66 +146,58 @@ export const npcBlueDragon: INPCTierBlueprint<22> = {
       chance: 10,
     },
     {
-      itemBlueprintKey: HelmetsBlueprint.GlacialCrown,
-      chance: 5,
+      itemBlueprintKey: SwordsBlueprint.YggdrasilTemplarSword,
+      chance: 10,
     },
     {
-      itemBlueprintKey: AxesBlueprint.GlacialAxe,
-      chance: 5,
+      itemBlueprintKey: MacesBlueprint.SunderingClub,
+      chance: 45,
     },
     {
-      itemBlueprintKey: LegsBlueprint.GlacialLegs,
-      chance: 5,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.GlacialSword,
-      chance: 5,
-    },
-    {
-      itemBlueprintKey: ShieldsBlueprint.EmeraldShield,
-      chance: 1,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
-      chance: 30,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.DragonScalCleaverClub,
-      chance: 40,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
-      chance: 35,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
-      chance: 48,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.TwinFangClub,
-      chance: 50,
+      itemBlueprintKey: MacesBlueprint.BoneBreakerClub,
+      chance: 78,
     },
     {
       itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
-      chance: 28,
+      chance: 50,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
+      chance: 84,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.GrimHarbingerClub,
+      chance: 40,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.TwinFangClub,
+      chance: 55,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
+      chance: 65,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.MetalMasherClub,
+      chance: 65,
     },
   ],
-  entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],
+  entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
   areaSpells: [
     {
-      spellKey: SpellsBlueprint.FireStorm,
-      probability: 40,
-      power: MagicPower.Medium,
+      spellKey: SpellsBlueprint.VampiricStorm,
+      probability: 50,
+      power: MagicPower.High,
     },
     {
-      spellKey: SpellsBlueprint.Blizzard,
+      spellKey: SpellsBlueprint.CorruptionWave,
       probability: 70,
       power: MagicPower.UltraHigh,
     },
     {
-      spellKey: SpellsBlueprint.VampiricStorm,
+      spellKey: SpellsBlueprint.FireStorm,
       probability: 40,
-      power: MagicPower.High,
+      power: MagicPower.Medium,
     },
   ],
 };

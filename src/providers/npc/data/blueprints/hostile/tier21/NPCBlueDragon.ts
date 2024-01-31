@@ -26,90 +26,62 @@ import {
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcYellowDragon: INPCTierBlueprint<23> = {
+export const npcBlueDragon: INPCTierBlueprint<21> = {
   ...generateMoveTowardsMovement(),
-  name: "Yellow Dragon",
-  key: HostileNPCsBlueprint.YellowDragon,
+  name: "Blue Dragon",
+  key: HostileNPCsBlueprint.BlueDragon,
   subType: NPCSubtype.Animal,
-  textureKey: HostileNPCsBlueprint.YellowDragon,
+  textureKey: HostileNPCsBlueprint.BlueDragon,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: AnimationEffectKeys.FireBall,
   hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
-
   maxRangeAttack: RangeTypes.High,
   speed: MovementSpeed.ExtraFast,
   // @ts-ignore
-  baseHealth: 70000,
+  baseHealth: 50000,
   healthRandomizerDice: Dice.D20,
   skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   canSwitchToLowHealthTarget: true,
   canSwitchToRandomTarget: true,
   isMagic: true,
+  tier: 21,
   skills: {
-    level: 478,
+    level: 358,
     strength: {
-      level: 478,
+      level: 358,
     },
     dexterity: {
-      level: 478,
+      level: 358,
     },
     resistance: {
-      level: 478,
+      level: 358,
     },
     magicResistance: {
-      level: 478,
+      level: 358,
     },
     magic: {
-      level: 478,
+      level: 358,
     },
   },
   loots: [
     {
-      itemBlueprintKey: SwordsBlueprint.DragonsSword,
+      itemBlueprintKey: SwordsBlueprint.LeviathanSword,
       chance: 20,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,
-      chance: 50,
+      chance: 100,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonTooth,
-      chance: 50,
+      chance: 80,
       quantityRange: [1, 3],
     },
     {
-      itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
-      chance: 60,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.DragonScalCleaverClub,
-      chance: 70,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
-      chance: 65,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
-      chance: 68,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.TwinFangClub,
-      chance: 78,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
-      chance: 38,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.MetalStoneScepter,
-      chance: 48,
-    },
-    {
-      itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
-      chance: 20,
+      itemBlueprintKey: ArmorsBlueprint.DarkArmor,
+      chance: 5,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.DemonShield,
@@ -156,23 +128,67 @@ export const npcYellowDragon: INPCTierBlueprint<23> = {
       itemBlueprintKey: AxesBlueprint.GuardianAxe,
       chance: 10,
     },
+    {
+      itemBlueprintKey: HelmetsBlueprint.GlacialCrown,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.GlacialAxe,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: LegsBlueprint.GlacialLegs,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.GlacialSword,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: ShieldsBlueprint.EmeraldShield,
+      chance: 1,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.DragonScalCleaverClub,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.TwinFangClub,
+      chance: 8,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
+      chance: 5,
+    },
   ],
-  entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],
+  entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],
   areaSpells: [
     {
       spellKey: SpellsBlueprint.FireStorm,
       probability: 40,
-      power: MagicPower.UltraHigh,
+      power: MagicPower.Medium,
     },
     {
-      spellKey: SpellsBlueprint.EnergyWave,
+      spellKey: SpellsBlueprint.Blizzard,
       probability: 70,
       power: MagicPower.UltraHigh,
     },
     {
       spellKey: SpellsBlueprint.VampiricStorm,
       probability: 40,
-      power: MagicPower.Medium,
+      power: MagicPower.High,
     },
   ],
 };
