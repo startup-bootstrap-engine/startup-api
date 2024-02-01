@@ -29,6 +29,7 @@ import {
   ICharacterAttributeChanged,
   IDisplayTextEvent,
   IIncreaseXPResult,
+  ILevelUpFromServer,
   IUIShowMessage,
   Modes,
   SkillEventType,
@@ -253,11 +254,17 @@ export class NPCExperience {
 
     await this.bootHPAndManaOnLevelUp(character);
 
+    const formattedPreviousLevel = this.numberFormatter.formatNumber(previousLevel);
+    const formattedCurrentLevel = this.numberFormatter.formatNumber(expData.level);
+
     this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId!, UISocketEvents.ShowMessage, {
-      message: `You advanced from level ${this.numberFormatter.formatNumber(
-        previousLevel
-      )} to level ${this.numberFormatter.formatNumber(expData.level)}.`,
+      message: `You advanced from level ${formattedPreviousLevel} to level ${formattedCurrentLevel}.`,
       type: "info",
+    });
+
+    this.socketMessaging.sendEventToUser<ILevelUpFromServer>(character.channelId!, SkillSocketEvents.LevelUp, {
+      previousLevel: formattedPreviousLevel,
+      currentLevel: formattedCurrentLevel,
     });
 
     const payload = {
