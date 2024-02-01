@@ -41,10 +41,6 @@ services:
         - traefik.http.services.rpg-api-socket-service.loadbalancer.server.port=5101
         - traefik.http.routers.rpg-api-socket.service=rpg-api-socket-service
 
-        # Add sticky session for websockets
-        # - "traefik.http.services.rpg-api-socket-service.loadbalancer.sticky=true"
-        # - "traefik.http.services.rpg-api-socket-service.loadbalancer.sticky.cookie.name=StickyCookie"
-        # - "traefik.http.services.rpg-api-socket-service.loadbalancer.sticky.cookie.secure=true"
     logging:
       options:
         max-size: "10m"
