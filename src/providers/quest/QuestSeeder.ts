@@ -24,18 +24,18 @@ export class QuestSeeder {
       console.log("🤷 No Quest data to seed");
     }
 
-    for (const questData of questSeedData) {
+    const questPromises = questSeedData.map(async (questData) => {
       const questFound = (await Quest.findOne({
         npcId: questData.npcId,
         key: questData.key,
-      })) as unknown as IQuestModel;
+      }).lean()) as unknown as IQuestModel;
 
       if (!questFound) {
-        // console.log(`🌱 Seeding database with Quest data for Quest with key: ${QuestData.key}`);
-
         await this.createNewQuest(questData as IQuest);
       }
-    }
+    });
+
+    await Promise.all(questPromises);
   }
 
   private async createNewQuest(QuestData: IQuest): Promise<void> {
