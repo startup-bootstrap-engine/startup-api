@@ -40,17 +40,19 @@ export class NPCSeeder {
     const npcDataArray = Array.from(npcSeedData.values());
     const existingNPCs = await this.fetchExistingNPCs(npcDataArray);
 
-    for (const NPCData of npcDataArray) {
+    const npcPromises = npcDataArray.map(async (NPCData) => {
       const npcFound = this.findExistingNPC(existingNPCs, NPCData);
       await this.setInitialNPCPositionAsSolid(NPCData);
       const customizedNPC = this.getNPCDataWithMultipliers(NPCData);
 
       if (!npcFound) {
-        await this.createNewNPCWithSkills(customizedNPC);
+        return this.createNewNPCWithSkills(customizedNPC);
       } else {
-        await this.handleExistingNPC(npcFound);
+        return this.handleExistingNPC(npcFound);
       }
-    }
+    });
+
+    await Promise.all(npcPromises);
 
     await this.npcDuplicateCleaner.cleanupDuplicateNPCs();
   }

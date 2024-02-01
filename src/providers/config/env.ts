@@ -16,7 +16,6 @@ export const appEnv = {
     SERVER_PORT: process.env.SERVER_PORT,
     SWAGGER_AUTH_TOKEN: process.env.SWAGGER_AUTH_TOKEN,
     FMP_API_KEY: process.env.FMP_API_KEY,
-    SENTRY_DNS_URL: process.env.SENTRY_DNS_URL,
 
     IS_UNIT_TEST: process.env.JEST_WORKER_ID !== undefined,
     DEBUG_MODE: process.env.DEBUG_MODE === "true",
