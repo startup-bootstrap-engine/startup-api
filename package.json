@@ -43,7 +43,7 @@
     "@amplitude/identify": "^1.8.2",
     "@amplitude/node": "^1.8.3",
     "@geckos.io/server": "^2.1.8",
-    "@rpg-engine/shared": "^0.9.16",
+    "@rpg-engine/shared": "^0.9.18",
     "@sendgrid/mail": "^7.4.0",
     "@side/jest-runtime": "^1.1.0",
     "@socket.io/pm2": "^5.3.0",

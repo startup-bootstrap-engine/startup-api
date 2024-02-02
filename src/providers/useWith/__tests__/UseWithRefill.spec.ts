@@ -6,7 +6,7 @@ import { container, unitTestHelper } from "@providers/inversify/container";
 import { ToolsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { PlantItemBlueprint } from "@providers/plant/data/types/PlantTypes";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
-import { IRefillableItem, ItemType, MapLayers } from "@rpg-engine/shared";
+import { IRefillableItem, ItemType, MapLayers, UseWithSocketEvents } from "@rpg-engine/shared";
 import _ from "lodash";
 import { IUseWithRefill, UseWithRefill } from "../abstractions/UseWithRefill";
 import { IUseWithTargetTile } from "../useWithTypes";
@@ -27,6 +27,7 @@ describe("UseWithRefill.ts", () => {
   const mockSocketMessaging = {
     sendMessageToCharacter: jest.fn(),
     sendErrorMessageToCharacter: jest.fn(),
+    sendEventToUser: jest.fn(),
   };
 
   beforeAll(() => {
@@ -168,6 +169,14 @@ describe("UseWithRefill.ts", () => {
     expect(updatedRefillItem?.remainingUses).toEqual(currentRemainingUses - decrementQty);
 
     expect(sendRandomMessageToCharacterMock).toBeCalledWith(testCharacter, useWithRefillData.successMessages, true);
+
+    expect(mockSocketMessaging.sendEventToUser).toBeCalledWith(
+      testCharacter.channelId!,
+      UseWithSocketEvents.UseWithWater,
+      {
+        status: true,
+      }
+    );
   });
 
   it("should handles error messages when random number is greater than 50", async () => {
