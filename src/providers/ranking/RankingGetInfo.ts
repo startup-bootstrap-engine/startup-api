@@ -143,6 +143,7 @@ export class RankingGetInfo {
       "cooking",
       "alchemy",
       "blacksmithing",
+      "farming",
     ];
 
     const pipeline = skills.map((skill) => {

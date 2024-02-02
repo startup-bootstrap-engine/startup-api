@@ -1,4 +1,5 @@
 import { Character } from "@entities/ModuleCharacter/CharacterModel";
+import { Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
@@ -8,7 +9,7 @@ import { ItemContainerBodyCleaner } from "@providers/item/cleaner/ItemContainerB
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { ItemReportGenerator } from "@providers/item/ItemReportGenerator";
 import { MarketplaceCleaner } from "@providers/marketplace/MarketplaceCleaner";
-import { FromGridX, FromGridY, IItem } from "@rpg-engine/shared";
+import { calculateSPToNextLevel, FromGridX, FromGridY, IItem } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
 
@@ -117,6 +118,27 @@ export class ScriptsUseCase {
       console.error(error);
 
       throw new BadRequestError("Failed to execute script!");
+    }
+  }
+
+  public async UpdateFarmingSkills(): Promise<void> {
+    try {
+      await Skill.updateMany(
+        {},
+        {
+          $set: {
+            farming: {
+              type: "Gathering",
+              level: 1,
+              skillPoints: 0,
+              skillPointsToNextLevel: calculateSPToNextLevel(0, 2),
+              lastSkillGain: new Date(),
+            },
+          },
+        }
+      );
+    } catch (error) {
+      console.error(error);
     }
   }
 }

@@ -32,3 +32,8 @@ Content-Type: application/json
 GET {{baseUrl}}/scripts/update-items-min-requirements HTTP/1.1
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
+
+### Scripts :: Update farming skills
+GET {{baseUrl}}/scripts/update-farming-skills HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
