@@ -72,6 +72,7 @@ export const CLASS_BONUS_OR_PENALTIES = [
       cooking: 0,
       alchemy: 0,
       blacksmithing: 0,
+      farming: 0,
     },
   },
   {
@@ -100,6 +101,7 @@ export const CLASS_BONUS_OR_PENALTIES = [
       cooking: 0,
       alchemy: -0.05,
       blacksmithing: 0.1,
+      farming: 0.1,
     },
   },
   {
@@ -128,6 +130,7 @@ export const CLASS_BONUS_OR_PENALTIES = [
       cooking: -0.05,
       alchemy: -0.1,
       blacksmithing: 0,
+      farming: 0.05,
     },
   },
   {
@@ -156,6 +159,7 @@ export const CLASS_BONUS_OR_PENALTIES = [
       cooking: 0.1,
       alchemy: 0.2,
       blacksmithing: 0,
+      farming: 0.2,
     },
   },
   {
@@ -184,6 +188,7 @@ export const CLASS_BONUS_OR_PENALTIES = [
       cooking: 0.05,
       alchemy: 0.15,
       blacksmithing: 0,
+      farming: -0.05,
     },
   },
   {
@@ -212,6 +217,7 @@ export const CLASS_BONUS_OR_PENALTIES = [
       cooking: 0,
       alchemy: 0.05,
       blacksmithing: 0.1,
+      farming: 0,
     },
   },
   {
@@ -240,6 +246,7 @@ export const CLASS_BONUS_OR_PENALTIES = [
       cooking: 0,
       alchemy: 0,
       blacksmithing: 0,
+      farming: 0.15,
     },
   },
 ];
@@ -271,6 +278,7 @@ export const RACE_BONUS_OR_PENALTIES = [
       cooking: 0,
       alchemy: 0,
       blacksmithing: 0,
+      farming: 0,
     },
   },
   {
@@ -299,6 +307,7 @@ export const RACE_BONUS_OR_PENALTIES = [
       cooking: -0.1,
       alchemy: -0.2,
       blacksmithing: 0,
+      farming: -0.1,
     },
   },
   {
@@ -327,6 +336,7 @@ export const RACE_BONUS_OR_PENALTIES = [
       cooking: -0.05,
       alchemy: -0.1,
       blacksmithing: 0.1,
+      farming: -0.2,
     },
   },
   {
@@ -355,6 +365,7 @@ export const RACE_BONUS_OR_PENALTIES = [
       cooking: 0,
       alchemy: 0,
       blacksmithing: 0,
+      farming: 0,
     },
   },
   {
@@ -383,6 +394,7 @@ export const RACE_BONUS_OR_PENALTIES = [
       cooking: 0,
       alchemy: 0,
       blacksmithing: 0,
+      farming: 0,
     },
   },
   {
@@ -411,6 +423,7 @@ export const RACE_BONUS_OR_PENALTIES = [
       cooking: 0.1,
       alchemy: 0.1,
       blacksmithing: 0.2,
+      farming: 0.1,
     },
   },
   {
@@ -439,6 +452,7 @@ export const RACE_BONUS_OR_PENALTIES = [
       cooking: 0.1,
       alchemy: 0.1,
       blacksmithing: 0,
+      farming: 0.2,
     },
   },
   {
@@ -467,6 +481,7 @@ export const RACE_BONUS_OR_PENALTIES = [
       cooking: 0,
       alchemy: 0,
       blacksmithing: 0,
+      farming: 0,
     },
   },
 ];

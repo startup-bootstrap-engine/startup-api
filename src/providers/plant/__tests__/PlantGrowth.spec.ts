@@ -179,6 +179,7 @@ describe("PlantGrowth.ts", () => {
             layer: plant.layer!,
             stackQty: plant.stackQty || 0,
             isDeadBodyLootable: plant.isDeadBodyLootable,
+            lastWatering: expect.anything(),
           },
         ],
       },

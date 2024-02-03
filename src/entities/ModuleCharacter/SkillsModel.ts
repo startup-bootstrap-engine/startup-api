@@ -94,6 +94,7 @@ export const skillsSchema = createLeanSchema(
     cooking: skillDetails(SkillType.Crafting),
     alchemy: skillDetails(SkillType.Crafting),
     blacksmithing: skillDetails(SkillType.Crafting),
+    farming: skillDetails(SkillType.Gathering),
   },
   { timestamps: { createdAt: true, updatedAt: true } }
 );

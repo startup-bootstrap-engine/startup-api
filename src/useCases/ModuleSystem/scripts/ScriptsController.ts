@@ -83,4 +83,13 @@ export class ScriptsController implements interfaces.Controller {
       message: "Items min requirements updated!",
     });
   }
+
+  @httpGet("/update-farming-skills")
+  public async updateFarmingSkills(@response() res): Promise<void> {
+    await this.scriptsUseCase.UpdateFarmingSkills();
+
+    return res.status(200).send({
+      message: "Farming skills updated!",
+    });
+  }
 }

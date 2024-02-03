@@ -138,6 +138,7 @@ export class ItemView {
       layer: item.layer!,
       stackQty: item.stackQty || 0,
       isDeadBodyLootable: item.isDeadBodyLootable,
+      lastWatering: item.lastWatering!,
     };
   }
 

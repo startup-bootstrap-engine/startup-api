@@ -7,7 +7,7 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { container } from "@providers/inversify/container";
 import { PlantGrowth } from "@providers/plant/PlantGrowth";
-import { IRefillableItem } from "@rpg-engine/shared";
+import { IRefillableItem, IUseWithTileValidation, UseWithSocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import _, { random } from "lodash";
 import { IUseWithTargetTile } from "../useWithTypes";
@@ -104,6 +104,15 @@ export class UseWithRefill {
 
       if (isSuccess) {
         originItem.remainingUses -= decrementQty ?? 1;
+
+        // send watered plant event to client
+        this.socketMessaging.sendEventToUser<IUseWithTileValidation>(
+          character.channelId!,
+          UseWithSocketEvents.UseWithWater,
+          {
+            status: true,
+          }
+        );
 
         await originItem.save();
 
