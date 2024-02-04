@@ -267,6 +267,14 @@ const characterSchema = createLeanSchema(
         ref: "Character",
       })
     ),
+    totalDaysPlayed: Type.number({
+      default: 0,
+      required: true,
+    }),
+
+    lastDayPlayed: Type.date({
+      required: false,
+    }),
   },
   {
     timestamps: { createdAt: true, updatedAt: true },

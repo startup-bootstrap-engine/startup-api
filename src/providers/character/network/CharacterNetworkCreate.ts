@@ -37,13 +37,14 @@ import { Locker } from "@providers/locks/Locker";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
 import { clearCacheForKey } from "speedgoose";
+import { CharacterDailyPlayTracker } from "../CharacterDailyPlayTracker";
 import { CharacterDeath } from "../CharacterDeath";
 import { CharacterPremiumAccount } from "../CharacterPremiumAccount";
 import { CharacterBuffTracker } from "../characterBuff/CharacterBuffTracker";
 import { CharacterBuffValidation } from "../characterBuff/CharacterBuffValidation";
 import { CharacterBaseSpeed } from "../characterMovement/CharacterBaseSpeed";
-import { WarriorPassiveHabilities } from "../characterPassiveHabilities/WarriorPassiveHabilities";
 import { ManaRegen } from "../characterPassiveHabilities/ManaRegen";
+import { WarriorPassiveHabilities } from "../characterPassiveHabilities/WarriorPassiveHabilities";
 
 @provide(CharacterNetworkCreate)
 export class CharacterNetworkCreate {
@@ -71,7 +72,8 @@ export class CharacterNetworkCreate {
 
     private characterBaseSpeed: CharacterBaseSpeed,
     private characterBuffTracker: CharacterBuffTracker,
-    private characterPremiumAccount: CharacterPremiumAccount
+    private characterPremiumAccount: CharacterPremiumAccount,
+    private characterDailyPlayTracker: CharacterDailyPlayTracker
   ) {}
 
   public onCharacterCreate(channel: SocketChannel): void {
@@ -99,6 +101,8 @@ export class CharacterNetworkCreate {
 
           return;
         }
+
+        await this.characterDailyPlayTracker.updateCharacterDailyPlay(character._id);
 
         // update baseSpeed according to skill level
 
