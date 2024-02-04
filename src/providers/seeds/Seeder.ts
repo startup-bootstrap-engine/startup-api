@@ -26,7 +26,7 @@ export class Seeder {
       this.timeSeeder(this.redisCleanup, "Redis Cleanup"),
     ]);
 
-    await this.timeSeeder(this.questSeeder, "Quest Seeding");
+    await this.timeSeeder(this.questSeeder, "Quest Seeding"); // quest needs to be here because it depends on npcs
 
     console.timeEnd("🌱 Total Seeding");
   }

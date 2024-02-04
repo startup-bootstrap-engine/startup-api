@@ -16,7 +16,6 @@ PORT=$(awk -F'=' '/^MONGO_PORT/ { print $2}' "$PROD_ENV")
 
 # Unzip db data 
 
-
 cd "$BACKUPS_FOLDER"
  
 unzip "db-dump.zip" -d "./"
@@ -26,7 +25,7 @@ docker cp "./db-dump" "$DB_CONTAINER:/"
 cd "$PROJECT_FOLDER" # We should go back to the project root folder to execute docker-compose properly, otherwise an error will occur!
 
 # Import it to container
-docker-compose exec $DB_CONTAINER mongorestore -d $DB_CONTAINER --port $PORT -u $USERNAME -p $PASSWORD "./db-dump/$DB_CONTAINER" --drop
+docker-compose exec $DB_CONTAINER mongorestore -d $DB_CONTAINER --port $PORT -u $USERNAME -p $PASSWORD --authenticationDatabase admin "./db-dump/$DB_CONTAINER" --drop
  
 echo "Finished, deleting db-dump folder..."
 rm -r "$BACKUPS_FOLDER/db-dump" 
