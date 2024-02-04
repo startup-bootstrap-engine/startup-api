@@ -7,6 +7,7 @@ import {
   AxesBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
+  DaggersBlueprint,
   FoodsBlueprint,
   GlovesBlueprint,
   HammersBlueprint,
@@ -184,6 +185,14 @@ export const npcYeti: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: AxesBlueprint.DanishAxe,
       chance: 30,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
+      chance: 18,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
+      chance: 16,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],

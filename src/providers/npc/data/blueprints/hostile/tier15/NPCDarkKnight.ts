@@ -6,6 +6,7 @@ import {
   ArmorsBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
+  DaggersBlueprint,
   FoodsBlueprint,
   HammersBlueprint,
   HelmetsBlueprint,
@@ -196,6 +197,10 @@ export const npcDarkKnight: INPCTierBlueprint<15> = {
     {
       itemBlueprintKey: LegsBlueprint.TerraformLegs,
       chance: 3,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
+      chance: 12,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],

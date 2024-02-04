@@ -108,6 +108,14 @@ export const npcDarkElf: INPCTierBlueprint<16> = {
       itemBlueprintKey: AxesBlueprint.MaulAxe,
       chance: 12,
     },
+    {
+      itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
+      chance: 18,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
+      chance: 16,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],
   areaSpells: [

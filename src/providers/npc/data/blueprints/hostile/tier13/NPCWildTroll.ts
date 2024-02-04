@@ -10,6 +10,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AxesBlueprint,
   CraftingResourcesBlueprint,
+  DaggersBlueprint,
   FoodsBlueprint,
   GlovesBlueprint,
   HammersBlueprint,
@@ -91,6 +92,10 @@ export const npcWildTroll: INPCTierBlueprint<13> = {
     {
       itemBlueprintKey: AxesBlueprint.HandAxe,
       chance: 2,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
+      chance: 10,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.VineGrasp],

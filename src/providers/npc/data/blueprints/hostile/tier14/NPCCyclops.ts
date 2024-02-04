@@ -87,6 +87,10 @@ export const npcCyclops: INPCTierBlueprint<14> = {
       itemBlueprintKey: AxesBlueprint.ButterflierAxe,
       chance: 18,
     },
+    {
+      itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
+      chance: 10,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
 };

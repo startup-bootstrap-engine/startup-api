@@ -6,6 +6,9 @@ import { itemIronDagger } from "./tier1/ItemIronDagger";
 import { itemIronJitte } from "./tier1/ItemIronJitte";
 import { itemRustedDagger } from "./tier1/ItemRustedDagger";
 import { itemRustedJitte } from "./tier1/ItemRustedJitte";
+import { itemDarkmoonDagger } from "./tier10/itemDarkmoonDagger";
+import { itemThunderboltDagger } from "./tier10/itemThunderboltDagger";
+import { itemStormswiftDagger } from "./tier10/itemStormswiftDagger";
 import { itemDamascusJitte } from "./tier2/ItemDamascusJitte";
 import { itemFrostDagger } from "./tier2/ItemFrostDagger";
 import { itemSaiDagger } from "./tier2/ItemSaiDagger";
@@ -25,7 +28,12 @@ import { itemGoldenDagger } from "./tier5/ItemGoldenDagger";
 import { itemDewDagger } from "./tier6/ItemDewDagger";
 import { itemFrostBiteDagger } from "./tier7/ItemFrostBiteDagger";
 import { itemHexBladeDagger } from "./tier8/ItemHexBladeDagger";
+import { itemFlameheartDagger } from "./tier9/itemFlameheartDagger";
+import { itemMistfireDagger } from "./tier9/itemMistfireDagger";
 import { itemSpiritBlade } from "./tier9/ItemSpiritBlade";
+import { itemArrowheadDagger } from "./tiier11/itemArrowheadDagger";
+import { itemAstralDagger } from "./tiier11/itemAstralDagger";
+import { itemStarshardDagger } from "./tiier11/itemStarshardDagger";
 
 export const daggersBlueprintIndex = {
   [DaggersBlueprint.Dagger]: itemDagger,
@@ -55,4 +63,12 @@ export const daggersBlueprintIndex = {
   [DaggersBlueprint.FrostBiteDagger]: itemFrostBiteDagger,
   [DaggersBlueprint.SpiritBlade]: itemSpiritBlade,
   [DaggersBlueprint.HexBladeDagger]: itemHexBladeDagger,
+  [DaggersBlueprint.FlameheartDagger]: itemFlameheartDagger,
+  [DaggersBlueprint.MistfireDagger]: itemMistfireDagger,
+  [DaggersBlueprint.DarkmoonDagger]: itemDarkmoonDagger,
+  [DaggersBlueprint.ThunderboltDagger]: itemThunderboltDagger,
+  [DaggersBlueprint.StormswiftDagger]: itemStormswiftDagger,
+  [DaggersBlueprint.ArrowheadDagger]: itemArrowheadDagger,
+  [DaggersBlueprint.AstralDagger]: itemAstralDagger,
+  [DaggersBlueprint.StarshardDagger]: itemStarshardDagger,
 };

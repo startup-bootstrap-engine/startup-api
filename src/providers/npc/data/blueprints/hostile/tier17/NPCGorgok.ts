@@ -5,6 +5,7 @@ import {
   AxesBlueprint,
   BootsBlueprint,
   ContainersBlueprint,
+  DaggersBlueprint,
   GlovesBlueprint,
   LegsBlueprint,
   MacesBlueprint,
@@ -145,6 +146,18 @@ export const npcGorgok: INPCTierBlueprint<17> = {
     {
       itemBlueprintKey: AxesBlueprint.MaulAxe,
       chance: 39,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
+      chance: 18,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
+      chance: 20,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.AstralDagger,
+      chance: 22,
     },
   ],
 };

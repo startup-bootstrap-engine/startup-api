@@ -4,6 +4,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AxesBlueprint,
   CraftingResourcesBlueprint,
+  DaggersBlueprint,
   FoodsBlueprint,
   HelmetsBlueprint,
   MacesBlueprint,
@@ -122,6 +123,14 @@ export const npcDragonKnight: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: AxesBlueprint.SpikeToppedAxe,
       chance: 10,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
+      chance: 18,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
+      chance: 16,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

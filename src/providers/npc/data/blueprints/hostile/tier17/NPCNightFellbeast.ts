@@ -86,10 +86,21 @@ export const npcNightFellbeast: INPCTierBlueprint<17> = {
       chance: 50,
       quantityRange: [1, 10],
     },
-
     {
       itemBlueprintKey: ArmorsBlueprint.MithrilArmor,
       chance: 5,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.StarshardDagger,
+      chance: 18,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
+      chance: 20,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.AstralDagger,
+      chance: 22,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],

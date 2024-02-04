@@ -120,6 +120,18 @@ export const npcNazgul: INPCTierBlueprint<18> = {
       itemBlueprintKey: AxesBlueprint.CrownSplitterAxe,
       chance: 26,
     },
+    {
+      itemBlueprintKey: DaggersBlueprint.AstralDagger,
+      chance: 28,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.StarshardDagger,
+      chance: 30,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
+      chance: 32,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
   areaSpells: [

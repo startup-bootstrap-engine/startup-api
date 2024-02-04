@@ -99,6 +99,18 @@ export const npcCorruptedCyclops: INPCTierBlueprint<18> = {
       itemBlueprintKey: AxesBlueprint.BrutalChopperAxe,
       chance: 11,
     },
+    {
+      itemBlueprintKey: DaggersBlueprint.StarshardDagger,
+      chance: 28,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
+      chance: 30,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
+      chance: 32,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
   areaSpells: [

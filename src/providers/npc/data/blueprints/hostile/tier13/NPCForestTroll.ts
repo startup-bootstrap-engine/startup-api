@@ -125,6 +125,10 @@ export const npcForestTroll: INPCTierBlueprint<14> = {
       chance: 40,
       quantityRange: [5, 10],
     },
+    {
+      itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
+      chance: 10,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],
   areaSpells: [

@@ -8,6 +8,7 @@ import {
   BootsBlueprint,
   ContainersBlueprint,
   CraftingResourcesBlueprint,
+  DaggersBlueprint,
   FoodsBlueprint,
   GlovesBlueprint,
   HammersBlueprint,
@@ -242,6 +243,14 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: AxesBlueprint.ButterflierAxe,
       chance: 22,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.AstralDagger,
+      chance: 18,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.StarshardDagger,
+      chance: 16,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],

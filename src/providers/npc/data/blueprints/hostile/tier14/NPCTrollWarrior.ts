@@ -9,6 +9,7 @@ import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNP
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   AxesBlueprint,
+  DaggersBlueprint,
   FoodsBlueprint,
   GlovesBlueprint,
   HelmetsBlueprint,
@@ -101,6 +102,10 @@ export const npcTrollWarrior: INPCTierBlueprint<14> = {
     {
       itemBlueprintKey: AxesBlueprint.HandAxe,
       chance: 2,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
+      chance: 10,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

@@ -120,6 +120,10 @@ export const npcDarkWraith: INPCTierBlueprint<15> = {
       itemBlueprintKey: HelmetsBlueprint.BerserkersHelmet,
       chance: 2,
     },
+    {
+      itemBlueprintKey: DaggersBlueprint.StarshardDagger,
+      chance: 12,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
   areaSpells: [

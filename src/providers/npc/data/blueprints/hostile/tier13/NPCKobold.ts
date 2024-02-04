@@ -4,6 +4,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   BootsBlueprint,
   CraftingResourcesBlueprint,
+  DaggersBlueprint,
   FoodsBlueprint,
   LegsBlueprint,
   ShieldsBlueprint,
@@ -92,6 +93,10 @@ export const npcKobold: INPCTierBlueprint<13> = {
     {
       itemBlueprintKey: ShieldsBlueprint.TowerShield,
       chance: 5,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
+      chance: 6,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],
