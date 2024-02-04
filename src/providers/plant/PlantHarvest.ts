@@ -5,6 +5,7 @@ import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
+import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SpellCalculator } from "@providers/spells/data/abstractions/SpellCalculator";
 import {
@@ -30,7 +31,8 @@ export class PlantHarvest {
     private spellCalculator: SpellCalculator,
     private characterInventory: CharacterInventory,
     private characterItemContainer: CharacterItemContainer,
-    private animationEffect: AnimationEffect
+    private animationEffect: AnimationEffect,
+    private skillIncrease: SkillIncrease
   ) {}
 
   public async harvestPlant(plant: IItem, character: ICharacter): Promise<void> {
@@ -74,6 +76,9 @@ export class PlantHarvest {
 
     await this.sendAnimationEvent(character, plant);
     await this.updateInventory(character, inventoryContainerId, harvestedItemBlueprint, harvestableItemQuantity);
+
+    await this.skillIncrease.increaseCraftingSP(character, ItemType.Plant, true);
+
     await this.handlePlantAfterHarvest(plant, blueprint, character);
   }
 

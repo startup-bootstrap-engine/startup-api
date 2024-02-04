@@ -1,6 +1,7 @@
 import { container } from "@providers/inversify/container";
 
 import { PotionsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { CraftingSkill, ItemType } from "@rpg-engine/shared";
 import { SkillCraftingMapper } from "../SkillCraftingMapper";
 import { CraftingSkillsMap } from "../constants";
 
@@ -22,6 +23,14 @@ describe("SkillCraftingMapper", () => {
     const skill = skillCraftingMapper.getCraftingSkillToUpdate(craftedItemKey);
 
     expect(skill).toBe("Tailoring");
+  });
+
+  it("Should get a farming skill when craftedItemKey is plant", () => {
+    const craftedItemKey = ItemType.Plant;
+
+    const skill = skillCraftingMapper.getCraftingSkillToUpdate(craftedItemKey);
+
+    expect(skill).toBe(CraftingSkill.Farming);
   });
 
   it("Should return undefined if skill is not found", () => {

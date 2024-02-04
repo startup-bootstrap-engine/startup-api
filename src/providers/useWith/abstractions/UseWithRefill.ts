@@ -7,7 +7,7 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { container } from "@providers/inversify/container";
 import { PlantGrowth } from "@providers/plant/PlantGrowth";
-import { IRefillableItem, IUseWithTileValidation, UseWithSocketEvents } from "@rpg-engine/shared";
+import { IRefillableItem, IUseWithTileValidation, ItemType, UseWithSocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import _, { random } from "lodash";
 import { IUseWithTargetTile } from "../useWithTypes";
@@ -115,6 +115,8 @@ export class UseWithRefill {
         );
 
         await originItem.save();
+
+        await skillIncrease.increaseCraftingSP(character, ItemType.Plant, true);
 
         if (successMessages) {
           this.sendRandomMessageToCharacter(character, successMessages, true);

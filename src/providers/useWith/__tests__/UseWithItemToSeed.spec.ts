@@ -2,6 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
+import { ItemType } from "@rpg-engine/shared";
 import { IUseWithItemToSeedOptions, UseWithItemToSeed } from "../abstractions/UseWithItemToSeed";
 
 describe("UseWithItemToSeed.ts", () => {
@@ -46,7 +47,11 @@ describe("UseWithItemToSeed.ts", () => {
   });
 
   it("should create a new plant and update inventory on successful execution", async () => {
-    await useWithItemToSeed.execute(testCharacter, options, skillIncrease);
+    const mockIncreaseCraftingSP = jest.fn();
+    const mockSkillIncrease = { increaseCraftingSP: mockIncreaseCraftingSP };
+
+    // @ts-ignore
+    await useWithItemToSeed.execute(testCharacter, options, mockSkillIncrease);
 
     const plant = await Item.findOne({
       where: {
@@ -55,6 +60,7 @@ describe("UseWithItemToSeed.ts", () => {
       },
     });
 
+    expect(mockIncreaseCraftingSP).toHaveBeenCalledWith(testCharacter, ItemType.Plant, true);
     expect(plant).toBeDefined();
     expect(sendMessageToCharacter).toHaveBeenCalledWith(testCharacter, "Planting Success");
   });
