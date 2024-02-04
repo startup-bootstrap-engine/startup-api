@@ -6,6 +6,7 @@ import {
   AxesBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
+  DaggersBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
@@ -208,6 +209,22 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
     {
       itemBlueprintKey: AxesBlueprint.BrutalChopperAxe,
       chance: 80,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
+      chance: 40,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.MistfireDagger,
+      chance: 85,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.AstralDagger,
+      chance: 85,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.StarshardDagger,
+      chance: 90,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],

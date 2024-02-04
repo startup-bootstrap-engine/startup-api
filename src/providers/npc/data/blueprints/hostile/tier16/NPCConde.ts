@@ -87,6 +87,14 @@ export const npcConde: INPCTierBlueprint<16> = {
       itemBlueprintKey: RangedWeaponsBlueprint.RuneCrossbow,
       chance: 1,
     },
+    {
+      itemBlueprintKey: DaggersBlueprint.MistfireDagger,
+      chance: 18,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
+      chance: 16,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Freezing],
   areaSpells: [

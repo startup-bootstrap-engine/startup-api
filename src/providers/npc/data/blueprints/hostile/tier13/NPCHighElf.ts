@@ -4,6 +4,7 @@ import {
   AccessoriesBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
+  DaggersBlueprint,
   FoodsBlueprint,
   HelmetsBlueprint,
   OthersBlueprint,
@@ -141,6 +142,10 @@ export const npcHighElf: INPCTierBlueprint<13> = {
     {
       itemBlueprintKey: BootsBlueprint.KnightBoots,
       chance: 10,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
+      chance: 6,
     },
   ],
 };

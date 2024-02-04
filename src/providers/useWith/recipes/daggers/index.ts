@@ -6,6 +6,10 @@ import { recipeSpiritBlade } from "./recipeSpiritBlade";
 import { recipeWoodenDagger } from "./recipeWoodenDagger";
 import { recipeAzureDagger } from "./recipeAzureDagger";
 import { recipeGoldenDagger } from "./recipeGoldenDagger";
+import { recipeAstralDagger } from "./recipeAstralDagger";
+import { recipeMistfireDagger } from "./recipeMistfireDagger";
+import { recipeStarshardDagger } from "./recipeStarshardDagger";
+import { recipeStormswiftDagger } from "./recipeStormswiftDagger";
 
 export const recipeDaggersIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [DaggersBlueprint.FrostDagger]: [recipeFrostDagger],
@@ -14,4 +18,8 @@ export const recipeDaggersIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [DaggersBlueprint.SpiritBlade]: [recipeSpiritBlade],
   [DaggersBlueprint.AzureDagger]: [recipeAzureDagger],
   [DaggersBlueprint.GoldenDagger]: [recipeGoldenDagger],
+  [DaggersBlueprint.AstralDagger]: [recipeAstralDagger],
+  [DaggersBlueprint.MistfireDagger]: [recipeMistfireDagger],
+  [DaggersBlueprint.StarshardDagger]: [recipeStarshardDagger],
+  [DaggersBlueprint.StormswiftDagger]: [recipeStormswiftDagger],
 };

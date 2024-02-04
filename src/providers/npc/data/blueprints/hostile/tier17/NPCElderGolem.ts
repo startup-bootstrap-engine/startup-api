@@ -3,6 +3,7 @@ import {
   ArmorsBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
+  DaggersBlueprint,
   GlovesBlueprint,
   HelmetsBlueprint,
   ShieldsBlueprint,
@@ -76,6 +77,18 @@ export const npcElderGolem: INPCTierBlueprint<17> = {
       itemBlueprintKey: CraftingResourcesBlueprint.PolishedStone,
       chance: 30,
       quantityRange: [5, 20],
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
+      chance: 18,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
+      chance: 20,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.MistfireDagger,
+      chance: 22,
     },
   ],
   areaSpells: [

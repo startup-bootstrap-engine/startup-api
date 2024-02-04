@@ -87,6 +87,10 @@ export const npcIceCyclops: INPCTierBlueprint<15> = {
       itemBlueprintKey: AxesBlueprint.MaulAxe,
       chance: 7,
     },
+    {
+      itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
+      chance: 12,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],
   areaSpells: [

@@ -102,6 +102,14 @@ export const npcOrcWarlord: INPCTierBlueprint<16> = {
       itemBlueprintKey: AxesBlueprint.CrownSplitterAxe,
       chance: 18,
     },
+    {
+      itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
+      chance: 18,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
+      chance: 16,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
   areaSpells: [

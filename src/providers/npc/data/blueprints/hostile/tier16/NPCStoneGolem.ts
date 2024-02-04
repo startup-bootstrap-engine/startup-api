@@ -6,6 +6,7 @@ import {
   AxesBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
+  DaggersBlueprint,
   FoodsBlueprint,
   GlovesBlueprint,
   HammersBlueprint,
@@ -186,6 +187,14 @@ export const npcStoneGolem: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: AxesBlueprint.ExecutionersAxe,
       chance: 6,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
+      chance: 18,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.MistfireDagger,
+      chance: 16,
     },
   ],
   areaSpells: [

@@ -154,15 +154,21 @@ describe("UseWithRefill.ts", () => {
     // @ts-expect-error
     const sendRandomMessageToCharacterMock = jest.spyOn(useWithRefill, "sendRandomMessageToCharacter");
 
+    const mockIncreaseCraftingSP = jest.fn();
+    const mockSkillIncrease = { increaseCraftingSP: mockIncreaseCraftingSP };
+
     const currentRemainingUses = testRefillItem.remainingUses ?? 10;
 
     const decrementQty = useWithRefillData.decrementQty ?? 1;
-
-    await useWithRefill.executeUse(testCharacter, useWithRefillData, skillIncrease);
+    // @ts-ignore
+    await useWithRefill.executeUse(testCharacter, useWithRefillData, mockSkillIncrease);
 
     const updatedPlant = await Item.findById(testPlant.id);
 
     const updatedRefillItem = await Item.findById(testRefillItem.id);
+
+    expect(mockIncreaseCraftingSP).toBeCalledWith(testCharacter, ItemType.Plant, true);
+
     // @ts-expect-error
     expect(updatedPlant?.lastWatering.getTime()).toBeLessThanOrEqual(new Date().getTime());
 

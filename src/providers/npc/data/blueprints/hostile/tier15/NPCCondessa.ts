@@ -110,6 +110,10 @@ export const npcCondessa: INPCTierBlueprint<15> = {
       itemBlueprintKey: AxesBlueprint.CrownSplitterAxe,
       chance: 12,
     },
+    {
+      itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
+      chance: 12,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
   areaSpells: [

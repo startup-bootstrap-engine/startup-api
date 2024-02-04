@@ -1,6 +1,7 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { CharacterLastAction } from "@providers/character/CharacterLastAction";
+import { CharacterRetentionTracker } from "@providers/character/CharacterRetentionTracker";
 import { SocketAdapter } from "@providers/sockets/SocketAdapter";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
@@ -9,6 +10,7 @@ import { CharacterSocketEvents, ICharacterAttributeChanged } from "@rpg-engine/s
 import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 import { CronJobScheduler } from "./CronJobScheduler";
+
 @provide(CharacterCrons)
 export class CharacterCrons {
   constructor(
@@ -17,7 +19,8 @@ export class CharacterCrons {
     private newRelic: NewRelic,
     private socketAdapter: SocketAdapter,
     private socketSessionControl: SocketSessionControl,
-    private cronJobScheduler: CronJobScheduler
+    private cronJobScheduler: CronJobScheduler,
+    private characterRetentionTracker: CharacterRetentionTracker
   ) {}
 
   public schedule(): void {
@@ -34,6 +37,10 @@ export class CharacterCrons {
         "Online",
         onlineCharactersCount
       );
+    });
+
+    this.cronJobScheduler.uniqueSchedule("character-cron-track-median-total-days-played", "0 */4 * * *", async () => {
+      await this.characterRetentionTracker.trackMedianTotalDaysPlayed();
     });
 
     this.cronJobScheduler.uniqueSchedule("character-cron-logout-inactive-characters", "* * * * *", async () => {

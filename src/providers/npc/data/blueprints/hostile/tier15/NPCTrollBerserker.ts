@@ -17,6 +17,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AxesBlueprint,
   CraftingResourcesBlueprint,
+  DaggersBlueprint,
   FoodsBlueprint,
   GlovesBlueprint,
   HammersBlueprint,
@@ -152,6 +153,10 @@ export const npcTrollBerserker: INPCTierBlueprint<15> = {
     {
       itemBlueprintKey: GlovesBlueprint.OraclegripGloves,
       chance: 1,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.MistfireDagger,
+      chance: 12,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

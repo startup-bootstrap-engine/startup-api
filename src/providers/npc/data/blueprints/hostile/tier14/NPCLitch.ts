@@ -177,6 +177,10 @@ export const npcLitch: INPCTierBlueprint<14> = {
       itemBlueprintKey: AxesBlueprint.TwinEdgeAxe,
       chance: 6,
     },
+    {
+      itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
+      chance: 10,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Corruption],
   areaSpells: [

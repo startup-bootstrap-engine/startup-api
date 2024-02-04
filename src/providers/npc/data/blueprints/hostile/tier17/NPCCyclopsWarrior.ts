@@ -101,6 +101,18 @@ export const npcCyclopsWarrior: INPCTierBlueprint<17> = {
       itemBlueprintKey: AxesBlueprint.CrownedAxe,
       chance: 20,
     },
+    {
+      itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
+      chance: 18,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
+      chance: 20,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.AstralDagger,
+      chance: 22,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
   areaSpells: [

@@ -6,6 +6,7 @@ import {
   AxesBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
+  DaggersBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
@@ -199,6 +200,22 @@ export const npcRedDragon: INPCTierBlueprint<20> = {
     {
       itemBlueprintKey: AxesBlueprint.IroncladCleaver,
       chance: 15,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
+      chance: 30,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
+      chance: 32,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.AstralDagger,
+      chance: 33,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
+      chance: 34,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],

@@ -5,6 +5,7 @@ import {
   ArmorsBlueprint,
   AxesBlueprint,
   BootsBlueprint,
+  DaggersBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
   ShieldsBlueprint,
@@ -129,6 +130,22 @@ export const npcEloraTheQueen: INPCTierBlueprint<19> = {
     {
       itemBlueprintKey: AxesBlueprint.RoyalChopperAxe,
       chance: 34,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
+      chance: 28,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
+      chance: 30,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.StarshardDagger,
+      chance: 34,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
+      chance: 36,
     },
   ],
   entityEffects: [EntityEffectBlueprint.VineGrasp],

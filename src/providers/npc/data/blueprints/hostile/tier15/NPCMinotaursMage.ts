@@ -165,6 +165,10 @@ export const npcMinotaurMage: INPCTierBlueprint<15> = {
       itemBlueprintKey: CraftingResourcesBlueprint.WeaponRecipe,
       chance: 10,
     },
+    {
+      itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
+      chance: 12,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Freezing],
   areaSpells: [

@@ -157,6 +157,14 @@ export enum DaggersBlueprint {
   FrostBiteDagger = "frost-bite-dagger",
   SpiritBlade = "spirit-blade",
   HexBladeDagger = "hex-blade-dagger",
+  MistfireDagger = "mistfire-dagger",
+  FlameheartDagger = "flameheart-dagger",
+  ThunderboltDagger = "thunderbolt-dagger",
+  StormswiftDagger = "stormswift-dagger",
+  DarkmoonDagger = "darkmoon-dagger",
+  AstralDagger = "astral-dagger",
+  ArrowheadDagger = "arrowhead-dagger",
+  StarshardDagger = "starshard-dagger",
 }
 
 export enum ArmorsBlueprint {

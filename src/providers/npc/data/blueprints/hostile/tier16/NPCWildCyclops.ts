@@ -3,6 +3,7 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
+  DaggersBlueprint,
   FoodsBlueprint,
   MagicsBlueprint,
   PotionsBlueprint,
@@ -80,6 +81,14 @@ export const npcWildCyclops: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: ShieldsBlueprint.StuddedShield,
       chance: 20,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
+      chance: 18,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.StarshardDagger,
+      chance: 16,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

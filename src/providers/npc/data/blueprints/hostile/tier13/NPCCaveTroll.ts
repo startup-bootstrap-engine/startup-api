@@ -4,6 +4,7 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   CraftingResourcesBlueprint,
+  DaggersBlueprint,
   FoodsBlueprint,
   GlovesBlueprint,
   HelmetsBlueprint,
@@ -117,6 +118,10 @@ export const npcCaveTroll: INPCTierBlueprint<13> = {
     {
       itemBlueprintKey: MacesBlueprint.WitchBaneMace,
       chance: 2,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
+      chance: 10,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

@@ -2,6 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { blueprintManager, container, unitTestHelper } from "@providers/inversify/container";
+import { ItemType } from "@rpg-engine/shared";
 import { PlantHarvest } from "../PlantHarvest";
 import { IPlantItem } from "../data/blueprints/PlantItem";
 import { PlantItemBlueprint, PlantLifeCycle } from "../data/types/PlantTypes";
@@ -22,6 +23,7 @@ describe("PlantHarvest.ts", () => {
   };
 
   let mockSpellCalculator: any;
+  let mockSkillIncrease: jest.SpyInstance;
 
   beforeAll(() => {
     plantHarvest = container.get<PlantHarvest>(PlantHarvest);
@@ -104,14 +106,17 @@ describe("PlantHarvest.ts", () => {
   });
 
   it("should harvest the plant, remove it and add the item to the character's inventory if regrowsAfterHarvest is false", async () => {
-    //
+    // @ts-ignore
+    mockSkillIncrease = jest.spyOn(plantHarvest.skillIncrease, "increaseCraftingSP");
+
     blueprint.regrowsAfterHarvest = false;
 
     mockSpellCalculator.getQuantityBasedOnSkillLevel.mockResolvedValue(1);
 
     await plantHarvest.harvestPlant(plant, testCharacter);
 
-    expect(mockSocketMessaging.sendEventToUser).toBeCalled();
+    expect(mockSkillIncrease).toHaveBeenCalledWith(testCharacter, ItemType.Plant, true);
+
     const updatedInventoryContainer = await ItemContainer.findById(inventoryContainer._id);
     expect(updatedInventoryContainer?.slots[0]).not.toBeNull();
     expect(updatedInventoryContainer?.slots[0].stackQty).toEqual(1);

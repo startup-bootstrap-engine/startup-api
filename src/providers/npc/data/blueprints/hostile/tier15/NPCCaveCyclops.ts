@@ -87,6 +87,10 @@ export const npcCaveCyclops: INPCTierBlueprint<15> = {
       itemBlueprintKey: AxesBlueprint.SpikeToppedAxe,
       chance: 16,
     },
+    {
+      itemBlueprintKey: DaggersBlueprint.MistfireDagger,
+      chance: 12,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
   areaSpells: [
