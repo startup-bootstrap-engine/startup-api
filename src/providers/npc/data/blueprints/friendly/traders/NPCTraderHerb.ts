@@ -12,6 +12,12 @@ export const npcTraderHerbalist = {
   isTrader: true,
   traderItems: [
     {
+      key: PotionsBlueprint.LightLifePotion,
+    },
+    {
+      key: PotionsBlueprint.LightManaPotion,
+    },
+    {
       key: CraftingResourcesBlueprint.Herb,
     },
     {
@@ -22,12 +28,6 @@ export const npcTraderHerbalist = {
     },
     {
       key: CraftingResourcesBlueprint.Worm,
-    },
-    {
-      key: PotionsBlueprint.LightLifePotion,
-    },
-    {
-      key: PotionsBlueprint.LightManaPotion,
     },
   ],
 } as Partial<INPC>;

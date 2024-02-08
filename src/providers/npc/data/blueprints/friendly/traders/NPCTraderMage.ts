@@ -1,7 +1,7 @@
 import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { BooksBlueprint, HelmetsBlueprint, StaffsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { HelmetsBlueprint, StaffsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { generateRandomMovement } from "@providers/npc/data/abstractions/BaseNeutralNPC";
-import { CharacterGender } from "@rpg-engine/shared";
+import { CharacterGender, MagicsBlueprint } from "@rpg-engine/shared";
 
 export const npcTraderMage = {
   ...generateRandomMovement(),
@@ -21,10 +21,7 @@ export const npcTraderMage = {
       key: HelmetsBlueprint.WizardHat,
     },
     {
-      key: BooksBlueprint.MysticWardenCodex,
-    },
-    {
-      key: BooksBlueprint.EmberSageScripture,
+      key: MagicsBlueprint.Rune,
     },
   ],
 } as Partial<INPC>;

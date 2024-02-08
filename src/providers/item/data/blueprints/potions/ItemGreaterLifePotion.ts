@@ -12,7 +12,7 @@ export const itemGreaterLifePotion: IConsumableItemBlueprint = {
   name: "Greater Life Potion",
   description: "A flask containing deep red liquid of a greater elixir of life.",
   weight: 0.5,
-  basePrice: 50,
+  basePrice: 200,
   maxStackSize: 999,
   canSell: false,
 

@@ -21,6 +21,7 @@ export const itemBomb: IRuneItemBlueprint = {
     "A powerful bomb typically used by rogues. It can be used to deal significant damage to enemies. Handle with care.",
   weight: 0.01,
   maxStackSize: 999,
+  basePrice: 300,
   hasUseWith: true,
   canUseOnNonPVPZone: false,
   useWithMaxDistanceGrid: RangeTypes.Medium,
