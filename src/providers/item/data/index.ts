@@ -27,6 +27,7 @@ import { spearsBlueprintsIndex } from "./blueprints/spears/index";
 import { staffsBlueprintIndex } from "./blueprints/staffs/index";
 import { swordsBlueprintIndex } from "./blueprints/swords/index";
 import { toolsBlueprintIndex } from "./blueprints/tools/index";
+import { gemsBlueprintIndex } from "./blueprints/gems/index";
 
 const itemsBlueprintIndex: IBlueprint = {
   ...bodiesBlueprintsIndex,
@@ -55,6 +56,7 @@ const itemsBlueprintIndex: IBlueprint = {
   ...toolsBlueprintIndex,
   ...hammersBlueprintIndex,
   ...cropsBlueprintIndex,
+  ...gemsBlueprintIndex,
 };
 
 // auto calculate minRequirements on items tier 3 and above

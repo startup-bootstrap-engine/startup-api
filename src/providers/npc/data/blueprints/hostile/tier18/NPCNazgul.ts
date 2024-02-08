@@ -6,6 +6,7 @@ import {
   AxesBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
+  GemsBlueprint,
   HammersBlueprint,
   HelmetsBlueprint,
   MacesBlueprint,
@@ -131,6 +132,10 @@ export const npcNazgul: INPCTierBlueprint<18> = {
     {
       itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
       chance: 32,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.CoralReefGem,
+      chance: 1,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],

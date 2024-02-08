@@ -196,6 +196,19 @@ export enum ArmorsBlueprint {
   EtherealGuardianMail = "ethereal-guardian-mail",
 }
 
+export enum GemsBlueprint {
+  EmeraldGem = "emerald-gem",
+  TopazRadiance = "topaz-radiance",
+  SapphireGem = "sapphire-gem",
+  RubyGem = "ruby-gem",
+  MistyQuartzGem = "misty-quartz-gem",
+  CoralReefGem = "coral-reef-gem",
+  JasperGem = "jasper-gem",
+  EarthstoneGem = "earthstone-gem",
+  ObsidianGem = "obsidian-gem",
+  AmethystGem = "amethyst-gem",
+}
+
 export enum AxesBlueprint {
   Axe = "axe",
   Bardiche = "bardiche",

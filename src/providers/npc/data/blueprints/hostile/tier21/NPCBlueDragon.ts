@@ -7,6 +7,7 @@ import {
   BootsBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
+  GemsBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
@@ -208,6 +209,14 @@ export const npcBlueDragon: INPCTierBlueprint<21> = {
     {
       itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
       chance: 51,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.SapphireGem,
+      chance: 1,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.AmethystGem,
+      chance: 1,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],

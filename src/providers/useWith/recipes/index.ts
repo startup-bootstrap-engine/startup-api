@@ -29,6 +29,7 @@ import { recipeShieldsIndex } from "./shields/index";
 import { recipeSpearsIndex } from "./spears/index";
 import { recipeStaffsIndex } from "./staffs/index";
 import { recipeSwordsIndex } from "./swords/index";
+import { recipeGemsIndex } from "./gems/index";
 
 const recipeBlueprintsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   ...recipeAccessoriesIndex,
@@ -51,6 +52,7 @@ const recipeBlueprintsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   ...recipePotionsIndex,
   ...recipeGlovesIndex,
   ...recipeHammersIndex,
+  ...recipeGemsIndex,
 };
 
 function addSocialCrystalAsRequirements(recipe: IUseWithCraftingRecipe, itemsBlueprintIndex: any): void {
