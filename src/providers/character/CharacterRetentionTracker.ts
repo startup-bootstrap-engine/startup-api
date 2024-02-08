@@ -1,6 +1,7 @@
 import { Character } from "@entities/ModuleCharacter/CharacterModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
+import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 
 @provide(CharacterRetentionTracker)
@@ -8,7 +9,13 @@ export class CharacterRetentionTracker {
   constructor(private newRelic: NewRelic) {}
 
   public async trackMedianTotalDaysPlayed(): Promise<void> {
-    const characters = await Character.find({ totalDaysPlayed: { $exists: true } }).lean();
+    const oneWeekAgo = dayjs().subtract(7, "day").toDate();
+
+    const characters = await Character.find({
+      totalDaysPlayed: { $exists: true },
+      updatedAt: { $gte: oneWeekAgo },
+    }).lean();
+
     const totalDaysPlayedArray = characters.map((character) => character.totalDaysPlayed);
 
     // Calculate the median
