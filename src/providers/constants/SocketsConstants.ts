@@ -21,10 +21,10 @@ export const SOCKET_IO_CONFIG: Partial<ServerOptions> = {
     origin: appEnv.general.ENV === EnvType.Development ? "*" : appEnv.general.APP_URL,
     credentials: true,
   },
-  transports: ["websocket"],
+  transports: ["websocket", "polling"],
 
-  // try to avoid disconnects
-  maxHttpBufferSize: 1e10,
-  pingTimeout: 1000 * 60 * 60,
-  pingInterval: 1000 * 5,
+  // Adjusted configuration to balance performance and resource usage
+  maxHttpBufferSize: 1e7, // Allows for 10MB messages, adjust as needed
+  pingTimeout: 1000 * 60 * 5, // 5 minutes timeout
+  pingInterval: 1000 * 25, // 25 seconds interval
 };
