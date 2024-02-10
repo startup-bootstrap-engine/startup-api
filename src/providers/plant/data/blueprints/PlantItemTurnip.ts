@@ -17,30 +17,30 @@ export const plantItemTurnip: IPlantItem = {
   texturePath: "seeds/seed-brown-2.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
-      requiredGrowthPoints: 5,
+      requiredGrowthPoints: 10,
       textureAtlas: "crops",
       texturePath: "seeds/seed-brown-2.png",
     },
     [PlantLifeCycle.Sprout]: {
-      requiredGrowthPoints: 10,
+      requiredGrowthPoints: 20,
       textureAtlas: "crops",
       texturePath: "plants/food/turnip/turnip-sprout.png",
     },
     [PlantLifeCycle.Young]: {
-      requiredGrowthPoints: 15,
+      requiredGrowthPoints: 30,
       textureAtlas: "crops",
       texturePath: "plants/food/turnip/turnip-young.png",
     },
     [PlantLifeCycle.Mature]: {
-      requiredGrowthPoints: 20,
+      requiredGrowthPoints: 40,
       textureAtlas: "crops",
       texturePath: "plants/food/turnip/turnip-mature.png",
     },
   },
   harvestableItemKey: FoodsBlueprint.Turnip,
   regrowsAfterHarvest: true,
-  growthFactor: 3,
-  maxHarvestablePerPlant: 3,
+  growthFactor: 1.2,
+  maxHarvestablePerPlant: 4,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
 };

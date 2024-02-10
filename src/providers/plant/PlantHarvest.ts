@@ -6,6 +6,7 @@ import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
+import { TraitGetter } from "@providers/skill/TraitGetter";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SpellCalculator } from "@providers/spells/data/abstractions/SpellCalculator";
 import {
@@ -32,7 +33,8 @@ export class PlantHarvest {
     private characterInventory: CharacterInventory,
     private characterItemContainer: CharacterItemContainer,
     private animationEffect: AnimationEffect,
-    private skillIncrease: SkillIncrease
+    private skillIncrease: SkillIncrease,
+    private traitGetter: TraitGetter
   ) {}
 
   public async harvestPlant(plant: IItem, character: ICharacter): Promise<void> {
@@ -94,13 +96,17 @@ export class PlantHarvest {
     return this.blueprintManager.getBlueprint("plants", plant.baseKey);
   }
 
-  private calculateHarvestableItemQuantity(character: ICharacter, blueprint: IPlantItem): Promise<number> {
-    const minMax = {
-      max: blueprint.maxHarvestablePerPlant,
-      min: 1,
-    };
-    // need to add farming skill
-    return this.spellCalculator.getQuantityBasedOnSkillLevel(character, CraftingSkill.Fishing, minMax);
+  private async calculateHarvestableItemQuantity(character: ICharacter, blueprint: IPlantItem): Promise<number> {
+    const Max = blueprint.maxHarvestablePerPlant ?? 1;
+    const skills = await this.spellCalculator.getCharacterSkill(character);
+    const skillLevel = await this.traitGetter.getSkillLevelWithBuffs(skills, CraftingSkill.Farming);
+
+    const harvestableItemQuantity = Math.round(Math.random() * (skillLevel / 3) + 1);
+
+    if (harvestableItemQuantity > Max) {
+      return Max;
+    }
+    return harvestableItemQuantity;
   }
 
   private getHarvestedItemBlueprint(blueprint: IPlantItem): Promise<IItem | null> {

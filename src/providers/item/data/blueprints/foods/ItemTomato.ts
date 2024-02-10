@@ -12,7 +12,7 @@ export const itemTomato: IConsumableItemBlueprint = {
   description: "Tomatoes are red shaped fruits that can be found in tropical areas.",
   weight: 0.5,
   maxStackSize: 999,
-  basePrice: 7,
+  basePrice: 88,
   canSell: true,
   usableEffectKey: UsableEffectsBlueprint.ModerateEatingEffect,
 };

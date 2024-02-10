@@ -17,7 +17,7 @@ export const itemRedGrapeSeed: IUseWithItemBlueprint = {
   description: "A small seed that grows into a red grape vine. It requires fertile soil and enough water to grow.",
   weight: 0.01,
   hasUseWith: true,
-  basePrice: 25,
+  basePrice: 35,
   rangeType: EntityAttackType.None,
   useWithMaxDistanceGrid: RangeTypes.Short,
   canSell: true,

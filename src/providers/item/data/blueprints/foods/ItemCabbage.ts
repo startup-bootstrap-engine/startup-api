@@ -12,7 +12,7 @@ export const itemCabbage: IConsumableItemBlueprint = {
   description: "A leafy green or purple biennial plant, grown as an annual vegetable crop for its dense-leaved heads.",
   weight: 0.2,
   maxStackSize: 999,
-  basePrice: 15,
+  basePrice: 392,
   canSell: true,
   usableEffectKey: UsableEffectsBlueprint.StrongEatingEffect,
 };
