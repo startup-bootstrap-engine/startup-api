@@ -1,5 +1,5 @@
 # Definya
 
-## Table of Contents
+## Summary
 
 - [Patreon Setup](./docs/PatreonSetup.md)
