@@ -4,7 +4,7 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { IItemUpdate, ItemSocketEvents } from "@rpg-engine/shared";
+import { AnimationEffectKeys, IItemUpdate, ItemSocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { CharacterInventory } from "./CharacterInventory";
 import { CharacterValidation } from "./CharacterValidation";
@@ -124,5 +124,7 @@ export class CharacterAutoLoot {
       id: bodyItem._id,
       isDeadBodyLootable: false,
     });
+
+    await this.animationEffect.sendAnimationEventToCharacter(character, AnimationEffectKeys.LevelUp);
   }
 }
