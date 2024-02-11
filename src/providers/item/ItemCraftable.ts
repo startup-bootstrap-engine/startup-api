@@ -233,7 +233,7 @@ export class ItemCraftable {
 
   @TrackNewRelicTransaction()
   private async sendRefreshItemsEvent(character: ICharacter, itemSubType?: string): Promise<void> {
-    const inventoryContainer = await this.characterItemContainer.getItemContainer(character);
+    const inventoryContainer = await this.characterItemContainer.getInventoryItemContainer(character);
     await this.inMemoryHashTable.delete("container-all-items", inventoryContainer?._id.toString()!);
 
     const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {

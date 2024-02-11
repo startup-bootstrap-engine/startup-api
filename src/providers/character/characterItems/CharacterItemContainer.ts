@@ -226,7 +226,7 @@ export class CharacterItemContainer {
   }
 
   @TrackNewRelicTransaction()
-  public async getItemContainer(character: ICharacter): Promise<IItemContainer | null> {
+  public async getInventoryItemContainer(character: ICharacter): Promise<IItemContainer | null> {
     const inventory = await this.characterInventory.getInventory(character);
     const inventoryContainer = await ItemContainer.findById(inventory?.itemContainer);
 
