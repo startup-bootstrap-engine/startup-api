@@ -6,6 +6,7 @@ import {
   AxesBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
+  GemsBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
   ShieldsBlueprint,
@@ -146,6 +147,10 @@ export const npcEloraTheQueen: INPCTierBlueprint<19> = {
     {
       itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
       chance: 36,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.RubyGem,
+      chance: 1,
     },
   ],
   entityEffects: [EntityEffectBlueprint.VineGrasp],

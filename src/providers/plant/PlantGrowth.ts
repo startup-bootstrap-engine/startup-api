@@ -48,14 +48,14 @@ export class PlantGrowth {
       if (currentGrowthPoints < requiredGrowthPoints) {
         await Item.updateOne(
           { _id: plant._id },
-          { $set: { growthPoints: currentGrowthPoints + 1, lastWatering: new Date() } }
+          { $set: { growthPoints: currentGrowthPoints + blueprint.growthFactor, lastWatering: new Date() } }
         );
         return true;
       }
 
       const nextCycle = this.getNextCycle((plant.currentPlantCycle as PlantLifeCycle) ?? PlantLifeCycle.Seed);
 
-      let updatedGrowthPoints = currentGrowthPoints + 1;
+      let updatedGrowthPoints = currentGrowthPoints + blueprint.growthFactor;
       if (plant.currentPlantCycle === PlantLifeCycle.Mature && !blueprint.regrowsAfterHarvest) {
         updatedGrowthPoints = currentGrowthPoints;
       }

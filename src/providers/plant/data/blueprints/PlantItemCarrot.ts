@@ -16,27 +16,27 @@ export const plantItemCarrot: IPlantItem = {
   texturePath: "seeds/seed-brown-1.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
-      requiredGrowthPoints: 5,
+      requiredGrowthPoints: 10,
       textureAtlas: "crops",
       texturePath: "seeds/seed-brown-1.png",
     },
     [PlantLifeCycle.Sprout]: {
-      requiredGrowthPoints: 10,
+      requiredGrowthPoints: 20,
       textureAtlas: "crops",
       texturePath: "plants/food/carrot/carrot-sprout.png",
     },
     [PlantLifeCycle.Young]: {
-      requiredGrowthPoints: 15,
+      requiredGrowthPoints: 30,
       textureAtlas: "crops",
       texturePath: "plants/food/carrot/carrot-young.png",
     },
     [PlantLifeCycle.Mature]: {
-      requiredGrowthPoints: 20,
+      requiredGrowthPoints: 40,
       textureAtlas: "crops",
       texturePath: "plants/food/carrot/carrot-mature.png",
     },
   },
-  growthFactor: 2,
+  growthFactor: 1.2,
   regrowsAfterHarvest: false,
   maxHarvestablePerPlant: 3,
   availableOnlyOnSeasons: [],

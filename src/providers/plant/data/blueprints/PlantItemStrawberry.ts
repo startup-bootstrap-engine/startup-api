@@ -17,30 +17,30 @@ export const plantItemStrawberry: IPlantItem = {
   texturePath: "seeds/seed-green-1.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
-      requiredGrowthPoints: 5,
+      requiredGrowthPoints: 10,
       textureAtlas: "crops",
       texturePath: "seeds/seed-green-1.png",
     },
     [PlantLifeCycle.Sprout]: {
-      requiredGrowthPoints: 10,
+      requiredGrowthPoints: 20,
       textureAtlas: "crops",
       texturePath: "plants/food/strawberry/strawberry-sprout.png",
     },
     [PlantLifeCycle.Young]: {
-      requiredGrowthPoints: 15,
+      requiredGrowthPoints: 30,
       textureAtlas: "crops",
       texturePath: "plants/food/strawberry/strawberry-young.png",
     },
     [PlantLifeCycle.Mature]: {
-      requiredGrowthPoints: 20,
+      requiredGrowthPoints: 40,
       textureAtlas: "crops",
       texturePath: "plants/food/strawberry/strawberry-mature.png",
     },
   },
   harvestableItemKey: FoodsBlueprint.Strawberry,
   regrowsAfterHarvest: true,
-  growthFactor: 4,
-  maxHarvestablePerPlant: 5,
+  growthFactor: 2,
+  maxHarvestablePerPlant: 6,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
 };

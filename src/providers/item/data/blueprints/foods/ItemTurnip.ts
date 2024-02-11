@@ -14,7 +14,7 @@ export const itemTurnip: IConsumableItemBlueprint = {
     "The turnip or white turnip is a root vegetable commonly grown in temperate climates worldwide for its white, fleshy taproot.",
   weight: 1,
   maxStackSize: 999,
-  basePrice: 14,
+  basePrice: 80,
   canSell: true,
   usableEffectKey: UsableEffectsBlueprint.ModerateEatingEffect,
 };

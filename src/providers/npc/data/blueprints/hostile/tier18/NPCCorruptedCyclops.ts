@@ -6,6 +6,7 @@ import {
   AxesBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
+  GemsBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
@@ -110,6 +111,10 @@ export const npcCorruptedCyclops: INPCTierBlueprint<18> = {
     {
       itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
       chance: 32,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.EarthstoneGem,
+      chance: 2,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],

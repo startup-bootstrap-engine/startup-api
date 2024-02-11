@@ -148,13 +148,13 @@ describe("PlantGrowth.ts", () => {
     await plantGrowth.updatePlantGrowth(plant, testCharacter);
     expect(Item.updateOne).toHaveBeenCalledWith(
       { _id: plant._id },
-      { $set: { growthPoints: growthPoints + 1, lastWatering: expect.anything() } }
+      { $set: { growthPoints: growthPoints + blueprint.growthFactor, lastWatering: expect.anything() } }
     );
   });
 
   it("should send socketMessaging to characters around character when advance to new plant cycle", async () => {
     // Set required growth points for cycle advancement to MaturePlant (20)
-    const growthPoints = 19;
+    const growthPoints = 39;
     plant.growthPoints = growthPoints;
     plant.currentPlantCycle = PlantLifeCycle.Young;
     await plant.save();
@@ -191,7 +191,7 @@ describe("PlantGrowth.ts", () => {
     mockItemFindByIdAndUpdate = jest.fn();
     Item.findByIdAndUpdate = mockItemFindByIdAndUpdate;
     // Set required growth points for cycle advancement to MaturePlant (20)
-    const growthPoints = 19;
+    const growthPoints = 39;
     plant.growthPoints = growthPoints;
     plant.currentPlantCycle = PlantLifeCycle.Young;
     await plant.save();
@@ -201,7 +201,7 @@ describe("PlantGrowth.ts", () => {
       plant._id,
       {
         $set: {
-          growthPoints: growthPoints + 1,
+          growthPoints: growthPoints + blueprint.growthFactor,
           currentPlantCycle: PlantLifeCycle.Mature,
           lastPlantCycleRun: expect.anything(),
           lastWatering: expect.anything(),
@@ -219,7 +219,7 @@ describe("PlantGrowth.ts", () => {
     mockItemFindByIdAndUpdate = jest.fn();
     Item.findByIdAndUpdate = mockItemFindByIdAndUpdate;
 
-    const growthPoints = 30;
+    const growthPoints = 39;
     plant.currentPlantCycle = PlantLifeCycle.Young;
     plant.growthPoints = growthPoints;
     await plant.save();
@@ -229,7 +229,7 @@ describe("PlantGrowth.ts", () => {
       plant._id,
       {
         $set: {
-          growthPoints: growthPoints + 1,
+          growthPoints: growthPoints + blueprint.growthFactor,
           currentPlantCycle: PlantLifeCycle.Mature,
           lastPlantCycleRun: expect.anything(),
           lastWatering: expect.anything(),
@@ -253,7 +253,7 @@ describe("PlantGrowth.ts", () => {
       regrowsAfterHarvest: false,
     });
 
-    const growthPoints = 30;
+    const growthPoints = 40;
     plant.currentPlantCycle = PlantLifeCycle.Mature;
     plant.growthPoints = growthPoints;
     await plant.save();

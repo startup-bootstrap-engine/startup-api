@@ -7,6 +7,7 @@ import {
   BootsBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
+  GemsBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
@@ -225,6 +226,14 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
     {
       itemBlueprintKey: DaggersBlueprint.StarshardDagger,
       chance: 90,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.AmethystGem,
+      chance: 3,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.RubyGem,
+      chance: 1,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
