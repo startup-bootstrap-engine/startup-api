@@ -112,9 +112,15 @@ export class CharacterAutoLoot {
         throw new Error("Inventory item container not found");
       }
 
-      const bodies = await Item.find({ _id: { $in: itemIdsToLoot } }).lean<IItem[]>();
+      const bodies = await Item.find({ _id: { $in: itemIdsToLoot } }).lean<IItem[]>({
+        virtuals: true,
+        defaults: true,
+      });
       const itemContainerIds = bodies.map((body) => body.itemContainer);
-      const itemContainers = await ItemContainer.find({ _id: { $in: itemContainerIds } }).lean<IItemContainer[]>();
+      const itemContainers = await ItemContainer.find({ _id: { $in: itemContainerIds } }).lean<IItemContainer[]>({
+        virtuals: true,
+        defaults: true,
+      });
 
       const itemContainerMap = new Map(itemContainers.map((ic) => [String(ic._id), ic]));
       const lootedItemNamesAndQty: string[] = [];
@@ -132,7 +138,10 @@ export class CharacterAutoLoot {
             continue;
           }
 
-          const item = (await Item.findOne({ _id: slot._id }).lean()) as IItem;
+          const item = (await Item.findOne({ _id: slot._id }).lean({
+            virtuals: true,
+            defaults: true,
+          })) as IItem;
           if (!item) {
             console.log(`Item with id ${slot._id} not found`);
             continue;
@@ -169,22 +178,22 @@ export class CharacterAutoLoot {
   }
 
   private async disableLooting(character: ICharacter, bodyItem: IItem): Promise<void> {
-    await Item.updateOne(
-      { _id: bodyItem._id },
-      {
-        $set: {
-          isDeadBodyLootable: false,
-        },
-      }
-    );
-
-    await this.characterView.addToCharacterView(character._id, bodyItem._id, "items");
+    await Promise.all([
+      Item.updateOne(
+        { _id: bodyItem._id },
+        {
+          $set: {
+            isDeadBodyLootable: false,
+          },
+        }
+      ),
+      this.characterView.addToCharacterView(character._id, bodyItem._id, "items"),
+      this.animationEffect.sendAnimationEventToCharacter(character, AnimationEffectKeys.LevelUp),
+    ]);
 
     this.socketMessaging.sendEventToUser<Partial<IItemUpdate>>(character.channelId!, ItemSocketEvents.Update, {
       id: bodyItem._id,
       isDeadBodyLootable: false,
     });
-
-    await this.animationEffect.sendAnimationEventToCharacter(character, AnimationEffectKeys.LevelUp);
   }
 }
