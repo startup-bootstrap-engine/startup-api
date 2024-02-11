@@ -101,41 +101,27 @@ export class CharacterAutoLoot {
   @TrackNewRelicTransaction()
   public async execAutoLoot(character: ICharacter, itemIdsToLoot: string[]): Promise<void> {
     try {
-      const hasBasicValidation = this.characterValidation.hasBasicValidation(character);
-
-      if (!hasBasicValidation) {
+      if (!this.characterValidation.hasBasicValidation(character)) {
         return;
       }
 
       const inventoryItemContainer = (await this.characterItemContainer.getInventoryItemContainer(
         character
       )) as IItemContainer;
-
       if (!inventoryItemContainer) {
         throw new Error("Inventory item container not found");
       }
 
-      const lootedItemNamesAndQty: string[] = [];
-
-      const disableLootingPromises: Promise<any>[] = [];
-
       const bodies = await Item.find({ _id: { $in: itemIdsToLoot } }).lean<IItem[]>();
+      const itemContainerIds = bodies.map((body) => body.itemContainer);
+      const itemContainers = await ItemContainer.find({ _id: { $in: itemContainerIds } }).lean<IItemContainer[]>();
 
-      const itemContainers = await ItemContainer.find({ _id: { $in: bodies.map((b) => b.itemContainer) } }).lean<
-        IItemContainer[]
-      >();
-
-      const itemContainerMap = new Map<string, IItemContainer>();
-      for (const body of bodies) {
-        const itemContainer = itemContainers.find((ic) => ic._id.toString() === body.itemContainer?.toString());
-        if (itemContainer) {
-          itemContainerMap.set(String(body.itemContainer!), itemContainer);
-        }
-      }
+      const itemContainerMap = new Map(itemContainers.map((ic) => [String(ic._id), ic]));
+      const lootedItemNamesAndQty: string[] = [];
+      const disableLootingPromises: Promise<any>[] = [];
 
       for (const bodyItem of bodies) {
         const itemContainer = itemContainerMap.get(String(bodyItem.itemContainer));
-
         if (!itemContainer) {
           console.log(`Item container with id ${bodyItem.itemContainer} not found`);
           continue;
@@ -147,41 +133,27 @@ export class CharacterAutoLoot {
           }
 
           const item = (await Item.findOne({ _id: slot._id }).lean()) as IItem;
-
           if (!item) {
             console.log(`Item with id ${slot._id} not found`);
             continue;
           }
 
-          const addedToInventory = await this.characterItemContainer.addItemToContainer(
-            item,
-            character,
-            inventoryItemContainer._id,
-            {
+          const [addedToInventory, removedFromBody] = await Promise.all([
+            this.characterItemContainer.addItemToContainer(item, character, inventoryItemContainer._id, {
               shouldAddOwnership: true,
               shouldAddAsCarriedItem: true,
-            }
-          );
-
-          const removedFromBody = await this.characterItemContainer.removeItemFromContainer(
-            item,
-            character,
-            itemContainer
-          );
+            }),
+            this.characterItemContainer.removeItemFromContainer(item, character, itemContainer),
+          ]);
 
           if (!addedToInventory || !removedFromBody) {
             console.log(`Failed to add ${item.name} to inventory or remove from body`);
             continue;
           }
 
-          const isStackableItem = item.maxStackSize > 1;
-
-          if (isStackableItem && item.stackQty! > 1) {
-            lootedItemNamesAndQty.push(`${item.name} (x${item.stackQty})`);
-          } else {
-            lootedItemNamesAndQty.push(item.name);
-          }
-
+          lootedItemNamesAndQty.push(
+            `${item.name}${item.maxStackSize > 1 && item.stackQty! > 1 ? ` (x${item.stackQty})` : ""}`
+          );
           disableLootingPromises.push(this.disableLooting(character, bodyItem));
         }
       }
