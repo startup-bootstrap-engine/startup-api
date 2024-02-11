@@ -2,11 +2,13 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IItemUpdate, ItemSocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { CharacterInventory } from "./CharacterInventory";
 import { CharacterValidation } from "./CharacterValidation";
+import { CharacterView } from "./CharacterView";
 import { CharacterItemContainer } from "./characterItems/CharacterItemContainer";
 
 @provide(CharacterAutoLoot)
@@ -15,7 +17,9 @@ export class CharacterAutoLoot {
     private characterValidation: CharacterValidation,
     private characterItemContainer: CharacterItemContainer,
     private socketMessaging: SocketMessaging,
-    private characterInventory: CharacterInventory
+    private characterInventory: CharacterInventory,
+    private characterView: CharacterView,
+    private animationEffect: AnimationEffect
   ) {}
 
   @TrackNewRelicTransaction()
@@ -90,7 +94,7 @@ export class CharacterAutoLoot {
 
           lootedItemNamesAndQty.push(item.stackQty === 1 ? item.name : `${item.name} (x${item.stackQty})`);
 
-          disableLootingPromises.push(this.disableLooting(character, item));
+          disableLootingPromises.push(this.disableLooting(character, bodyItem));
         }
       }
 
@@ -104,11 +108,20 @@ export class CharacterAutoLoot {
     }
   }
 
-  private async disableLooting(character: ICharacter, item: IItem): Promise<void> {
-    await Item.updateOne({ _id: item._id }, { isDeadBodyLootable: false });
+  private async disableLooting(character: ICharacter, bodyItem: IItem): Promise<void> {
+    await Item.updateOne(
+      { _id: bodyItem._id },
+      {
+        $set: {
+          isDeadBodyLootable: false,
+        },
+      }
+    );
+
+    await this.characterView.addToCharacterView(character._id, bodyItem._id, "items");
 
     this.socketMessaging.sendEventToUser<Partial<IItemUpdate>>(character.channelId!, ItemSocketEvents.Update, {
-      id: item._id,
+      id: bodyItem._id,
       isDeadBodyLootable: false,
     });
   }
