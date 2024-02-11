@@ -197,7 +197,7 @@ async function onItemContainerUpdate(doc, next): Promise<void> {
   // @ts-ignore
   const itemContainer = await this.model.findOne(this.getQuery());
 
-  if (!itemContainer.owner) {
+  if (!itemContainer?.owner) {
     return next();
   }
 

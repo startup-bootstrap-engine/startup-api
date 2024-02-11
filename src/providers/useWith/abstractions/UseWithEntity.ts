@@ -222,7 +222,9 @@ export class UseWithEntity {
   }
 
   private async sendRefreshItemsEvent(character: ICharacter): Promise<void> {
-    const container = (await this.characterItemContainer.getItemContainer(character)) as unknown as IItemContainer;
+    const container = (await this.characterItemContainer.getInventoryItemContainer(
+      character
+    )) as unknown as IItemContainer;
 
     const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {
       inventory: container,

@@ -1,11 +1,12 @@
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { provide } from "inversify-binding-decorators";
+import { CharacterNetworkAutoLoot } from "./CharacterNetworkAutoLoot";
 import { CharacterNetworkCreate } from "./CharacterNetworkCreate";
 import { CharacterNetworkLogout } from "./CharacterNetworkLogout";
 import { CharacterNetworkPing } from "./CharacterNetworkPing";
+import { CharacterNetworkSearch } from "./CharacterNetworkSearch";
 import { CharacterNetworkTrading } from "./CharacterNetworkTrading";
 import { CharacterNetworkUpdateQueue } from "./CharacterNetworkUpdate/CharacterNetworkUpdateQueue";
-import { CharacterNetworkSearch } from "./CharacterNetworkSearch";
 
 @provide(CharacterNetwork)
 export class CharacterNetwork {
@@ -15,7 +16,8 @@ export class CharacterNetwork {
     private characterUpdate: CharacterNetworkUpdateQueue,
     private characterPing: CharacterNetworkPing,
     private characterTrading: CharacterNetworkTrading,
-    private characterSearch: CharacterNetworkSearch
+    private characterSearch: CharacterNetworkSearch,
+    private characterAutoLoot: CharacterNetworkAutoLoot
   ) {}
 
   public onAddEventListeners(channel: SocketChannel): void {
@@ -25,5 +27,6 @@ export class CharacterNetwork {
     this.characterPing.onCharacterPing(channel);
     this.characterTrading.onCharacterNPCTrade(channel);
     this.characterSearch.onFindCharacter(channel);
+    this.characterAutoLoot.onCharacterAutoLoot(channel);
   }
 }

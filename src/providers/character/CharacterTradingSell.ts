@@ -2,12 +2,14 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
+import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { TRADER_SELL_PRICE_MULTIPLIER } from "@providers/constants/ItemConstants";
 import { blueprintManager } from "@providers/inversify/container";
 import { AvailableBlueprints, OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { MathHelper } from "@providers/math/MathHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import Shared, {
   IEquipmentAndInventoryUpdatePayload,
   IItemContainer,
@@ -25,8 +27,6 @@ import { CharacterItemContainer } from "./characterItems/CharacterItemContainer"
 import { CharacterItemInventory } from "./characterItems/CharacterItemInventory";
 import { CharacterItemSlots } from "./characterItems/CharacterItemSlots";
 import { CharacterWeight } from "./weight/CharacterWeight";
-import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
-import { NewRelic } from "@providers/analytics/NewRelic";
 
 @provide(CharacterTradingSell)
 export class CharacterTradingSell {
@@ -202,7 +202,7 @@ export class CharacterTradingSell {
     const uniqueItems: string[] = [];
     let priceMultiplier = 1;
 
-    const container = await this.characterItemContainer.getItemContainer(character);
+    const container = await this.characterItemContainer.getInventoryItemContainer(character);
     if (!container) {
       return;
     }
