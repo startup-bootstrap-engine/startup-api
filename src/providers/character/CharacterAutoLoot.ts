@@ -62,8 +62,6 @@ export class CharacterAutoLoot {
 
           try {
             await this.execAutoLoot(character, itemIdsToLoot);
-
-            console.log("Finished auto-loot job successfully!");
           } catch (err) {
             console.error(err);
             throw err;
@@ -86,8 +84,6 @@ export class CharacterAutoLoot {
   }
 
   public async autoLoot(character: ICharacter, itemIdsToLoot: string[]): Promise<void> {
-    console.log("Auto looting for character", character._id, "with items", itemIdsToLoot.join(", "));
-
     if (!this.connection || !this.queue || !this.worker) {
       this.init();
     }
