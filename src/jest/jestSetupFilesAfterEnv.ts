@@ -60,6 +60,10 @@ jest.mock("@providers/constants/PartyConstants", () => ({
   PARTY_BONUS_RATIO: 1,
 }));
 
+jest.mock("@providers/constants/EquipmentConstants", () => ({
+  IS_GEAR_CLASS_RESTRICTION_ACTIVE: true,
+}));
+
 jest.mock("@providers/constants/PremiumAccountConstants", () => ({
   PREMIUM_ACCOUNT_METADATA: {
     free: undefined,

@@ -1,3 +1,4 @@
+import { IS_GEAR_CLASS_RESTRICTION_ACTIVE } from "@providers/constants/EquipmentConstants";
 import { CharacterClass, ItemSubType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
@@ -31,6 +32,10 @@ export class EquipmentCharacterClass {
   }
 
   public isItemAllowed(characterType: string, itemSubType: string): boolean {
+    if (!IS_GEAR_CLASS_RESTRICTION_ACTIVE) {
+      return true;
+    }
+
     if (itemSubType === "First") {
       return true;
     }
