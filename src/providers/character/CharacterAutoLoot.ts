@@ -121,8 +121,20 @@ export class CharacterAutoLoot {
 
       const bodies = await Item.find({ _id: { $in: itemIdsToLoot } }).lean<IItem[]>();
 
+      const itemContainers = await ItemContainer.find({ _id: { $in: bodies.map((b) => b.itemContainer) } }).lean<
+        IItemContainer[]
+      >();
+
+      const itemContainerMap = new Map<string, IItemContainer>();
+      for (const body of bodies) {
+        const itemContainer = itemContainers.find((ic) => ic._id.toString() === body.itemContainer?.toString());
+        if (itemContainer) {
+          itemContainerMap.set(String(body.itemContainer!), itemContainer);
+        }
+      }
+
       for (const bodyItem of bodies) {
-        const itemContainer = (await ItemContainer.findOne({ _id: bodyItem.itemContainer }).lean()) as IItemContainer;
+        const itemContainer = itemContainerMap.get(String(bodyItem.itemContainer));
 
         if (!itemContainer) {
           console.log(`Item container with id ${bodyItem.itemContainer} not found`);
@@ -178,7 +190,7 @@ export class CharacterAutoLoot {
         this.socketMessaging.sendMessageToCharacter(character, `Auto-loot: ${lootedItemNamesAndQty.join(", ")}`);
       }
 
-      await Promise.all([this.characterInventory.sendInventoryUpdateEvent(character), disableLootingPromises]);
+      await Promise.all([this.characterInventory.sendInventoryUpdateEvent(character), ...disableLootingPromises]);
     } catch (error) {
       console.error(error);
     }
