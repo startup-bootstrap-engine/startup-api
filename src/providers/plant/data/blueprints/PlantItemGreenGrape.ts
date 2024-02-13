@@ -1,3 +1,4 @@
+import { FARMING_SUPER_YIELD_FACTOR } from "@providers/constants/FarmingConstants";
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemSubType, ItemType } from "@rpg-engine/shared";
 import { PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
@@ -39,7 +40,7 @@ export const plantItemGreenGrape: IPlantItem = {
   harvestableItemKey: FoodsBlueprint.GreenGrape,
   regrowsAfterHarvest: true,
   growthFactor: 1.5,
-  maxHarvestablePerPlant: 8,
+  yieldFactor: FARMING_SUPER_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
 };

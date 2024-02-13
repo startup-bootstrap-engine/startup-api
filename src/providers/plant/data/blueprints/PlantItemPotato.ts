@@ -1,3 +1,4 @@
+import { FARMING_MEDIUM_YIELD_FACTOR } from "@providers/constants/FarmingConstants";
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemSubType, ItemType } from "@rpg-engine/shared";
 import { PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
@@ -40,7 +41,7 @@ export const plantItemPotato: IPlantItem = {
   harvestableItemKey: FoodsBlueprint.Potato,
   regrowsAfterHarvest: false,
   growthFactor: 3.5,
-  maxHarvestablePerPlant: 3,
+  yieldFactor: FARMING_MEDIUM_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
 };

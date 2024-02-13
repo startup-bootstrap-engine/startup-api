@@ -1,4 +1,5 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { blueprintManager, container, unitTestHelper } from "@providers/inversify/container";
@@ -22,7 +23,8 @@ describe("PlantHarvest.ts", () => {
     sendEventToUser: jest.fn(),
   };
 
-  let mockSpellCalculator: any;
+  const farmingSkillLevel = 10;
+
   let mockSkillIncrease: jest.SpyInstance;
 
   beforeAll(() => {
@@ -36,6 +38,10 @@ describe("PlantHarvest.ts", () => {
       hasSkills: true,
     });
 
+    const testCharacterSkills = (await Skill.findById(testCharacter.skills)) as ISkill;
+    testCharacterSkills.farming.level = farmingSkillLevel;
+    await testCharacterSkills.save();
+
     blueprint = (await blueprintManager.getBlueprint("plants", PlantItemBlueprint.Carrot)) as IPlantItem;
     plant = await unitTestHelper.createMockItem(blueprint);
 
@@ -45,10 +51,6 @@ describe("PlantHarvest.ts", () => {
 
     // @ts-expect-error
     plantHarvest.socketMessaging = mockSocketMessaging;
-
-    mockSpellCalculator = {
-      getQuantityBasedOnSkillLevel: jest.fn(),
-    };
 
     inventory = await testCharacter.inventory;
     inventoryContainer = (await ItemContainer.findById(inventory.itemContainer)) as unknown as IItemContainer;
@@ -110,16 +112,15 @@ describe("PlantHarvest.ts", () => {
     mockSkillIncrease = jest.spyOn(plantHarvest.skillIncrease, "increaseCraftingSP");
 
     blueprint.regrowsAfterHarvest = false;
-
-    mockSpellCalculator.getQuantityBasedOnSkillLevel.mockResolvedValue(1);
-
+    // @ts-ignore
+    const harvestQty = plantHarvest.calculateCropYield(farmingSkillLevel, blueprint);
     await plantHarvest.harvestPlant(plant, testCharacter);
 
     expect(mockSkillIncrease).toHaveBeenCalledWith(testCharacter, ItemType.Plant, true);
 
     const updatedInventoryContainer = await ItemContainer.findById(inventoryContainer._id);
     expect(updatedInventoryContainer?.slots[0]).not.toBeNull();
-    expect(updatedInventoryContainer?.slots[0].stackQty).toEqual(1);
+    expect(updatedInventoryContainer?.slots[0].stackQty).toEqual(harvestQty);
     expect(updatedInventoryContainer?.slots[0].key).toEqual(blueprint.harvestableItemKey);
 
     const updatedPlant = await Item.findById(plant._id);
@@ -130,14 +131,16 @@ describe("PlantHarvest.ts", () => {
     //
     blueprint.regrowsAfterHarvest = true;
 
-    mockSpellCalculator.getQuantityBasedOnSkillLevel.mockResolvedValue(1);
+    // @ts-ignore
+    const harvestQty = plantHarvest.calculateCropYield(farmingSkillLevel, blueprint);
+    await plantHarvest.harvestPlant(plant, testCharacter);
 
     await plantHarvest.harvestPlant(plant, testCharacter);
 
     expect(mockSocketMessaging.sendEventToUser).toBeCalled();
     const updatedInventoryContainer = await ItemContainer.findById(inventoryContainer._id);
     expect(updatedInventoryContainer?.slots[0]).not.toBeNull();
-    expect(updatedInventoryContainer?.slots[0].stackQty).toEqual(1);
+    expect(updatedInventoryContainer?.slots[0].stackQty).toEqual(harvestQty);
     expect(updatedInventoryContainer?.slots[0].key).toEqual(blueprint.harvestableItemKey);
 
     const updatedPlant = await Item.findById(plant._id);

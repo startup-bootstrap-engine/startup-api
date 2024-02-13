@@ -5,6 +5,7 @@ import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
+import { FARMING_BASE_YIELD, FARMING_SKILL_FACTOR } from "@providers/constants/FarmingConstants";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { TraitGetter } from "@providers/skill/TraitGetter";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -54,7 +55,10 @@ export class PlantHarvest {
       return;
     }
 
-    const harvestableItemQuantity = await this.calculateHarvestableItemQuantity(character, blueprint);
+    const skills = await this.spellCalculator.getCharacterSkill(character);
+    const skillLevel = await this.traitGetter.getSkillLevelWithBuffs(skills, CraftingSkill.Farming);
+    const harvestableItemQuantity = this.calculateCropYield(skillLevel, blueprint);
+
     const harvestedItemBlueprint = await this.getHarvestedItemBlueprint(blueprint);
     const inventoryContainerId = await this.getInventoryContainerId(character);
 
@@ -96,17 +100,10 @@ export class PlantHarvest {
     return this.blueprintManager.getBlueprint("plants", plant.baseKey);
   }
 
-  private async calculateHarvestableItemQuantity(character: ICharacter, blueprint: IPlantItem): Promise<number> {
-    const Max = blueprint.maxHarvestablePerPlant ?? 1;
-    const skills = await this.spellCalculator.getCharacterSkill(character);
-    const skillLevel = await this.traitGetter.getSkillLevelWithBuffs(skills, CraftingSkill.Farming);
-
-    const harvestableItemQuantity = Math.round(Math.random() * (skillLevel / 3) + 1);
-
-    if (harvestableItemQuantity > Max) {
-      return Max;
-    }
-    return harvestableItemQuantity;
+  private calculateCropYield(farmingSkill: number, blueprint: IPlantItem): number {
+    return Math.round(
+      FARMING_BASE_YIELD + FARMING_BASE_YIELD * FARMING_SKILL_FACTOR * Math.sqrt(farmingSkill) * blueprint.yieldFactor
+    );
   }
 
   private getHarvestedItemBlueprint(blueprint: IPlantItem): Promise<IItem | null> {
