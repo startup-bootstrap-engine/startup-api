@@ -2,6 +2,7 @@ import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
+  AccessoriesBlueprint,
   AxesBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
@@ -131,6 +132,14 @@ export const npcDragonKnight: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
       chance: 16,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.EmberglowNecklace,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.MoonstoneRing,
+      chance: 8,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

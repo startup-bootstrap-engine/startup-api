@@ -3,6 +3,7 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
+  AccessoriesBlueprint,
   AxesBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
@@ -73,6 +74,10 @@ export const npcCorruptedCyclops: INPCTierBlueprint<18> = {
       chance: 15,
     },
     {
+      itemBlueprintKey: AccessoriesBlueprint.PendantOfMana,
+      chance: 1,
+    },
+    {
       itemBlueprintKey: BootsBlueprint.GoldenBoots,
       chance: 2,
     },
@@ -115,6 +120,14 @@ export const npcCorruptedCyclops: INPCTierBlueprint<18> = {
     {
       itemBlueprintKey: GemsBlueprint.EarthstoneGem,
       chance: 2,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.GoldenRubyNecklace,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.GoldenGlimmerRing,
+      chance: 12,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],

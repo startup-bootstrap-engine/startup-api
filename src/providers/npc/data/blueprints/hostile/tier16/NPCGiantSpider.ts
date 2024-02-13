@@ -125,6 +125,10 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
       chance: 10,
     },
     {
+      itemBlueprintKey: AccessoriesBlueprint.PendantOfLife,
+      chance: 1,
+    },
+    {
       itemBlueprintKey: HelmetsBlueprint.InfantryHelmet,
       chance: 10,
     },
@@ -251,6 +255,14 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: DaggersBlueprint.StarshardDagger,
       chance: 16,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.AzureNecklace,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.SapphireSerenadeRing,
+      chance: 8,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],

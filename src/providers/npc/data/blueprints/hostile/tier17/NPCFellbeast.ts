@@ -116,6 +116,14 @@ export const npcFellbeast: INPCTierBlueprint<17> = {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
       chance: 22,
     },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.RubyglintNecklace,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.QuantumSunRing,
+      chance: 8,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],
   areaSpells: [

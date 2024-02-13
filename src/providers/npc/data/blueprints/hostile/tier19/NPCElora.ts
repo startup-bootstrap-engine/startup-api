@@ -2,6 +2,7 @@ import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
+  AccessoriesBlueprint,
   ArmorsBlueprint,
   AxesBlueprint,
   BootsBlueprint,
@@ -151,6 +152,18 @@ export const npcEloraTheQueen: INPCTierBlueprint<19> = {
     {
       itemBlueprintKey: GemsBlueprint.RubyGem,
       chance: 1,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.RubyNeckles,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.EmberglowNecklace,
+      chance: 12,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.SilverDawnRing,
+      chance: 14,
     },
   ],
   entityEffects: [EntityEffectBlueprint.VineGrasp],

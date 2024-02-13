@@ -11,8 +11,8 @@ export const itemRoyalBracelet: IEquippableAccessoryTier0Blueprint = {
   name: "Royal Bracelet",
   description:
     "An ornate bracelet, often made of gold or other precious materials, that is traditionally worn by royalty.",
-  attack: 1,
-  defense: 0,
+  attack: 3,
+  defense: 3,
   tier: 0,
   weight: 0.1,
   allowedEquipSlotType: [ItemSlotType.Ring],

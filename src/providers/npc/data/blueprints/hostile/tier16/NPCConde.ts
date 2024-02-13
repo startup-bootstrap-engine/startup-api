@@ -95,6 +95,14 @@ export const npcConde: INPCTierBlueprint<16> = {
       itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
       chance: 16,
     },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.EmberglowNecklace,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.RubyTriquetraRing,
+      chance: 8,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Freezing],
   areaSpells: [

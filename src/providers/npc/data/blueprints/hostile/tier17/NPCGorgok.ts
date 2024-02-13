@@ -1,6 +1,7 @@
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
+  AccessoriesBlueprint,
   ArmorsBlueprint,
   AxesBlueprint,
   BootsBlueprint,
@@ -158,6 +159,14 @@ export const npcGorgok: INPCTierBlueprint<17> = {
     {
       itemBlueprintKey: DaggersBlueprint.AstralDagger,
       chance: 22,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.EmberStrandNecklace,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.FrostfireRubyRing,
+      chance: 8,
     },
   ],
 };

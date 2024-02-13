@@ -1,5 +1,6 @@
 import { Dice } from "@providers/constants/DiceConstants";
 import {
+  AccessoriesBlueprint,
   ArmorsBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
@@ -89,6 +90,14 @@ export const npcElderGolem: INPCTierBlueprint<17> = {
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
       chance: 22,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.GarnetNecklace,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.GoldenGlowRing,
+      chance: 8,
     },
   ],
   areaSpells: [

@@ -102,6 +102,14 @@ export const npcNightFellbeast: INPCTierBlueprint<17> = {
       itemBlueprintKey: DaggersBlueprint.AstralDagger,
       chance: 22,
     },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.GildedNecklace,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.GoldenGlowRing,
+      chance: 8,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
   areaSpells: [

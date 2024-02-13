@@ -63,6 +63,10 @@ export const npcBandit: INPCTierBlueprint<4> = {
       chance: 20,
     },
     {
+      itemBlueprintKey: AccessoriesBlueprint.AmuletOfLuck,
+      chance: 5,
+    },
+    {
       itemBlueprintKey: GlovesBlueprint.StuddedGloves,
       chance: 20,
     },

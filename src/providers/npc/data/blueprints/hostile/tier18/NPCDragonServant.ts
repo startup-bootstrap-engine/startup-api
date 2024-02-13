@@ -2,6 +2,7 @@ import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
+  AccessoriesBlueprint,
   ArmorsBlueprint,
   AxesBlueprint,
   BooksBlueprint,
@@ -190,6 +191,18 @@ export const npcDragonServant: INPCTierBlueprint<18> = {
     {
       itemBlueprintKey: GemsBlueprint.CoralReefGem,
       chance: 1,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.SapphireStrandNecklace,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.RubyglintNecklace,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.MoonstoneRing,
+      chance: 12,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],
