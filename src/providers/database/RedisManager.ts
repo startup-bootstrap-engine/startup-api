@@ -60,4 +60,8 @@ export class RedisManager {
       this.client = null;
     }
   }
+
+  public async getClientCount(): Promise<number> {
+    return await this.redisIOClient.getTotalConnectedClients();
+  }
 }
