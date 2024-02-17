@@ -28,7 +28,7 @@ export class RedisManager {
       if (retries > 0) {
         console.log(`Retrying in ${this.retryDelay}ms...`);
         setTimeout(() => this.connect(retries - 1), this.retryDelay);
-        this.retryDelay *= 2; // Implement exponential backoff
+        this.retryDelay *= 2; // Exponential backoff
       } else {
         console.error("Max retries reached. Failed to connect to Redis.");
       }
