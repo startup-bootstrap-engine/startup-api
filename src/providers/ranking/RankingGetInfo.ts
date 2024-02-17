@@ -26,6 +26,8 @@ export class RankingGetInfo {
       return cachedTopLevelGlobal;
     }
 
+    const fifteenDaysAgo = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000); // Setting date to 15 days later from now
+
     const topSkill = await Skill.aggregate([
       {
         $match: {
@@ -44,6 +46,7 @@ export class RankingGetInfo {
       {
         $match: {
           "characterInfo.name": { $not: /^GM/ },
+          "characterInfo.updatedAt": { $gte: fifteenDaysAgo }, // Filter for characters updated in the last 15 days
         },
       },
       { $sort: { level: -1 } },
@@ -77,6 +80,7 @@ export class RankingGetInfo {
       return cachedTopLevelByClass;
     }
 
+    const fifteenDaysAgo = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000); // Setting date to 15 days later from now
     const characterClasses = Object.values(CharacterClass);
 
     const characterInfo = await Character.aggregate([
@@ -84,6 +88,7 @@ export class RankingGetInfo {
         $match: {
           class: { $in: characterClasses },
           name: { $not: /^GM/ },
+          updatedAt: { $gte: fifteenDaysAgo }, // Filter for characters updated in the last 15 days
         },
       },
       {
@@ -146,6 +151,8 @@ export class RankingGetInfo {
       "farming",
     ];
 
+    const fifteenDaysAgo = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000); // Setting date to 15 days later from now
+
     const pipeline = skills.map((skill) => {
       return [
         {
@@ -165,6 +172,7 @@ export class RankingGetInfo {
         {
           $match: {
             "characterInfo.name": { $not: /GM/ },
+            "characterInfo.updatedAt": { $gte: fifteenDaysAgo }, // Filter for characters updated in the last 15 days
           },
         },
         {
