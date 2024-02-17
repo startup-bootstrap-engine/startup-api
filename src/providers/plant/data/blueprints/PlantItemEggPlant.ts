@@ -15,12 +15,13 @@ export const plantItemEggPlant: IPlantItem = {
   isPersistent: true,
   weight: 1,
   textureAtlas: "crops",
-  texturePath: "seeds/seed-purple-1.png",
+  texturePath: "seeds/seed-brown-1.png",
+  deadTexturePath: "plants/food/eggplant/generic-sprout-dead-2.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
       requiredGrowthPoints: 10,
       textureAtlas: "crops",
-      texturePath: "seeds/seed-purple-1.png",
+      texturePath: "seeds/seed-brown-1.png",
     },
     [PlantLifeCycle.Sprout]: {
       requiredGrowthPoints: 20,

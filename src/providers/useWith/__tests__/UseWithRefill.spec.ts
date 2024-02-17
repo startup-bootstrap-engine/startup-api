@@ -210,6 +210,17 @@ describe("UseWithRefill.ts", () => {
     expect(sendRandomMessageToCharacterMock).not.toBeCalled();
   });
 
+  it("should sends an error message when plan is allready dead", async () => {
+    testPlant.isDead = true;
+
+    await useWithRefill.executeUse(testCharacter, useWithRefillData, skillIncrease);
+
+    expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
+      testCharacter,
+      "Sorry, you can't water the plant because it is already dead."
+    );
+  });
+
   describe("executeRefill", () => {
     it("should handles error messages when random number is greater than 50", async () => {
       jest.spyOn(_, "random").mockImplementation(() => 70);

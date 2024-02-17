@@ -15,12 +15,13 @@ export const plantItemPumpkin: IPlantItem = {
   isPersistent: true,
   weight: 1,
   textureAtlas: "crops",
-  texturePath: "seeds/seed-orange-1.png",
+  texturePath: "seeds/seed-brown-3.png",
+  deadTexturePath: "plants/food/pumpkin/generic-sprout-dead-2.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
       requiredGrowthPoints: 10,
       textureAtlas: "crops",
-      texturePath: "seeds/seed-orange-1.png",
+      texturePath: "seeds/seed-brown-3.png",
     },
     [PlantLifeCycle.Sprout]: {
       requiredGrowthPoints: 20,

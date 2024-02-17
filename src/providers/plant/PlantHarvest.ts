@@ -39,6 +39,11 @@ export class PlantHarvest {
   ) {}
 
   public async harvestPlant(plant: IItem, character: ICharacter): Promise<void> {
+    if (plant.isDead) {
+      this.sendErrorMessage(character, "Sorry, you can't harvest the plant because it is already dead.");
+      return;
+    }
+
     if (!this.isPlantOwner(plant, character)) {
       this.sendErrorMessage(character, "Sorry, Only the owner can harvest this plant.");
       return;

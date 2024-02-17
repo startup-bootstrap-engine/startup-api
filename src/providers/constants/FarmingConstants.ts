@@ -4,3 +4,5 @@ export const FARMING_LOW_YIELD_FACTOR = 1;
 export const FARMING_MEDIUM_YIELD_FACTOR = 2;
 export const FARMING_HIGH_YIELD_FACTOR = 3;
 export const FARMING_SUPER_YIELD_FACTOR = 4;
+
+export const MAX_HOURS_NO_WATER_DEAD = 72;

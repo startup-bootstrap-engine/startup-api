@@ -16,6 +16,7 @@ export const plantItemTurnip: IPlantItem = {
   weight: 1,
   textureAtlas: "crops",
   texturePath: "seeds/seed-brown-2.png",
+  deadTexturePath: "plants/food/turnip/generic-sprout-dead-2.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
       requiredGrowthPoints: 10,

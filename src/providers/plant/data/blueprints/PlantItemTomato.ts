@@ -14,12 +14,13 @@ export const plantItemTomato: IPlantItem = {
   isPersistent: true,
   weight: 1,
   textureAtlas: "crops",
-  texturePath: "seeds/seed-red-1.png",
+  texturePath: "seeds/seed-brown-2.png",
+  deadTexturePath: "plants/food/tomato/generic-sprout-dead-2.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
       requiredGrowthPoints: 10,
       textureAtlas: "crops",
-      texturePath: "seeds/seed-red-1.png",
+      texturePath: "seeds/seed-brown-2.png",
     },
     [PlantLifeCycle.Sprout]: {
       requiredGrowthPoints: 20,

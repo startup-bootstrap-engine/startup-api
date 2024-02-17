@@ -16,6 +16,7 @@ export const plantItemCabbage: IPlantItem = {
   weight: 1,
   textureAtlas: "crops",
   texturePath: "seeds/seed-green-1.png",
+  deadTexturePath: "plants/food/cabbage/cabbage-dead.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
       requiredGrowthPoints: 5,

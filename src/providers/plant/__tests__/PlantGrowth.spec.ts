@@ -276,4 +276,14 @@ describe("PlantGrowth.ts", () => {
       }
     );
   });
+
+  it("should send an error message to the character if the plant is dead", async () => {
+    plant.isDead = true;
+    await plantGrowth.updatePlantGrowth(plant, testCharacter);
+
+    expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
+      testCharacter,
+      "Sorry, the plant is allready dead."
+    );
+  });
 });

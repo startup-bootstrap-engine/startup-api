@@ -11,6 +11,7 @@ export interface IPlantItem extends Partial<IItem> {
   description: string;
   isStatic: boolean;
   isPersistent: boolean;
+  deadTexturePath: string;
   stagesRequirements: {
     [stage in PlantLifeCycle]?: {
       requiredGrowthPoints: number;

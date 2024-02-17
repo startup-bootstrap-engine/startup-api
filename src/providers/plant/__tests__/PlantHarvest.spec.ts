@@ -148,4 +148,14 @@ describe("PlantHarvest.ts", () => {
     expect(updatedPlant?.currentPlantCycle).toEqual(PlantLifeCycle.Seed);
     expect(updatedPlant?.texturePath).toEqual(blueprint.stagesRequirements[PlantLifeCycle.Seed]?.texturePath);
   });
+
+  it("should send an error message to the character if the plant is dead", async () => {
+    plant.isDead = true;
+    await plantHarvest.harvestPlant(plant, testCharacter);
+
+    expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
+      testCharacter,
+      "Sorry, you can't harvest the plant because it is already dead."
+    );
+  });
 });

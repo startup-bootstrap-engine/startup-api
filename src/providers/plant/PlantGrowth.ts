@@ -25,6 +25,11 @@ export class PlantGrowth {
   @TrackNewRelicTransaction()
   public async updatePlantGrowth(plant: IItem, character: ICharacter): Promise<boolean> {
     try {
+      if (plant.isDead) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, the plant is allready dead.");
+        return false;
+      }
+
       const blueprintManager = container.get<BlueprintManager>(BlueprintManager);
 
       const blueprint = (await blueprintManager.getBlueprint("plants", plant.baseKey)) as IPlantItem;
@@ -121,6 +126,24 @@ export class PlantGrowth {
       isDeadBodyLootable: item.isDeadBodyLootable,
       lastWatering: item.lastWatering!,
     };
+  }
+
+  public async updatePlantTexture(plant: IItem): Promise<void> {
+    const itemToUpdate = this.prepareItemToUpdate(plant);
+
+    if (plant.owner) {
+      const character = (await Character.findById(plant.owner).lean()) as ICharacter;
+      if (character) {
+        await this.socketMessaging.sendEventToCharactersAroundCharacter<IItemUpdateAll>(
+          character,
+          ItemSocketEvents.UpdateAll,
+          { items: [itemToUpdate] },
+          true
+        );
+      } else {
+        console.error("Character not found");
+      }
+    }
   }
 
   private getNextCycle(currentCycle: PlantLifeCycle): PlantLifeCycle {

@@ -15,6 +15,7 @@ export const plantItemGreenGrape: IPlantItem = {
   weight: 1,
   textureAtlas: "crops",
   texturePath: "seeds/seed-green-1.png",
+  deadTexturePath: "plants/food/green-grape/generic-sprout-3-dead.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
       requiredGrowthPoints: 5,

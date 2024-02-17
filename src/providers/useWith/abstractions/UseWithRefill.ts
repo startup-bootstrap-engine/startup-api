@@ -86,6 +86,14 @@ export class UseWithRefill {
         return;
       }
 
+      if (resourceKey === "water" && targetItem.isDead) {
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          "Sorry, you can't water the plant because it is already dead."
+        );
+        return;
+      }
+
       const chance = 50; // 50% chance
       const n = _.random(0, 100);
 

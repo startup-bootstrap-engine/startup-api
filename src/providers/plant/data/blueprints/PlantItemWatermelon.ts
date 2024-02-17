@@ -15,6 +15,7 @@ export const plantItemWatermelon: IPlantItem = {
   weight: 1,
   textureAtlas: "crops",
   texturePath: "seeds/seed-green-1.png",
+  deadTexturePath: "plants/food/watermelon/generic-sprout-dead-2.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
       requiredGrowthPoints: 5,
