@@ -26,7 +26,7 @@ export class PlantGrowth {
   public async updatePlantGrowth(plant: IItem, character: ICharacter): Promise<boolean> {
     try {
       if (plant.isDead) {
-        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, the plant is allready dead.");
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, the plant is already dead.");
         return false;
       }
 
