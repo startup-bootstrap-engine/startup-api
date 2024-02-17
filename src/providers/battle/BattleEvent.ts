@@ -1,5 +1,5 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
+import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterWeapon } from "@providers/character/CharacterWeapon";
@@ -26,8 +26,17 @@ export class BattleEvent {
 
   @TrackNewRelicTransaction()
   public async calculateEvent(attacker: BattleParticipant, target: BattleParticipant): Promise<BattleEventType> {
-    const attackerSkills = attacker.skills as unknown as ISkill;
-    const defenderSkills = target.skills as unknown as ISkill;
+    let attackerSkills = attacker.skills as unknown as ISkill;
+    let defenderSkills = target.skills as unknown as ISkill;
+
+    // if the skills somehow are not populated, fetch them
+    if (!attackerSkills.owner) {
+      attackerSkills = (await Skill.findOne({ owner: attacker._id }).lean()) as unknown as ISkill;
+    }
+
+    if (!defenderSkills.owner) {
+      defenderSkills = (await Skill.findOne({ owner: target._id }).lean()) as unknown as ISkill;
+    }
 
     // Fetch the required data in parallel
     const [defenderDefense, attackerAttack, attackerDexterityLevel, defenderDexterityLevel] = await Promise.all([
