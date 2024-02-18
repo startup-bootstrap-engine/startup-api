@@ -1,6 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IUser } from "@entities/ModuleSystem/UserModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
+import { CharacterBan } from "@providers/character/CharacterBan";
 import { CharacterLastAction } from "@providers/character/CharacterLastAction";
 import { appEnv } from "@providers/config/env";
 import { BYPASS_EVENTS_AS_LAST_ACTION } from "@providers/constants/EventsConstants";
@@ -8,14 +9,14 @@ import {
   EXHAUSTABLE_EVENTS,
   LOCKABLE_EVENTS,
   LOGGABLE_EVENTS,
-  THROTTABLE_DEFAULT_MS_THRESHOLD,
   THROTTABLE_EVENTS,
 } from "@providers/constants/ServerConstants";
 import { ExhaustValidation } from "@providers/exhaust/ExhaustValidation";
 import { NewRelicTransactionCategory } from "@providers/types/NewRelicTypes";
-import { IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
+import { CharacterSocketEvents, IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
 import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
+import { SocketAuthEventsViolation } from "./SocketAuthEventsViolation";
 import { SocketAuthLock } from "./SocketAuthLock";
 import { SocketMessaging } from "./SocketMessaging";
 
@@ -26,53 +27,28 @@ export class SocketAuthEventsValidator {
     private exhaustValidation: ExhaustValidation,
     private socketMessaging: SocketMessaging,
     private newRelic: NewRelic,
-    private socketAuthLock: SocketAuthLock
+    private socketAuthLock: SocketAuthLock,
+    private socketAuthEventsViolation: SocketAuthEventsViolation,
+    private characterBan: CharacterBan
   ) {}
 
-  public async handleEventLogic(
-    channel,
+  public async handleEventLogic<T>(
+    channel: string,
     event: string,
-    data: any,
-    callback: (data, character: ICharacter, owner: IUser) => Promise<any>,
+    data: T,
+    callback: (data: T, character: ICharacter, owner: IUser) => Promise<any>,
     character: ICharacter,
     owner: IUser
   ): Promise<void> {
-    await this.newRelic.trackTransaction(NewRelicTransactionCategory.SocketEvent, event, async (): Promise<void> => {
-      const shouldLog = this.shouldLogEvent(event);
-      const shouldSetLastAction = this.shouldSetLastAction(event);
-      const isLockableEvent = LOCKABLE_EVENTS.includes(event);
-
-      const [isExhausted, isThrottleViolated] = await Promise.all([
-        this.isExhausted(character, event),
-        this.isThrottleViolated(character, event),
-      ]);
-
-      if (shouldLog) {
-        this.logEvent(character, event);
-      }
-
-      if (isExhausted) {
-        this.notifyExhaustion(channel);
-        return;
-      }
-
-      if (isThrottleViolated) {
-        return;
-      }
-
-      if (shouldSetLastAction) {
-        await this.characterLastAction.setLastAction(character._id, dayjs().toISOString());
-      }
-
-      if (isLockableEvent) {
-        await this.socketAuthLock.performLockedEvent(character._id, character.name, event, async () => {
-          await callback(data, character, owner);
-        });
-        return;
-      }
-
-      await callback(data, character, owner);
-    });
+    try {
+      await this.newRelic.trackTransaction(NewRelicTransactionCategory.SocketEvent, event, async () => {
+        if (await this.preProcessEventChecks(event, character, channel)) {
+          await this.processEvent(event, data, callback, character, owner);
+        }
+      });
+    } catch (error) {
+      console.error(`Error processing event ${event} for character ${character._id} - ${character.name}: ${error}`);
+    }
   }
 
   public shouldLogEvent(event: string): boolean {
@@ -112,11 +88,37 @@ export class SocketAuthEventsValidator {
       if (lastActionExecution) {
         const diff = dayjs().diff(dayjs(lastActionExecution), "millisecond");
 
-        if (diff < THROTTABLE_DEFAULT_MS_THRESHOLD) {
+        const isDiffLowerThanThreshold = diff < THROTTABLE_EVENTS[event];
+
+        if (isDiffLowerThanThreshold) {
           this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId!, UISocketEvents.ShowMessage, {
-            message: "Sorry, you're doing it too fast!",
+            message: "Sorry, you're doing it too fast! Stop, or you'll be kicked out!",
             type: "error",
           });
+          console.log(`⚠️ Throttle violation for ${event} on character ${character._id}`);
+
+          await this.socketAuthEventsViolation.addViolation(character);
+
+          const isViolationHigherThanThreshold = await this.socketAuthEventsViolation.isViolationHigherThanThreshold(
+            character
+          );
+
+          if (isViolationHigherThanThreshold) {
+            console.log(
+              `🚫 Throttle violation threshold reached for ${event} on character ${character._id} - kicking out!`
+            );
+
+            this.socketMessaging.sendEventToUser(character.channelId!, CharacterSocketEvents.CharacterForceDisconnect, {
+              reason:
+                "You are disconnected for spamming the server with in-game actions. You'll get banned if you continue.",
+            });
+
+            await this.socketAuthEventsViolation.resetCharacterViolations(character);
+
+            await this.characterBan.addPenalty(character);
+
+            return true;
+          }
 
           return true;
         }
@@ -126,5 +128,47 @@ export class SocketAuthEventsValidator {
     }
 
     return false;
+  }
+
+  private async preProcessEventChecks(event: string, character: ICharacter, channel: string): Promise<boolean> {
+    const shouldLog = this.shouldLogEvent(event);
+    if (shouldLog) {
+      this.logEvent(character, event);
+    }
+
+    const isExhausted = await this.isExhausted(character, event);
+    if (isExhausted) {
+      this.notifyExhaustion(channel);
+      return false;
+    }
+
+    const isThrottleViolated = await this.isThrottleViolated(character, event);
+    if (isThrottleViolated) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private async processEvent<T>(
+    event: string,
+    data: T,
+    callback: (data: T, character: ICharacter, owner: IUser) => Promise<any>,
+    character: ICharacter,
+    owner: IUser
+  ): Promise<void> {
+    const shouldSetLastAction = this.shouldSetLastAction(event);
+    if (shouldSetLastAction) {
+      await this.characterLastAction.setLastAction(character._id, dayjs().toISOString());
+    }
+
+    const isLockableEvent = LOCKABLE_EVENTS.includes(event);
+    if (isLockableEvent) {
+      await this.socketAuthLock.performLockedEvent(character._id, character.name, event, () =>
+        callback(data, character, owner)
+      );
+    } else {
+      await callback(data, character, owner);
+    }
   }
 }
