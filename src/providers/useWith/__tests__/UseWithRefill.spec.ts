@@ -34,8 +34,6 @@ describe("UseWithRefill.ts", () => {
     useWithRefill = container.get<UseWithRefill>(UseWithRefill);
     skillIncrease = container.get<SkillIncrease>(SkillIncrease);
     blueprintManager = container.get<BlueprintManager>(BlueprintManager);
-
-    jest.spyOn(_, "random").mockImplementation(() => 40);
   });
 
   beforeEach(async () => {
@@ -150,9 +148,12 @@ describe("UseWithRefill.ts", () => {
     );
   });
 
-  it("should properly use the item when random number is less than 50", async () => {
+  it("should properly water if all conditions are met", async () => {
     // @ts-expect-error
     const sendRandomMessageToCharacterMock = jest.spyOn(useWithRefill, "sendRandomMessageToCharacter");
+
+    // @ts-expect-error
+    jest.spyOn(useWithRefill.plantGrowth, "updatePlantGrowth").mockResolvedValue(true);
 
     const mockIncreaseCraftingSP = jest.fn();
     const mockSkillIncrease = { increaseCraftingSP: mockIncreaseCraftingSP };
@@ -163,14 +164,9 @@ describe("UseWithRefill.ts", () => {
     // @ts-ignore
     await useWithRefill.executeUse(testCharacter, useWithRefillData, mockSkillIncrease);
 
-    const updatedPlant = await Item.findById(testPlant.id);
-
     const updatedRefillItem = await Item.findById(testRefillItem.id);
 
     expect(mockIncreaseCraftingSP).toBeCalledWith(testCharacter, ItemType.Plant, true);
-
-    // @ts-expect-error
-    expect(updatedPlant?.lastWatering.getTime()).toBeLessThanOrEqual(new Date().getTime());
 
     expect(updatedRefillItem?.remainingUses).toEqual(currentRemainingUses - decrementQty);
 
@@ -185,20 +181,7 @@ describe("UseWithRefill.ts", () => {
     );
   });
 
-  it("should handles error messages when random number is greater than 50", async () => {
-    jest.spyOn(_, "random").mockImplementation(() => 70);
-
-    // @ts-expect-error
-    const sendRandomMessageToCharacterMock = jest.spyOn(useWithRefill, "sendRandomMessageToCharacter");
-
-    await useWithRefill.executeUse(testCharacter, useWithRefillData, skillIncrease);
-
-    expect(sendRandomMessageToCharacterMock).toBeCalledWith(testCharacter, useWithRefillData.errorMessages, false);
-  });
-
   it("should not send sendRandomMessageToCharacter when updatePlantGrowth returns false", async () => {
-    jest.spyOn(_, "random").mockImplementation(() => 40);
-
     // @ts-ignore
     jest.spyOn(useWithRefill.plantGrowth, "updatePlantGrowth").mockImplementation(() => false);
 
@@ -222,8 +205,8 @@ describe("UseWithRefill.ts", () => {
   });
 
   describe("executeRefill", () => {
-    it("should handles error messages when random number is greater than 50", async () => {
-      jest.spyOn(_, "random").mockImplementation(() => 70);
+    it("should handles error messages when random number is greater than 75", async () => {
+      jest.spyOn(_, "random").mockImplementation(() => 76);
 
       // @ts-expect-error
       const sendRandomMessageToCharacterMock = jest.spyOn(useWithRefill, "sendRandomMessageToCharacter");
@@ -233,8 +216,8 @@ describe("UseWithRefill.ts", () => {
       expect(sendRandomMessageToCharacterMock).toBeCalledWith(testCharacter, useWithRefillData.errorMessages, false);
     });
 
-    it("should properly refill the item when random number is less than 50", async () => {
-      jest.spyOn(_, "random").mockImplementation(() => 40);
+    it("should properly refill the item when random number is less than 75", async () => {
+      jest.spyOn(_, "random").mockImplementation(() => 74);
 
       // @ts-expect-error
       const sendRandomMessageToCharacterMock = jest.spyOn(useWithRefill, "sendRandomMessageToCharacter");

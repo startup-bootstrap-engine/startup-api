@@ -4,6 +4,7 @@ import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { ItemSocketEvents, ItemSubType, ItemType } from "@rpg-engine/shared";
 import dayjs from "dayjs";
+import _ from "lodash";
 import { MAXIMUM_HOURS_FOR_GROW, MINIMUM_HOURS_FOR_WATERING, PlantGrowth } from "../PlantGrowth";
 import { IPlantItem } from "../data/blueprints/PlantItem";
 import { PlantItemBlueprint, PlantLifeCycle } from "../data/types/PlantTypes";
@@ -16,6 +17,8 @@ describe("PlantGrowth.ts", () => {
   let mockItemFindByIdAndUpdate: jest.Mock;
   let testCharacter: ICharacter;
   let blueprintManager: BlueprintManager;
+  let errorMessages: string[] | undefined;
+  let errorMessage: string;
 
   const mockSocketMessaging = {
     sendEventToCharactersAroundCharacter: jest.fn(),
@@ -44,6 +47,10 @@ describe("PlantGrowth.ts", () => {
 
     // @ts-ignore
     plantGrowth.socketMessaging = mockSocketMessaging;
+    errorMessage = "Sorry, you can't water now. Please try again";
+    errorMessages = [errorMessage];
+
+    jest.spyOn(_, "random").mockImplementation(() => 74);
   });
 
   afterEach(() => {
@@ -100,11 +107,11 @@ describe("PlantGrowth.ts", () => {
     // @ts-ignore
     expect(plantGrowth.canPlantGrow(plant, blueprint)).toMatchObject({ canGrow: false, canWater: false });
 
-    await plantGrowth.updatePlantGrowth(plant, testCharacter);
+    await plantGrowth.updatePlantGrowth(plant, testCharacter, errorMessages);
 
     expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
       testCharacter,
-      "Sorry, the plant is not ready to be watered."
+      "Sorry, the plant is not ready to be watered. Try again in a few hours."
     );
   });
 
@@ -115,7 +122,7 @@ describe("PlantGrowth.ts", () => {
     // @ts-ignore
     expect(plantGrowth.canPlantGrow(plant, blueprint)).toMatchObject({ canGrow: false, canWater: false });
 
-    const result = await plantGrowth.updatePlantGrowth(plant, testCharacter);
+    const result = await plantGrowth.updatePlantGrowth(plant, testCharacter, errorMessages);
 
     expect(result).toBeFalsy();
   });
@@ -127,7 +134,7 @@ describe("PlantGrowth.ts", () => {
     // @ts-ignore
     expect(plantGrowth.canPlantGrow(plant, blueprint)).toMatchObject({ canGrow: false, canWater: true });
 
-    const result = await plantGrowth.updatePlantGrowth(plant, testCharacter);
+    const result = await plantGrowth.updatePlantGrowth(plant, testCharacter, errorMessages);
 
     expect(Item.updateOne).toHaveBeenCalledWith(
       { _id: plant._id },
@@ -145,7 +152,7 @@ describe("PlantGrowth.ts", () => {
     const growthPoints = 0;
     plant.growthPoints = growthPoints;
     await plant.save();
-    await plantGrowth.updatePlantGrowth(plant, testCharacter);
+    await plantGrowth.updatePlantGrowth(plant, testCharacter, errorMessages);
     expect(Item.updateOne).toHaveBeenCalledWith(
       { _id: plant._id },
       { $set: { growthPoints: growthPoints + blueprint.growthFactor, lastWatering: expect.anything() } }
@@ -159,7 +166,7 @@ describe("PlantGrowth.ts", () => {
     plant.currentPlantCycle = PlantLifeCycle.Young;
     await plant.save();
 
-    await plantGrowth.updatePlantGrowth(plant, testCharacter);
+    await plantGrowth.updatePlantGrowth(plant, testCharacter, errorMessages);
 
     const character = (await Character.findById(plant.owner).lean()) as ICharacter;
     expect(mockSocketMessaging.sendEventToCharactersAroundCharacter).toBeCalledWith(
@@ -196,7 +203,7 @@ describe("PlantGrowth.ts", () => {
     plant.currentPlantCycle = PlantLifeCycle.Young;
     await plant.save();
 
-    await plantGrowth.updatePlantGrowth(plant, testCharacter);
+    await plantGrowth.updatePlantGrowth(plant, testCharacter, errorMessages);
     expect(Item.findByIdAndUpdate).toHaveBeenCalledWith(
       plant._id,
       {
@@ -224,7 +231,7 @@ describe("PlantGrowth.ts", () => {
     plant.growthPoints = growthPoints;
     await plant.save();
 
-    await plantGrowth.updatePlantGrowth(plant, testCharacter);
+    await plantGrowth.updatePlantGrowth(plant, testCharacter, errorMessages);
     expect(Item.findByIdAndUpdate).toHaveBeenCalledWith(
       plant._id,
       {
@@ -258,7 +265,7 @@ describe("PlantGrowth.ts", () => {
     plant.growthPoints = growthPoints;
     await plant.save();
 
-    await plantGrowth.updatePlantGrowth(plant, testCharacter);
+    await plantGrowth.updatePlantGrowth(plant, testCharacter, errorMessages);
     expect(Item.findByIdAndUpdate).toHaveBeenCalledWith(
       plant._id,
       {
@@ -277,9 +284,17 @@ describe("PlantGrowth.ts", () => {
     );
   });
 
+  it("should send error messages when random number is greater than 75", async () => {
+    jest.spyOn(_, "random").mockImplementation(() => 76);
+
+    await plantGrowth.updatePlantGrowth(plant, testCharacter, errorMessages);
+
+    expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(testCharacter, errorMessage);
+  });
+
   it("should send an error message to the character if the plant is dead", async () => {
     plant.isDead = true;
-    await plantGrowth.updatePlantGrowth(plant, testCharacter);
+    await plantGrowth.updatePlantGrowth(plant, testCharacter, errorMessages);
 
     expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
       testCharacter,
