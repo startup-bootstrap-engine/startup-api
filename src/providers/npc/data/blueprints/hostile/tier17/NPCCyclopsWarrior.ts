@@ -5,8 +5,10 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AccessoriesBlueprint,
   AxesBlueprint,
+  BooksBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
+  HelmetsBlueprint,
   MacesBlueprint,
   PotionsBlueprint,
   ShieldsBlueprint,
@@ -120,6 +122,22 @@ export const npcCyclopsWarrior: INPCTierBlueprint<17> = {
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.WoodenRing,
+      chance: 8,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.MysticCompendium,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.MysticalMemoirs,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.DruidicLoreVolume,
+      chance: 7,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
       chance: 8,
     },
   ],

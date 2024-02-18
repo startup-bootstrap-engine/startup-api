@@ -4,10 +4,12 @@ import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
   AxesBlueprint,
+  BooksBlueprint,
   BootsBlueprint,
   ContainersBlueprint,
   DaggersBlueprint,
   GlovesBlueprint,
+  HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
   RangedWeaponsBlueprint,
@@ -167,6 +169,22 @@ export const npcGorgok: INPCTierBlueprint<17> = {
     {
       itemBlueprintKey: AccessoriesBlueprint.FrostfireRubyRing,
       chance: 8,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.AstralAtlas,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.MysticCompendium,
+      chance: 7,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.DruidicLoreVolume,
+      chance: 6,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
+      chance: 4,
     },
   ],
 };

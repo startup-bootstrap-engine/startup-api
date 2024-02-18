@@ -204,6 +204,22 @@ export const npcDragonServant: INPCTierBlueprint<18> = {
       itemBlueprintKey: AccessoriesBlueprint.MoonstoneRing,
       chance: 12,
     },
+    {
+      itemBlueprintKey: BooksBlueprint.EsotericEpistles,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.ElementalCodex,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.LoreVolume,
+      chance: 7,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.MysticVeilHat,
+      chance: 8,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],
   areaSpells: [

@@ -4,6 +4,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AccessoriesBlueprint,
   AxesBlueprint,
+  BooksBlueprint,
   DaggersBlueprint,
   FoodsBlueprint,
   HelmetsBlueprint,
@@ -117,6 +118,18 @@ export const npcOrcWarlord: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: AccessoriesBlueprint.CherryRing,
       chance: 8,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.ElementalGrimoire,
+      chance: 3,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.PotioncraftPrimer,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
+      chance: 7,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

@@ -4,6 +4,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
+  BooksBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
   HelmetsBlueprint,
@@ -109,6 +110,22 @@ export const npcNightFellbeast: INPCTierBlueprint<17> = {
     {
       itemBlueprintKey: AccessoriesBlueprint.GoldenGlowRing,
       chance: 8,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.EnchantedManuscript,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.CelestialChronicles,
+      chance: 7,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.DruidicLoreVolume,
+      chance: 6,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
+      chance: 4,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],

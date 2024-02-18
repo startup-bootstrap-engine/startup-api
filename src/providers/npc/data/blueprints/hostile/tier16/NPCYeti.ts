@@ -5,6 +5,7 @@ import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
   AxesBlueprint,
+  BooksBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
@@ -200,6 +201,18 @@ export const npcYeti: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.SapphireRing,
+      chance: 8,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.EnchantedManuscript,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.DruidicLoreVolume,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.ArcaneAdepthat,
       chance: 8,
     },
   ],

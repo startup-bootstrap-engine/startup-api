@@ -5,6 +5,7 @@ import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
   AxesBlueprint,
+  BooksBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
@@ -223,6 +224,26 @@ export const npcYellowDragon: INPCTierBlueprint<22> = {
     {
       itemBlueprintKey: AccessoriesBlueprint.CherryRing,
       chance: 18,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.ElementalCodex,
+      chance: 6,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.ElementalGrimoire,
+      chance: 8,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.ArcaneArchives,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.EnigmaScrolls,
+      chance: 12,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.ArcaneAdepthat,
+      chance: 14,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],
