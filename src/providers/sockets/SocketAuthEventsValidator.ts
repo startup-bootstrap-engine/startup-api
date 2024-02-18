@@ -33,7 +33,6 @@ export class SocketAuthEventsValidator {
   ) {}
 
   public async handleEventLogic<T>(
-    channel: string,
     event: string,
     data: T,
     callback: (data: T, character: ICharacter, owner: IUser) => Promise<any>,
@@ -42,7 +41,7 @@ export class SocketAuthEventsValidator {
   ): Promise<void> {
     try {
       await this.newRelic.trackTransaction(NewRelicTransactionCategory.SocketEvent, event, async () => {
-        if (await this.preProcessEventChecks(event, character, channel)) {
+        if (await this.preProcessEventChecks(event, character)) {
           await this.processEvent(event, data, callback, character, owner);
         }
       });
@@ -130,7 +129,7 @@ export class SocketAuthEventsValidator {
     return false;
   }
 
-  private async preProcessEventChecks(event: string, character: ICharacter, channel: string): Promise<boolean> {
+  private async preProcessEventChecks(event: string, character: ICharacter): Promise<boolean> {
     const shouldLog = this.shouldLogEvent(event);
     if (shouldLog) {
       this.logEvent(character, event);
@@ -138,7 +137,7 @@ export class SocketAuthEventsValidator {
 
     const isExhausted = await this.isExhausted(character, event);
     if (isExhausted) {
-      this.notifyExhaustion(channel);
+      this.notifyExhaustion(character.channelId!);
       return false;
     }
 

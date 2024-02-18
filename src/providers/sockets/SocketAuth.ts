@@ -35,7 +35,7 @@ export class SocketAuth {
         const [owner, character] = await this.getCharacterAndOwner(channel, data, isLeanQuery);
         if (!(await this.validateCharacterAndProceed(character, channel.id, runBasicCharacterValidation))) return;
 
-        await this.socketAuthEventsValidator.handleEventLogic(channel, event, data, callback, character, owner);
+        await this.socketAuthEventsValidator.handleEventLogic(event, data, callback, character, owner);
       } catch (error) {
         console.error(error);
       } finally {
