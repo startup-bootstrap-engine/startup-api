@@ -116,6 +116,18 @@ export const npcFellbeast: INPCTierBlueprint<17> = {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
       chance: 22,
     },
+    {
+      itemBlueprintKey: SwordsBlueprint.CelestialSaber,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.ThunderclapKatana,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.ThunderstormEdge,
+      chance: 10,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],
   areaSpells: [

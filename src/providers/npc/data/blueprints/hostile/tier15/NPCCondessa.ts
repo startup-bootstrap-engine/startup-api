@@ -10,6 +10,7 @@ import {
   RangedWeaponsBlueprint,
   ShieldsBlueprint,
   StaffsBlueprint,
+  SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
@@ -113,6 +114,14 @@ export const npcCondessa: INPCTierBlueprint<15> = {
     {
       itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
       chance: 12,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.VenomousStinger,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.VenomousFang,
+      chance: 10,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

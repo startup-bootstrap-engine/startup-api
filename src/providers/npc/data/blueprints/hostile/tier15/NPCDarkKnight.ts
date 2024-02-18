@@ -202,6 +202,14 @@ export const npcDarkKnight: INPCTierBlueprint<15> = {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
       chance: 12,
     },
+    {
+      itemBlueprintKey: SwordsBlueprint.FrostbiteFang,
+      chance: 12,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.ShadowstrikeFalchion,
+      chance: 12,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],
   areaSpells: [

@@ -113,6 +113,18 @@ export const npcCyclopsWarrior: INPCTierBlueprint<17> = {
       itemBlueprintKey: DaggersBlueprint.AstralDagger,
       chance: 22,
     },
+    {
+      itemBlueprintKey: SwordsBlueprint.CelestialEdge,
+      chance: 12,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.CelestialSaber,
+      chance: 12,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.FrostfireLongblade,
+      chance: 12,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
   areaSpells: [

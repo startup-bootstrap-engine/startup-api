@@ -113,5 +113,13 @@ export const npcAsterion: INPCTierBlueprint<15> = {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
       chance: 12,
     },
+    {
+      itemBlueprintKey: SwordsBlueprint.FlamestrikeBlade,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.InfernalSlicer,
+      chance: 10,
+    },
   ],
 };

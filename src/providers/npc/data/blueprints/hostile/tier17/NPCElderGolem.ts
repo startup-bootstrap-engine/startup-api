@@ -8,6 +8,7 @@ import {
   HelmetsBlueprint,
   ShieldsBlueprint,
   StaffsBlueprint,
+  SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
@@ -89,6 +90,18 @@ export const npcElderGolem: INPCTierBlueprint<17> = {
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
       chance: 22,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.MoonlightCrescent,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.Stormbreaker,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.ThunderclapKatana,
+      chance: 10,
     },
   ],
   areaSpells: [

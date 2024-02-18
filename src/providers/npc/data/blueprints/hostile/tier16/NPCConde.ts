@@ -8,6 +8,7 @@ import {
   RangedWeaponsBlueprint,
   ShieldsBlueprint,
   StaffsBlueprint,
+  SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
@@ -94,6 +95,14 @@ export const npcConde: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
       chance: 16,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.EmberbrandClaymore,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.BloodmoonBlade,
+      chance: 10,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Freezing],

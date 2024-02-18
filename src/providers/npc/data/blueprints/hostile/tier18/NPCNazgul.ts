@@ -137,6 +137,18 @@ export const npcNazgul: INPCTierBlueprint<18> = {
       itemBlueprintKey: GemsBlueprint.CoralReefGem,
       chance: 1,
     },
+    {
+      itemBlueprintKey: SwordsBlueprint.FrostbiteSaber,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.FrostfangDagger,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.InfernoCleaver,
+      chance: 10,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
   areaSpells: [

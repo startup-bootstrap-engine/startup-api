@@ -132,6 +132,14 @@ export const npcDragonKnight: INPCTierBlueprint<16> = {
       itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
       chance: 16,
     },
+    {
+      itemBlueprintKey: SwordsBlueprint.SeraphicSabre,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.SeraphicScimitar,
+      chance: 10,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
   areaSpells: [

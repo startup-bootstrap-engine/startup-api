@@ -116,6 +116,18 @@ export const npcCorruptedCyclops: INPCTierBlueprint<18> = {
       itemBlueprintKey: GemsBlueprint.EarthstoneGem,
       chance: 2,
     },
+    {
+      itemBlueprintKey: SwordsBlueprint.FrostfangDagger,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.FrostbiteSaber,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.CelestialDefender,
+      chance: 10,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
   areaSpells: [

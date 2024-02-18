@@ -26,7 +26,37 @@ import { itemPhoenixSword } from "./tier12/ItemPhoenixSword";
 import { itemWarlordBroadsword } from "./tier12/ItemWarlordBroadsword";
 import { itemZenBroadsword } from "./tier12/ItemZenBroadsword";
 import { itemYggdrasilJianSword } from "./tier13/ItemYggdrasilJianSword";
+import { itemFrostbiteFang } from "./tier14/itemFrostbiteFang";
+import { itemShadowstrikeFalchion } from "./tier14/itemShadowstrikeFalchion";
+import { itemVenomousBlade } from "./tier14/itemVenomousBlade";
+import { itemVenomousStinger } from "./tier14/itemVenomousStinger";
 import { itemYggdrasilTemplarSword } from "./tier15/ItemYggdrasilTemplarSword";
+import { itemFlamestrikeBlade } from "./tier15/itemFlamestrikeBlade";
+import { itemMoonshadowBlade } from "./tier15/itemMoonshadowBlade";
+import { itemShadowblade } from "./tier15/itemShadowblade";
+import { itemThunderboltCutlass } from "./tier15/itemThunderboltCutlass";
+import { itemVenomousFang } from "./tier15/itemVenomousFang";
+import { itemBloodmoonBlade } from "./tier16/itemBloodmoonBlade";
+import { itemEmberbrandClaymore } from "./tier16/itemEmberbrandClaymore";
+import { itemEmberglowRapier } from "./tier16/itemEmberglowRapier";
+import { itemFrostheartBroadsword } from "./tier16/itemFrostheartBroadsword";
+import { itemSeraphicSabre } from "./tier16/itemSeraphicSabre";
+import { itemSeraphicScimitar } from "./tier16/itemSeraphicScimitar";
+import { itemThunderousClaymore } from "./tier16/itemThunderousClaymore";
+import { itemCelestialEdge } from "./tier17/itemCelestialEdge";
+import { itemCelestialSaber } from "./tier17/itemCelestialSaber";
+import { itemFrostfireLongblade } from "./tier17/itemFrostfireLongblade";
+import { itemMoonlightCrescent } from "./tier17/itemMoonlightCrescent";
+import { itemStormbreaker } from "./tier17/itemStormbreaker";
+import { itemThunderclapKatana } from "./tier17/itemThunderclapKatana";
+import { itemThunderstormEdge } from "./tier17/itemThunderstormEdge";
+import { itemCelestialDefender } from "./tier18/itemCelestialDefender";
+import { itemFrostbiteSaber } from "./tier18/itemFrostbiteSaber";
+import { itemFrostfangDagger } from "./tier18/itemFrostfangDagger";
+import { itemFrostfireGladius } from "./tier18/itemFrostfireGladius";
+import { itemFrostwindCutter } from "./tier18/itemFrostwindCutter";
+import { itemInfernalSlicer } from "./tier18/itemInfernalSlicer";
+import { itemInfernoCleaver } from "./tier18/itemInfernoCleaver";
 import { itemCopperBroadsword } from "./tier2/ItemCopperBroadsword";
 import { itemDoubleEdgedSword } from "./tier2/ItemDoubleEdgedSword";
 import { itemIceSword } from "./tier2/ItemIceSword";
@@ -149,4 +179,34 @@ export const swordsBlueprintIndex = {
   [SwordsBlueprint.TitanTetherTachiSword]: itemTitanTetherTachiSword,
   [SwordsBlueprint.YggdrasilBroadsword]: itemYggdrasilBroadsword,
   [SwordsBlueprint.EonGuardianSword]: itemEonGuardianSword,
+  [SwordsBlueprint.Shadowblade]: itemShadowblade,
+  [SwordsBlueprint.FrostwindCutter]: itemFrostwindCutter,
+  [SwordsBlueprint.Stormbreaker]: itemStormbreaker,
+  [SwordsBlueprint.FlamestrikeBlade]: itemFlamestrikeBlade,
+  [SwordsBlueprint.FrostbiteSaber]: itemFrostbiteSaber,
+  [SwordsBlueprint.ThunderousClaymore]: itemThunderousClaymore,
+  [SwordsBlueprint.VenomousFang]: itemVenomousFang,
+  [SwordsBlueprint.CelestialEdge]: itemCelestialEdge,
+  [SwordsBlueprint.InfernalSlicer]: itemInfernalSlicer,
+  [SwordsBlueprint.MoonlightCrescent]: itemMoonlightCrescent,
+  [SwordsBlueprint.FrostfireLongblade]: itemFrostfireLongblade,
+  [SwordsBlueprint.SeraphicScimitar]: itemSeraphicScimitar,
+  [SwordsBlueprint.ThunderclapKatana]: itemThunderclapKatana,
+  [SwordsBlueprint.EmberglowRapier]: itemEmberglowRapier,
+  [SwordsBlueprint.FrostheartBroadsword]: itemFrostheartBroadsword,
+  [SwordsBlueprint.VenomousStinger]: itemVenomousStinger,
+  [SwordsBlueprint.CelestialDefender]: itemCelestialDefender,
+  [SwordsBlueprint.ShadowstrikeFalchion]: itemShadowstrikeFalchion,
+  [SwordsBlueprint.BloodmoonBlade]: itemBloodmoonBlade,
+  [SwordsBlueprint.FrostfangDagger]: itemFrostfangDagger,
+  [SwordsBlueprint.ThunderboltCutlass]: itemThunderboltCutlass,
+  [SwordsBlueprint.InfernoCleaver]: itemInfernoCleaver,
+  [SwordsBlueprint.MoonshadowBlade]: itemMoonshadowBlade,
+  [SwordsBlueprint.FrostfireGladius]: itemFrostfireGladius,
+  [SwordsBlueprint.SeraphicSabre]: itemSeraphicSabre,
+  [SwordsBlueprint.ThunderstormEdge]: itemThunderstormEdge,
+  [SwordsBlueprint.EmberbrandClaymore]: itemEmberbrandClaymore,
+  [SwordsBlueprint.FrostbiteFang]: itemFrostbiteFang,
+  [SwordsBlueprint.VenomousBlade]: itemVenomousBlade,
+  [SwordsBlueprint.CelestialSaber]: itemCelestialSaber,
 };

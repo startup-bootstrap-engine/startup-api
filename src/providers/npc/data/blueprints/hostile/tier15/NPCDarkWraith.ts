@@ -14,6 +14,7 @@ import {
   RangedWeaponsBlueprint,
   ShieldsBlueprint,
   StaffsBlueprint,
+  SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 
@@ -122,6 +123,14 @@ export const npcDarkWraith: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.StarshardDagger,
+      chance: 12,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.VenomousBlade,
+      chance: 12,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.VenomousStinger,
       chance: 12,
     },
   ],

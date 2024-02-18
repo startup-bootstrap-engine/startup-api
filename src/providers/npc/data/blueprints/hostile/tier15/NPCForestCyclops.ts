@@ -97,6 +97,14 @@ export const npcForestCyclops: INPCTierBlueprint<15> = {
       itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
       chance: 12,
     },
+    {
+      itemBlueprintKey: SwordsBlueprint.Shadowblade,
+      chance: 12,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.FlamestrikeBlade,
+      chance: 12,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Poison, EntityEffectBlueprint.Bleeding],
   areaSpells: [

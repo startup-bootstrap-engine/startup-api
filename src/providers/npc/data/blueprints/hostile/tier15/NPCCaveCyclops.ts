@@ -9,6 +9,7 @@ import {
   DaggersBlueprint,
   MacesBlueprint,
   RangedWeaponsBlueprint,
+  SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
@@ -90,6 +91,14 @@ export const npcCaveCyclops: INPCTierBlueprint<15> = {
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
       chance: 12,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.ThunderboltCutlass,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.Shadowblade,
+      chance: 10,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
