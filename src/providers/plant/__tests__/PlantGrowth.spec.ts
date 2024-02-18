@@ -283,7 +283,7 @@ describe("PlantGrowth.ts", () => {
 
     expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
       testCharacter,
-      "Sorry, the plant is allready dead."
+      "Sorry, the plant is already dead."
     );
   });
 });
