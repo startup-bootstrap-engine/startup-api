@@ -11,7 +11,7 @@ export const recipePotioncraftPrimer: IUseWithCraftingRecipe = {
       qty: 6,
     },
     {
-      key: CraftingResourcesBlueprint.ObsidiumOre,
+      key: CraftingResourcesBlueprint.ObsidiumIngot,
       qty: 4,
     },
     {

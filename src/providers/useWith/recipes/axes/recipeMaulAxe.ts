@@ -19,7 +19,7 @@ export const recipeMaulAxe: IUseWithCraftingRecipe = {
       qty: 55,
     },
     {
-      key: CraftingResourcesBlueprint.GreenOre,
+      key: CraftingResourcesBlueprint.GreenIngot,
       qty: 55,
     },
     {

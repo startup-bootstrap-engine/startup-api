@@ -16,7 +16,7 @@ export const recipeSpellboundCodex: IUseWithCraftingRecipe = {
       qty: 6,
     },
     {
-      key: CraftingResourcesBlueprint.ObsidiumOre,
+      key: CraftingResourcesBlueprint.ObsidiumIngot,
       qty: 4,
     },
     {
@@ -32,7 +32,7 @@ export const recipeSpellboundCodex: IUseWithCraftingRecipe = {
     CraftingSkill.Alchemy,
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.MagicRecipe, 6],
-      [CraftingResourcesBlueprint.ObsidiumOre, 4],
+      [CraftingResourcesBlueprint.ObsidiumIngot, 4],
       [CraftingResourcesBlueprint.Leather, 3],
     ]),
   ],

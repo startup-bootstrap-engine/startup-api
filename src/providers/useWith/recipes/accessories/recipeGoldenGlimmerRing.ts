@@ -31,7 +31,7 @@ export const recipeGoldenGlimmerRing: IUseWithCraftingRecipe = {
       qty: 50,
     },
     {
-      key: CraftingResourcesBlueprint.CopperOre,
+      key: CraftingResourcesBlueprint.CopperIngot,
       qty: 120,
     },
     {

@@ -39,7 +39,7 @@ export const recipeScarletNecklace: IUseWithCraftingRecipe = {
       qty: 130,
     },
     {
-      key: CraftingResourcesBlueprint.ObsidiumOre,
+      key: CraftingResourcesBlueprint.ObsidiumIngot,
       qty: 120,
     },
   ],

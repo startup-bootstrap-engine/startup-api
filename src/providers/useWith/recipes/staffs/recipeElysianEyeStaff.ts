@@ -15,7 +15,7 @@ export const recipeElysianEyeStaff: IUseWithCraftingRecipe = {
       qty: 100,
     },
     {
-      key: CraftingResourcesBlueprint.ObsidiumOre,
+      key: CraftingResourcesBlueprint.ObsidiumIngot,
       qty: 100,
     },
     {

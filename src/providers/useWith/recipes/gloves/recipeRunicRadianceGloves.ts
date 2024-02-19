@@ -16,7 +16,7 @@ export const recipeRunicRadianceGloves: IUseWithCraftingRecipe = {
       qty: 90,
     },
     {
-      key: CraftingResourcesBlueprint.GreenOre,
+      key: CraftingResourcesBlueprint.GreenIngot,
       qty: 80,
     },
     {
@@ -29,7 +29,7 @@ export const recipeRunicRadianceGloves: IUseWithCraftingRecipe = {
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.MagicRecipe, 80],
       [CraftingResourcesBlueprint.ElvenLeaf, 90],
-      [CraftingResourcesBlueprint.GoldenOre, 80],
+      [CraftingResourcesBlueprint.GoldenIngot, 80],
       [CraftingResourcesBlueprint.Bone, 90],
     ]),
   ],

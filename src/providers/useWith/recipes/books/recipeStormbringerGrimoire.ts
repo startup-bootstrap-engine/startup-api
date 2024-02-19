@@ -16,7 +16,7 @@ export const recipeStormbringerGrimoire: IUseWithCraftingRecipe = {
       qty: 4,
     },
     {
-      key: CraftingResourcesBlueprint.ObsidiumOre,
+      key: CraftingResourcesBlueprint.ObsidiumIngot,
       qty: 3,
     },
     {
@@ -32,7 +32,7 @@ export const recipeStormbringerGrimoire: IUseWithCraftingRecipe = {
     CraftingSkill.Alchemy,
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.MagicRecipe, 4],
-      [CraftingResourcesBlueprint.ObsidiumOre, 3],
+      [CraftingResourcesBlueprint.ObsidiumIngot, 3],
       [CraftingResourcesBlueprint.Leather, 5],
     ]),
   ],

@@ -7,7 +7,7 @@ export const recipePlasmaPierceArrow: IUseWithCraftingRecipe = {
   outputQtyRange: [5, 10],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.IronOre,
+      key: CraftingResourcesBlueprint.IronIngot,
       qty: 12,
     },
     {

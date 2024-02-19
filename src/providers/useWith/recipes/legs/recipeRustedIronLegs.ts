@@ -7,7 +7,7 @@ export const recipeRustedIronLegs: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 1],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.IronOre,
+      key: CraftingResourcesBlueprint.IronIngot,
       qty: 25,
     },
     {

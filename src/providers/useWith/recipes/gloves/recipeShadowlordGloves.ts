@@ -11,7 +11,7 @@ export const recipeShadowlordGloves: IUseWithCraftingRecipe = {
       qty: 120,
     },
     {
-      key: CraftingResourcesBlueprint.CopperOre,
+      key: CraftingResourcesBlueprint.CopperIngot,
       qty: 100,
     },
     {

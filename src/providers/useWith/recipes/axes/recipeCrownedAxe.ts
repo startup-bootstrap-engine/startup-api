@@ -19,7 +19,7 @@ export const recipeCrownedAxe: IUseWithCraftingRecipe = {
       qty: 60,
     },
     {
-      key: CraftingResourcesBlueprint.GreenOre,
+      key: CraftingResourcesBlueprint.GreenIngot,
       qty: 50,
     },
     {
