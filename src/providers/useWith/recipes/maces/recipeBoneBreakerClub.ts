@@ -19,7 +19,7 @@ export const recipeBoneBreakerClub: IUseWithCraftingRecipe = {
       qty: 15,
     },
     {
-      key: CraftingResourcesBlueprint.CopperOre,
+      key: CraftingResourcesBlueprint.CopperIngot,
       qty: 35,
     },
     {

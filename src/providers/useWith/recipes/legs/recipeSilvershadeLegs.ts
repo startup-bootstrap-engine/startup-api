@@ -7,7 +7,7 @@ export const recipeSilvershadeLegs: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 1],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.SilverOre,
+      key: CraftingResourcesBlueprint.SilverIngot,
       qty: 40,
     },
     {

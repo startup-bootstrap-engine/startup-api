@@ -19,7 +19,7 @@ export const recipeIronWoodCrusherClub: IUseWithCraftingRecipe = {
       qty: 10,
     },
     {
-      key: CraftingResourcesBlueprint.CopperOre,
+      key: CraftingResourcesBlueprint.CopperIngot,
       qty: 30,
     },
     {

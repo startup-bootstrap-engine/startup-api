@@ -31,6 +31,12 @@ import { itemJadeEmperorsHelm } from "./tier4/ItemJadeEmperorsHelm";
 import { itemRoyalHelmet } from "./tier4/ItemRoyalHelmet";
 import { itemRoyalKnightHelmet } from "./tier4/ItemRoyalKnightHelmet";
 import { itemSpellcastersHat } from "./tier4/ItemSpellcastersHat";
+import { itemAmethystArchmageHat } from "./tier5/itemAmethystArchmageHat";
+import { itemArcaneAdepthat } from "./tier5/itemArcaneAdepthat";
+import { itemAzureWizardHat } from "./tier5/itemAzureWizardHat";
+import { itemYellowEnchanterHat } from "./tier5/itemYellowEnchanterHat";
+import { itemCelestialCrown } from "./tiier6/itemCelestialCrown";
+import { itemMysticVeilHat } from "./tiier6/itemMysticVeilHat";
 
 export const helmetsBlueprintIndex = {
   [HelmetsBlueprint.ArabicHelmet]: itemArabicHelmet,
@@ -65,4 +71,10 @@ export const helmetsBlueprintIndex = {
   [HelmetsBlueprint.MysticVeil]: itemMysticVeil,
   [HelmetsBlueprint.SorcerersVeil]: itemSorcerersVeil,
   [HelmetsBlueprint.SpellcastersHat]: itemSpellcastersHat,
+  [HelmetsBlueprint.AmethystArchmageHat]: itemAmethystArchmageHat,
+  [HelmetsBlueprint.ArcaneAdepthat]: itemArcaneAdepthat,
+  [HelmetsBlueprint.AzureWizardHat]: itemAzureWizardHat,
+  [HelmetsBlueprint.YellowEnchanterHat]: itemYellowEnchanterHat,
+  [HelmetsBlueprint.CelestialCrown]: itemCelestialCrown,
+  [HelmetsBlueprint.MysticVeilHat]: itemMysticVeilHat,
 };

@@ -7,7 +7,7 @@ export const recipeBlazingFirebomb: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 2],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.CorruptionOre,
+      key: CraftingResourcesBlueprint.CorruptionIngot,
       qty: 3,
     },
     {

@@ -5,6 +5,7 @@ import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
   AxesBlueprint,
+  BooksBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
   GemsBlueprint,
@@ -167,6 +168,22 @@ export const npcMalakarLichKing: INPCTierBlueprint<19> = {
     {
       itemBlueprintKey: AccessoriesBlueprint.SapphireSerenadeRing,
       chance: 14,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.EsotericEpistles,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.ArcaneArchives,
+      chance: 6,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.AstralAtlas,
+      chance: 8,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.MysticVeilHat,
+      chance: 10,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Corruption],

@@ -4,6 +4,7 @@ import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
   AxesBlueprint,
+  BooksBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
@@ -210,6 +211,18 @@ export const npcStoneGolem: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.QuantumSunRing,
+      chance: 8,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.SpellboundCodex,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.MysticalTomes,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.YellowEnchanterHat,
       chance: 8,
     },
   ],

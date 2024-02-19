@@ -16,7 +16,7 @@ export const recipeStarshardDagger: IUseWithCraftingRecipe = {
       qty: 85,
     },
     {
-      key: CraftingResourcesBlueprint.SilverOre,
+      key: CraftingResourcesBlueprint.SilverIngot,
       qty: 60,
     },
     {
@@ -29,7 +29,7 @@ export const recipeStarshardDagger: IUseWithCraftingRecipe = {
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.Bone, 60],
       [CraftingResourcesBlueprint.Skull, 85],
-      [CraftingResourcesBlueprint.SilverOre, 60],
+      [CraftingResourcesBlueprint.SilverIngot, 60],
       [CraftingResourcesBlueprint.CopperIngot, 15],
     ]),
   ],

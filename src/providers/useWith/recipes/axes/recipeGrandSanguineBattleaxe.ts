@@ -19,7 +19,7 @@ export const recipeGrandSanguineBattleaxe: IUseWithCraftingRecipe = {
       qty: 45,
     },
     {
-      key: CraftingResourcesBlueprint.GreenOre,
+      key: CraftingResourcesBlueprint.GreenIngot,
       qty: 50,
     },
   ],

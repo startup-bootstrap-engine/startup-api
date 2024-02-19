@@ -5,6 +5,7 @@ import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
   AxesBlueprint,
+  BooksBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
@@ -234,6 +235,22 @@ export const npcBlueDragon: INPCTierBlueprint<21> = {
     {
       itemBlueprintKey: AccessoriesBlueprint.SilverRing,
       chance: 17,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.EsotericEpistles,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.MysticalTomes,
+      chance: 6,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.AlchemistsAlmanac,
+      chance: 8,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.AzureWizardHat,
+      chance: 10,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],

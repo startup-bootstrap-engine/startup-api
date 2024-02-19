@@ -5,6 +5,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AccessoriesBlueprint,
   AxesBlueprint,
+  BooksBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
   GemsBlueprint,
@@ -128,6 +129,22 @@ export const npcCorruptedCyclops: INPCTierBlueprint<18> = {
     {
       itemBlueprintKey: AccessoriesBlueprint.GoldenGlimmerRing,
       chance: 12,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.EsotericEpistles,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.ElementalCodex,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.EnchantedManuscript,
+      chance: 7,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.MysticVeilHat,
+      chance: 8,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],

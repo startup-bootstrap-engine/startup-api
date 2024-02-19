@@ -5,6 +5,7 @@ import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
   AxesBlueprint,
+  BooksBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
   GemsBlueprint,
@@ -144,6 +145,22 @@ export const npcNazgul: INPCTierBlueprint<18> = {
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.GreenTourmalineRing,
+      chance: 8,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.SpellboundCodex,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.AstralAtlas,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.DruidicLoreVolume,
+      chance: 7,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.MysticVeilHat,
       chance: 8,
     },
   ],

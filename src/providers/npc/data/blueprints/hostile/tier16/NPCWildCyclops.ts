@@ -4,8 +4,10 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   AccessoriesBlueprint,
+  BooksBlueprint,
   DaggersBlueprint,
   FoodsBlueprint,
+  HelmetsBlueprint,
   MagicsBlueprint,
   PotionsBlueprint,
   RangedWeaponsBlueprint,
@@ -97,6 +99,18 @@ export const npcWildCyclops: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.GoldenGlimmerRing,
+      chance: 8,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.EnchantedManuscript,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.ArcaneArchives,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.ArcaneAdepthat,
       chance: 8,
     },
   ],

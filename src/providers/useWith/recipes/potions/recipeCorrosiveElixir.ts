@@ -15,7 +15,7 @@ export const recipeCorrosiveElixir: IUseWithCraftingRecipe = {
       qty: 5,
     },
     {
-      key: CraftingResourcesBlueprint.CorruptionOre,
+      key: CraftingResourcesBlueprint.CorruptionIngot,
       qty: 3,
     },
   ],

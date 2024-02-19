@@ -39,7 +39,7 @@ export const recipeAzureNecklace: IUseWithCraftingRecipe = {
       qty: 130,
     },
     {
-      key: CraftingResourcesBlueprint.GreenOre,
+      key: CraftingResourcesBlueprint.GreenIngot,
       qty: 120,
     },
   ],

@@ -5,6 +5,7 @@ import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
   AxesBlueprint,
+  BooksBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
@@ -255,6 +256,26 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
     {
       itemBlueprintKey: AccessoriesBlueprint.SunlitRubyNecklace,
       chance: 18,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.ElementalCodex,
+      chance: 6,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.MysticCompendium,
+      chance: 8,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.SpellboundCodex,
+      chance: 10,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.PotioncraftPrimer,
+      chance: 12,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.ArcaneAdepthat,
+      chance: 14,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],

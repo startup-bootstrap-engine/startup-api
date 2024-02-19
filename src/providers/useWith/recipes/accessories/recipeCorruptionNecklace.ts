@@ -8,7 +8,7 @@ export const recipeCorruptionNecklace: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 1],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.CorruptionOre,
+      key: CraftingResourcesBlueprint.CorruptionIngot,
       qty: 3,
     },
     {
@@ -23,7 +23,7 @@ export const recipeCorruptionNecklace: IUseWithCraftingRecipe = {
   minCraftingRequirements: [
     CraftingSkill.Blacksmithing,
     calculateMinimumLevel([
-      [CraftingResourcesBlueprint.CorruptionOre, 3],
+      [CraftingResourcesBlueprint.CorruptionIngot, 3],
       [CraftingResourcesBlueprint.Rope, 1],
     ]),
   ],

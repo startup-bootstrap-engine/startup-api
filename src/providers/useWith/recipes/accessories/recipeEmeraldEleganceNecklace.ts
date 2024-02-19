@@ -19,7 +19,7 @@ export const recipeEmeraldEleganceNecklace: IUseWithCraftingRecipe = {
       qty: 100,
     },
     {
-      key: CraftingResourcesBlueprint.GreenOre,
+      key: CraftingResourcesBlueprint.GreenIngot,
       qty: 100,
     },
     {

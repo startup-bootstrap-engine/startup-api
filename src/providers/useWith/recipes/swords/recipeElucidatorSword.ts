@@ -12,7 +12,7 @@ export const recipeElucidatorSword: IUseWithCraftingRecipe = {
       qty: 180,
     },
     {
-      key: CraftingResourcesBlueprint.CorruptionOre,
+      key: CraftingResourcesBlueprint.CorruptionIngot,
       qty: 160,
     },
     {
@@ -24,7 +24,7 @@ export const recipeElucidatorSword: IUseWithCraftingRecipe = {
     CraftingSkill.Blacksmithing,
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.ObsidiumIngot, 180],
-      [CraftingResourcesBlueprint.CorruptionOre, 160],
+      [CraftingResourcesBlueprint.CorruptionIngot, 160],
       [CraftingResourcesBlueprint.WoodenBoard, 90],
     ]),
   ],

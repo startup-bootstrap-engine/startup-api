@@ -109,6 +109,12 @@ export enum HelmetsBlueprint {
   MysticVeil = "mystic-veil",
   SorcerersVeil = "sorcerers-veil",
   SpellcastersHat = "spellcasters-hat",
+  AmethystArchmageHat = "amethyst-archmage-hat",
+  ArcaneAdepthat = "arcane-adept-hat",
+  AzureWizardHat = "azure-wizard-hat",
+  YellowEnchanterHat = "yellow-enchanter-hat",
+  MysticVeilHat = "mystic-veil-hat",
+  CelestialCrown = "celestial-crown",
 }
 
 export enum EffectsBlueprint {
@@ -630,6 +636,23 @@ export enum BooksBlueprint {
   FrostWraithTome = "frost-wraith-tome",
   StormbringerGrimoire = "stormbringer-grimoire",
   ArcaneArbiterChronicles = "arcane-arbiter-chronicles",
+  SpellboundCodex = "spellbound-codex",
+  EnchantedManuscript = "enchanted-manuscript",
+  MysticCompendium = "mystic-compendium",
+  ElementalCodex = "elemental-codex",
+  PotioncraftPrimer = "potioncraft-primer",
+  CelestialChronicles = "celestial-chronicles",
+  DruidicLoreVolume = "druidic-lore-volume",
+  AstralAtlas = "astral-atlas",
+  EnigmaScrolls = "enigma-scrolls",
+  MysticalMemoirs = "mystical-memoirs",
+  ArcaneArchives = "arcane-archives",
+  ElementalGrimoire = "elemental-grimoire",
+  EsotericEpistles = "esoteric-epistles",
+  EtherealTomes = "ethereal-tomes",
+  MysticalTomes = "mystical-tomes",
+  LoreVolume = "lore-volume",
+  AlchemistsAlmanac = "alchemists-almanac",
 }
 
 export enum OthersBlueprint {

@@ -1219,3 +1219,24 @@ export interface IEquippableLightArmorTier13Blueprint extends IEquippableArmorBl
   tier: 13;
   defense: LightArmorTier13Defense;
 }
+
+// Book ========================================
+export interface IEquippableBookTier0Blueprint extends IEquippableItemBlueprint {
+  tier: 0;
+}
+
+export interface IEquippableBookTier1Blueprint extends IEquippableItemBlueprint {
+  tier: 1;
+}
+
+export interface IEquippableBookTier2Blueprint extends IEquippableItemBlueprint {
+  tier: 2;
+}
+
+export interface IEquippableBookTier3Blueprint extends IEquippableItemBlueprint {
+  tier: 3;
+}
+
+export interface IEquippableBookTier4Blueprint extends IEquippableItemBlueprint {
+  tier: 4;
+}

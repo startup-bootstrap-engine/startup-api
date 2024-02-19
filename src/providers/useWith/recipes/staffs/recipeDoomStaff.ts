@@ -7,7 +7,7 @@ export const recipeDoomStaff: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 1],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.ObsidiumOre,
+      key: CraftingResourcesBlueprint.ObsidiumIngot,
       qty: 160,
     },
     {
