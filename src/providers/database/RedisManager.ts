@@ -20,7 +20,9 @@ export class RedisManager {
         ? await this.redisBareClient.connect()
         : await this.redisIOClient.connect();
 
-      console.log("✅ Successfully connected to Redis.");
+      if (!appEnv.general.IS_UNIT_TEST) {
+        console.log("✅ Successfully connected to Redis.");
+      }
 
       this.setupEventListeners();
     } catch (error) {
