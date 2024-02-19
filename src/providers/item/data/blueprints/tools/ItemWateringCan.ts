@@ -50,7 +50,7 @@ export const itemWateringCan: IRefillableItem = {
     const options: IUseWithRefill = {
       targetTile,
       originItem,
-      errorMessages: ["Sorry, you can't refill this time"],
+      errorMessages: ["Sorry, you can't refill at this time. Please try again."],
       successMessages: ["You've refilled your watering can"],
     };
 
@@ -69,7 +69,7 @@ export const itemWateringCan: IRefillableItem = {
       originItem,
       decrementQty: 1,
       targetType: ItemType.Plant,
-      errorMessages: ["Sorry, You can't water now"],
+      errorMessages: ["Sorry, you can't water now. Please try again"],
       successMessages: ["You've watered the plant"],
     };
 

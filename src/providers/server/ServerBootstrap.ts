@@ -24,6 +24,7 @@ import { NPCCycleQueue } from "@providers/npc/NPCCycleQueue";
 import { NPCFreezer } from "@providers/npc/NPCFreezer";
 import PartyManagement from "@providers/party/PartyManagement";
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
+import { SocketAuthEventsViolation } from "@providers/sockets/SocketAuthEventsViolation";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import SpellSilence from "@providers/spells/data/logic/mage/druid/SpellSilence";
 import { EnvType } from "@rpg-engine/shared";
@@ -56,7 +57,8 @@ export class ServerBootstrap {
     private entityEffectDuration: EntityEffectDurationControl,
     private characterMonitorCallbackTracker: CharacterMonitorCallbackTracker,
     private characterNetworkUpdateQueue: CharacterNetworkUpdateQueue,
-    private patreonAPI: PatreonAPI
+    private patreonAPI: PatreonAPI,
+    private socketAuthEventsViolation: SocketAuthEventsViolation
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -122,6 +124,7 @@ export class ServerBootstrap {
 
     await this.pathfindingResults.clearAllResults();
 
+    await this.socketAuthEventsViolation.clear();
     await this.inMemoryHashTable.deleteAll("crafting-recipes");
     await this.inMemoryHashTable.deleteAll("craftable-item-ingredients");
     await this.inMemoryHashTable.deleteAll("load-craftable-items");
