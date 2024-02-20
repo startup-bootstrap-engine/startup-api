@@ -66,6 +66,10 @@ export const npcEloraTheQueen: INPCTierBlueprint<19> = {
       chance: 20,
     },
     {
+      itemBlueprintKey: SwordsBlueprint.CelestialDefender,
+      chance: 1,
+    },
+    {
       itemBlueprintKey: ShieldsBlueprint.DemonShield,
       chance: 20,
     },

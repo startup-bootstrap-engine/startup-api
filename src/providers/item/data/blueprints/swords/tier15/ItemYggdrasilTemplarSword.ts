@@ -1,6 +1,15 @@
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableMeleeTier15WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { EntityAttackType, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  CombatSkill,
+  EntityAttackType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { SwordsBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemYggdrasilTemplarSword: IEquippableMeleeTier15WeaponBlueprint = {
@@ -19,4 +28,19 @@ export const itemYggdrasilTemplarSword: IEquippableMeleeTier15WeaponBlueprint = 
   tier: 15,
   rangeType: EntityAttackType.Melee,
   entityEffects: [EntityEffectBlueprint.Bleeding],
+  equippedBuff: [
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Sword,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 7,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "Increases sword skill by 15% and resistance by 7%",
 };

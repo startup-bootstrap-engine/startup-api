@@ -1,5 +1,15 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableMeleeTier17WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { EntityAttackType, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  CombatSkill,
+  EntityAttackType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { SwordsBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemThunderclapKatana: IEquippableMeleeTier17WeaponBlueprint = {
@@ -18,4 +28,21 @@ export const itemThunderclapKatana: IEquippableMeleeTier17WeaponBlueprint = {
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   rangeType: EntityAttackType.Melee,
   basePrice: 270,
+  entityEffects: [EntityEffectBlueprint.Freezing, EntityEffectBlueprint.Bleeding],
+  entityEffectChance: 85,
+  equippedBuff: [
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Sword,
+      buffPercentage: 20,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "Increases sword skill by 20% and magic by 15%",
 };

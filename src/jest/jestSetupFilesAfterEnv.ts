@@ -59,6 +59,9 @@ jest.mock("@providers/constants/SkillConstants", () => ({
 jest.mock("@providers/constants/PartyConstants", () => ({
   PARTY_BONUS_RATIO: 1,
 }));
+jest.mock("@providers/constants/RaidConstants", () => ({
+  RAID_TRIGGERING_CHANCE_RATIO: 1,
+}));
 
 jest.mock("@providers/constants/EquipmentConstants", () => ({
   IS_GEAR_CLASS_RESTRICTION_ACTIVE: true,

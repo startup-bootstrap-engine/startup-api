@@ -76,6 +76,10 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
       chance: 20,
     },
     {
+      itemBlueprintKey: SwordsBlueprint.InfernoCleaver,
+      chance: 1,
+    },
+    {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,
       chance: 100,
     },

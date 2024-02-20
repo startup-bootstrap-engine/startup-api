@@ -124,16 +124,13 @@ export const npcCorruptedCyclops: INPCTierBlueprint<18> = {
     },
     {
       itemBlueprintKey: SwordsBlueprint.FrostfangDagger,
-      chance: 10,
+      chance: 1,
     },
     {
       itemBlueprintKey: SwordsBlueprint.FrostbiteSaber,
       chance: 10,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.CelestialDefender,
-      chance: 10,
-    },
+
     {
       itemBlueprintKey: AccessoriesBlueprint.GoldenRubyNecklace,
       chance: 2,

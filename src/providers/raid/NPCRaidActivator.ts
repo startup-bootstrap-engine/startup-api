@@ -1,5 +1,6 @@
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { RAID_TRIGGERING_CHANCE_RATIO } from "@providers/constants/RaidConstants";
 import { DiscordBot } from "@providers/discord/DiscordBot";
 import { NPCSpawn } from "@providers/npc/NPCSpawn";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -130,7 +131,7 @@ export class NPCRaidActivator {
     const eligibleRaids = raids.filter((raid) => {
       const randomValue = random(0, 100); // Get a random number between 1 and 100
 
-      return randomValue <= raid.triggeringChance; // Check if the random number is less than or equal to the raid's triggering chance
+      return randomValue <= raid.triggeringChance * RAID_TRIGGERING_CHANCE_RATIO; // Check if the random number is less than or equal to the raid's triggering chance
     });
 
     if (eligibleRaids.length === 0) {

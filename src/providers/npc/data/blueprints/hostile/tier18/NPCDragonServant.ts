@@ -192,10 +192,7 @@ export const npcDragonServant: INPCTierBlueprint<18> = {
       itemBlueprintKey: GemsBlueprint.CoralReefGem,
       chance: 1,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.FrostfireGladius,
-      chance: 10,
-    },
+
     {
       itemBlueprintKey: SwordsBlueprint.FrostwindCutter,
       chance: 10,
