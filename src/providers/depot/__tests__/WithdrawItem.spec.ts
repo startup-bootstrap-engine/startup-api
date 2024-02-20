@@ -38,7 +38,7 @@ describe("WithdrawItem.ts", () => {
     depotContainer = (await depositItem.deposit(testCharacter, {
       itemId: item.id,
       npcId: testNPC.id,
-    })) as IItemContainer;
+    })) as unknown as IItemContainer;
 
     const characterEquipment = (await Equipment.findById(testCharacter.equipment)
       .populate("inventory")
