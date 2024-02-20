@@ -35,5 +35,5 @@ export const itemAzureNecklace: IEquippableAccessoryTier23Blueprint = {
       },
     },
   },
-  equippedBuffDescription: "Increases max health by 9% respectively",
+  equippedBuffDescription: "Increases max health by 9%",
 };
