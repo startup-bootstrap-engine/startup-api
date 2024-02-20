@@ -1,5 +1,14 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableMeleeTier14WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { EntityAttackType, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  EntityAttackType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { SwordsBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemFrostbiteFang: IEquippableMeleeTier14WeaponBlueprint = {
@@ -18,4 +27,21 @@ export const itemFrostbiteFang: IEquippableMeleeTier14WeaponBlueprint = {
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   rangeType: EntityAttackType.Melee,
   basePrice: 230,
+  entityEffects: [EntityEffectBlueprint.Freezing],
+  entityEffectChance: 85,
+  equippedBuff: [
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 7,
+      durationType: CharacterBuffDurationType.Permanent,
+      options: {
+        messages: {
+          activation: "You feel the power of the frostbite fang flowing through your body. (+7% resistance)",
+          deactivation: "You feel the power of the frostbite fang leaving your body. (-7% resistance)",
+        },
+      },
+    },
+  ],
+  equippedBuffDescription: "Increases resistance by 7%",
 };

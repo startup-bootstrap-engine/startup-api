@@ -1,5 +1,14 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableMeleeTier15WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { EntityAttackType, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  CombatSkill,
+  EntityAttackType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { SwordsBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemMoonshadowBlade: IEquippableMeleeTier15WeaponBlueprint = {
@@ -18,4 +27,15 @@ export const itemMoonshadowBlade: IEquippableMeleeTier15WeaponBlueprint = {
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   rangeType: EntityAttackType.Melee,
   basePrice: 230,
+  entityEffects: [EntityEffectBlueprint.Corruption],
+  entityEffectChance: 85,
+  equippedBuff: [
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Sword,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "Increases sword skill by 15%",
 };

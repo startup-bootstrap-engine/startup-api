@@ -1,5 +1,14 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableMeleeTier14WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { EntityAttackType, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  CombatSkill,
+  EntityAttackType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { SwordsBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemVenomousBlade: IEquippableMeleeTier14WeaponBlueprint = {
@@ -18,4 +27,21 @@ export const itemVenomousBlade: IEquippableMeleeTier14WeaponBlueprint = {
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   rangeType: EntityAttackType.Melee,
   basePrice: 240,
+  entityEffects: [EntityEffectBlueprint.Poison],
+  entityEffectChance: 85,
+  equippedBuff: [
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Sword,
+      buffPercentage: 11,
+      durationType: CharacterBuffDurationType.Permanent,
+      options: {
+        messages: {
+          activation: "You feel the power of the venomous blade flowing through your body. (+11% sword skill)",
+          deactivation: "You feel the power of the venomous blade leaving your body. (-11% sword skill)",
+        },
+      },
+    },
+  ],
+  equippedBuffDescription: "Increases sword skill by 11%",
 };
