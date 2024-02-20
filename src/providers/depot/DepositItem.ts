@@ -1,8 +1,8 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Depot } from "@entities/ModuleDepot/DepotModel";
-import { IItemContainer as IItemContainerModel } from "@entities/ModuleInventory/ItemContainerModel";
+import { IItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
-import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
+import { NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
 import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
@@ -12,7 +12,7 @@ import { ItemUpdater } from "@providers/item/ItemUpdater";
 import { ItemView } from "@providers/item/ItemView";
 import { MapHelper } from "@providers/map/MapHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { IDepotDepositItem, IEquipmentAndInventoryUpdatePayload, IItemContainer } from "@rpg-engine/shared";
+import { IDepotDepositItem, IEquipmentAndInventoryUpdatePayload } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { DepotSystem } from "./DepotSystem";
 import { OpenDepot } from "./OpenDepot";
@@ -35,64 +35,76 @@ export class DepositItem {
   @TrackNewRelicTransaction()
   public async deposit(character: ICharacter, data: IDepotDepositItem): Promise<IItemContainer | undefined> {
     const { itemId, npcId, fromContainerId } = data;
-    const itemContainer = await this.openDepot.getContainer(character.id, npcId);
+
+    // Simultaneously retrieve necessary data to reduce wait times.
+    const [itemContainer, item, npc] = await Promise.all([
+      this.openDepot.getContainer(character.id, npcId),
+      Item.findById(itemId) as unknown as IItem,
+      NPC.findById(npcId).lean(),
+    ]);
 
     if (!itemContainer) {
       throw new Error(`DepotSystem > Item container not found for character id ${character.id} and npc id ${npcId}`);
     }
-
-    // check if item exists
-    const item = await Item.findById(itemId);
     if (!item) {
-      // prevent depot slot from getting stuck
-      await this.characterItemSlots.deleteItemOnSlot(itemContainer as any, itemId);
-
       throw new Error(`DepotSystem > Item not found: ${itemId}`);
     }
+    if (!npc) {
+      throw new Error(`DepotSystem > NPC not found: ${npcId}`);
+    }
 
-    const npc = (await NPC.findById(npcId).lean()) as INPC;
+    const isDepositValid = await this.isDepositValid(character, data);
+    if (!isDepositValid) return;
 
-    const isDepositValid = await this.isDepositValid(character, data, npc);
+    // Update item key and save only if necessary.
+    if (item.key !== item.baseKey) {
+      item.key = item.baseKey;
+      await item.save();
+    }
 
-    if (!isDepositValid) {
+    const wasItemAddedToContainer = await this.depotSystem.addItemToContainer(
+      character,
+      item,
+      itemContainer as unknown as IItemContainer
+    );
+    if (!wasItemAddedToContainer) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Failed to deposit item. Please try again.");
       return;
     }
 
-    const isItemFromMap =
-      this.mapHelper.isCoordinateValid(item.x) && this.mapHelper.isCoordinateValid(item.y) && item.scene;
-
-    // support depositing items from a tiled map seed
-    item.key = item.baseKey;
-    await item.save();
-
-    // deposit from the characters container
-    if (!!fromContainerId && !isItemFromMap) {
-      const container = await this.depotSystem.removeFromContainer(fromContainerId, item);
-      await this.inMemoryHashTable.delete("container-all-items", fromContainerId);
-
-      if (!item.owner) {
-        await this.itemOwnership.addItemOwnership(item, character);
-      }
-
-      await this.markItemAsInDepot(item);
-
-      // whenever a new item is removed, we need to update the character weight
-      void this.characterWeight.updateCharacterWeight(character);
-
-      const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {
-        inventory: container as any,
-      };
-
-      this.depotSystem.updateInventoryCharacter(payloadUpdate, character);
+    if (fromContainerId) {
+      await this.handleItemRemovalFromContainer(fromContainerId, item, character);
     }
 
-    if (isItemFromMap) {
+    // Separate handling for map items to keep the deposit logic clean and focused.
+    if (this.isItemFromMap(item)) {
       await this.removeFromMapContainer(item);
     }
 
-    await this.depotSystem.addItemToContainer(character, item, itemContainer as unknown as IItemContainerModel);
+    return itemContainer as unknown as IItemContainer;
+  }
 
-    return itemContainer;
+  private async handleItemRemovalFromContainer(
+    fromContainerId: string,
+    item: IItem,
+    character: ICharacter
+  ): Promise<void> {
+    const promises = [
+      this.depotSystem.removeFromContainer(fromContainerId, item),
+      this.inMemoryHashTable.delete("container-all-items", fromContainerId),
+      item.owner ? Promise.resolve() : this.itemOwnership.addItemOwnership(item, character),
+      this.markItemAsInDepot(item),
+      this.characterWeight.updateCharacterWeight(character),
+    ];
+
+    const [container] = await Promise.all(promises);
+
+    const payloadUpdate: IEquipmentAndInventoryUpdatePayload = { inventory: container as any };
+    this.depotSystem.updateInventoryCharacter(payloadUpdate, character);
+  }
+
+  private isItemFromMap(item: IItem): boolean {
+    return this.mapHelper.isCoordinateValid(item.x) && this.mapHelper.isCoordinateValid(item.y) && !!item.scene;
   }
 
   private async markItemAsInDepot(item: IItem): Promise<void> {
@@ -103,7 +115,7 @@ export class DepositItem {
     });
   }
 
-  private async isDepositValid(character: ICharacter, data: IDepotDepositItem, npc: INPC): Promise<boolean> {
+  private async isDepositValid(character: ICharacter, data: IDepotDepositItem): Promise<boolean> {
     // check if there're slots available on the depot
 
     const depot = await Depot.findOne({ owner: character._id }).lean();
@@ -117,7 +129,8 @@ export class DepositItem {
 
     const hasAvailableSlot = await this.characterItemSlots.hasAvailableSlot(
       depot?.itemContainer as string,
-      itemToBeAdded as IItem
+      itemToBeAdded as IItem,
+      true
     );
 
     if (!hasAvailableSlot) {

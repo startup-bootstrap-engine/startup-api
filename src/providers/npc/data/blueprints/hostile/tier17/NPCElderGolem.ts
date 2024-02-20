@@ -1,6 +1,8 @@
 import { Dice } from "@providers/constants/DiceConstants";
 import {
+  AccessoriesBlueprint,
   ArmorsBlueprint,
+  BooksBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
@@ -102,6 +104,30 @@ export const npcElderGolem: INPCTierBlueprint<17> = {
     {
       itemBlueprintKey: SwordsBlueprint.ThunderclapKatana,
       chance: 10,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.GarnetNecklace,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.GoldenGlowRing,
+      chance: 8,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.MysticCompendium,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.MysticalMemoirs,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.AstralAtlas,
+      chance: 7,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
+      chance: 8,
     },
   ],
   areaSpells: [

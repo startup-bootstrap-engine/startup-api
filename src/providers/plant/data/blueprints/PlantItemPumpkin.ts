@@ -1,3 +1,4 @@
+import { FARMING_LOW_YIELD_FACTOR } from "@providers/constants/FarmingConstants";
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemSubType, ItemType } from "@rpg-engine/shared";
 import { PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
@@ -14,12 +15,13 @@ export const plantItemPumpkin: IPlantItem = {
   isPersistent: true,
   weight: 1,
   textureAtlas: "crops",
-  texturePath: "seeds/seed-orange-1.png",
+  texturePath: "seeds/seed-brown-3.png",
+  deadTexturePath: "plants/food/pumpkin/generic-sprout-dead-2.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
       requiredGrowthPoints: 10,
       textureAtlas: "crops",
-      texturePath: "seeds/seed-orange-1.png",
+      texturePath: "seeds/seed-brown-3.png",
     },
     [PlantLifeCycle.Sprout]: {
       requiredGrowthPoints: 20,
@@ -40,7 +42,7 @@ export const plantItemPumpkin: IPlantItem = {
   harvestableItemKey: FoodsBlueprint.Pumpkin,
   regrowsAfterHarvest: false,
   growthFactor: 4.5,
-  maxHarvestablePerPlant: 2,
+  yieldFactor: FARMING_LOW_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
 };

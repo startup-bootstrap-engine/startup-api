@@ -68,6 +68,45 @@ export type AccessoryTier17Defense = AccessoryTier16Defense | 52 | 53 | 54;
 export type AccessoryTier18Attack = AccessoryTier17Attack | 55 | 56 | 57;
 export type AccessoryTier18Defense = AccessoryTier17Defense | 55 | 56 | 57;
 
+export type AccessoryTier19Attack = AccessoryTier18Attack | 58 | 59 | 60;
+export type AccessoryTier19Defense = AccessoryTier18Defense | 58 | 59 | 60;
+
+export type AccessoryTier20Attack = AccessoryTier19Attack | 61 | 62 | 63;
+export type AccessoryTier20Defense = AccessoryTier19Defense | 61 | 62 | 63;
+
+export type AccessoryTier21Attack = AccessoryTier20Attack | 64 | 65 | 66;
+export type AccessoryTier21Defense = AccessoryTier20Defense | 64 | 65 | 66;
+
+export type AccessoryTier22Attack = AccessoryTier21Attack | 67 | 68 | 69;
+export type AccessoryTier22Defense = AccessoryTier21Defense | 67 | 68 | 69;
+
+export type AccessoryTier23Attack = AccessoryTier22Attack | 70 | 71 | 72;
+export type AccessoryTier23Defense = AccessoryTier22Defense | 70 | 71 | 72;
+
+export type AccessoryTier24Attack = AccessoryTier23Attack | 71 | 72 | 73;
+export type AccessoryTier24Defense = AccessoryTier23Defense | 71 | 72 | 73;
+
+export type AccessoryTier25Attack = AccessoryTier24Attack | 74 | 75 | 76;
+export type AccessoryTier25Defense = AccessoryTier24Defense | 74 | 75 | 76;
+
+export type AccessoryTier26Attack = AccessoryTier25Attack | 77 | 78 | 79;
+export type AccessoryTier26Defense = AccessoryTier25Defense | 77 | 78 | 79;
+
+export type AccessoryTier27Attack = AccessoryTier26Attack | 80 | 81 | 82;
+export type AccessoryTier27Defense = AccessoryTier26Defense | 80 | 81 | 82;
+
+export type AccessoryTier28Attack = AccessoryTier27Attack | 83 | 84 | 85;
+export type AccessoryTier28Defense = AccessoryTier27Defense | 83 | 84 | 85;
+
+export type AccessoryTier29Attack = AccessoryTier28Attack | 86 | 87 | 88;
+export type AccessoryTier29Defense = AccessoryTier28Defense | 86 | 87 | 88;
+
+export type AccessoryTier30Attack = AccessoryTier29Attack | 89 | 90 | 91;
+export type AccessoryTier30Defense = AccessoryTier29Defense | 89 | 90 | 91;
+
+export type AccessoryTier31Attack = AccessoryTier30Attack | 92 | 93 | 94;
+export type AccessoryTier31Defense = AccessoryTier30Defense | 92 | 93 | 94;
+
 export interface IEquippableAccessoryTier0Blueprint extends IEquippableItemBlueprint {
   tier: 0;
   attack: AccessoryTier0Attack;
@@ -173,6 +212,84 @@ export interface IEquippableAccessoryTier18Blueprint extends IEquippableItemBlue
   tier: 18;
   attack: AccessoryTier18Attack;
   defense: AccessoryTier18Defense;
+}
+
+export interface IEquippableAccessoryTier19Blueprint extends IEquippableItemBlueprint {
+  tier: 19;
+  attack: AccessoryTier19Attack;
+  defense: AccessoryTier19Defense;
+}
+
+export interface IEquippableAccessoryTier20Blueprint extends IEquippableItemBlueprint {
+  tier: 20;
+  attack: AccessoryTier20Attack;
+  defense: AccessoryTier20Attack;
+}
+
+export interface IEquippableAccessoryTier21Blueprint extends IEquippableItemBlueprint {
+  tier: 21;
+  attack: AccessoryTier21Attack;
+  defense: AccessoryTier21Attack;
+}
+
+export interface IEquippableAccessoryTier22Blueprint extends IEquippableItemBlueprint {
+  tier: 22;
+  attack: AccessoryTier22Attack;
+  defense: AccessoryTier22Attack;
+}
+
+export interface IEquippableAccessoryTier23Blueprint extends IEquippableItemBlueprint {
+  tier: 23;
+  attack: AccessoryTier23Attack;
+  defense: AccessoryTier23Attack;
+}
+
+export interface IEquippableAccessoryTier24Blueprint extends IEquippableItemBlueprint {
+  tier: 24;
+  attack: AccessoryTier24Attack;
+  defense: AccessoryTier24Attack;
+}
+
+export interface IEquippableAccessoryTier25Blueprint extends IEquippableItemBlueprint {
+  tier: 25;
+  attack: AccessoryTier25Attack;
+  defense: AccessoryTier25Attack;
+}
+
+export interface IEquippableAccessoryTier26Blueprint extends IEquippableItemBlueprint {
+  tier: 26;
+  attack: AccessoryTier26Defense;
+  defense: AccessoryTier26Defense;
+}
+
+export interface IEquippableAccessoryTier27Blueprint extends IEquippableItemBlueprint {
+  tier: 27;
+  attack: AccessoryTier27Defense;
+  defense: AccessoryTier27Defense;
+}
+
+export interface IEquippableAccessoryTier28Blueprint extends IEquippableItemBlueprint {
+  tier: 28;
+  attack: AccessoryTier28Defense;
+  defense: AccessoryTier28Defense;
+}
+
+export interface IEquippableAccessoryTier29Blueprint extends IEquippableItemBlueprint {
+  tier: 29;
+  attack: AccessoryTier29Defense;
+  defense: AccessoryTier29Defense;
+}
+
+export interface IEquippableAccessoryTier30Blueprint extends IEquippableItemBlueprint {
+  tier: 30;
+  attack: AccessoryTier30Defense;
+  defense: AccessoryTier30Defense;
+}
+
+export interface IEquippableAccessoryTier31Blueprint extends IEquippableItemBlueprint {
+  tier: 31;
+  attack: AccessoryTier31Defense;
+  defense: AccessoryTier31Defense;
 }
 
 // Melee ========================================
@@ -1101,4 +1218,25 @@ export interface IEquippableLightArmorTier12Blueprint extends IEquippableArmorBl
 export interface IEquippableLightArmorTier13Blueprint extends IEquippableArmorBlueprint {
   tier: 13;
   defense: LightArmorTier13Defense;
+}
+
+// Book ========================================
+export interface IEquippableBookTier0Blueprint extends IEquippableItemBlueprint {
+  tier: 0;
+}
+
+export interface IEquippableBookTier1Blueprint extends IEquippableItemBlueprint {
+  tier: 1;
+}
+
+export interface IEquippableBookTier2Blueprint extends IEquippableItemBlueprint {
+  tier: 2;
+}
+
+export interface IEquippableBookTier3Blueprint extends IEquippableItemBlueprint {
+  tier: 3;
+}
+
+export interface IEquippableBookTier4Blueprint extends IEquippableItemBlueprint {
+  tier: 4;
 }

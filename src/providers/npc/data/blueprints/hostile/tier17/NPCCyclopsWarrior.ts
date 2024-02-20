@@ -3,9 +3,12 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
+  AccessoriesBlueprint,
   AxesBlueprint,
+  BooksBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
+  HelmetsBlueprint,
   MacesBlueprint,
   PotionsBlueprint,
   ShieldsBlueprint,
@@ -124,6 +127,30 @@ export const npcCyclopsWarrior: INPCTierBlueprint<17> = {
     {
       itemBlueprintKey: SwordsBlueprint.FrostfireLongblade,
       chance: 12,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.SunlitRubyNecklace,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.WoodenRing,
+      chance: 8,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.MysticCompendium,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.MysticalMemoirs,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.DruidicLoreVolume,
+      chance: 7,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
+      chance: 8,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

@@ -1,3 +1,4 @@
+import { FARMING_MEDIUM_YIELD_FACTOR } from "@providers/constants/FarmingConstants";
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemSubType, ItemType } from "@rpg-engine/shared";
 import { PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
@@ -15,6 +16,7 @@ export const plantItemPotato: IPlantItem = {
   weight: 1,
   textureAtlas: "crops",
   texturePath: "seeds/seed-brown-1.png",
+  deadTexturePath: "plants/food/potato/potato-dead.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
       requiredGrowthPoints: 5,
@@ -40,7 +42,7 @@ export const plantItemPotato: IPlantItem = {
   harvestableItemKey: FoodsBlueprint.Potato,
   regrowsAfterHarvest: false,
   growthFactor: 3.5,
-  maxHarvestablePerPlant: 3,
+  yieldFactor: FARMING_MEDIUM_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
 };

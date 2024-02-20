@@ -5,6 +5,7 @@ import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
   AxesBlueprint,
+  BooksBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
   HelmetsBlueprint,
@@ -127,6 +128,26 @@ export const npcFellbeast: INPCTierBlueprint<17> = {
     {
       itemBlueprintKey: SwordsBlueprint.ThunderstormEdge,
       chance: 10,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.RubyglintNecklace,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.QuantumSunRing,
+      chance: 8,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.MysticCompendium,
+      chance: 3,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.DruidicLoreVolume,
+      chance: 6,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
+      chance: 7,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],

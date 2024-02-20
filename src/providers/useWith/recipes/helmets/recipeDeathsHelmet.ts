@@ -12,11 +12,11 @@ export const recipeDeathsHelmet: IUseWithCraftingRecipe = {
       qty: 8,
     },
     {
-      key: CraftingResourcesBlueprint.ObsidiumOre,
+      key: CraftingResourcesBlueprint.ObsidiumIngot,
       qty: 2,
     },
     {
-      key: CraftingResourcesBlueprint.CorruptionOre,
+      key: CraftingResourcesBlueprint.CorruptionIngot,
       qty: 4,
     },
   ],
@@ -24,8 +24,8 @@ export const recipeDeathsHelmet: IUseWithCraftingRecipe = {
     CraftingSkill.Blacksmithing,
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.IronIngot, 8],
-      [CraftingResourcesBlueprint.ObsidiumOre, 2],
-      [CraftingResourcesBlueprint.CorruptionOre, 4],
+      [CraftingResourcesBlueprint.ObsidiumIngot, 2],
+      [CraftingResourcesBlueprint.CorruptionIngot, 4],
     ]),
   ],
 };

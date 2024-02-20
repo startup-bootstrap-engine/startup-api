@@ -151,6 +151,8 @@ const itemSchema = createLeanSchema(
     isRefillable: Type.boolean({ required: false }),
 
     remainingUses: Type.number({ required: false }),
+
+    isDead: Type.boolean({ required: false }),
   },
   { timestamps: { createdAt: true, updatedAt: true } }
 ).plugin(updateIfCurrentPlugin);

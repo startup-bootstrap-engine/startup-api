@@ -11,10 +11,10 @@ export const itemAmuletOfLuck: IEquippableAccessoryTier0Blueprint = {
   name: "Amulet Of Luck",
   description:
     "Wearing this amulet is said to increase the wearer's chances of success in all their endeavors, from combat to crafting and beyond",
-  attack: 0,
-  defense: 0,
+  attack: 1,
+  defense: 1,
   tier: 0,
   weight: 0.1,
-  allowedEquipSlotType: [ItemSlotType.Ring],
+  allowedEquipSlotType: [ItemSlotType.Neck],
   basePrice: 5000,
 };

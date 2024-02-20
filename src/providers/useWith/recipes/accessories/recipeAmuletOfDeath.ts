@@ -31,7 +31,7 @@ export const recipeAmuletOfDeath: IUseWithCraftingRecipe = {
       qty: 25,
     },
     {
-      key: CraftingResourcesBlueprint.CorruptionOre,
+      key: CraftingResourcesBlueprint.CorruptionIngot,
       qty: 50,
     },
   ],

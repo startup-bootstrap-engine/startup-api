@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { appEnv } from "@providers/config/env";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
@@ -19,12 +20,22 @@ export class RedisIOClient {
         const redisConnectionUrl = `redis://${appEnv.database.REDIS_CONTAINER}:${appEnv.database.REDIS_PORT}`;
 
         this.client = new IORedis(redisConnectionUrl, {
-          maxRetriesPerRequest: null, // Disables the retry mechanism for individual commands; be cautious
-          enableAutoPipelining: true, // Enables command pipelining for better performance
-          keepAlive: 3000, // Keeps idle sockets open for 3 seconds; however, this doesn't close idle connections
-          connectTimeout: 10000, // 10 seconds to timeout if a connection can't be established
-          lazyConnect: true, // Connection will be lazily created on the first command
-          autoResendUnfulfilledCommands: false, // Prevents re-sending of queued commands on reconnect, avoiding command duplication
+          retryStrategy: (times) => {
+            // Exponential backoff with a maximum delay, considering Docker's internal networking
+            return Math.min(times * 100, 3000);
+          },
+          enableAutoPipelining: true, // Maintain command pipelining
+          keepAlive: 10000, // Keep connections alive longer to mitigate Docker networking quirks
+          connectTimeout: 15000, // Allow more time for connections, given potential Docker network delays
+          maxRetriesPerRequest: null, // Must be null for bullmq
+          autoResendUnfulfilledCommands: true, // Ensure command continuity over reconnects
+          reconnectOnError: (err) => {
+            // Broaden reconnection triggers to include common network-related errors in containerized environments
+            return /READONLY|CONNECTION_LOST|ECONNRESET|ETIMEDOUT|ECONNREFUSED|ENETDOWN/i.test(err.message);
+          },
+          // Docker Swarm can cause IP changes; DNS resolution retries help handle service IP updates
+          dnsLookup: (address, callback) => callback(null, address),
+          maxListeners: 50, // Adjust for potential high concurrency within the swarm
         });
 
         this.client.setMaxListeners(20);

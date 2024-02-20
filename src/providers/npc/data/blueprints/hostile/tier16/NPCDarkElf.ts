@@ -4,8 +4,10 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AccessoriesBlueprint,
   AxesBlueprint,
+  BooksBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
+  HelmetsBlueprint,
   MacesBlueprint,
   RangedWeaponsBlueprint,
   ShieldsBlueprint,
@@ -124,6 +126,26 @@ export const npcDarkElf: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: SwordsBlueprint.FrostheartBroadsword,
       chance: 10,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.GoldenRubyNecklace,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.CherryRing,
+      chance: 8,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.ElementalGrimoire,
+      chance: 3,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.EnigmaScrolls,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
+      chance: 7,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],

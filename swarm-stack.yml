@@ -9,7 +9,7 @@ services:
       timeout: 30s
       retries: 3
     deploy:
-      replicas: 2
+      replicas: 3
       restart_policy:
         condition: on-failure
       placement:

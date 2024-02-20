@@ -2,8 +2,10 @@ import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
+  AccessoriesBlueprint,
   ArmorsBlueprint,
   AxesBlueprint,
+  BooksBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
@@ -221,6 +223,34 @@ export const npcRedDragon: INPCTierBlueprint<20> = {
     {
       itemBlueprintKey: GemsBlueprint.CoralReefGem,
       chance: 2,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.RubyglintNecklace,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.RubyTriquetraRing,
+      chance: 12,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.CherryRing,
+      chance: 14,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.EsotericEpistles,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.ArcaneArchives,
+      chance: 6,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.AlchemistsAlmanac,
+      chance: 8,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.YellowEnchanterHat,
+      chance: 10,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],

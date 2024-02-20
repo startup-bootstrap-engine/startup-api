@@ -22,8 +22,8 @@ export const EXHAUSTABLE_EVENTS = [
   ChatSocketEvents.PrivateChatMessageCreate,
   ItemSocketEvents.UseWith,
   "CastSpell",
-  "UseWithTile",
   "UseWithItem",
+  UseWithSocketEvents.UseWithTile,
   ItemSocketEvents.Use,
   ItemSocketEvents.CraftItem,
   UseWithSocketEvents.UseWithTile,
@@ -46,7 +46,7 @@ export const LOCKABLE_EVENTS = [
   ItemSocketEvents.ContainerTransfer,
   ItemSocketEvents.CraftItem,
   ItemSocketEvents.Move,
-  "UseWithTile",
+  UseWithSocketEvents.UseWithTile,
   "UseWithItem",
   BattleSocketEvents.InitTargeting,
   BattleSocketEvents.StopTargeting,
@@ -61,6 +61,7 @@ export const THROTTABLE_EVENTS_MS_THRESHOLD_DISCONNECT = 20;
 export const THROTTABLE_DEFAULT_MS_THRESHOLD = 1000;
 
 export const THROTTABLE_EVENTS = {
+  [UseWithSocketEvents.UseWithTile]: 2000,
   [ItemSocketEvents.CraftItem]: 2000,
   [ChatSocketEvents.GlobalChatMessageCreate]: THROTTABLE_DEFAULT_MS_THRESHOLD,
   [SpellSocketEvents.CastSpell]: THROTTABLE_DEFAULT_MS_THRESHOLD,

@@ -20,7 +20,7 @@ export const recipeArcaneArbiterChronicles: IUseWithCraftingRecipe = {
       qty: 3,
     },
     {
-      key: CraftingResourcesBlueprint.GoldenOre,
+      key: CraftingResourcesBlueprint.GoldenIngot,
       qty: 3,
     },
     {
@@ -33,7 +33,7 @@ export const recipeArcaneArbiterChronicles: IUseWithCraftingRecipe = {
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.MagicRecipe, 5],
       [CraftingResourcesBlueprint.PhoenixFeather, 3],
-      [CraftingResourcesBlueprint.GoldenOre, 3],
+      [CraftingResourcesBlueprint.GoldenIngot, 3],
     ]),
   ],
 };

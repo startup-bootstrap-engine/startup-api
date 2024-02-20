@@ -7,7 +7,7 @@ export const recipeGaiasSoleplate: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 1],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.GoldenOre,
+      key: CraftingResourcesBlueprint.GoldenIngot,
       qty: 140,
     },
     {

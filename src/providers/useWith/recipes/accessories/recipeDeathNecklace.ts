@@ -8,7 +8,7 @@ export const recipeDeathNecklace: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 1],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.CorruptionOre,
+      key: CraftingResourcesBlueprint.CorruptionIngot,
       qty: 3,
     },
     {
@@ -27,7 +27,7 @@ export const recipeDeathNecklace: IUseWithCraftingRecipe = {
   minCraftingRequirements: [
     CraftingSkill.Blacksmithing,
     calculateMinimumLevel([
-      [CraftingResourcesBlueprint.CorruptionOre, 3],
+      [CraftingResourcesBlueprint.CorruptionIngot, 3],
       [CraftingResourcesBlueprint.Rope, 1],
       [CraftingResourcesBlueprint.WolfTooth, 1],
       [CraftingResourcesBlueprint.Bone, 1],

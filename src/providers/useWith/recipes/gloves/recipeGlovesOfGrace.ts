@@ -15,7 +15,7 @@ export const recipeGlovesOfGrace: IUseWithCraftingRecipe = {
       qty: 50,
     },
     {
-      key: CraftingResourcesBlueprint.GoldenOre,
+      key: CraftingResourcesBlueprint.GoldenIngot,
       qty: 40,
     },
     {

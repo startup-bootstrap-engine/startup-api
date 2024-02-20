@@ -23,7 +23,7 @@ export const recipeStormBow: IUseWithCraftingRecipe = {
       qty: 10,
     },
     {
-      key: CraftingResourcesBlueprint.ObsidiumOre,
+      key: CraftingResourcesBlueprint.ObsidiumIngot,
       qty: 15,
     },
   ],

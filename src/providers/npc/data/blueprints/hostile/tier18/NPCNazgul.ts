@@ -2,8 +2,10 @@ import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
+  AccessoriesBlueprint,
   ArmorsBlueprint,
   AxesBlueprint,
+  BooksBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
   GemsBlueprint,
@@ -148,6 +150,30 @@ export const npcNazgul: INPCTierBlueprint<18> = {
     {
       itemBlueprintKey: SwordsBlueprint.InfernoCleaver,
       chance: 10,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.WoodlandNecklace,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.GreenTourmalineRing,
+      chance: 8,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.SpellboundCodex,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.AstralAtlas,
+      chance: 5,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.DruidicLoreVolume,
+      chance: 7,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.MysticVeilHat,
+      chance: 8,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],

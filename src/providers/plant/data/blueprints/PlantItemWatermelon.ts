@@ -1,3 +1,4 @@
+import { FARMING_LOW_YIELD_FACTOR } from "@providers/constants/FarmingConstants";
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemSubType, ItemType } from "@rpg-engine/shared";
 import { PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
@@ -14,6 +15,7 @@ export const plantItemWatermelon: IPlantItem = {
   weight: 1,
   textureAtlas: "crops",
   texturePath: "seeds/seed-green-1.png",
+  deadTexturePath: "plants/food/watermelon/generic-sprout-dead-2.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
       requiredGrowthPoints: 5,
@@ -39,7 +41,7 @@ export const plantItemWatermelon: IPlantItem = {
   harvestableItemKey: FoodsBlueprint.Watermelon,
   regrowsAfterHarvest: true,
   growthFactor: 4.5,
-  maxHarvestablePerPlant: 2,
+  yieldFactor: FARMING_LOW_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
 };

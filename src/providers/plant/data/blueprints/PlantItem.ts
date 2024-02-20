@@ -11,6 +11,7 @@ export interface IPlantItem extends Partial<IItem> {
   description: string;
   isStatic: boolean;
   isPersistent: boolean;
+  deadTexturePath: string;
   stagesRequirements: {
     [stage in PlantLifeCycle]?: {
       requiredGrowthPoints: number;
@@ -19,7 +20,7 @@ export interface IPlantItem extends Partial<IItem> {
     };
   };
   growthFactor: number;
-  maxHarvestablePerPlant: number;
+  yieldFactor: number;
   regrowsAfterHarvest: boolean; // if true, the plant will go back to stage 1 after being harvested (if not, it will be removed from the world)
   availableOnlyOnSeasons: Season[]; // if empty, it means it's available all year round
   fasterGrowthOnSeasons: Season[]; // if empty, it means it grows at the same rate all year round

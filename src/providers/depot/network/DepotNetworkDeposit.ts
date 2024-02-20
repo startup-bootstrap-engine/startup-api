@@ -7,6 +7,7 @@ import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import {
   DepotSocketEvents,
   IDepotDepositItem,
+  IItemContainer,
   IItemContainerRead,
   ItemContainerType,
   ItemSocketEvents,
@@ -58,7 +59,7 @@ export class DepotNetworkDeposit {
         }
 
         this.socketMessaging.sendEventToUser<IItemContainerRead>(character.channelId!, ItemSocketEvents.ContainerRead, {
-          itemContainer,
+          itemContainer: itemContainer as unknown as IItemContainer,
           type: ItemContainerType.Depot,
         });
       } catch (error) {

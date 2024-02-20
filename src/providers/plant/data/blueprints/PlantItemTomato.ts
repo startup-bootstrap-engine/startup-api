@@ -1,3 +1,4 @@
+import { FARMING_HIGH_YIELD_FACTOR } from "@providers/constants/FarmingConstants";
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemSubType, ItemType } from "@rpg-engine/shared";
 import { PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
@@ -13,12 +14,13 @@ export const plantItemTomato: IPlantItem = {
   isPersistent: true,
   weight: 1,
   textureAtlas: "crops",
-  texturePath: "seeds/seed-red-1.png",
+  texturePath: "seeds/seed-brown-2.png",
+  deadTexturePath: "plants/food/tomato/generic-sprout-dead-2.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
       requiredGrowthPoints: 10,
       textureAtlas: "crops",
-      texturePath: "seeds/seed-red-1.png",
+      texturePath: "seeds/seed-brown-2.png",
     },
     [PlantLifeCycle.Sprout]: {
       requiredGrowthPoints: 20,
@@ -39,7 +41,7 @@ export const plantItemTomato: IPlantItem = {
   harvestableItemKey: FoodsBlueprint.Tomato,
   regrowsAfterHarvest: true,
   growthFactor: 1.2,
-  maxHarvestablePerPlant: 5,
+  yieldFactor: FARMING_HIGH_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
 };

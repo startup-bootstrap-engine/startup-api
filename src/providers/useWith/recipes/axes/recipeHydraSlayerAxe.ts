@@ -23,7 +23,7 @@ export const recipeHydraSlayerAxe: IUseWithCraftingRecipe = {
       qty: 75,
     },
     {
-      key: CraftingResourcesBlueprint.GoldenOre,
+      key: CraftingResourcesBlueprint.GoldenIngot,
       qty: 90,
     },
   ],

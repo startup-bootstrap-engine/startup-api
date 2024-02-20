@@ -16,7 +16,7 @@ export const recipeIceSword: IUseWithCraftingRecipe = {
       qty: 3,
     },
     {
-      key: CraftingResourcesBlueprint.GreenOre,
+      key: CraftingResourcesBlueprint.GreenIngot,
       qty: 2,
     },
   ],
@@ -25,7 +25,7 @@ export const recipeIceSword: IUseWithCraftingRecipe = {
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.BlueSapphire, 3],
       [CraftingResourcesBlueprint.SilverIngot, 3],
-      [CraftingResourcesBlueprint.GoldenOre, 2],
+      [CraftingResourcesBlueprint.GoldenIngot, 2],
     ]),
   ],
 };

@@ -7,6 +7,7 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IItemUpdate, IItemUpdateAll, ItemSocketEvents, ItemSubType, ItemType } from "@rpg-engine/shared";
 import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
+import _, { random } from "lodash";
 import { IPlantItem } from "./data/blueprints/PlantItem";
 import { PlantLifeCycle } from "./data/types/PlantTypes";
 
@@ -23,22 +24,47 @@ export class PlantGrowth {
   constructor(private socketMessaging: SocketMessaging) {}
 
   @TrackNewRelicTransaction()
-  public async updatePlantGrowth(plant: IItem, character: ICharacter): Promise<boolean> {
+  public async updatePlantGrowth(
+    plant: IItem,
+    character: ICharacter,
+    errorMessages: string[] | undefined
+  ): Promise<boolean> {
     try {
+      if (plant.isDead) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, the plant is already dead.");
+        return false;
+      }
+
       const blueprintManager = container.get<BlueprintManager>(BlueprintManager);
 
       const blueprint = (await blueprintManager.getBlueprint("plants", plant.baseKey)) as IPlantItem;
 
       const { canGrow, canWater }: IPlantGrowthStatus = this.canPlantGrow(plant);
 
+      if (!canWater) {
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          "Sorry, the plant is not ready to be watered. Try again in a few hours."
+        );
+        return false;
+      }
+
+      const chance = 75;
+      const n = _.random(0, 100);
+
+      if (n >= chance) {
+        if (errorMessages) {
+          this.socketMessaging.sendErrorMessageToCharacter(
+            character,
+            errorMessages[random(0, errorMessages.length - 1)]
+          );
+        }
+        return false;
+      }
+
       if (!canGrow && canWater) {
         await Item.updateOne({ _id: plant._id }, { $set: { lastWatering: new Date() } });
         return true;
-      } else if (!canWater) {
-        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, the plant is not ready to be watered.");
-        return false;
-      } else if (!canGrow) {
-        return false;
       }
 
       const currentGrowthPoints = plant.growthPoints ?? 0;
@@ -121,6 +147,24 @@ export class PlantGrowth {
       isDeadBodyLootable: item.isDeadBodyLootable,
       lastWatering: item.lastWatering!,
     };
+  }
+
+  public async updatePlantTexture(plant: IItem): Promise<void> {
+    const itemToUpdate = this.prepareItemToUpdate(plant);
+
+    if (plant.owner) {
+      const character = (await Character.findById(plant.owner).lean()) as ICharacter;
+      if (character) {
+        await this.socketMessaging.sendEventToCharactersAroundCharacter<IItemUpdateAll>(
+          character,
+          ItemSocketEvents.UpdateAll,
+          { items: [itemToUpdate] },
+          true
+        );
+      } else {
+        console.error("Character not found");
+      }
+    }
   }
 
   private getNextCycle(currentCycle: PlantLifeCycle): PlantLifeCycle {

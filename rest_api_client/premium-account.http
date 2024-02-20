@@ -4,9 +4,9 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "blueprintKey": "bonebreaker-club",
-  "quantity": 1,
-  "characterId": "65aadb3d2d5d93006ba518d5" 
+  "blueprintKey": "gold-coin",
+  "quantity": 20000,
+  "characterId": "65cdf6c898f915005037e5ba" 
 }
 
 ###

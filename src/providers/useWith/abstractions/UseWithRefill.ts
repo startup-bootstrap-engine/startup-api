@@ -86,20 +86,18 @@ export class UseWithRefill {
         return;
       }
 
-      const chance = 50; // 50% chance
-      const n = _.random(0, 100);
-
-      if (n >= chance) {
-        if (errorMessages) {
-          this.sendRandomMessageToCharacter(character, errorMessages, false);
-        }
+      if (resourceKey === "water" && targetItem.isDead) {
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          "Sorry, you can't water the plant because it is already dead."
+        );
         return;
       }
 
       let isSuccess = false;
 
       if (resourceKey === "water") {
-        isSuccess = await this.plantGrowth.updatePlantGrowth(targetItem, character);
+        isSuccess = await this.plantGrowth.updatePlantGrowth(targetItem, character, errorMessages);
       }
 
       if (isSuccess) {
@@ -143,7 +141,7 @@ export class UseWithRefill {
     const { originItem, errorMessages, successMessages } = options;
 
     try {
-      const chance = 50;
+      const chance = 75;
       const n = _.random(0, 100);
       if (n >= chance) {
         if (errorMessages) {

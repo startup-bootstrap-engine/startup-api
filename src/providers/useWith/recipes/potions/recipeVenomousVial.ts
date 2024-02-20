@@ -15,7 +15,7 @@ export const recipeVenomousVial: IUseWithCraftingRecipe = {
       qty: 4,
     },
     {
-      key: CraftingResourcesBlueprint.CorruptionOre,
+      key: CraftingResourcesBlueprint.CorruptionIngot,
       qty: 1,
     },
   ],

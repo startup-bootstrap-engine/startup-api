@@ -3,8 +3,10 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   AccessoriesBlueprint,
+  BooksBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
+  HelmetsBlueprint,
   RangedWeaponsBlueprint,
   ShieldsBlueprint,
   StaffsBlueprint,
@@ -103,6 +105,26 @@ export const npcConde: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: SwordsBlueprint.BloodmoonBlade,
       chance: 10,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.EmberglowNecklace,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.RubyTriquetraRing,
+      chance: 8,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.MysticCompendium,
+      chance: 3,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.MysticalMemoirs,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
+      chance: 7,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Freezing],

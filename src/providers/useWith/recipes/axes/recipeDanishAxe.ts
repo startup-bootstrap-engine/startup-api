@@ -19,7 +19,7 @@ export const recipeDanishAxe: IUseWithCraftingRecipe = {
       qty: 79,
     },
     {
-      key: CraftingResourcesBlueprint.GreenOre,
+      key: CraftingResourcesBlueprint.GreenIngot,
       qty: 50,
     },
     {

@@ -5,6 +5,7 @@ import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
   AxesBlueprint,
+  BooksBlueprint,
   BootsBlueprint,
   ContainersBlueprint,
   CraftingResourcesBlueprint,
@@ -124,6 +125,10 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: HammersBlueprint.WarHammer,
       chance: 10,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.PendantOfLife,
+      chance: 1,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.InfantryHelmet,
@@ -260,6 +265,26 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: SwordsBlueprint.EmberglowRapier,
       chance: 10,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.AzureNecklace,
+      chance: 2,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.SapphireSerenadeRing,
+      chance: 8,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.EtherealTomes,
+      chance: 3,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.PotioncraftPrimer,
+      chance: 4,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
+      chance: 7,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],

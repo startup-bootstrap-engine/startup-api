@@ -19,7 +19,7 @@ export const recipeGaleGuardianGripCrossbow: IUseWithCraftingRecipe = {
       qty: 90,
     },
     {
-      key: CraftingResourcesBlueprint.ObsidiumOre,
+      key: CraftingResourcesBlueprint.ObsidiumIngot,
       qty: 60,
     },
   ],
