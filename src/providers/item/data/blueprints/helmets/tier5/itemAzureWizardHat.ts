@@ -1,5 +1,6 @@
 import {
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   ItemSlotType,
@@ -25,28 +26,22 @@ export const itemAzureWizardHat: IEquippableLightArmorTier5Blueprint = {
   equippedBuff: [
     {
       type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Strength,
+      trait: BasicAttribute.Magic,
       buffPercentage: 10,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of strength flowing through your body. (+10% strength)",
-          deactivation: "You feel the power of strength leaving your body. (-10% strength)",
-        },
-      },
     },
     {
       type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Resistance,
+      trait: BasicAttribute.MagicResistance,
       buffPercentage: 10,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of resistance flowing through your body. (+10% resistance)",
-          deactivation: "You feel the power of resistance leaving your body. (-10% resistance)",
-        },
-      },
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 7,
+      durationType: CharacterBuffDurationType.Permanent,
     },
   ],
-  equippedBuffDescription: "Increases strength by 10% and resistance by 10% respectively",
+  equippedBuffDescription: "Increases magic and magic resistance by 10% and max mana by 7% respectively",
 };

@@ -1,5 +1,6 @@
 import {
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   ItemSlotType,
@@ -25,28 +26,22 @@ export const itemYellowEnchanterHat: IEquippableLightArmorTier5Blueprint = {
   equippedBuff: [
     {
       type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Strength,
-      buffPercentage: 10,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 15,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of strength flowing through your body. (+10% strength)",
-          deactivation: "You feel the power of strength leaving your body. (-10% strength)",
-        },
-      },
     },
     {
       type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Resistance,
-      buffPercentage: 10,
+      trait: BasicAttribute.MagicResistance,
+      buffPercentage: 15,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of resistance flowing through your body. (+10% resistance)",
-          deactivation: "You feel the power of resistance leaving your body. (-10% resistance)",
-        },
-      },
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 7,
+      durationType: CharacterBuffDurationType.Permanent,
     },
   ],
-  equippedBuffDescription: "Increases strength by 10% and resistance by 10% respectively",
+  equippedBuffDescription: "Increases magic and magic resistance by 15% and max mana by 7% respectively",
 };

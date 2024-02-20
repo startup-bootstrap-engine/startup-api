@@ -26,28 +26,22 @@ export const itemAmethystArchmageHat: IEquippableLightArmorTier5Blueprint = {
   equippedBuff: [
     {
       type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Strength,
+      trait: BasicAttribute.Magic,
       buffPercentage: 10,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of strength flowing through your body. (+10% strength)",
-          deactivation: "You feel the power of strength leaving your body. (-10% strength)",
-        },
-      },
     },
     {
       type: CharacterBuffType.CharacterAttribute,
       trait: CharacterAttributes.MaxHealth,
       buffPercentage: 8,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of max health flowing through your body. (+8% MaxHealth)",
-          deactivation: "You feel the power of max health leaving your body. (-8% MaxHealth)",
-        },
-      },
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 7,
+      durationType: CharacterBuffDurationType.Permanent,
     },
   ],
-  equippedBuffDescription: "Increases strength by 10% and max health by 8% respectively",
+  equippedBuffDescription: "Increases magic by 10% and max health by 8% respectively",
 };

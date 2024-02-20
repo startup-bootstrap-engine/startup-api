@@ -26,28 +26,28 @@ export const itemMysticVeilHat: IEquippableLightArmorTier6Blueprint = {
   equippedBuff: [
     {
       type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Strength,
-      buffPercentage: 12,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 20,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of strength flowing through your body. (+12% strength)",
-          deactivation: "You feel the power of strength leaving your body. (-12% strength)",
-        },
-      },
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.MagicResistance,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
     },
     {
       type: CharacterBuffType.CharacterAttribute,
       trait: CharacterAttributes.MaxHealth,
-      buffPercentage: 10,
+      buffPercentage: 20,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of max health flowing through your body. (+8% MaxHealth)",
-          deactivation: "You feel the power of max health leaving your body. (-8% MaxHealth)",
-        },
-      },
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 20,
+      durationType: CharacterBuffDurationType.Permanent,
     },
   ],
-  equippedBuffDescription: "Increases strength by 12% and max health by 10% respectively",
+  equippedBuffDescription: "Increases magic and magic resistance by 20% and max health by 20% respectively",
 };
