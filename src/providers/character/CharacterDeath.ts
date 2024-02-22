@@ -450,7 +450,6 @@ export class CharacterDeath {
       // now that the slot is clear, lets drop the item on the body
       await this.characterItemContainer.addItemToContainer(item, character, bodyContainer._id, {
         shouldAddOwnership: false,
-        shouldAddAsCarriedItem: false,
       });
 
       if (!isDeadBodyLootable) {
@@ -506,7 +505,6 @@ export class CharacterDeath {
           // now that the slot is clear, lets drop the item on the body
           await this.characterItemContainer.addItemToContainer(item, character, bodyContainer._id, {
             shouldAddOwnership: false,
-            shouldAddAsCarriedItem: false,
           });
 
           if (!isDeadBodyLootable) {

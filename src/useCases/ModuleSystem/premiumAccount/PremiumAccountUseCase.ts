@@ -112,7 +112,6 @@ export class PremiumAccountUseCase {
 
       const result = await this.characterItemContainer.addItemToContainer(item, character, inventoryContainerId, {
         shouldAddOwnership: true,
-        shouldAddAsCarriedItem: true,
       });
 
       if (!result) {

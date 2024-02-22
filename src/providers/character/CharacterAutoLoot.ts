@@ -150,7 +150,6 @@ export class CharacterAutoLoot {
           const [addedToInventory, removedFromBody] = await Promise.all([
             this.characterItemContainer.addItemToContainer(item, character, inventoryItemContainer._id, {
               shouldAddOwnership: true,
-              shouldAddAsCarriedItem: true,
             }),
             this.characterItemContainer.removeItemFromContainer(item, character, itemContainer),
           ]);
