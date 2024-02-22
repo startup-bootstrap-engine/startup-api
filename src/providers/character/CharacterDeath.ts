@@ -458,57 +458,49 @@ export class CharacterDeath {
   ): Promise<void> {
     let isDeadBodyLootable = false;
 
-    let multi = 1;
-    if (character.hasSkull && character.skullType) {
-      // if has yellow, 30% more. If has red => all loss
-      switch (character.skullType) {
-        case CharacterSkullType.YellowSkull:
-          multi = 0.7;
-          break;
-        case CharacterSkullType.RedSkull:
-          forceDropAll = true;
-          break;
-      }
-    }
-
-    const dropItemPromises = DROPPABLE_EQUIPMENT.map(async (slot) => {
+    const skullMultiplier = this.getSkullMultiplier(character);
+    for (const slot of DROPPABLE_EQUIPMENT) {
       const itemId = equipment[slot];
+      if (!itemId) continue;
 
-      if (!itemId) return;
-
-      const n = _.random(0, 100) * multi;
-      if (forceDropAll || n <= DROP_EQUIPMENT_CHANCE) {
+      const dropChance = _.random(0, 100) * skullMultiplier;
+      if (forceDropAll || dropChance <= DROP_EQUIPMENT_CHANCE) {
         try {
           const item = await this.clearItem(character, itemId);
-
           const removeEquipmentFromSlot = await equipmentSlots.removeItemFromSlot(
             character,
             item.key,
             slot as EquipmentSlotTypes
           );
 
-          if (!removeEquipmentFromSlot) {
-            return;
-          }
+          if (!removeEquipmentFromSlot) continue;
 
-          // now that the slot is clear, lets drop the item on the body
           await this.characterItemContainer.addItemToContainer(item, character, bodyContainer._id, {
             shouldAddOwnership: false,
           });
 
-          if (!isDeadBodyLootable) {
-            isDeadBodyLootable = true;
-          }
+          isDeadBodyLootable = true;
         } catch (error) {
           console.error(error);
         }
       }
-    });
-
-    await Promise.all(dropItemPromises);
+    }
 
     if (isDeadBodyLootable) {
       await Item.updateOne({ _id: bodyContainer.parentItem }, { $set: { isDeadBodyLootable: true } });
+    }
+  }
+
+  private getSkullMultiplier(character: ICharacter): number {
+    if (!character.hasSkull || !character.skullType) return 1;
+
+    switch (character.skullType) {
+      case CharacterSkullType.YellowSkull:
+        return 0.7;
+      case CharacterSkullType.RedSkull:
+        return 0;
+      default:
+        return 1;
     }
   }
 
