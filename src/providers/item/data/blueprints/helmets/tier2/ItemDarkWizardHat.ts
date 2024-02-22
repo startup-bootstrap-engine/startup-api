@@ -1,4 +1,11 @@
-import { ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  CharacterAttributes,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { IEquippableLightArmorTier2Blueprint } from "../../../types/TierBlueprintTypes";
 import { HelmetsBlueprint } from "../../../types/itemsBlueprintTypes";
 
@@ -15,4 +22,13 @@ export const itemDarkWizardHat: IEquippableLightArmorTier2Blueprint = {
   weight: 0.5,
   allowedEquipSlotType: [ItemSlotType.Head],
   basePrice: 37,
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 4,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "Increases max mana by 4%",
 };
