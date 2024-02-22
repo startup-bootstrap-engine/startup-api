@@ -114,8 +114,6 @@ const itemSchema = createLeanSchema(
 
     isInContainer: Type.boolean({ required: false }),
 
-    isBeingPickedUp: Type.boolean({ required: false }),
-
     isPersistent: Type.boolean({ required: false }),
 
     isStatic: Type.boolean({ required: false }),

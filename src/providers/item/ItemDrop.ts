@@ -23,6 +23,7 @@ import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterItems } from "../character/characterItems/CharacterItems";
 
+import { Locker } from "@providers/locks/Locker";
 import { ItemDropCleanup } from "./ItemDropCleanup";
 import { ItemOwnership } from "./ItemOwnership";
 
@@ -38,135 +39,164 @@ export class ItemDrop {
     private itemOwnership: ItemOwnership,
     private characterInventory: CharacterInventory,
     private itemCleanup: ItemDropCleanup,
-    private inMemoryHashTable: InMemoryHashTable
+    private inMemoryHashTable: InMemoryHashTable,
+    private locker: Locker
   ) {}
 
   //! For now, only a drop from inventory or equipment set is allowed.
   @TrackNewRelicTransaction()
   public async performItemDrop(itemDropData: IItemDrop, character: ICharacter): Promise<boolean> {
-    const isDropValid = await this.isItemDropValid(itemDropData, character);
-    const source = itemDropData.source;
-    if (!isDropValid) {
-      return false;
-    }
-
-    const itemToBeDropped = await Item.findById(itemDropData.itemId);
-
-    if (!itemToBeDropped) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, item to be dropped wasn't found.");
-      return false;
-    }
-
-    const mapDrop = await this.tryDroppingToMap(itemDropData, itemToBeDropped as unknown as IItem, character);
-
-    if (!mapDrop) {
-      return false;
-    }
-
-    let isItemRemoved = false;
-
-    await clearCacheForKey(`${character._id}-inventory`);
-    await clearCacheForKey(`${character._id}-equipment`);
-
     try {
-      switch (source) {
-        case "equipment":
-          isItemRemoved = await this.removeItemFromEquipmentSet(itemToBeDropped as unknown as IItem, character);
+      const isDropValid = await this.isItemDropValid(itemDropData, character);
+      if (!isDropValid) {
+        return false;
+      }
 
-          if (!isItemRemoved) {
-            this.socketMessaging.sendErrorMessageToCharacter(character);
-            return false;
-          }
+      const isDropLocked = await this.locker.lock(`item-drop-${itemDropData.itemId}`);
+      if (!isDropLocked) {
+        return false;
+      }
 
+      const itemToBeDropped = await Item.findById(itemDropData.itemId);
+      if (!itemToBeDropped) {
+        this.sendErrorMessage(character, "Sorry, item to be dropped wasn't found.");
+        return false;
+      }
+
+      const mapDrop = await this.tryDroppingToMap(itemDropData, itemToBeDropped, character);
+      if (!mapDrop) {
+        return false;
+      }
+
+      const isItemRemoved = await this.removeItemFromSource(itemDropData, itemToBeDropped, character);
+      if (!isItemRemoved) {
+        this.sendErrorMessage(character);
+        return false;
+      }
+
+      await this.clearCharacterCache(character, itemDropData, itemToBeDropped);
+
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    } finally {
+      await this.locker.unlock(`item-drop-${itemDropData.itemId}`);
+    }
+  }
+
+  private async clearCharacterCache(
+    character: ICharacter,
+    itemDropData: IItemDrop,
+    itemToBeDropped: IItem
+  ): Promise<void> {
+    const promises = [
+      clearCacheForKey(`${character._id}-inventory`),
+      clearCacheForKey(`${character._id}-equipment`),
+      this.inMemoryHashTable.delete("equipment-slots", character._id),
+      this.inMemoryHashTable.delete("character-weapon", character._id),
+      this.inMemoryHashTable.delete("container-all-items", itemDropData.fromContainerId),
+      this.inMemoryHashTable.delete("inventory-weight", character._id),
+      this.inMemoryHashTable.delete("character-max-weights", character._id),
+    ];
+
+    if (itemToBeDropped.type === ItemType.CraftingResource) {
+      promises.push(this.inMemoryHashTable.delete("load-craftable-items", character._id));
+    }
+
+    await Promise.all(promises);
+
+    await this.characterWeight.updateCharacterWeight(character);
+  }
+
+  private async removeItemFromSource(
+    itemDropData: IItemDrop,
+    itemToBeDropped: IItem,
+    character: ICharacter
+  ): Promise<boolean> {
+    let isItemRemoved = false;
+    switch (itemDropData.source) {
+      case "equipment":
+        isItemRemoved = await this.removeItemFromEquipmentSet(itemToBeDropped, character);
+        if (isItemRemoved) {
           const equipmentSlots = await this.equipmentSlots.getEquipmentSlots(
             character._id,
-            character.equipment as unknown as string
+            character.equipment as string
           );
-
-          this.sendRefreshItemsEvent(
-            {
-              equipment: equipmentSlots,
-              openEquipmentSetOnUpdate: false,
-            },
-            character
-          );
-
-          break;
-        case "inventory":
-          isItemRemoved = await this.removeItemFromInventory(
-            itemToBeDropped as unknown as IItem,
-            character,
-            itemDropData.fromContainerId
-          );
-
-          if (!isItemRemoved) {
-            this.socketMessaging.sendErrorMessageToCharacter(character);
-            return false;
-          }
-
+          this.sendRefreshItemsEvent({ equipment: equipmentSlots, openEquipmentSetOnUpdate: false }, character);
+        }
+        break;
+      case "inventory":
+        isItemRemoved = await this.removeItemFromInventory(itemToBeDropped, character, itemDropData.fromContainerId);
+        if (isItemRemoved) {
           const inventoryContainer = (await ItemContainer.findById(
             itemDropData.fromContainerId
           )) as unknown as IItemContainer;
-
           const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {
             inventory: inventoryContainer,
             openEquipmentSetOnUpdate: false,
             openInventoryOnUpdate: false,
           };
-
           this.sendRefreshItemsEvent(payloadUpdate, character);
-
-          break;
-      }
-
-      await this.inMemoryHashTable.delete("character-weapon", character._id);
-
-      await this.inMemoryHashTable.delete("container-all-items", itemDropData.fromContainerId);
-
-      if (itemToBeDropped.type === ItemType.CraftingResource) {
-        await this.inMemoryHashTable.delete("load-craftable-items", character._id);
-      }
-
-      await this.inMemoryHashTable.delete("inventory-weight", character._id);
-      await this.inMemoryHashTable.delete("character-max-weights", character._id);
-
-      await this.characterWeight.updateCharacterWeight(character);
-
-      return true;
-    } catch (err) {
-      this.socketMessaging.sendErrorMessageToCharacter(character);
-
-      console.log(err);
-      return false;
+        }
+        break;
     }
+    return isItemRemoved;
+  }
+
+  private sendErrorMessage(character: ICharacter, message?: string): void {
+    this.socketMessaging.sendErrorMessageToCharacter(character, message);
   }
 
   private async tryDroppingToMap(itemDrop: IItemDrop, dropItem: IItem, character: ICharacter): Promise<boolean> {
     // if itemDrop toPosition has x and y, then drop item to that position in the map, if not, then drop to the character position
-
-    const targetX = itemDrop.toPosition?.x || itemDrop.x;
-    const targetY = itemDrop.toPosition?.y || itemDrop.y;
+    const targetPosition = this.getTargetPosition(itemDrop);
 
     // check if targetX and Y is under range
-
-    const isUnderRange = this.movementHelper.isUnderRange(character.x, character.y, targetX, targetY, 8);
-
-    if (!isUnderRange) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        "Sorry, you're trying to drop this item too far away."
-      );
+    if (!this.isDropPositionValid(character, targetPosition)) {
+      this.sendDropErrorMessage(character);
       return false;
     }
 
     // update x, y, scene and unset owner, using updateOne
+    await this.updateItemPosition(dropItem, targetPosition, character);
 
+    // Perform cleanup, status update, and ownership removal concurrently
+    await Promise.all([
+      this.cleanupDroppedItems(character),
+      this.updateItemStatus(dropItem),
+      this.removeItemOwnership(dropItem),
+    ]);
+
+    return true;
+  }
+
+  private getTargetPosition(itemDrop: IItemDrop): { x: number; y: number } {
+    return {
+      x: itemDrop.toPosition?.x || itemDrop.x,
+      y: itemDrop.toPosition?.y || itemDrop.y,
+    };
+  }
+
+  private isDropPositionValid(character: ICharacter, targetPosition: { x: number; y: number }): boolean {
+    return this.movementHelper.isUnderRange(character.x, character.y, targetPosition.x, targetPosition.y, 8);
+  }
+
+  private sendDropErrorMessage(character: ICharacter): void {
+    this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you're trying to drop this item too far away.");
+  }
+
+  private async updateItemPosition(
+    dropItem: IItem,
+    targetPosition: { x: number; y: number },
+    character: ICharacter
+  ): Promise<void> {
     await Item.updateOne(
       { _id: dropItem._id },
       {
         $set: {
-          x: targetX,
-          y: targetY,
+          x: targetPosition.x,
+          y: targetPosition.y,
           scene: character.scene,
           droppedBy: character._id,
           isInContainer: false,
@@ -176,14 +206,18 @@ export class ItemDrop {
         },
       }
     );
+  }
 
+  private async cleanupDroppedItems(character: ICharacter): Promise<void> {
     await this.itemCleanup.tryCharacterDroppedItemsCleanup(character);
+  }
 
+  private async updateItemStatus(dropItem: IItem): Promise<void> {
     await Item.updateOne({ _id: dropItem._id }, { isEquipped: false });
+  }
 
+  private async removeItemOwnership(dropItem: IItem): Promise<void> {
     await this.itemOwnership.removeItemOwnership(dropItem);
-
-    return true;
   }
 
   private async removeItemFromEquipmentSet(item: IItem, character: ICharacter): Promise<boolean> {

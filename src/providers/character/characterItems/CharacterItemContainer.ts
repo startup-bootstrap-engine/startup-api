@@ -19,7 +19,6 @@ interface IAddItemToContainerOptions {
   shouldAddOwnership?: boolean;
   isInventoryItem?: boolean;
   dropOnMapIfFull?: boolean;
-  shouldAddAsCarriedItem?: boolean;
 }
 
 @provide(CharacterItemContainer)
