@@ -12,14 +12,14 @@ import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemCon
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { ItemCraftable } from "@providers/item/ItemCraftable";
 import { FromGridX, FromGridY, IRefillableItem, IUseWithTile, MapLayers } from "@rpg-engine/shared";
-import { UseWithTile } from "../abstractions/UseWithTile";
+import { UseWithTileQueue } from "../abstractions/UseWithTileQueue";
 describe("UseWithTile.ts", () => {
   let testItem: IItem,
     testRefillItem: IItem,
     testRefillItemBlueprint: IRefillableItem,
     testCharacter: ICharacter,
     testCharacterEquipment: IEquipment,
-    useWithTile: UseWithTile,
+    useWithTile: UseWithTileQueue,
     useWithTileData: IUseWithTile,
     useWithTileDataRefill: IUseWithTile,
     skillIncrease: SkillIncrease,
@@ -31,7 +31,7 @@ describe("UseWithTile.ts", () => {
     characterSkills: ISkill;
 
   beforeAll(async () => {
-    useWithTile = container.get<UseWithTile>(UseWithTile);
+    useWithTile = container.get<UseWithTileQueue>(UseWithTileQueue);
     skillIncrease = container.get<SkillIncrease>(SkillIncrease);
     itemCraftable = container.get<ItemCraftable>(ItemCraftable);
     inMemoryHashTable = container.get<InMemoryHashTable>(InMemoryHashTable);

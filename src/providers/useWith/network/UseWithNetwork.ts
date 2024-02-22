@@ -3,12 +3,12 @@ import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { provide } from "inversify-binding-decorators";
 import { UseWithEntity } from "../abstractions/UseWithEntity";
 import { UseWithSeed } from "../abstractions/UseWithSeed";
-import { UseWithTile } from "../abstractions/UseWithTile";
+import { UseWithTileQueue } from "../abstractions/UseWithTileQueue";
 
 @provide(UseWithNetwork)
 export class UseWithNetwork {
   constructor(
-    private useWithTile: UseWithTile,
+    private useWithTile: UseWithTileQueue,
     private useWithEntity: UseWithEntity,
     private useWithSeed: UseWithSeed
   ) {}
