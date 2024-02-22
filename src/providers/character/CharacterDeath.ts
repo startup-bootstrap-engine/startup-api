@@ -123,8 +123,11 @@ export class CharacterDeath {
     if (killer) {
       await this.clearAttackerTarget(killer);
       if (killer.type === EntityType.Character) {
-        await this.sendDiscordPVPMessage(killer as ICharacter, character);
-        await this.handleCharacterKiller(killer as ICharacter, character);
+        const killerCharacter = killer as ICharacter;
+        await Promise.all([
+          this.sendDiscordPVPMessage(killerCharacter, character),
+          this.handleCharacterKiller(killerCharacter, character),
+        ]);
       }
     }
   }
@@ -138,9 +141,11 @@ export class CharacterDeath {
       y: character.y,
       createdAt: new Date(),
     });
-    await characterDeathLog.save();
+
     if (!characterDeathLog.isJustify) {
-      await this.characterSkull.updateSkullAfterKill(killer._id.toString());
+      await Promise.all([characterDeathLog.save(), this.characterSkull.updateSkullAfterKill(killer._id.toString())]);
+    } else {
+      await characterDeathLog.save();
     }
   }
 
@@ -340,26 +345,25 @@ export class CharacterDeath {
       return;
     }
 
-    const equipment = (await Equipment.findById(character.equipment).cacheQuery({
+    const equipment = await Equipment.findById(character.equipment).cacheQuery({
       cacheKey: `${character._id}-equipment`,
-    })) as IEquipment;
-
-    equipment.inventory = (await this.characterInventory.getInventory(character)) as unknown as IItem;
-
-    if (!equipment.inventory) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you don't have an inventory");
-      return;
-    }
+    });
 
     if (!equipment) {
       throw new Error(`No equipment found for id ${equipmentId}`);
     }
 
-    // get item container associated with characterBody
+    const inventory = await this.characterInventory.getInventory(character);
+
+    if (!inventory) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you don't have an inventory");
+      return;
+    }
+
     const bodyContainer = (await ItemContainer.findById(characterBody.itemContainer).lean({
       virtuals: true,
       defaults: true,
-    })) as unknown as IItemContainer;
+    })) as IItemContainer;
 
     if (!bodyContainer) {
       throw new Error(`Error fetching itemContainer for Item with key ${characterBody.key}`);
@@ -369,13 +373,10 @@ export class CharacterDeath {
     await this.dropEquippedItemOnBody(character, bodyContainer, equipment, forceDropAll);
 
     // drop backpack
-    const inventory = equipment.inventory as unknown as IItem;
-
     if (inventory) {
       await this.dropInventory(character, bodyContainer, inventory, forceDropAll);
+      await this.clearAllInventoryItems(inventory._id, character);
     }
-
-    await this.clearAllInventoryItems(inventory as unknown as string, character);
   }
 
   private async clearAllInventoryItems(inventoryId: string, character: ICharacter): Promise<void> {
@@ -470,14 +471,14 @@ export class CharacterDeath {
       }
     }
 
-    for (const slot of DROPPABLE_EQUIPMENT) {
-      try {
-        const itemId = equipment[slot];
+    const dropItemPromises = DROPPABLE_EQUIPMENT.map(async (slot) => {
+      const itemId = equipment[slot];
 
-        if (!itemId) continue;
+      if (!itemId) return;
 
-        const n = _.random(0, 100) * multi;
-        if (forceDropAll || n <= DROP_EQUIPMENT_CHANCE) {
+      const n = _.random(0, 100) * multi;
+      if (forceDropAll || n <= DROP_EQUIPMENT_CHANCE) {
+        try {
           const item = await this.clearItem(character, itemId);
 
           const removeEquipmentFromSlot = await equipmentSlots.removeItemFromSlot(
@@ -497,13 +498,17 @@ export class CharacterDeath {
 
           if (!isDeadBodyLootable) {
             isDeadBodyLootable = true;
-            await Item.updateOne({ _id: bodyContainer.parentItem }, { $set: { isDeadBodyLootable: true } });
           }
+        } catch (error) {
+          console.error(error);
         }
-      } catch (error) {
-        console.error(error);
-        continue;
       }
+    });
+
+    await Promise.all(dropItemPromises);
+
+    if (isDeadBodyLootable) {
+      await Item.updateOne({ _id: bodyContainer.parentItem }, { $set: { isDeadBodyLootable: true } });
     }
   }
 
