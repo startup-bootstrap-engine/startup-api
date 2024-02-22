@@ -43,7 +43,7 @@ import {
   UISocketEvents,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import _, { random } from "lodash";
+import _ from "lodash";
 import { Types } from "mongoose";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterDeathCalculator } from "./CharacterDeathCalculator";
@@ -91,103 +91,89 @@ export class CharacterDeath {
   @TrackNewRelicTransaction()
   public async handleCharacterDeath(killer: INPC | ICharacter | null, character: ICharacter): Promise<void> {
     try {
-      // try to avoid concurrency issues. Dont remove this for now, because in prod sometimes this method is executed twice.
-      await this.time.waitForMilliseconds(random(1, 50));
-
       const isLocked = await this.locker.hasLock(`character-death-${character.id}`);
-
-      if (isLocked) {
-        return;
-      }
+      if (isLocked) return;
 
       await this.locker.lock(`character-death-${character.id}`, 3);
-
-      await this.sendBattleDeathEvents(character);
-
-      if (killer) {
-        await this.clearAttackerTarget(killer);
-      }
-
-      if (killer?.type === EntityType.Character) {
-        await this.sendDiscordPVPMessage(killer as ICharacter, character);
-      }
-
       const characterBody = await this.generateCharacterBody(character);
 
-      if (killer?.type === EntityType.Character) {
-        const characterKiller = killer as ICharacter;
-
-        // insert to kill log table
-        const characterDeathLog = new CharacterPvPKillLog({
-          killer: characterKiller._id.toString(),
-          target: character._id.toString(),
-          isJustify: !(await this.characterSkull.checkForUnjustifiedAttack(characterKiller, character)),
-          x: character.x,
-          y: character.y,
-          createdAt: new Date(),
-        });
-
-        await characterDeathLog.save();
-
-        if (!characterDeathLog.isJustify) {
-          await this.characterSkull.updateSkullAfterKill(killer._id.toString());
-        }
-        if (characterKiller.mode === Modes.SoftMode && !character.hasSkull) {
-          return;
-        }
-      }
-
-      if (!character.mode) {
-        await this.applyPenalties(character, characterBody);
-        return;
-      }
-
-      switch (character.mode) {
-        case Modes.HardcoreMode:
-          await this.applyPenalties(character, characterBody);
-          break;
-        case Modes.SoftMode:
-          // If character has Skull => auto Hardcore mode/Permadeath penalty
-          if (character.hasSkull && character.skullType) {
-            await this.applyPenalties(character, characterBody);
-          }
-          break;
-        case Modes.PermadeathMode:
-          // penalties forcing all equip/inventory loss
-          await this.softDeleteCharacterOnPermaDeathMode(character);
-          await this.applyPenalties(character, characterBody, true);
-          break;
-        default:
-          await this.applyPenalties(character, characterBody);
-          break;
-      }
-
-      if (killer?.type === EntityType.NPC) {
-        const killerNPC = killer as INPC;
-
-        switch (killerNPC.hasCustomDeathPenalty) {
-          case NPCCustomDeathPenalties.Hardcore:
-            await this.applyPenalties(character, characterBody);
-            break;
-          case NPCCustomDeathPenalties.FullLootDrop:
-            await this.applyPenalties(character, characterBody, true);
-            break;
-        }
-      }
+      // Run these tasks concurrently as they don't depend on each other
+      await Promise.all([
+        this.sendBattleDeathEvents(character),
+        this.handleKiller(killer, character),
+        this.handleCharacterMode(character, characterBody, killer),
+        this.characterWeight.updateCharacterWeight(character),
+        this.sendRefreshEquipmentEvent(character),
+      ]);
 
       this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Characters, "Death", 1);
-
-      await this.characterWeight.updateCharacterWeight(character);
-
-      await this.sendRefreshEquipmentEvent(character);
     } catch (err) {
       console.error(err);
     } finally {
-      await entityEffectUse.clearAllEntityEffects(character); // make sure to clear all entity effects before respawn
+      // Run these tasks concurrently as they don't depend on each other
+      await Promise.all([
+        entityEffectUse.clearAllEntityEffects(character), // make sure to clear all entity effects before respawn
+        this.clearCache(character),
+        this.respawnCharacter(character),
+      ]);
+    }
+  }
 
-      await this.clearCache(character);
+  private async handleKiller(killer: INPC | ICharacter | null, character: ICharacter): Promise<void> {
+    if (killer) {
+      await this.clearAttackerTarget(killer);
+      if (killer.type === EntityType.Character) {
+        await this.sendDiscordPVPMessage(killer as ICharacter, character);
+        await this.handleCharacterKiller(killer as ICharacter, character);
+      }
+    }
+  }
 
-      await this.respawnCharacter(character);
+  private async handleCharacterKiller(killer: ICharacter, character: ICharacter): Promise<void> {
+    const characterDeathLog = new CharacterPvPKillLog({
+      killer: killer._id.toString(),
+      target: character._id.toString(),
+      isJustify: !(await this.characterSkull.checkForUnjustifiedAttack(killer, character)),
+      x: character.x,
+      y: character.y,
+      createdAt: new Date(),
+    });
+    await characterDeathLog.save();
+    if (!characterDeathLog.isJustify) {
+      await this.characterSkull.updateSkullAfterKill(killer._id.toString());
+    }
+  }
+
+  private async handleCharacterMode(
+    character: ICharacter,
+    characterBody: IItem,
+    killer: INPC | ICharacter | null
+  ): Promise<void> {
+    const isKillerNPC = killer?.type === EntityType.NPC;
+    const isCharacterInSoftModeWithoutSkull = character.mode === Modes.SoftMode && !character.hasSkull;
+    const isCharacterInHardcoreMode = character.mode === Modes.HardcoreMode;
+    const isCharacterInPermadeathMode = character.mode === Modes.PermadeathMode;
+    const isCharacterInSoftModeWithSkull =
+      character.mode === Modes.SoftMode && character.hasSkull && character.skullType;
+
+    let shouldForceDropAll = false;
+
+    if (isCharacterInPermadeathMode) {
+      await this.softDeleteCharacterOnPermaDeathMode(character);
+      shouldForceDropAll = true;
+    } else if (isCharacterInHardcoreMode || isCharacterInSoftModeWithSkull) {
+      shouldForceDropAll = false;
+    }
+
+    if (isKillerNPC && !shouldForceDropAll) {
+      const killerNPC = killer as INPC;
+      shouldForceDropAll =
+        killerNPC.hasCustomDeathPenalty === NPCCustomDeathPenalties.Hardcore ||
+        killerNPC.hasCustomDeathPenalty === NPCCustomDeathPenalties.FullLootDrop;
+    }
+
+    if (!isCharacterInSoftModeWithoutSkull) {
+      await this.applyPenalties(character, characterBody, shouldForceDropAll);
     }
   }
 
@@ -294,16 +280,18 @@ export class CharacterDeath {
   }
 
   private async clearCache(character: ICharacter): Promise<void> {
-    await this.inMemoryHashTable.delete("character-weapon", character._id);
-    await this.inMemoryHashTable.delete("character-max-weights", character._id);
-    await this.inMemoryHashTable.delete("inventory-weight", character._id);
-    await this.inMemoryHashTable.delete("equipment-weight", character._id);
-    await clearCacheForKey(`${character._id}-equipment`);
-    await clearCacheForKey(`${character._id}-inventory`);
-    await this.inMemoryHashTable.delete("equipment-slots", character._id);
-    await this.inMemoryHashTable.deleteAll(`${character._id}-skill-level-with-buff`);
-    await clearCacheForKey(`characterBuffs_${character._id}`);
-    await clearCacheForKey(`${character._id}-skills`);
+    await Promise.all([
+      this.inMemoryHashTable.delete("character-weapon", character._id),
+      this.inMemoryHashTable.delete("character-max-weights", character._id),
+      this.inMemoryHashTable.delete("inventory-weight", character._id),
+      this.inMemoryHashTable.delete("equipment-weight", character._id),
+      clearCacheForKey(`${character._id}-equipment`),
+      clearCacheForKey(`${character._id}-inventory`),
+      this.inMemoryHashTable.delete("equipment-slots", character._id),
+      this.inMemoryHashTable.deleteAll(`${character._id}-skill-level-with-buff`),
+      clearCacheForKey(`characterBuffs_${character._id}`),
+      clearCacheForKey(`${character._id}-skills`),
+    ]);
   }
 
   private async sendRefreshEquipmentEvent(character: ICharacter): Promise<void> {
