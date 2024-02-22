@@ -35,5 +35,5 @@ export const itemTwilightEmberNecklace: IEquippableAccessoryTier23Blueprint = {
       },
     },
   },
-  equippedBuffDescription: "Increases max health by 10% respectively",
+  equippedBuffDescription: "Increases max health by 10%",
 };

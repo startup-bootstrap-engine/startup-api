@@ -4,9 +4,9 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "blueprintKey": "gold-coin",
-  "quantity": 20000,
-  "characterId": "65cdf6c898f915005037e5ba" 
+  "blueprintKey": "backpack",
+  "quantity": 1,
+  "characterId": "65d6b25e0c67c700b2a88442" 
 }
 
 ###

@@ -27,14 +27,14 @@ export class ItemPickupUpdater {
   ) {}
 
   @TrackNewRelicTransaction()
-  public async finalizePickup(itemToBePicked: IItem, character: ICharacter): Promise<void> {
-    await clearCacheForKey(`${character._id}-inventory`);
+  public async finalizePickup(item: IItem, character: ICharacter): Promise<void> {
+    await Promise.all([
+      clearCacheForKey(`${character._id}-inventory`),
+      this.inMemoryHashTable.delete("container-all-items", item.itemContainer as string),
+      this.inMemoryHashTable.delete("inventory-weight", character._id),
+      this.inMemoryHashTable.delete("character-max-weights", character._id),
+    ]);
 
-    await this.inMemoryHashTable.delete("inventory-weight", character._id);
-
-    await this.inMemoryHashTable.delete("character-max-weights", character._id);
-
-    // whenever a new item is added, we need to update the character weight
     await this.characterWeight.updateCharacterWeight(character);
   }
 
