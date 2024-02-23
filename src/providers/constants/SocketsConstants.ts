@@ -26,5 +26,13 @@ export const SOCKET_IO_CONFIG: Partial<ServerOptions> = {
   // Adjusted configuration to balance performance and resource usage
   maxHttpBufferSize: 1e7, // Allows for 10MB messages, adjust as needed
   pingTimeout: 1000 * 60 * 5, // 5 minutes timeout
-  pingInterval: 1000 * 25, // 25 seconds interval
+  pingInterval: 5000, // 5 seconds
 };
+
+/* Ping Interval
+
+General Recommendation: A pingInterval of around 25-30 seconds is a common default in many applications, providing a balance between keeping the connection alive and minimizing unnecessary traffic. However, for more dynamic environments like MMORPGs, this might be too high.
+
+For Responsive Gameplay: Considering the need for more responsive gameplay, a pingInterval of 1-5 seconds might be more appropriate. This range is aggressive but can help ensure that connections are alive and responsive, which is critical for fast-paced game actions.
+
+*/
