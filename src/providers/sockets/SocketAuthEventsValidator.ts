@@ -91,7 +91,7 @@ export class SocketAuthEventsValidator {
 
         if (isDiffLowerThanThreshold) {
           this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId!, UISocketEvents.ShowMessage, {
-            message: "Sorry, you're doing it too fast! Stop, or you'll be kicked out!",
+            message: "Sorry, you're doing it too fast! Please slow down!",
             type: "error",
           });
           console.log(`⚠️ Throttle violation for ${event} on character ${character._id}`);
