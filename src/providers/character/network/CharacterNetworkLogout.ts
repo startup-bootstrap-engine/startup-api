@@ -69,9 +69,8 @@ export class CharacterNetworkLogout {
         data
       );
     }
-    console.log(`🚪: Character id ${data.id} has disconnected`);
-
-    this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Server, "Disconnect", 1);
+    console.log(`🚪: Character id ${data.id} (${character.name}) has disconnected`);
+    this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Server, "SocketDisconnect", 1);
   }
 
   private async updateTextureKeysAndStatus(data: ICharacterLogout, character: ICharacter): Promise<void> {
