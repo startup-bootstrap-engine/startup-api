@@ -13,7 +13,7 @@ import {
 } from "@providers/constants/ServerConstants";
 import { ExhaustValidation } from "@providers/exhaust/ExhaustValidation";
 import { NewRelicTransactionCategory } from "@providers/types/NewRelicTypes";
-import { CharacterSocketEvents, IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
+import { IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
 import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 import { SocketAuthEventsViolation } from "./SocketAuthEventsViolation";
@@ -95,29 +95,6 @@ export class SocketAuthEventsValidator {
             type: "error",
           });
           console.log(`⚠️ Throttle violation for ${event} on character ${character._id}`);
-
-          await this.socketAuthEventsViolation.addViolation(character);
-
-          const isViolationHigherThanThreshold = await this.socketAuthEventsViolation.isViolationHigherThanThreshold(
-            character
-          );
-
-          if (isViolationHigherThanThreshold) {
-            console.log(
-              `🚫 Throttle violation threshold reached for ${event} on character ${character._id} - kicking out!`
-            );
-
-            this.socketMessaging.sendEventToUser(character.channelId!, CharacterSocketEvents.CharacterForceDisconnect, {
-              reason:
-                "You are disconnected for spamming the server with in-game actions. You'll get banned if you continue.",
-            });
-
-            await this.socketAuthEventsViolation.resetCharacterViolations(character);
-
-            await this.characterBan.addPenalty(character);
-
-            return true;
-          }
 
           return true;
         }
