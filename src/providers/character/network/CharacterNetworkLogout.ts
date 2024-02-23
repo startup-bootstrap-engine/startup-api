@@ -1,5 +1,6 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ICharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
+import { NewRelic } from "@providers/analytics/NewRelic";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import PartyManagement from "@providers/party/PartyManagement";
@@ -11,6 +12,7 @@ import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { SpellLearn } from "@providers/spells/SpellLearn";
 import { NamespaceRedisControl } from "@providers/spells/data/types/SpellsBlueprintTypes";
+import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { CharacterSocketEvents, ICharacterLogout, SpellsBlueprint } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
@@ -30,7 +32,8 @@ export class CharacterNetworkLogout {
     private specialEffect: SpecialEffect,
     private socketSessionControl: SocketSessionControl,
     private skillStatsIncrease: SkillStatsIncrease,
-    private partyManagement: PartyManagement
+    private partyManagement: PartyManagement,
+    private newRelic: NewRelic
   ) {}
 
   public onCharacterLogout(channel: SocketChannel): void {
@@ -67,6 +70,8 @@ export class CharacterNetworkLogout {
       );
     }
     console.log(`🚪: Character id ${data.id} has disconnected`);
+
+    this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Server, "Disconnect", 1);
   }
 
   private async updateTextureKeysAndStatus(data: ICharacterLogout, character: ICharacter): Promise<void> {
