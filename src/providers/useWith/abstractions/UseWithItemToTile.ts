@@ -7,11 +7,13 @@ import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
 import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { RESOURCE_GATHERING_SKIP_TILES_IF_DESCRIPTION } from "@providers/constants/ResourceGatheringConstants";
 import {
   RESOURCE_LEVEL_REQUIREMENTS,
   RESOURCE_LEVEL_REQUIREMENTS_RATIO,
 } from "@providers/constants/ResourceRequirementConstants";
 import { itemsBlueprintIndex } from "@providers/item/data/index";
+import { MapTiles } from "@providers/map/MapTiles";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
@@ -21,6 +23,9 @@ import {
   ISkill,
   IUseWithTileValidation,
   ItemSocketEvents,
+  MAP_LAYERS_TO_ID,
+  ToGridX,
+  ToGridY,
   UseWithSocketEvents,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -58,7 +63,8 @@ export class UseWithItemToTile {
     private characterItemContainer: CharacterItemContainer,
     private characterWeight: CharacterWeight,
     private characterInventory: CharacterInventory,
-    private useWithTileExhaustionControl: UseWithTileExhaustionControl
+    private useWithTileExhaustionControl: UseWithTileExhaustionControl,
+    private mapTiles: MapTiles
   ) {}
 
   public async execute(
@@ -199,7 +205,21 @@ export class UseWithItemToTile {
       this.sendRandomMessageToCharacter(character, successMessages);
     }
 
-    await this.useWithTileExhaustionControl.incrementResourceDepletion(targetTile);
+    const tileDescription = this.mapTiles.getPropertyFromLayer(
+      targetTile.map,
+      ToGridX(targetTile.x),
+      ToGridY(targetTile.y),
+      MAP_LAYERS_TO_ID[targetTile.layer],
+      "description"
+    );
+
+    const shouldSkipTileExhaustionIncrement = RESOURCE_GATHERING_SKIP_TILES_IF_DESCRIPTION.some((description) =>
+      tileDescription?.includes(description)
+    );
+
+    if (!shouldSkipTileExhaustionIncrement) {
+      await this.useWithTileExhaustionControl.incrementResourceDepletion(targetTile);
+    }
 
     await this.refreshInventory(character);
   }

@@ -10,6 +10,7 @@ import { Seeder } from "@providers/seeds/Seeder";
 
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { HitTarget } from "@providers/battle/HitTarget";
+import { CharacterActionsTracker } from "@providers/character/CharacterActionsTracker";
 import { CharacterConsumptionControl } from "@providers/character/CharacterConsumptionControl";
 import { CharacterMonitorCallbackTracker } from "@providers/character/CharacterMonitorInterval/CharacterMonitorCallbackTracker";
 import { CharacterNetworkUpdateQueue } from "@providers/character/network/CharacterNetworkUpdate/CharacterNetworkUpdateQueue";
@@ -62,7 +63,8 @@ export class ServerBootstrap {
     private patreonAPI: PatreonAPI,
     private useWithTileQueue: UseWithTileQueue,
     private chatNetworkGlobalMessaging: ChatNetworkGlobalMessaging,
-    private spellNetworkCast: SpellNetworkCast
+    private spellNetworkCast: SpellNetworkCast,
+    private characterActionsTracker: CharacterActionsTracker
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -140,6 +142,8 @@ export class ServerBootstrap {
     await this.inMemoryHashTable.deleteAll("use-item-to-tile");
     await this.entityEffectDuration.clearAll();
     await this.characterMonitorCallbackTracker.clearAll();
+
+    await this.characterActionsTracker.clearAllCharacterActions();
 
     // Firebase-admin setup, that push notification requires.
     PushNotificationHelper.initialize();
