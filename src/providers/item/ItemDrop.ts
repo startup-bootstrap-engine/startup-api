@@ -91,11 +91,9 @@ export class ItemDrop {
     itemToBeDropped: IItem
   ): Promise<void> {
     const promises = [
-      clearCacheForKey(`${character._id}-inventory`),
       clearCacheForKey(`${character._id}-equipment`),
       this.inMemoryHashTable.delete("equipment-slots", character._id),
       this.inMemoryHashTable.delete("character-weapon", character._id),
-      this.inMemoryHashTable.delete("container-all-items", itemDropData.fromContainerId),
       this.inMemoryHashTable.delete("inventory-weight", character._id),
       this.inMemoryHashTable.delete("character-max-weights", character._id),
     ];
@@ -114,6 +112,13 @@ export class ItemDrop {
     itemToBeDropped: IItem,
     character: ICharacter
   ): Promise<boolean> {
+    const cachePromises = [
+      clearCacheForKey(`${character._id}-inventory`),
+      this.inMemoryHashTable.delete("container-all-items", itemDropData.fromContainerId),
+    ];
+
+    await Promise.all(cachePromises);
+
     let isItemRemoved = false;
     switch (itemDropData.source) {
       case "equipment":
