@@ -14,7 +14,7 @@ services:
         condition: on-failure
       placement:
         constraints:
-          - node.role == api #! Only runs in API dedicated nodes to preserve the DB on the manager node
+          - node.role == worker #! Only runs in worker node to preserve the DB on the manager node
         preferences:
           - spread: node.id
         max_replicas_per_node: 1
@@ -158,6 +158,22 @@ services:
       interval: 30s
       timeout: 15s
       retries: 3
+
+  newrelic-infra:
+    image: newrelic/infrastructure:latest
+    environment:
+      NRIA_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
+      NRIA_DISPLAY_NAME: "Definya API Docker"
+    volumes:
+      - "/:/host:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      mode: global
+      resources:
+        limits:
+          memory: 128M
+    cap_add:
+      - SYS_PTRACE
 
 networks:
   rpg-network:
