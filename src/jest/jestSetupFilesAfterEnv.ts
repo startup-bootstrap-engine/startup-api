@@ -67,6 +67,14 @@ jest.mock("@providers/constants/EquipmentConstants", () => ({
   IS_GEAR_CLASS_RESTRICTION_ACTIVE: true,
 }));
 
+jest.mock("@providers/constants/AntiMacroConstants", () => ({
+  ANTI_MACRO_PROBABILITY_TRIGGER: 5,
+  ANTI_MACRO_IDLE_THRESHOLD: 1000,
+  CHARACTER_MAX_ACTIONS_STORAGE_THRESHOLD: 2,
+  ANTI_MACRO_SKIP_EVENTS_FROM_SIMILARITY_CHECK: [],
+  ANTI_MACRO_SIMILARITY_THRESHOLD: 0.5,
+}));
+
 jest.mock("@providers/constants/PremiumAccountConstants", () => ({
   PREMIUM_ACCOUNT_METADATA: {
     free: undefined,
