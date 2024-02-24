@@ -50,13 +50,17 @@ export class ChatNetworkGlobalMessaging {
             return;
           }
 
+          let spellCastPromise;
           if (this.spellCast.isSpellCasting(data.message)) {
-            const spellCharacter = (await Character.findById(character._id)) as ICharacter;
+            const spellCharacter = (await Character.findById(character._id).lean()) as ICharacter;
 
-            await this.spellCast.castSpell({ magicWords: data.message }, spellCharacter);
+            spellCastPromise = this.spellCast.castSpell({ magicWords: data.message }, spellCharacter);
           }
 
-          const nearbyCharacters = await this.characterView.getCharactersInView(character as ICharacter);
+          const charactersInViewPromise = this.characterView.getCharactersInView(character as ICharacter);
+
+          // eslint-disable-next-line no-unused-vars
+          const [_, nearbyCharacters] = await Promise.all([spellCastPromise, charactersInViewPromise]);
 
           if (data.message.length >= 200) {
             this.socketMessaging.sendErrorMessageToCharacter(
