@@ -92,7 +92,7 @@ export class SocketAuthEventsValidator {
             message: "Sorry, you're doing it too fast! Please slow down!",
             type: "error",
           });
-          console.log(`⚠️ Throttle violation for ${event} on character ${character._id}`);
+          console.log(`⚠️ Throttle violation for ${event} on character ${character._id} (${character.name})`);
 
           return true;
         }
