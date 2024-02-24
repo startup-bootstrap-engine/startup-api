@@ -17,12 +17,6 @@ export class MacroCharacterBotDetector {
       this.areLastActionsTooSimilar(character),
       this.hasMultiClient(character),
     ]);
-    console.log(
-      `
-      isIdle: ${isIdle}
-      areActionsSimilar: ${areActionsSimilar}
-      hasMultiClient: ${hasMultiClient}`
-    );
 
     return isIdle || areActionsSimilar || hasMultiClient;
   }
@@ -42,7 +36,6 @@ export class MacroCharacterBotDetector {
   private async areLastActionsTooSimilar(character: ICharacter): Promise<boolean> {
     const lastActions = await this.characterActionsTracker.getCharacterActions(character._id);
 
-    console.log(lastActions);
     let actionCount = 0;
     const uniqueActions = new Set();
 
@@ -58,8 +51,6 @@ export class MacroCharacterBotDetector {
     }
 
     const similarityRatio = uniqueActions.size / actionCount;
-
-    console.log("similarityRatio", similarityRatio, "ANTI_MACRO_SIMILARITY_THRESHOLD", ANTI_MACRO_SIMILARITY_THRESHOLD);
 
     return similarityRatio <= ANTI_MACRO_SIMILARITY_THRESHOLD;
   }

@@ -107,7 +107,9 @@ export class MacroCaptchaCrons {
 
         const isPotentialMacroOrBotUser = await this.macroCharacterBotDetector.isPotentialBotUser(character);
 
-        console.log(`⚠️ Character ${character.name} is potential bot user: ${isPotentialMacroOrBotUser}`);
+        if (isPotentialMacroOrBotUser) {
+          console.log(`⚠️ Character ${character.name} is potential bot user: ${isPotentialMacroOrBotUser}`);
+        }
 
         if (isPotentialMacroOrBotUser) {
           const n = _.random(1, 100);
