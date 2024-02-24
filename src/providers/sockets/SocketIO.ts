@@ -5,7 +5,6 @@ import { NewRelic } from "@providers/analytics/NewRelic";
 import { appEnv } from "@providers/config/env";
 import { SOCKET_IO_CONFIG } from "@providers/constants/SocketsConstants";
 import { SocketIOAuthMiddleware } from "@providers/middlewares/SocketIOAuthMiddleware";
-import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { EnvType, ISocket } from "@rpg-engine/shared";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { provide } from "inversify-binding-decorators";
@@ -37,15 +36,6 @@ export class SocketIO implements ISocket {
         const subClient = pubClient.duplicate();
 
         this.socket.adapter(createAdapter(pubClient, subClient));
-
-        this.socket.on("error", (error) => {
-          console.error("🔴 SocketIO Error:", error);
-          this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Server, "SocketError", 1);
-        });
-
-        this.socket.on("disconnect", (reason) => {
-          console.error("🔴 SocketIO Disconnected:", reason);
-        });
 
         await Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
           this.socket.use(SocketIOAuthMiddleware);
