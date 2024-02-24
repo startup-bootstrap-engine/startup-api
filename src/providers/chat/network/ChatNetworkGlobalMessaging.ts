@@ -118,49 +118,35 @@ export class ChatNetworkGlobalMessaging {
     );
 
     const chatLogsInView = await ChatLog.find({
-      $and: [
-        {
-          x: {
-            $gte: socketTransmissionZone.x,
-            $lte: socketTransmissionZone.width,
-          },
-        },
-        {
-          y: {
-            $gte: socketTransmissionZone.y,
-            $lte: socketTransmissionZone.height,
-          },
-        },
-        {
-          scene: character.scene,
-        },
-      ],
+      x: { $gte: socketTransmissionZone.x, $lte: socketTransmissionZone.width },
+      y: { $gte: socketTransmissionZone.y, $lte: socketTransmissionZone.height },
+      scene: character.scene,
     })
       .sort({ createdAt: -1 })
-      .populate("emitter", "name")
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
-    chatLogsInView.reverse();
+    const emitterIds = chatLogsInView.map((chatLog) => chatLog.emitter);
+    const emitters = await Character.find({ _id: { $in: emitterIds } }, "name").lean();
 
-    if (!chatLogsInView.length) {
-      return {
-        messages: [],
-      };
-    }
+    const emitterNameById = emitters.reduce((map, emitter) => {
+      map[emitter._id.toString()] = emitter.name;
+      return map;
+    }, {});
 
-    const chatLogs = chatLogsInView.map((chatLog) => {
-      const emitter = chatLog.emitter as unknown as ICharacter;
-
-      return {
-        _id: chatLog._id,
+    const chatLogs = chatLogsInView
+      .map((chatLog) => ({
+        _id: chatLog._id.toString(),
         message: chatLog.message,
         emitter: {
-          _id: emitter._id as string,
-          name: emitter.name,
+          // @ts-ignore
+          _id: chatLog.emitter.toString(),
+          // @ts-ignore
+          name: emitterNameById[chatLog.emitter.toString()],
         },
         type: chatLog.type as ChatMessageType,
-      };
-    });
+      }))
+      .reverse();
 
     return {
       messages: chatLogs,
