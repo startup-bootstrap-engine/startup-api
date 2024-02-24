@@ -246,50 +246,51 @@ export class UseWithItemToTile {
   }
 
   private async addRewardToInventory(character: ICharacter, rewards: IUseWithItemToTileReward[]): Promise<boolean> {
-    let atLeastOneRewardAdded = false;
+    const inventory = await this.characterInventory.getInventory(character);
+    if (!inventory?.itemContainer) {
+      console.error("Inventory container not found for character");
+      return false;
+    }
+    const inventoryContainerId = inventory.itemContainer as string;
 
     for (const reward of rewards) {
-      let addReward = false;
-
-      if (typeof reward.chance === "function") {
-        addReward = await reward.chance();
-      } else {
-        const n = _.random(0, 100);
-        addReward = n <= reward.chance;
+      if (!(await this.shouldAddReward(reward))) {
+        continue; // Skip to the next reward if the current one should not be added
       }
 
-      if (addReward) {
-        const itemBlueprint = itemsBlueprintIndex[reward.key];
+      const itemBlueprint = itemsBlueprintIndex[reward.key];
+      if (!(await this.hasMinimumRequireLevelForReward(character, reward, itemBlueprint.name))) {
+        continue; // Skip to the next reward if the character does not meet the level requirement
+      }
 
-        const hasMinimumRequireLevelForReward = await this.hasMinimumRequireLevelForReward(
-          character,
-          reward,
-          itemBlueprint.name
-        );
-
-        if (!hasMinimumRequireLevelForReward) {
-          return false;
-        }
-
-        const item = new Item({
-          ...itemBlueprint,
-          stackQty: isArray(reward.qty) ? _.random(reward.qty[0], reward.qty[1]) : reward.qty,
-        });
-        await item.save();
-
-        const inventory = await this.characterInventory.getInventory(character);
-        const inventoryContainerId = inventory?.itemContainer as unknown as string;
-
-        // add it to the character's inventory
-        atLeastOneRewardAdded = await this.characterItemContainer.addItemToContainer(
-          item,
-          character,
-          inventoryContainerId
-        );
+      const qty = isArray(reward.qty) ? _.random(reward.qty[0], reward.qty[1]) : reward.qty;
+      const added = await this.tryAddItemToInventory(character, itemBlueprint, qty, inventoryContainerId);
+      if (added) {
+        return true; // Return immediately after successfully adding at least one reward
       }
     }
 
-    return atLeastOneRewardAdded;
+    return false; // Return false if no rewards were added
+  }
+
+  private async shouldAddReward(reward: IUseWithItemToTileReward): Promise<boolean> {
+    if (typeof reward.chance === "function") {
+      return await reward.chance();
+    }
+    const randomNumber = _.random(0, 100);
+    return randomNumber <= reward.chance;
+  }
+
+  private async tryAddItemToInventory(
+    character: ICharacter,
+    itemBlueprint: any,
+    qty: number,
+    inventoryContainerId: string
+  ): Promise<boolean> {
+    const item = new Item({ ...itemBlueprint, stackQty: qty });
+    await item.save(); // Consider batching these operations if possible, or using an upsert operation to reduce the number of database calls
+
+    return this.characterItemContainer.addItemToContainer(item, character, inventoryContainerId);
   }
 
   private async refreshInventory(character: ICharacter): Promise<void> {

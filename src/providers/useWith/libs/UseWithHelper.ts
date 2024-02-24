@@ -32,7 +32,10 @@ export class UseWithHelper {
     }
 
     // Check if the item corresponds to the useWithKey
-    const item = await Item.findById(itemId);
+    const item = (await Item.findById(itemId).lean({
+      virtuals: true,
+      defaults: true,
+    })) as unknown as IItem;
     if (!item) {
       throw new Error(`UseWith > Item with id ${itemId} does not exist!`);
     }
