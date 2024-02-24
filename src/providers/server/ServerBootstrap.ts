@@ -24,7 +24,6 @@ import { NPCCycleQueue } from "@providers/npc/NPCCycleQueue";
 import { NPCFreezer } from "@providers/npc/NPCFreezer";
 import PartyManagement from "@providers/party/PartyManagement";
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
-import { SocketAuthEventsViolation } from "@providers/sockets/SocketAuthEventsViolation";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import SpellSilence from "@providers/spells/data/logic/mage/druid/SpellSilence";
 import { UseWithTileQueue } from "@providers/useWith/abstractions/UseWithTileQueue";
@@ -59,7 +58,6 @@ export class ServerBootstrap {
     private characterMonitorCallbackTracker: CharacterMonitorCallbackTracker,
     private characterNetworkUpdateQueue: CharacterNetworkUpdateQueue,
     private patreonAPI: PatreonAPI,
-    private socketAuthEventsViolation: SocketAuthEventsViolation,
     private useWithTileQueue: UseWithTileQueue
   ) {}
 
@@ -127,7 +125,6 @@ export class ServerBootstrap {
 
     await this.pathfindingResults.clearAllResults();
 
-    await this.socketAuthEventsViolation.clear();
     await this.inMemoryHashTable.deleteAll("crafting-recipes");
     await this.inMemoryHashTable.deleteAll("craftable-item-ingredients");
     await this.inMemoryHashTable.deleteAll("load-craftable-items");

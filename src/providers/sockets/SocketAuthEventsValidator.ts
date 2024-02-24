@@ -1,7 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IUser } from "@entities/ModuleSystem/UserModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
-import { CharacterBan } from "@providers/character/CharacterBan";
 import { CharacterLastAction } from "@providers/character/CharacterLastAction";
 import { appEnv } from "@providers/config/env";
 import { BYPASS_EVENTS_AS_LAST_ACTION } from "@providers/constants/EventsConstants";
@@ -16,7 +15,6 @@ import { NewRelicTransactionCategory } from "@providers/types/NewRelicTypes";
 import { IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
 import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
-import { SocketAuthEventsViolation } from "./SocketAuthEventsViolation";
 import { SocketAuthLock } from "./SocketAuthLock";
 import { SocketMessaging } from "./SocketMessaging";
 
@@ -27,9 +25,7 @@ export class SocketAuthEventsValidator {
     private exhaustValidation: ExhaustValidation,
     private socketMessaging: SocketMessaging,
     private newRelic: NewRelic,
-    private socketAuthLock: SocketAuthLock,
-    private socketAuthEventsViolation: SocketAuthEventsViolation,
-    private characterBan: CharacterBan
+    private socketAuthLock: SocketAuthLock
   ) {}
 
   public async handleEventLogic<T>(
