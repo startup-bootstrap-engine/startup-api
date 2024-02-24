@@ -27,6 +27,7 @@ import PartyManagement from "@providers/party/PartyManagement";
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import SpellSilence from "@providers/spells/data/logic/mage/druid/SpellSilence";
+import { SpellNetworkCast } from "@providers/spells/network/SpellNetworkCast";
 import { UseWithTileQueue } from "@providers/useWith/abstractions/UseWithTileQueue";
 import { EnvType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -60,7 +61,8 @@ export class ServerBootstrap {
     private characterNetworkUpdateQueue: CharacterNetworkUpdateQueue,
     private patreonAPI: PatreonAPI,
     private useWithTileQueue: UseWithTileQueue,
-    private chatNetworkGlobalMessaging: ChatNetworkGlobalMessaging
+    private chatNetworkGlobalMessaging: ChatNetworkGlobalMessaging,
+    private spellNetworkCast: SpellNetworkCast
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -96,6 +98,7 @@ export class ServerBootstrap {
       await this.characterNetworkUpdateQueue.shutdown();
       await this.useWithTileQueue.shutdown();
       await this.chatNetworkGlobalMessaging.shutdown();
+      await this.spellNetworkCast.shutdown();
     };
 
     process.on("SIGTERM", async () => {
@@ -158,6 +161,7 @@ export class ServerBootstrap {
     await this.characterNetworkUpdateQueue.clearAllJobs();
     await this.useWithTileQueue.clearAllJobs();
     await this.chatNetworkGlobalMessaging.clearAllJobs();
+    await this.spellNetworkCast.clearAllJobs();
 
     console.log("🧹 BullMQ queues cleared...");
   }
