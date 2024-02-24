@@ -14,7 +14,7 @@ services:
         condition: on-failure
       placement:
         constraints:
-          - node.role == api #! Only runs in API dedicated nodes to preserve the DB on the manager node
+          - node.labels.api == true
         preferences:
           - spread: node.id
         max_replicas_per_node: 1
@@ -80,7 +80,7 @@ services:
         - "traefik.http.services.rpg-client.loadbalancer.server.port=8080"
       placement:
         constraints:
-          - node.role == accessory
+          - node.labels.accessory == true
     networks:
       - rpg-network
   rpg-docs:
@@ -106,7 +106,7 @@ services:
         - "traefik.http.services.rpg-docs.loadbalancer.server.port=3000"
       placement:
         constraints:
-          - node.role == accessory
+          - node.labels.accessory == true
     networks:
       - rpg-network
 
