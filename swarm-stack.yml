@@ -26,7 +26,7 @@ services:
         parallelism: 2
         delay: 10s
       labels:
-        # Basic setup for API
+        # Basic setup for API config
         - traefik.enable=true
         - traefik.http.routers.rpg-api.rule=Host(`na.definya.com`)
         - traefik.http.routers.rpg-api.entrypoints=websecure
