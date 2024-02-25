@@ -7,7 +7,14 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { container } from "@providers/inversify/container";
 import { PlantGrowth } from "@providers/plant/PlantGrowth";
-import { IRefillableItem, IUseWithTileValidation, ItemType, UseWithSocketEvents } from "@rpg-engine/shared";
+import {
+  IRefillableItem,
+  ISimpleTutorialWithKey,
+  IUseWithTileValidation,
+  ItemType,
+  SimpleTutorialSocketEvents,
+  UseWithSocketEvents,
+} from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import _, { random } from "lodash";
 import { IUseWithTargetTile } from "../useWithTypes";
@@ -109,6 +116,14 @@ export class UseWithRefill {
           UseWithSocketEvents.UseWithWater,
           {
             status: true,
+          }
+        );
+
+        this.socketMessaging.sendEventToUser<ISimpleTutorialWithKey>(
+          character.channelId!,
+          SimpleTutorialSocketEvents.SimpleTutorialWithKey,
+          {
+            key: "plant-water",
           }
         );
 

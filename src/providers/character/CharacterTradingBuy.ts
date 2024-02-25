@@ -12,8 +12,11 @@ import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/Ne
 import {
   IEquipmentAndInventoryUpdatePayload,
   IItemContainer,
+  ISimpleTutorialWithKey,
   ITradeRequestItem,
   ItemSocketEvents,
+  ItemSubType,
+  SimpleTutorialSocketEvents,
   TradingEntity,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -150,6 +153,16 @@ export class CharacterTradingBuy {
             "An error occurred while processing your purchase."
           );
           return false;
+        }
+
+        if (itemBlueprint.subType === ItemSubType.Seed) {
+          this.socketMessaging.sendEventToUser<ISimpleTutorialWithKey>(
+            character.channelId!,
+            SimpleTutorialSocketEvents.SimpleTutorialWithKey,
+            {
+              key: "buy-seed",
+            }
+          );
         }
       }
     }

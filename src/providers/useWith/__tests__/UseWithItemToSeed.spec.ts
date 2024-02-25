@@ -2,7 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
-import { ItemType } from "@rpg-engine/shared";
+import { ItemType, SimpleTutorialSocketEvents } from "@rpg-engine/shared";
 import { IUseWithItemToSeedOptions, UseWithItemToSeed } from "../abstractions/UseWithItemToSeed";
 
 describe("UseWithItemToSeed.ts", () => {
@@ -13,6 +13,7 @@ describe("UseWithItemToSeed.ts", () => {
   let mockItemSave: jest.Mock;
   let sendMessageToCharacter: jest.SpyInstance;
   let sendErrorMessageToCharacter: jest.SpyInstance;
+  let sendEventToUser: jest.SpyInstance;
 
   beforeAll(() => {
     useWithItemToSeed = container.get<UseWithItemToSeed>(UseWithItemToSeed);
@@ -44,6 +45,9 @@ describe("UseWithItemToSeed.ts", () => {
 
     // @ts-ignore
     sendErrorMessageToCharacter = jest.spyOn(useWithItemToSeed.socketMessaging, "sendErrorMessageToCharacter");
+
+    // @ts-ignore
+    sendEventToUser = jest.spyOn(useWithItemToSeed.socketMessaging, "sendEventToUser");
   });
 
   it("should create a new plant and update inventory on successful execution", async () => {
@@ -63,6 +67,13 @@ describe("UseWithItemToSeed.ts", () => {
     expect(mockIncreaseCraftingSP).toHaveBeenCalledWith(testCharacter, ItemType.Plant, true);
     expect(plant).toBeDefined();
     expect(sendMessageToCharacter).toHaveBeenCalledWith(testCharacter, "Planting Success");
+    expect(sendEventToUser).toHaveBeenCalledWith(
+      testCharacter.channelId!,
+      SimpleTutorialSocketEvents.SimpleTutorialWithKey,
+      {
+        key: "plant-seed",
+      }
+    );
   });
 
   it("should send an error message on failure ", async () => {
