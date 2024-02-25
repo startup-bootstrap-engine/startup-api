@@ -1,4 +1,10 @@
-import { CharacterTradeSocketEvents, ItemSocketEvents, ITradeRequestItem, UserAccountTypes } from "@rpg-engine/shared";
+import {
+  CharacterTradeSocketEvents,
+  ItemSocketEvents,
+  ITradeRequestItem,
+  SimpleTutorialSocketEvents,
+  UserAccountTypes,
+} from "@rpg-engine/shared";
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
@@ -10,6 +16,7 @@ import {
   FoodsBlueprint,
   OthersBlueprint,
   PotionsBlueprint,
+  SeedsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { IBlueprint } from "@providers/types/temp/BlueprintTypes";
@@ -63,6 +70,9 @@ describe("CharacterTradingValidation.ts", () => {
         },
         {
           key: FoodsBlueprint.Banana,
+        },
+        {
+          key: SeedsBlueprint.CarrotSeed,
         },
       ],
     });
@@ -123,6 +133,35 @@ describe("CharacterTradingValidation.ts", () => {
           inventory: updatedInventoryContainer,
           openEquipmentSetOnUpdate: false,
           openInventoryOnUpdate: true,
+        }
+      );
+
+      expect(sendEventToUserOnBuyItem).not.toHaveBeenCalledWith(
+        testCharacter.channelId!,
+        SimpleTutorialSocketEvents.SimpleTutorialWithKey,
+        {
+          key: "buy-seed",
+        }
+      );
+    });
+
+    it("should emit SimpleTutorialWithKey socket event for seed items when purchased", async () => {
+      transactionItems = [
+        {
+          key: SeedsBlueprint.CarrotSeed,
+          qty: 1,
+        },
+      ];
+
+      const result = await characterTradingNPCBuy.buyItemsFromNPC(testCharacter, testNPCTrader, transactionItems);
+
+      expect(result).toBe(true);
+
+      expect(sendEventToUserOnBuyItem).toHaveBeenCalledWith(
+        testCharacter.channelId!,
+        SimpleTutorialSocketEvents.SimpleTutorialWithKey,
+        {
+          key: "buy-seed",
         }
       );
     });

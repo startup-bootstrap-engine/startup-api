@@ -11,7 +11,14 @@ import { IPosition } from "@providers/movement/MovementHelper";
 import { IPlantItem } from "@providers/plant/data/blueprints/PlantItem";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { IEquipmentAndInventoryUpdatePayload, IItemContainer, ItemSocketEvents, ItemType } from "@rpg-engine/shared";
+import {
+  IEquipmentAndInventoryUpdatePayload,
+  IItemContainer,
+  ISimpleTutorialWithKey,
+  ItemSocketEvents,
+  ItemType,
+  SimpleTutorialSocketEvents,
+} from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
 export interface IUseWithItemToSeedOptions {
@@ -65,6 +72,14 @@ export class UseWithItemToSeed {
       await skillIncrease.increaseCraftingSP(character, ItemType.Plant, true);
 
       this.socketMessaging.sendMessageToCharacter(character, successMessage);
+
+      this.socketMessaging.sendEventToUser<ISimpleTutorialWithKey>(
+        character.channelId!,
+        SimpleTutorialSocketEvents.SimpleTutorialWithKey,
+        {
+          key: "plant-seed",
+        }
+      );
 
       await this.refreshInventory(character);
     } catch (error) {
