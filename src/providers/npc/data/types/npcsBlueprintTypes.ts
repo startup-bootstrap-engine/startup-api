@@ -166,7 +166,14 @@ export enum HostileNPCsBlueprint {
   NightFellbeast = "night-fellbeast",
   OrcWarlord = "orc-warlord",
   WildCyclops = "wild-cyclops",
-
+  BlackNaga = "black-naga",
+  CorruptedNaga = "corrupted-naga",
+  CrimsonNaga = "crimson-naga",
+  FireNaga = "fire-naga",
+  ForestNaga = "forest-naga",
+  IceNaga = "ice-naga",
+  RedNaga = "red-naga",
+  VenomNaga = "venom-naga",
   // Trainer
   BattleCompanion = "battle-companion",
   BattleCompanionMagic = "battle-companion-magic",
