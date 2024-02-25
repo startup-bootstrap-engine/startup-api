@@ -14,6 +14,7 @@ import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IEquipmentAndInventoryUpdatePayload, IItemContainer, ItemSocketEvents, ItemType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import { clearCacheForKey } from "speedgoose";
 
 export interface IUseWithItemToSeedOptions {
   map: string;
@@ -70,10 +71,16 @@ export class UseWithItemToSeed {
 
       await this.simpleTutorial.sendSimpleTutorialActionToCharacter(character, "plant-seed");
 
+      await this.cacheClear(character);
+
       await this.refreshInventory(character);
     } catch (error) {
       this.socketMessaging.sendErrorMessageToCharacter(character, errorMessage);
     }
+  }
+
+  private async cacheClear(character: ICharacter): Promise<void> {
+    await clearCacheForKey(`${character._id}-inventory`);
   }
 
   private async refreshInventory(character: ICharacter): Promise<void> {
