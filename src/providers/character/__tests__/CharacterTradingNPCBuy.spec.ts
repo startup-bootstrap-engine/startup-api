@@ -33,6 +33,7 @@ describe("CharacterTradingValidation.ts", () => {
   let transactionItems: ITradeRequestItem[];
   let inventory: IItem;
   let inventoryContainer: IItemContainer;
+  let sendSimpleTutorialEvent: jest.SpyInstance;
 
   beforeAll(() => {
     characterTradingNPCBuy = container.get<CharacterTradingNPCBuy>(CharacterTradingNPCBuy);
@@ -87,6 +88,12 @@ describe("CharacterTradingValidation.ts", () => {
       // @ts-ignore
       characterTradingNPCBuy.characterTradingBuy.socketMessaging,
       "sendEventToUser"
+    );
+
+    sendSimpleTutorialEvent = jest.spyOn(
+      // @ts-ignore
+      characterTradingNPCBuy.characterTradingBuy.simpleTutorial,
+      "sendSimpleTutorialActionToCharacter"
     );
 
     // @ts-ignore
@@ -157,13 +164,7 @@ describe("CharacterTradingValidation.ts", () => {
 
       expect(result).toBe(true);
 
-      expect(sendEventToUserOnBuyItem).toHaveBeenCalledWith(
-        testCharacter.channelId!,
-        SimpleTutorialSocketEvents.SimpleTutorialWithKey,
-        {
-          key: "buy-seed",
-        }
-      );
+      expect(sendSimpleTutorialEvent).toHaveBeenCalledWith(testCharacter, "buy-seed");
     });
 
     it("should properly buy a STACKABLE item from a trader NPC", async () => {

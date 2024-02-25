@@ -7,14 +7,8 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { container } from "@providers/inversify/container";
 import { PlantGrowth } from "@providers/plant/PlantGrowth";
-import {
-  IRefillableItem,
-  ISimpleTutorialWithKey,
-  IUseWithTileValidation,
-  ItemType,
-  SimpleTutorialSocketEvents,
-  UseWithSocketEvents,
-} from "@rpg-engine/shared";
+import { SimpleTutorial } from "@providers/simpleTutorial/SimpleTutorial";
+import { IRefillableItem, IUseWithTileValidation, ItemType, UseWithSocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import _, { random } from "lodash";
 import { IUseWithTargetTile } from "../useWithTypes";
@@ -37,7 +31,8 @@ export class UseWithRefill {
   constructor(
     private socketMessaging: SocketMessaging,
     private movementHelper: MovementHelper,
-    private plantGrowth: PlantGrowth
+    private plantGrowth: PlantGrowth,
+    private simpleTutorial: SimpleTutorial
   ) {}
 
   public async executeUse(character: ICharacter, options: IUseWithRefill, skillIncrease: SkillIncrease): Promise<void> {
@@ -119,13 +114,7 @@ export class UseWithRefill {
           }
         );
 
-        this.socketMessaging.sendEventToUser<ISimpleTutorialWithKey>(
-          character.channelId!,
-          SimpleTutorialSocketEvents.SimpleTutorialWithKey,
-          {
-            key: "plant-water",
-          }
-        );
+        await this.simpleTutorial.sendSimpleTutorialActionToCharacter(character, "plant-water");
 
         await originItem.save();
 

@@ -9,16 +9,10 @@ import { container } from "@providers/inversify/container";
 
 import { IPosition } from "@providers/movement/MovementHelper";
 import { IPlantItem } from "@providers/plant/data/blueprints/PlantItem";
+import { SimpleTutorial } from "@providers/simpleTutorial/SimpleTutorial";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import {
-  IEquipmentAndInventoryUpdatePayload,
-  IItemContainer,
-  ISimpleTutorialWithKey,
-  ItemSocketEvents,
-  ItemType,
-  SimpleTutorialSocketEvents,
-} from "@rpg-engine/shared";
+import { IEquipmentAndInventoryUpdatePayload, IItemContainer, ItemSocketEvents, ItemType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
 export interface IUseWithItemToSeedOptions {
@@ -36,7 +30,8 @@ export class UseWithItemToSeed {
     private socketMessaging: SocketMessaging,
     private characterItemInventory: CharacterItemInventory,
     private characterWeight: CharacterWeight,
-    private characterInventory: CharacterInventory
+    private characterInventory: CharacterInventory,
+    private simpleTutorial: SimpleTutorial
   ) {}
 
   public async execute(
@@ -73,13 +68,7 @@ export class UseWithItemToSeed {
 
       this.socketMessaging.sendMessageToCharacter(character, successMessage);
 
-      this.socketMessaging.sendEventToUser<ISimpleTutorialWithKey>(
-        character.channelId!,
-        SimpleTutorialSocketEvents.SimpleTutorialWithKey,
-        {
-          key: "plant-seed",
-        }
-      );
+      await this.simpleTutorial.sendSimpleTutorialActionToCharacter(character, "plant-seed");
 
       await this.refreshInventory(character);
     } catch (error) {

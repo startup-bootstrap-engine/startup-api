@@ -4,9 +4,9 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "blueprintKey": "backpack",
-  "quantity": 1,
-  "characterId": "65d6b25e0c67c700b2a88442" 
+  "blueprintKey": "gold-coin",
+  "quantity": 999,
+  "characterId": "65dbb3773658bd0035038e14" 
 }
 
 ###
@@ -17,7 +17,7 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "characterId": "6549765f4ce996004faaa311",
+  "characterId": "65dbb3773658bd0035038e14",
   "depotCity": "ilya",
   "slotQtyToAdd": 40
 }

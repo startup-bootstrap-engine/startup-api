@@ -6,13 +6,7 @@ import { container, unitTestHelper } from "@providers/inversify/container";
 import { ToolsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { PlantItemBlueprint } from "@providers/plant/data/types/PlantTypes";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
-import {
-  IRefillableItem,
-  ItemType,
-  MapLayers,
-  SimpleTutorialSocketEvents,
-  UseWithSocketEvents,
-} from "@rpg-engine/shared";
+import { IRefillableItem, ItemType, MapLayers, UseWithSocketEvents } from "@rpg-engine/shared";
 import _ from "lodash";
 import { IUseWithRefill, UseWithRefill } from "../abstractions/UseWithRefill";
 import { IUseWithTargetTile } from "../useWithTypes";
@@ -29,6 +23,7 @@ describe("UseWithRefill.ts", () => {
   let blueprintManager: BlueprintManager;
   let skillIncrease: SkillIncrease;
   let resourceKey: string;
+  let sendSimpleTutorialEvent: jest.SpyInstance;
 
   const mockSocketMessaging = {
     sendMessageToCharacter: jest.fn(),
@@ -79,7 +74,10 @@ describe("UseWithRefill.ts", () => {
       successMessages: ["your success"],
     };
 
-    // @ts-expect-error
+    // @ts-ignore
+    sendSimpleTutorialEvent = jest.spyOn(useWithRefill.simpleTutorial, "sendSimpleTutorialActionToCharacter");
+
+    // @ts-ignore
     useWithRefill.socketMessaging = mockSocketMessaging;
   });
 
@@ -186,13 +184,7 @@ describe("UseWithRefill.ts", () => {
       }
     );
 
-    expect(mockSocketMessaging.sendEventToUser).toBeCalledWith(
-      testCharacter.channelId!,
-      SimpleTutorialSocketEvents.SimpleTutorialWithKey,
-      {
-        key: "plant-water",
-      }
-    );
+    expect(sendSimpleTutorialEvent).toBeCalledWith(testCharacter!, "plant-water");
   });
 
   it("should not send sendRandomMessageToCharacter when updatePlantGrowth returns false", async () => {

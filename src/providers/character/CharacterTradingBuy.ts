@@ -7,16 +7,15 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { TRADER_BUY_PRICE_MULTIPLIER } from "@providers/constants/ItemConstants";
 import { blueprintManager } from "@providers/inversify/container";
 import { AvailableBlueprints, OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { SimpleTutorial } from "@providers/simpleTutorial/SimpleTutorial";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import {
   IEquipmentAndInventoryUpdatePayload,
   IItemContainer,
-  ISimpleTutorialWithKey,
   ITradeRequestItem,
   ItemSocketEvents,
   ItemSubType,
-  SimpleTutorialSocketEvents,
   TradingEntity,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -41,7 +40,8 @@ export class CharacterTradingBuy {
     private characterTradingValidation: CharacterTradingValidation,
     private characterInventory: CharacterInventory,
     private newRelic: NewRelic,
-    private characterUser: CharacterUser
+    private characterUser: CharacterUser,
+    private simpleTutorial: SimpleTutorial
   ) {}
 
   @TrackNewRelicTransaction()
@@ -156,13 +156,7 @@ export class CharacterTradingBuy {
         }
 
         if (itemBlueprint.subType === ItemSubType.Seed) {
-          this.socketMessaging.sendEventToUser<ISimpleTutorialWithKey>(
-            character.channelId!,
-            SimpleTutorialSocketEvents.SimpleTutorialWithKey,
-            {
-              key: "buy-seed",
-            }
-          );
+          await this.simpleTutorial.sendSimpleTutorialActionToCharacter(character, "buy-seed");
         }
       }
     }
