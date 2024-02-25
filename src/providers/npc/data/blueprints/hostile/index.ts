@@ -59,6 +59,14 @@ import { npcRedDragon } from "./tier20/NPCRedDragon";
 import { npcBlueDragon } from "./tier21/NPCBlueDragon";
 import { npcYellowDragon } from "./tier22/NPCYellowDragon";
 import { npcPurpleDragon } from "./tier23/NPCPurpleDragon";
+import { npcBlackNaga } from "./tier24/NPCBlackNaga";
+import { npcCorruptedNaga } from "./tier24/NPCCorruptedNaga";
+import { npcCrimsonNaga } from "./tier24/NPCCrimsonNaga";
+import { npcFireNaga } from "./tier24/NPCFireNaga";
+import { npcForestNaga } from "./tier25/ForestNaga";
+import { npcIceNaga } from "./tier25/NPCIceNaga";
+import { npcRedNaga } from "./tier25/NPCRedNaga";
+import { npcVenomNaga } from "./tier25/NPCVenomNaga";
 import { npcBlackEagle } from "./tier3/NPCBlackEagle";
 import { npcBlackSpider } from "./tier3/NPCBlackSpider";
 import { npcBrownBear } from "./tier3/NPCBrownBear";
@@ -179,4 +187,12 @@ export const hostileNPCs = {
   [HostileNPCsBlueprint.BattleCompanion]: npcBattleCompanion,
   [HostileNPCsBlueprint.BattleCompanionMagic]: npcBattleCompanionMagic,
   [HostileNPCsBlueprint.DarkElf]: npcDarkElf,
+  [HostileNPCsBlueprint.BlackNaga]: npcBlackNaga,
+  [HostileNPCsBlueprint.CorruptedNaga]: npcCorruptedNaga,
+  [HostileNPCsBlueprint.CrimsonNaga]: npcCrimsonNaga,
+  [HostileNPCsBlueprint.FireNaga]: npcFireNaga,
+  [HostileNPCsBlueprint.ForestNaga]: npcForestNaga,
+  [HostileNPCsBlueprint.RedNaga]: npcRedNaga,
+  [HostileNPCsBlueprint.IceNaga]: npcIceNaga,
+  [HostileNPCsBlueprint.VenomNaga]: npcVenomNaga,
 };
