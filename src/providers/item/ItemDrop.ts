@@ -205,6 +205,7 @@ export class ItemDrop {
           scene: character.scene,
           droppedBy: character._id,
           isInContainer: false,
+          updatedAt: new Date(), // explicitly update it, so we avoid the cron cleaner deleting items that are dropped just before the cron runs
         },
         $unset: {
           carrier: 1,
