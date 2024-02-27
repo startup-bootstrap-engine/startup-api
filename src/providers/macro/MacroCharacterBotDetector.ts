@@ -1,8 +1,8 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { CharacterActionsTracker } from "@providers/character/CharacterActionsTracker";
 import {
+  ANTI_MACRO_ACTION_SIMILARITY_RATIO_THRESHOLD,
   ANTI_MACRO_IDLE_THRESHOLD,
-  ANTI_MACRO_SIMILARITY_THRESHOLD,
   ANTI_MACRO_SKIP_EVENTS_FROM_SIMILARITY_CHECK,
 } from "@providers/constants/AntiMacroConstants";
 import { provide } from "inversify-binding-decorators";
@@ -52,7 +52,7 @@ export class MacroCharacterBotDetector {
 
     const similarityRatio = uniqueActions.size / actionCount;
 
-    return similarityRatio <= ANTI_MACRO_SIMILARITY_THRESHOLD;
+    return similarityRatio <= ANTI_MACRO_ACTION_SIMILARITY_RATIO_THRESHOLD;
   }
 
   private async hasMultiClient(character: ICharacter): Promise<boolean> {
