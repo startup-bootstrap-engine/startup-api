@@ -39,8 +39,8 @@ export class CharacterCrons {
       );
     });
 
-    this.cronJobScheduler.uniqueSchedule("character-cron-track-median-total-days-played", "0 */4 * * *", async () => {
-      await this.characterRetentionTracker.trackMedianTotalDaysPlayed();
+    this.cronJobScheduler.uniqueSchedule("character-cron-track-average-total-days-played", "0 */4 * * *", async () => {
+      await this.characterRetentionTracker.trackAverageTotalDaysPlayed();
     });
 
     this.cronJobScheduler.uniqueSchedule("character-cron-logout-inactive-characters", "* * * * *", async () => {
