@@ -2,6 +2,7 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { CharacterActionsTracker } from "@providers/character/CharacterActionsTracker";
 import {
   ANTI_MACRO_ACTION_SIMILARITY_RATIO_THRESHOLD,
+  ANTI_MACRO_ENABLED_SECURITY_FEATURES,
   ANTI_MACRO_IDLE_THRESHOLD,
   ANTI_MACRO_SKIP_EVENTS_FROM_SIMILARITY_CHECK,
 } from "@providers/constants/AntiMacroConstants";
@@ -12,13 +13,15 @@ export class MacroCharacterBotDetector {
   constructor(private characterActionsTracker: CharacterActionsTracker) {}
 
   public async isPotentialBotUser(character: ICharacter): Promise<boolean> {
-    const [isIdle, areActionsSimilar, hasMultiClient] = await Promise.all([
-      this.isCharacterIdle(character),
-      this.areLastActionsTooSimilar(character),
-      this.hasMultiClient(character),
-    ]);
+    const checks = {
+      "idle-check": () => this.isCharacterIdle(character),
+      "similarity-check": () => this.areLastActionsTooSimilar(character),
+      "multi-client-check": () => this.hasMultiClient(character),
+    };
 
-    return isIdle || areActionsSimilar || hasMultiClient;
+    const results = await Promise.all(ANTI_MACRO_ENABLED_SECURITY_FEATURES.map((feature) => checks[feature]()));
+
+    return results.some((result) => result);
   }
 
   private isCharacterIdle(character: ICharacter): boolean {

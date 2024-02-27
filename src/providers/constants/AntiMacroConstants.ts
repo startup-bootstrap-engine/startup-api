@@ -1,6 +1,9 @@
 import { CharacterSocketEvents, NPCSocketEvents, ViewSocketEvents } from "@rpg-engine/shared";
 
-export const ANTI_MACRO_PROBABILITY_TRIGGER = 1; // chance of triggering the anti-macro system, per character, each 5 minutes
+// export const ANTI_MACRO_ENABLED_SECURITY_FEATURES = ["idle-check", "similarity-check", "multi-client-check"];
+export const ANTI_MACRO_ENABLED_SECURITY_FEATURES = ["multi-client-check"];
+
+export const ANTI_MACRO_PROBABILITY_TRIGGER = 20; // chance of triggering the anti-macro system, per character, each 5 minutes
 
 // 30 min
 export const ANTI_MACRO_IDLE_THRESHOLD = 30 * 60 * 1000; // 20 minutes in milliseconds
