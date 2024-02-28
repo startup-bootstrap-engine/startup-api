@@ -227,32 +227,43 @@ export class ChatNetworkGlobalMessaging {
       SOCKET_TRANSMISSION_ZONE_WIDTH
     );
 
-    const chatLogsInView = await ChatLog.find({
-      x: { $gte: socketTransmissionZone.x, $lte: socketTransmissionZone.width },
-      y: { $gte: socketTransmissionZone.y, $lte: socketTransmissionZone.height },
-      scene: character.scene,
-    })
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .lean();
-
-    const emitterIds = chatLogsInView.map((chatLog) => chatLog.emitter);
-    const emitters = await Character.find({ _id: { $in: emitterIds } }, "name").lean();
-
-    const emitterNameById = emitters.reduce((map, emitter) => {
-      map[emitter._id.toString()] = emitter.name;
-      return map;
-    }, {});
+    const chatLogsInView = await ChatLog.aggregate([
+      {
+        $match: {
+          x: { $gte: socketTransmissionZone.x, $lte: socketTransmissionZone.width },
+          y: { $gte: socketTransmissionZone.y, $lte: socketTransmissionZone.height },
+          scene: character.scene,
+        },
+      },
+      { $sort: { createdAt: -1 } },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: "characters",
+          localField: "emitter",
+          foreignField: "_id",
+          as: "emitter",
+        },
+      },
+      { $unwind: "$emitter" },
+      {
+        $project: {
+          _id: 1,
+          message: 1,
+          type: 1,
+          "emitter._id": 1,
+          "emitter.name": 1,
+        },
+      },
+    ]);
 
     const chatLogs = chatLogsInView
       .map((chatLog) => ({
         _id: chatLog._id.toString(),
         message: chatLog.message,
         emitter: {
-          // @ts-ignore
-          _id: chatLog.emitter.toString(),
-          // @ts-ignore
-          name: emitterNameById[chatLog.emitter.toString()],
+          _id: chatLog.emitter._id.toString(),
+          name: chatLog.emitter.name,
         },
         type: chatLog.type as ChatMessageType,
       }))
