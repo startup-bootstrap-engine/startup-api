@@ -17,6 +17,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { NPCAlignment, RangeTypes } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcHighElf: INPCTierBlueprint<13> = {
   ...generateMoveTowardsMovement(),
@@ -55,97 +56,97 @@ export const npcHighElf: INPCTierBlueprint<13> = {
   loots: [
     {
       itemBlueprintKey: FoodsBlueprint.Blueberry,
-      chance: 75,
+      chance: LootProbability.VeryCommon,
       quantityRange: [1, 10],
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.PhoenixBow,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
 
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,
-      chance: 25,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 2],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Silk,
-      chance: 35,
+      chance: LootProbability.SemiCommon,
       quantityRange: [1, 6],
     },
     {
       itemBlueprintKey: HelmetsBlueprint.BerserkersHelmet,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: OthersBlueprint.GoldCoin,
-      chance: 50,
+      chance: LootProbability.VeryCommon,
       quantityRange: [45, 75],
     },
     {
       itemBlueprintKey: HelmetsBlueprint.RoyalHelmet,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
 
     {
       itemBlueprintKey: HelmetsBlueprint.SaviorsHelmet,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.CorruptionSword,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.RoyalKnightHelmet,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.SilverShield,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
 
     {
       itemBlueprintKey: SwordsBlueprint.ElvenSword,
-      chance: 2.5,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.TemplarSword,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.ElvenRing,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
 
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Arrow,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [3, 10],
     },
 
     {
       itemBlueprintKey: CraftingResourcesBlueprint.ElvenWood,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.ElvenLeaf,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [5, 10],
     },
 
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Herb,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [5, 10],
     },
     {
       itemBlueprintKey: BootsBlueprint.KnightBoots,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
-      chance: 6,
+      chance: LootProbability.Rare,
     },
   ],
 };

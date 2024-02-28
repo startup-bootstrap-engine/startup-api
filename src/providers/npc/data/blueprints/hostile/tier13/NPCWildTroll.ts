@@ -19,6 +19,7 @@ import {
   RangedWeaponsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcWildTroll: INPCTierBlueprint<13> = {
   ...generateMoveTowardsMovement(),
@@ -54,48 +55,48 @@ export const npcWildTroll: INPCTierBlueprint<13> = {
   loots: [
     {
       itemBlueprintKey: MacesBlueprint.SpikedClub,
-      chance: 25,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: GlovesBlueprint.StuddedGloves,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.GladiatorHelmet,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: HammersBlueprint.RoyalHammer,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Bolt,
-      chance: 50,
+      chance: LootProbability.VeryCommon,
       quantityRange: [5, 10],
     },
 
     {
       itemBlueprintKey: FoodsBlueprint.Salmon,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WoodenSticks,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.PhoenixFeather,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: AxesBlueprint.HandAxe,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.VineGrasp],

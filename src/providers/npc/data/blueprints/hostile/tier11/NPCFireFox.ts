@@ -15,6 +15,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcFireFox: INPCTierBlueprint<11> = {
   ...generateMoveTowardsMovement(),
@@ -48,42 +49,42 @@ export const npcFireFox: INPCTierBlueprint<11> = {
   loots: [
     {
       itemBlueprintKey: SwordsBlueprint.FireSword,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: StaffsBlueprint.FireStaff,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.PlateArmor,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: GlovesBlueprint.ChainGloves,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.VikingHelmet,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Leather,
-      chance: 40,
+      chance: LootProbability.Common,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.FireBolt,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [2, 5],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.MagicRecipe,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.PhoenixFeather,
-      chance: 5,
+      chance: LootProbability.Rare,
       quantityRange: [5, 10],
     },
   ],

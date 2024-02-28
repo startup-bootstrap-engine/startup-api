@@ -29,6 +29,7 @@ import {
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcTrollBerserker: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
@@ -67,96 +68,96 @@ export const npcTrollBerserker: INPCTierBlueprint<15> = {
   loots: [
     {
       itemBlueprintKey: GlovesBlueprint.PlateGloves,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
 
     {
       itemBlueprintKey: ShieldsBlueprint.PaviseShield,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.TowerShield,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
 
     {
       itemBlueprintKey: LegsBlueprint.BronzeLegs,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.PlateShield,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.SoldiersHelmet,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: AxesBlueprint.DoubleAxe,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: HammersBlueprint.WarHammer,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
 
     {
       itemBlueprintKey: AxesBlueprint.RoyalDoubleAxe,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Bolt,
-      chance: 50,
+      chance: LootProbability.VeryCommon,
       quantityRange: [5, 10],
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.RoyalCrossbow,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Bow,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: FoodsBlueprint.Salmon,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.GreaterWoodenLog,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [1, 2],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 2],
     },
     {
       itemBlueprintKey: SwordsBlueprint.Rapier,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: MagicsBlueprint.FireRune,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.PhoenixFeather,
-      chance: 5,
+      chance: LootProbability.Rare,
       quantityRange: [5, 10],
     },
     {
       itemBlueprintKey: SwordsBlueprint.AngelicSword,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: GlovesBlueprint.OraclegripGloves,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
-      chance: 12,
+      chance: LootProbability.Uncommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

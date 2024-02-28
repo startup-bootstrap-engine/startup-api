@@ -18,6 +18,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 
 import { NPCAlignment, NPCCustomDeathPenalties } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcAsterion: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
@@ -52,70 +53,70 @@ export const npcAsterion: INPCTierBlueprint<15> = {
   loots: [
     {
       itemBlueprintKey: BootsBlueprint.CopperBoots,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: SwordsBlueprint.MinotaurSword,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: SpearsBlueprint.RoyalSpear,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: GlovesBlueprint.PlateGloves,
-      chance: 85,
+      chance: LootProbability.VeryCommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.Fish,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
 
     {
       itemBlueprintKey: RangedWeaponsBlueprint.AsterionsBow,
-      chance: 40,
+      chance: LootProbability.Common,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.IronArrow,
-      chance: 25,
+      chance: LootProbability.Uncommon,
       quantityRange: [10, 20],
     },
     {
       itemBlueprintKey: LegsBlueprint.StuddedLegs,
-      chance: 60,
+      chance: LootProbability.VeryCommon,
     },
     {
       itemBlueprintKey: BootsBlueprint.CopperBoots,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: ShieldsBlueprint.TowerShield,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: SpearsBlueprint.RoyalSpear,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: StaffsBlueprint.SkyBlueStaff,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: StaffsBlueprint.TartarusStaff,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: GlovesBlueprint.JadeclaspGloves,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
-      chance: 12,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: SwordsBlueprint.FlamestrikeBlade,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
   ],
 };

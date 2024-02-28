@@ -15,6 +15,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { AnimationEffectKeys, NPCAlignment, NPCSubtype, RangeTypes } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcIceFox: INPCTierBlueprint<10> = {
   ...generateMoveTowardsMovement(),
@@ -50,56 +51,56 @@ export const npcIceFox: INPCTierBlueprint<10> = {
   loots: [
     {
       itemBlueprintKey: RangedWeaponsBlueprint.FrostBow,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.FrostArrow,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [10, 20],
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.FrostCrossbow,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Arrow,
-      chance: 50,
+      chance: LootProbability.VeryCommon,
       quantityRange: [10, 20],
     },
     {
       itemBlueprintKey: ShieldsBlueprint.FrostShield,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AxesBlueprint.FrostDoubleAxe,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: GlovesBlueprint.ChainGloves,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.FrostDagger,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Silk,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [5, 10],
     },
     {
       itemBlueprintKey: FoodsBlueprint.IceMushroom,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [3, 4],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Bone,
-      chance: 40,
+      chance: LootProbability.Common,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.BlueFeather,
-      chance: 40,
+      chance: LootProbability.Common,
       quantityRange: [3, 5],
     },
   ],

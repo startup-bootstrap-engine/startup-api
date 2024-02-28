@@ -15,6 +15,7 @@ import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { MagicPower, NPCAlignment, NPCSubtype, RangeTypes, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcMinotaurArcher: INPCTierBlueprint<12> = {
   ...generateMoveTowardsMovement(),
@@ -49,49 +50,49 @@ export const npcMinotaurArcher: INPCTierBlueprint<12> = {
   loots: [
     {
       itemBlueprintKey: BootsBlueprint.RoyalBoots,
-      chance: 3,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.IronJitte,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.Fish,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
 
     {
       itemBlueprintKey: RangedWeaponsBlueprint.RoyalCrossbow,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.FireBolt,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: ArmorsBlueprint.BronzeArmor,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Jade,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Herb,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.EaglesEyeBow,
-      chance: 3,
+      chance: LootProbability.VeryRare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning],

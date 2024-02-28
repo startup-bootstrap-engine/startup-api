@@ -20,6 +20,7 @@ import {
   StaffsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcTroll: INPCTierBlueprint<12> = {
   ...generateMoveTowardsMovement(),
@@ -56,67 +57,67 @@ export const npcTroll: INPCTierBlueprint<12> = {
   loots: [
     {
       itemBlueprintKey: MacesBlueprint.Club,
-      chance: 25,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.BlueSapphire,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: GlovesBlueprint.LeatherGloves,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: PotionsBlueprint.LightLifePotion,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Arrow,
-      chance: 50,
+      chance: LootProbability.VeryCommon,
       quantityRange: [5, 10],
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.HuntersBow,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.GladiatorHelmet,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.Salmon,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Bow,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.GreaterWoodenLog,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [1, 2],
     },
     {
       itemBlueprintKey: StaffsBlueprint.PoisonStaff,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WoodenBoard,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Eye,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: LegsBlueprint.BronzeLegs,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.DewDagger,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

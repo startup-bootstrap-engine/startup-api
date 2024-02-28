@@ -10,6 +10,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcRedCentipede: INPCTierBlueprint<3> = {
   ...generateMoveTowardsMovement(),
@@ -40,21 +41,21 @@ export const npcRedCentipede: INPCTierBlueprint<3> = {
   loots: [
     {
       itemBlueprintKey: FoodsBlueprint.Apple,
-      chance: 50,
+      chance: LootProbability.VeryCommon,
       quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: HelmetsBlueprint.ArabicHelmet,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.Banana,
-      chance: 25,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.MagicRecipe,
-      chance: 40,
+      chance: LootProbability.Common,
       quantityRange: [1, 10],
     },
   ],
