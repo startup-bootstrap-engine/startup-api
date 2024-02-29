@@ -29,6 +29,7 @@ import PartyManagement from "@providers/party/PartyManagement";
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import SpellSilence from "@providers/spells/data/logic/mage/druid/SpellSilence";
+import { BullStrength } from "@providers/spells/data/logic/minotaur/BullStrength";
 import { SpellNetworkCast } from "@providers/spells/network/SpellNetworkCast";
 import { UseWithTileQueue } from "@providers/useWith/abstractions/UseWithTileQueue";
 import { EnvType } from "@rpg-engine/shared";
@@ -66,7 +67,8 @@ export class ServerBootstrap {
     private chatNetworkGlobalMessaging: ChatNetworkGlobalMessaging,
     private spellNetworkCast: SpellNetworkCast,
     private characterActionsTracker: CharacterActionsTracker,
-    private errorHandlingTracker: ErrorHandlingTracker
+    private errorHandlingTracker: ErrorHandlingTracker,
+    private bullStrength: BullStrength
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -151,6 +153,8 @@ export class ServerBootstrap {
     await this.inMemoryHashTable.deleteAll("character-bonus-penalties");
     await this.entityEffectDuration.clearAll();
     await this.characterMonitorCallbackTracker.clearAll();
+
+    await this.bullStrength.clearAllGiantForms();
 
     await this.characterActionsTracker.clearAllCharacterActions();
 
