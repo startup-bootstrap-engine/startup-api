@@ -17,72 +17,71 @@ export class SkillBuff {
 
   @TrackNewRelicTransaction()
   public async getSkillsWithBuff(character: ICharacter): Promise<ISkill> {
-    const skills = (await Skill.findById(character.skills)
+    const skills = await this.fetchSkills(character);
+    this.validateSkills(skills, character);
+    const clonedSkills = _.cloneDeep(skills);
+
+    if (clonedSkills.ownerType === "Character") {
+      await this.applyBuffs(clonedSkills, character);
+      await this.applyBonusesAndPenalties(clonedSkills, character);
+    }
+
+    return clonedSkills;
+  }
+
+  private async fetchSkills(character: ICharacter): Promise<ISkill> {
+    return (await Skill.findById(character.skills)
       .lean({ virtuals: true, defaults: true })
       .cacheQuery({
         cacheKey: `${character._id}-skills`,
       })) as ISkill;
+  }
 
+  private validateSkills(skills: ISkill, character: ICharacter): void {
     if (!skills) {
-      throw new Error("Skills not found for character ", character._id.toString());
+      throw new Error(`Skills not found for character ${character._id.toString()}`);
     }
+  }
 
+  private async applyBuffs(clonedSkills: ISkill, character: ICharacter): Promise<void> {
+    const buffedSkills = await CharacterBuff.find({
+      owner: clonedSkills.owner,
+      type: CharacterBuffType.Skill,
+    })
+      .lean({
+        virtuals: true,
+        defaults: true,
+      })
+      .cacheQuery({
+        cacheKey: `characterBuffs_${clonedSkills.owner?.toString()}`,
+      });
+
+    for (const buff of buffedSkills) {
+      if (buff.type !== CharacterBuffType.Skill) continue;
+      if (!clonedSkills[buff.trait]?.level) {
+        console.log(`Skill not found for character ${character._id} trait ${buff.trait}`);
+        continue;
+      }
+
+      clonedSkills[buff.trait].buffAndDebuff = await this.characterBuffTracker.getAllBuffPercentageChanges(
+        character._id,
+        buff.trait as CharacterTrait
+      );
+    }
+  }
+
+  private async applyBonusesAndPenalties(clonedSkills: ISkill, character: ICharacter): Promise<void> {
     const parsedBonusAndPenalties = await this.characterBonusOrPenalties.getClassBonusOrPenaltiesBuffs(character._id);
 
-    // Clone the original skills
-    const clonedSkills = _.cloneDeep(skills);
+    for (const [key, value] of Object.entries(parsedBonusAndPenalties)) {
+      if (!clonedSkills[key]) continue;
 
-    if (skills.ownerType === "Character") {
-      const buffedSkills = await CharacterBuff.find({
-        owner: skills.owner,
-        type: CharacterBuffType.Skill,
-      })
-        .lean({
-          virtuals: true,
-          defaults: true,
-        })
-        .cacheQuery({
-          cacheKey: `characterBuffs_${skills.owner?.toString()}`,
-        });
+      const currentValue = clonedSkills[key].buffAndDebuff ?? 0;
+      clonedSkills[key].buffAndDebuff = currentValue + value;
 
-      for (const buff of buffedSkills) {
-        if (buff.type !== CharacterBuffType.Skill) {
-          continue;
-        }
-
-        if (!clonedSkills?.[buff.trait]?.level) {
-          console.log(`Skill not found for character ${character._id} trait ${buff.trait}`);
-          continue;
-        }
-
-        clonedSkills[buff.trait].buffAndDebuff = await this.characterBuffTracker.getAllBuffPercentageChanges(
-          character._id,
-          buff.trait as CharacterTrait
-        );
-      }
-
-      for (const [key, value] of Object.entries(parsedBonusAndPenalties)) {
-        const currentValue = clonedSkills[key].buffAndDebuff;
-
-        if (!clonedSkills[key]) {
-          continue;
-        }
-
-        // if we have nothing set, just consider the bonus and penalties from class
-        if (!clonedSkills[key].buffAndDebuff) {
-          clonedSkills[key].buffAndDebuff = value;
-        }
-
-        // if we already have something there, just increment with the bonus and penalties from class
-
-        clonedSkills[key].buffAndDebuff = (currentValue ?? 0) + value;
-
-        if (clonedSkills[key].buffAndDebuff === 0) {
-          delete clonedSkills[key].buffAndDebuff;
-        }
+      if (clonedSkills[key].buffAndDebuff === 0) {
+        delete clonedSkills[key].buffAndDebuff;
       }
     }
-
-    return clonedSkills;
   }
 }
