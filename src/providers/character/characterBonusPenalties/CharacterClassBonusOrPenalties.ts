@@ -47,9 +47,10 @@ export class CharacterClassBonusOrPenalties {
 
     const classBonusPenalties = this.getClassBonusOrPenalties(character.class as CharacterClass);
 
-    await this.inMemoryHashTable.set("character-bonus-penalties", characterId, classBonusPenalties);
+    const parsedBonusAndPenalties = this.parseBonusAndPenalties(classBonusPenalties);
 
-    return this.parseBonusAndPenalties(classBonusPenalties);
+    await this.inMemoryHashTable.set("character-bonus-penalties", characterId, parsedBonusAndPenalties);
+    return parsedBonusAndPenalties;
   }
 
   private parseBonusAndPenalties(bonusAndPenalties: Record<string, any>): Record<string, number> {
