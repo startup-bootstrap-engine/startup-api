@@ -19,6 +19,7 @@ import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DiscordBot } from "@providers/discord/DiscordBot";
 import { EntityEffectDurationControl } from "@providers/entityEffects/EntityEffectDurationControl";
+import { ErrorHandlingTracker } from "@providers/errorHandling/ErrorHandlingTracker";
 import { ItemUseCycleQueue } from "@providers/item/ItemUseCycleQueue";
 import { Locker } from "@providers/locks/Locker";
 import { NPCBattleCycleQueue } from "@providers/npc/NPCBattleCycleQueue";
@@ -64,7 +65,8 @@ export class ServerBootstrap {
     private useWithTileQueue: UseWithTileQueue,
     private chatNetworkGlobalMessaging: ChatNetworkGlobalMessaging,
     private spellNetworkCast: SpellNetworkCast,
-    private characterActionsTracker: CharacterActionsTracker
+    private characterActionsTracker: CharacterActionsTracker,
+    private errorHandlingTracker: ErrorHandlingTracker
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -88,6 +90,12 @@ export class ServerBootstrap {
     await this.queueShutdownHandling();
 
     await this.clearSomeQueues();
+
+    if (appEnv.general.ENV === EnvType.Production) {
+      this.errorHandlingTracker.overrideErrorHandling();
+
+      this.addUnhandledRejectionListener();
+    }
   }
 
   public queueShutdownHandling(): void {
@@ -155,6 +163,16 @@ export class ServerBootstrap {
     this.npcFreezer.init();
 
     await this.locker.clear();
+  }
+
+  private addUnhandledRejectionListener(): void {
+    process.on("uncaughtException", (err) => {
+      console.error("❌ Uncaught Exception:", err);
+    });
+
+    process.on("unhandledRejection", (reason, promise) => {
+      console.error("❌ Unhandled Rejection at:", promise, "reason:", reason);
+    });
   }
 
   private async clearSomeQueues(): Promise<void> {

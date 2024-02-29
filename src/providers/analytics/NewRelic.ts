@@ -86,4 +86,12 @@ export class NewRelic {
 
     return newrelic.recordMetric(`${category}/${subcategory}/${name}`, value);
   }
+
+  public noticeError(error: Error): void {
+    if (appEnv.general.IS_UNIT_TEST) {
+      return;
+    }
+
+    return newrelic.noticeError(error);
+  }
 }

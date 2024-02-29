@@ -38,8 +38,6 @@ export class RedisIOClient {
           maxListeners: 50, // Adjust for potential high concurrency within the swarm
         });
 
-        this.client.setMaxListeners(20);
-
         if (!appEnv.general.IS_UNIT_TEST) {
           this.client.on("connect", () => {
             if (!appEnv.general.IS_UNIT_TEST) {
