@@ -1,4 +1,4 @@
-import { CharacterBuff } from "@entities/ModuleCharacter/CharacterBuffModel";
+import { CharacterBuff, ICharacterBuff } from "@entities/ModuleCharacter/CharacterBuffModel";
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
@@ -44,29 +44,32 @@ export class SkillBuff {
   }
 
   private async applyBuffs(clonedSkills: ISkill, character: ICharacter): Promise<void> {
-    const buffedSkills = await CharacterBuff.find({
+    const buffedSkills = (await CharacterBuff.find({
       owner: clonedSkills.owner,
       type: CharacterBuffType.Skill,
     })
-      .lean({
-        virtuals: true,
-        defaults: true,
-      })
-      .cacheQuery({
-        cacheKey: `characterBuffs_${clonedSkills.owner?.toString()}`,
-      });
+      .lean({ virtuals: true, defaults: true })
+      .cacheQuery({ cacheKey: `characterBuffs_${clonedSkills.owner?.toString()}` })) as ICharacterBuff[];
 
-    for (const buff of buffedSkills) {
-      if (buff.type !== CharacterBuffType.Skill) continue;
-      if (!clonedSkills[buff.trait]?.level) {
-        console.log(`Skill not found for character ${character._id} trait ${buff.trait}`);
-        continue;
-      }
+    // Map buffs to promises and filter out unnecessary operations
+    const buffPromises = buffedSkills
+      .filter((buff) => buff.type === CharacterBuffType.Skill && clonedSkills[buff.trait]?.level)
+      .map((buff) => this.applyBuffToSkill(clonedSkills, character, buff));
 
-      clonedSkills[buff.trait].buffAndDebuff = await this.characterBuffTracker.getAllBuffPercentageChanges(
+    // Wait for all promises to resolve
+    await Promise.all(buffPromises);
+  }
+
+  // Separate method to apply each buff, returns a Promise
+  private async applyBuffToSkill(clonedSkills: ISkill, character: ICharacter, buff: ICharacterBuff): Promise<void> {
+    try {
+      const buffValue = await this.characterBuffTracker.getAllBuffPercentageChanges(
         character._id,
         buff.trait as CharacterTrait
       );
+      clonedSkills[buff.trait].buffAndDebuff = buffValue;
+    } catch (error) {
+      console.error(`Error applying buff to skill for character ${character._id} trait ${buff.trait}`, error);
     }
   }
 
