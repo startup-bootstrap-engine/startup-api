@@ -14,4 +14,5 @@ export const itemMysticVeil: IEquippableLightArmorTier2Blueprint = {
   defense: 10,
   tier: 2,
   allowedEquipSlotType: [ItemSlotType.Head],
+  isMageGear: true,
 };

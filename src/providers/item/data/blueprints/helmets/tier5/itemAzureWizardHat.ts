@@ -21,6 +21,7 @@ export const itemAzureWizardHat: IEquippableLightArmorTier5Blueprint = {
   defense: 24,
   tier: 5,
   weight: 3.2,
+  isMageGear: true,
   allowedEquipSlotType: [ItemSlotType.Head],
   basePrice: 100,
   equippedBuff: [

@@ -23,6 +23,7 @@ export const itemArcaneAdepthat: IEquippableLightArmorTier5Blueprint = {
   weight: 3,
   allowedEquipSlotType: [ItemSlotType.Head],
   basePrice: 95,
+  isMageGear: true,
   equippedBuff: [
     {
       type: CharacterBuffType.Skill,

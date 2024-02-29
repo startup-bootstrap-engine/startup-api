@@ -15,4 +15,5 @@ export const itemWizardHat: IEquippableLightArmorTier0Blueprint = {
   weight: 1,
   allowedEquipSlotType: [ItemSlotType.Head],
   basePrice: 37,
+  isMageGear: true,
 };
