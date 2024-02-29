@@ -42,6 +42,7 @@ export class SkillGainValidation {
 
   private async clearSkillCache(character: ICharacter, skillName: string): Promise<void> {
     await clearCacheForKey(`${character._id}-skills`);
+    await this.inMemoryHashTable.delete("skills-with-buff", character._id);
     await this.inMemoryHashTable.delete(`${character._id}-skill-level-with-buff`, skillName);
     await clearCacheForKey(`characterBuffs_${character._id}`);
   }

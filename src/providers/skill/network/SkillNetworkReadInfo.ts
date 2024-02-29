@@ -1,5 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { CharacterBuffSkill } from "@providers/character/characterBuff/CharacterBuffSkill";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
@@ -14,12 +15,14 @@ export class SkillNetworkReadInfo {
     private socketAuth: SocketAuth,
     private socketMessaging: SocketMessaging,
     private characterBuffSkill: CharacterBuffSkill,
-    private skillBuff: SkillBuff
+    private skillBuff: SkillBuff,
+    private inMemoryHashTable: InMemoryHashTable
   ) {}
 
   public onGetInfo(channel: SocketChannel): void {
     this.socketAuth.authCharacterOn(channel, SkillSocketEvents.ReadInfo, async (data, character: ICharacter) => {
       await clearCacheForKey(`${character._id}-skills`);
+      await this.inMemoryHashTable.delete("skills-with-buff", character._id);
 
       const skill = await this.skillBuff.getSkillsWithBuff(character);
 

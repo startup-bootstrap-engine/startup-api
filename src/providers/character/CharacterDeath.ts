@@ -296,6 +296,7 @@ export class CharacterDeath {
       this.inMemoryHashTable.deleteAll(`${character._id}-skill-level-with-buff`),
       clearCacheForKey(`characterBuffs_${character._id}`),
       clearCacheForKey(`${character._id}-skills`),
+      this.inMemoryHashTable.delete("skills-with-buff", character._id),
     ]);
   }
 

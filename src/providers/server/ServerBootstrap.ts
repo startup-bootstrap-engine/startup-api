@@ -151,6 +151,8 @@ export class ServerBootstrap {
     await this.inMemoryHashTable.deleteAll("npc-target-check-count");
     await this.inMemoryHashTable.deleteAll("use-item-to-tile");
     await this.inMemoryHashTable.deleteAll("character-bonus-penalties");
+    await this.inMemoryHashTable.deleteAll("skills-with-buff");
+
     await this.entityEffectDuration.clearAll();
     await this.characterMonitorCallbackTracker.clearAll();
 

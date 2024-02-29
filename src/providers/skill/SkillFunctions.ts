@@ -133,6 +133,7 @@ export class SkillFunctions {
     await Promise.all([
       clearCacheForKey(`characterBuffs_${character._id}`),
       clearCacheForKey(`${character._id}-skills`),
+      this.inMemoryHashTable.delete("skills-with-buff", character._id),
       this.inMemoryHashTable.delete("load-craftable-items", character._id),
     ]);
   }

@@ -149,6 +149,7 @@ export class CharacterBuffTracker {
   public async clearCache(character: ICharacter, skillName: string): Promise<void> {
     await clearCacheForKey(`characterBuffs_${character._id}`);
     await clearCacheForKey(`${character._id}-skills`);
+    await this.inMemoryHashTable.delete("skills-with-buff", character._id);
     await this.inMemoryHashTable.delete(character._id.toString(), "totalAttack");
     await this.inMemoryHashTable.delete(character._id.toString(), "totalDefense");
     await this.inMemoryHashTable.delete(`${character._id}-skill-level-with-buff`, skillName);

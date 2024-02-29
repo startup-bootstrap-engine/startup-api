@@ -4,6 +4,7 @@ import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterClassBonusOrPenalties } from "@providers/character/characterBonusPenalties/CharacterClassBonusOrPenalties";
 import { CharacterBuffTracker } from "@providers/character/characterBuff/CharacterBuffTracker";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { CharacterBuffType, CharacterTrait } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
@@ -12,11 +13,18 @@ import _ from "lodash";
 export class SkillBuff {
   constructor(
     private characterBuffTracker: CharacterBuffTracker,
-    private characterBonusOrPenalties: CharacterClassBonusOrPenalties
+    private characterBonusOrPenalties: CharacterClassBonusOrPenalties,
+    private inMemoryHashTable: InMemoryHashTable
   ) {}
 
   @TrackNewRelicTransaction()
   public async getSkillsWithBuff(character: ICharacter): Promise<ISkill> {
+    const skillsWithBuff = (await this.inMemoryHashTable.get("skills-with-buff", character._id)) as ISkill;
+
+    if (skillsWithBuff) {
+      return skillsWithBuff;
+    }
+
     const skills = await this.fetchSkills(character);
     this.validateSkills(skills, character);
     const clonedSkills = _.cloneDeep(skills);
@@ -25,6 +33,8 @@ export class SkillBuff {
       await this.applyBuffs(clonedSkills, character);
       await this.applyBonusesAndPenalties(clonedSkills, character);
     }
+
+    await this.inMemoryHashTable.set("skills-with-buff", character._id, clonedSkills);
 
     return clonedSkills;
   }

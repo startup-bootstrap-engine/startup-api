@@ -170,6 +170,7 @@ export class EquipmentUnequip {
     await clearCacheForKey(`${character._id}-equipment`);
     await clearCacheForKey(`characterBuffs_${character._id}`);
     await clearCacheForKey(`${character._id}-skills`);
+    await this.inMemoryHashTable.delete("skills-with-buff", character._id);
   }
 
   private async handleBookEffect(item: IItem, equipmentSlots: IEquipmentSet, bookValue: number): Promise<void> {
