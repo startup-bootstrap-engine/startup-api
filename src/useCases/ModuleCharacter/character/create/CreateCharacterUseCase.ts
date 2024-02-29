@@ -2,6 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { User } from "@entities/ModuleSystem/UserModel";
 import { ACCOUNT_MAX_CHAR_LIMIT } from "@providers/constants/AccountConstants";
 import { isAlphanumeric } from "@providers/constants/AlphanumericConstants";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { TS } from "@providers/translation/TranslationHelper";
 import { CharacterRepository } from "@repositories/ModuleCharacter/CharacterRepository";
@@ -11,7 +12,11 @@ import { CreateCharacterDTO } from "./CreateCharacterDTO";
 
 @provide(CreateCharacterUseCase)
 export class CreateCharacterUseCase {
-  constructor(private characterRepository: CharacterRepository, private factionRepository: FactionRepository) {}
+  constructor(
+    private characterRepository: CharacterRepository,
+    private factionRepository: FactionRepository,
+    private inMemoryHashTable: InMemoryHashTable
+  ) {}
 
   public async create(newCharacter: CreateCharacterDTO, ownerId: string): Promise<ICharacter> {
     // assign character to user
@@ -41,6 +46,8 @@ export class CreateCharacterUseCase {
 
     user.characters?.push(createdCharacter._id);
     await user.save();
+
+    await this.inMemoryHashTable.delete("available-characters", ownerId);
 
     return createdCharacter;
   }

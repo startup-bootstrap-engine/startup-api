@@ -1,4 +1,5 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { CharacterRepository } from "@repositories/ModuleCharacter/CharacterRepository";
 import { provide } from "inversify-binding-decorators";
@@ -6,7 +7,7 @@ import { clearCacheForKey } from "speedgoose";
 
 @provide(DeleteCharacterUseCase)
 export class DeleteCharacterUseCase {
-  constructor(private characterRepository: CharacterRepository) {}
+  constructor(private characterRepository: CharacterRepository, private inMemoryHashTable: InMemoryHashTable) {}
 
   public async delete(id: string, ownerId: string): Promise<boolean> {
     let wasDeleted: boolean = false;
@@ -35,6 +36,10 @@ export class DeleteCharacterUseCase {
 
         return wasDeleted;
       });
+
+    if (wasDeleted) {
+      await this.inMemoryHashTable.delete("available-characters", ownerId);
+    }
 
     return wasDeleted;
   }
