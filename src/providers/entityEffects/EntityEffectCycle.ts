@@ -47,7 +47,7 @@ export class EntityEffectCycle {
     );
 
     // wait for 1 second before starting
-    await this.time.waitForSeconds(1);
+    await this.time.waitForMilliseconds(50);
 
     await this.execute(
       entityEffect,
