@@ -3,7 +3,6 @@ import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
 import { CharacterBaseSpeed } from "@providers/character/characterMovement/CharacterBaseSpeed";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
-import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
 import { CharacterRepository } from "@repositories/ModuleCharacter/CharacterRepository";
 import { UserAccountTypes } from "@rpg-engine/shared";
@@ -16,8 +15,7 @@ export class ReadCharacterUseCase {
     private characterInventory: CharacterInventory,
     private stealth: Stealth,
     private characterBaseSpeed: CharacterBaseSpeed,
-    private characterPremiumAccount: CharacterPremiumAccount,
-    private inMemoryHashTable: InMemoryHashTable
+    private characterPremiumAccount: CharacterPremiumAccount
   ) {}
 
   public async read(id: string, selectFields: string[]): Promise<ICharacter> {
@@ -67,16 +65,6 @@ export class ReadCharacterUseCase {
     let characters = await this.characterRepository.readAll(Character, { owner: ownerId }, false, null, true);
     characters = characters.filter((char) => !char.isSoftDeleted);
 
-    const charactersCache = (await this.inMemoryHashTable.get("available-characters", ownerId)) as ICharacter[];
-
-    if (charactersCache) {
-      return charactersCache;
-    }
-
-    const result = await Promise.all(characters.map((char) => this.enrichCharacter(char)));
-
-    await this.inMemoryHashTable.set("available-characters", ownerId, result);
-
-    return result;
+    return Promise.all(characters.map((char) => this.enrichCharacter(char)));
   }
 }
