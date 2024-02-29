@@ -37,6 +37,14 @@ export class SocketIO implements ISocket {
 
         this.socket.adapter(createAdapter(pubClient, subClient));
 
+        pubClient.on("error", (err) => {
+          console.log(err.message);
+        });
+
+        subClient.on("error", (err) => {
+          console.log(err.message);
+        });
+
         await Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
           this.socket.use(SocketIOAuthMiddleware);
           this.socket.listen(appEnv.socket.port.SOCKET);
