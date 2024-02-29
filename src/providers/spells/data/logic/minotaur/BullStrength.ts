@@ -40,8 +40,20 @@ export class BullStrength {
     }
   }
 
+  public async clearAllGiantForms(): Promise<void> {
+    try {
+      await Character.updateMany({ isGiantForm: true }, { $set: { isGiantForm: false } });
+    } catch (error) {
+      console.error(`Failed to clear all giant forms: ${error}`);
+    }
+  }
+
+  private async setGiantForm(character: ICharacter, value: boolean): Promise<void> {
+    await Character.updateOne({ _id: character._id }, { $set: { isGiantForm: value } });
+  }
+
   private async enableGiantForm(character: ICharacter, timeout: number): Promise<void> {
-    await Character.updateOne({ _id: character._id }, { $set: { isGiantForm: true } });
+    await this.setGiantForm(character, true);
 
     const payload: ICharacterAttributeChanged = {
       targetId: character._id,
@@ -65,7 +77,7 @@ export class BullStrength {
   }
 
   private async disableGiantForm(character: ICharacter): Promise<void> {
-    await Character.updateOne({ _id: character._id }, { $set: { isGiantForm: false } });
+    await this.setGiantForm(character, false);
 
     const payload: ICharacterAttributeChanged = {
       targetId: character._id,
