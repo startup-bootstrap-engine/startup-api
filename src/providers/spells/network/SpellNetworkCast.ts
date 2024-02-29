@@ -24,6 +24,10 @@ export class SpellNetworkCast {
       channel,
       SpellSocketEvents.CastSpell,
       async (data: ISpellCast, character: ICharacter) => {
+        if (!data || !character) {
+          return;
+        }
+
         await this.addToQueue(data, character);
       },
       true,
@@ -56,6 +60,14 @@ export class SpellNetworkCast {
         this.queueName,
         async (job) => {
           const { character, data } = job.data;
+
+          if (!data || !character) {
+            console.error(
+              `Error processing ${this.queueName} for Character ${character.name}:`,
+              "No data or character"
+            );
+            return;
+          }
 
           try {
             await this.spellCast.castSpell(data, character);

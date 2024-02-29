@@ -64,114 +64,119 @@ export class SpellCast {
 
   @TrackNewRelicTransaction()
   public async castSpell(data: ISpellCast, character: ICharacter): Promise<boolean> {
-    if (!this.characterValidation.hasBasicValidation(character)) {
-      return false;
-    }
-
-    const spell = this.getSpell(data.magicWords) as ISpell;
-
-    if (!(await this.isSpellCastingValid(spell, character))) {
-      return false;
-    }
-
-    if (character.target.id !== undefined && character.target.type !== undefined) {
-      data.targetId = character.target.id as unknown as string;
-      data.targetType = character.target.type as unknown as EntityType;
-    }
-
-    if (spell.castingType === SpellCastingType.RangedCasting && (!data.targetType || !data.targetId)) {
-      await this.sendPreSpellCastEvents(spell, character);
-      this.sendIdentifyTargetEvent(character, data);
-      return false;
-    }
-
-    if (spell.castingType === SpellCastingType.SelfCasting) {
-      await this.sendPreSpellCastEvents(spell, character);
-    }
-
-    const namespace = `${NamespaceRedisControl.CharacterSpell}:${character._id}`;
-    let key = spell.attribute;
-    // @ts-ignore
-    key || (key = spell.key);
-
-    if (key) {
-      const buffActivated = await this.inMemoryHashTable.has(namespace, key);
-
-      if (buffActivated) {
-        this.socketMessaging.sendErrorMessageToCharacter(character, `Sorry, ${spell.name} is already activated.`);
+    try {
+      if (!this.characterValidation.hasBasicValidation(character)) {
         return false;
       }
-    }
 
-    let target;
-    if (spell.castingType === SpellCastingType.RangedCasting) {
-      target = await EntityUtil.getEntity(data.targetId!, data.targetType!);
-      if (!(await this.isRangedCastingValid(character, target, spell))) {
+      const spell = this.getSpell(data.magicWords) as ISpell;
+
+      if (!(await this.isSpellCastingValid(spell, character))) {
         return false;
       }
-    }
 
-    if (target) {
-      if (target.type === "NPC") {
-        target = await NPC.findOne({ _id: target._id, scene: target.scene }).lean({
-          virtuals: true,
-          defaults: true,
-        });
+      if (character.target.id !== undefined && character.target.type !== undefined) {
+        data.targetId = character.target.id as unknown as string;
+        data.targetType = character.target.type as unknown as EntityType;
+      }
 
-        const updatedNPCSkills = await Skill.findOne({ owner: target._id, ownerType: "NPC" })
-          .lean({
+      if (spell.castingType === SpellCastingType.RangedCasting && (!data.targetType || !data.targetId)) {
+        await this.sendPreSpellCastEvents(spell, character);
+        this.sendIdentifyTargetEvent(character, data);
+        return false;
+      }
+
+      if (spell.castingType === SpellCastingType.SelfCasting) {
+        await this.sendPreSpellCastEvents(spell, character);
+      }
+
+      const namespace = `${NamespaceRedisControl.CharacterSpell}:${character._id}`;
+      let key = spell.attribute;
+      // @ts-ignore
+      key || (key = spell.key);
+
+      if (key) {
+        const buffActivated = await this.inMemoryHashTable.has(namespace, key);
+
+        if (buffActivated) {
+          this.socketMessaging.sendErrorMessageToCharacter(character, `Sorry, ${spell.name} is already activated.`);
+          return false;
+        }
+      }
+
+      let target;
+      if (spell.castingType === SpellCastingType.RangedCasting) {
+        target = await EntityUtil.getEntity(data.targetId!, data.targetType!);
+        if (!(await this.isRangedCastingValid(character, target, spell))) {
+          return false;
+        }
+      }
+
+      if (target) {
+        if (target.type === "NPC") {
+          target = await NPC.findOne({ _id: target._id, scene: target.scene }).lean({
             virtuals: true,
             defaults: true,
-          })
-          .cacheQuery({
+          });
+
+          const updatedNPCSkills = await Skill.findOne({ owner: target._id, ownerType: "NPC" })
+            .lean({
+              virtuals: true,
+              defaults: true,
+            })
+            .cacheQuery({
+              cacheKey: `${target._id}-skills`,
+            });
+
+          target.skills = updatedNPCSkills;
+        }
+        if (target.type === "Character") {
+          target = await Character.findOne({ _id: target._id, scene: target.scene }).lean({
+            virtuals: true,
+            defaults: true,
+          });
+
+          const updatedCharacterSkills = await Skill.findOne({ owner: target._id, ownerType: "Character" }).cacheQuery({
             cacheKey: `${target._id}-skills`,
           });
 
-        target.skills = updatedNPCSkills;
+          target.skills = updatedCharacterSkills;
+        }
       }
-      if (target.type === "Character") {
-        target = await Character.findOne({ _id: target._id, scene: target.scene }).lean({
-          virtuals: true,
-          defaults: true,
-        });
 
-        const updatedCharacterSkills = await Skill.findOne({ owner: target._id, ownerType: "Character" }).cacheQuery({
-          cacheKey: `${target._id}-skills`,
-        });
+      const hasCastSucceeded = await spell.usableEffect(character, target);
 
-        target.skills = updatedCharacterSkills;
+      // if it fails, it will return explicitly false above. We prevent moving forward, so mana is not spent unnecessarily
+      if (hasCastSucceeded === false) {
+        return false;
       }
-    }
 
-    const hasCastSucceeded = await spell.usableEffect(character, target);
+      const hasSpellCooldown = await this.spellCoolDown.haveSpellCooldown(character, spell.magicWords);
 
-    // if it fails, it will return explicitly false above. We prevent moving forward, so mana is not spent unnecessarily
-    if (hasCastSucceeded === false) {
+      if (!hasSpellCooldown) {
+        await this.spellCoolDown.setSpellCooldown(spell.key, character, spell.magicWords, spell.cooldown);
+      }
+      await this.spellCoolDown.getAllSpellCooldowns(character);
+
+      const updatedCharacter = (await Character.findById(character._id)) as ICharacter;
+
+      await this.itemUsableEffect.apply(updatedCharacter, EffectableAttribute.Mana, -1 * spell.manaCost);
+      await updatedCharacter.save();
+
+      await this.sendPostSpellCastEvents(updatedCharacter, spell, target);
+
+      await this.skillIncrease.increaseMagicSP(updatedCharacter, spell.manaCost);
+      if (target?.type === EntityType.Character) {
+        await this.skillIncrease.increaseMagicResistanceSP(target, spell.manaCost);
+      }
+
+      await this.characterBonusPenalties.applyRaceBonusPenalties(updatedCharacter, BasicAttribute.Magic);
+
+      return true;
+    } catch (error) {
+      console.error(error);
       return false;
     }
-
-    const hasSpellCooldown = await this.spellCoolDown.haveSpellCooldown(character, spell.magicWords);
-
-    if (!hasSpellCooldown) {
-      await this.spellCoolDown.setSpellCooldown(spell.key, character, spell.magicWords, spell.cooldown);
-    }
-    await this.spellCoolDown.getAllSpellCooldowns(character);
-
-    const updatedCharacter = (await Character.findById(character._id)) as ICharacter;
-
-    await this.itemUsableEffect.apply(updatedCharacter, EffectableAttribute.Mana, -1 * spell.manaCost);
-    await updatedCharacter.save();
-
-    await this.sendPostSpellCastEvents(updatedCharacter, spell, target);
-
-    await this.skillIncrease.increaseMagicSP(updatedCharacter, spell.manaCost);
-    if (target?.type === EntityType.Character) {
-      await this.skillIncrease.increaseMagicResistanceSP(target, spell.manaCost);
-    }
-
-    await this.characterBonusPenalties.applyRaceBonusPenalties(updatedCharacter, BasicAttribute.Magic);
-
-    return true;
   }
 
   private async isRangedCastingValid(caster: ICharacter, target: ICharacter | INPC, spell: ISpell): Promise<boolean> {

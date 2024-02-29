@@ -68,73 +68,77 @@ export class UseWithEntity {
 
   @TrackNewRelicTransaction()
   public async execute(payload: IUseWithEntity, character: ICharacter): Promise<void> {
-    const item = payload.itemId ? ((await Item.findById(payload.itemId)) as unknown as IItem) : null;
+    try {
+      const item = payload.itemId ? ((await Item.findById(payload.itemId)) as unknown as IItem) : null;
 
-    if (payload.entityType === EntityType.Item && item && item.isRefillable) {
-      const targetItem = await Item.findById(payload.entityId);
+      if (payload.entityType === EntityType.Item && item && item.isRefillable) {
+        const targetItem = await Item.findById(payload.entityId);
 
-      if (!targetItem) {
-        this.socketMessaging.sendErrorMessageToCharacter(character, "Target item is not found");
+        if (!targetItem) {
+          this.socketMessaging.sendErrorMessageToCharacter(character, "Target item is not found");
+          return;
+        }
+
+        const blueprintRefill = (await this.blueprintManager.getBlueprint("items", item.baseKey!)) as IRefillableItem;
+
+        if (!blueprintRefill || !blueprintRefill.usableEffect) {
+          this.socketMessaging.sendErrorMessageToCharacter(
+            character,
+            "Refill blueprint is not found or usableEffect is not defined"
+          );
+          return;
+        }
+
+        await blueprintRefill.usableEffect!(character, targetItem, this.skillIncrease, item);
+
         return;
       }
 
-      const blueprintRefill = (await this.blueprintManager.getBlueprint("items", item.baseKey!)) as IRefillableItem;
+      const blueprint = (await this.blueprintManager.getBlueprint("items", item?.baseKey!)) as IUseWithItemSource;
 
-      if (!blueprintRefill || !blueprintRefill.usableEffect) {
-        this.socketMessaging.sendErrorMessageToCharacter(
-          character,
-          "Refill blueprint is not found or usableEffect is not defined"
-        );
+      if (!payload.entityId && blueprint.hasSelfAutoTarget) {
+        payload.entityId = character.id;
+        payload.entityType = EntityType.Character;
+      }
+
+      const target = payload.entityId ? await EntityUtil.getEntity(payload.entityId, payload.entityType) : null;
+
+      const isBaseRequestValid = this.useWithEntityValidation.baseValidation(
+        character,
+        item!,
+        blueprint,
+        payload.entityType
+      );
+
+      if (!isBaseRequestValid) {
         return;
       }
 
-      await blueprintRefill.usableEffect!(character, targetItem, this.skillIncrease, item);
+      const isSelfTarget = blueprint.hasSelfAutoTarget;
 
-      return;
+      if (isSelfTarget) {
+        character = (await Character.findById(character._id)) as unknown as ICharacter;
+
+        await this.executeEffect(character, character, item!);
+
+        return;
+      }
+
+      const isTargetValid = await this.useWithEntityValidation.validateTargetRequest(
+        character,
+        target,
+        item,
+        blueprint,
+        payload.entityType
+      );
+      if (!isTargetValid) {
+        return;
+      }
+
+      await this.executeEffect(character, target!, item!);
+    } catch (error) {
+      console.error(error);
     }
-
-    const blueprint = (await this.blueprintManager.getBlueprint("items", item?.baseKey!)) as IUseWithItemSource;
-
-    if (!payload.entityId && blueprint.hasSelfAutoTarget) {
-      payload.entityId = character.id;
-      payload.entityType = EntityType.Character;
-    }
-
-    const target = payload.entityId ? await EntityUtil.getEntity(payload.entityId, payload.entityType) : null;
-
-    const isBaseRequestValid = this.useWithEntityValidation.baseValidation(
-      character,
-      item!,
-      blueprint,
-      payload.entityType
-    );
-
-    if (!isBaseRequestValid) {
-      return;
-    }
-
-    const isSelfTarget = blueprint.hasSelfAutoTarget;
-
-    if (isSelfTarget) {
-      character = (await Character.findById(character._id)) as unknown as ICharacter;
-
-      await this.executeEffect(character, character, item!);
-
-      return;
-    }
-
-    const isTargetValid = await this.useWithEntityValidation.validateTargetRequest(
-      character,
-      target,
-      item,
-      blueprint,
-      payload.entityType
-    );
-    if (!isTargetValid) {
-      return;
-    }
-
-    await this.executeEffect(character, target!, item!);
   }
 
   private async executeEffect(caster: ICharacter, target: ICharacter | INPC | IItem, item: IItem): Promise<void> {
