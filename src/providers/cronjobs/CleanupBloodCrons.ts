@@ -11,11 +11,11 @@ export class CleanupBloodCrons {
 
   public schedule(): void {
     this.cronJobScheduler.uniqueSchedule("cleanup-blood-crons", "*/1 * * * *", async () => {
-      const fiveMinAgo = new Date();
-      fiveMinAgo.setMinutes(fiveMinAgo.getMinutes() - 5);
+      const oneMinAgo = new Date();
+      oneMinAgo.setMinutes(oneMinAgo.getMinutes() - 1);
 
       await Item.deleteMany({
-        createdAt: { $lt: fiveMinAgo },
+        createdAt: { $lt: oneMinAgo },
         key: EffectsBlueprint.GroundBlood,
         subType: { $ne: ItemSubType.DeadBody },
       });
