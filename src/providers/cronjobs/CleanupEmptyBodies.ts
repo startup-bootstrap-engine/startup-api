@@ -14,17 +14,17 @@ export class CleanupEmptyBodyCrons {
       const threeMinAgo = new Date();
       threeMinAgo.setMinutes(threeMinAgo.getMinutes() - 3);
 
-      const charBodies = await Item.find({
+      const emptyBodies = await Item.find({
         createdAt: { $lt: threeMinAgo },
         subType: ItemSubType.DeadBody,
       })
         .populate({ path: "itemContainer", select: "slots slotQty" })
         .exec();
 
-      for (const charBody of charBodies) {
-        const itemContainer = charBody.itemContainer as IItemContainer;
+      for (const emptyBody of emptyBodies) {
+        const itemContainer = emptyBody.itemContainer as IItemContainer;
         if (itemContainer?.emptySlotsQty === itemContainer?.slotQty) {
-          await charBody.remove();
+          await emptyBody.remove();
         }
       }
     });

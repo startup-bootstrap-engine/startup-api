@@ -1,7 +1,7 @@
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { ItemSubType } from "@rpg-engine/shared";
+import { EntityType, ItemSubType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
 @provide(ItemContainerBodyCleaner)
@@ -48,13 +48,13 @@ export class ItemContainerBodyCleaner {
     const npcBodies = await Item.find({
       createdAt: { $lt: fiveMinutesAgo },
       subType: ItemSubType.DeadBody,
-      key: { $exists: true },
+      $or: [{ deadBodyEntityType: EntityType.NPC }, { deadBodyEntityType: { $exists: false } }],
     });
 
     const characterBodies = await Item.find({
       createdAt: { $lt: oneHourAgo },
       subType: ItemSubType.DeadBody,
-      key: { $exists: false },
+      deadBodyEntityType: EntityType.Character,
     });
 
     return [...npcBodies, ...characterBodies];

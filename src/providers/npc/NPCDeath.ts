@@ -13,7 +13,7 @@ import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTy
 import { Locker } from "@providers/locks/Locker";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
-import { BattleSocketEvents, CharacterPartyBenefits, IBattleDeath, INPCLoot } from "@rpg-engine/shared";
+import { BattleSocketEvents, CharacterPartyBenefits, EntityType, IBattleDeath, INPCLoot } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { Types } from "mongoose";
 import { NPCExperience } from "./NPCExperience/NPCExperience";
@@ -172,6 +172,7 @@ export class NPCDeath {
       scene: npc.scene,
       x: npc.x,
       y: npc.y,
+      deadBodyEntityType: EntityType.NPC,
     });
 
     return await npcBody.save();

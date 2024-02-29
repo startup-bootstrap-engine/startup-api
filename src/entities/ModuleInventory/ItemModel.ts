@@ -5,7 +5,7 @@ import { ItemView } from "@providers/item/ItemView";
 import { RangedWeaponsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { MapHelper } from "@providers/map/MapHelper";
 import { ItemRarities, ItemSlotType, ItemSubType, ItemType, MapLayers, TypeHelper } from "@rpg-engine/shared";
-import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
+import { EntityAttackType, EntityType } from "@rpg-engine/shared/dist/types/entity.types";
 import { UpdateQuery } from "mongoose";
 import { ExtractDoc, Type, typedModel } from "ts-mongoose";
 import { ItemContainer } from "./ItemContainerModel";
@@ -109,6 +109,8 @@ const itemSchema = createLeanSchema(
     }),
 
     isInDepot: Type.boolean({ required: false }),
+
+    deadBodyEntityType: Type.string({ required: false, enum: TypeHelper.enumToStringArray(EntityType) }),
 
     isDeadBodyLootable: Type.boolean({ required: false }),
 
