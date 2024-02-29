@@ -31,8 +31,11 @@ export class SocketIO implements ISocket {
           socket: {
             host: appEnv.database.REDIS_CONTAINER,
             port: appEnv.database.REDIS_PORT,
+            connectTimeout: 10000,
             reconnectStrategy: (retries) => Math.min(retries * 100, 1500), // Exponential backoff
           },
+          pingInterval: 2500,
+          disableOfflineQueue: true,
         };
 
         const pubClient = createClient(redisOptions);

@@ -1,6 +1,6 @@
 import { appEnv } from "@providers/config/env";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import IORedis from "ioredis";
+import { Redis } from "ioredis";
 import { RedisBareClient } from "./RedisManager/RedisBareClient";
 import { RedisIOClient } from "./RedisManager/RedisIOClient";
 
@@ -8,7 +8,7 @@ import { RedisIOClient } from "./RedisManager/RedisIOClient";
 export class RedisManager {
   private maxRetries: number = 5;
   private retryDelay: number = 1000; // Start with 1 second
-  public client: IORedis.Redis | null = null;
+  public client: Redis | null | void = null;
 
   constructor(private redisBareClient: RedisBareClient, private redisIOClient: RedisIOClient) {}
 
