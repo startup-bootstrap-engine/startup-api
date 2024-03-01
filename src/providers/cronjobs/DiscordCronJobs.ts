@@ -94,7 +94,7 @@ export class DiscordCronJobs {
       // Your message content
       const message = `Feeling a little bit lost? 
         
-        Checkout our BEGINNER'S GUIDE: https://definya.com/docs/category/guides`;
+        Checkout our BEGINNER'S GUIDE: https://docs.definya.com/`;
 
       await this.discordBot.sendMessageWithColor(
         message,
