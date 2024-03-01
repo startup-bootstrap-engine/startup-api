@@ -3,6 +3,7 @@ import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterDeath } from "@providers/character/CharacterDeath";
+import { GENERATE_BLOOD_ON_DEATH } from "@providers/constants/BattleConstants";
 import { NPCDeath } from "@providers/npc/NPCDeath";
 import { NPCExperience } from "@providers/npc/NPCExperience/NPCExperience";
 import { NPCTarget } from "@providers/npc/movement/NPCTarget";
@@ -10,6 +11,7 @@ import { QuestSystem } from "@providers/quest/QuestSystem";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { EntityType, QuestType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import { random } from "lodash";
 import { BattleEffects } from "../BattleEffects";
 import { BattleNetworkStopTargeting } from "../network/BattleNetworkStopTargetting";
 
@@ -29,7 +31,11 @@ export class BattleAttackTargetDeath {
   @TrackNewRelicTransaction()
   public async handleDeathAfterHit(attacker: ICharacter | INPC, target: ICharacter | INPC): Promise<void> {
     if (!target.isAlive) {
-      await this.battleEffects.generateBloodOnGround(target);
+      const n = random(0, 100);
+
+      if (n <= GENERATE_BLOOD_ON_DEATH) {
+        await this.battleEffects.generateBloodOnGround(target);
+      }
 
       if (target.type === "Character") {
         await this.handleCharacterDeath(attacker, target as ICharacter);

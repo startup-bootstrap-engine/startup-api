@@ -2,6 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { CharacterDeath } from "@providers/character/CharacterDeath";
+import { GENERATE_BLOOD_GROUND_ON_HIT } from "@providers/constants/BattleConstants";
 import { NPCDeath } from "@providers/npc/NPCDeath";
 import { NPCExperience } from "@providers/npc/NPCExperience/NPCExperience";
 import { QuestSystem } from "@providers/quest/QuestSystem";
@@ -53,7 +54,7 @@ export class OnTargetHit {
   private async generateBloodOnGround(target: ICharacter | INPC): Promise<void> {
     const n = _.random(0, 100);
 
-    if (n <= 10) {
+    if (n <= GENERATE_BLOOD_GROUND_ON_HIT) {
       await this.battleEffects.generateBloodOnGround(target);
     }
   }

@@ -26,7 +26,7 @@ import {
 } from "@rpg-engine/shared";
 
 import { appEnv } from "@providers/config/env";
-import { BONUS_DAMAGE_MULTIPLIER, GENERATE_BLOOD_GROUND_CHANGE } from "@providers/constants/BattleConstants";
+import { BONUS_DAMAGE_MULTIPLIER, GENERATE_BLOOD_GROUND_ON_HIT } from "@providers/constants/BattleConstants";
 import { RedisManager } from "@providers/database/RedisManager";
 import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { blueprintManager } from "@providers/inversify/container";
@@ -365,7 +365,7 @@ export class HitTarget {
 
         const generateBloodChance = random(1, 100);
 
-        generateBloodChance <= GENERATE_BLOOD_GROUND_CHANGE &&
+        generateBloodChance <= GENERATE_BLOOD_GROUND_ON_HIT &&
           damageRelatedPromises.push(this.battleEffects.generateBloodOnGround(target));
       }
 

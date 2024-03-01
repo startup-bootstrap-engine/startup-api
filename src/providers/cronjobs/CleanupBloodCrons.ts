@@ -1,6 +1,5 @@
 import { Item } from "@entities/ModuleInventory/ItemModel";
 import { EffectsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
-import { ItemSubType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { CronJobScheduler } from "./CronJobScheduler";
 
@@ -16,7 +15,6 @@ export class CleanupBloodCrons {
       await Item.deleteMany({
         createdAt: { $lt: oneMinAgo },
         key: EffectsBlueprint.GroundBlood,
-        subType: { $ne: ItemSubType.DeadBody },
       });
     });
   }
