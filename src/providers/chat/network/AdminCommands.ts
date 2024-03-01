@@ -3,6 +3,7 @@ import { container } from "@providers/inversify/container";
 import { MapTransition } from "@providers/map/MapTransition/MapTransition";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { CharacterSocketEvents, ToGridX, ToGridY } from "@rpg-engine/shared";
+import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 
 function formatPlayerName(playerName: string): string {
@@ -36,6 +37,8 @@ export class AdminCommands {
       return;
     }
 
+    const banRemovalDate = dayjs().add(banDuration, "day").toDate();
+
     await Character.updateOne(
       {
         _id: targetPlayer._id,
@@ -43,7 +46,7 @@ export class AdminCommands {
       {
         $set: {
           isBanned: true,
-          banRemovalDate: new Date(Date.now() + banDuration * 24 * 60 * 60 * 1000),
+          banRemovalDate,
         },
       }
     );
