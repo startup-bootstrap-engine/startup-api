@@ -7,7 +7,7 @@ export const itemIroncladCleaver: IEquippableMeleeTier16WeaponBlueprint = {
   type: ItemType.Weapon,
   subType: ItemSubType.Axe,
   textureAtlas: "items",
-  texturePath: "axes/ironclad-cleaver.png",
+  texturePath: "axes/ironclad-cleaver-axe.png",
   name: "Ironclad Cleaver",
   description: "The Ironclad Cleaver axe commands respect with its sharp, imposing presence.",
   weight: 5.6,
