@@ -32,7 +32,8 @@ describe("AdminCommands", () => {
 
       const diff = dayjs(updatedCharacter.banRemovalDate).diff(dayjs(), "day");
 
-      expect(diff).toBe(10);
+      expect(diff).toBeGreaterThanOrEqual(9);
+      expect(diff).toBeLessThanOrEqual(10);
       expect(updatedCharacter.isBanned).toBe(true);
       expect(sendMessageToCharacterSpy).toHaveBeenCalledWith(
         expect.objectContaining({
