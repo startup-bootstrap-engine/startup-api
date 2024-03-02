@@ -683,6 +683,12 @@ export enum BooksBlueprint {
   MysticalTomes = "mystical-tomes",
   LoreVolume = "lore-volume",
   AlchemistsAlmanac = "alchemists-almanac",
+  SoulCrystal = "soul-crystal",
+  ElementalSphere = "elemental-sphere",
+  MysteryOrb = "mystery-orb",
+  MagicOrb = "magic-orb",
+  AstralGlobe = "astral-globe",
+  EtherealSphere = "ethereal-sphere",
 }
 
 export enum OthersBlueprint {

@@ -25,6 +25,7 @@ import {
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcCondessa: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
@@ -62,66 +63,66 @@ export const npcCondessa: INPCTierBlueprint<15> = {
   loots: [
     {
       itemBlueprintKey: StaffsBlueprint.PoisonWand,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.PaviseShield,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,
-      chance: 15,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 10],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Silk,
-      chance: 35,
+      chance: LootProbability.SemiCommon,
       quantityRange: [1, 10],
     },
     {
       itemBlueprintKey: DaggersBlueprint.CorruptionDagger,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.HasteRing,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.RuneCrossbow,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
 
     {
       itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
-      chance: 4,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.StonefangCleaverClub,
-      chance: 6,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.DualImpactAxe,
-      chance: 8,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.BattleAxe,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AxesBlueprint.CrownSplitterAxe,
-      chance: 12,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
-      chance: 12,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: SwordsBlueprint.VenomousStinger,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: SwordsBlueprint.VenomousFang,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

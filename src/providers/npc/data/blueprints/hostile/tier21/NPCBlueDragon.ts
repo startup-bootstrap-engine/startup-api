@@ -16,6 +16,7 @@ import {
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import {
@@ -72,185 +73,189 @@ export const npcBlueDragon: INPCTierBlueprint<21> = {
   loots: [
     {
       itemBlueprintKey: SwordsBlueprint.LeviathanSword,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,
-      chance: 100,
+      chance: LootProbability.VeryCommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonTooth,
-      chance: 80,
+      chance: LootProbability.VeryCommon,
       quantityRange: [1, 3],
     },
     {
+      itemBlueprintKey: BooksBlueprint.EtherealSphere,
+      chance: LootProbability.VeryRare,
+    },
+    {
       itemBlueprintKey: ArmorsBlueprint.DarkArmor,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.DemonShield,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.MithrilArmor,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: LegsBlueprint.MithrilLegs,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: LegsBlueprint.GoldenLegs,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: BootsBlueprint.GoldenBoots,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.RoyalHelmet,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
 
     {
       itemBlueprintKey: HelmetsBlueprint.SaviorsHelmet,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.CorruptionSword,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.RoyalKnightHelmet,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.SilverShield,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: AxesBlueprint.GuardianAxe,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.GlacialCrown,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.GlacialAxe,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: LegsBlueprint.GlacialLegs,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.GlacialSword,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.EmeraldShield,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.DragonScalCleaverClub,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.TwinFangClub,
-      chance: 8,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.BoneReaperAxe,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: AxesBlueprint.IroncladCleaver,
-      chance: 40,
+      chance: LootProbability.Common,
     },
     {
       itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: 39,
+      chance: LootProbability.Common,
     },
     {
       itemBlueprintKey: AxesBlueprint.ExecutionersAxe,
-      chance: 42,
+      chance: LootProbability.Common,
     },
     {
       itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
-      chance: 44,
+      chance: LootProbability.Common,
     },
     {
       itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
-      chance: 46,
+      chance: LootProbability.Common,
     },
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
-      chance: 50,
+      chance: LootProbability.VeryCommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
-      chance: 51,
+      chance: LootProbability.VeryCommon,
     },
     {
       itemBlueprintKey: GemsBlueprint.SapphireGem,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: GemsBlueprint.AmethystGem,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.GoldenRubyNecklace,
-      chance: 3,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.SunlitRubyNecklace,
-      chance: 14,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.CrimsonNecklace,
-      chance: 16,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.SilverRing,
-      chance: 17,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: BooksBlueprint.EsotericEpistles,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: BooksBlueprint.MysticalTomes,
-      chance: 6,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: BooksBlueprint.AlchemistsAlmanac,
-      chance: 8,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.AzureWizardHat,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],

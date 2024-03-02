@@ -22,6 +22,12 @@ import { itemEtherealTomes } from "./tier3/itemEtherealTomes";
 import { itemLoreVolume } from "./tier3/itemLoreVolume";
 import { itemMysticalTomes } from "./tier3/itemMysticalTomes";
 import { itemAlchemistsAlmanac } from "./tier4/itemAlchemistsAlmanac";
+import { itemSoulCrystal } from "./tier5/itemSoulCrystal";
+import { itemElementalSphere } from "./tier5/itemElementalSphere";
+import { itemMagicOrb } from "./tier6/itemMagicOrb";
+import { itemAstralGlobe } from "./tier6/itemAstralGlobe";
+import { itemEtherealSphere } from "./tier7/itemEtherealSphere";
+import { itemMysteryOrb } from "./tier7/itemMysteryOrb";
 
 export const booksBlueprintIndex = {
   [BooksBlueprint.Book]: itemBook,
@@ -47,4 +53,10 @@ export const booksBlueprintIndex = {
   [BooksBlueprint.LoreVolume]: itemLoreVolume,
   [BooksBlueprint.MysticalTomes]: itemMysticalTomes,
   [BooksBlueprint.AlchemistsAlmanac]: itemAlchemistsAlmanac,
+  [BooksBlueprint.SoulCrystal]: itemSoulCrystal,
+  [BooksBlueprint.ElementalSphere]: itemElementalSphere,
+  [BooksBlueprint.MysteryOrb]: itemMysteryOrb,
+  [BooksBlueprint.MagicOrb]: itemMagicOrb,
+  [BooksBlueprint.AstralGlobe]: itemAstralGlobe,
+  [BooksBlueprint.EtherealSphere]: itemEtherealSphere,
 };

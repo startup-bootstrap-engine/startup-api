@@ -6,6 +6,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcWinterWolf: INPCTierBlueprint<2> = {
   ...generateMoveTowardsMovement(),
@@ -35,16 +36,16 @@ export const npcWinterWolf: INPCTierBlueprint<2> = {
   loots: [
     {
       itemBlueprintKey: FoodsBlueprint.Salmon,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.Bread,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
 
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WolfTooth,
-      chance: 50,
+      chance: LootProbability.VeryCommon,
       quantityRange: [3, 5],
     },
   ],

@@ -1240,3 +1240,15 @@ export interface IEquippableBookTier3Blueprint extends IEquippableItemBlueprint 
 export interface IEquippableBookTier4Blueprint extends IEquippableItemBlueprint {
   tier: 4;
 }
+
+export interface IEquippableBookTier5Blueprint extends IEquippableItemBlueprint {
+  tier: 5;
+}
+
+export interface IEquippableBookTier6Blueprint extends IEquippableItemBlueprint {
+  tier: 6;
+}
+
+export interface IEquippableBookTier7Blueprint extends IEquippableItemBlueprint {
+  tier: 7;
+}

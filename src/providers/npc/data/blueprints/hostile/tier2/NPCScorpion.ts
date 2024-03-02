@@ -11,6 +11,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcScorpion: INPCTierBlueprint<2> = {
   ...generateMoveTowardsMovement(),
@@ -41,15 +42,15 @@ export const npcScorpion: INPCTierBlueprint<2> = {
   loots: [
     {
       itemBlueprintKey: PotionsBlueprint.LightAntidote,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.Potato,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Shuriken,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
   ],

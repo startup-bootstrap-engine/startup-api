@@ -12,6 +12,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcBlackSpider: INPCTierBlueprint<3> = {
   ...generateMoveTowardsMovement(),
@@ -41,19 +42,19 @@ export const npcBlackSpider: INPCTierBlueprint<3> = {
   loots: [
     {
       itemBlueprintKey: HelmetsBlueprint.WizardHat,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.Fish,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: SwordsBlueprint.ShortSword,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.SaiDagger,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],

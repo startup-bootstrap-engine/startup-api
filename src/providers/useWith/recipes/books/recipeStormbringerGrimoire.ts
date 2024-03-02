@@ -13,27 +13,27 @@ export const recipeStormbringerGrimoire: IUseWithCraftingRecipe = {
   requiredItems: [
     {
       key: CraftingResourcesBlueprint.MagicRecipe,
-      qty: 4,
+      qty: 8,
     },
     {
       key: CraftingResourcesBlueprint.ObsidiumIngot,
-      qty: 3,
+      qty: 10,
     },
     {
-      key: CraftingResourcesBlueprint.Leather,
-      qty: 5,
+      key: CraftingResourcesBlueprint.BlueFeather,
+      qty: 10,
     },
     {
       key: MagicsBlueprint.ThunderRune,
-      qty: 2,
+      qty: 19,
     },
   ],
   minCraftingRequirements: [
     CraftingSkill.Alchemy,
     calculateMinimumLevel([
-      [CraftingResourcesBlueprint.MagicRecipe, 4],
-      [CraftingResourcesBlueprint.ObsidiumIngot, 3],
-      [CraftingResourcesBlueprint.Leather, 5],
+      [CraftingResourcesBlueprint.MagicRecipe, 8],
+      [CraftingResourcesBlueprint.ObsidiumIngot, 10],
+      [CraftingResourcesBlueprint.BlueFeather, 10],
     ]),
   ],
 };

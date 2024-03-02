@@ -11,6 +11,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcBrownBear: INPCTierBlueprint<3> = {
   ...generateMoveTowardsMovement(),
@@ -41,29 +42,29 @@ export const npcBrownBear: INPCTierBlueprint<3> = {
   loots: [
     {
       itemBlueprintKey: FoodsBlueprint.WildSalmon,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.BrownFish,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.RedMeat,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.RawBeefSteak,
-      chance: 5,
+      chance: LootProbability.Rare,
       quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Leather,
-      chance: 50,
+      chance: LootProbability.VeryCommon,
       quantityRange: [5, 10],
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.SapphireNecklace,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

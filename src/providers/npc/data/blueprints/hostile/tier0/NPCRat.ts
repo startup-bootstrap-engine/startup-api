@@ -1,6 +1,7 @@
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { CraftingResourcesBlueprint, FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
@@ -34,17 +35,17 @@ export const npcRat: INPCTierBlueprint<0> = {
   loots: [
     {
       itemBlueprintKey: FoodsBlueprint.Cheese,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: FoodsBlueprint.CheeseSlice,
-      chance: 35,
+      chance: LootProbability.SemiCommon,
       quantityRange: [2, 3],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Worm,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [5, 10],
     },
   ],

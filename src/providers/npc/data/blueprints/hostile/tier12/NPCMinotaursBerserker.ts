@@ -18,6 +18,7 @@ import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcMinotaurBerserker: INPCTierBlueprint<12> = {
   ...generateMoveTowardsMovement(),
@@ -53,70 +54,70 @@ export const npcMinotaurBerserker: INPCTierBlueprint<12> = {
   loots: [
     {
       itemBlueprintKey: BootsBlueprint.RoyalBoots,
-      chance: 3,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: SpearsBlueprint.GuanDao,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.Fish,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: SwordsBlueprint.PoisonSword,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: DaggersBlueprint.CopperJitte,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.DamascusJitte,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: GlovesBlueprint.PlateGloves,
-      chance: 85,
+      chance: LootProbability.VeryCommon,
     },
     {
       itemBlueprintKey: SpearsBlueprint.Trident,
-      chance: 4,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.KnightsSword,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: HammersBlueprint.WarHammer,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.InfantryHelmet,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: SwordsBlueprint.BasiliskSword,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: SwordsBlueprint.CopperBroadsword,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Jade,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: SwordsBlueprint.PixieCutSword,
-      chance: 3,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.StellarBlade,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

@@ -13,27 +13,27 @@ export const recipeFrostWraithTome: IUseWithCraftingRecipe = {
   requiredItems: [
     {
       key: CraftingResourcesBlueprint.MagicRecipe,
-      qty: 2,
+      qty: 10,
     },
     {
       key: CraftingResourcesBlueprint.BlueSapphire,
-      qty: 3,
+      qty: 30,
     },
     {
       key: CraftingResourcesBlueprint.RedSapphire,
-      qty: 2,
+      qty: 20,
     },
     {
       key: MagicsBlueprint.CorruptionRune,
-      qty: 2,
+      qty: 20,
     },
   ],
   minCraftingRequirements: [
     CraftingSkill.Alchemy,
     calculateMinimumLevel([
-      [CraftingResourcesBlueprint.MagicRecipe, 2],
-      [CraftingResourcesBlueprint.BlueSapphire, 2],
-      [CraftingResourcesBlueprint.RedSapphire, 2],
+      [CraftingResourcesBlueprint.MagicRecipe, 10],
+      [CraftingResourcesBlueprint.BlueSapphire, 30],
+      [CraftingResourcesBlueprint.RedSapphire, 20],
     ]),
   ],
 };

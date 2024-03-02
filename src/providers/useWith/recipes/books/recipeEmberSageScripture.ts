@@ -9,23 +9,23 @@ export const recipeEmberSageScripture: IUseWithCraftingRecipe = {
   requiredItems: [
     {
       key: CraftingResourcesBlueprint.RedSapphire,
-      qty: 2,
+      qty: 20,
     },
     {
       key: CraftingResourcesBlueprint.PhoenixFeather,
-      qty: 2,
+      qty: 20,
     },
     {
-      key: CraftingResourcesBlueprint.Leather,
-      qty: 3,
+      key: CraftingResourcesBlueprint.BlueLeather,
+      qty: 30,
     },
   ],
   minCraftingRequirements: [
     CraftingSkill.Alchemy,
     calculateMinimumLevel([
-      [CraftingResourcesBlueprint.RedSapphire, 2],
-      [CraftingResourcesBlueprint.PhoenixFeather, 2],
-      [CraftingResourcesBlueprint.Leather, 3],
+      [CraftingResourcesBlueprint.RedSapphire, 20],
+      [CraftingResourcesBlueprint.PhoenixFeather, 20],
+      [CraftingResourcesBlueprint.BlueLeather, 30],
     ]),
   ],
 };

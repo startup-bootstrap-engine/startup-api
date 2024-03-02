@@ -13,27 +13,27 @@ export const recipeArcaneArbiterChronicles: IUseWithCraftingRecipe = {
   requiredItems: [
     {
       key: CraftingResourcesBlueprint.MagicRecipe,
-      qty: 5,
+      qty: 15,
     },
     {
       key: CraftingResourcesBlueprint.PhoenixFeather,
-      qty: 3,
+      qty: 30,
     },
     {
       key: CraftingResourcesBlueprint.GoldenIngot,
-      qty: 3,
+      qty: 30,
     },
     {
       key: MagicsBlueprint.EnergyBoltRune,
-      qty: 3,
+      qty: 30,
     },
   ],
   minCraftingRequirements: [
     CraftingSkill.Alchemy,
     calculateMinimumLevel([
-      [CraftingResourcesBlueprint.MagicRecipe, 5],
-      [CraftingResourcesBlueprint.PhoenixFeather, 3],
-      [CraftingResourcesBlueprint.GoldenIngot, 3],
+      [CraftingResourcesBlueprint.MagicRecipe, 15],
+      [CraftingResourcesBlueprint.PhoenixFeather, 30],
+      [CraftingResourcesBlueprint.GoldenIngot, 30],
     ]),
   ],
 };

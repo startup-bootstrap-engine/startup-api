@@ -11,6 +11,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcPolarBear: INPCTierBlueprint<4> = {
   ...generateMoveTowardsMovement(),
@@ -41,40 +42,40 @@ export const npcPolarBear: INPCTierBlueprint<4> = {
   loots: [
     {
       itemBlueprintKey: FoodsBlueprint.Fish,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.Salmon,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.Banana,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Leather,
-      chance: 50,
+      chance: LootProbability.VeryCommon,
       quantityRange: [5, 10],
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.SapphireNecklace,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Wheat,
       quantityRange: [3, 5],
-      chance: 25,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
       quantityRange: [2, 4],
-      chance: 25,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.BlueSapphire,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

@@ -22,6 +22,7 @@ import {
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcForestWalker: INPCTierBlueprint<8> = {
   ...generateMoveTowardsMovement(),
@@ -57,71 +58,71 @@ export const npcForestWalker: INPCTierBlueprint<8> = {
   loots: [
     {
       itemBlueprintKey: PotionsBlueprint.LightLifePotion,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.SpikedShield,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Arrow,
-      chance: 50,
+      chance: LootProbability.VeryCommon,
       quantityRange: [10, 20],
     },
     {
       itemBlueprintKey: FoodsBlueprint.Salmon,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
 
     {
       itemBlueprintKey: BootsBlueprint.CopperBoots,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.VikingShield,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.FireBolt,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WoodenSticks,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [1, 10],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.SmallWoodenStick,
-      chance: 40,
+      chance: LootProbability.Common,
       quantityRange: [5, 15],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WoodenBoard,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [1, 10],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,
-      chance: 5,
+      chance: LootProbability.Rare,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Herb,
-      chance: 50,
+      chance: LootProbability.VeryCommon,
       quantityRange: [5, 10],
     },
     {
       itemBlueprintKey: SwordsBlueprint.EldensSword,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.EarthArrow,
-      chance: 3,
+      chance: LootProbability.VeryRare,
       quantityRange: [10, 20],
     },
     {
       itemBlueprintKey: BootsBlueprint.LeafstepBoots,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],

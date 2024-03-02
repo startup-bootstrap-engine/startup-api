@@ -30,7 +30,7 @@ describe("AdminCommands", () => {
         .lean()
         .select("isBanned banRemovalDate")) as ICharacter;
 
-      const diff = dayjs(updatedCharacter.banRemovalDate).diff(dayjs(), "day") + 1;
+      const diff = dayjs(updatedCharacter.banRemovalDate).diff(dayjs(), "day");
 
       expect(diff).toBe(10);
       expect(updatedCharacter.isBanned).toBe(true);

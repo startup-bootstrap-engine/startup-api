@@ -19,6 +19,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcWildCyclops: INPCTierBlueprint<16> = {
   ...generateMoveTowardsMovement(),
@@ -51,67 +52,67 @@ export const npcWildCyclops: INPCTierBlueprint<16> = {
   loots: [
     {
       itemBlueprintKey: SwordsBlueprint.AzureMachete,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: PotionsBlueprint.ManaPotion,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.IronArrow,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [5, 10],
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.PhoenixBow,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: FoodsBlueprint.Coconut,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: SwordsBlueprint.FalconsSword,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: MagicsBlueprint.PoisonRune,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: ShieldsBlueprint.StuddedShield,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
-      chance: 18,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.StarshardDagger,
-      chance: 16,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.RubyglintNecklace,
-      chance: 4,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.GoldenGlimmerRing,
-      chance: 8,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: BooksBlueprint.EnchantedManuscript,
-      chance: 4,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: BooksBlueprint.ArcaneArchives,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.ArcaneAdepthat,
-      chance: 8,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

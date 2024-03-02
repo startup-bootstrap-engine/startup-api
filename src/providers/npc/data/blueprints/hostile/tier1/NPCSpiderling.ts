@@ -10,6 +10,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcSpiderling: INPCTierBlueprint<1> = {
   ...generateMoveTowardsMovement(),
@@ -39,16 +40,16 @@ export const npcSpiderling: INPCTierBlueprint<1> = {
   loots: [
     {
       itemBlueprintKey: GlovesBlueprint.StuddedGloves,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.Banana,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.BlueSilk,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
   ],

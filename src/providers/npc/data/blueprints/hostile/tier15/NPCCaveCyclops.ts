@@ -16,6 +16,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcCaveCyclops: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
@@ -48,57 +49,57 @@ export const npcCaveCyclops: INPCTierBlueprint<15> = {
   loots: [
     {
       itemBlueprintKey: AxesBlueprint.GoldenAxe,
-      chance: 25,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.PhoenixDagger,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.HellishBow,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
 
     {
       itemBlueprintKey: CraftingResourcesBlueprint.ObsidiumOre,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: AccessoriesBlueprint.SapphireRing,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: MacesBlueprint.TwinFangClub,
-      chance: 6,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.IronWoodCrusherClub,
-      chance: 8,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.CleaverAxe,
-      chance: 9,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: 13,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AxesBlueprint.SpikeToppedAxe,
-      chance: 16,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
-      chance: 12,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: SwordsBlueprint.ThunderboltCutlass,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: SwordsBlueprint.Shadowblade,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

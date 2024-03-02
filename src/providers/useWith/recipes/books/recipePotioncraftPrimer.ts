@@ -8,19 +8,19 @@ export const recipePotioncraftPrimer: IUseWithCraftingRecipe = {
   requiredItems: [
     {
       key: CraftingResourcesBlueprint.MagicRecipe,
-      qty: 6,
+      qty: 12,
     },
     {
       key: CraftingResourcesBlueprint.ObsidiumIngot,
-      qty: 4,
+      qty: 40,
     },
     {
       key: CraftingResourcesBlueprint.ElvenLeaf,
-      qty: 6,
+      qty: 60,
     },
     {
       key: CraftingResourcesBlueprint.BlueLeather,
-      qty: 2,
+      qty: 20,
     },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 18],

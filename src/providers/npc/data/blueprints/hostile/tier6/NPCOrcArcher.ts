@@ -16,6 +16,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcOrcArcher: INPCTierBlueprint<6> = {
   ...generateMoveTowardsMovement(),
@@ -55,65 +56,65 @@ export const npcOrcArcher: INPCTierBlueprint<6> = {
   loots: [
     {
       itemBlueprintKey: HelmetsBlueprint.LeatherHelmet,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
 
     {
       itemBlueprintKey: ToolsBlueprint.FishingRod,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: LegsBlueprint.StuddedLegs,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.NinjaKunai,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: RangedWeaponsBlueprint.IronArrow,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [3, 10],
     },
     {
       itemBlueprintKey: StaffsBlueprint.EnchantedStaff,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.ElvenWood,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [10, 15],
     },
     {
       itemBlueprintKey: BootsBlueprint.IronBoots,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.BlueSapphire,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: LegsBlueprint.BronzeLegs,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.RedSapphire,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: ArmorsBlueprint.BronzeArmor,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.OrcishBow,
-      chance: 40,
+      chance: LootProbability.Common,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.SunflareArrow,
-      chance: 2,
+      chance: LootProbability.VeryRare,
       quantityRange: [10, 20],
     },
   ],

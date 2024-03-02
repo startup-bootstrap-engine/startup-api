@@ -16,6 +16,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcMudGolem: INPCTierBlueprint<10> = {
   ...generateMoveTowardsMovement(),
@@ -53,49 +54,49 @@ export const npcMudGolem: INPCTierBlueprint<10> = {
   loots: [
     {
       itemBlueprintKey: BootsBlueprint.CopperBoots,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: SpearsBlueprint.RoyalSpear,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: GlovesBlueprint.PlateGloves,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.StoneShield,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.FalconsArmor,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: FoodsBlueprint.Fish,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
 
     {
       itemBlueprintKey: StaffsBlueprint.FireWand,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.PolishedStone,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: HammersBlueprint.DragonFistHammer,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: StaffsBlueprint.GravityStaff,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: GlovesBlueprint.OsirisGloves,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
   ],
 };

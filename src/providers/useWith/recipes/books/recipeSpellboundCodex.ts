@@ -13,27 +13,27 @@ export const recipeSpellboundCodex: IUseWithCraftingRecipe = {
   requiredItems: [
     {
       key: CraftingResourcesBlueprint.MagicRecipe,
-      qty: 6,
+      qty: 12,
     },
     {
       key: CraftingResourcesBlueprint.ObsidiumIngot,
-      qty: 4,
+      qty: 40,
     },
     {
-      key: CraftingResourcesBlueprint.Leather,
-      qty: 3,
+      key: CraftingResourcesBlueprint.BlueFeather,
+      qty: 30,
     },
     {
       key: MagicsBlueprint.ThunderRune,
-      qty: 3,
+      qty: 50,
     },
   ],
   minCraftingRequirements: [
     CraftingSkill.Alchemy,
     calculateMinimumLevel([
-      [CraftingResourcesBlueprint.MagicRecipe, 6],
-      [CraftingResourcesBlueprint.ObsidiumIngot, 4],
-      [CraftingResourcesBlueprint.Leather, 3],
+      [CraftingResourcesBlueprint.MagicRecipe, 12],
+      [CraftingResourcesBlueprint.ObsidiumIngot, 40],
+      [CraftingResourcesBlueprint.BlueFeather, 30],
     ]),
   ],
 };

@@ -13,6 +13,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { NPCAlignment, NPCSubtype, RangeTypes } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcDwarfArcher: INPCTierBlueprint<6> = {
   ...generateMoveTowardsMovement(),
@@ -51,61 +52,61 @@ export const npcDwarfArcher: INPCTierBlueprint<6> = {
   loots: [
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Arrow,
-      chance: 40,
+      chance: LootProbability.Common,
       quantityRange: [10, 20],
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Bolt,
-      chance: 40,
+      chance: LootProbability.Common,
       quantityRange: [10, 20],
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Crossbow,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
 
     {
       itemBlueprintKey: BootsBlueprint.StuddedBoots,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.IronArmor,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: ToolsBlueprint.Pickaxe,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.SapphireRing,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
 
     {
       itemBlueprintKey: CraftingResourcesBlueprint.SmallWoodenStick,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Shuriken,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [5, 10],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.SilverOre,
-      chance: 7,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.WhisperWindBow,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.HeartseekerArrow,
-      chance: 3,
+      chance: LootProbability.VeryRare,
       quantityRange: [10, 20],
     },
   ],
