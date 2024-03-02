@@ -16,6 +16,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcCaveSpider: INPCTierBlueprint<3> = {
   ...generateMoveTowardsMovement(),
@@ -45,40 +46,40 @@ export const npcCaveSpider: INPCTierBlueprint<3> = {
   loots: [
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Herb,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [5, 10],
     },
     {
       itemBlueprintKey: LegsBlueprint.StuddedLegs,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.BroadSword,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: StaffsBlueprint.CorruptionStaff,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AxesBlueprint.Bardiche,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: BootsBlueprint.Sandals,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.DeathsHelmet,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.DeathNecklace,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.SewingThread,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [3, 5],
     },
   ],

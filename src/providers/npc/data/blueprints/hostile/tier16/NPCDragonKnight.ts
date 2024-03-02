@@ -20,6 +20,7 @@ import { SpellsBlueprint } from "@providers/spells/data/types/SpellsBlueprintTyp
 import { MagicPower, NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcDragonKnight: INPCTierBlueprint<16> = {
   ...generateMoveTowardsMovement(),
@@ -54,113 +55,113 @@ export const npcDragonKnight: INPCTierBlueprint<16> = {
   loots: [
     {
       itemBlueprintKey: FoodsBlueprint.Blueberry,
-      chance: 75,
+      chance: LootProbability.VeryCommon,
       quantityRange: [1, 10],
     },
 
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,
-      chance: 25,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 2],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Silk,
-      chance: 35,
+      chance: LootProbability.SemiCommon,
       quantityRange: [1, 6],
     },
     {
       itemBlueprintKey: HelmetsBlueprint.BerserkersHelmet,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: OthersBlueprint.GoldCoin,
-      chance: 50,
+      chance: LootProbability.VeryCommon,
       quantityRange: [25, 75],
     },
     {
       itemBlueprintKey: HelmetsBlueprint.RoyalHelmet,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
 
     {
       itemBlueprintKey: HelmetsBlueprint.SaviorsHelmet,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.CorruptionSword,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.RoyalSword,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.RoyalKnightHelmet,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.SilverShield,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: AxesBlueprint.DaramianWaraxe,
-      chance: 3,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.GuardianSword,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
-      chance: 6,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
-      chance: 8,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.DanishAxe,
-      chance: 9,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.SpikeToppedAxe,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
-      chance: 18,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
-      chance: 16,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: SwordsBlueprint.SeraphicSabre,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: SwordsBlueprint.SeraphicScimitar,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.EmberglowNecklace,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.MoonstoneRing,
-      chance: 8,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: BooksBlueprint.EtherealTomes,
-      chance: 3,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: BooksBlueprint.EnigmaScrolls,
-      chance: 4,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
-      chance: 7,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

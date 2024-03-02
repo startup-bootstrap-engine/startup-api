@@ -22,6 +22,7 @@ import {
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcKobold: INPCTierBlueprint<13> = {
   ...generateMoveTowardsMovement(),
@@ -58,45 +59,45 @@ export const npcKobold: INPCTierBlueprint<13> = {
   loots: [
     {
       itemBlueprintKey: FoodsBlueprint.Fish,
-      chance: 80,
+      chance: LootProbability.VeryCommon,
       quantityRange: [1, 5],
     },
 
     {
       itemBlueprintKey: CraftingResourcesBlueprint.RedSapphire,
-      chance: 5,
+      chance: LootProbability.Rare,
       quantityRange: [1, 4],
     },
     {
       itemBlueprintKey: BootsBlueprint.IronBoots,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: CraftingResourcesBlueprint.BlueSapphire,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: LegsBlueprint.BronzeLegs,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.CorruptionSword,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: BootsBlueprint.CopperBoots,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: ShieldsBlueprint.TowerShield,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
-      chance: 6,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],

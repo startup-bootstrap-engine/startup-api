@@ -20,6 +20,7 @@ import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcMinotaur: INPCTierBlueprint<6> = {
   ...generateMoveTowardsMovement(),
@@ -55,88 +56,88 @@ export const npcMinotaur: INPCTierBlueprint<6> = {
   loots: [
     {
       itemBlueprintKey: ArmorsBlueprint.BronzeArmor,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: HammersBlueprint.WarHammer,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.IronDagger,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: HelmetsBlueprint.InfantryHelmet,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: SwordsBlueprint.Katana,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: BootsBlueprint.CopperBoots,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: SpearsBlueprint.RoyalSpear,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: GlovesBlueprint.PlateGloves,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.Fish,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
 
     {
       itemBlueprintKey: ArmorsBlueprint.BronzeArmor,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.BerserkersHelmet,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.StuddedArmor,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: LegsBlueprint.StuddedLegs,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: SpearsBlueprint.Trident,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.KnightsSword,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.IronNail,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Jade,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Herb,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
   ],

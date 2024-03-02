@@ -21,6 +21,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcDwarfGuard: INPCTierBlueprint<7> = {
   ...generateMoveTowardsMovement(),
@@ -56,74 +57,74 @@ export const npcDwarfGuard: INPCTierBlueprint<7> = {
   loots: [
     {
       itemBlueprintKey: BootsBlueprint.Boots,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: ToolsBlueprint.FishingRod,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: ToolsBlueprint.Pickaxe,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: BootsBlueprint.StuddedBoots,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: SwordsBlueprint.AzureMachete,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.IronArmor,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: GlovesBlueprint.StuddedGloves,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: MacesBlueprint.SpikedClub,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Arrow,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [7, 12],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: SpearsBlueprint.Javelin,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.DwarvenShield,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: LegsBlueprint.BronzeLegs,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.RedSapphire,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: ArmorsBlueprint.BronzeArmor,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: HammersBlueprint.WarHammer,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.InfantryHelmet,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

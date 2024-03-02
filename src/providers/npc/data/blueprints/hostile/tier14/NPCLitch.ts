@@ -30,6 +30,7 @@ import {
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcLitch: INPCTierBlueprint<14> = {
   ...generateMoveTowardsMovement(),
@@ -70,116 +71,116 @@ export const npcLitch: INPCTierBlueprint<14> = {
   loots: [
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,
-      chance: 15,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 10],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Silk,
-      chance: 35,
+      chance: LootProbability.SemiCommon,
       quantityRange: [1, 10],
     },
     {
       itemBlueprintKey: DaggersBlueprint.HellishDagger,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.HasteRing,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.RuneCrossbow,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: OthersBlueprint.GoldCoin,
-      chance: 65,
+      chance: LootProbability.VeryCommon,
       quantityRange: [10, 50],
     },
     {
       itemBlueprintKey: StaffsBlueprint.MoonsStaff,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.SapphireDagger,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.SapphireJitte,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: StaffsBlueprint.CorruptionStaff,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: StaffsBlueprint.FireStaff,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: ContainersBlueprint.Backpack,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: BootsBlueprint.CopperBoots,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: GlovesBlueprint.PlateGloves,
-      chance: 85,
+      chance: LootProbability.VeryCommon,
     },
     {
       itemBlueprintKey: LegsBlueprint.MithrilLegs,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.DarkShield,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.PhoenixFeather,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [5, 8],
     },
     {
       itemBlueprintKey: ArmorsBlueprint.MithrilArmor,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.HellishBow,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.IronFistSword,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: GlovesBlueprint.CrimsonCrestWraps,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
-      chance: 3,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: MacesBlueprint.IronWoodCrusherClub,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.BoneReaperAxe,
-      chance: 3,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: 4,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.TwinEdgeAxe,
-      chance: 6,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Corruption],

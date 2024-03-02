@@ -6,6 +6,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcGhost: INPCTierBlueprint<3> = {
   ...generateMoveTowardsMovement(),
@@ -41,34 +42,34 @@ export const npcGhost: INPCTierBlueprint<3> = {
   loots: [
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Arrow,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [3, 10],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Bandage,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.RedSapphire,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Bolt,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [3, 10],
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Bow,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Crossbow,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Silk,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [5, 10],
     },
   ],

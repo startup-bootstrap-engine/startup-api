@@ -14,6 +14,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcSkeletonKnight: INPCTierBlueprint<5> = {
   ...generateMoveTowardsMovement(),
@@ -48,51 +49,51 @@ export const npcSkeletonKnight: INPCTierBlueprint<5> = {
   loots: [
     {
       itemBlueprintKey: ArmorsBlueprint.StuddedArmor,
-      chance: 25,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.BlueSapphire,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.StuddedShield,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
 
     {
       itemBlueprintKey: HelmetsBlueprint.IronHelmet,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: BootsBlueprint.StuddedBoots,
-      chance: 25,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.KnightsShield,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Bow,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.ElvenBolt,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
 
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Bone,
-      chance: 50,
+      chance: LootProbability.VeryCommon,
       quantityRange: [5, 10],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Skull,
-      chance: 25,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: SwordsBlueprint.CopperveinBlade,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
   ],
 };

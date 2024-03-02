@@ -19,6 +19,7 @@ import {
   StaffsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcTrollWarrior: INPCTierBlueprint<14> = {
   ...generateMoveTowardsMovement(),
@@ -54,58 +55,58 @@ export const npcTrollWarrior: INPCTierBlueprint<14> = {
   loots: [
     {
       itemBlueprintKey: MacesBlueprint.Mace,
-      chance: 25,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.InfantryHelmet,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.ScutumShield,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: GlovesBlueprint.PlateGloves,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.BrassHelmet,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Bolt,
-      chance: 50,
+      chance: LootProbability.VeryCommon,
       quantityRange: [5, 10],
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Bow,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.RoyalBow,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: FoodsBlueprint.Salmon,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: StaffsBlueprint.PoisonStaff,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Shuriken,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [5, 10],
     },
     {
       itemBlueprintKey: AxesBlueprint.HandAxe,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

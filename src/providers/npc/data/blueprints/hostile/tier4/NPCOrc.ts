@@ -22,6 +22,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcOrc: INPCTierBlueprint<4> = {
   ...generateMoveTowardsMovement(),
@@ -56,101 +57,101 @@ export const npcOrc: INPCTierBlueprint<4> = {
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Wheat,
       quantityRange: [3, 5],
-      chance: 25,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
       quantityRange: [2, 4],
-      chance: 25,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: BootsBlueprint.StuddedBoots,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.BlueSapphire,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.RedSapphire,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.RedMushroom,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 2],
     },
     {
       itemBlueprintKey: FoodsBlueprint.RottenMeat,
-      chance: 40,
+      chance: LootProbability.Common,
       quantityRange: [5, 10],
     },
     {
       itemBlueprintKey: ToolsBlueprint.CarpentersAxe,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: OthersBlueprint.Candle,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.LeatherHelmet,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: LegsBlueprint.LeatherLegs,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: MacesBlueprint.SpikedClub,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.WoodenShield,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: HammersBlueprint.IronHammer,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.FarmersHelmet,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Arrow,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [3, 10],
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.OrcRing,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: StaffsBlueprint.Wand,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: SwordsBlueprint.Sword,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.ShortBow,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.FarmersJacket,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: BootsBlueprint.FarmersBoot,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: FoodsBlueprint.Milk,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
   ],
 };

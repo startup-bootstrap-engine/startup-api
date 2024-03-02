@@ -20,6 +20,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcWraith: INPCTierBlueprint<12> = {
   ...generateMoveTowardsMovement(),
@@ -55,73 +56,73 @@ export const npcWraith: INPCTierBlueprint<12> = {
   loots: [
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,
-      chance: 15,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 10],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Silk,
-      chance: 35,
+      chance: LootProbability.SemiCommon,
       quantityRange: [1, 10],
     },
     {
       itemBlueprintKey: DaggersBlueprint.HellishDagger,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.RuneCrossbow,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: OthersBlueprint.GoldCoin,
-      chance: 65,
+      chance: LootProbability.VeryCommon,
       quantityRange: [10, 50],
     },
     {
       itemBlueprintKey: StaffsBlueprint.MoonsStaff,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
 
     {
       itemBlueprintKey: ContainersBlueprint.Backpack,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: BootsBlueprint.CopperBoots,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: GlovesBlueprint.PlateGloves,
-      chance: 85,
+      chance: LootProbability.VeryCommon,
     },
     {
       itemBlueprintKey: LegsBlueprint.StuddedLegs,
-      chance: 60,
+      chance: LootProbability.VeryCommon,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.PlateShield,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.PhoenixFeather,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [5, 8],
     },
     {
       itemBlueprintKey: StaffsBlueprint.SerpentWand,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.WindCutterSword,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: AxesBlueprint.SerpentDanceAxe,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: GlovesBlueprint.GleamingGauntlets,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],

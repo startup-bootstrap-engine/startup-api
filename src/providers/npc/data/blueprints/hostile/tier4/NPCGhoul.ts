@@ -14,6 +14,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcGhoul: INPCTierBlueprint<4> = {
   ...generateMoveTowardsMovement(),
@@ -48,64 +49,64 @@ export const npcGhoul: INPCTierBlueprint<4> = {
   loots: [
     {
       itemBlueprintKey: MacesBlueprint.SpikedClub,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.RedSapphire,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Bandage,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Worm,
-      chance: 50,
+      chance: LootProbability.VeryCommon,
       quantityRange: [10, 15],
     },
 
     {
       itemBlueprintKey: DaggersBlueprint.RustedDagger,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.RustedJitte,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: LegsBlueprint.StuddedLegs,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
 
     {
       itemBlueprintKey: GlovesBlueprint.StuddedGloves,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Arrow,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [10, 13],
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Bolt,
-      chance: 5,
+      chance: LootProbability.Rare,
       quantityRange: [10, 13],
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Crossbow,
-      chance: 4,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.Sword,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Eye,
-      chance: 15,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 3],
     },
   ],

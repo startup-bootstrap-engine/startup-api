@@ -18,6 +18,7 @@ import { FriendlyNPCsBlueprint, HostileNPCsBlueprint } from "@providers/npc/data
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcBandit: INPCTierBlueprint<4> = {
   ...generateMoveTowardsMovement(),
@@ -52,68 +53,68 @@ export const npcBandit: INPCTierBlueprint<4> = {
   loots: [
     {
       itemBlueprintKey: SwordsBlueprint.BroadSword,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.Milk,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: MacesBlueprint.SpikedClub,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.AmuletOfLuck,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: GlovesBlueprint.StuddedGloves,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.LeatherHelmet,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.RedHoodie,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.BanditShield,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.Turban,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.Fish,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: LegsBlueprint.LeatherLegs,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AxesBlueprint.Bardiche,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.Halberd,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Silk,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [5, 10],
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.Bandana,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: BootsBlueprint.SteelBoots,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
   ],
 };

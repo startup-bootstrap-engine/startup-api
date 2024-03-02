@@ -26,6 +26,7 @@ import {
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcOrcMage: INPCTierBlueprint<7> = {
   ...generateMoveTowardsMovement(),
@@ -64,92 +65,92 @@ export const npcOrcMage: INPCTierBlueprint<7> = {
   loots: [
     {
       itemBlueprintKey: BootsBlueprint.Boots,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: AxesBlueprint.Axe,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.BlueSapphire,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [1, 3],
     },
 
     {
       itemBlueprintKey: CraftingResourcesBlueprint.RedSapphire,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [1, 3],
     },
 
     {
       itemBlueprintKey: HelmetsBlueprint.StuddedHelmet,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: StaffsBlueprint.AquaStaff,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: StaffsBlueprint.Emberward,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.StuddedArmor,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: BootsBlueprint.StuddedBoots,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: GlovesBlueprint.StuddedGloves,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: MacesBlueprint.SpikedClub,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Bow,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: BooksBlueprint.Book,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: MagicsBlueprint.Rune,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: StaffsBlueprint.PoisonWand,
-      chance: 15,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: StaffsBlueprint.FireStaff,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.AmethystHelmet,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: StaffsBlueprint.CorruptionStaff,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Jade,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Herb,
-      chance: 40,
+      chance: LootProbability.Common,
       quantityRange: [5, 10],
     },
   ],

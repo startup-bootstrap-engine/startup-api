@@ -17,6 +17,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcGoblin: INPCTierBlueprint<3> = {
   ...generateMoveTowardsMovement(),
@@ -54,92 +55,92 @@ export const npcGoblin: INPCTierBlueprint<3> = {
   loots: [
     {
       itemBlueprintKey: SwordsBlueprint.ShortSword,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: ArmorsBlueprint.IronArmor,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: FoodsBlueprint.Fish,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.RottenMeat,
-      chance: 40,
+      chance: LootProbability.Common,
       quantityRange: [5, 10],
     },
 
     {
       itemBlueprintKey: ToolsBlueprint.FishingRod,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.Pineapple,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 2],
     },
     {
       itemBlueprintKey: FoodsBlueprint.BrownFish,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 2],
     },
     {
       itemBlueprintKey: FoodsBlueprint.BrownMushroom,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 2],
     },
 
     {
       itemBlueprintKey: HelmetsBlueprint.BrassHelmet,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.WoodenShield,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AxesBlueprint.Bardiche,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: BootsBlueprint.Sandals,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
 
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Stone,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [5, 15],
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.LongBow,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Rope,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
 
     {
       itemBlueprintKey: SwordsBlueprint.Saber,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.PolishedStone,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [5, 10],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Wheat,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [5, 10],
     },
 
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Rock,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [1, 5],
     },
   ],

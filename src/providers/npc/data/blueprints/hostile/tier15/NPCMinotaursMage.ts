@@ -27,6 +27,7 @@ import {
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcMinotaurMage: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
@@ -67,107 +68,107 @@ export const npcMinotaurMage: INPCTierBlueprint<15> = {
   loots: [
     {
       itemBlueprintKey: CraftingResourcesBlueprint.BlueFeather,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
-      chance: 20,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
 
     {
       itemBlueprintKey: StaffsBlueprint.MoonsStaff,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: StaffsBlueprint.RoyalStaff,
-      chance: 7,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: StaffsBlueprint.TartarusStaff,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: GlovesBlueprint.PlateGloves,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: FoodsBlueprint.Fish,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
     },
 
     {
       itemBlueprintKey: StaffsBlueprint.EnchantedStaff,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: StaffsBlueprint.SoulStaff,
-      chance: 5,
+      chance: LootProbability.Rare,
     },
 
     {
       itemBlueprintKey: SwordsBlueprint.GoldenSword,
-      chance: 4,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.PhoenixDagger,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.PhoenixJitte,
-      chance: 20,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.FoodRecipe,
-      chance: 10,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Eye,
-      chance: 50,
+      chance: LootProbability.VeryCommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Herb,
-      chance: 55,
+      chance: LootProbability.VeryCommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.PolishedStone,
-      chance: 50,
+      chance: LootProbability.VeryCommon,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.RuneCrossbow,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
 
     {
       itemBlueprintKey: ShieldsBlueprint.DarkShield,
-      chance: 1,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.PhoenixFeather,
-      chance: 30,
+      chance: LootProbability.SemiCommon,
       quantityRange: [5, 8],
     },
     {
       itemBlueprintKey: SpearsBlueprint.PoseidonTrident,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: HammersBlueprint.GoldHammer,
-      chance: 2,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WeaponRecipe,
-      chance: 10,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
-      chance: 12,
+      chance: LootProbability.Uncommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Freezing],
