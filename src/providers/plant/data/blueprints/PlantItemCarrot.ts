@@ -1,4 +1,8 @@
-import { FARMING_MEDIUM_YIELD_FACTOR } from "@providers/constants/FarmingConstants";
+import {
+  DEFAULT_PLANT_CYCLE,
+  FARMING_MEDIUM_YIELD_FACTOR,
+  ULTRA_LOW_GROWTH_FACTOR,
+} from "@providers/constants/FarmingConstants";
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemSubType, ItemType } from "@rpg-engine/shared";
 import { PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
@@ -18,27 +22,27 @@ export const plantItemCarrot: IPlantItem = {
   deadTexturePath: "plants/food/carrot/carrot-dead.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
-      requiredGrowthPoints: 10,
+      requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Seed,
       textureAtlas: "crops",
       texturePath: "seeds/seed-brown-1.png",
     },
     [PlantLifeCycle.Sprout]: {
-      requiredGrowthPoints: 20,
+      requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Sprout,
       textureAtlas: "crops",
       texturePath: "plants/food/carrot/carrot-sprout.png",
     },
     [PlantLifeCycle.Young]: {
-      requiredGrowthPoints: 30,
+      requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Young,
       textureAtlas: "crops",
       texturePath: "plants/food/carrot/carrot-young.png",
     },
     [PlantLifeCycle.Mature]: {
-      requiredGrowthPoints: 40,
+      requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Mature,
       textureAtlas: "crops",
       texturePath: "plants/food/carrot/carrot-mature.png",
     },
   },
-  growthFactor: 1.2,
+  growthFactor: ULTRA_LOW_GROWTH_FACTOR,
   regrowsAfterHarvest: false,
   yieldFactor: FARMING_MEDIUM_YIELD_FACTOR,
   availableOnlyOnSeasons: [],

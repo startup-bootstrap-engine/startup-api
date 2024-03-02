@@ -1,4 +1,8 @@
-import { FARMING_HIGH_YIELD_FACTOR } from "@providers/constants/FarmingConstants";
+import {
+  DEFAULT_PLANT_CYCLE,
+  FARMING_HIGH_YIELD_FACTOR,
+  ULTRA_LOW_GROWTH_FACTOR,
+} from "@providers/constants/FarmingConstants";
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemSubType, ItemType } from "@rpg-engine/shared";
 import { PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
@@ -18,29 +22,29 @@ export const plantItemTomato: IPlantItem = {
   deadTexturePath: "plants/food/tomato/generic-sprout-dead-2.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
-      requiredGrowthPoints: 10,
+      requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Seed,
       textureAtlas: "crops",
       texturePath: "seeds/seed-brown-2.png",
     },
     [PlantLifeCycle.Sprout]: {
-      requiredGrowthPoints: 20,
+      requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Sprout,
       textureAtlas: "crops",
       texturePath: "plants/food/tomato/tomato-sprout.png",
     },
     [PlantLifeCycle.Young]: {
-      requiredGrowthPoints: 30,
+      requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Young,
       textureAtlas: "crops",
       texturePath: "plants/food/tomato/tomato-young.png",
     },
     [PlantLifeCycle.Mature]: {
-      requiredGrowthPoints: 40,
+      requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Mature,
       textureAtlas: "crops",
       texturePath: "plants/food/tomato/tomato-mature.png",
     },
   },
   harvestableItemKey: FoodsBlueprint.Tomato,
   regrowsAfterHarvest: true,
-  growthFactor: 1.2,
+  growthFactor: ULTRA_LOW_GROWTH_FACTOR,
   yieldFactor: FARMING_HIGH_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],

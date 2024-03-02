@@ -1,4 +1,4 @@
-import { FARMING_SUPER_YIELD_FACTOR } from "@providers/constants/FarmingConstants";
+import { FARMING_SUPER_YIELD_FACTOR, LOW_GROWTH_FACTOR, SLOW_PLANT_CYCLE } from "@providers/constants/FarmingConstants";
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemSubType, ItemType } from "@rpg-engine/shared";
 import { PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
@@ -18,29 +18,29 @@ export const plantItemGreenGrape: IPlantItem = {
   deadTexturePath: "plants/food/green-grape/generic-sprout-3-dead.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
-      requiredGrowthPoints: 5,
+      requiredGrowthPoints: SLOW_PLANT_CYCLE.Seed,
       textureAtlas: "crops",
       texturePath: "seeds/seed-green-1.png",
     },
     [PlantLifeCycle.Sprout]: {
-      requiredGrowthPoints: 15,
+      requiredGrowthPoints: SLOW_PLANT_CYCLE.Sprout,
       textureAtlas: "crops",
       texturePath: "plants/food/green-grape/green-grape-sprout.png",
     },
     [PlantLifeCycle.Young]: {
-      requiredGrowthPoints: 30,
+      requiredGrowthPoints: SLOW_PLANT_CYCLE.Young,
       textureAtlas: "crops",
       texturePath: "plants/food/green-grape/green-grape-young.png",
     },
     [PlantLifeCycle.Mature]: {
-      requiredGrowthPoints: 45,
+      requiredGrowthPoints: SLOW_PLANT_CYCLE.Mature,
       textureAtlas: "crops",
       texturePath: "plants/food/green-grape/green-grape-mature.png",
     },
   },
   harvestableItemKey: FoodsBlueprint.GreenGrape,
   regrowsAfterHarvest: true,
-  growthFactor: 1.5,
+  growthFactor: LOW_GROWTH_FACTOR,
   yieldFactor: FARMING_SUPER_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],

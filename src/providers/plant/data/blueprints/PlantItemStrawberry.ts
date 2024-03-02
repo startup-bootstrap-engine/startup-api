@@ -1,4 +1,8 @@
-import { FARMING_HIGH_YIELD_FACTOR } from "@providers/constants/FarmingConstants";
+import {
+  DEFAULT_PLANT_CYCLE,
+  FARMING_HIGH_YIELD_FACTOR,
+  MEDIUM_GROWTH_FACTOR,
+} from "@providers/constants/FarmingConstants";
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemSubType, ItemType } from "@rpg-engine/shared";
 import { PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
@@ -19,29 +23,29 @@ export const plantItemStrawberry: IPlantItem = {
   deadTexturePath: "plants/food/strawberry/generic-sprout-dead.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
-      requiredGrowthPoints: 10,
+      requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Seed,
       textureAtlas: "crops",
       texturePath: "seeds/seed-green-1.png",
     },
     [PlantLifeCycle.Sprout]: {
-      requiredGrowthPoints: 20,
+      requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Sprout,
       textureAtlas: "crops",
       texturePath: "plants/food/strawberry/strawberry-sprout.png",
     },
     [PlantLifeCycle.Young]: {
-      requiredGrowthPoints: 30,
+      requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Young,
       textureAtlas: "crops",
       texturePath: "plants/food/strawberry/strawberry-young.png",
     },
     [PlantLifeCycle.Mature]: {
-      requiredGrowthPoints: 40,
+      requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Mature,
       textureAtlas: "crops",
       texturePath: "plants/food/strawberry/strawberry-mature.png",
     },
   },
   harvestableItemKey: FoodsBlueprint.Strawberry,
   regrowsAfterHarvest: true,
-  growthFactor: 2,
+  growthFactor: MEDIUM_GROWTH_FACTOR,
   yieldFactor: FARMING_HIGH_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],

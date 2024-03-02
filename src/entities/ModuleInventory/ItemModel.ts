@@ -153,6 +153,8 @@ const itemSchema = createLeanSchema(
     remainingUses: Type.number({ required: false }),
 
     isDead: Type.boolean({ required: false }),
+
+    isTileTinted: Type.boolean({ required: false }),
   },
   { timestamps: { createdAt: true, updatedAt: true } }
 ).plugin(updateIfCurrentPlugin);

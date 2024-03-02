@@ -1,4 +1,8 @@
-import { FARMING_MEDIUM_YIELD_FACTOR } from "@providers/constants/FarmingConstants";
+import {
+  DEFAULT_PLANT_CYCLE,
+  FARMING_MEDIUM_YIELD_FACTOR,
+  HIGH_GROWTH_FACTOR,
+} from "@providers/constants/FarmingConstants";
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemSubType, ItemType } from "@rpg-engine/shared";
 import { PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
@@ -19,29 +23,29 @@ export const plantItemEggPlant: IPlantItem = {
   deadTexturePath: "plants/food/eggplant/generic-sprout-dead-2.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
-      requiredGrowthPoints: 10,
+      requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Seed,
       textureAtlas: "crops",
       texturePath: "seeds/seed-brown-1.png",
     },
     [PlantLifeCycle.Sprout]: {
-      requiredGrowthPoints: 20,
+      requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Sprout,
       textureAtlas: "crops",
       texturePath: "plants/food/eggplant/eggplant-sprout.png",
     },
     [PlantLifeCycle.Young]: {
-      requiredGrowthPoints: 30,
+      requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Young,
       textureAtlas: "crops",
       texturePath: "plants/food/eggplant/eggplant-young.png",
     },
     [PlantLifeCycle.Mature]: {
-      requiredGrowthPoints: 40,
+      requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Mature,
       textureAtlas: "crops",
       texturePath: "plants/food/eggplant/eggplant-mature.png",
     },
   },
   harvestableItemKey: FoodsBlueprint.Eggplant,
   regrowsAfterHarvest: true,
-  growthFactor: 2.5,
+  growthFactor: HIGH_GROWTH_FACTOR,
   yieldFactor: FARMING_MEDIUM_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],

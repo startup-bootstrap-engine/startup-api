@@ -1,5 +1,5 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { IItem } from "@entities/ModuleInventory/ItemModel";
+import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -114,6 +114,9 @@ export class UseWithRefill {
           }
         );
 
+        targetItem.isTileTinted = true;
+        await targetItem.save();
+
         await this.simpleTutorial.sendSimpleTutorialActionToCharacter(character, "plant-water");
 
         await originItem.save();
@@ -166,8 +169,7 @@ export class UseWithRefill {
       const initialRemainingUses = blueprintRefill.initialRemainingUses;
 
       if (originItem.remainingUses !== initialRemainingUses) {
-        originItem.remainingUses = initialRemainingUses;
-        await originItem.save();
+        await Item.updateOne({ _id: originItem._id }, { $set: { remainingUses: initialRemainingUses } });
       }
 
       if (successMessages) {
