@@ -1,4 +1,10 @@
-import { CharacterTradeSocketEvents, ItemSocketEvents, ITradeRequestItem, UserAccountTypes } from "@rpg-engine/shared";
+import {
+  CharacterTradeSocketEvents,
+  ItemSocketEvents,
+  ITradeRequestItem,
+  SimpleTutorialSocketEvents,
+  UserAccountTypes,
+} from "@rpg-engine/shared";
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
@@ -10,6 +16,7 @@ import {
   FoodsBlueprint,
   OthersBlueprint,
   PotionsBlueprint,
+  SeedsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { IBlueprint } from "@providers/types/temp/BlueprintTypes";
@@ -26,6 +33,7 @@ describe("CharacterTradingValidation.ts", () => {
   let transactionItems: ITradeRequestItem[];
   let inventory: IItem;
   let inventoryContainer: IItemContainer;
+  let sendSimpleTutorialEvent: jest.SpyInstance;
 
   beforeAll(() => {
     characterTradingNPCBuy = container.get<CharacterTradingNPCBuy>(CharacterTradingNPCBuy);
@@ -64,6 +72,9 @@ describe("CharacterTradingValidation.ts", () => {
         {
           key: FoodsBlueprint.Banana,
         },
+        {
+          key: SeedsBlueprint.CarrotSeed,
+        },
       ],
     });
 
@@ -77,6 +88,12 @@ describe("CharacterTradingValidation.ts", () => {
       // @ts-ignore
       characterTradingNPCBuy.characterTradingBuy.socketMessaging,
       "sendEventToUser"
+    );
+
+    sendSimpleTutorialEvent = jest.spyOn(
+      // @ts-ignore
+      characterTradingNPCBuy.characterTradingBuy.simpleTutorial,
+      "sendSimpleTutorialActionToCharacter"
     );
 
     // @ts-ignore
@@ -125,6 +142,29 @@ describe("CharacterTradingValidation.ts", () => {
           openInventoryOnUpdate: true,
         }
       );
+
+      expect(sendEventToUserOnBuyItem).not.toHaveBeenCalledWith(
+        testCharacter.channelId!,
+        SimpleTutorialSocketEvents.SimpleTutorialWithKey,
+        {
+          key: "buy-seed",
+        }
+      );
+    });
+
+    it("should emit SimpleTutorialWithKey socket event for seed items when purchased", async () => {
+      transactionItems = [
+        {
+          key: SeedsBlueprint.CarrotSeed,
+          qty: 1,
+        },
+      ];
+
+      const result = await characterTradingNPCBuy.buyItemsFromNPC(testCharacter, testNPCTrader, transactionItems);
+
+      expect(result).toBe(true);
+
+      expect(sendSimpleTutorialEvent).toHaveBeenCalledWith(testCharacter, "buy-seed");
     });
 
     it("should properly buy a STACKABLE item from a trader NPC", async () => {

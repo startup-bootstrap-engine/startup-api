@@ -1,6 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IUser } from "@entities/ModuleSystem/UserModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
+import { CharacterActionsTracker } from "@providers/character/CharacterActionsTracker";
 import { CharacterLastAction } from "@providers/character/CharacterLastAction";
 import { appEnv } from "@providers/config/env";
 import { BYPASS_EVENTS_AS_LAST_ACTION } from "@providers/constants/EventsConstants";
@@ -25,7 +26,8 @@ export class SocketAuthEventsValidator {
     private exhaustValidation: ExhaustValidation,
     private socketMessaging: SocketMessaging,
     private newRelic: NewRelic,
-    private socketAuthLock: SocketAuthLock
+    private socketAuthLock: SocketAuthLock,
+    private characterActionsTracker: CharacterActionsTracker
   ) {}
 
   public async handleEventLogic<T>(
@@ -90,7 +92,7 @@ export class SocketAuthEventsValidator {
             message: "Sorry, you're doing it too fast! Please slow down!",
             type: "error",
           });
-          console.log(`⚠️ Throttle violation for ${event} on character ${character._id}`);
+          console.log(`⚠️ Throttle violation for ${event} on character ${character._id} (${character.name})`);
 
           return true;
         }
@@ -133,6 +135,8 @@ export class SocketAuthEventsValidator {
     if (shouldSetLastAction) {
       await this.characterLastAction.setLastAction(character._id, dayjs().toISOString());
     }
+
+    await this.characterActionsTracker.setCharacterAction(character._id, event);
 
     const isLockableEvent = LOCKABLE_EVENTS.includes(event);
     if (isLockableEvent) {

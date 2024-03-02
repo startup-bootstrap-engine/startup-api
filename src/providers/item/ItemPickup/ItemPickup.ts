@@ -40,7 +40,9 @@ export class ItemPickup {
         return false;
       }
 
-      await this.cleanupCache(character);
+      if (itemPickupData.fromContainerId) {
+        await this.cleanupCache(character, itemPickupData.fromContainerId);
+      }
 
       const itemToBePicked = await this.validateItemPickup(itemPickupData, character);
       if (!itemToBePicked) return false;
@@ -88,13 +90,14 @@ export class ItemPickup {
     }
   }
 
-  private async cleanupCache(character: ICharacter): Promise<void> {
+  private async cleanupCache(character: ICharacter, fromContainerId: string): Promise<void> {
     const promises = [
       clearCacheForKey(`${character._id}-inventory`),
       clearCacheForKey(`${character._id}-equipment`),
       this.inMemoryHashTable.delete("equipment-slots", character._id),
       this.inMemoryHashTable.delete("inventory-weight", character._id),
       this.inMemoryHashTable.delete("character-max-weights", character._id),
+      this.inMemoryHashTable.delete("container-all-items", fromContainerId),
     ];
 
     await Promise.all(promises);

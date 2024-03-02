@@ -1,8 +1,8 @@
 import { Character } from "@entities/ModuleCharacter/CharacterModel";
-import { NewRelic } from "@providers/analytics/NewRelic";
 import { CharacterBan } from "@providers/character/CharacterBan";
 import { ANTI_MACRO_PROBABILITY_TRIGGER } from "@providers/constants/AntiMacroConstants";
 import { MacroCaptchaSend } from "@providers/macro/MacroCaptchaSend";
+import { MacroCharacterBotDetector } from "@providers/macro/MacroCharacterBotDetector";
 import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
 import { CronJobScheduler } from "./CronJobScheduler";
@@ -11,23 +11,23 @@ import { CronJobScheduler } from "./CronJobScheduler";
 export class MacroCaptchaCrons {
   constructor(
     private characterBan: CharacterBan,
-    private newRelic: NewRelic,
     private macroCaptchaSend: MacroCaptchaSend,
-    private cronJobScheduler: CronJobScheduler
+    private cronJobScheduler: CronJobScheduler,
+    private macroCharacterBotDetector: MacroCharacterBotDetector
   ) {}
 
   public schedule(): void {
     //! Disabled because this shit only gives me headaches and turn off players.
-    // this.cronJobScheduler.uniqueSchedule("macro-captcha-cron-ban-macro-characters", "*/2 * * * *", async () => {
-    //   await this.banMacroCharacters();
-    // });
-    // this.cronJobScheduler.uniqueSchedule(
-    //   "macro-captcha-cron-send-macro-captcha-to-active-characters",
-    //   "*/5 * * * *",
-    //   async () => {
-    //     await this.sendMacroCaptchaToActiveCharacters();
-    //   }
-    // );
+    this.cronJobScheduler.uniqueSchedule("macro-captcha-cron-ban-macro-characters", "*/2 * * * *", async () => {
+      await this.banMacroCharacters();
+    });
+    this.cronJobScheduler.uniqueSchedule(
+      "macro-captcha-cron-send-macro-captcha-to-active-characters",
+      "*/5 * * * *",
+      async () => {
+        await this.sendMacroCaptchaToActiveCharacters();
+      }
+    );
   }
 
   private async banMacroCharacters(): Promise<void> {
@@ -100,16 +100,24 @@ export class MacroCaptchaCrons {
 
     await Promise.all(
       charactersWithCaptchaNotVerified.map(async (character) => {
-        const n = _.random(1, 100);
-
         // Skip anti macro on training rooms
         if (character.scene.includes("training")) {
           return;
         }
 
-        if (n <= ANTI_MACRO_PROBABILITY_TRIGGER) {
-          await this.macroCaptchaSend.sendAndStartCaptchaVerification(character);
-          sentTo++;
+        const isPotentialMacroOrBotUser = await this.macroCharacterBotDetector.isPotentialBotUser(character);
+
+        if (isPotentialMacroOrBotUser) {
+          console.log(`⚠️ Character ${character.name} is potential bot user: ${isPotentialMacroOrBotUser}`);
+        }
+
+        if (isPotentialMacroOrBotUser) {
+          const n = _.random(1, 100);
+
+          if (n <= ANTI_MACRO_PROBABILITY_TRIGGER) {
+            await this.macroCaptchaSend.sendAndStartCaptchaVerification(character);
+            sentTo++;
+          }
         }
       })
     );

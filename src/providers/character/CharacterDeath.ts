@@ -102,9 +102,10 @@ export class CharacterDeath {
         this.sendBattleDeathEvents(character),
         this.handleKiller(killer, character),
         this.handleCharacterMode(character, characterBody, killer),
-        this.characterWeight.updateCharacterWeight(character),
-        this.sendRefreshEquipmentEvent(character),
       ]);
+
+      await this.characterWeight.updateCharacterWeight(character);
+      await this.sendRefreshEquipmentEvent(character);
 
       this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Characters, "Death", 1);
     } catch (err) {
@@ -194,6 +195,7 @@ export class CharacterDeath {
       texturePath: `${character.textureKey}/death/0.png`,
       x: character.x,
       y: character.y,
+      deadBodyEntityType: EntityType.Character,
     });
 
     await charBody.save();
@@ -296,6 +298,7 @@ export class CharacterDeath {
       this.inMemoryHashTable.deleteAll(`${character._id}-skill-level-with-buff`),
       clearCacheForKey(`characterBuffs_${character._id}`),
       clearCacheForKey(`${character._id}-skills`),
+      this.inMemoryHashTable.delete("skills-with-buff", character._id),
     ]);
   }
 
@@ -443,7 +446,10 @@ export class CharacterDeath {
 
       if (!isDeadBodyLootable) {
         isDeadBodyLootable = true;
-        await Item.updateOne({ _id: bodyContainer.parentItem }, { $set: { isDeadBodyLootable: true } });
+        await Item.updateOne(
+          { _id: bodyContainer.parentItem },
+          { $set: { isDeadBodyLootable: true, updatedAt: new Date() } }
+        );
       }
 
       await this.characterInventory.generateNewInventory(character, ContainersBlueprint.Bag, true);
@@ -487,7 +493,10 @@ export class CharacterDeath {
     }
 
     if (isDeadBodyLootable) {
-      await Item.updateOne({ _id: bodyContainer.parentItem }, { $set: { isDeadBodyLootable: true } });
+      await Item.updateOne(
+        { _id: bodyContainer.parentItem },
+        { $set: { isDeadBodyLootable: true, updatedAt: new Date() } }
+      );
     }
   }
 

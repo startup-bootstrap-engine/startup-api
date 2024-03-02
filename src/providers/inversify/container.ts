@@ -26,7 +26,7 @@ import { SpellLearn } from "@providers/spells/SpellLearn";
 import { SpellCalculator } from "@providers/spells/data/abstractions/SpellCalculator";
 import { UnitTestHelper } from "@providers/unitTests/UnitTestHelper";
 import { Container } from "inversify";
-import { buildProviderModule } from "inversify-binding-decorators";
+import { autoProvide, buildProviderModule } from "inversify-binding-decorators";
 import { Cronjob } from "../cronjobs/CronJobs";
 import { Seeder } from "../seeds/Seeder";
 import { Database } from "../server/Database";
@@ -51,6 +51,8 @@ container.load(
   useCasesControllers,
   blueprintControllerContainer
 );
+
+autoProvide(container);
 
 export const database = container.get<Database>(Database);
 export const cronJobs = container.get<Cronjob>(Cronjob);

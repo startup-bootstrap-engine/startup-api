@@ -48,65 +48,73 @@ export class ItemUse {
 
   @TrackNewRelicTransaction()
   public async performItemUse(itemUse: any, character: ICharacter): Promise<boolean> {
-    if (!this.characterValidation.hasBasicValidation(character)) {
+    try {
+      if (!this.characterValidation.hasBasicValidation(character)) {
+        return false;
+      }
+
+      const isItemInCharacterInventory = await this.itemValidation.isItemInCharacterInventory(
+        character,
+        itemUse.itemId
+      );
+      if (!isItemInCharacterInventory) {
+        return false;
+      }
+
+      const useItem = (await Item.findById(itemUse.itemId).lean({ virtuals: true, defaults: true })) as IItem;
+
+      if (!useItem) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you cannot use this item.");
+        return false;
+      }
+
+      const bluePrintItem = await blueprintManager.getBlueprint<IItem>("items", useItem.key as AvailableBlueprints);
+
+      if (!bluePrintItem || !bluePrintItem.usableEffect) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you cannot use this item.");
+        return false;
+      }
+
+      const canApplyItemUsage = await this.canApplyItemUsage(bluePrintItem, character);
+
+      if (!canApplyItemUsage) {
+        return false;
+      }
+
+      if (useItem && useItem.subType === ItemSubType.Food && useItem.healthRecovery) {
+        await this.applyItemUsage(bluePrintItem, character.id, useItem.healthRecovery);
+      } else {
+        await this.applyItemUsage(bluePrintItem, character.id);
+      }
+
+      const rarity = useItem.rarity || undefined;
+      await this.characterItemInventory.decrementItemFromInventoryByKey(useItem.key, character, 1, rarity);
+
+      await this.characterWeight.updateCharacterWeight(character);
+
+      const updatedInventoryContainer = await this.getInventoryContainer(character);
+
+      const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {
+        inventory: {
+          _id: updatedInventoryContainer?._id,
+          parentItem: updatedInventoryContainer!.parentItem.toString(),
+          owner: updatedInventoryContainer?.owner?.toString() || character.name,
+          name: updatedInventoryContainer?.name,
+          slotQty: updatedInventoryContainer!.slotQty,
+          slots: updatedInventoryContainer?.slots,
+          allowedItemTypes: this.equipmentEquip.getAllowedItemTypes(),
+          isEmpty: updatedInventoryContainer!.isEmpty,
+        },
+        openInventoryOnUpdate: false,
+      };
+
+      this.updateInventoryCharacter(payloadUpdate, character);
+
+      return true;
+    } catch (error) {
+      console.error(error);
       return false;
     }
-
-    const isItemInCharacterInventory = await this.itemValidation.isItemInCharacterInventory(character, itemUse.itemId);
-    if (!isItemInCharacterInventory) {
-      return false;
-    }
-
-    const useItem = (await Item.findById(itemUse.itemId).lean({ virtuals: true, defaults: true })) as IItem;
-
-    if (!useItem) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you cannot use this item.");
-      return false;
-    }
-
-    const bluePrintItem = await blueprintManager.getBlueprint<IItem>("items", useItem.key as AvailableBlueprints);
-
-    if (!bluePrintItem || !bluePrintItem.usableEffect) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you cannot use this item.");
-      return false;
-    }
-
-    const canApplyItemUsage = await this.canApplyItemUsage(bluePrintItem, character);
-
-    if (!canApplyItemUsage) {
-      return false;
-    }
-
-    if (useItem && useItem.subType === ItemSubType.Food && useItem.healthRecovery) {
-      await this.applyItemUsage(bluePrintItem, character.id, useItem.healthRecovery);
-    } else {
-      await this.applyItemUsage(bluePrintItem, character.id);
-    }
-
-    const rarity = useItem.rarity || undefined;
-    await this.characterItemInventory.decrementItemFromInventoryByKey(useItem.key, character, 1, rarity);
-
-    await this.characterWeight.updateCharacterWeight(character);
-
-    const updatedInventoryContainer = await this.getInventoryContainer(character);
-
-    const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {
-      inventory: {
-        _id: updatedInventoryContainer?._id,
-        parentItem: updatedInventoryContainer!.parentItem.toString(),
-        owner: updatedInventoryContainer?.owner?.toString() || character.name,
-        name: updatedInventoryContainer?.name,
-        slotQty: updatedInventoryContainer!.slotQty,
-        slots: updatedInventoryContainer?.slots,
-        allowedItemTypes: this.equipmentEquip.getAllowedItemTypes(),
-        isEmpty: updatedInventoryContainer!.isEmpty,
-      },
-      openInventoryOnUpdate: false,
-    };
-
-    this.updateInventoryCharacter(payloadUpdate, character);
-
-    return true;
   }
 
   private async canApplyItemUsage(bluePrintItem: Partial<IItem>, character: ICharacter): Promise<boolean> {

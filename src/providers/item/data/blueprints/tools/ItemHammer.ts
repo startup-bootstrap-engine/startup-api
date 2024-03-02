@@ -28,7 +28,7 @@ export const itemHammer: IToolItemBlueprint = {
   textureAtlas: "items",
   texturePath: "hammers/hammer.png",
   name: "Blacksmith's Hammer",
-  description: "A simple hammer used as a weapon or for blacksmithing.",
+  description: "Use with an anvil with some ore in your inventory to forge an ingot.",
   attack: 5,
   defense: 2,
   weight: 0.1,

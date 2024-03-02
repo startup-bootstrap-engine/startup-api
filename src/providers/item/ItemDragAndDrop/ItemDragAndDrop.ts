@@ -5,9 +5,10 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { blueprintManager } from "@providers/inversify/container";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { IEquipmentAndInventoryUpdatePayload, IItem, IItemMove, ItemSocketEvents } from "@rpg-engine/shared";
+import { IEquipmentAndInventoryUpdatePayload, IItem, IItemMove, ItemSocketEvents, ItemType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
 import { AvailableBlueprints } from "../data/types/itemsBlueprintTypes";
@@ -18,7 +19,8 @@ export class ItemDragAndDrop {
     private socketMessaging: SocketMessaging,
     private characterValidation: CharacterValidation,
     private characterItemSlots: CharacterItemSlots,
-    private characterInventory: CharacterInventory
+    private characterInventory: CharacterInventory,
+    private inMemoryHashTable: InMemoryHashTable
   ) {}
 
   //! For now, only a move on inventory is allowed.
@@ -28,6 +30,13 @@ export class ItemDragAndDrop {
     if (!isMoveValid) {
       return false;
     }
+
+    await this.clearCharacterCache(
+      character,
+      itemMoveData.from.containerId,
+      itemMoveData.to.containerId,
+      itemMoveData.from.item
+    );
 
     const itemToBeMoved = await Item.findById(itemMoveData.from.item._id);
     if (!itemToBeMoved) {
@@ -78,8 +87,6 @@ export class ItemDragAndDrop {
           break;
       }
 
-      await clearCacheForKey(`${character._id}-inventory`);
-
       return true;
     } catch (err) {
       this.socketMessaging.sendErrorMessageToCharacter(character);
@@ -87,6 +94,30 @@ export class ItemDragAndDrop {
       console.log(err);
       return false;
     }
+  }
+
+  private async clearCharacterCache(
+    character: ICharacter,
+    fromContainerId: string,
+    toContainerId: string,
+    itemToBeDropped: IItem
+  ): Promise<void> {
+    const promises = [
+      this.inMemoryHashTable.delete("container-all-items", fromContainerId),
+      this.inMemoryHashTable.delete("container-all-items", toContainerId),
+      clearCacheForKey(`${character._id}-inventory`),
+      clearCacheForKey(`${character._id}-equipment`),
+      this.inMemoryHashTable.delete("equipment-slots", character._id),
+      this.inMemoryHashTable.delete("character-weapon", character._id),
+      this.inMemoryHashTable.delete("inventory-weight", character._id),
+      this.inMemoryHashTable.delete("character-max-weights", character._id),
+    ];
+
+    if (itemToBeDropped.type === ItemType.CraftingResource) {
+      promises.push(this.inMemoryHashTable.delete("load-craftable-items", character._id));
+    }
+
+    await Promise.all(promises);
   }
 
   private async moveItemInInventory(

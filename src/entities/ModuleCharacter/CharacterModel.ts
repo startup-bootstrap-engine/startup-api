@@ -156,6 +156,7 @@ const characterSchema = createLeanSchema(
     isOnline: Type.boolean({
       default: false,
       required: true,
+      index: true,
     }),
     layer: Type.number({
       default: MapLayers.Character,
@@ -292,6 +293,7 @@ characterSchema.index(
     isBanned: 1,
     hasSkull: 1,
     skullExpiredAt: 1,
+    class: 1,
   },
   { background: true }
 );

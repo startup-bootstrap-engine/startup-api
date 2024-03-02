@@ -174,6 +174,9 @@ export enum HostileNPCsBlueprint {
   IceNaga = "ice-naga",
   RedNaga = "red-naga",
   VenomNaga = "venom-naga",
+  CorruptedKobold = "corrupted-kobold",
+  BlackKobold = "black-kobold",
+  ForestKobold = "forest-kobold",
   // Trainer
   BattleCompanion = "battle-companion",
   BattleCompanionMagic = "battle-companion-magic",

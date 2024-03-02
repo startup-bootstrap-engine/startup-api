@@ -107,6 +107,12 @@ export class CharacterItemContainer {
 
       const itemToBeAdded = item;
 
+      if (item.isItemContainer && !item.itemContainer) {
+        // if item does not have itemContainer reference, it means its a lean item that havent triggered the post save hook with the itemContainer creation. So we need to fetch the item again to get the itemContainer reference.
+        item = (await Item.findById(item._id)) as IItem;
+        await item.save();
+      }
+
       if (!itemToBeAdded) {
         this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The item to be added was not found.");
         return false;

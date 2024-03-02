@@ -23,6 +23,7 @@ export const itemCelestialCrown: IEquippableLightArmorTier6Blueprint = {
   weight: 3.6,
   allowedEquipSlotType: [ItemSlotType.Head],
   basePrice: 110,
+  isMageGear: true,
   equippedBuff: [
     {
       type: CharacterBuffType.Skill,

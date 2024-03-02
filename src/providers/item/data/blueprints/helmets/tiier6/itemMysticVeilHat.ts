@@ -23,6 +23,7 @@ export const itemMysticVeilHat: IEquippableLightArmorTier6Blueprint = {
   weight: 3.4,
   allowedEquipSlotType: [ItemSlotType.Head],
   basePrice: 100,
+  isMageGear: true,
   equippedBuff: [
     {
       type: CharacterBuffType.Skill,

@@ -7,7 +7,6 @@ import {
   AxesBlueprint,
   BooksBlueprint,
   BootsBlueprint,
-  CraftingResourcesBlueprint,
   DaggersBlueprint,
   GemsBlueprint,
   HelmetsBlueprint,
@@ -29,19 +28,19 @@ import {
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcBlackNaga: INPCTierBlueprint<24> = {
+export const npcRedNaga: INPCTierBlueprint<19> = {
   ...generateMoveTowardsMovement(),
-  name: "Black Naga",
-  key: HostileNPCsBlueprint.BlackNaga,
-  textureKey: HostileNPCsBlueprint.BlackNaga,
+  name: "Red Naga",
+  key: HostileNPCsBlueprint.RedNaga,
+  textureKey: HostileNPCsBlueprint.RedNaga,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Ranged,
   ammoKey: AnimationEffectKeys.FireBall,
   maxRangeAttack: RangeTypes.High,
   speed: MovementSpeed.Standard,
-  tier: 24,
+  tier: 19,
   subType: NPCSubtype.Humanoid,
-  baseHealth: 6170,
+  baseHealth: 3170,
   healthRandomizerDice: Dice.D20,
   skillRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
@@ -49,231 +48,225 @@ export const npcBlackNaga: INPCTierBlueprint<24> = {
   canSwitchToLowHealthTarget: true,
   isMagic: true,
   skills: {
-    level: 558,
+    level: 248,
     strength: {
-      level: 558,
+      level: 248,
     },
     dexterity: {
-      level: 558,
+      level: 248,
     },
     resistance: {
-      level: 558,
+      level: 248,
     },
     magicResistance: {
-      level: 558,
+      level: 248,
+    },
+    magic: {
+      level: 248,
     },
   },
   fleeOnLowHealth: true,
   loots: [
     {
       itemBlueprintKey: SwordsBlueprint.DragonsSword,
-      chance: 22,
+      chance: 34,
     },
     {
       itemBlueprintKey: SwordsBlueprint.InfernoCleaver,
-      chance: 2,
-    },
-    {
-      itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,
-      chance: 110,
-    },
-    {
-      itemBlueprintKey: CraftingResourcesBlueprint.DragonTooth,
-      chance: 104,
-      quantityRange: [5, 10],
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.YggdrasilJianSword,
-      chance: 2,
-    },
-    {
-      itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
-      chance: 25,
-    },
-    {
-      itemBlueprintKey: ArmorsBlueprint.DarkArmor,
-      chance: 25,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.LeviathanSword,
-      chance: 25,
-    },
-    {
-      itemBlueprintKey: ArmorsBlueprint.TemplarsPlate,
-      chance: 14,
-    },
-    {
-      itemBlueprintKey: ShieldsBlueprint.DemonShield,
-      chance: 25,
-    },
-    {
-      itemBlueprintKey: ArmorsBlueprint.MithrilArmor,
-      chance: 25,
-    },
-    {
-      itemBlueprintKey: LegsBlueprint.MithrilLegs,
-      chance: 18,
-    },
-    {
-      itemBlueprintKey: LegsBlueprint.GoldenLegs,
-      chance: 14,
-    },
-    {
-      itemBlueprintKey: BootsBlueprint.GoldenBoots,
-      chance: 35,
-    },
-    {
-      itemBlueprintKey: HelmetsBlueprint.RoyalHelmet,
-      chance: 35,
+      chance: 12,
     },
 
     {
-      itemBlueprintKey: HelmetsBlueprint.SaviorsHelmet,
-      chance: 5,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.CorruptionSword,
-      chance: 7,
-    },
-    {
-      itemBlueprintKey: HelmetsBlueprint.RoyalKnightHelmet,
-      chance: 7,
-    },
-    {
-      itemBlueprintKey: ShieldsBlueprint.SilverShield,
-      chance: 35,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.GuardianAxe,
-      chance: 12,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.YggdrasilTemplarSword,
+      itemBlueprintKey: SwordsBlueprint.YggdrasilJianSword,
       chance: 14,
     },
     {
-      itemBlueprintKey: MacesBlueprint.SunderingClub,
+      itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
+      chance: 40,
+    },
+    {
+      itemBlueprintKey: ArmorsBlueprint.DarkArmor,
+      chance: 40,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.LeviathanSword,
+      chance: 40,
+    },
+    {
+      itemBlueprintKey: ArmorsBlueprint.TemplarsPlate,
+      chance: 30,
+    },
+    {
+      itemBlueprintKey: ShieldsBlueprint.DemonShield,
+      chance: 38,
+    },
+    {
+      itemBlueprintKey: ArmorsBlueprint.MithrilArmor,
+      chance: 38,
+    },
+    {
+      itemBlueprintKey: LegsBlueprint.MithrilLegs,
+      chance: 34,
+    },
+    {
+      itemBlueprintKey: LegsBlueprint.GoldenLegs,
+      chance: 34,
+    },
+    {
+      itemBlueprintKey: BootsBlueprint.GoldenBoots,
+      chance: 52,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.RoyalHelmet,
       chance: 50,
     },
     {
+      itemBlueprintKey: HelmetsBlueprint.SaviorsHelmet,
+      chance: 18,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.CorruptionSword,
+      chance: 19,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.RoyalKnightHelmet,
+      chance: 19,
+    },
+    {
+      itemBlueprintKey: ShieldsBlueprint.SilverShield,
+      chance: 50,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.GuardianAxe,
+      chance: 24,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.YggdrasilTemplarSword,
+      chance: 28,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SunderingClub,
+      chance: 70,
+    },
+    {
       itemBlueprintKey: MacesBlueprint.BoneBreakerClub,
-      chance: 80,
+      chance: 94,
     },
     {
       itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
-      chance: 55,
+      chance: 72,
     },
     {
       itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
-      chance: 84,
+      chance: 98,
     },
     {
       itemBlueprintKey: MacesBlueprint.GrimHarbingerClub,
-      chance: 45,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.TwinFangClub,
       chance: 60,
     },
     {
+      itemBlueprintKey: MacesBlueprint.TwinFangClub,
+      chance: 74,
+    },
+    {
       itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
-      chance: 70,
+      chance: 84,
     },
     {
       itemBlueprintKey: MacesBlueprint.MetalMasherClub,
-      chance: 70,
+      chance: 86,
     },
     {
       itemBlueprintKey: AxesBlueprint.CleaverAxe,
-      chance: 45,
+      chance: 60,
     },
     {
       itemBlueprintKey: AxesBlueprint.WarAxe,
-      chance: 55,
+      chance: 70,
     },
     {
       itemBlueprintKey: AxesBlueprint.DanishAxe,
-      chance: 66,
+      chance: 78,
     },
     {
       itemBlueprintKey: AxesBlueprint.SpikedCleaverAxe,
-      chance: 68,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.TimberSplitterAxe,
-      chance: 75,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
       chance: 80,
     },
     {
+      itemBlueprintKey: AxesBlueprint.TimberSplitterAxe,
+      chance: 87,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
+      chance: 92,
+    },
+    {
       itemBlueprintKey: AxesBlueprint.BrutalChopperAxe,
-      chance: 85,
+      chance: 97,
     },
     {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
-      chance: 45,
+      chance: 58,
     },
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
-      chance: 90,
+      chance: 105,
     },
     {
       itemBlueprintKey: DaggersBlueprint.AstralDagger,
-      chance: 90,
+      chance: 105,
     },
     {
       itemBlueprintKey: DaggersBlueprint.StarshardDagger,
-      chance: 95,
+      chance: 108,
     },
     {
       itemBlueprintKey: GemsBlueprint.AmethystGem,
-      chance: 4,
+      chance: 16,
     },
     {
       itemBlueprintKey: GemsBlueprint.RubyGem,
-      chance: 2,
-    },
-    {
-      itemBlueprintKey: AccessoriesBlueprint.EarthstoneEmeraldNecklace,
-      chance: 7,
-    },
-    {
-      itemBlueprintKey: AccessoriesBlueprint.SapphireStrandNecklace,
-      chance: 18,
-    },
-    {
-      itemBlueprintKey: AccessoriesBlueprint.RubyNeckles,
-      chance: 18,
-    },
-    {
-      itemBlueprintKey: AccessoriesBlueprint.GoldenRubyNecklace,
-      chance: 22,
-    },
-    {
-      itemBlueprintKey: AccessoriesBlueprint.SunlitRubyNecklace,
-      chance: 22,
-    },
-    {
-      itemBlueprintKey: BooksBlueprint.ElementalCodex,
-      chance: 8,
-    },
-    {
-      itemBlueprintKey: BooksBlueprint.MysticCompendium,
-      chance: 10,
-    },
-    {
-      itemBlueprintKey: BooksBlueprint.SpellboundCodex,
       chance: 12,
     },
     {
+      itemBlueprintKey: AccessoriesBlueprint.EarthstoneEmeraldNecklace,
+      chance: 18,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.SapphireStrandNecklace,
+      chance: 32,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.RubyNeckles,
+      chance: 34,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.GoldenRubyNecklace,
+      chance: 34,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.SunlitRubyNecklace,
+      chance: 33,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.ElementalCodex,
+      chance: 16,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.MysticCompendium,
+      chance: 22,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.SpellboundCodex,
+      chance: 24,
+    },
+    {
       itemBlueprintKey: BooksBlueprint.PotioncraftPrimer,
-      chance: 14,
+      chance: 26,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.ArcaneAdepthat,
-      chance: 16,
+      chance: 30,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],

@@ -40,13 +40,18 @@ import { npcOrcWarlord } from "./tier16/NPCOrcWarlord";
 import { npcStoneGolem } from "./tier16/NPCStoneGolem";
 import { npcWildCyclops } from "./tier16/NPCWildCyclops";
 import { npcYeti } from "./tier16/NPCYeti";
+import { npcForestKobold } from "./tier16/npcForestKobold";
+import { npcBlackKobold } from "./tier17/NPCBlackKobold";
 import { npcCyclopsWarrior } from "./tier17/NPCCyclopsWarrior";
 import { npcElderGolem } from "./tier17/NPCElderGolem";
 import { npcFellbeast } from "./tier17/NPCFellbeast";
 import { npcNightFellbeast } from "./tier17/NPCNightFellbeast";
+import { npcForestNaga } from "./tier18/ForestNaga";
 import { npcCorruptedCyclops } from "./tier18/NPCCorruptedCyclops";
+import { npcCorruptedKobold } from "./tier18/NPCCorruptedKobold";
 import { npcDragonServant } from "./tier18/NPCDragonServant";
 import { npcNazgul } from "./tier18/NPCNazgul";
+import { npcRedNaga } from "./tier19/NPCRedNaga";
 import { npcAssaultSpider } from "./tier2/NPCAssaultSpider";
 import { npcCaveBat } from "./tier2/NPCCaveBat";
 import { npcCentipede } from "./tier2/NPCCentipede";
@@ -55,18 +60,16 @@ import { npcScorpion } from "./tier2/NPCScorpion";
 import { npcSlime } from "./tier2/NPCSlime";
 import { npcSnake } from "./tier2/NPCSnake";
 import { npcWinterWolf } from "./tier2/NPCWinterWolf";
+import { npcCorruptedNaga } from "./tier20/NPCCorruptedNaga";
+import { npcFireNaga } from "./tier20/NPCFireNaga";
 import { npcRedDragon } from "./tier20/NPCRedDragon";
 import { npcBlueDragon } from "./tier21/NPCBlueDragon";
+import { npcCrimsonNaga } from "./tier21/NPCCrimsonNaga";
+import { npcIceNaga } from "./tier21/NPCIceNaga";
+import { npcVenomNaga } from "./tier22/NPCVenomNaga";
 import { npcYellowDragon } from "./tier22/NPCYellowDragon";
+import { npcBlackNaga } from "./tier23/NPCBlackNaga";
 import { npcPurpleDragon } from "./tier23/NPCPurpleDragon";
-import { npcBlackNaga } from "./tier24/NPCBlackNaga";
-import { npcCorruptedNaga } from "./tier24/NPCCorruptedNaga";
-import { npcCrimsonNaga } from "./tier24/NPCCrimsonNaga";
-import { npcFireNaga } from "./tier24/NPCFireNaga";
-import { npcForestNaga } from "./tier25/ForestNaga";
-import { npcIceNaga } from "./tier25/NPCIceNaga";
-import { npcRedNaga } from "./tier25/NPCRedNaga";
-import { npcVenomNaga } from "./tier25/NPCVenomNaga";
 import { npcBlackEagle } from "./tier3/NPCBlackEagle";
 import { npcBlackSpider } from "./tier3/NPCBlackSpider";
 import { npcBrownBear } from "./tier3/NPCBrownBear";
@@ -195,4 +198,7 @@ export const hostileNPCs = {
   [HostileNPCsBlueprint.RedNaga]: npcRedNaga,
   [HostileNPCsBlueprint.IceNaga]: npcIceNaga,
   [HostileNPCsBlueprint.VenomNaga]: npcVenomNaga,
+  [HostileNPCsBlueprint.BlackKobold]: npcBlackKobold,
+  [HostileNPCsBlueprint.CorruptedKobold]: npcCorruptedKobold,
+  [HostileNPCsBlueprint.ForestKobold]: npcForestKobold,
 };

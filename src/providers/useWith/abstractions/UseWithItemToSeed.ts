@@ -9,10 +9,12 @@ import { container } from "@providers/inversify/container";
 
 import { IPosition } from "@providers/movement/MovementHelper";
 import { IPlantItem } from "@providers/plant/data/blueprints/PlantItem";
+import { SimpleTutorial } from "@providers/simpleTutorial/SimpleTutorial";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IEquipmentAndInventoryUpdatePayload, IItemContainer, ItemSocketEvents, ItemType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import { clearCacheForKey } from "speedgoose";
 
 export interface IUseWithItemToSeedOptions {
   map: string;
@@ -29,7 +31,8 @@ export class UseWithItemToSeed {
     private socketMessaging: SocketMessaging,
     private characterItemInventory: CharacterItemInventory,
     private characterWeight: CharacterWeight,
-    private characterInventory: CharacterInventory
+    private characterInventory: CharacterInventory,
+    private simpleTutorial: SimpleTutorial
   ) {}
 
   public async execute(
@@ -66,10 +69,18 @@ export class UseWithItemToSeed {
 
       this.socketMessaging.sendMessageToCharacter(character, successMessage);
 
+      await this.simpleTutorial.sendSimpleTutorialActionToCharacter(character, "plant-seed");
+
+      await this.cacheClear(character);
+
       await this.refreshInventory(character);
     } catch (error) {
       this.socketMessaging.sendErrorMessageToCharacter(character, errorMessage);
     }
+  }
+
+  private async cacheClear(character: ICharacter): Promise<void> {
+    await clearCacheForKey(`${character._id}-inventory`);
   }
 
   private async refreshInventory(character: ICharacter): Promise<void> {

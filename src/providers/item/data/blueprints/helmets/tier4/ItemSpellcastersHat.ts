@@ -22,6 +22,7 @@ export const itemSpellcastersHat: IEquippableLightArmorTier4Blueprint = {
   weight: 1,
   defense: 17,
   tier: 4,
+  isMageGear: true,
   allowedEquipSlotType: [ItemSlotType.Head],
   equippedBuff: [
     {

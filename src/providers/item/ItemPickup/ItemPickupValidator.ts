@@ -8,6 +8,7 @@ import { CharacterItemSlots } from "@providers/character/characterItems/Characte
 import { CharacterItems } from "@providers/character/characterItems/CharacterItems";
 import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
 import { ITEM_PICKUP_DISTANCE_THRESHOLD } from "@providers/constants/ItemConstants";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { EquipmentEquip } from "@providers/equipment/EquipmentEquip";
 import { MapHelper } from "@providers/map/MapHelper";
 import { MovementHelper } from "@providers/movement/MovementHelper";
@@ -16,6 +17,7 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IItemPickup, ItemType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { isEmpty } from "lodash";
+import { clearCacheForKey } from "speedgoose";
 
 @provide(ItemPickupValidator)
 export class ItemPickupValidator {
@@ -29,7 +31,8 @@ export class ItemPickupValidator {
     private characterValidation: CharacterValidation,
     private characterInventory: CharacterInventory,
     private equipmentEquip: EquipmentEquip,
-    private plantHarvest: PlantHarvest
+    private plantHarvest: PlantHarvest,
+    private inMemoryHashTable: InMemoryHashTable
   ) {}
 
   @TrackNewRelicTransaction()
@@ -40,6 +43,8 @@ export class ItemPickupValidator {
       this.sendErrorMessage(character, "Sorry, the item to be picked up was not found.");
       return false;
     }
+
+    await this.clearCharacterCache(character, itemPickupData.fromContainerId!, itemPickupData.toContainerId, item);
 
     if (item.isStatic) {
       if (item.type === ItemType.Plant) {
@@ -56,6 +61,8 @@ export class ItemPickupValidator {
       itemPickupData.toContainerId = inventory?.itemContainer as string;
     }
 
+    const isPickedItemAlreadyOnInventory = !item.scene;
+
     if (this.shouldEquipInventoryItem(item, inventory, itemPickupData)) {
       await this.equipmentEquip.equipInventory(character, item._id);
       return false;
@@ -69,7 +76,7 @@ export class ItemPickupValidator {
       !this.canPickupItemFromMap(character, item) ||
       !(await this.canCarryAdditionalWeight(character, item)) ||
       !this.canStoreItem(character, item) ||
-      !this.isInRangeForPickup(item, character, itemPickupData) ||
+      (!isPickedItemAlreadyOnInventory && !this.isInRangeForPickup(item, character, itemPickupData)) ||
       !this.canPickupNotOwnedItem(character, item) ||
       !(await this.canPickupAlreadyOwnedItem(character, item, inventory, itemPickupData))
     ) {
@@ -81,6 +88,30 @@ export class ItemPickupValidator {
     }
 
     return item;
+  }
+
+  private async clearCharacterCache(
+    character: ICharacter,
+    fromContainerId: string,
+    toContainerId: string,
+    itemToBeDropped: IItem
+  ): Promise<void> {
+    const promises = [
+      fromContainerId && this.inMemoryHashTable.delete("container-all-items", fromContainerId),
+      this.inMemoryHashTable.delete("container-all-items", toContainerId),
+      clearCacheForKey(`${character._id}-inventory`),
+      clearCacheForKey(`${character._id}-equipment`),
+      this.inMemoryHashTable.delete("equipment-slots", character._id),
+      this.inMemoryHashTable.delete("character-weapon", character._id),
+      this.inMemoryHashTable.delete("inventory-weight", character._id),
+      this.inMemoryHashTable.delete("character-max-weights", character._id),
+    ];
+
+    if (itemToBeDropped.type === ItemType.CraftingResource) {
+      promises.push(this.inMemoryHashTable.delete("load-craftable-items", character._id));
+    }
+
+    await Promise.all(promises);
   }
 
   private sendErrorMessage(character: ICharacter, message: string): void {
@@ -174,6 +205,7 @@ export class ItemPickupValidator {
         itemPickupData.y,
         ITEM_PICKUP_DISTANCE_THRESHOLD
       );
+
       if (!underRange) {
         this.sendErrorMessage(character, "Sorry, you are too far away to pick up this item.");
         return false;

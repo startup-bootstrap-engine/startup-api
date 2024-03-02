@@ -10,6 +10,7 @@ import { Seeder } from "@providers/seeds/Seeder";
 
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { HitTarget } from "@providers/battle/HitTarget";
+import { CharacterActionsTracker } from "@providers/character/CharacterActionsTracker";
 import { CharacterConsumptionControl } from "@providers/character/CharacterConsumptionControl";
 import { CharacterMonitorCallbackTracker } from "@providers/character/CharacterMonitorInterval/CharacterMonitorCallbackTracker";
 import { CharacterNetworkUpdateQueue } from "@providers/character/network/CharacterNetworkUpdate/CharacterNetworkUpdateQueue";
@@ -18,6 +19,7 @@ import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DiscordBot } from "@providers/discord/DiscordBot";
 import { EntityEffectDurationControl } from "@providers/entityEffects/EntityEffectDurationControl";
+import { ErrorHandlingTracker } from "@providers/errorHandling/ErrorHandlingTracker";
 import { ItemUseCycleQueue } from "@providers/item/ItemUseCycleQueue";
 import { Locker } from "@providers/locks/Locker";
 import { NPCBattleCycleQueue } from "@providers/npc/NPCBattleCycleQueue";
@@ -27,6 +29,7 @@ import PartyManagement from "@providers/party/PartyManagement";
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import SpellSilence from "@providers/spells/data/logic/mage/druid/SpellSilence";
+import { BullStrength } from "@providers/spells/data/logic/minotaur/BullStrength";
 import { SpellNetworkCast } from "@providers/spells/network/SpellNetworkCast";
 import { UseWithTileQueue } from "@providers/useWith/abstractions/UseWithTileQueue";
 import { EnvType } from "@rpg-engine/shared";
@@ -62,7 +65,10 @@ export class ServerBootstrap {
     private patreonAPI: PatreonAPI,
     private useWithTileQueue: UseWithTileQueue,
     private chatNetworkGlobalMessaging: ChatNetworkGlobalMessaging,
-    private spellNetworkCast: SpellNetworkCast
+    private spellNetworkCast: SpellNetworkCast,
+    private characterActionsTracker: CharacterActionsTracker,
+    private errorHandlingTracker: ErrorHandlingTracker,
+    private bullStrength: BullStrength
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -86,6 +92,12 @@ export class ServerBootstrap {
     await this.queueShutdownHandling();
 
     await this.clearSomeQueues();
+
+    if (appEnv.general.ENV === EnvType.Production) {
+      this.errorHandlingTracker.overrideErrorHandling();
+
+      this.addUnhandledRejectionListener();
+    }
   }
 
   public queueShutdownHandling(): void {
@@ -138,8 +150,15 @@ export class ServerBootstrap {
     await this.inMemoryHashTable.deleteAll("raids");
     await this.inMemoryHashTable.deleteAll("npc-target-check-count");
     await this.inMemoryHashTable.deleteAll("use-item-to-tile");
+    await this.inMemoryHashTable.deleteAll("character-bonus-penalties");
+    await this.inMemoryHashTable.deleteAll("skills-with-buff");
+
     await this.entityEffectDuration.clearAll();
     await this.characterMonitorCallbackTracker.clearAll();
+
+    await this.bullStrength.clearAllGiantForms();
+
+    await this.characterActionsTracker.clearAllCharacterActions();
 
     // Firebase-admin setup, that push notification requires.
     PushNotificationHelper.initialize();
@@ -151,6 +170,16 @@ export class ServerBootstrap {
     this.npcFreezer.init();
 
     await this.locker.clear();
+  }
+
+  private addUnhandledRejectionListener(): void {
+    process.on("uncaughtException", (err) => {
+      console.error("❌ Uncaught Exception:", err);
+    });
+
+    process.on("unhandledRejection", (reason, promise) => {
+      console.error("❌ Unhandled Rejection at:", promise, "reason:", reason);
+    });
   }
 
   private async clearSomeQueues(): Promise<void> {

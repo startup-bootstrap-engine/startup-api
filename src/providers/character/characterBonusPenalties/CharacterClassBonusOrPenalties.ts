@@ -1,6 +1,7 @@
 import { Character } from "@entities/ModuleCharacter/CharacterModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CLASS_BONUS_OR_PENALTIES } from "@providers/constants/SkillConstants";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { CharacterClass } from "@rpg-engine/shared";
 import {
   IBasicAttributesBonusAndPenalties,
@@ -11,7 +12,7 @@ import { provide } from "inversify-binding-decorators";
 
 @provide(CharacterClassBonusOrPenalties)
 export class CharacterClassBonusOrPenalties {
-  constructor() {}
+  constructor(private inMemoryHashTable: InMemoryHashTable) {}
 
   public getClassBonusOrPenalties(characterClass: CharacterClass): {
     basicAttributes: IBasicAttributesBonusAndPenalties;
@@ -32,6 +33,12 @@ export class CharacterClassBonusOrPenalties {
 
   @TrackNewRelicTransaction()
   public async getClassBonusOrPenaltiesBuffs(characterId: string): Promise<Record<string, number>> {
+    const characterBonusPenalties = await this.inMemoryHashTable.get("character-bonus-penalties", characterId);
+
+    if (characterBonusPenalties) {
+      return characterBonusPenalties;
+    }
+
     const character = await Character.findById(characterId).lean({ virtuals: true, defaults: true }).select("class");
 
     if (!character) {
@@ -40,7 +47,10 @@ export class CharacterClassBonusOrPenalties {
 
     const classBonusPenalties = this.getClassBonusOrPenalties(character.class as CharacterClass);
 
-    return this.parseBonusAndPenalties(classBonusPenalties);
+    const parsedBonusAndPenalties = this.parseBonusAndPenalties(classBonusPenalties);
+
+    await this.inMemoryHashTable.set("character-bonus-penalties", characterId, parsedBonusAndPenalties);
+    return parsedBonusAndPenalties;
   }
 
   private parseBonusAndPenalties(bonusAndPenalties: Record<string, any>): Record<string, number> {

@@ -23,6 +23,7 @@ describe("UseWithRefill.ts", () => {
   let blueprintManager: BlueprintManager;
   let skillIncrease: SkillIncrease;
   let resourceKey: string;
+  let sendSimpleTutorialEvent: jest.SpyInstance;
 
   const mockSocketMessaging = {
     sendMessageToCharacter: jest.fn(),
@@ -73,7 +74,10 @@ describe("UseWithRefill.ts", () => {
       successMessages: ["your success"],
     };
 
-    // @ts-expect-error
+    // @ts-ignore
+    sendSimpleTutorialEvent = jest.spyOn(useWithRefill.simpleTutorial, "sendSimpleTutorialActionToCharacter");
+
+    // @ts-ignore
     useWithRefill.socketMessaging = mockSocketMessaging;
   });
 
@@ -179,6 +183,8 @@ describe("UseWithRefill.ts", () => {
         status: true,
       }
     );
+
+    expect(sendSimpleTutorialEvent).toBeCalledWith(testCharacter!, "plant-water");
   });
 
   it("should not send sendRandomMessageToCharacter when updatePlantGrowth returns false", async () => {

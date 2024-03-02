@@ -1,4 +1,4 @@
-import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { characterBuffActivator } from "@providers/inversify/container";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -32,11 +32,6 @@ export class BullStrength {
           durationType: CharacterBuffDurationType.Temporary,
           isStackable: false,
           originateFrom: SpellsBlueprint.MinotaurBullStrength,
-          options: {
-            messages: {
-              skipAllMessages: true,
-            },
-          },
         }),
         this.enableGiantForm(character, timeout),
       ]);
@@ -45,9 +40,20 @@ export class BullStrength {
     }
   }
 
+  public async clearAllGiantForms(): Promise<void> {
+    try {
+      await Character.updateMany({ isGiantForm: true }, { $set: { isGiantForm: false } });
+    } catch (error) {
+      console.error(`Failed to clear all giant forms: ${error}`);
+    }
+  }
+
+  private async setGiantForm(character: ICharacter, value: boolean): Promise<void> {
+    await Character.updateOne({ _id: character._id }, { $set: { isGiantForm: value } });
+  }
+
   private async enableGiantForm(character: ICharacter, timeout: number): Promise<void> {
-    character.isGiantForm = true;
-    await character.save();
+    await this.setGiantForm(character, true);
 
     const payload: ICharacterAttributeChanged = {
       targetId: character._id,
@@ -60,15 +66,19 @@ export class BullStrength {
       payload,
       true
     );
-    this.socketMessaging.sendMessageToCharacter(character, "You have become a giant!");
+
+    setTimeout(() => {
+      this.socketMessaging.sendMessageToCharacter(character, "You have become a giant! Let's crush some skulls 💀!");
+    }, 2000);
+
     setTimeout(async () => {
       await this.disableGiantForm(character);
     }, timeout * 1000);
   }
 
   private async disableGiantForm(character: ICharacter): Promise<void> {
-    character.isGiantForm = false;
-    await character.save();
+    await this.setGiantForm(character, false);
+
     const payload: ICharacterAttributeChanged = {
       targetId: character._id,
       isGiantForm: false,
@@ -80,6 +90,9 @@ export class BullStrength {
       payload,
       true
     );
-    this.socketMessaging.sendMessageToCharacter(character, "You turn back to normal!");
+
+    setTimeout(() => {
+      this.socketMessaging.sendMessageToCharacter(character, "You turn back to normal!");
+    }, 2000);
   }
 }

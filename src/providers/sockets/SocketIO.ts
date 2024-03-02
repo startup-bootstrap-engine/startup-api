@@ -5,11 +5,10 @@ import { NewRelic } from "@providers/analytics/NewRelic";
 import { appEnv } from "@providers/config/env";
 import { SOCKET_IO_CONFIG } from "@providers/constants/SocketsConstants";
 import { SocketIOAuthMiddleware } from "@providers/middlewares/SocketIOAuthMiddleware";
-import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { EnvType, ISocket } from "@rpg-engine/shared";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { provide } from "inversify-binding-decorators";
-import { createClient } from "redis";
+import { RedisClientOptions, createClient } from "redis";
 import { Socket, Server as SocketIOServer } from "socket.io";
 
 @provide(SocketIO)
@@ -28,29 +27,36 @@ export class SocketIO implements ISocket {
         this.socket.listen(appEnv.socket.port.SOCKET);
         break;
       case EnvType.Production:
-        const pubClient = createClient({
+        const redisOptions: RedisClientOptions = {
           socket: {
             host: appEnv.database.REDIS_CONTAINER,
             port: appEnv.database.REDIS_PORT,
+            connectTimeout: 10000,
+            reconnectStrategy: (retries) => Math.min(retries * 100, 1500), // Exponential backoff
           },
-        });
+          pingInterval: 2500,
+          disableOfflineQueue: true,
+        };
+
+        const pubClient = createClient(redisOptions);
         const subClient = pubClient.duplicate();
 
-        this.socket.adapter(createAdapter(pubClient, subClient));
+        const handleRedisError = (client: string) => (error: Error) => {
+          console.error(`${client} Redis error:`, error);
+        };
 
-        this.socket.on("error", (error) => {
-          console.error("🔴 SocketIO Error:", error);
-          this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Server, "SocketError", 1);
-        });
+        pubClient.on("error", handleRedisError("Publisher"));
+        subClient.on("error", handleRedisError("Subscriber"));
 
-        this.socket.on("disconnect", (reason) => {
-          console.error("🔴 SocketIO Disconnected:", reason);
-        });
-
-        await Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
+        try {
+          await Promise.all([pubClient.connect(), subClient.connect()]);
+          this.socket.adapter(createAdapter(pubClient, subClient));
           this.socket.use(SocketIOAuthMiddleware);
           this.socket.listen(appEnv.socket.port.SOCKET);
-        });
+        } catch (error) {
+          console.error("Failed to initialize Redis clients:", error);
+          this.newRelic.noticeError(error);
+        }
         break;
     }
   }

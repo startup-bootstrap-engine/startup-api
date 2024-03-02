@@ -13,6 +13,7 @@ describe("UseWithItemToSeed.ts", () => {
   let mockItemSave: jest.Mock;
   let sendMessageToCharacter: jest.SpyInstance;
   let sendErrorMessageToCharacter: jest.SpyInstance;
+  let sendSimpleTutorialAction: jest.SpyInstance;
 
   beforeAll(() => {
     useWithItemToSeed = container.get<UseWithItemToSeed>(UseWithItemToSeed);
@@ -44,6 +45,9 @@ describe("UseWithItemToSeed.ts", () => {
 
     // @ts-ignore
     sendErrorMessageToCharacter = jest.spyOn(useWithItemToSeed.socketMessaging, "sendErrorMessageToCharacter");
+
+    // @ts-ignore
+    sendSimpleTutorialAction = jest.spyOn(useWithItemToSeed.simpleTutorial, "sendSimpleTutorialActionToCharacter");
   });
 
   it("should create a new plant and update inventory on successful execution", async () => {
@@ -63,6 +67,7 @@ describe("UseWithItemToSeed.ts", () => {
     expect(mockIncreaseCraftingSP).toHaveBeenCalledWith(testCharacter, ItemType.Plant, true);
     expect(plant).toBeDefined();
     expect(sendMessageToCharacter).toHaveBeenCalledWith(testCharacter, "Planting Success");
+    expect(sendSimpleTutorialAction).toHaveBeenCalledWith(testCharacter, "plant-seed");
   });
 
   it("should send an error message on failure ", async () => {

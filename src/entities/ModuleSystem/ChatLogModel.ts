@@ -21,6 +21,8 @@ const chatLogSchema = createLeanSchema(
   { timestamps: { createdAt: true, updatedAt: true } }
 );
 
+chatLogSchema.index({ x: 1, y: 1, scene: 1, createdAt: -1 });
+
 export type IChatLog = ExtractDoc<typeof chatLogSchema>;
 
 export const ChatLog = typedModel("ChatLog", chatLogSchema);

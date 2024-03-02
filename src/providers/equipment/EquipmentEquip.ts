@@ -202,6 +202,8 @@ export class EquipmentEquip {
     await clearCacheForKey(`${character._id}-equipment`);
     await clearCacheForKey(`characterBuffs_${character._id}`);
     await clearCacheForKey(`${character._id}-skills`);
+    await this.inMemoryHashTable.delete("skills-with-buff", character._id);
+
     await this.inMemoryHashTable.delete("equipment-slots", character._id);
     await this.inMemoryHashTable.delete("character-shield", character._id);
     await this.inMemoryHashTable.delete("character-weapon", character._id);

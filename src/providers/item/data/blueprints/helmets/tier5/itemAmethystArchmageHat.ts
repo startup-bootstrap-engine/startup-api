@@ -23,6 +23,7 @@ export const itemAmethystArchmageHat: IEquippableLightArmorTier5Blueprint = {
   weight: 2.8,
   allowedEquipSlotType: [ItemSlotType.Head],
   basePrice: 90,
+  isMageGear: true,
   equippedBuff: [
     {
       type: CharacterBuffType.Skill,
