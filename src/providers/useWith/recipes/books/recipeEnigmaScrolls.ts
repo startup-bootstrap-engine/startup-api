@@ -8,19 +8,19 @@ export const recipeEnigmaScrolls: IUseWithCraftingRecipe = {
   requiredItems: [
     {
       key: CraftingResourcesBlueprint.MagicRecipe,
-      qty: 6,
+      qty: 20,
     },
     {
       key: CraftingResourcesBlueprint.ObsidiumIngot,
-      qty: 4,
+      qty: 40,
     },
     {
       key: CraftingResourcesBlueprint.ElvenLeaf,
-      qty: 6,
+      qty: 60,
     },
     {
       key: CraftingResourcesBlueprint.PhoenixFeather,
-      qty: 4,
+      qty: 40,
     },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 20],

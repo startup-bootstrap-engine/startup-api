@@ -5,6 +5,7 @@ import { recipeArcaneArbiterChronicles } from "./recipeArcaneArbiterChronicles";
 import { recipeEmberSageScripture } from "./recipeEmberSageScripture";
 import { recipeEnigmaScrolls } from "./recipeEnigmaScrolls";
 import { recipeFrostWraithTome } from "./recipeFrostWraithTome";
+import { recipeMysteryOrb } from "./recipeMysteryOrb";
 import { recipeMysticWardenCodex } from "./recipeMysticWardenCodex";
 import { recipePotioncraftPrimer } from "./recipePotioncraftPrimer";
 import { recipeSpellboundCodex } from "./recipeSpellboundCodex";
@@ -20,4 +21,5 @@ export const recipeBooksIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [BooksBlueprint.EnigmaScrolls]: [recipeEnigmaScrolls],
   [BooksBlueprint.PotioncraftPrimer]: [recipePotioncraftPrimer],
   [BooksBlueprint.SpellboundCodex]: [recipeSpellboundCodex],
+  [BooksBlueprint.MysteryOrb]: [recipeMysteryOrb],
 };

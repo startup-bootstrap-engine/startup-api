@@ -7,8 +7,8 @@ import {
   ItemSubType,
   ItemType,
 } from "@rpg-engine/shared";
-import { BooksBlueprint } from "../../../types/itemsBlueprintTypes";
 import { IEquippableBookTier7Blueprint } from "../../../types/TierBlueprintTypes";
+import { BooksBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemMysteryOrb: IEquippableBookTier7Blueprint = {
   key: BooksBlueprint.MysteryOrb,
@@ -26,40 +26,28 @@ export const itemMysteryOrb: IEquippableBookTier7Blueprint = {
   equippedBuff: [
     {
       type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Strength,
-      buffPercentage: 11,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 20,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of strength flowing through your body. (+11% strength)",
-          deactivation: "You feel the power of strength leaving your body. (-11% strength)",
-        },
-      },
     },
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Resistance,
-      buffPercentage: 11,
+      buffPercentage: 15,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of resistance flowing through your body. (+11% resistance)",
-          deactivation: "You feel the power of resistance leaving your body. (-11% resistance)",
-        },
-      },
     },
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Dexterity,
-      buffPercentage: 11,
+      buffPercentage: 15,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of dexterity flowing through your body. (+11% dexterity)",
-          deactivation: "You feel the power of dexterity leaving your body. (-11% dexterity)",
-        },
-      },
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 20,
+      durationType: CharacterBuffDurationType.Permanent,
     },
   ],
-  equippedBuffDescription: "Increases strength by 11%, resistance by 11% and dexterity by 11% respectively",
+  equippedBuffDescription: "Increases magic, resistance, dexterity and max mana by 20%.",
 };

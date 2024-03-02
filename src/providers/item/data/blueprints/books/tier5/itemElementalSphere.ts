@@ -1,14 +1,13 @@
 import {
   BasicAttribute,
-  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   ItemSlotType,
   ItemSubType,
   ItemType,
 } from "@rpg-engine/shared";
-import { BooksBlueprint } from "../../../types/itemsBlueprintTypes";
 import { IEquippableBookTier5Blueprint } from "../../../types/TierBlueprintTypes";
+import { BooksBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemElementalSphere: IEquippableBookTier5Blueprint = {
   key: BooksBlueprint.ElementalSphere,
@@ -25,41 +24,11 @@ export const itemElementalSphere: IEquippableBookTier5Blueprint = {
   tier: 5,
   equippedBuff: [
     {
-      type: CharacterBuffType.CharacterAttribute,
-      trait: CharacterAttributes.MaxHealth,
-      buffPercentage: 9,
-      durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of max health flowing through your body. (+9% max health)",
-          deactivation: "You feel the power of max health leaving your body. (-9% max health)",
-        },
-      },
-    },
-    {
       type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Resistance,
-      buffPercentage: 9,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 30,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of resistance flowing through your body. (+9% resistance)",
-          deactivation: "You feel the power of resistance leaving your body. (-9% resistance)",
-        },
-      },
-    },
-    {
-      type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Dexterity,
-      buffPercentage: 9,
-      durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of dexterity flowing through your body. (+9% dexterity)",
-          deactivation: "You feel the power of dexterity leaving your body. (-9% dexterity)",
-        },
-      },
     },
   ],
-  equippedBuffDescription: "Increases max health by 9%, resistance by 9% and dexterity by 6% respectively",
+  equippedBuffDescription: "Increases magic by 30%.",
 };

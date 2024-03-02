@@ -7,8 +7,8 @@ import {
 import { IUseWithCraftingRecipe } from "@providers/useWith/useWithTypes";
 import { CraftingSkill } from "@rpg-engine/shared";
 
-export const recipeFrostWraithTome: IUseWithCraftingRecipe = {
-  outputKey: BooksBlueprint.FrostWraithTome,
+export const recipeMysteryOrb: IUseWithCraftingRecipe = {
+  outputKey: BooksBlueprint.MysteryOrb,
   outputQtyRange: [1, 1],
   requiredItems: [
     {
@@ -16,24 +16,29 @@ export const recipeFrostWraithTome: IUseWithCraftingRecipe = {
       qty: 10,
     },
     {
-      key: CraftingResourcesBlueprint.BlueSapphire,
+      key: CraftingResourcesBlueprint.ObsidiumIngot,
       qty: 30,
     },
     {
-      key: CraftingResourcesBlueprint.RedSapphire,
-      qty: 20,
+      key: CraftingResourcesBlueprint.BlueFeather,
+      qty: 50,
     },
     {
-      key: MagicsBlueprint.CorruptionRune,
-      qty: 20,
+      key: MagicsBlueprint.ThunderRune,
+      qty: 99,
+    },
+    {
+      key: CraftingResourcesBlueprint.Jade,
+      qty: 99,
     },
   ],
   minCraftingRequirements: [
     CraftingSkill.Alchemy,
     calculateMinimumLevel([
       [CraftingResourcesBlueprint.MagicRecipe, 10],
-      [CraftingResourcesBlueprint.BlueSapphire, 30],
-      [CraftingResourcesBlueprint.RedSapphire, 20],
+      [CraftingResourcesBlueprint.ObsidiumIngot, 30],
+      [CraftingResourcesBlueprint.BlueFeather, 50],
+      [CraftingResourcesBlueprint.Jade, 99],
     ]),
   ],
 };

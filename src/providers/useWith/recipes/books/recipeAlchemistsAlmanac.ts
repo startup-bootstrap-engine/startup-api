@@ -8,23 +8,23 @@ export const recipeAlchemistsAlmanac: IUseWithCraftingRecipe = {
   requiredItems: [
     {
       key: CraftingResourcesBlueprint.MagicRecipe,
-      qty: 6,
+      qty: 10,
     },
     {
       key: CraftingResourcesBlueprint.ObsidiumIngot,
-      qty: 4,
+      qty: 40,
     },
     {
       key: CraftingResourcesBlueprint.GoldenIngot,
-      qty: 4,
+      qty: 40,
     },
     {
       key: MagicsBlueprint.EnergyBoltRune,
-      qty: 6,
+      qty: 60,
     },
     {
       key: CraftingResourcesBlueprint.MagicRecipe,
-      qty: 2,
+      qty: 20,
     },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 22],

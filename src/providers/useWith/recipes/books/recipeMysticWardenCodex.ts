@@ -8,24 +8,29 @@ export const recipeMysticWardenCodex: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 1],
   requiredItems: [
     {
+      key: CraftingResourcesBlueprint.MagicRecipe,
+      qty: 10,
+    },
+    {
       key: CraftingResourcesBlueprint.PhoenixFeather,
-      qty: 2,
+      qty: 20,
     },
     {
       key: CraftingResourcesBlueprint.ElvenLeaf,
-      qty: 3,
+      qty: 30,
     },
     {
       key: CraftingResourcesBlueprint.BlueLeather,
-      qty: 1,
+      qty: 10,
     },
   ],
   minCraftingRequirements: [
     CraftingSkill.Alchemy,
     calculateMinimumLevel([
-      [CraftingResourcesBlueprint.PhoenixFeather, 2],
-      [CraftingResourcesBlueprint.ElvenLeaf, 3],
-      [CraftingResourcesBlueprint.BlueLeather, 1],
+      [CraftingResourcesBlueprint.MagicRecipe, 10],
+      [CraftingResourcesBlueprint.PhoenixFeather, 20],
+      [CraftingResourcesBlueprint.ElvenLeaf, 30],
+      [CraftingResourcesBlueprint.BlueLeather, 10],
     ]),
   ],
 };
