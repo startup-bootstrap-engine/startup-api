@@ -1,6 +1,6 @@
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
-import { MAX_HOURS_NO_WATER_DEAD } from "@providers/constants/FarmingConstants";
+import { DEAD_PLANT_REMOVE_HOURS, MAX_HOURS_NO_WATER_DEAD } from "@providers/constants/FarmingConstants";
 import { container } from "@providers/inversify/container";
 import { ItemType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -45,10 +45,23 @@ export class PlantDead {
 
     const updatedPlant = await Item.findOneAndUpdate(
       { _id: plant._id },
-      { $set: { isDead: true, texturePath: blueprint.deadTexturePath } },
+      { $set: { isDead: true, texturePath: blueprint.deadTexturePath, timeOfDeath: new Date() } },
       { new: true }
     ).exec();
 
     await this.plantGrowth.updatePlantTexture(updatedPlant as IItem);
+  }
+
+  public async removeDeadPlants(): Promise<void> {
+    const thresholdDate = new Date(Date.now() - DEAD_PLANT_REMOVE_HOURS * 60 * 60 * 1000);
+
+    const removingPlants = await Item.find({
+      type: ItemType.Plant,
+      isDead: true,
+      timeOfDeath: { $lt: thresholdDate },
+    });
+
+    const removePromises = removingPlants.map((plant) => plant.remove());
+    await Promise.all(removePromises);
   }
 }

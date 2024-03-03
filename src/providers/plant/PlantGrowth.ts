@@ -2,6 +2,7 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
+import { MAXIMUM_MINUTES_FOR_GROW, MINIMUM_MINUTES_FOR_WATERING } from "@providers/constants/FarmingConstants";
 import { container } from "@providers/inversify/container";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IItemUpdate, IItemUpdateAll, ItemSocketEvents, ItemSubType, ItemType } from "@rpg-engine/shared";
@@ -10,9 +11,6 @@ import { provide } from "inversify-binding-decorators";
 import _, { random } from "lodash";
 import { IPlantItem } from "./data/blueprints/PlantItem";
 import { PlantLifeCycle } from "./data/types/PlantTypes";
-
-export const MAXIMUM_HOURS_FOR_GROW: number = 24;
-export const MINIMUM_HOURS_FOR_WATERING: number = 3;
 
 interface IPlantGrowthStatus {
   canGrow: boolean;
@@ -44,7 +42,7 @@ export class PlantGrowth {
       if (!canWater) {
         this.socketMessaging.sendErrorMessageToCharacter(
           character,
-          "Sorry, the plant is not ready to be watered. Try again in a few hours."
+          "Sorry, the plant is not ready to be watered. Try again in a few minutes."
         );
         return false;
       }
@@ -191,9 +189,9 @@ export class PlantGrowth {
   }
 
   private checkPlantGrowthSincePlanted(now: dayjs.Dayjs, plant: IItem): IPlantGrowthStatus {
-    const hoursSincePlanted = now.diff(dayjs(plant.createdAt), "hour");
+    const minutesSincePlanted = now.diff(dayjs(plant.createdAt), "minute");
 
-    if (hoursSincePlanted <= MAXIMUM_HOURS_FOR_GROW) {
+    if (minutesSincePlanted <= MAXIMUM_MINUTES_FOR_GROW) {
       return { canGrow: true, canWater: true };
     }
 
@@ -201,16 +199,46 @@ export class PlantGrowth {
   }
 
   private checkPlantGrowthSinceLastWatering(now: dayjs.Dayjs, plant: IItem): IPlantGrowthStatus {
-    const hoursSinceLastWatering = now.diff(dayjs(plant.lastWatering), "hour");
+    const minutesSinceLastWatering = now.diff(dayjs(plant.lastWatering), "minute");
 
-    if (hoursSinceLastWatering > MAXIMUM_HOURS_FOR_GROW) {
+    if (minutesSinceLastWatering > MAXIMUM_MINUTES_FOR_GROW) {
       return { canGrow: false, canWater: true };
     }
 
-    if (hoursSinceLastWatering <= MAXIMUM_HOURS_FOR_GROW && hoursSinceLastWatering > MINIMUM_HOURS_FOR_WATERING) {
+    if (
+      minutesSinceLastWatering <= MAXIMUM_MINUTES_FOR_GROW &&
+      minutesSinceLastWatering >= MINIMUM_MINUTES_FOR_WATERING
+    ) {
       return { canGrow: true, canWater: true };
     }
 
     return { canGrow: false, canWater: false };
+  }
+
+  public async checkAndUpdateTintedTilePlants(): Promise<void> {
+    const thresholdTime = new Date(Date.now() - MINIMUM_MINUTES_FOR_WATERING * 60 * 1000);
+
+    const plantsToBeUpdated = await Item.find({
+      type: ItemType.Plant,
+      isTileTinted: true,
+      lastWatering: { $lt: thresholdTime },
+    }).lean<IItem[]>({ virtuals: true, defaults: true });
+
+    await this.bulkUpdateTintedTileStatus(plantsToBeUpdated);
+
+    await Promise.all(plantsToBeUpdated.map((plant) => this.updatePlantTexture(plant)));
+  }
+
+  private async bulkUpdateTintedTileStatus(plants: IItem[]): Promise<void> {
+    const ids = plants.map((plant) => plant._id);
+    const bulkUpdateOps = ids.map((id) => ({
+      updateOne: {
+        filter: { _id: id },
+        update: { $set: { isTileTinted: false } },
+      },
+    }));
+
+    // Execute bulk operation
+    await Item.bulkWrite(bulkUpdateOps);
   }
 }

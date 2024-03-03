@@ -1,4 +1,8 @@
-import { FARMING_LOW_YIELD_FACTOR } from "@providers/constants/FarmingConstants";
+import {
+  DEFAULT_PLANT_CYCLE,
+  FARMING_LOW_YIELD_FACTOR,
+  SUPER_GROWTH_FACTOR,
+} from "@providers/constants/FarmingConstants";
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemSubType, ItemType } from "@rpg-engine/shared";
 import { PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
@@ -19,29 +23,29 @@ export const plantItemPumpkin: IPlantItem = {
   deadTexturePath: "plants/food/pumpkin/generic-sprout-dead-2.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
-      requiredGrowthPoints: 10,
+      requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Seed,
       textureAtlas: "crops",
       texturePath: "seeds/seed-brown-3.png",
     },
     [PlantLifeCycle.Sprout]: {
-      requiredGrowthPoints: 20,
+      requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Sprout,
       textureAtlas: "crops",
       texturePath: "plants/food/pumpkin/pumpkin-sprout.png",
     },
     [PlantLifeCycle.Young]: {
-      requiredGrowthPoints: 30,
+      requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Young,
       textureAtlas: "crops",
       texturePath: "plants/food/pumpkin/pumpkin-young.png",
     },
     [PlantLifeCycle.Mature]: {
-      requiredGrowthPoints: 40,
+      requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Mature,
       textureAtlas: "crops",
       texturePath: "plants/food/pumpkin/pumpkin-mature.png",
     },
   },
   harvestableItemKey: FoodsBlueprint.Pumpkin,
   regrowsAfterHarvest: false,
-  growthFactor: 4.5,
+  growthFactor: SUPER_GROWTH_FACTOR,
   yieldFactor: FARMING_LOW_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],

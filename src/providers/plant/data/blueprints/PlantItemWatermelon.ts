@@ -1,4 +1,4 @@
-import { FARMING_LOW_YIELD_FACTOR } from "@providers/constants/FarmingConstants";
+import { FARMING_LOW_YIELD_FACTOR, FAST_PLANT_CYCLE, SUPER_GROWTH_FACTOR } from "@providers/constants/FarmingConstants";
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemSubType, ItemType } from "@rpg-engine/shared";
 import { PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
@@ -18,29 +18,29 @@ export const plantItemWatermelon: IPlantItem = {
   deadTexturePath: "plants/food/watermelon/generic-sprout-dead-2.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
-      requiredGrowthPoints: 5,
+      requiredGrowthPoints: FAST_PLANT_CYCLE.Seed,
       textureAtlas: "crops",
       texturePath: "seeds/seed-green-1.png",
     },
     [PlantLifeCycle.Sprout]: {
-      requiredGrowthPoints: 10,
+      requiredGrowthPoints: FAST_PLANT_CYCLE.Sprout,
       textureAtlas: "crops",
       texturePath: "plants/food/watermelon/watermelon-sprout.png",
     },
     [PlantLifeCycle.Young]: {
-      requiredGrowthPoints: 20,
+      requiredGrowthPoints: FAST_PLANT_CYCLE.Young,
       textureAtlas: "crops",
       texturePath: "plants/food/watermelon/watermelon-young.png",
     },
     [PlantLifeCycle.Mature]: {
-      requiredGrowthPoints: 30,
+      requiredGrowthPoints: FAST_PLANT_CYCLE.Mature,
       textureAtlas: "crops",
       texturePath: "plants/food/watermelon/watermelon-mature.png",
     },
   },
   harvestableItemKey: FoodsBlueprint.Watermelon,
   regrowsAfterHarvest: true,
-  growthFactor: 4.5,
+  growthFactor: SUPER_GROWTH_FACTOR,
   yieldFactor: FARMING_LOW_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],

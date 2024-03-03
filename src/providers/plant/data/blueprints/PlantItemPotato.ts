@@ -1,4 +1,8 @@
-import { FARMING_MEDIUM_YIELD_FACTOR } from "@providers/constants/FarmingConstants";
+import {
+  FARMING_MEDIUM_YIELD_FACTOR,
+  FAST_PLANT_CYCLE,
+  SUPER_GROWTH_FACTOR,
+} from "@providers/constants/FarmingConstants";
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemSubType, ItemType } from "@rpg-engine/shared";
 import { PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
@@ -19,29 +23,29 @@ export const plantItemPotato: IPlantItem = {
   deadTexturePath: "plants/food/potato/potato-dead.png",
   stagesRequirements: {
     [PlantLifeCycle.Seed]: {
-      requiredGrowthPoints: 5,
+      requiredGrowthPoints: FAST_PLANT_CYCLE.Seed,
       textureAtlas: "crops",
       texturePath: "seeds/seed-brown-1.png",
     },
     [PlantLifeCycle.Sprout]: {
-      requiredGrowthPoints: 10,
+      requiredGrowthPoints: FAST_PLANT_CYCLE.Sprout,
       textureAtlas: "crops",
       texturePath: "plants/food/potato/potato-sprout.png",
     },
     [PlantLifeCycle.Young]: {
-      requiredGrowthPoints: 20,
+      requiredGrowthPoints: FAST_PLANT_CYCLE.Young,
       textureAtlas: "crops",
       texturePath: "plants/food/potato/potato-young.png",
     },
     [PlantLifeCycle.Mature]: {
-      requiredGrowthPoints: 30,
+      requiredGrowthPoints: FAST_PLANT_CYCLE.Mature,
       textureAtlas: "crops",
       texturePath: "plants/food/potato/potato-mature.png",
     },
   },
   harvestableItemKey: FoodsBlueprint.Potato,
   regrowsAfterHarvest: false,
-  growthFactor: 3.5,
+  growthFactor: SUPER_GROWTH_FACTOR,
   yieldFactor: FARMING_MEDIUM_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
