@@ -24,14 +24,17 @@ export class SpellNetworkCast {
       channel,
       SpellSocketEvents.CastSpell,
       async (data: ISpellCast, character: ICharacter) => {
+        if (!character._id) {
+          throw new Error("Character ID not found");
+        }
+
         if (!data || !character) {
           return;
         }
 
         await this.addToQueue(data, character);
       },
-      true,
-      false
+      true
     );
   }
 
