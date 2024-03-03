@@ -16,6 +16,10 @@ export class PlantCrons {
       await this.plantDead.checkUpdateDeadPlants();
     });
 
+    this.cronJobScheduler.uniqueSchedule("remove-dead-plant-cron", "0,30 * * * *", async () => {
+      await this.plantDead.removeDeadPlants();
+    });
+
     this.cronJobScheduler.uniqueSchedule("plant-tile-tint-cron", "* * * * *", async () => {
       await this.plantGrowth.checkAndUpdateTintedTilePlants();
     });

@@ -6,6 +6,7 @@ export const FARMING_HIGH_YIELD_FACTOR = 3;
 export const FARMING_SUPER_YIELD_FACTOR = 4;
 
 export const MAX_HOURS_NO_WATER_DEAD = 72;
+export const DEAD_PLANT_REMOVE_HOURS = 1;
 
 export const MAXIMUM_MINUTES_FOR_GROW: number = 120;
 export const MINIMUM_MINUTES_FOR_WATERING: number = 5;

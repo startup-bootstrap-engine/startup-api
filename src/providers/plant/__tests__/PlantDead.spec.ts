@@ -1,7 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
-import { MAX_HOURS_NO_WATER_DEAD } from "@providers/constants/FarmingConstants";
+import { DEAD_PLANT_REMOVE_HOURS, MAX_HOURS_NO_WATER_DEAD } from "@providers/constants/FarmingConstants";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { PlantDead } from "../PlantDead";
 import { IPlantItem } from "../data/blueprints/PlantItem";
@@ -71,5 +71,15 @@ describe("PlantDead.ts", () => {
     const updatePlant = await Item.findById(plant._id);
     expect(updatePlantTexture).toHaveBeenCalled();
     expect(updatePlant?.texturePath).toBe(blueprint.deadTexturePath);
+  });
+
+  it("should remove dead plants after DEAD_PLANT_REMOVE_HOURS", async () => {
+    plant.isDead = true;
+    plant.timeOfDeath = new Date(Date.now() - DEAD_PLANT_REMOVE_HOURS * 60 * 60 * 1000);
+    await plant.save();
+
+    await plantDead.removeDeadPlants();
+    const updatedPlant = await Item.findById(plant._id);
+    expect(updatedPlant).toBeNull();
   });
 });

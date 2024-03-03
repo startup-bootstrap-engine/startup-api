@@ -154,6 +154,7 @@ const itemSchema = createLeanSchema(
 
     isDead: Type.boolean({ required: false }),
 
+    timeOfDeath: Type.date({ required: false }),
     isTileTinted: Type.boolean({ required: false }),
   },
   { timestamps: { createdAt: true, updatedAt: true } }
