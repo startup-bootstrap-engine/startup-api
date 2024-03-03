@@ -46,10 +46,10 @@ import { npcCyclopsWarrior } from "./tier17/NPCCyclopsWarrior";
 import { npcElderGolem } from "./tier17/NPCElderGolem";
 import { npcFellbeast } from "./tier17/NPCFellbeast";
 import { npcNightFellbeast } from "./tier17/NPCNightFellbeast";
-import { npcForestNaga } from "./tier18/ForestNaga";
 import { npcCorruptedCyclops } from "./tier18/NPCCorruptedCyclops";
 import { npcCorruptedKobold } from "./tier18/NPCCorruptedKobold";
 import { npcDragonServant } from "./tier18/NPCDragonServant";
+import { npcForestNaga } from "./tier18/NPCForestNaga";
 import { npcNazgul } from "./tier18/NPCNazgul";
 import { npcRedNaga } from "./tier19/NPCRedNaga";
 import { npcAssaultSpider } from "./tier2/NPCAssaultSpider";
@@ -70,6 +70,7 @@ import { npcVenomNaga } from "./tier22/NPCVenomNaga";
 import { npcYellowDragon } from "./tier22/NPCYellowDragon";
 import { npcBlackNaga } from "./tier23/NPCBlackNaga";
 import { npcPurpleDragon } from "./tier23/NPCPurpleDragon";
+import { npcAncientDragon } from "./tier26/NPCAncientDragon";
 import { npcBlackEagle } from "./tier3/NPCBlackEagle";
 import { npcBlackSpider } from "./tier3/NPCBlackSpider";
 import { npcBrownBear } from "./tier3/NPCBrownBear";
@@ -201,4 +202,5 @@ export const hostileNPCs = {
   [HostileNPCsBlueprint.BlackKobold]: npcBlackKobold,
   [HostileNPCsBlueprint.CorruptedKobold]: npcCorruptedKobold,
   [HostileNPCsBlueprint.ForestKobold]: npcForestKobold,
+  [HostileNPCsBlueprint.AncientDragon]: npcAncientDragon,
 };

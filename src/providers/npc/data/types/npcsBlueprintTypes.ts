@@ -148,6 +148,7 @@ export enum HostileNPCsBlueprint {
   BlueDragon = "blue-dragon-01",
   YellowDragon = "yellow-dragon-01",
   PurpleDragon = "purple-dragon-01",
+  AncientDragon = "ancient-dragon",
   OrcArcher = "orc-archer",
   DarkKnight = "dark-knight",
   Litch = "litch",
