@@ -398,15 +398,15 @@ export class HitTarget {
     let data;
     switch (target.type) {
       case EntityType.Character:
-        data = await Character.findOne({ _id: target.id, scene: target.scene }).lean().select("health");
+        data = await Character.findOne({ _id: target._id, scene: target.scene }).lean().select("health");
         break;
       case EntityType.NPC:
-        data = await NPC.findOne({ _id: target.id, scene: target.scene }).lean().select("health");
+        data = await NPC.findOne({ _id: target._id, scene: target.scene }).lean().select("health");
         break;
       default:
         throw new Error(`Invalid target type: ${target.type}`);
     }
-    return data.health;
+    return data?.health ?? target.health;
   }
 
   private async updateHealthInDatabase(target: ICharacter | INPC, health: number): Promise<void> {
