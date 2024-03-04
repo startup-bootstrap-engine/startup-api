@@ -24,8 +24,6 @@ export class PlantGrowth {
   public async updatePlantGrowth(plant: IItem, character: ICharacter): Promise<boolean> {
     try {
       if (plant.isDead) {
-        // this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, the plant is already dead.");
-
         this.notifyCharacter(character, "Sorry, the plant is already dead.");
         return false;
       }
@@ -54,23 +52,10 @@ export class PlantGrowth {
       console.log("requiredGrowthPoints", requiredGrowthPoints);
 
       if (currentGrowthPoints < requiredGrowthPoints) {
-        console.log("Not enough growth points to grow yet");
-        await Item.updateOne(
-          { _id: plant._id },
-          { $set: { growthPoints: currentGrowthPoints + blueprint.growthFactor, lastWatering: new Date() } }
-        );
-        return true;
+        return await this.updateGrowthPoints(plant, currentGrowthPoints, blueprint);
       }
 
-      const nextCycle = this.getNextCycle((plant.currentPlantCycle as PlantLifeCycle) ?? PlantLifeCycle.Seed);
-
-      console.log("nextCycle", nextCycle);
-
-      let updatedGrowthPoints = currentGrowthPoints + blueprint.growthFactor;
-      if (plant.currentPlantCycle === PlantLifeCycle.Mature && !blueprint.regrowsAfterHarvest) {
-        console.log("Plant is mature and does not regrow after harvest");
-        updatedGrowthPoints = currentGrowthPoints;
-      }
+      const { updatedGrowthPoints, nextCycle } = this.calculateGrowth(plant, blueprint);
 
       const texturePath = blueprint.stagesRequirements?.[nextCycle]?.texturePath;
 
@@ -125,6 +110,39 @@ export class PlantGrowth {
       console.error("Error updating plant growth:", error);
       return false;
     }
+  }
+
+  private async updateGrowthPoints(plant: IItem, currentGrowthPoints: number, blueprint: IPlantItem): Promise<boolean> {
+    console.log("Not enough growth points to grow yet");
+    await Item.updateOne(
+      { _id: plant._id },
+      { $set: { growthPoints: currentGrowthPoints + blueprint.growthFactor, lastWatering: new Date() } }
+    );
+    return true;
+  }
+
+  private calculateGrowth(
+    plant: IItem,
+    blueprint: IPlantItem
+  ): { updatedGrowthPoints: number; nextCycle: PlantLifeCycle } {
+    const currentGrowthPoints = plant.growthPoints ?? 0;
+    const requiredGrowthPoints =
+      blueprint.stagesRequirements[plant.currentPlantCycle ?? PlantLifeCycle.Seed].requiredGrowthPoints;
+
+    if (currentGrowthPoints < requiredGrowthPoints) {
+      return {
+        updatedGrowthPoints: currentGrowthPoints + blueprint.growthFactor,
+        nextCycle: plant.currentPlantCycle as PlantLifeCycle,
+      };
+    }
+
+    const nextCycle = this.getNextCycle((plant.currentPlantCycle as PlantLifeCycle) ?? PlantLifeCycle.Seed);
+    let updatedGrowthPoints = currentGrowthPoints + blueprint.growthFactor;
+    if (plant.currentPlantCycle === PlantLifeCycle.Mature && !blueprint.regrowsAfterHarvest) {
+      updatedGrowthPoints = currentGrowthPoints; // Plant does not regrow, keep current growth points
+    }
+
+    return { updatedGrowthPoints, nextCycle };
   }
 
   private async updateLastWatering(plant: IItem): Promise<boolean> {
