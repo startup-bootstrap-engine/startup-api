@@ -29,14 +29,11 @@ export class PlantGrowth {
       }
 
       const blueprint = (await this.getPlantBlueprint(plant)) as IPlantItem;
-
-      const { canGrow, canWater }: IPlantGrowthStatus = this.canPlantGrow(plant);
+      const { canGrow, canWater } = this.canPlantGrow(plant);
 
       console.log("canPlantGrow", canGrow, canWater);
 
-      const canWaterStatus = this.handleWateringStatus(canWater, character);
-
-      if (!canWaterStatus) {
+      if (!this.handleWateringStatus(canWater, character)) {
         return false;
       }
 
@@ -56,34 +53,8 @@ export class PlantGrowth {
       }
 
       const { updatedGrowthPoints, nextCycle } = this.calculateGrowth(plant, blueprint);
+      const updatedPlant = await this.updatePlantData(plant, updatedGrowthPoints, nextCycle, blueprint);
 
-      const texturePath = blueprint.stagesRequirements?.[nextCycle]?.texturePath;
-
-      if (!texturePath) {
-        console.error("Texture path not found for next cycle");
-        return false;
-      }
-
-      console.log("Updating plant growth", updatedGrowthPoints, nextCycle, new Date(), texturePath);
-
-      const updatedPlant = await Item.findByIdAndUpdate(
-        plant._id,
-        {
-          $set: {
-            growthPoints: updatedGrowthPoints,
-            currentPlantCycle: nextCycle,
-            lastPlantCycleRun: new Date(),
-            lastWatering: new Date(),
-            texturePath: texturePath,
-          },
-        },
-        {
-          new: true,
-          lean: { virtuals: true, defaults: true },
-        }
-      );
-
-      // Verifying if update was successful
       if (!updatedPlant) {
         console.error("Failed to update plant");
         return false;
@@ -92,14 +63,9 @@ export class PlantGrowth {
       const itemToUpdate = this.prepareItemToUpdate(updatedPlant);
 
       if (plant.owner) {
-        const character = (await Character.findById(plant.owner).lean()) as ICharacter;
-        if (character) {
-          await this.socketMessaging.sendEventToCharactersAroundCharacter<IItemUpdateAll>(
-            character,
-            ItemSocketEvents.UpdateAll,
-            { items: [itemToUpdate] },
-            true
-          );
+        const ownerCharacter = (await Character.findById(plant.owner).lean()) as ICharacter;
+        if (ownerCharacter) {
+          await this.notifyCharactersAroundCharacter(ownerCharacter, itemToUpdate);
         } else {
           console.error("Character not found");
         }
@@ -110,6 +76,42 @@ export class PlantGrowth {
       console.error("Error updating plant growth:", error);
       return false;
     }
+  }
+
+  private async notifyCharactersAroundCharacter(character: ICharacter, itemToUpdate: IItemUpdate): Promise<void> {
+    await this.socketMessaging.sendEventToCharactersAroundCharacter<IItemUpdateAll>(
+      character,
+      ItemSocketEvents.UpdateAll,
+      { items: [itemToUpdate] },
+      true
+    );
+  }
+
+  private async updatePlantData(
+    plant: IItem,
+    updatedGrowthPoints: number,
+    nextCycle: PlantLifeCycle,
+    blueprint: IPlantItem
+  ): Promise<IItem | null> {
+    const texturePath = blueprint.stagesRequirements[nextCycle]?.texturePath;
+    if (!texturePath) {
+      console.error("Texture path not found for next cycle");
+      return null;
+    }
+
+    return await Item.findByIdAndUpdate(
+      plant._id,
+      {
+        $set: {
+          growthPoints: updatedGrowthPoints,
+          currentPlantCycle: nextCycle,
+          lastPlantCycleRun: new Date(),
+          lastWatering: new Date(),
+          texturePath: texturePath,
+        },
+      },
+      { new: true, lean: { virtuals: true, defaults: true } }
+    );
   }
 
   private async updateGrowthPoints(plant: IItem, currentGrowthPoints: number, blueprint: IPlantItem): Promise<boolean> {
