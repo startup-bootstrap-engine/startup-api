@@ -42,13 +42,8 @@ export const spellPolymorph: Partial<ISpell> = {
 
     const spellCalculator = container.get(SpellCalculator);
 
-    // avoid self target
-    if (character._id.toString() === target._id.toString()) {
-      return false;
-    }
-
     if (target.type === "NPC") {
-      socketMessaging.sendErrorMessageToCharacter(character, "You can't cast this spell on a NPC.");
+      socketMessaging.sendErrorMessageToCharacter(character, "You can't cast this spell on a NPC. It's a PVP spell.");
       return false;
     }
 

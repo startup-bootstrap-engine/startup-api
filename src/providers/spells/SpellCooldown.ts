@@ -18,9 +18,14 @@ export default class SpellCoolDown {
 
   @TrackNewRelicTransaction()
   public async haveSpellCooldown(character: ICharacter, magicWords: string): Promise<boolean> {
-    this.validateArguments(character._id, magicWords);
+    if (!character?._id) {
+      return false;
+    }
+
+    this.validateArguments(magicWords);
 
     const key = this.getNamespaceKey(magicWords);
+
     const namespace = this.getSpellCooldownNamespace(character._id, magicWords);
 
     const hasSpellCooldown = await this.inMemoryHashtable.has(namespace, key);
@@ -35,7 +40,7 @@ export default class SpellCoolDown {
     magicWords: string,
     cooldown: number
   ): Promise<boolean> {
-    this.validateArguments(character._id, magicWords, cooldown);
+    this.validateArguments(magicWords, cooldown);
 
     const key = this.getNamespaceKey(magicWords);
     const namespace = this.getSpellCooldownNamespace(character._id, magicWords);
@@ -111,7 +116,7 @@ export default class SpellCoolDown {
   }
 
   public async getTimeLeft(characterId: string, magicWords: string): Promise<number> {
-    this.validateArguments(characterId, magicWords);
+    this.validateArguments(magicWords);
 
     const namespace = this.getSpellCooldownNamespace(characterId, magicWords);
 
@@ -127,7 +132,7 @@ export default class SpellCoolDown {
   }
 
   private getSpellCooldownNamespace(characterId: string, magicWords: string): string {
-    this.validateArguments(characterId, magicWords);
+    this.validateArguments(magicWords);
     const key = this.getNamespaceKey(magicWords);
 
     return `${NamespaceRedisControl.CharacterSpellCoolDown}:${characterId.toString()}:${key}`;
@@ -137,13 +142,7 @@ export default class SpellCoolDown {
     return magicWords.toLocaleLowerCase().replace(/\s+/g, "_");
   }
 
-  private validateArguments(characterId: string, magicWords: string, cooldown?: number): void {
-    if (!characterId) {
-      throw new Error(
-        `Invalid characterId argument. characterId: ${characterId}, magicWords: ${magicWords}, cooldown: ${cooldown}`
-      );
-    }
-
+  private validateArguments(magicWords: string, cooldown?: number): void {
     if (magicWords.length === 0 || magicWords.length > 100) {
       throw new Error("Invalid magicWords argument");
     }

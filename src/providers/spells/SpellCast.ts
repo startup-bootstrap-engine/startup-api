@@ -190,6 +190,7 @@ export class SpellCast {
 
     if (!spell.canSelfTarget) {
       if (caster._id.toString() === target._id?.toString()) {
+        this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, you can't cast this spell on yourself.");
         return false;
       }
     }
@@ -203,6 +204,7 @@ export class SpellCast {
     }
 
     if (target.type === EntityType.NPC && (target as INPC).alignment === NPCAlignment.Friendly) {
+      this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, you can't cast this spell on a friendly NPC.");
       return false;
     }
 
