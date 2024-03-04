@@ -24,7 +24,9 @@ export class PlantGrowth {
   public async updatePlantGrowth(plant: IItem, character: ICharacter): Promise<boolean> {
     try {
       if (plant.isDead) {
-        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, the plant is already dead.");
+        // this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, the plant is already dead.");
+
+        this.notifyCharacter(character, "Sorry, the plant is already dead.");
         return false;
       }
 
@@ -35,10 +37,8 @@ export class PlantGrowth {
       console.log("canPlantGrow", canGrow, canWater);
 
       if (!canWater) {
-        this.socketMessaging.sendErrorMessageToCharacter(
-          character,
-          "Sorry, the plant is not ready to be watered. Try again in a few minutes."
-        );
+        this.notifyCharacter(character, "Sorry, the plant is not ready to be watered. Try again in a few minutes.");
+
         return false;
       }
 
@@ -126,6 +126,10 @@ export class PlantGrowth {
       console.error("Error updating plant growth:", error);
       return false;
     }
+  }
+
+  private notifyCharacter(character: ICharacter, message: string): void {
+    this.socketMessaging.sendErrorMessageToCharacter(character, message);
   }
 
   private async getPlantBlueprint(plant: IItem): Promise<IPlantItem | null> {
