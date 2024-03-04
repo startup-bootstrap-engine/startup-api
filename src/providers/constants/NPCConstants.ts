@@ -16,7 +16,7 @@ export const NPC_FRIENDLY_NEUTRAL_FREEZE_CHECK_CHANCE = 25;
 export const NPC_HOSTILE_FREEZE_CHECK_CHANCE = 10;
 
 // PZ
-export const NPC_CAN_ATTACK_IN_NON_PVP_ZONE = false;
+export const NPC_CAN_ATTACK_IN_NON_PVP_ZONE = true;
 
 // Trader
 export const NPC_TRADER_INTERACTION_DISTANCE = 14;
