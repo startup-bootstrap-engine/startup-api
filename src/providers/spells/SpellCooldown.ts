@@ -139,7 +139,9 @@ export default class SpellCoolDown {
 
   private validateArguments(characterId: string, magicWords: string, cooldown?: number): void {
     if (!characterId) {
-      throw new Error("Invalid characterId argument");
+      throw new Error(
+        `Invalid characterId argument. characterId: ${characterId}, magicWords: ${magicWords}, cooldown: ${cooldown}`
+      );
     }
 
     if (magicWords.length === 0 || magicWords.length > 100) {
