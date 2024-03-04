@@ -920,8 +920,9 @@ describe("UseWithEntity.ts", () => {
     let testNPC: INPC;
     let testItem: IItem;
     let testRefillItem: IItem;
+    let testScytheItem: IItem;
     let testItemBlueprint: IUseWithItemSource;
-    let testRefillItemBlueprint: any;
+    let testMockItemBlueprint: any;
 
     beforeAll(() => {
       useWithEntity = container.get(UseWithEntity);
@@ -938,12 +939,14 @@ describe("UseWithEntity.ts", () => {
 
       testRefillItem = await unitTestHelper.createMockItemFromBlueprint(ToolsBlueprint.WateringCan);
 
+      testScytheItem = await unitTestHelper.createMockItemFromBlueprint(ToolsBlueprint.Scythe);
+
       testItemBlueprint = await blueprintManager.getBlueprint<IUseWithItemSource>("items", testItem.baseKey);
 
       // @ts-ignore
       sendErrorMessageToCharacter = jest.spyOn(useWithEntity.socketMessaging, "sendErrorMessageToCharacter");
 
-      testRefillItemBlueprint = {
+      testMockItemBlueprint = {
         usableEffect: jest.fn().mockResolvedValue({}),
       };
     });
@@ -1038,22 +1041,22 @@ describe("UseWithEntity.ts", () => {
 
     it("should execute usableEffect if item is refillable and entity type is item", async () => {
       // @ts-ignore
-      jest.spyOn(useWithEntity.blueprintManager, "getBlueprint").mockResolvedValueOnce(testRefillItemBlueprint);
+      jest.spyOn(useWithEntity.blueprintManager, "getBlueprint").mockResolvedValueOnce(testMockItemBlueprint);
 
       const payload = { entityId: testItem._id, itemId: testRefillItem._id, entityType: EntityType.Item };
 
       await useWithEntity.execute(payload, testCharacter);
-      expect(testRefillItemBlueprint.usableEffect).toHaveBeenCalled();
+      expect(testMockItemBlueprint.usableEffect).toHaveBeenCalled();
     });
 
     it("should not execute usableEffect if item is refillable and entity type is NPC", async () => {
       // @ts-ignore
-      jest.spyOn(useWithEntity.blueprintManager, "getBlueprint").mockResolvedValueOnce(testRefillItemBlueprint);
+      jest.spyOn(useWithEntity.blueprintManager, "getBlueprint").mockResolvedValueOnce(testMockItemBlueprint);
 
       const payload = { entityId: testItem._id, itemId: testRefillItem._id, entityType: EntityType.NPC };
 
       await useWithEntity.execute(payload, testCharacter);
-      expect(testRefillItemBlueprint.usableEffect).not.toHaveBeenCalled();
+      expect(testMockItemBlueprint.usableEffect).not.toHaveBeenCalled();
     });
 
     it("should not execute usableEffect if blueprint is not found", async () => {
@@ -1073,13 +1076,35 @@ describe("UseWithEntity.ts", () => {
       const objectId = new mongoose.Types.ObjectId();
 
       // @ts-ignore
-      jest.spyOn(useWithEntity.blueprintManager, "getBlueprint").mockResolvedValueOnce(testRefillItemBlueprint);
+      jest.spyOn(useWithEntity.blueprintManager, "getBlueprint").mockResolvedValueOnce(testMockItemBlueprint);
 
       const payload = { entityId: objectId as string, itemId: testRefillItem._id, entityType: EntityType.Item };
 
       await useWithEntity.execute(payload, testCharacter);
 
       expect(sendErrorMessageToCharacter).toBeCalledWith(testCharacter, "Target item is not found");
+    });
+
+    it("should execute usableEffect if item key is scythe", async () => {
+      testMockItemBlueprint.key = ToolsBlueprint.Scythe;
+      // @ts-ignore
+      jest.spyOn(useWithEntity.blueprintManager, "getBlueprint").mockResolvedValueOnce(testMockItemBlueprint);
+
+      const payload = { entityId: testItem._id, itemId: testScytheItem._id, entityType: EntityType.Item };
+
+      await useWithEntity.execute(payload, testCharacter);
+      expect(testMockItemBlueprint.usableEffect).toHaveBeenCalled();
+    });
+
+    it("should not execute usableEffect if item key is not scythe", async () => {
+      testMockItemBlueprint.key = "any-key";
+      // @ts-ignore
+      jest.spyOn(useWithEntity.blueprintManager, "getBlueprint").mockResolvedValueOnce(testMockItemBlueprint);
+
+      const payload = { entityId: testItem._id, itemId: testScytheItem._id, entityType: EntityType.Item };
+
+      await useWithEntity.execute(payload, testCharacter);
+      expect(testMockItemBlueprint.usableEffect).not.toHaveBeenCalled();
     });
   });
 });

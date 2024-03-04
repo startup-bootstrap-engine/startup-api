@@ -1,9 +1,10 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
-import { ItemCraftable } from "@providers/item/ItemCraftable";
+import { container } from "@providers/inversify/container";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
-import { IUseWithTargetTile } from "@providers/useWith/useWithTypes";
+import { IUseWithRemove, UseWithItemToRemove } from "@providers/useWith/abstractions/UseWithItemToRemove";
 import {
+  AnimationEffectKeys,
   EntityAttackType,
   IToolItemBlueprint,
   ItemSlotType,
@@ -28,15 +29,25 @@ export const itemScythe: IToolItemBlueprint = {
   rangeType: EntityAttackType.Melee,
   useWithMaxDistanceGrid: RangeTypes.Medium,
   canSell: false,
-  useWithTileEffect: async (
-    originItem: IItem,
-    targetTile: IUseWithTargetTile,
-    targetName: string,
+
+  usableEffect: async (
     character: ICharacter,
-    itemCraftable: ItemCraftable,
-    skillIncrease: SkillIncrease
+    targetItem: IItem,
+    itemCraftable: IItem,
+    skillIncrease: SkillIncrease,
+    originItem: IItem
   ): Promise<void> => {
-    //! Not implemented yet
+    const useWithItemToRemove = container.get<UseWithItemToRemove>(UseWithItemToRemove);
+
+    const options: IUseWithRemove = {
+      targetItem,
+      originItem,
+      successAnimationEffectKey: AnimationEffectKeys.Rooted,
+      errorMessages: ["Sorry, removal is not possible at the moment. Please try again"],
+      successMessages: ["Removal has been completed successfully."],
+    };
+
+    await useWithItemToRemove.executeUse(character, options, skillIncrease);
   },
   usableEffectDescription: "Use it on grass or crops to cut them",
 };
