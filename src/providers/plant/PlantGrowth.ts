@@ -28,9 +28,7 @@ export class PlantGrowth {
         return false;
       }
 
-      const blueprintManager = container.get<BlueprintManager>(BlueprintManager);
-
-      const blueprint = (await blueprintManager.getBlueprint("plants", plant.baseKey)) as IPlantItem;
+      const blueprint = (await this.getPlantBlueprint(plant)) as IPlantItem;
 
       const { canGrow, canWater }: IPlantGrowthStatus = this.canPlantGrow(plant);
 
@@ -127,6 +125,16 @@ export class PlantGrowth {
     } catch (error) {
       console.error("Error updating plant growth:", error);
       return false;
+    }
+  }
+
+  private async getPlantBlueprint(plant: IItem): Promise<IPlantItem | null> {
+    const blueprintManager = container.get<BlueprintManager>(BlueprintManager);
+    try {
+      return (await blueprintManager.getBlueprint("plants", plant.baseKey)) as IPlantItem;
+    } catch (error) {
+      console.error("Failed to get plant blueprint:", error);
+      return null;
     }
   }
 
