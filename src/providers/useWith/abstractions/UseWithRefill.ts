@@ -4,13 +4,20 @@ import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 
+import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { container } from "@providers/inversify/container";
 import { PlantGrowth } from "@providers/plant/PlantGrowth";
 import { SimpleTutorial } from "@providers/simpleTutorial/SimpleTutorial";
-import { IRefillableItem, IUseWithTileValidation, ItemType, UseWithSocketEvents } from "@rpg-engine/shared";
+import {
+  AnimationEffectKeys,
+  IRefillableItem,
+  IUseWithTileValidation,
+  ItemType,
+  UseWithSocketEvents,
+} from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import _, { random } from "lodash";
+import { random } from "lodash";
 import { IUseWithTargetTile } from "../useWithTypes";
 
 export interface IUseWithRefill {
@@ -22,7 +29,6 @@ export interface IUseWithRefill {
   targetEntityAnimationEffectKey?: string;
   successAnimationEffectKey?: string;
   errorAnimationEffectKey?: string;
-  errorMessages?: string[];
   successMessages?: string[];
 }
 
@@ -32,11 +38,12 @@ export class UseWithRefill {
     private socketMessaging: SocketMessaging,
     private movementHelper: MovementHelper,
     private plantGrowth: PlantGrowth,
-    private simpleTutorial: SimpleTutorial
+    private simpleTutorial: SimpleTutorial,
+    private animationEffect: AnimationEffect
   ) {}
 
   public async executeUse(character: ICharacter, options: IUseWithRefill, skillIncrease: SkillIncrease): Promise<void> {
-    const { targetItem, originItem, decrementQty, targetType, successMessages, errorMessages } = options;
+    const { targetItem, originItem, decrementQty, targetType, successMessages } = options;
 
     if (!targetItem) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, item you are trying to use was not found.");
@@ -68,7 +75,10 @@ export class UseWithRefill {
       const resourceKey = blueprintRefill.refillResourceKey;
 
       if (!originItem.remainingUses || originItem.remainingUses === 0) {
-        this.socketMessaging.sendErrorMessageToCharacter(character, `Sorry, Please refill your ${resourceKey}.`);
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          `Sorry, Please refill your tool on a ${resourceKey} source.`
+        );
         return;
       }
 
@@ -99,7 +109,7 @@ export class UseWithRefill {
       let isSuccess = false;
 
       if (resourceKey === "water") {
-        isSuccess = await this.plantGrowth.updatePlantGrowth(targetItem, character, errorMessages);
+        isSuccess = await this.plantGrowth.updatePlantGrowth(targetItem, character);
       }
 
       if (isSuccess) {
@@ -126,6 +136,8 @@ export class UseWithRefill {
         if (successMessages) {
           this.sendRandomMessageToCharacter(character, successMessages, true);
         }
+
+        await this.animationEffect.sendAnimationEventToCharacter(character, AnimationEffectKeys.SkillLevelUp);
       }
     } catch (error) {
       console.log(error);
@@ -145,18 +157,9 @@ export class UseWithRefill {
     options: IUseWithRefill,
     skillIncrease: SkillIncrease
   ): Promise<void> {
-    const { originItem, errorMessages, successMessages } = options;
+    const { originItem, successMessages } = options;
 
     try {
-      const chance = 75;
-      const n = _.random(0, 100);
-      if (n >= chance) {
-        if (errorMessages) {
-          this.sendRandomMessageToCharacter(character, errorMessages, false);
-        }
-        return;
-      }
-
       const blueprintManager = container.get<BlueprintManager>(BlueprintManager);
 
       const blueprintRefill = (await blueprintManager.getBlueprint("items", originItem?.baseKey!)) as IRefillableItem;
@@ -175,6 +178,8 @@ export class UseWithRefill {
       if (successMessages) {
         this.sendRandomMessageToCharacter(character, successMessages, true);
       }
+
+      await this.animationEffect.sendAnimationEventToCharacter(character, AnimationEffectKeys.SkillLevelUp);
     } catch (error) {
       console.log(error);
     }

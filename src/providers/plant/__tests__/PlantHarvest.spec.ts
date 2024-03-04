@@ -78,7 +78,7 @@ describe("PlantHarvest.ts", () => {
 
     expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
       testCharacter,
-      "Sorry, Plant is not mature enough to be harvested"
+      "Sorry, your plant is not mature enough to be harvested."
     );
   });
 

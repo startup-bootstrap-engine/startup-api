@@ -7,7 +7,6 @@ import { ToolsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { PlantItemBlueprint } from "@providers/plant/data/types/PlantTypes";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { IRefillableItem, ItemType, MapLayers, UseWithSocketEvents } from "@rpg-engine/shared";
-import _ from "lodash";
 import { IUseWithRefill, UseWithRefill } from "../abstractions/UseWithRefill";
 import { IUseWithTargetTile } from "../useWithTypes";
 
@@ -70,7 +69,6 @@ describe("UseWithRefill.ts", () => {
       } as unknown as IUseWithTargetTile,
       decrementQty: 1,
       targetType: ItemType.Plant,
-      errorMessages: ["Sorry,  something went wrong!"],
       successMessages: ["your success"],
     };
 
@@ -126,7 +124,7 @@ describe("UseWithRefill.ts", () => {
 
     expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
       testCharacter,
-      `Sorry, Please refill your ${resourceKey}.`
+      `Sorry, Please refill your tool on a ${resourceKey} source.`
     );
   });
 
@@ -199,7 +197,7 @@ describe("UseWithRefill.ts", () => {
     expect(sendRandomMessageToCharacterMock).not.toBeCalled();
   });
 
-  it("should sends an error message when plan is allready dead", async () => {
+  it("should sends an error message when plan is already dead", async () => {
     testPlant.isDead = true;
 
     await useWithRefill.executeUse(testCharacter, useWithRefillData, skillIncrease);
@@ -211,32 +209,6 @@ describe("UseWithRefill.ts", () => {
   });
 
   describe("executeRefill", () => {
-    it("should handles error messages when random number is greater than 75", async () => {
-      jest.spyOn(_, "random").mockImplementation(() => 76);
-
-      // @ts-expect-error
-      const sendRandomMessageToCharacterMock = jest.spyOn(useWithRefill, "sendRandomMessageToCharacter");
-
-      await useWithRefill.executeRefill(testCharacter, useWithRefillData, skillIncrease);
-
-      expect(sendRandomMessageToCharacterMock).toBeCalledWith(testCharacter, useWithRefillData.errorMessages, false);
-    });
-
-    it("should properly refill the item when random number is less than 75", async () => {
-      jest.spyOn(_, "random").mockImplementation(() => 74);
-
-      // @ts-expect-error
-      const sendRandomMessageToCharacterMock = jest.spyOn(useWithRefill, "sendRandomMessageToCharacter");
-
-      await useWithRefill.executeRefill(testCharacter, useWithRefillData, skillIncrease);
-
-      const updatedRefillItem = await Item.findById(testRefillItem.id);
-
-      expect(updatedRefillItem?.remainingUses).toEqual(testRefillItemBlueprint.initialRemainingUses);
-
-      expect(sendRandomMessageToCharacterMock).toBeCalledWith(testCharacter, useWithRefillData.successMessages, true);
-    });
-
     it("should sends an error message when the blueprint is not found", async () => {
       // @ts-ignore
       useWithRefillData.originItem = undefined;

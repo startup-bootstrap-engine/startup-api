@@ -8,7 +8,6 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IItemUpdate, IItemUpdateAll, ItemSocketEvents, ItemSubType, ItemType } from "@rpg-engine/shared";
 import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
-import _, { random } from "lodash";
 import { IPlantItem } from "./data/blueprints/PlantItem";
 import { PlantLifeCycle } from "./data/types/PlantTypes";
 
@@ -22,11 +21,7 @@ export class PlantGrowth {
   constructor(private socketMessaging: SocketMessaging) {}
 
   @TrackNewRelicTransaction()
-  public async updatePlantGrowth(
-    plant: IItem,
-    character: ICharacter,
-    errorMessages: string[] | undefined
-  ): Promise<boolean> {
+  public async updatePlantGrowth(plant: IItem, character: ICharacter): Promise<boolean> {
     try {
       if (plant.isDead) {
         this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, the plant is already dead.");
@@ -39,24 +34,13 @@ export class PlantGrowth {
 
       const { canGrow, canWater }: IPlantGrowthStatus = this.canPlantGrow(plant);
 
+      console.log("canPlantGrow", canGrow, canWater);
+
       if (!canWater) {
         this.socketMessaging.sendErrorMessageToCharacter(
           character,
           "Sorry, the plant is not ready to be watered. Try again in a few minutes."
         );
-        return false;
-      }
-
-      const chance = 75;
-      const n = _.random(0, 100);
-
-      if (n >= chance) {
-        if (errorMessages) {
-          this.socketMessaging.sendErrorMessageToCharacter(
-            character,
-            errorMessages[random(0, errorMessages.length - 1)]
-          );
-        }
         return false;
       }
 
@@ -69,7 +53,11 @@ export class PlantGrowth {
       const requiredGrowthPoints =
         blueprint.stagesRequirements[plant.currentPlantCycle ?? PlantLifeCycle.Seed].requiredGrowthPoints;
 
+      console.log("currentGrowthPoints", currentGrowthPoints);
+      console.log("requiredGrowthPoints", requiredGrowthPoints);
+
       if (currentGrowthPoints < requiredGrowthPoints) {
+        console.log("Not enough growth points to grow yet");
         await Item.updateOne(
           { _id: plant._id },
           { $set: { growthPoints: currentGrowthPoints + blueprint.growthFactor, lastWatering: new Date() } }
@@ -79,10 +67,22 @@ export class PlantGrowth {
 
       const nextCycle = this.getNextCycle((plant.currentPlantCycle as PlantLifeCycle) ?? PlantLifeCycle.Seed);
 
+      console.log("nextCycle", nextCycle);
+
       let updatedGrowthPoints = currentGrowthPoints + blueprint.growthFactor;
       if (plant.currentPlantCycle === PlantLifeCycle.Mature && !blueprint.regrowsAfterHarvest) {
+        console.log("Plant is mature and does not regrow after harvest");
         updatedGrowthPoints = currentGrowthPoints;
       }
+
+      const texturePath = blueprint.stagesRequirements?.[nextCycle]?.texturePath;
+
+      if (!texturePath) {
+        console.error("Texture path not found for next cycle");
+        return false;
+      }
+
+      console.log("Updating plant growth", updatedGrowthPoints, nextCycle, new Date(), texturePath);
 
       const updatedPlant = await Item.findByIdAndUpdate(
         plant._id,
@@ -92,7 +92,7 @@ export class PlantGrowth {
             currentPlantCycle: nextCycle,
             lastPlantCycleRun: new Date(),
             lastWatering: new Date(),
-            texturePath: blueprint.stagesRequirements[nextCycle]?.texturePath,
+            texturePath: texturePath,
           },
         },
         {
@@ -216,17 +216,25 @@ export class PlantGrowth {
   }
 
   public async checkAndUpdateTintedTilePlants(): Promise<void> {
-    const thresholdTime = new Date(Date.now() - MINIMUM_MINUTES_FOR_WATERING * 60 * 1000);
+    // Calculate the time before which plants should have been watered
+    // If a plant was last watered before this time, it needs to be updated
+    const wateringCutoffTime = dayjs().subtract(MINIMUM_MINUTES_FOR_WATERING, "minute").toDate();
 
-    const plantsToBeUpdated = await Item.find({
+    // Find all plants that need to be updated
+    // These are plants of type 'Plant', that have a tinted tile, and were last watered before the cutoff time
+    const plantsNeedingUpdate = await Item.find({
       type: ItemType.Plant,
       isTileTinted: true,
-      lastWatering: { $lt: thresholdTime },
+      lastWatering: { $lt: wateringCutoffTime },
     }).lean<IItem[]>({ virtuals: true, defaults: true });
 
-    await this.bulkUpdateTintedTileStatus(plantsToBeUpdated);
+    // Update the tinted tile status for all plants that need to be updated
+    await this.bulkUpdateTintedTileStatus(plantsNeedingUpdate);
 
-    await Promise.all(plantsToBeUpdated.map((plant) => this.updatePlantTexture(plant)));
+    console.log("Number of plants to be updated", plantsNeedingUpdate.length);
+
+    // Update the texture for each plant that needs to be updated
+    await Promise.all(plantsNeedingUpdate.map((plant) => this.updatePlantTexture(plant)));
   }
 
   private async bulkUpdateTintedTileStatus(plants: IItem[]): Promise<void> {

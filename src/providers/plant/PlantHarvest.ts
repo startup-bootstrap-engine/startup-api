@@ -50,7 +50,7 @@ export class PlantHarvest {
     }
 
     if (!this.isPlantMature(plant)) {
-      this.sendErrorMessage(character, "Sorry, Plant is not mature enough to be harvested");
+      this.sendErrorMessage(character, "Sorry, your plant is not mature enough to be harvested.");
       return;
     }
 
