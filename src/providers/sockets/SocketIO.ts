@@ -32,10 +32,12 @@ export class SocketIO implements ISocket {
             host: appEnv.database.REDIS_CONTAINER,
             port: appEnv.database.REDIS_PORT,
             connectTimeout: 10000,
-            reconnectStrategy: (retries) => Math.min(retries * 100, 1500), // Exponential backoff
+            // keep connection alive for a mmorpg
+            keepAlive: 1000,
+            noDelay: true,
+            reconnectStrategy: (retries) => Math.min(50 * 2 ** retries, 30000), // Exponential backoff
           },
-          pingInterval: 2500,
-          disableOfflineQueue: true,
+          pingInterval: 2000,
         };
 
         const pubClient = createClient(redisOptions);
