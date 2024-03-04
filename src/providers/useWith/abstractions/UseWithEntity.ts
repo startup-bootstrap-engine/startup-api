@@ -12,7 +12,7 @@ import { CharacterItemInventory } from "@providers/character/characterItems/Char
 import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
 import { EntityUtil } from "@providers/entityEffects/EntityUtil";
 import { blueprintManager } from "@providers/inversify/container";
-import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTypes";
+import { AvailableBlueprints, ToolsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -25,6 +25,7 @@ import {
   IItemContainer,
   IRefillableItem,
   IRuneItemBlueprint,
+  IToolItemBlueprint,
   IUseWithEntity,
   ItemSocketEvents,
   UseWithSocketEvents,
@@ -111,6 +112,12 @@ export class UseWithEntity {
       );
 
       if (!isBaseRequestValid) {
+        return;
+      }
+
+      if (blueprint.key === ToolsBlueprint.Scythe) {
+        const toolsBlueprint = blueprint as unknown as IToolItemBlueprint;
+        await toolsBlueprint.usableEffect!(character, target!, null, this.skillIncrease, item!);
         return;
       }
 

@@ -5,6 +5,7 @@ import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { BattleAttackRanged } from "@providers/battle/BattleAttackTarget/BattleAttackRanged";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
+import { ToolsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemValidation } from "@providers/item/validation/ItemValidation";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -38,8 +39,10 @@ export class UseWithEntityValidation {
     }
 
     if (!blueprint || !(!!blueprint.power || targetType === StaticEntity) || !blueprint.usableEffect) {
-      this.socketMessaging.sendErrorMessageToCharacter(caster, `Sorry, '${item.name}' cannot be used with target.`);
-      return false;
+      if (!blueprint || blueprint.key !== ToolsBlueprint.Scythe) {
+        this.socketMessaging.sendErrorMessageToCharacter(caster, `Sorry, '${item.name}' cannot be used with target.`);
+        return false;
+      }
     }
 
     if (!this.characterValidation.hasBasicValidation(caster)) {
