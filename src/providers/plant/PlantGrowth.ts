@@ -36,15 +36,14 @@ export class PlantGrowth {
 
       console.log("canPlantGrow", canGrow, canWater);
 
-      if (!canWater) {
-        this.notifyCharacter(character, "Sorry, the plant is not ready to be watered. Try again in a few minutes.");
+      const canWaterStatus = this.handleWateringStatus(canWater, character);
 
+      if (!canWaterStatus) {
         return false;
       }
 
       if (!canGrow && canWater) {
-        await Item.updateOne({ _id: plant._id }, { $set: { lastWatering: new Date() } });
-        return true;
+        return await this.updateLastWatering(plant);
       }
 
       const currentGrowthPoints = plant.growthPoints ?? 0;
@@ -126,6 +125,19 @@ export class PlantGrowth {
       console.error("Error updating plant growth:", error);
       return false;
     }
+  }
+
+  private async updateLastWatering(plant: IItem): Promise<boolean> {
+    await Item.updateOne({ _id: plant._id }, { $set: { lastWatering: new Date() } });
+    return true;
+  }
+
+  private handleWateringStatus(canWater: boolean, character: ICharacter): boolean {
+    if (!canWater) {
+      this.notifyCharacter(character, "Sorry, the plant is not ready to be watered. Try again in a few minutes.");
+      return false;
+    }
+    return true;
   }
 
   private notifyCharacter(character: ICharacter, message: string): void {
