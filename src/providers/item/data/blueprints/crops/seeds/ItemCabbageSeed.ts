@@ -11,6 +11,7 @@ export const itemCabbageSeed: IUseWithItemBlueprint = {
   key: SeedsBlueprint.CabbageSeed,
   type: ItemType.Other,
   subType: ItemSubType.Seed,
+  maxStackSize: 999,
   textureAtlas: "items",
   texturePath: "farm/seed-packs/seed-pack-green.png",
   name: "Cabbage Seed",

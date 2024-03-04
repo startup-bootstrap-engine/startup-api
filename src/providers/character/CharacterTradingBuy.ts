@@ -154,10 +154,9 @@ export class CharacterTradingBuy {
           );
           return false;
         }
-
-        if (itemBlueprint.subType === ItemSubType.Seed) {
-          await this.simpleTutorial.sendSimpleTutorialActionToCharacter(character, "buy-seed");
-        }
+      }
+      if (itemBlueprint.subType === ItemSubType.Seed) {
+        await this.simpleTutorial.sendSimpleTutorialActionToCharacter(character, "buy-seed");
       }
     }
 

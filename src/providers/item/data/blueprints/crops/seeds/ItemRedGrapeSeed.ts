@@ -11,6 +11,7 @@ export const itemRedGrapeSeed: IUseWithItemBlueprint = {
   key: SeedsBlueprint.RedGrapeSeed,
   type: ItemType.Other,
   subType: ItemSubType.Seed,
+  maxStackSize: 999,
   textureAtlas: "items",
   texturePath: "farm/seed-packs/seed-pack-red.png",
   name: "Red Grape Seed",

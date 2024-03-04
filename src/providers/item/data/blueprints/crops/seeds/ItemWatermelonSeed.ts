@@ -11,6 +11,7 @@ export const itemWatermelonSeed: IUseWithItemBlueprint = {
   key: SeedsBlueprint.WatermelonSeed,
   type: ItemType.Other,
   subType: ItemSubType.Seed,
+  maxStackSize: 999,
   textureAtlas: "items",
   texturePath: "farm/seed-packs/seed-pack-red.png",
   name: "Watermelon Seed",

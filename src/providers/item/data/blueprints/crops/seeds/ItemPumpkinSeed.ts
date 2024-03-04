@@ -11,6 +11,7 @@ export const itemPumpkinSeed: IUseWithItemBlueprint = {
   key: SeedsBlueprint.PumpkinSeed,
   type: ItemType.Other,
   subType: ItemSubType.Seed,
+  maxStackSize: 999,
   textureAtlas: "items",
   texturePath: "farm/seed-packs/seed-pack-orange.png",
   name: "Pumpkin Seed",

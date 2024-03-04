@@ -67,7 +67,7 @@ describe("PlantHarvest.ts", () => {
 
     expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
       testCharacter,
-      "Sorry, Only the owner can harvest this plant."
+      "Sorry, only the owner can harvest this plant."
     );
   });
 

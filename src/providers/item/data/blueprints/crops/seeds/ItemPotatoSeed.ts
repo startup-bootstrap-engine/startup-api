@@ -11,6 +11,7 @@ export const itemPotatoSeed: IUseWithItemBlueprint = {
   key: SeedsBlueprint.PotatoSeed,
   type: ItemType.Other,
   subType: ItemSubType.Seed,
+  maxStackSize: 999,
   textureAtlas: "items",
   texturePath: "farm/seed-packs/seed-pack-brown.png",
   name: "Potato Seed",

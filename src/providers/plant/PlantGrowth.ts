@@ -31,8 +31,6 @@ export class PlantGrowth {
       const blueprint = (await this.getPlantBlueprint(plant)) as IPlantItem;
       const { canGrow, canWater } = this.canPlantGrow(plant);
 
-      console.log("canPlantGrow", canGrow, canWater);
-
       if (!this.handleWateringStatus(canWater, character)) {
         return false;
       }
@@ -44,9 +42,6 @@ export class PlantGrowth {
       const currentGrowthPoints = plant.growthPoints ?? 0;
       const requiredGrowthPoints =
         blueprint.stagesRequirements[plant.currentPlantCycle ?? PlantLifeCycle.Seed].requiredGrowthPoints;
-
-      console.log("currentGrowthPoints", currentGrowthPoints);
-      console.log("requiredGrowthPoints", requiredGrowthPoints);
 
       if (currentGrowthPoints < requiredGrowthPoints) {
         return await this.updateGrowthPoints(plant, currentGrowthPoints, blueprint);
@@ -115,7 +110,6 @@ export class PlantGrowth {
   }
 
   private async updateGrowthPoints(plant: IItem, currentGrowthPoints: number, blueprint: IPlantItem): Promise<boolean> {
-    console.log("Not enough growth points to grow yet");
     await Item.updateOne(
       { _id: plant._id },
       { $set: { growthPoints: currentGrowthPoints + blueprint.growthFactor, lastWatering: new Date() } }
@@ -274,8 +268,6 @@ export class PlantGrowth {
 
     // Update the tinted tile status for all plants that need to be updated
     await this.bulkUpdateTintedTileStatus(plantsNeedingUpdate);
-
-    console.log("Number of plants to be updated", plantsNeedingUpdate.length);
 
     // Update the texture for each plant that needs to be updated
     await Promise.all(plantsNeedingUpdate.map((plant) => this.updatePlantTexture(plant)));

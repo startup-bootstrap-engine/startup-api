@@ -45,7 +45,7 @@ export class PlantHarvest {
     }
 
     if (!this.isPlantOwner(plant, character)) {
-      this.sendErrorMessage(character, "Sorry, Only the owner can harvest this plant.");
+      this.sendErrorMessage(character, "Sorry, only the owner can harvest this plant.");
       return;
     }
 
