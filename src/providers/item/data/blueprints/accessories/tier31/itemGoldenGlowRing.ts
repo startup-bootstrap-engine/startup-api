@@ -22,7 +22,7 @@ export const itemGoldenGlowRing: IEquippableAccessoryTier31Blueprint = {
   defense: 85,
   tier: 31,
   weight: 1.5,
-  allowedEquipSlotType: [ItemSlotType.Neck],
+  allowedEquipSlotType: [ItemSlotType.Ring],
   basePrice: 41000,
   equippedBuff: [
     {

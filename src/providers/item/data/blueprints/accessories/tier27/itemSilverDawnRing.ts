@@ -21,7 +21,7 @@ export const itemSilverDawnRing: IEquippableAccessoryTier27Blueprint = {
   defense: 76,
   tier: 27,
   weight: 1.2,
-  allowedEquipSlotType: [ItemSlotType.Neck],
+  allowedEquipSlotType: [ItemSlotType.Ring],
   basePrice: 38000,
   equippedBuff: {
     type: CharacterBuffType.CharacterAttribute,

@@ -21,7 +21,7 @@ export const itemWoodenRing: IEquippableAccessoryTier25Blueprint = {
   defense: 72,
   tier: 25,
   weight: 1,
-  allowedEquipSlotType: [ItemSlotType.Neck],
+  allowedEquipSlotType: [ItemSlotType.Ring],
   basePrice: 37000,
   equippedBuff: {
     type: CharacterBuffType.CharacterAttribute,

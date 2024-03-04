@@ -21,7 +21,7 @@ export const itemSapphireSerenadeRing: IEquippableAccessoryTier30Blueprint = {
   defense: 83,
   tier: 30,
   weight: 1.4,
-  allowedEquipSlotType: [ItemSlotType.Neck],
+  allowedEquipSlotType: [ItemSlotType.Ring],
   basePrice: 41500,
   equippedBuff: {
     type: CharacterBuffType.CharacterAttribute,

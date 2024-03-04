@@ -21,7 +21,7 @@ export const itemCherryRing: IEquippableAccessoryTier29Blueprint = {
   defense: 80,
   tier: 29,
   weight: 1.4,
-  allowedEquipSlotType: [ItemSlotType.Neck],
+  allowedEquipSlotType: [ItemSlotType.Ring],
   basePrice: 40000,
   equippedBuff: {
     type: CharacterBuffType.Skill,

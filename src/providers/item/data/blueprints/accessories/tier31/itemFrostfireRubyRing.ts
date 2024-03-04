@@ -22,7 +22,7 @@ export const itemFrostfireRubyRing: IEquippableAccessoryTier31Blueprint = {
   defense: 87,
   tier: 31,
   weight: 1.5,
-  allowedEquipSlotType: [ItemSlotType.Neck],
+  allowedEquipSlotType: [ItemSlotType.Ring],
   basePrice: 42000,
   equippedBuff: [
     {

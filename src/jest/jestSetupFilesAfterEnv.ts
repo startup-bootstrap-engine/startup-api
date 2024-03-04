@@ -207,6 +207,7 @@ jest.mock("@providers/constants/MarketplaceConstants", () => ({
 jest.mock("@providers/constants/NPCConstants", () => ({
   ...jest.requireActual("@providers/constants/NPCConstants"),
   NPC_TRADER_INTERACTION_DISTANCE: 2,
+  NPC_CAN_ATTACK_IN_NON_PVP_ZONE: false,
 }));
 
 jest.mock("@providers/constants/PVPConstants", () => ({

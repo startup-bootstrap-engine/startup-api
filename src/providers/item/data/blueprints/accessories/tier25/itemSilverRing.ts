@@ -22,7 +22,7 @@ export const itemSilverRing: IEquippableAccessoryTier25Blueprint = {
   defense: 72,
   tier: 25,
   weight: 1,
-  allowedEquipSlotType: [ItemSlotType.Neck],
+  allowedEquipSlotType: [ItemSlotType.Ring],
   basePrice: 37500,
   equippedBuff: {
     type: CharacterBuffType.Skill,

@@ -21,7 +21,7 @@ export const itemSmokeRing: IEquippableAccessoryTier26Blueprint = {
   defense: 74,
   tier: 26,
   weight: 1.1,
-  allowedEquipSlotType: [ItemSlotType.Neck],
+  allowedEquipSlotType: [ItemSlotType.Ring],
   basePrice: 38000,
   equippedBuff: {
     type: CharacterBuffType.Skill,

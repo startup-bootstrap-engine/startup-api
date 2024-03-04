@@ -22,7 +22,7 @@ export const itemMoonstoneRing: IEquippableAccessoryTier28Blueprint = {
   defense: 75,
   tier: 28,
   weight: 1.3,
-  allowedEquipSlotType: [ItemSlotType.Neck],
+  allowedEquipSlotType: [ItemSlotType.Ring],
   basePrice: 39500,
   equippedBuff: [
     {

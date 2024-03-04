@@ -21,7 +21,7 @@ export const itemRubyTriquetraRing: IEquippableAccessoryTier30Blueprint = {
   defense: 83,
   tier: 30,
   weight: 1.4,
-  allowedEquipSlotType: [ItemSlotType.Neck],
+  allowedEquipSlotType: [ItemSlotType.Ring],
   basePrice: 41000,
   equippedBuff: {
     type: CharacterBuffType.Skill,

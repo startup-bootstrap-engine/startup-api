@@ -21,7 +21,7 @@ export const itemGreenTourmalineRing: IEquippableAccessoryTier27Blueprint = {
   defense: 73,
   tier: 27,
   weight: 1.2,
-  allowedEquipSlotType: [ItemSlotType.Neck],
+  allowedEquipSlotType: [ItemSlotType.Ring],
   basePrice: 39000,
   equippedBuff: {
     type: CharacterBuffType.CharacterAttribute,

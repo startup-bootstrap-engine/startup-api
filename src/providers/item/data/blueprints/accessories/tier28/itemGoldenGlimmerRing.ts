@@ -22,7 +22,7 @@ export const itemGoldenGlimmerRing: IEquippableAccessoryTier28Blueprint = {
   defense: 76,
   tier: 28,
   weight: 1.3,
-  allowedEquipSlotType: [ItemSlotType.Neck],
+  allowedEquipSlotType: [ItemSlotType.Ring],
   basePrice: 38000,
   equippedBuff: [
     {

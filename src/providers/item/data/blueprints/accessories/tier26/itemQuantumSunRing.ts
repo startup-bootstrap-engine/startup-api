@@ -22,7 +22,7 @@ export const itemQuantumSunRing: IEquippableAccessoryTier26Blueprint = {
   defense: 73,
   tier: 26,
   weight: 1.1,
-  allowedEquipSlotType: [ItemSlotType.Neck],
+  allowedEquipSlotType: [ItemSlotType.Ring],
   basePrice: 38500,
   equippedBuff: {
     type: CharacterBuffType.CharacterAttribute,
