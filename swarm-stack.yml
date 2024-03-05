@@ -33,6 +33,7 @@ services:
         - traefik.http.routers.rpg-api.tls.certresolver=myresolver
         - traefik.http.services.rpg-api-service.loadbalancer.server.port=5002
         - traefik.http.routers.rpg-api.service=rpg-api-service
+        - traefik.http.services.rpg-api-service.loadbalancer.method=leastconn # Least connection method for load balancing
 
         # Websockets
         - traefik.http.routers.rpg-api-socket.rule=Host(`na.definya.com`) && Path(`/socket.io/`)
