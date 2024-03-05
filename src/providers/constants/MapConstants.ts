@@ -1,4 +1,14 @@
-export const EXTERIOR_LIGHTENING_MAPS = ["dragon's-lair", "frozen-island", "ilya", "minotaur's island", "farm-land"];
+export const EXTERIOR_LIGHTENING_MAPS = [
+  "dragons-lair",
+  "frozen-island",
+  "ilya",
+  "minotaurs island",
+  "farm-land",
+  "ilya-dwarf-island",
+  "lost-temple",
+  "ravenfall-sanctuary",
+  "wildwood",
+];
 
 export const NO_LIGHTENING_MAPS = ["ilya-village-interiors"];
 
