@@ -204,6 +204,42 @@ jest.mock("@providers/constants/MarketplaceConstants", () => ({
   MARKETPLACE_ITEM_MAX_WEEKS_LENGTH: 1,
 }));
 
+jest.mock("@providers/constants/FarmingConstants", () => ({
+  FARMING_BASE_YIELD: 1,
+  FARMING_SKILL_FACTOR: 0.2,
+  FARMING_LOW_YIELD_FACTOR: 1,
+  FARMING_MEDIUM_YIELD_FACTOR: 2,
+  FARMING_HIGH_YIELD_FACTOR: 3,
+  FARMING_SUPER_YIELD_FACTOR: 4,
+  MAX_HOURS_NO_WATER_DEAD: 72,
+  DEAD_PLANT_REMOVE_HOURS: 1,
+  MAXIMUM_MINUTES_FOR_GROW: 120,
+  MINIMUM_MINUTES_FOR_WATERING: 5,
+  ULTRA_LOW_GROWTH_FACTOR: 1,
+  LOW_GROWTH_FACTOR: 1.5,
+  MEDIUM_GROWTH_FACTOR: 2,
+  HIGH_GROWTH_FACTOR: 2.5,
+  SUPER_GROWTH_FACTOR: 3,
+  DEFAULT_PLANT_CYCLE: {
+    Seed: 5,
+    Sprout: 10,
+    Young: 15,
+    Mature: 20,
+  },
+  SLOW_PLANT_CYCLE: {
+    Seed: 5,
+    Sprout: 12,
+    Young: 19,
+    Mature: 25,
+  },
+  FAST_PLANT_CYCLE: {
+    Seed: 4,
+    Sprout: 8,
+    Young: 12,
+    Mature: 15,
+  },
+}));
+
 jest.mock("@providers/constants/NPCConstants", () => ({
   ...jest.requireActual("@providers/constants/NPCConstants"),
   NPC_TRADER_INTERACTION_DISTANCE: 2,

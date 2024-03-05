@@ -5,7 +5,6 @@ import { PlantItemBlueprint } from "@providers/plant/data/types/PlantTypes";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { AnimationEffectKeys, ItemType } from "@rpg-engine/shared";
 import _ from "lodash";
-import mongoose from "mongoose";
 import { IUseWithRemove, UseWithItemToRemove } from "../abstractions/UseWithItemToRemove";
 
 describe("UseWithItemToRemove.ts", () => {
@@ -59,18 +58,6 @@ describe("UseWithItemToRemove.ts", () => {
     expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
       testCharacter,
       "Sorry, you can only remove plants."
-    );
-  });
-
-  it("should sends an error message if non-owner trying remove plant", async () => {
-    testPlant.owner = new mongoose.Types.ObjectId();
-    await testPlant.save();
-
-    await useWithItemToRemove.executeUse(testCharacter, useWithItemToRemoveData, skillIncrease);
-
-    expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
-      testCharacter,
-      "Sorry, you can only remove your own plants."
     );
   });
 

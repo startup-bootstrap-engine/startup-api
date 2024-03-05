@@ -34,11 +34,6 @@ export class UseWithItemToRemove {
       return;
     }
 
-    if (!this.isOwner(targetItem, character)) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you can only remove your own plants.");
-      return;
-    }
-
     if (!targetItem.isDead) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you can only remove dead plants.");
       return;
