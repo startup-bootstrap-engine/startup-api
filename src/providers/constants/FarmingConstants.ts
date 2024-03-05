@@ -1,5 +1,6 @@
-export const FARMING_BASE_YIELD = 1;
-export const FARMING_SKILL_FACTOR = 0.1;
+// Harvesting yields
+export const FARMING_BASE_YIELD = 2;
+export const FARMING_SKILL_FACTOR = 0.2;
 export const FARMING_LOW_YIELD_FACTOR = 1;
 export const FARMING_MEDIUM_YIELD_FACTOR = 2;
 export const FARMING_HIGH_YIELD_FACTOR = 3;
