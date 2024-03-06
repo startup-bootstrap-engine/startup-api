@@ -92,6 +92,7 @@ export class UseWithItemToItem {
     }
 
     const { originItemId, targetItemId } = data;
+
     const hasOriginItem = await this.characterItemInventory.checkItemInInventory(originItemId, character);
     const hasTargetItem = await this.characterItemInventory.checkItemInInventory(targetItemId, character);
 
