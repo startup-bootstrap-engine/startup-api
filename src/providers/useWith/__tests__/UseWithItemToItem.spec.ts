@@ -44,13 +44,23 @@ describe("UseWithItemToItem", () => {
   };
 
   beforeEach(async () => {
-    testCharacter = await unitTestHelper.createMockCharacter(null, {
+    const characterPromise = unitTestHelper.createMockCharacter(null, {
       hasEquipment: true,
       hasInventory: true,
     });
 
-    testOriginItem = await unitTestHelper.createMockItemFromBlueprint(GemsBlueprint.RubyGem);
-    testTargetItem = await unitTestHelper.createMockItemFromBlueprint(SwordsBlueprint.BroadSword);
+    const originItemPromise = unitTestHelper.createMockItemFromBlueprint(GemsBlueprint.RubyGem);
+    const targetItemPromise = unitTestHelper.createMockItemFromBlueprint(SwordsBlueprint.BroadSword);
+
+    const [character, originItem, targetItem] = await Promise.all([
+      characterPromise,
+      originItemPromise,
+      targetItemPromise,
+    ]);
+
+    testCharacter = character;
+    testOriginItem = originItem;
+    testTargetItem = targetItem;
 
     await addOriginAndTargetItemsToInventory();
   });
