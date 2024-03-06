@@ -1,5 +1,5 @@
 // Harvesting yields
-export const FARMING_BASE_YIELD = 1.5;
+export const FARMING_BASE_YIELD = 1.75;
 export const FARMING_SKILL_FACTOR = 0.1;
 export const FARMING_LOW_YIELD_FACTOR = 1;
 export const FARMING_MEDIUM_YIELD_FACTOR = 2;
@@ -10,7 +10,7 @@ export const MAX_HOURS_NO_WATER_DEAD = 6;
 export const DEAD_PLANT_REMOVE_HOURS = 1;
 
 export const MAXIMUM_MINUTES_FOR_GROW: number = 240;
-export const MINIMUM_MINUTES_FOR_WATERING: number = 30;
+export const MINIMUM_MINUTES_FOR_WATERING: number = 20;
 
 export const ULTRA_LOW_GROWTH_FACTOR = 1;
 export const LOW_GROWTH_FACTOR = 1.5;

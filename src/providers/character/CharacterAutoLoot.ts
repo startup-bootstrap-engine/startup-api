@@ -6,7 +6,7 @@ import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { AnimationEffectKeys, EnvType, IItemUpdate, ItemSocketEvents } from "@rpg-engine/shared";
+import { AnimationEffectKeys, EnvType, IItemUpdate, ItemSocketEvents, ItemSubType, ItemType } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
 import { provide } from "inversify-binding-decorators";
 import { v4 as uuidv4 } from "uuid";
@@ -193,6 +193,17 @@ export class CharacterAutoLoot {
     this.socketMessaging.sendEventToUser<Partial<IItemUpdate>>(character.channelId!, ItemSocketEvents.Update, {
       id: bodyItem._id,
       isDeadBodyLootable: false,
+      textureAtlas: bodyItem.textureAtlas,
+      texturePath: bodyItem.texturePath,
+      type: bodyItem.type as ItemType,
+      subType: bodyItem.subType as ItemSubType,
+      name: bodyItem.name,
+      x: bodyItem.x!,
+      y: bodyItem.y!,
+      scene: bodyItem.scene,
+      layer: bodyItem.layer,
+      stackQty: bodyItem.stackQty || 0,
+      isStackable: bodyItem.maxStackSize > 1,
     });
   }
 }

@@ -98,14 +98,14 @@ export class ItemView {
 
     for (let i = 0; i < itemsNearby.length; i++) {
       const item = itemsNearby[i];
-      const itemOnCharView = itemsOnCharView?.find((el) => el.id === item.id);
+      const itemOnCharView = itemsOnCharView?.find((el) => el.id === item._id);
 
       const shouldSkip =
         !options?.always &&
         itemOnCharView &&
         this.objectHelper.doesObjectAttrMatches(itemOnCharView, item, ["id", "x", "y", "scene", "isDeadBodyLootable"]);
 
-      const isInvalidItem = item.x === undefined || item.y === undefined || !item.scene || !item.layer;
+      const isInvalidItem = item.x === undefined || item.y === undefined || !item.scene || !item.layer || !item.name;
 
       if (shouldSkip || isInvalidItem) {
         continue;
@@ -127,7 +127,7 @@ export class ItemView {
 
   private prepareItemToUpdate(item: IItem): IItemUpdate {
     return {
-      id: item.id,
+      id: item._id,
       texturePath: item.texturePath,
       textureAtlas: item.textureAtlas,
       type: item.type as ItemType,
@@ -144,7 +144,7 @@ export class ItemView {
 
   private prepareAddToView(item: IItem): IViewElement {
     return {
-      id: item.id,
+      id: item._id,
       x: item.x!,
       y: item.y!,
       scene: item.scene!,
