@@ -1,6 +1,10 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableTwoHandedStaffTier15WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   AnimationEffectKeys,
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
   EntityAttackType,
   ItemSlotType,
   ItemSubType,
@@ -28,4 +32,19 @@ export const itemGravityStaff: IEquippableTwoHandedStaffTier15WeaponBlueprint = 
   maxRange: RangeTypes.High,
   basePrice: 210,
   isTwoHanded: true,
+  entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],
+  entityEffectChance: 95,
+  equippedBuff: {
+    type: CharacterBuffType.Skill,
+    trait: BasicAttribute.Strength,
+    buffPercentage: 10,
+    durationType: CharacterBuffDurationType.Permanent,
+    options: {
+      messages: {
+        activation: "You feel the power of strength flowing through your body. (+10% strength)",
+        deactivation: "You feel the power of strength leaving your body. (-10% strength)",
+      },
+    },
+  },
+  equippedBuffDescription: "Increases strength by 10%",
 };

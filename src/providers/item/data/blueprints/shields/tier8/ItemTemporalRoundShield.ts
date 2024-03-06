@@ -1,5 +1,12 @@
 import { IEquippableArmorTier8Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  CombatSkill,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { ShieldsBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemTemporalRoundShield: IEquippableArmorTier8Blueprint = {
@@ -15,4 +22,17 @@ export const itemTemporalRoundShield: IEquippableArmorTier8Blueprint = {
   defense: 64,
   tier: 8,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
+  equippedBuff: {
+    type: CharacterBuffType.Skill,
+    trait: CombatSkill.Shielding,
+    buffPercentage: 7,
+    durationType: CharacterBuffDurationType.Permanent,
+    options: {
+      messages: {
+        activation: "You feel the power of shielding flowing through your body. (+7% shielding)",
+        deactivation: "You feel the power of shielding leaving your body. (-7% shielding)",
+      },
+    },
+  },
+  equippedBuffDescription: "Increases resistance by 7%",
 };

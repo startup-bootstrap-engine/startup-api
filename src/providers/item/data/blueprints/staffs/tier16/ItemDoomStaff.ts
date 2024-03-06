@@ -1,6 +1,10 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableTwoHandedStaffTier16WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   AnimationEffectKeys,
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
   EntityAttackType,
   ItemSlotType,
   ItemSubType,
@@ -28,4 +32,45 @@ export const itemDoomStaff: IEquippableTwoHandedStaffTier16WeaponBlueprint = {
   maxRange: RangeTypes.High,
   basePrice: 220,
   isTwoHanded: true,
+  entityEffects: [EntityEffectBlueprint.Poison, EntityEffectBlueprint.Corruption],
+  entityEffectChance: 105,
+  equippedBuff: [
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+      options: {
+        messages: {
+          activation: "You feel the power of strength flowing through your body. (+15% strength)",
+          deactivation: "You feel the power of strength leaving your body. (-15% strength)",
+        },
+      },
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+      options: {
+        messages: {
+          activation: "You feel the power of resistance flowing through your body. (+10% resistance)",
+          deactivation: "You feel the power of resistance leaving your body. (-10% resistance)",
+        },
+      },
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+      options: {
+        messages: {
+          activation: "You feel the power of magic flowing through your body. (+10% magic)",
+          deactivation: "You feel the power of magic leaving your body. (-10% magic)",
+        },
+      },
+    },
+  ],
+  equippedBuffDescription: "Increases strength by 15%, resistance by 10% and magic by 10%",
 };

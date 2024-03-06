@@ -1,6 +1,15 @@
-import { EntityAttackType, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  EntityAttackType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { IEquippableTwoHandedTier5WeaponBlueprint } from "../../../types/TierBlueprintTypes";
 import { SpearsBlueprint } from "../../../types/itemsBlueprintTypes";
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 
 export const itemRustedDoubleVoulge: IEquippableTwoHandedTier5WeaponBlueprint = {
   key: SpearsBlueprint.RustedDoubleVoulge,
@@ -19,4 +28,33 @@ export const itemRustedDoubleVoulge: IEquippableTwoHandedTier5WeaponBlueprint = 
   rangeType: EntityAttackType.Melee,
   basePrice: 44,
   isTwoHanded: true,
+  entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],
+  entityEffectChance: 95,
+  equippedBuff: [
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 7,
+      durationType: CharacterBuffDurationType.Permanent,
+      options: {
+        messages: {
+          activation: "You feel the power of strength flowing through your body. (+7% strength)",
+          deactivation: "You feel the power of strength leaving your body. (-7% strength)",
+        },
+      },
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 7,
+      durationType: CharacterBuffDurationType.Permanent,
+      options: {
+        messages: {
+          activation: "You feel the power of resistance flowing through your body. (+7% resistance)",
+          deactivation: "You feel the power of resistance leaving your body. (-7% resistance)",
+        },
+      },
+    },
+  ],
+  equippedBuffDescription: "Increases strength by 7%, and resistance by 7%.",
 };

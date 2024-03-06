@@ -1,5 +1,15 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableRangedTier10WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { EntityAttackType, ItemSlotType, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  EntityAttackType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+  RangeTypes,
+} from "@rpg-engine/shared";
 import { RangedWeaponsBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemDragonWingBow: IEquippableRangedTier10WeaponBlueprint = {
@@ -34,4 +44,19 @@ export const itemDragonWingBow: IEquippableRangedTier10WeaponBlueprint = {
   tier: 10,
   isTwoHanded: true,
   basePrice: 200,
+  entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding],
+  entityEffectChance: 95,
+  equippedBuff: {
+    type: CharacterBuffType.Skill,
+    trait: BasicAttribute.Resistance,
+    buffPercentage: 5,
+    durationType: CharacterBuffDurationType.Permanent,
+    options: {
+      messages: {
+        activation: "You feel the power of resistance flowing through your body. (+5% resistance)",
+        deactivation: "You feel the power of resistance leaving your body. (-5% resistance)",
+      },
+    },
+  },
+  equippedBuffDescription: "Increases resistance by 5%",
 };

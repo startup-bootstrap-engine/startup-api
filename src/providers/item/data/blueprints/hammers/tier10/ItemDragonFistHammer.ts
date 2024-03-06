@@ -1,5 +1,14 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableMeleeTier10WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { EntityAttackType, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  EntityAttackType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { HammersBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemDragonFistHammer: IEquippableMeleeTier10WeaponBlueprint = {
@@ -17,4 +26,19 @@ export const itemDragonFistHammer: IEquippableMeleeTier10WeaponBlueprint = {
   defense: 42,
   tier: 10,
   rangeType: EntityAttackType.Melee,
+  entityEffects: [EntityEffectBlueprint.Burning],
+  entityEffectChance: 90,
+  equippedBuff: {
+    type: CharacterBuffType.Skill,
+    trait: BasicAttribute.Resistance,
+    buffPercentage: 8,
+    durationType: CharacterBuffDurationType.Permanent,
+    options: {
+      messages: {
+        activation: "You feel the power of resistance flowing through your body. (+8% resistance)",
+        deactivation: "You feel the power of resistance leaving your body. (-8% resistance)",
+      },
+    },
+  },
+  equippedBuffDescription: "Increases resistance by 8%",
 };

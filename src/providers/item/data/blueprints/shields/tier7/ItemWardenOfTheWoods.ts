@@ -1,5 +1,12 @@
 import { IEquippableArmorTier7Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { ShieldsBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemWardenOfTheWoods: IEquippableArmorTier7Blueprint = {
@@ -15,4 +22,17 @@ export const itemWardenOfTheWoods: IEquippableArmorTier7Blueprint = {
   defense: 55,
   tier: 7,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
+  equippedBuff: {
+    type: CharacterBuffType.Skill,
+    trait: BasicAttribute.Resistance,
+    buffPercentage: 4,
+    durationType: CharacterBuffDurationType.Permanent,
+    options: {
+      messages: {
+        activation: "You feel the power of resistance flowing through your body. (+4% resistance)",
+        deactivation: "You feel the power of resistance leaving your body. (-4% resistance)",
+      },
+    },
+  },
+  equippedBuffDescription: "Increases resistance by 4%",
 };

@@ -1,3 +1,4 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableRangedTier11WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import { EntityAttackType, ItemSlotType, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
 import { RangedWeaponsBlueprint } from "../../../types/itemsBlueprintTypes";
@@ -36,4 +37,6 @@ export const itemStarsHooterBow: IEquippableRangedTier11WeaponBlueprint = {
   tier: 11,
   isTwoHanded: true,
   basePrice: 220,
+  entityEffects: [EntityEffectBlueprint.Burning],
+  entityEffectChance: 100,
 };

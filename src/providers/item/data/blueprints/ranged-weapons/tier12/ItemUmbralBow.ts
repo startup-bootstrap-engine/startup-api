@@ -1,5 +1,15 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableRangedTier12WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { EntityAttackType, ItemSlotType, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  EntityAttackType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+  RangeTypes,
+} from "@rpg-engine/shared";
 import { RangedWeaponsBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemUmbralBow: IEquippableRangedTier12WeaponBlueprint = {
@@ -37,4 +47,19 @@ export const itemUmbralBow: IEquippableRangedTier12WeaponBlueprint = {
   tier: 12,
   isTwoHanded: true,
   basePrice: 230,
+  entityEffects: [EntityEffectBlueprint.Corruption],
+  entityEffectChance: 90,
+  equippedBuff: {
+    type: CharacterBuffType.Skill,
+    trait: BasicAttribute.Resistance,
+    buffPercentage: 7,
+    durationType: CharacterBuffDurationType.Permanent,
+    options: {
+      messages: {
+        activation: "You feel the power of resistance flowing through your body. (+7% resistance)",
+        deactivation: "You feel the power of resistance leaving your body. (-7% resistance)",
+      },
+    },
+  },
+  equippedBuffDescription: "Increases resistance by 7%",
 };

@@ -1,6 +1,15 @@
-import { EntityAttackType, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  EntityAttackType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { IEquippableTwoHandedTier4WeaponBlueprint } from "../../../types/TierBlueprintTypes";
 import { SpearsBlueprint } from "../../../types/itemsBlueprintTypes";
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 
 export const itemPoseidonTrident: IEquippableTwoHandedTier4WeaponBlueprint = {
   key: SpearsBlueprint.PoseidonTrident,
@@ -19,4 +28,19 @@ export const itemPoseidonTrident: IEquippableTwoHandedTier4WeaponBlueprint = {
   rangeType: EntityAttackType.Melee,
   basePrice: 75,
   isTwoHanded: true,
+  entityEffects: [EntityEffectBlueprint.Poison],
+  entityEffectChance: 90,
+  equippedBuff: {
+    type: CharacterBuffType.Skill,
+    trait: BasicAttribute.MagicResistance,
+    buffPercentage: 5,
+    durationType: CharacterBuffDurationType.Permanent,
+    options: {
+      messages: {
+        activation: "You feel the power of magic resistance flowing through your body. (+5% magic resistance)",
+        deactivation: "You feel the power of magic resistance leaving your body. (-5% magic resistance)",
+      },
+    },
+  },
+  equippedBuffDescription: "Increases magic resistance by 5%",
 };

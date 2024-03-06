@@ -1,5 +1,14 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableMeleeTier8WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { EntityAttackType, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  EntityAttackType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { MacesBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemMetalStoneScepter: IEquippableMeleeTier8WeaponBlueprint = {
@@ -16,4 +25,19 @@ export const itemMetalStoneScepter: IEquippableMeleeTier8WeaponBlueprint = {
   defense: 58,
   tier: 8,
   rangeType: EntityAttackType.Melee,
+  entityEffects: [EntityEffectBlueprint.Bleeding],
+  entityEffectChance: 85,
+  equippedBuff: {
+    type: CharacterBuffType.Skill,
+    trait: BasicAttribute.Resistance,
+    buffPercentage: 5,
+    durationType: CharacterBuffDurationType.Permanent,
+    options: {
+      messages: {
+        activation: "You feel the power of resistance flowing through your body. (+5% resistance)",
+        deactivation: "You feel the power of resistance leaving your body. (-5% resistance)",
+      },
+    },
+  },
+  equippedBuffDescription: "Increases resistance by 5%",
 };

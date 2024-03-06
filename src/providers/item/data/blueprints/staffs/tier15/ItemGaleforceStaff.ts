@@ -1,6 +1,10 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableTwoHandedStaffTier15WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   AnimationEffectKeys,
+  CharacterAttributes,
+  CharacterBuffDurationType,
+  CharacterBuffType,
   EntityAttackType,
   ItemSlotType,
   ItemSubType,
@@ -28,4 +32,19 @@ export const itemGaleforceStaff: IEquippableTwoHandedStaffTier15WeaponBlueprint 
   maxRange: RangeTypes.High,
   basePrice: 200,
   isTwoHanded: true,
+  entityEffects: [EntityEffectBlueprint.Bleeding],
+  entityEffectChance: 90,
+  equippedBuff: {
+    type: CharacterBuffType.CharacterAttribute,
+    trait: CharacterAttributes.MaxHealth,
+    buffPercentage: 5,
+    durationType: CharacterBuffDurationType.Permanent,
+    options: {
+      messages: {
+        activation: "You feel the power of max health flowing through your body. (+5% MaxHealth)",
+        deactivation: "You feel the power of max health leaving your body. (-5% MaxHealth)",
+      },
+    },
+  },
+  equippedBuffDescription: "Increases max health by 5% respectively",
 };

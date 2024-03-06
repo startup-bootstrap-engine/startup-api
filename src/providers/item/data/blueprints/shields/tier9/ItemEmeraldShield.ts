@@ -30,8 +30,8 @@ export const itemEmeraldShield: IEquippableArmorTier9Blueprint = {
       durationType: CharacterBuffDurationType.Permanent,
       options: {
         messages: {
-          activation: "You feel the power of shielding flowing through your body. (+10% shielding)",
-          deactivation: "You feel the power of shielding leaving your body. (-10% shielding)",
+          activation: "You feel the power of shielding flowing through your body. (+20% shielding)",
+          deactivation: "You feel the power of shielding leaving your body. (-20% shielding)",
         },
       },
     },

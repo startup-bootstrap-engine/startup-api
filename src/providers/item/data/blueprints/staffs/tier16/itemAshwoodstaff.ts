@@ -1,6 +1,10 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableTwoHandedStaffTier16WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   AnimationEffectKeys,
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
   EntityAttackType,
   ItemSlotType,
   ItemSubType,
@@ -28,4 +32,33 @@ export const itemAshwoodstaff: IEquippableTwoHandedStaffTier16WeaponBlueprint = 
   maxRange: RangeTypes.High,
   basePrice: 217,
   isTwoHanded: true,
+  entityEffects: [EntityEffectBlueprint.Poison, EntityEffectBlueprint.Burning],
+  entityEffectChance: 100,
+  equippedBuff: [
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 12,
+      durationType: CharacterBuffDurationType.Permanent,
+      options: {
+        messages: {
+          activation: "You feel the power of strength flowing through your body. (+12% strength)",
+          deactivation: "You feel the power of strength leaving your body. (-12% strength)",
+        },
+      },
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 5,
+      durationType: CharacterBuffDurationType.Permanent,
+      options: {
+        messages: {
+          activation: "You feel the power of resistance flowing through your body. (+5% resistance)",
+          deactivation: "You feel the power of resistance leaving your body. (-5% resistance)",
+        },
+      },
+    },
+  ],
+  equippedBuffDescription: "Increases strength by 12% and resistance by 7%",
 };

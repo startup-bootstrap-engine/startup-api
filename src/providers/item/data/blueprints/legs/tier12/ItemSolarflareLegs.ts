@@ -1,5 +1,12 @@
 import { IEquippableLightArmorTier12Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  CharacterAttributes,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { LegsBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemSolarflareLegs: IEquippableLightArmorTier12Blueprint = {
@@ -14,4 +21,31 @@ export const itemSolarflareLegs: IEquippableLightArmorTier12Blueprint = {
   defense: 65,
   tier: 12,
   allowedEquipSlotType: [ItemSlotType.Legs],
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.Speed,
+      buffPercentage: 20,
+      durationType: CharacterBuffDurationType.Permanent,
+      options: {
+        messages: {
+          activation: "You feel the power of speed and quickness flowing through your body. (+20% speed)",
+          deactivation: "You feel the power of speed and quickness leaving your body. (-20% speed)",
+        },
+      },
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 7,
+      durationType: CharacterBuffDurationType.Permanent,
+      options: {
+        messages: {
+          activation: "You feel the power of max health flowing through your body. (+7% MaxHealth)",
+          deactivation: "You feel the power of max health leaving your body. (-7% MaxHealth)",
+        },
+      },
+    },
+  ],
+  equippedBuffDescription: "Increases speed by 20% and max health by 5% respectively",
 };

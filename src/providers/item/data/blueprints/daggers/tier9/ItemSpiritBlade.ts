@@ -1,5 +1,14 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableMeleeTier9WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { EntityAttackType, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  CombatSkill,
+  EntityAttackType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { DaggersBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemSpiritBlade: IEquippableMeleeTier9WeaponBlueprint = {
@@ -18,4 +27,19 @@ export const itemSpiritBlade: IEquippableMeleeTier9WeaponBlueprint = {
   tier: 9,
   rangeType: EntityAttackType.Melee,
   basePrice: 81,
+  entityEffects: [EntityEffectBlueprint.Bleeding],
+  entityEffectChance: 90,
+  equippedBuff: {
+    type: CharacterBuffType.Skill,
+    trait: CombatSkill.Dagger,
+    buffPercentage: 10,
+    durationType: CharacterBuffDurationType.Permanent,
+    options: {
+      messages: {
+        activation: "You feel the power of dagger flowing through your body. (+10% dagger)",
+        deactivation: "You feel the power of dagger leaving your body. (-10% dagger)",
+      },
+    },
+  },
+  equippedBuffDescription: "Increases dagger by 10%",
 };

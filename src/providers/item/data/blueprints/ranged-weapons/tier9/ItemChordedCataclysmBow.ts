@@ -1,4 +1,5 @@
 import { IItem } from "@entities/ModuleInventory/ItemModel";
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { EntityAttackType, ItemSlotType, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
 import { RangedWeaponsBlueprint } from "../../../types/itemsBlueprintTypes";
 
@@ -32,4 +33,6 @@ export const itemChordedCataclysmBow: Partial<IItem> = {
   tier: 9,
   isTwoHanded: true,
   basePrice: 182,
+  entityEffects: [EntityEffectBlueprint.Poison, EntityEffectBlueprint.Bleeding],
+  entityEffectChance: 90,
 };

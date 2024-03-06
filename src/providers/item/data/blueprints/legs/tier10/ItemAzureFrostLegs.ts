@@ -1,5 +1,13 @@
 import { IEquippableLightArmorTier10Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterAttributes,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { LegsBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemAzureFrostLegs: IEquippableLightArmorTier10Blueprint = {
@@ -14,4 +22,31 @@ export const itemAzureFrostLegs: IEquippableLightArmorTier10Blueprint = {
   defense: 53,
   tier: 10,
   allowedEquipSlotType: [ItemSlotType.Legs],
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.Speed,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+      options: {
+        messages: {
+          activation: "You feel the power of speed and quickness flowing through your body. (+10% speed)",
+          deactivation: "You feel the power of speed and quickness leaving your body. (-10% speed)",
+        },
+      },
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 5,
+      durationType: CharacterBuffDurationType.Permanent,
+      options: {
+        messages: {
+          activation: "You feel the strength and fortitude coursing through your body. (+5% strength)",
+          deactivation: "You feel the strength and fortitude coursing leaving through your body. (-5% strength)",
+        },
+      },
+    },
+  ],
+  equippedBuffDescription: "Increases speed by 10% and strength by 5% respectively",
 };

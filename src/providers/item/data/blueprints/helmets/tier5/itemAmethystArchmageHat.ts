@@ -44,5 +44,5 @@ export const itemAmethystArchmageHat: IEquippableLightArmorTier5Blueprint = {
       durationType: CharacterBuffDurationType.Permanent,
     },
   ],
-  equippedBuffDescription: "Increases magic by 10% and max health by 8% respectively",
+  equippedBuffDescription: "Increases magic by 10%, max health by 8% and max mana by 7% respectively",
 };

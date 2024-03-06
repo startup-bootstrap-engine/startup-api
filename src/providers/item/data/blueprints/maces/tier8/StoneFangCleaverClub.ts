@@ -1,5 +1,14 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableMeleeTier8WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { EntityAttackType, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  CharacterAttributes,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  EntityAttackType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { MacesBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemStoneFangCleaverClub: IEquippableMeleeTier8WeaponBlueprint = {
@@ -16,4 +25,19 @@ export const itemStoneFangCleaverClub: IEquippableMeleeTier8WeaponBlueprint = {
   defense: 52,
   tier: 8,
   rangeType: EntityAttackType.Melee,
+  entityEffects: [EntityEffectBlueprint.Poison],
+  entityEffectChance: 90,
+  equippedBuff: {
+    type: CharacterBuffType.CharacterAttribute,
+    trait: CharacterAttributes.MaxHealth,
+    buffPercentage: 4,
+    durationType: CharacterBuffDurationType.Permanent,
+    options: {
+      messages: {
+        activation: "You feel the power of max health flowing through your body. (+4% MaxHealth)",
+        deactivation: "You feel the power of max health leaving your body. (-4% MaxHealth)",
+      },
+    },
+  },
+  equippedBuffDescription: "Increases max health by 4% respectively",
 };

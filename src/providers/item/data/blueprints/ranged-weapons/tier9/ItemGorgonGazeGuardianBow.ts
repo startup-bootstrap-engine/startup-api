@@ -1,6 +1,16 @@
-import { EntityAttackType, ItemSlotType, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  EntityAttackType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+  RangeTypes,
+} from "@rpg-engine/shared";
 import { IEquippableRangedTier9WeaponBlueprint } from "../../../types/TierBlueprintTypes";
 import { RangedWeaponsBlueprint } from "../../../types/itemsBlueprintTypes";
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 
 export const itemGorgonGazeGuardianBow: IEquippableRangedTier9WeaponBlueprint = {
   key: RangedWeaponsBlueprint.GorgonGazeGuardianBow,
@@ -32,4 +42,19 @@ export const itemGorgonGazeGuardianBow: IEquippableRangedTier9WeaponBlueprint = 
   tier: 9,
   isTwoHanded: true,
   basePrice: 186,
+  entityEffects: [EntityEffectBlueprint.Poison, EntityEffectBlueprint.Burning],
+  entityEffectChance: 95,
+  equippedBuff: {
+    type: CharacterBuffType.Skill,
+    trait: BasicAttribute.Strength,
+    buffPercentage: 5,
+    durationType: CharacterBuffDurationType.Permanent,
+    options: {
+      messages: {
+        activation: "You feel the strength and fortitude coursing through your body. (+5% strength)",
+        deactivation: "You feel the strength and fortitude coursing leaving through your body. (-5% strength)",
+      },
+    },
+  },
+  equippedBuffDescription: "Increases strength by 5%",
 };

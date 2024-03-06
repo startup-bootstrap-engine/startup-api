@@ -1,6 +1,10 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableTwoHandedStaffTier13WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   AnimationEffectKeys,
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
   EntityAttackType,
   ItemSlotType,
   ItemSubType,
@@ -28,4 +32,19 @@ export const itemLunarWand: IEquippableTwoHandedStaffTier13WeaponBlueprint = {
   maxRange: RangeTypes.High,
   basePrice: 180,
   isTwoHanded: true,
+  entityEffects: [EntityEffectBlueprint.Corruption],
+  entityEffectChance: 85,
+  equippedBuff: {
+    type: CharacterBuffType.Skill,
+    trait: BasicAttribute.Magic,
+    buffPercentage: 5,
+    durationType: CharacterBuffDurationType.Permanent,
+    options: {
+      messages: {
+        activation: "You feel the power of magic flowing through your body. (+5% magic)",
+        deactivation: "You feel the power of magic leaving your body. (-5% magic)",
+      },
+    },
+  },
+  equippedBuffDescription: "Increases magic by 5%",
 };

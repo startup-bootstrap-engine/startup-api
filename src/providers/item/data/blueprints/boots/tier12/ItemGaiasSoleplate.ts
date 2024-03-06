@@ -1,5 +1,12 @@
 import { IEquippableLightArmorTier12Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  CharacterAttributes,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { BootsBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemGaiasSoleplate: IEquippableLightArmorTier12Blueprint = {
@@ -15,4 +22,17 @@ export const itemGaiasSoleplate: IEquippableLightArmorTier12Blueprint = {
   weight: 0.5,
   allowedEquipSlotType: [ItemSlotType.Feet],
   basePrice: 135,
+  equippedBuff: {
+    type: CharacterBuffType.CharacterAttribute,
+    trait: CharacterAttributes.Speed,
+    buffPercentage: 18,
+    durationType: CharacterBuffDurationType.Permanent,
+    options: {
+      messages: {
+        activation: "You feel the power of speed and quickness flowing through your body. (+18% speed)",
+        deactivation: "You feel the power of speed and quickness leaving your body. (-18% speed)",
+      },
+    },
+  },
+  equippedBuffDescription: "Increases speed by 18%",
 };

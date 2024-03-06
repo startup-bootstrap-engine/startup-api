@@ -25,8 +25,14 @@ export const itemWindstriderBoots: IEquippableLightArmorTier9Blueprint = {
   equippedBuff: {
     type: CharacterBuffType.CharacterAttribute,
     trait: CharacterAttributes.Speed,
-    buffPercentage: 10,
+    buffPercentage: 12,
     durationType: CharacterBuffDurationType.Permanent,
+    options: {
+      messages: {
+        activation: "You feel the power of speed and quickness flowing through your body. (+12% speed)",
+        deactivation: "You feel the power of speed and quickness leaving your body. (-12% speed)",
+      },
+    },
   },
-  equippedBuffDescription: "Increases speed by 10%",
+  equippedBuffDescription: "Increases speed by 12%",
 };

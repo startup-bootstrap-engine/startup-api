@@ -1,6 +1,10 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableTwoHandedStaffTier14WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   AnimationEffectKeys,
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
   EntityAttackType,
   ItemSlotType,
   ItemSubType,
@@ -28,4 +32,19 @@ export const itemElementalStaff: IEquippableTwoHandedStaffTier14WeaponBlueprint 
   maxRange: RangeTypes.High,
   basePrice: 190,
   isTwoHanded: true,
+  entityEffects: [EntityEffectBlueprint.VineGrasp],
+  entityEffectChance: 85,
+  equippedBuff: {
+    type: CharacterBuffType.Skill,
+    trait: BasicAttribute.Magic,
+    buffPercentage: 7,
+    durationType: CharacterBuffDurationType.Permanent,
+    options: {
+      messages: {
+        activation: "You feel the power of magic flowing through your body. (+7% magic)",
+        deactivation: "You feel the power of magic leaving your body. (-7% magic)",
+      },
+    },
+  },
+  equippedBuffDescription: "Increases magic by 7%",
 };

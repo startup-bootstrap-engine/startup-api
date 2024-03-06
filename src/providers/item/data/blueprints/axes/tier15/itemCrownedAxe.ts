@@ -1,5 +1,14 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableMeleeTier15WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { EntityAttackType, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  EntityAttackType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { AxesBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemCrownedAxe: IEquippableMeleeTier15WeaponBlueprint = {
@@ -17,4 +26,19 @@ export const itemCrownedAxe: IEquippableMeleeTier15WeaponBlueprint = {
   tier: 15,
   rangeType: EntityAttackType.Melee,
   basePrice: 134,
+  entityEffects: [EntityEffectBlueprint.Corruption],
+  entityEffectChance: 80,
+  equippedBuff: {
+    type: CharacterBuffType.Skill,
+    trait: BasicAttribute.Strength,
+    buffPercentage: 4,
+    durationType: CharacterBuffDurationType.Permanent,
+    options: {
+      messages: {
+        activation: "You feel the strength and fortitude coursing through your body. (+4% strength)",
+        deactivation: "You feel the strength and fortitude coursing leaving through your body. (-4% strength)",
+      },
+    },
+  },
+  equippedBuffDescription: "Increases strength by 4%",
 };
