@@ -22,6 +22,10 @@ export const recipeGaiasSoleplate: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.Diamond,
       qty: 80,
     },
+    {
+      key: CraftingResourcesBlueprint.SocialCrystal,
+      qty: 10,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Blacksmithing, 37],
 };

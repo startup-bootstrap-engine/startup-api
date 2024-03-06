@@ -7,6 +7,10 @@ export const recipeVoltstepBoots: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 1],
   requiredItems: [
     {
+      key: CraftingResourcesBlueprint.SocialCrystal,
+      qty: 10,
+    },
+    {
       key: CraftingResourcesBlueprint.CorruptionIngot,
       qty: 90,
     },
