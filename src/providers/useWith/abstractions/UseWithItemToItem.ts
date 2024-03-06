@@ -21,29 +21,13 @@ export class UseWithItemToItem {
 
   public onUseWithItemToItem(channel: SocketChannel): void {
     this.socketAuth.authCharacterOn(channel, UseWithSocketEvents.UseWithItem, async (data: IUseWithItem, character) => {
-      const originItemBlueprint = (await this.blueprintManager.getBlueprint(
-        "items",
-        data.originItemId
-      )) as IUseWithItemBlueprint;
-
-      await this.execute(character, data, originItemBlueprint);
+      await this.execute(character, data);
     });
   }
 
-  public async execute(
-    character: ICharacter,
-    data: IUseWithItem,
-    originItemBlueprint: IUseWithItemBlueprint
-  ): Promise<void> {
+  public async execute(character: ICharacter, data: IUseWithItem): Promise<void> {
     try {
-      const validateData = await this.validateData(character, data, originItemBlueprint);
-
-      if (!validateData) {
-        return;
-      }
-
       const originItem = (await Item.findById(data.originItemId).lean({ virtuals: true, defaults: true })) as IItem;
-      const targetItem = (await Item.findById(data.targetItemId).lean({ virtuals: true, defaults: true })) as IItem;
 
       if (!originItem) {
         this.socketMessaging.sendErrorMessageToCharacter(
@@ -53,17 +37,46 @@ export class UseWithItemToItem {
         return;
       }
 
+      const originItemBlueprint = (await this.blueprintManager.getBlueprint(
+        "items",
+        originItem.key
+      )) as IUseWithItemBlueprint;
+
+      const validateData = await this.validateData(character, data, originItemBlueprint);
+
+      if (!validateData) {
+        return;
+      }
+
+      await this.fetchItemsAndExecuteEffect(originItem, originItemBlueprint, data.targetItemId, character);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  private async fetchItemsAndExecuteEffect(
+    originItem: IItem,
+    originItemBlueprint: IUseWithItemBlueprint,
+    targetItemId: string,
+    character: ICharacter
+  ): Promise<boolean> {
+    try {
+      const targetItem = (await Item.findById(targetItemId).lean({ virtuals: true, defaults: true })) as IItem;
+
       if (!targetItem) {
         this.socketMessaging.sendErrorMessageToCharacter(
           character,
           "Sorry, failed to fetch target item required information."
         );
-        return;
+        return false;
       }
 
       await originItemBlueprint.useWithItemEffect!(originItem, targetItem, character as any);
+
+      return true;
     } catch (error) {
       console.error(error);
+      return false;
     }
   }
 
