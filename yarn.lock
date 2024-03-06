@@ -2483,10 +2483,10 @@
     estree-walker "^2.0.2"
     picomatch "^2.3.1"
 
-"@rpg-engine/shared@^0.9.32":
-  version "0.9.32"
-  resolved "https://registry.yarnpkg.com/@rpg-engine/shared/-/shared-0.9.32.tgz#df654a43f0ed712498df89c0bf9eac33d0baedb5"
-  integrity sha512-0SYTAN1lVj59j3vYthmyus0WXhOU+aeaD07VRGHFfkpPKo/KIFYj9VXc/oEynb1RAfekCFXjljm8Eeltjwm43Q==
+"@rpg-engine/shared@^0.9.35":
+  version "0.9.35"
+  resolved "https://registry.yarnpkg.com/@rpg-engine/shared/-/shared-0.9.35.tgz#7620932e5e914d773773ddb5e4dd585517827045"
+  integrity sha512-0MyjNbTp+VJEjar0NZs8mijPN+LSI/MEW6xLI7+KSfr+OJJCTtSwe5Fkyf1rrEQYl2yr2RnkJTaj53Ei04bZVA==
   dependencies:
     husky "^4.3.0"
     mobile-device-detect "^0.4.3"

@@ -1,18 +1,21 @@
-import { ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
-import { IEquippableArmorTier1Blueprint } from "../../../types/TierBlueprintTypes";
+import { EntityAttackType, IItemGem, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
 import { GemsBlueprint } from "../../../types/itemsBlueprintTypes";
 
-export const itemRubyGem: IEquippableArmorTier1Blueprint = {
+export const itemRubyGem: IItemGem = {
   key: GemsBlueprint.RubyGem,
-  type: ItemType.Jewelry,
+  type: ItemType.Tool,
   subType: ItemSubType.Gem,
   textureAtlas: "items",
   texturePath: "gems/ruby-gem.png",
   name: "Ruby Gem",
   description: "Vibrant red charm, clear brilliance; a timeless and captivating beauty in this precious jewel.",
-  defense: 9,
-  tier: 1,
+  hasUseWith: true,
+  useWithMaxDistanceGrid: RangeTypes.Medium,
   weight: 1.5,
-  allowedEquipSlotType: [ItemSlotType.Accessory],
   basePrice: 50,
+  canSell: false,
+  rangeType: EntityAttackType.None,
+  useWithItemEffect: async (originItem, targetItem, character) => {
+    // Add your custom logic here
+  },
 };
