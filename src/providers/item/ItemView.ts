@@ -98,7 +98,7 @@ export class ItemView {
 
     for (let i = 0; i < itemsNearby.length; i++) {
       const item = itemsNearby[i];
-      const itemOnCharView = itemsOnCharView?.find((el) => el.id === item._id);
+      const itemOnCharView = itemsOnCharView?.find((el) => el.id === item.id);
 
       const shouldSkip =
         !options?.always &&
