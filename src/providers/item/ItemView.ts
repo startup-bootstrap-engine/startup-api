@@ -123,6 +123,8 @@ export class ItemView {
         items: itemsToUpdate,
       });
     }
+
+    await this.characterView.clearAllOutOfViewElements(character._id, character.x, character.y);
   }
 
   private prepareItemToUpdate(item: IItem): IItemUpdate {

@@ -77,8 +77,9 @@ export class CharacterView {
   }
 
   public isOutOfCharacterView(characterX: number, characterY: number, x: number, y: number): boolean {
-    const viewWidth = SOCKET_TRANSMISSION_ZONE_WIDTH * 2;
-    const viewHeight = SOCKET_TRANSMISSION_ZONE_WIDTH * 2;
+    // These 0.9 magic numbers it to make sure it somehow matches the getOtherElementsInView method query
+    const viewWidth = SOCKET_TRANSMISSION_ZONE_WIDTH * 0.9;
+    const viewHeight = SOCKET_TRANSMISSION_ZONE_WIDTH * 0.9;
     return (
       x < characterX - viewWidth / 2 ||
       x > characterX + viewWidth / 2 ||
