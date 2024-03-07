@@ -37,40 +37,16 @@ export const itemDoomStaff: IEquippableTwoHandedStaffTier16WeaponBlueprint = {
   equippedBuff: [
     {
       type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Strength,
+      trait: BasicAttribute.Magic,
       buffPercentage: 15,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of strength flowing through your body. (+15% strength)",
-          deactivation: "You feel the power of strength leaving your body. (-15% strength)",
-        },
-      },
     },
     {
       type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Resistance,
+      trait: BasicAttribute.MagicResistance,
       buffPercentage: 10,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of resistance flowing through your body. (+10% resistance)",
-          deactivation: "You feel the power of resistance leaving your body. (-10% resistance)",
-        },
-      },
-    },
-    {
-      type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Magic,
-      buffPercentage: 10,
-      durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of magic flowing through your body. (+10% magic)",
-          deactivation: "You feel the power of magic leaving your body. (-10% magic)",
-        },
-      },
     },
   ],
-  equippedBuffDescription: "Increases strength by 15%, resistance by 10% and magic by 10%",
+  equippedBuffDescription: "Increases magic by 15% and magic resistance by 10%",
 };

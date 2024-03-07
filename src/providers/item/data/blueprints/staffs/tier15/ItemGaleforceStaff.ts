@@ -34,17 +34,19 @@ export const itemGaleforceStaff: IEquippableTwoHandedStaffTier15WeaponBlueprint 
   isTwoHanded: true,
   entityEffects: [EntityEffectBlueprint.Bleeding],
   entityEffectChance: 90,
-  equippedBuff: {
-    type: CharacterBuffType.CharacterAttribute,
-    trait: CharacterAttributes.MaxHealth,
-    buffPercentage: 5,
-    durationType: CharacterBuffDurationType.Permanent,
-    options: {
-      messages: {
-        activation: "You feel the power of max health flowing through your body. (+5% MaxHealth)",
-        deactivation: "You feel the power of max health leaving your body. (-5% MaxHealth)",
-      },
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
     },
-  },
-  equippedBuffDescription: "Increases max health by 5% respectively",
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "Increases max health and max mana by 10%",
 };

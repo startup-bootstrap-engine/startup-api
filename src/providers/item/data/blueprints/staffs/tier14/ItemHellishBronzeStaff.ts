@@ -34,15 +34,9 @@ export const itemHellishBronzeStaff: IEquippableTwoHandedStaffTier14WeaponBluepr
   entityEffectChance: 85,
   equippedBuff: {
     type: CharacterBuffType.Skill,
-    trait: BasicAttribute.Strength,
-    buffPercentage: 5,
+    trait: BasicAttribute.Magic,
+    buffPercentage: 7,
     durationType: CharacterBuffDurationType.Permanent,
-    options: {
-      messages: {
-        activation: "You feel the power of strength flowing through your body. (+7% strength)",
-        deactivation: "You feel the power of strength leaving your body. (-7% strength)",
-      },
-    },
   },
-  equippedBuffDescription: "Increases strength by 7%",
+  equippedBuffDescription: "Increases magic by 7%",
 };
