@@ -13,6 +13,7 @@ import {
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { CharacterSkullType, CharacterSocketEvents, ICharacterAttributeChanged, Modes } from "@rpg-engine/shared";
+import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 
 @provide(CharacterSkull)
@@ -139,13 +140,13 @@ export class CharacterSkull {
     let timeExpired = new Date();
     switch (skullType) {
       case CharacterSkullType.WhiteSkull:
-        timeExpired = new Date(Date.now() + CHARACTER_SKULL_WHITE_SKULL_DURATION);
+        timeExpired = dayjs().add(CHARACTER_SKULL_WHITE_SKULL_DURATION, "millisecond").toDate();
         break;
       case CharacterSkullType.YellowSkull:
-        timeExpired = new Date(Date.now() + CHARACTER_SKULL_YELLOW_SKULL_DURATION);
+        timeExpired = dayjs().add(CHARACTER_SKULL_YELLOW_SKULL_DURATION, "millisecond").toDate();
         break;
       case CharacterSkullType.RedSkull:
-        timeExpired = new Date(Date.now() + CHARACTER_SKULL_RED_SKULL_DURATION);
+        timeExpired = dayjs().add(CHARACTER_SKULL_RED_SKULL_DURATION, "millisecond").toDate();
         break;
     }
     character.hasSkull = true;
@@ -181,7 +182,7 @@ export class CharacterSkull {
       killer: characterId,
       isJustify: false,
       createdAt: {
-        $gte: new Date(Date.now() - CHARACTER_SKULL_MAX_TIME_UNTIL_UPGRADE_TO_RED_SKULL),
+        $gte: dayjs().subtract(CHARACTER_SKULL_MAX_TIME_UNTIL_UPGRADE_TO_RED_SKULL, "millisecond").toDate(),
       },
     });
 
@@ -192,9 +193,7 @@ export class CharacterSkull {
       const totalKillCount7Days = await CharacterPvPKillLog.countDocuments({
         killer: characterId,
         isJustify: false,
-        createdAt: {
-          $gte: new Date(Date.now() - CHARACTER_SKULL_YELLOW_SKULL_DURATION),
-        },
+        createdAt: { $gte: dayjs().subtract(CHARACTER_SKULL_YELLOW_SKULL_DURATION, "millisecond").toDate() },
       });
       // if total kill > 1 => set Yellow skull and reset timer
       if (totalKillCount7Days > CHARACTER_SKULL_AMOUNT_KILLS_NEEDED_TO_YELLOW_SKULL) {

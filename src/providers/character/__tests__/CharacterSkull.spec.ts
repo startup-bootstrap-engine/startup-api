@@ -2,6 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { CHARACTER_SKULL_YELLOW_SKULL_DURATION } from "@providers/constants/CharacterSkullConstants";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { CharacterFactions, CharacterSkullType } from "@rpg-engine/shared";
+import dayjs from "dayjs";
 import { CharacterSkull } from "../CharacterSkull";
 
 describe("CharacterSkull.ts", () => {
@@ -106,7 +107,7 @@ describe("CharacterSkull.ts", () => {
 
   it("should renew red skull when a character is red skull and kills a character", async () => {
     const character = testCharacterWithRedSkull;
-    character.skullExpiredAt = new Date(Date.now() + CHARACTER_SKULL_YELLOW_SKULL_DURATION);
+    character.skullExpiredAt = dayjs().add(CHARACTER_SKULL_YELLOW_SKULL_DURATION, "millisecond").toDate();
     await character.save();
 
     // reset timer after kill with red skull
@@ -115,7 +116,7 @@ describe("CharacterSkull.ts", () => {
 
   it("should reset yellow skull when 7 days have passed", async () => {
     const character = testCharacterWithYellowSkull;
-    character.skullExpiredAt = new Date(Date.now() - 1000);
+    character.skullExpiredAt = dayjs().subtract(1, "second").toDate();
     await character.save();
 
     // update character to red skull
@@ -124,7 +125,7 @@ describe("CharacterSkull.ts", () => {
 
   it("should reset red skull when 14 days have passed", async () => {
     const character = testCharacterWithRedSkull;
-    character.skullExpiredAt = new Date(Date.now() - 1000);
+    character.skullExpiredAt = dayjs().subtract(1000, "millisecond").toDate();
     await character.save();
 
     // update character to red skull

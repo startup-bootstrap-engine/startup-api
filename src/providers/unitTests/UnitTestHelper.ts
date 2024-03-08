@@ -44,6 +44,7 @@ import {
   QuestType,
   UserAccountTypes,
 } from "@rpg-engine/shared";
+import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { Types } from "mongoose";
@@ -66,6 +67,7 @@ import {
   questMock,
   questRewardsMock,
 } from "./mock/questMock";
+
 import { userMock } from "./mock/userMock";
 
 export enum InteractionQuestSubtype {
@@ -424,14 +426,14 @@ export class UnitTestHelper {
       testCharacter.skullType = options?.hasSkull;
       switch (options?.hasSkull) {
         case CharacterSkullType.WhiteSkull:
-          testCharacter.skullExpiredAt = new Date(Date.now() + CHARACTER_SKULL_WHITE_SKULL_DURATION);
+          testCharacter.skullExpiredAt = dayjs().add(CHARACTER_SKULL_WHITE_SKULL_DURATION, "millisecond").toDate();
           break;
         case CharacterSkullType.YellowSkull:
-          testCharacter.skullExpiredAt = new Date(Date.now() + CHARACTER_SKULL_YELLOW_SKULL_DURATION);
+          testCharacter.skullExpiredAt = dayjs().add(CHARACTER_SKULL_YELLOW_SKULL_DURATION, "millisecond").toDate();
           await this.addUnjustifiedKills(testCharacter, 2);
           break;
         case CharacterSkullType.RedSkull:
-          testCharacter.skullExpiredAt = new Date(Date.now() + CHARACTER_SKULL_RED_SKULL_DURATION);
+          testCharacter.skullExpiredAt = dayjs().add(CHARACTER_SKULL_RED_SKULL_DURATION, "millisecond").toDate();
           await this.addUnjustifiedKills(testCharacter, 4);
           break;
       }
