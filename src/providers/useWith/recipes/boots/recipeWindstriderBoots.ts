@@ -8,7 +8,7 @@ export const recipeWindstriderBoots: IUseWithCraftingRecipe = {
   requiredItems: [
     {
       key: CraftingResourcesBlueprint.SocialCrystal,
-      qty: 20,
+      qty: 10,
     },
     {
       key: CraftingResourcesBlueprint.SilverIngot,

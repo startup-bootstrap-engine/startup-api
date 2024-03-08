@@ -205,12 +205,12 @@ export class CharacterNetworkUpdateQueue {
     isMoving: boolean
   ): Promise<void> {
     await this.syncIfPositionMismatch(character, { x: character.x, y: character.y }, data.originX, data.originY);
+
     this.characterMovementWarn.warn(character, data);
     void this.npcManager.startNearbyNPCsBehaviorLoop(character);
     await this.updateServerSideEmitterInfo(character, data.newX, data.newY, isMoving, data.direction);
     void this.mapTransition.handleNonPVPZone(character, data.newX, data.newY);
     await this.mapTransition.handleMapTransition(character, data.newX, data.newY);
-    void this.characterView.clearAllOutOfViewElements(character._id, character.x, character.y);
     this.sendConfirmation(character, data.direction, true);
   }
 

@@ -37,28 +37,16 @@ export const itemAshwoodstaff: IEquippableTwoHandedStaffTier16WeaponBlueprint = 
   equippedBuff: [
     {
       type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Strength,
+      trait: BasicAttribute.Magic,
       buffPercentage: 12,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of strength flowing through your body. (+12% strength)",
-          deactivation: "You feel the power of strength leaving your body. (-12% strength)",
-        },
-      },
     },
     {
       type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Resistance,
+      trait: BasicAttribute.MagicResistance,
       buffPercentage: 5,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of resistance flowing through your body. (+5% resistance)",
-          deactivation: "You feel the power of resistance leaving your body. (-5% resistance)",
-        },
-      },
     },
   ],
-  equippedBuffDescription: "Increases strength by 12% and resistance by 7%",
+  equippedBuffDescription: "Increases magic by 12% and magic resistance by 7%",
 };

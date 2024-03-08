@@ -5,6 +5,7 @@ import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { TRADER_BUY_PRICE_MULTIPLIER } from "@providers/constants/ItemConstants";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { blueprintManager } from "@providers/inversify/container";
 import { AvailableBlueprints, OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SimpleTutorial } from "@providers/simpleTutorial/SimpleTutorial";
@@ -41,7 +42,8 @@ export class CharacterTradingBuy {
     private characterInventory: CharacterInventory,
     private newRelic: NewRelic,
     private characterUser: CharacterUser,
-    private simpleTutorial: SimpleTutorial
+    private simpleTutorial: SimpleTutorial,
+    private inMemoryHashTable: InMemoryHashTable
   ) {}
 
   @TrackNewRelicTransaction()
@@ -94,6 +96,8 @@ export class CharacterTradingBuy {
       }
 
       const decrementQty = itemPrice * purchasedItem.qty;
+
+      await this.inMemoryHashTable.delete("container-all-items", inventoryContainerId.toString()!);
 
       const decrementedGold = await this.characterItemInventory.decrementItemFromNestedInventoryByKey(
         OthersBlueprint.GoldCoin,

@@ -3,6 +3,7 @@ import { IEquippableTwoHandedStaffTier15WeaponBlueprint } from "@providers/item/
 import {
   AnimationEffectKeys,
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   EntityAttackType,
@@ -34,17 +35,19 @@ export const itemGravityStaff: IEquippableTwoHandedStaffTier15WeaponBlueprint = 
   isTwoHanded: true,
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],
   entityEffectChance: 95,
-  equippedBuff: {
-    type: CharacterBuffType.Skill,
-    trait: BasicAttribute.Strength,
-    buffPercentage: 10,
-    durationType: CharacterBuffDurationType.Permanent,
-    options: {
-      messages: {
-        activation: "You feel the power of strength flowing through your body. (+10% strength)",
-        deactivation: "You feel the power of strength leaving your body. (-10% strength)",
-      },
+  equippedBuff: [
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
     },
-  },
-  equippedBuffDescription: "Increases strength by 10%",
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.Speed,
+      buffPercentage: 4,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "Increases magic by 10% and speed by 4%",
 };
