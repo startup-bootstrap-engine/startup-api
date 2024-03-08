@@ -14,6 +14,7 @@ import { CharacterInventory } from "./CharacterInventory";
 import { CharacterValidation } from "./CharacterValidation";
 import { CharacterView } from "./CharacterView";
 import { CharacterItemContainer } from "./characterItems/CharacterItemContainer";
+import { CharacterItemSlots } from "./characterItems/CharacterItemSlots";
 
 @provide(CharacterAutoLoot)
 export class CharacterAutoLoot {
@@ -31,7 +32,8 @@ export class CharacterAutoLoot {
     private characterInventory: CharacterInventory,
     private characterView: CharacterView,
     private animationEffect: AnimationEffect,
-    private redisManager: RedisManager
+    private redisManager: RedisManager,
+    private characterItemSlots: CharacterItemSlots
   ) {}
 
   public init(): void {
@@ -147,15 +149,28 @@ export class CharacterAutoLoot {
             continue;
           }
 
-          const [addedToInventory, removedFromBody] = await Promise.all([
-            this.characterItemContainer.addItemToContainer(item, character, inventoryItemContainer._id, {
+          const successfullyAddedItem = await this.characterItemContainer.addItemToContainer(
+            item,
+            character,
+            inventoryItemContainer._id,
+            {
               shouldAddOwnership: true,
-            }),
-            this.characterItemContainer.removeItemFromContainer(item, character, itemContainer),
-          ]);
+            }
+          );
 
-          if (!addedToInventory || !removedFromBody) {
-            console.log(`Failed to add ${item.name} to inventory or remove from body`);
+          if (!successfullyAddedItem) {
+            console.log(`Failed to add ${item.name} to inventory. Skipping...`);
+            continue;
+          }
+
+          const removedFromBody = await this.characterItemContainer.removeItemFromContainer(
+            item,
+            character,
+            itemContainer
+          );
+
+          if (!removedFromBody) {
+            console.log(`Failed to remove ${item.name} from body. Skipping...`);
             continue;
           }
 
@@ -177,6 +192,20 @@ export class CharacterAutoLoot {
   }
 
   private async disableLooting(character: ICharacter, bodyItem: IItem): Promise<void> {
+    // only proceed if there are no lootable items
+    const updatedBodyItem = await ItemContainer.findOne({ parentItem: bodyItem._id })
+      .lean<IItemContainer>({
+        virtuals: true,
+        defaults: true,
+      })
+      .select("slots");
+
+    const areAllSlotsEmpty = Object.values(updatedBodyItem.slots as Record<string, IItem>).every((x) => !x);
+
+    if (!areAllSlotsEmpty) {
+      return;
+    }
+
     await Promise.all([
       Item.updateOne(
         { _id: bodyItem._id },
