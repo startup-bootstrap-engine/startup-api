@@ -1,4 +1,5 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { CharacterPvPKillLog } from "@entities/ModuleCharacter/CharacterPvPKillLogModel";
 import { Equipment, IEquipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { Depot, IDepot } from "@entities/ModuleDepot/DepotModel";
@@ -12,7 +13,13 @@ import { ChatLog } from "@entities/ModuleSystem/ChatLogModel";
 import { IControlTime, MapControlTimeModel } from "@entities/ModuleSystem/MapControlTimeModel";
 import { IUser, User } from "@entities/ModuleSystem/UserModel";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
+import { CharacterSkull } from "@providers/character/CharacterSkull";
 import { CharacterItems } from "@providers/character/characterItems/CharacterItems";
+import {
+  CHARACTER_SKULL_RED_SKULL_DURATION,
+  CHARACTER_SKULL_WHITE_SKULL_DURATION,
+  CHARACTER_SKULL_YELLOW_SKULL_DURATION,
+} from "@providers/constants/CharacterSkullConstants";
 import { EquipmentEquip } from "@providers/equipment/EquipmentEquip";
 import { blueprintManager, container, mapLoader } from "@providers/inversify/container";
 import {
@@ -29,7 +36,15 @@ import {
   stoppedMovementMockNPC,
 } from "@providers/unitTests/mock/NPCMock";
 import { characterMock } from "@providers/unitTests/mock/characterMock";
-import { ISocketTransmissionZone, NPCMovementType, PeriodOfDay, QuestType, UserAccountTypes } from "@rpg-engine/shared";
+import {
+  CharacterSkullType,
+  ISocketTransmissionZone,
+  NPCMovementType,
+  PeriodOfDay,
+  QuestType,
+  UserAccountTypes,
+} from "@rpg-engine/shared";
+import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { Types } from "mongoose";
@@ -52,6 +67,7 @@ import {
   questMock,
   questRewardsMock,
 } from "./mock/questMock";
+
 import { userMock } from "./mock/userMock";
 
 export enum InteractionQuestSubtype {
@@ -65,6 +81,7 @@ interface IMockCharacterOptions {
   isPremiumAccount?: boolean;
   isPremiumAccountType?: UserAccountTypes;
   hasUser?: boolean;
+  hasSkull?: CharacterSkullType;
 }
 
 interface IMockNPCOptions {
@@ -79,7 +96,8 @@ interface IMockQuestOptions {
 
 @provide(UnitTestHelper)
 export class UnitTestHelper {
-  constructor(private characterInventory: CharacterInventory) {}
+  private readonly oneMinuteAgo = 60 * 1000;
+  constructor(private characterInventory: CharacterInventory, private characterSkull: CharacterSkull) {}
 
   private mongoServer: MongoMemoryServer;
   private characterItems: CharacterItems;
@@ -403,6 +421,24 @@ export class UnitTestHelper {
       testCharacter.y = 0;
     }
 
+    if (options?.hasSkull) {
+      testCharacter.hasSkull = true;
+      testCharacter.skullType = options?.hasSkull;
+      switch (options?.hasSkull) {
+        case CharacterSkullType.WhiteSkull:
+          testCharacter.skullExpiredAt = dayjs().add(CHARACTER_SKULL_WHITE_SKULL_DURATION, "millisecond").toDate();
+          break;
+        case CharacterSkullType.YellowSkull:
+          testCharacter.skullExpiredAt = dayjs().add(CHARACTER_SKULL_YELLOW_SKULL_DURATION, "millisecond").toDate();
+          await this.addUnjustifiedKills(testCharacter, 2);
+          break;
+        case CharacterSkullType.RedSkull:
+          testCharacter.skullExpiredAt = dayjs().add(CHARACTER_SKULL_RED_SKULL_DURATION, "millisecond").toDate();
+          await this.addUnjustifiedKills(testCharacter, 4);
+          break;
+      }
+    }
+
     await testCharacter.save();
 
     // @ts-ignore
@@ -424,6 +460,22 @@ export class UnitTestHelper {
       chatLogMock.emitter = emitter._id;
       const chatLog = new ChatLog(chatLogMock);
       await chatLog.save();
+    }
+  }
+
+  public async addUnjustifiedKills(killer: ICharacter, amount: number): Promise<void> {
+    const targetId = Types.ObjectId();
+    for (let i = 0; i < amount; i++) {
+      const characterDeathLog = new CharacterPvPKillLog({
+        killer: killer._id.toString(),
+        target: targetId.toString(),
+        isJustify: false,
+        x: 1,
+        y: 2,
+        createdAt: new Date(Date.now() - amount * this.oneMinuteAgo),
+      });
+
+      await characterDeathLog.save();
     }
   }
 
