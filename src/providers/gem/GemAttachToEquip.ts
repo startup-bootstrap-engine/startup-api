@@ -2,6 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
+import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IItemGem, ItemSubType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -11,7 +12,8 @@ export class GemAttachToEquip {
   constructor(
     private characterValidation: CharacterValidation,
     private socketMessaging: SocketMessaging,
-    private blueprintManager: BlueprintManager
+    private blueprintManager: BlueprintManager,
+    private characterItemInventory: CharacterItemInventory
   ) {}
 
   public async attachGemToEquip(originItem: IItem, targetItem: IItem, character: ICharacter): Promise<boolean> {
@@ -22,6 +24,15 @@ export class GemAttachToEquip {
     if (!isValid) {
       return false;
     }
+
+    const wasGemConsumed = await this.characterItemInventory.deleteItemFromInventory(originItem._id, character);
+
+    if (!wasGemConsumed) {
+      return false;
+    }
+
+    // delete database gem representation
+    await Item.findByIdAndDelete(originItem._id);
 
     if (gemItemBlueprint.gemStatBuff) {
       await this.attachGemStatBuffToEquip(gemItemBlueprint, targetItem);

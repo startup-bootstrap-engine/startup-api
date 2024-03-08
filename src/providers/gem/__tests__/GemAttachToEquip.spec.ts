@@ -54,7 +54,7 @@ describe("GemAttachToEquip", () => {
     jest.clearAllMocks();
   });
 
-  it("should attach gem to equip", async () => {
+  it("should attach a gem to equip and consume it", async () => {
     expect(testEquipItem.attack).toBe(8);
     expect(testEquipItem.defense).toBe(7);
 
@@ -65,6 +65,11 @@ describe("GemAttachToEquip", () => {
 
     expect(updatedEquipItem.attack).toBe(13);
     expect(updatedEquipItem.defense).toBe(10);
+
+    // verify the gem was consumed
+    const gemItem = await Item.findById(testGemItem._id).lean();
+
+    expect(gemItem).toBeNull();
   });
 
   describe("Edge cases", () => {
