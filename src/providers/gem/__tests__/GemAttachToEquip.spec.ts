@@ -111,5 +111,19 @@ describe("GemAttachToEquip", () => {
       expect(result).toBe(false);
       // Since the equipment doesn't belong to the character, there's no need to verify its stats
     });
+
+    it("should not attach gem if character fails basic validation", async () => {
+      // Setup a mock where character validation fails
+      // @ts-ignore
+      jest.spyOn(gemAttachToEquip.characterValidation, "hasBasicValidation").mockReturnValueOnce(false);
+
+      // Attempt to attach the gem
+      const result = await gemAttachToEquip.attachGemToEquip(testGemItem, testEquipItem, testCharacter);
+      expect(result).toBe(false);
+      // Verify the equipment stats remain unchanged
+      const unchangedEquipItem = (await Item.findById(testEquipItem._id).lean()) as IItem;
+      expect(unchangedEquipItem.attack).toBe(8);
+      expect(unchangedEquipItem.defense).toBe(7);
+    });
   });
 });
