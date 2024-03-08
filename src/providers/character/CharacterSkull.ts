@@ -159,9 +159,7 @@ export class CharacterSkull {
   @TrackNewRelicTransaction()
   public async updateSkullAfterKill(characterId: string): Promise<void> {
     const character = await Character.findById(characterId);
-    if (!character) {
-      return;
-    }
+    if (!character || !character.skullExpiredAt) return;
 
     // Reset kill count if skull expired and was yellow or red
     if (
