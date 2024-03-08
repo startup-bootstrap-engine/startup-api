@@ -203,7 +203,6 @@ export class CharacterSkull {
   }
 
   private async resetSkull(characterId: string): Promise<void> {
-    console.log(`Reseting skull from player ${characterId}`);
     await Character.updateOne(
       { _id: characterId },
       {
