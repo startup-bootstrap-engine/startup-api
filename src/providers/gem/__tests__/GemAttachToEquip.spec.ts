@@ -66,4 +66,50 @@ describe("GemAttachToEquip", () => {
     expect(updatedEquipItem.attack).toBe(13);
     expect(updatedEquipItem.defense).toBe(10);
   });
+
+  describe("Edge cases", () => {
+    // Test for attaching an invalid gem type to equipment
+    it("should not attach non-gem item to equip", async () => {
+      // Setup a non-gem item
+      const nonGemItem = await unitTestHelper.createMockItemFromBlueprint(SwordsBlueprint.Sword); // Assuming this creates a non-gem item
+      await characterItemContainer.addItemToContainer(nonGemItem, testCharacter, inventoryItemContainer._id, {
+        shouldAddOwnership: true,
+      });
+
+      // Attempt to attach the non-gem item
+      const result = await gemAttachToEquip.attachGemToEquip(nonGemItem, testEquipItem, testCharacter);
+      expect(result).toBe(false);
+      // Verify the equipment stats remain unchanged
+      const unchangedEquipItem = (await Item.findById(testEquipItem._id).lean()) as IItem;
+      expect(unchangedEquipItem.attack).toBe(8);
+      expect(unchangedEquipItem.defense).toBe(7);
+    });
+
+    // Test for attaching a gem that doesn't belong to the character
+    it("should not attach gem that character does not own to equip", async () => {
+      // Setup a gem that the character doesn't own
+      const unownedGemItem = await unitTestHelper.createMockItemFromBlueprint(GemsBlueprint.RubyGem);
+      // Notice we're not adding the gem to the character's inventory to simulate the character not owning it
+
+      // Attempt to attach the unowned gem
+      const result = await gemAttachToEquip.attachGemToEquip(unownedGemItem, testEquipItem, testCharacter);
+      expect(result).toBe(false);
+      // Verify the equipment stats remain unchanged
+      const unchangedEquipItem = (await Item.findById(testEquipItem._id).lean()) as IItem;
+      expect(unchangedEquipItem.attack).toBe(8);
+      expect(unchangedEquipItem.defense).toBe(7);
+    });
+
+    // Test for attaching a gem to equipment that doesn't belong to the character
+    it("should not attach gem to equip that character does not own", async () => {
+      // Setup equipment that the character doesn't own
+      const unownedEquipItem = await unitTestHelper.createMockItemFromBlueprint(SwordsBlueprint.Sword);
+      // Notice we're not adding the equipment to the character's inventory to simulate the character not owning it
+
+      // Attempt to attach the gem to the unowned equipment
+      const result = await gemAttachToEquip.attachGemToEquip(testGemItem, unownedEquipItem, testCharacter);
+      expect(result).toBe(false);
+      // Since the equipment doesn't belong to the character, there's no need to verify its stats
+    });
+  });
 });
