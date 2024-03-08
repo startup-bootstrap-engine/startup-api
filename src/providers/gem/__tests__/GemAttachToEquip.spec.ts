@@ -72,6 +72,22 @@ describe("GemAttachToEquip", () => {
     expect(gemItem).toBeNull();
   });
 
+  it("should send the correct success message upon successful attachment", async () => {
+    // @ts-ignore
+    const sendMessageSpy = jest.spyOn(gemAttachToEquip.socketMessaging, "sendMessageToCharacter");
+
+    // Perform the gem attachment operation
+    await gemAttachToEquip.attachGemToEquip(testGemItem, testEquipItem, testCharacter);
+
+    // Check that sendMessageToCharacter was called
+    expect(sendMessageSpy).toHaveBeenCalled();
+
+    expect(sendMessageSpy).toHaveBeenCalledWith(
+      testCharacter,
+      "Attached 'Ruby Gem' to Sword. Increased stats by: +5 attack, +3 defense. Added effects: burning."
+    );
+  });
+
   describe("Edge cases", () => {
     // Test for attaching an invalid gem type to equipment
     it("should not attach non-gem item to equip", async () => {

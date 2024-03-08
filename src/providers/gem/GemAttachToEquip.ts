@@ -42,12 +42,33 @@ export class GemAttachToEquip {
       await this.attachGemEntityEffectsToEquip(gemItemBlueprint, targetItem);
     }
 
-    this.socketMessaging.sendMessageToCharacter(
-      character,
-      `You have successfully attached '${originItem.name}' to your ${targetItem.name}. `
-    );
+    this.sendSuccessMessage(character, gemItemBlueprint, originItem, targetItem);
 
     return true;
+  }
+
+  private sendSuccessMessage(
+    character: ICharacter,
+    gemItemBlueprint: IItemGem,
+    originItem: IItem,
+    targetItem: IItem
+  ): void {
+    let message = `Attached '${originItem.name}' to ${targetItem.name}.`;
+
+    if (gemItemBlueprint.gemStatBuff) {
+      const { attack = 0, defense = 0 } = gemItemBlueprint.gemStatBuff;
+      if (attack > 0 || defense > 0) {
+        message += ` Increased stats by: ${attack > 0 ? `+${attack} attack` : ""}${
+          defense > 0 ? `, +${defense} defense` : ""
+        }.`;
+      }
+    }
+
+    if (gemItemBlueprint.gemEntityEffectsAdd && gemItemBlueprint.gemEntityEffectsAdd.length > 0) {
+      message += ` Added effects: ${gemItemBlueprint.gemEntityEffectsAdd.join(", ")}.`;
+    }
+
+    this.socketMessaging.sendMessageToCharacter(character, message);
   }
 
   private async attachGemStatBuffToEquip(gemItemBlueprint: IItemGem, targetItem: IItem): Promise<void> {
