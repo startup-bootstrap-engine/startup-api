@@ -16,6 +16,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 
 import { PlantLifeCycle } from "@providers/plant/data/types/PlantTypes";
 import { updateIfCurrentPlugin } from "mongoose-update-if-current";
+import { GemSchema } from "./GemSchema";
 
 const itemSchema = createLeanSchema(
   {
@@ -157,20 +158,7 @@ const itemSchema = createLeanSchema(
     timeOfDeath: Type.date({ required: false }),
     isTileTinted: Type.boolean({ required: false }),
 
-    attachedGems: Type.object().of({
-      key: Type.string(),
-      name: Type.string(),
-      gemStatBuff: Type.object().of({
-        attack: Type.number(),
-        defense: Type.number(),
-      }),
-      gemEntityEffectsAdd: Type.array().of(
-        Type.string({
-          typeof: EntityEffectBlueprint,
-        })
-      ),
-      gemEquippedBuffAdd: Type.array().of(Type.object()),
-    }),
+    attachedGems: Type.array({ required: false }).of(GemSchema),
   },
   { timestamps: { createdAt: true, updatedAt: true } }
 ).plugin(updateIfCurrentPlugin);

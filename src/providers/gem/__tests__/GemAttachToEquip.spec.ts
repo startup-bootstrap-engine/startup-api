@@ -1,12 +1,13 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
-import { container, unitTestHelper } from "@providers/inversify/container";
+import { blueprintManager, container, unitTestHelper } from "@providers/inversify/container";
 import { GemsBlueprint, SwordsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 
 import { IItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
-import { GemAttachToEquip } from "../GemAttachToEquip";
+import { IItemGem } from "@rpg-engine/shared";
+import { GemAttachToEquip, IAttachedItemGem } from "../GemAttachToEquip";
 
 describe("GemAttachToEquip", () => {
   let testCharacter: ICharacter;
@@ -16,11 +17,14 @@ describe("GemAttachToEquip", () => {
   let characterItemContainer: CharacterItemContainer;
   let inventoryItemContainer: IItemContainer;
   let characterInventory: CharacterInventory;
+  let testGemBlueprint: IItemGem;
 
   beforeAll(() => {
     gemAttachToEquip = container.resolve(GemAttachToEquip);
     characterItemContainer = container.resolve(CharacterItemContainer);
     characterInventory = container.resolve(CharacterInventory);
+
+    testGemBlueprint = blueprintManager.getBlueprint<IItemGem>("items", GemsBlueprint.RubyGem);
   });
 
   beforeEach(async () => {
@@ -70,6 +74,21 @@ describe("GemAttachToEquip", () => {
     const gemItem = await Item.findById(testGemItem._id).lean();
 
     expect(gemItem).toBeNull();
+
+    const attachedGemsMetadata = updatedEquipItem.attachedGems as IAttachedItemGem[];
+
+    expect(attachedGemsMetadata).toHaveLength(1);
+
+    expect(attachedGemsMetadata).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: testGemBlueprint.key,
+          name: testGemBlueprint.name,
+          gemEntityEffectsAdd: testGemBlueprint.gemEntityEffectsAdd,
+          gemStatBuff: testGemBlueprint.gemStatBuff,
+        }),
+      ])
+    );
   });
 
   it("should send the correct success message upon successful attachment", async () => {

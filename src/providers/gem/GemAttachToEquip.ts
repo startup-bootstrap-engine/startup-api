@@ -7,6 +7,16 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IItemGem, ItemSubType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
+export interface IAttachedItemGem {
+  key: string;
+  name: string;
+  gemStatBuff?: {
+    attack?: number;
+    defense?: number;
+  };
+  gemEntityEffectsAdd?: string[];
+}
+
 @provide(GemAttachToEquip)
 export class GemAttachToEquip {
   constructor(
@@ -31,6 +41,15 @@ export class GemAttachToEquip {
       return false;
     }
 
+    const wasTargetItemUpdatedWithGemMetadata = await this.updateTargetItemAttachedGemsArray(
+      targetItem,
+      gemItemBlueprint
+    );
+
+    if (!wasTargetItemUpdatedWithGemMetadata) {
+      return false;
+    }
+
     // delete database gem representation
     await Item.findByIdAndDelete(originItem._id);
 
@@ -45,6 +64,23 @@ export class GemAttachToEquip {
     this.sendSuccessMessage(character, gemItemBlueprint, originItem, targetItem);
 
     return true;
+  }
+
+  private async updateTargetItemAttachedGemsArray(targetItem: IItem, gemItemBlueprint: IItemGem): Promise<boolean> {
+    const attachedGemPayload: IAttachedItemGem = {
+      key: gemItemBlueprint.key,
+      name: gemItemBlueprint.name,
+      gemStatBuff: gemItemBlueprint.gemStatBuff,
+      gemEntityEffectsAdd: gemItemBlueprint.gemEntityEffectsAdd,
+    };
+
+    const updated = await Item.findByIdAndUpdate(targetItem._id, {
+      $addToSet: {
+        attachedGems: attachedGemPayload,
+      },
+    });
+
+    return !!updated;
   }
 
   private sendSuccessMessage(
