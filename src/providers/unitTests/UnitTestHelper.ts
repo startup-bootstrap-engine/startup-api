@@ -1,7 +1,7 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { CharacterPvPKillLog } from "@entities/ModuleCharacter/CharacterPvPKillLogModel";
 import { Equipment, IEquipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { Skill } from "@entities/ModuleCharacter/SkillsModel";
-import { CharacterPvPKillLog } from "@entities/ModuleCharacter/CharacterPvPKillLogModel";
 import { Depot, IDepot } from "@entities/ModuleDepot/DepotModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
@@ -13,8 +13,13 @@ import { ChatLog } from "@entities/ModuleSystem/ChatLogModel";
 import { IControlTime, MapControlTimeModel } from "@entities/ModuleSystem/MapControlTimeModel";
 import { IUser, User } from "@entities/ModuleSystem/UserModel";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
-import { CharacterItems } from "@providers/character/characterItems/CharacterItems";
 import { CharacterSkull } from "@providers/character/CharacterSkull";
+import { CharacterItems } from "@providers/character/characterItems/CharacterItems";
+import {
+  CHARACTER_SKULL_RED_SKULL_DURATION,
+  CHARACTER_SKULL_WHITE_SKULL_DURATION,
+  CHARACTER_SKULL_YELLOW_SKULL_DURATION,
+} from "@providers/constants/CharacterSkullConstants";
 import { EquipmentEquip } from "@providers/equipment/EquipmentEquip";
 import { blueprintManager, container, mapLoader } from "@providers/inversify/container";
 import {
@@ -32,12 +37,12 @@ import {
 } from "@providers/unitTests/mock/NPCMock";
 import { characterMock } from "@providers/unitTests/mock/characterMock";
 import {
+  CharacterSkullType,
   ISocketTransmissionZone,
   NPCMovementType,
   PeriodOfDay,
   QuestType,
   UserAccountTypes,
-  CharacterSkullType,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { MongoMemoryServer } from "mongodb-memory-server";
@@ -419,14 +424,14 @@ export class UnitTestHelper {
       testCharacter.skullType = options?.hasSkull;
       switch (options?.hasSkull) {
         case CharacterSkullType.WhiteSkull:
-          testCharacter.skullExpiredAt = new Date(Date.now() + this.characterSkull.whiteSkullDuration);
+          testCharacter.skullExpiredAt = new Date(Date.now() + CHARACTER_SKULL_WHITE_SKULL_DURATION);
           break;
         case CharacterSkullType.YellowSkull:
-          testCharacter.skullExpiredAt = new Date(Date.now() + this.characterSkull.yellowSkullDuration);
+          testCharacter.skullExpiredAt = new Date(Date.now() + CHARACTER_SKULL_YELLOW_SKULL_DURATION);
           await this.addUnjustifiedKills(testCharacter, 2);
           break;
         case CharacterSkullType.RedSkull:
-          testCharacter.skullExpiredAt = new Date(Date.now() + this.characterSkull.redSkullDuration);
+          testCharacter.skullExpiredAt = new Date(Date.now() + CHARACTER_SKULL_RED_SKULL_DURATION);
           await this.addUnjustifiedKills(testCharacter, 4);
           break;
       }

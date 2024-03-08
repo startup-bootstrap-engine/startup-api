@@ -2,6 +2,14 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { CharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { CharacterPvPKillLog } from "@entities/ModuleCharacter/CharacterPvPKillLogModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import {
+  CHARACTER_SKULL_AMOUNT_KILLS_NEEDED_TO_RED_SKULL,
+  CHARACTER_SKULL_AMOUNT_KILLS_NEEDED_TO_YELLOW_SKULL,
+  CHARACTER_SKULL_MAX_TIME_UNTIL_UPGRADE_TO_RED_SKULL,
+  CHARACTER_SKULL_RED_SKULL_DURATION,
+  CHARACTER_SKULL_WHITE_SKULL_DURATION,
+  CHARACTER_SKULL_YELLOW_SKULL_DURATION,
+} from "@providers/constants/CharacterSkullConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { CharacterSkullType, CharacterSocketEvents, ICharacterAttributeChanged, Modes } from "@rpg-engine/shared";
@@ -9,13 +17,6 @@ import { provide } from "inversify-binding-decorators";
 
 @provide(CharacterSkull)
 export class CharacterSkull {
-  private readonly amountKillsNeededToRedSkull = 3;
-  private readonly amountKillsNeededToYellowSkull = 1;
-  private readonly maxTimeUntilUpgradeToRedSkull = 10 * 24 * 60 * 60 * 1000;
-  public readonly redSkullDuration = 14 * 24 * 60 * 60 * 1000;
-  public readonly whiteSkullDuration = 15 * 60 * 1000;
-  public readonly yellowSkullDuration = 7 * 24 * 60 * 60 * 1000;
-
   constructor(
     private readonly inMemoryHashTable: InMemoryHashTable,
     private readonly socketMessaging: SocketMessaging
@@ -83,7 +84,7 @@ export class CharacterSkull {
       }
       // Set the last attack target
       await this.inMemoryHashTable.set(namespace, character._id.toString(), targetId);
-      await this.inMemoryHashTable.expire(namespace, 15 * 60, "NX");
+      await this.inMemoryHashTable.expire(namespace, CHARACTER_SKULL_WHITE_SKULL_DURATION / 1000, "NX");
     } catch (err) {
       console.error(`An error occurred while trying to update skull to character ${characterId}`, err);
     }
@@ -138,13 +139,13 @@ export class CharacterSkull {
     let timeExpired = new Date();
     switch (skullType) {
       case CharacterSkullType.WhiteSkull:
-        timeExpired = new Date(Date.now() + this.whiteSkullDuration);
+        timeExpired = new Date(Date.now() + CHARACTER_SKULL_WHITE_SKULL_DURATION);
         break;
       case CharacterSkullType.YellowSkull:
-        timeExpired = new Date(Date.now() + this.yellowSkullDuration);
+        timeExpired = new Date(Date.now() + CHARACTER_SKULL_YELLOW_SKULL_DURATION);
         break;
       case CharacterSkullType.RedSkull:
-        timeExpired = new Date(Date.now() + this.redSkullDuration);
+        timeExpired = new Date(Date.now() + CHARACTER_SKULL_RED_SKULL_DURATION);
         break;
     }
     character.hasSkull = true;
@@ -180,11 +181,11 @@ export class CharacterSkull {
       killer: characterId,
       isJustify: false,
       createdAt: {
-        $gte: new Date(Date.now() - this.maxTimeUntilUpgradeToRedSkull),
+        $gte: new Date(Date.now() - CHARACTER_SKULL_MAX_TIME_UNTIL_UPGRADE_TO_RED_SKULL),
       },
     });
 
-    if (totalKillCount10Days > this.amountKillsNeededToRedSkull) {
+    if (totalKillCount10Days > CHARACTER_SKULL_AMOUNT_KILLS_NEEDED_TO_RED_SKULL) {
       // set red skull when total kill in 10 days > 3
       await this.setSkull(character, CharacterSkullType.RedSkull);
     } else {
@@ -192,11 +193,11 @@ export class CharacterSkull {
         killer: characterId,
         isJustify: false,
         createdAt: {
-          $gte: new Date(Date.now() - this.yellowSkullDuration),
+          $gte: new Date(Date.now() - CHARACTER_SKULL_YELLOW_SKULL_DURATION),
         },
       });
       // if total kill > 1 => set Yellow skull and reset timer
-      if (totalKillCount7Days > this.amountKillsNeededToYellowSkull) {
+      if (totalKillCount7Days > CHARACTER_SKULL_AMOUNT_KILLS_NEEDED_TO_YELLOW_SKULL) {
         await this.setSkull(character, CharacterSkullType.YellowSkull);
       }
     }

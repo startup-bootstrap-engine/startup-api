@@ -1,4 +1,5 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { CHARACTER_SKULL_YELLOW_SKULL_DURATION } from "@providers/constants/CharacterSkullConstants";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { CharacterFactions, CharacterSkullType } from "@rpg-engine/shared";
 import { CharacterSkull } from "../CharacterSkull";
@@ -105,7 +106,7 @@ describe("CharacterSkull.ts", () => {
 
   it("should renew red skull when a character is red skull and kills a character", async () => {
     const character = testCharacterWithRedSkull;
-    character.skullExpiredAt = new Date(Date.now() + characterSkull.yellowSkullDuration);
+    character.skullExpiredAt = new Date(Date.now() + CHARACTER_SKULL_YELLOW_SKULL_DURATION);
     await character.save();
 
     // reset timer after kill with red skull
