@@ -85,34 +85,6 @@ export class CharacterTradingBuy {
         continue;
       }
 
-      const itemPrice = await this.characterTradingBalance.getItemBuyPrice(purchasedItem.key, priceMultiplier);
-
-      if (!itemPrice) {
-        this.socketMessaging.sendErrorMessageToCharacter(
-          character,
-          "The item price is not valid for item " + purchasedItem.key
-        );
-        return false;
-      }
-
-      const decrementQty = itemPrice * purchasedItem.qty;
-
-      await this.inMemoryHashTable.delete("container-all-items", inventoryContainerId.toString()!);
-
-      const decrementedGold = await this.characterItemInventory.decrementItemFromNestedInventoryByKey(
-        OthersBlueprint.GoldCoin,
-        character,
-        decrementQty
-      );
-
-      if (!decrementedGold.success) {
-        this.socketMessaging.sendErrorMessageToCharacter(
-          character,
-          "An error occurred while processing your purchase."
-        );
-        return false;
-      }
-
       // create the new item representation on the database
       const itemBlueprint = await blueprintManager.getBlueprint<IItem>(
         "items",
@@ -136,6 +108,15 @@ export class CharacterTradingBuy {
           character,
           inventoryContainerId
         );
+
+        if (!wasItemAddedToContainer) {
+          this.socketMessaging.sendErrorMessageToCharacter(
+            character,
+            "An error occurred while processing your purchase."
+          );
+          await Item.deleteOne({ _id: newItem._id });
+          return false;
+        }
       } else {
         for (let i = 0; i < purchasedItem.qty; i++) {
           const newItem = new Item({
@@ -149,9 +130,41 @@ export class CharacterTradingBuy {
             character,
             inventoryContainerId
           );
+
+          if (!wasItemAddedToContainer) {
+            this.socketMessaging.sendErrorMessageToCharacter(
+              character,
+              "An error occurred while processing your purchase."
+            );
+
+            await Item.deleteOne({ _id: newItem._id });
+            return false;
+          }
+        }
+      }
+
+      if (wasItemAddedToContainer) {
+        const itemPrice = await this.characterTradingBalance.getItemBuyPrice(purchasedItem.key, priceMultiplier);
+
+        if (!itemPrice) {
+          this.socketMessaging.sendErrorMessageToCharacter(
+            character,
+            "The item price is not valid for item " + purchasedItem.key
+          );
+          return false;
         }
 
-        if (!wasItemAddedToContainer) {
+        const decrementQty = itemPrice * purchasedItem.qty;
+
+        await this.inMemoryHashTable.delete("container-all-items", inventoryContainerId.toString()!);
+
+        const decrementedGold = await this.characterItemInventory.decrementItemFromNestedInventoryByKey(
+          OthersBlueprint.GoldCoin,
+          character,
+          decrementQty
+        );
+
+        if (!decrementedGold.success) {
           this.socketMessaging.sendErrorMessageToCharacter(
             character,
             "An error occurred while processing your purchase."
@@ -159,6 +172,7 @@ export class CharacterTradingBuy {
           return false;
         }
       }
+
       if (itemBlueprint.subType === ItemSubType.Seed) {
         await this.simpleTutorial.sendSimpleTutorialActionToCharacter(character, "buy-seed");
       }
