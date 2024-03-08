@@ -9,6 +9,13 @@ import { provide } from "inversify-binding-decorators";
 
 @provide(CharacterSkull)
 export class CharacterSkull {
+  private readonly amountKillsNeededToRedSkull = 3;
+  private readonly amountKillsNeededToYellowSkull = 1;
+  private readonly maxTimeUntilUpgradeToRedSkull = 10 * 24 * 60 * 60 * 1000;
+  public readonly redSkullDuration = 14 * 24 * 60 * 60 * 1000;
+  public readonly whiteSkullDuration = 15 * 60 * 1000;
+  public readonly yellowSkullDuration = 7 * 24 * 60 * 60 * 1000;
+
   constructor(
     private readonly inMemoryHashTable: InMemoryHashTable,
     private readonly socketMessaging: SocketMessaging
@@ -131,14 +138,13 @@ export class CharacterSkull {
     let timeExpired = new Date();
     switch (skullType) {
       case CharacterSkullType.WhiteSkull:
-        timeExpired = new Date(Date.now() + 15 * 60 * 1000);
-
+        timeExpired = new Date(Date.now() + this.whiteSkullDuration);
         break;
       case CharacterSkullType.YellowSkull:
-        timeExpired = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        timeExpired = new Date(Date.now() + this.yellowSkullDuration);
         break;
       case CharacterSkullType.RedSkull:
-        timeExpired = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+        timeExpired = new Date(Date.now() + this.redSkullDuration);
         break;
     }
     character.hasSkull = true;
@@ -157,21 +163,30 @@ export class CharacterSkull {
       return;
     }
 
+    // Reset kill count if skull expired and was yellow or red
+    if (
+      character.skullExpiredAt < new Date() &&
+      (character.skullType === CharacterSkullType.YellowSkull || character.skullType === CharacterSkullType.RedSkull)
+    ) {
+      await this.resetSkull(characterId);
+    }
+
     if (character.hasSkull && character.skullType === CharacterSkullType.RedSkull) {
       // always reset timer when kill with red skull
       await this.setSkull(character, CharacterSkullType.RedSkull);
       return;
     }
 
-    // check if character upgrage to red skull
+    // check if character upgrade to red skull
     const totalKillCount10Days = await CharacterPvPKillLog.countDocuments({
       killer: characterId,
       isJustify: false,
       createdAt: {
-        $gte: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+        $gte: new Date(Date.now() - this.maxTimeUntilUpgradeToRedSkull),
       },
     });
-    if (totalKillCount10Days > 3) {
+
+    if (totalKillCount10Days > this.amountKillsNeededToRedSkull) {
       // set red skull when total kill in 10 days > 3
       await this.setSkull(character, CharacterSkullType.RedSkull);
     } else {
@@ -179,13 +194,29 @@ export class CharacterSkull {
         killer: characterId,
         isJustify: false,
         createdAt: {
-          $gte: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+          $gte: new Date(Date.now() - this.yellowSkullDuration),
         },
       });
       // if total kill > 1 => set Yellow skull and reset timer
-      if (totalKillCount7Days > 1) {
+      if (totalKillCount7Days > this.amountKillsNeededToYellowSkull) {
         await this.setSkull(character, CharacterSkullType.YellowSkull);
       }
     }
+  }
+
+  private async resetSkull(characterId: string): Promise<void> {
+    console.log(`Reseting skull from player ${characterId}`);
+    await Character.updateOne(
+      { _id: characterId },
+      {
+        $set: {
+          hasSkull: false,
+        },
+        $unset: {
+          skullType: "",
+          skullExpiredAt: "",
+        },
+      }
+    );
   }
 }

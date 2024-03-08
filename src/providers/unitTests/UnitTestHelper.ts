@@ -1,6 +1,7 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Equipment, IEquipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { Skill } from "@entities/ModuleCharacter/SkillsModel";
+import { CharacterPvPKillLog } from "@entities/ModuleCharacter/CharacterPvPKillLogModel";
 import { Depot, IDepot } from "@entities/ModuleDepot/DepotModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
@@ -13,6 +14,7 @@ import { IControlTime, MapControlTimeModel } from "@entities/ModuleSystem/MapCon
 import { IUser, User } from "@entities/ModuleSystem/UserModel";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItems } from "@providers/character/characterItems/CharacterItems";
+import { CharacterSkull } from "@providers/character/CharacterSkull";
 import { EquipmentEquip } from "@providers/equipment/EquipmentEquip";
 import { blueprintManager, container, mapLoader } from "@providers/inversify/container";
 import {
@@ -29,7 +31,14 @@ import {
   stoppedMovementMockNPC,
 } from "@providers/unitTests/mock/NPCMock";
 import { characterMock } from "@providers/unitTests/mock/characterMock";
-import { ISocketTransmissionZone, NPCMovementType, PeriodOfDay, QuestType, UserAccountTypes } from "@rpg-engine/shared";
+import {
+  ISocketTransmissionZone,
+  NPCMovementType,
+  PeriodOfDay,
+  QuestType,
+  UserAccountTypes,
+  CharacterSkullType,
+} from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { Types } from "mongoose";
@@ -65,6 +74,7 @@ interface IMockCharacterOptions {
   isPremiumAccount?: boolean;
   isPremiumAccountType?: UserAccountTypes;
   hasUser?: boolean;
+  hasSkull?: CharacterSkullType;
 }
 
 interface IMockNPCOptions {
@@ -79,7 +89,8 @@ interface IMockQuestOptions {
 
 @provide(UnitTestHelper)
 export class UnitTestHelper {
-  constructor(private characterInventory: CharacterInventory) {}
+  private readonly oneMinuteAgo = 60 * 1000;
+  constructor(private characterInventory: CharacterInventory, private characterSkull: CharacterSkull) {}
 
   private mongoServer: MongoMemoryServer;
   private characterItems: CharacterItems;
@@ -403,6 +414,24 @@ export class UnitTestHelper {
       testCharacter.y = 0;
     }
 
+    if (options?.hasSkull) {
+      testCharacter.hasSkull = true;
+      testCharacter.skullType = options?.hasSkull;
+      switch (options?.hasSkull) {
+        case CharacterSkullType.WhiteSkull:
+          testCharacter.skullExpiredAt = new Date(Date.now() + this.characterSkull.whiteSkullDuration);
+          break;
+        case CharacterSkullType.YellowSkull:
+          testCharacter.skullExpiredAt = new Date(Date.now() + this.characterSkull.yellowSkullDuration);
+          await this.addUnjustifiedKills(testCharacter, 2);
+          break;
+        case CharacterSkullType.RedSkull:
+          testCharacter.skullExpiredAt = new Date(Date.now() + this.characterSkull.redSkullDuration);
+          await this.addUnjustifiedKills(testCharacter, 4);
+          break;
+      }
+    }
+
     await testCharacter.save();
 
     // @ts-ignore
@@ -424,6 +453,22 @@ export class UnitTestHelper {
       chatLogMock.emitter = emitter._id;
       const chatLog = new ChatLog(chatLogMock);
       await chatLog.save();
+    }
+  }
+
+  public async addUnjustifiedKills(killer: ICharacter, amount: number): Promise<void> {
+    const targetId = Types.ObjectId();
+    for (let i = 0; i < amount; i++) {
+      const characterDeathLog = new CharacterPvPKillLog({
+        killer: killer._id.toString(),
+        target: targetId.toString(),
+        isJustify: false,
+        x: 1,
+        y: 2,
+        createdAt: new Date(Date.now() - amount * this.oneMinuteAgo),
+      });
+
+      await characterDeathLog.save();
     }
   }
 
