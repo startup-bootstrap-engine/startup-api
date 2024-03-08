@@ -72,7 +72,11 @@ export class EquipmentEquipValidator {
     return true;
   }
 
-  private isDualYieldAllowed(character: ICharacter, item1: IItem, item2: IItem): boolean {
+  private isDualYieldAllowed(character: ICharacter, item1: IItem | null, item2: IItem | null): boolean {
+    if (!item1 || !item2) {
+      return false;
+    }
+
     const allowedCombinations = CHARACTER_CLASS_DUAL_YIELD_LIST[character.class];
     if (!allowedCombinations) {
       return false;

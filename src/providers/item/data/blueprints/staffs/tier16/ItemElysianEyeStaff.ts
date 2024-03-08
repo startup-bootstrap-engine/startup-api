@@ -36,40 +36,22 @@ export const itemElysianEyeStaff: IEquippableTwoHandedStaffTier16WeaponBlueprint
   equippedBuff: [
     {
       type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Strength,
+      trait: BasicAttribute.Magic,
       buffPercentage: 18,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of strength flowing through your body. (+18% strength)",
-          deactivation: "You feel the power of strength leaving your body. (-18% strength)",
-        },
-      },
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.MagicResistance,
+      buffPercentage: 12,
+      durationType: CharacterBuffDurationType.Permanent,
     },
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Resistance,
-      buffPercentage: 12,
+      buffPercentage: 5,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of resistance flowing through your body. (+12% resistance)",
-          deactivation: "You feel the power of resistance leaving your body. (-12% resistance)",
-        },
-      },
-    },
-    {
-      type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Magic,
-      buffPercentage: 10,
-      durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of magic flowing through your body. (+10% magic)",
-          deactivation: "You feel the power of magic leaving your body. (-10% magic)",
-        },
-      },
     },
   ],
-  equippedBuffDescription: "Increases strength by 18%, resistance by 12% and magic by 10%",
+  equippedBuffDescription: "Increases magic by 18%, magic resistance by 12%, and resistance by 5%",
 };

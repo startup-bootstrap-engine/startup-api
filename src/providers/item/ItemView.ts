@@ -105,7 +105,7 @@ export class ItemView {
         itemOnCharView &&
         this.objectHelper.doesObjectAttrMatches(itemOnCharView, item, ["id", "x", "y", "scene", "isDeadBodyLootable"]);
 
-      const isInvalidItem = item.x === undefined || item.y === undefined || !item.scene || !item.layer;
+      const isInvalidItem = item.x === undefined || item.y === undefined || !item.scene || !item.layer || !item.name;
 
       if (shouldSkip || isInvalidItem) {
         continue;
@@ -123,11 +123,13 @@ export class ItemView {
         items: itemsToUpdate,
       });
     }
+
+    await this.characterView.clearAllOutOfViewElements(character._id, character.x, character.y);
   }
 
   private prepareItemToUpdate(item: IItem): IItemUpdate {
     return {
-      id: item.id,
+      id: item._id,
       texturePath: item.texturePath,
       textureAtlas: item.textureAtlas,
       type: item.type as ItemType,
@@ -144,7 +146,7 @@ export class ItemView {
 
   private prepareAddToView(item: IItem): IViewElement {
     return {
-      id: item.id,
+      id: item._id,
       x: item.x!,
       y: item.y!,
       scene: item.scene!,

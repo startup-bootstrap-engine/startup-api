@@ -5,6 +5,7 @@ import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { TRADER_SELL_PRICE_MULTIPLIER } from "@providers/constants/ItemConstants";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { blueprintManager } from "@providers/inversify/container";
 import { AvailableBlueprints, OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { MathHelper } from "@providers/math/MathHelper";
@@ -40,7 +41,8 @@ export class CharacterTradingSell {
     private characterItemSlots: CharacterItemSlots,
     private characterTradingBalance: CharacterTradingBalance,
     private characterInventory: CharacterInventory,
-    private newRelic: NewRelic
+    private newRelic: NewRelic,
+    private inMemoryHashTable: InMemoryHashTable
   ) {}
 
   @TrackNewRelicTransaction()
@@ -74,9 +76,13 @@ export class CharacterTradingSell {
 
     void this.characterWeight.updateCharacterWeight(character);
 
-    await this.sendRefreshItemsEvent(character);
-
     await clearCacheForKey(`${character._id}-inventory`);
+    const inventoryItemContainer = (await this.characterInventory.getInventoryItemContainer(
+      character
+    )) as unknown as IItemContainer;
+    await this.inMemoryHashTable.delete("container-all-items", inventoryItemContainer._id);
+
+    await this.sendRefreshItemsEvent(character);
 
     this.newRelic.trackMetric(
       NewRelicMetricCategory.Count,
