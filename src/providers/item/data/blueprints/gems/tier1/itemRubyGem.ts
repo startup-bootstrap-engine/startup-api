@@ -1,3 +1,4 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { EntityAttackType, IItemGem, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
 import { GemsBlueprint } from "../../../types/itemsBlueprintTypes";
 
@@ -15,6 +16,11 @@ export const itemRubyGem: IItemGem = {
   basePrice: 50,
   canSell: false,
   rangeType: EntityAttackType.None,
+  gemStatBuff: {
+    attack: 5,
+    defense: 3,
+  },
+  gemEntityEffectsAdd: [EntityEffectBlueprint.Burning],
   useWithItemEffect: async (originItem, targetItem, character) => {
     // Add your custom logic here
   },
