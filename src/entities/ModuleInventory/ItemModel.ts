@@ -156,6 +156,21 @@ const itemSchema = createLeanSchema(
 
     timeOfDeath: Type.date({ required: false }),
     isTileTinted: Type.boolean({ required: false }),
+
+    attachedGems: Type.object().of({
+      key: Type.string(),
+      name: Type.string(),
+      gemStatBuff: Type.object().of({
+        attack: Type.number(),
+        defense: Type.number(),
+      }),
+      gemEntityEffectsAdd: Type.array().of(
+        Type.string({
+          typeof: EntityEffectBlueprint,
+        })
+      ),
+      gemEquippedBuffAdd: Type.array().of(Type.object()),
+    }),
   },
   { timestamps: { createdAt: true, updatedAt: true } }
 ).plugin(updateIfCurrentPlugin);
