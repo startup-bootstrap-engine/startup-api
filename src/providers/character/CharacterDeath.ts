@@ -99,7 +99,6 @@ export class CharacterDeath {
 
       // Run these tasks concurrently as they don't depend on each other
       await Promise.all([
-        this.sendBattleDeathEvents(character),
         this.handleKiller(killer, character),
         this.handleCharacterMode(character, characterBody, killer),
       ]);
@@ -111,6 +110,7 @@ export class CharacterDeath {
     } catch (err) {
       console.error(err);
     } finally {
+      await this.sendBattleDeathEvents(character);
       // Run these tasks concurrently as they don't depend on each other
       await Promise.all([
         entityEffectUse.clearAllEntityEffects(character), // make sure to clear all entity effects before respawn
