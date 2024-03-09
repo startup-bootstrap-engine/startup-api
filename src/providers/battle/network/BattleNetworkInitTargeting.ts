@@ -68,14 +68,13 @@ export class BattleNetworkInitTargeting {
             });
           }
 
-          if (!target) {
+          if (!target || target.health === 0) {
             this.socketMessaging.sendEventToUser<IBattleCancelTargeting>(
               character.channelId!,
               BattleSocketEvents.CancelTargeting,
               {
                 targetId: data.targetId,
                 type: data.type,
-                reason: "Invalid target.",
               }
             );
             throw new Error(`Failed to set target on NPC ${data.targetId}`);

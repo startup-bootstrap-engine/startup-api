@@ -237,6 +237,7 @@ export class CharacterItemContainer {
 
     if (!inventoryContainer) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The character does not have an inventory.");
+      return null;
     }
 
     return inventoryContainer;
