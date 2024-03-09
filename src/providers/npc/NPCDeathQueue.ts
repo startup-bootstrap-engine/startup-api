@@ -146,7 +146,7 @@ export class NPCDeathQueue {
   }
 
   @TrackNewRelicTransaction()
-  public async execHandleNPCDeath(killer: ICharacter, npc: INPC): Promise<void> {
+  private async execHandleNPCDeath(killer: ICharacter, npc: INPC): Promise<void> {
     try {
       await this.npcFreezer.freezeNPC(npc, "NPCDeath");
       const hasLocked = await this.locker.lock(`npc-death-${npc._id}`);

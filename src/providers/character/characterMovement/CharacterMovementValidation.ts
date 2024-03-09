@@ -1,5 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { Locker } from "@providers/locks/Locker";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -30,6 +31,7 @@ export class CharacterMovementValidation {
     private stun: Stun
   ) {}
 
+  @TrackNewRelicTransaction()
   public async isValid(character: ICharacter, newX: number, newY: number, isMoving: boolean): Promise<boolean> {
     if (!isMoving) {
       return true; // if character is not moving, we dont need to check anything else!

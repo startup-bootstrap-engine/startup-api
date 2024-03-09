@@ -1,4 +1,5 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
 import { TILE_MAX_REACH_DISTANCE_IN_GRID } from "@providers/constants/TileConstants";
 import { RedisManager } from "@providers/database/RedisManager";
@@ -96,6 +97,7 @@ export class UseWithTileQueue {
     }
   }
 
+  @TrackNewRelicTransaction()
   public async onExecuteUseWithTile(character: ICharacter, useWithTileData: IUseWithTile): Promise<void> {
     const useWithData = await this.validateData(character, useWithTileData);
 

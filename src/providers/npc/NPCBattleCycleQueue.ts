@@ -93,7 +93,6 @@ export class NPCBattleCycleQueue {
     }
   }
 
-  @TrackNewRelicTransaction()
   public async add(npc: INPC, npcSkills: ISkill): Promise<void> {
     if (!this.connection || !this.queue || !this.worker) {
       this.init();
@@ -161,6 +160,7 @@ export class NPCBattleCycleQueue {
     this.worker = null;
   }
 
+  @TrackNewRelicTransaction()
   private async execBattleCycle(npc: INPC, npcSkills: ISkill): Promise<void> {
     try {
       const hasLock = await this.locker.hasLock(`npc-${npc._id}-npc-battle-cycle`);

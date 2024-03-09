@@ -167,7 +167,7 @@ export class NPCMovementMoveTowardsQueue {
   }
 
   @TrackNewRelicTransaction()
-  public async execStartMoveTowardsMovement(npc: INPC): Promise<void> {
+  private async execStartMoveTowardsMovement(npc: INPC): Promise<void> {
     const targetCharacter = (await Character.findById(npc.targetCharacter)
       .lean()
       .select("_id x y scene health isOnline isBanned target")) as ICharacter | null;

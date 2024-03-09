@@ -1,6 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
@@ -38,6 +39,7 @@ export class PlantHarvest {
     private traitGetter: TraitGetter
   ) {}
 
+  @TrackNewRelicTransaction()
   public async harvestPlant(plant: IItem, character: ICharacter): Promise<void> {
     if (plant.isDead) {
       this.sendErrorMessage(character, "Sorry, you can't harvest the plant because it is already dead.");

@@ -151,7 +151,6 @@ export class HitTarget {
     }
   }
 
-  @TrackNewRelicTransaction()
   public async hit(
     attacker: ICharacter | INPC,
     target: ICharacter | INPC,

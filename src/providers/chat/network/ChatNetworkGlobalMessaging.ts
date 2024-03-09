@@ -142,6 +142,7 @@ export class ChatNetworkGlobalMessaging {
     );
   }
 
+  @TrackNewRelicTransaction()
   private async execGlobalMessaging(data: IChatMessageCreatePayload, character: ICharacter): Promise<void> {
     try {
       const canChat = this.characterValidation.hasBasicValidation(character);
