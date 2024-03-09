@@ -23,7 +23,7 @@ import { NPCView } from "./NPCView";
 import { NPCMovement } from "./movement/NPCMovement";
 import { NPCMovementFixedPath } from "./movement/NPCMovementFixedPath";
 import { NPCMovementMoveAway } from "./movement/NPCMovementMoveAway";
-import { NPCMovementMoveTowards } from "./movement/NPCMovementMoveTowards";
+import { NPCMovementMoveTowardsQueue } from "./movement/NPCMovementMoveTowardsQueue";
 import { NPCMovementRandomPath } from "./movement/NPCMovementRandomPath";
 import { NPCMovementStopped } from "./movement/NPCMovementStopped";
 @provideSingleton(NPCCycleQueue)
@@ -42,7 +42,7 @@ export class NPCCycleQueue {
     private npcMovement: NPCMovement,
     private npcMovementFixedPath: NPCMovementFixedPath,
     private npcMovementRandom: NPCMovementRandomPath,
-    private npcMovementMoveTowards: NPCMovementMoveTowards,
+    private npcMovementMoveTowards: NPCMovementMoveTowardsQueue,
     private npcMovementStopped: NPCMovementStopped,
     private npcMovementMoveAway: NPCMovementMoveAway,
     private stun: Stun,

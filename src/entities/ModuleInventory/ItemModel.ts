@@ -204,7 +204,7 @@ const warnAboutItemChanges = async (item: IItem, warnType: "changes" | "removal"
 
     for (const character of nearbyCharacters) {
       if (warnType === "changes") {
-        await itemView.warnCharacterAboutItemsInView(character);
+        await itemView.warnCharacterAboutItemsInView(character, { always: true });
       }
 
       if (warnType === "removal") {

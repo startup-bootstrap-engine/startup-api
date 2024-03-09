@@ -18,7 +18,7 @@ import { Queue, Worker } from "bullmq";
 import _ from "lodash";
 import { v4 as uuidv4 } from "uuid";
 import { NPCView } from "./NPCView";
-import { ICharacterHealth } from "./movement/NPCMovementMoveTowards";
+import { ICharacterHealth } from "./movement/NPCMovementMoveTowardsQueue";
 import { NPCTarget } from "./movement/NPCTarget";
 @provideSingleton(NPCBattleCycleQueue)
 export class NPCBattleCycleQueue {
