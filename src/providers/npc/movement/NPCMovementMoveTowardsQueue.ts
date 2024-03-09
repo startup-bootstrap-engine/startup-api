@@ -32,7 +32,6 @@ import { NPCMovement } from "./NPCMovement";
 import { NPCTarget } from "./NPCTarget";
 
 import { RedisManager } from "@providers/database/RedisManager";
-import { v4 as uuidv4 } from "uuid";
 export interface ICharacterHealth {
   id: string;
   health: number;
@@ -44,9 +43,8 @@ export class NPCMovementMoveTowardsQueue {
   private worker: Worker | null = null;
   private connection;
 
-  private queueName: string = `npc-movement-move-towards-${uuidv4()}-${
-    appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
-  }`;
+  private queueName = (scene: string): string =>
+    `npc-movement-move-towards-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
 
   debouncedFaceTarget: _.DebouncedFunc<(npc: INPC, targetCharacter: ICharacter) => Promise<void>>;
 
@@ -65,7 +63,7 @@ export class NPCMovementMoveTowardsQueue {
     private npcFreezer: NPCFreezer
   ) {}
 
-  public init(): void {
+  public init(scene: string): void {
     if (appEnv.general.IS_UNIT_TEST) {
       return;
     }
@@ -75,7 +73,7 @@ export class NPCMovementMoveTowardsQueue {
     }
 
     if (!this.queue) {
-      this.queue = new Queue(this.queueName, {
+      this.queue = new Queue(this.queueName(scene), {
         connection: this.connection,
       });
 
@@ -91,14 +89,14 @@ export class NPCMovementMoveTowardsQueue {
 
     if (!this.worker) {
       this.worker = new Worker(
-        this.queueName,
+        this.queueName(scene),
         async (job) => {
           const { npc } = job.data;
 
           try {
             await this.execStartMoveTowardsMovement(npc);
           } catch (err) {
-            console.error(`Error processing ${this.queueName} for NPC ${npc.key}:`, err);
+            console.error(`Error processing ${this.queueName(scene)} for NPC ${npc.key}:`, err);
             throw err;
           }
         },
@@ -126,10 +124,6 @@ export class NPCMovementMoveTowardsQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    if (!this.connection || !this.queue || !this.worker) {
-      this.init();
-    }
-
     const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
     for (const job of jobs) {
       try {
@@ -147,7 +141,7 @@ export class NPCMovementMoveTowardsQueue {
     }
 
     if (!this.connection || !this.queue || !this.worker) {
-      this.init();
+      this.init(npc.scene);
     }
 
     try {
@@ -158,7 +152,7 @@ export class NPCMovementMoveTowardsQueue {
       }
 
       await this.queue?.add(
-        `npc-move-towards-${npc._id}-${uuidv4()}`,
+        this.queueName(npc.scene),
         { npc },
         {
           removeOnComplete: true,
