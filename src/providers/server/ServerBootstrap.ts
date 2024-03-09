@@ -202,6 +202,6 @@ export class ServerBootstrap {
     await this.spellNetworkCast.clearAllJobs();
     await this.npcDeathQueue.clearAllJobs();
 
-    console.log("🧹 BullMQ queues cleared...");
+    console.log("🧹 BullMQ queues cleared!");
   }
 }
