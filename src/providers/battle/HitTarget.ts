@@ -25,7 +25,6 @@ import {
   ItemSubType,
 } from "@rpg-engine/shared";
 
-import { TrackClassExecutionTime } from "@jonit-dev/decorators-utils";
 import { appEnv } from "@providers/config/env";
 import { BONUS_DAMAGE_MULTIPLIER, GENERATE_BLOOD_GROUND_ON_HIT } from "@providers/constants/BattleConstants";
 import { RedisManager } from "@providers/database/RedisManager";
@@ -34,13 +33,11 @@ import { blueprintManager } from "@providers/inversify/container";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Queue, Worker } from "bullmq";
 import random from "lodash/random";
-import { v4 as uuidv4 } from "uuid";
 import { BattleAttackTargetDeath } from "./BattleAttackTarget/BattleAttackTargetDeath";
 import { BattleDamageCalculator } from "./BattleDamageCalculator";
 import { BattleEffects } from "./BattleEffects";
 import { BattleEvent } from "./BattleEvent";
 
-@TrackClassExecutionTime()
 @provideSingleton(HitTarget)
 export class HitTarget {
   private npcQueue: Queue | null = null;
@@ -48,13 +45,15 @@ export class HitTarget {
   private worker: Worker | null = null;
   private connection: any;
 
-  private queueNPCHitName: string = `npc-hit-target-${uuidv4()}-${
-    appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
-  }`;
+  // private queueNPCHitName: string = `npc-hit-target-${uuidv4()}-${
+  //   appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
+  // }`;
 
-  private queueCharacterHitName: string = `character-hit-target-${uuidv4()}-${
-    appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
-  }`;
+  private queueNPCHitName = (scene: string): string =>
+    `npc-hit-target-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
+
+  private queueCharacterHitName = (scene: string): string =>
+    `character-hit-target-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
 
   constructor(
     private battleEvent: BattleEvent,
@@ -74,7 +73,7 @@ export class HitTarget {
     private specialEffect: SpecialEffect
   ) {}
 
-  public init(): void {
+  public init(scene: string): void {
     if (appEnv.general.IS_UNIT_TEST) {
       return;
     }
@@ -84,7 +83,7 @@ export class HitTarget {
     }
 
     if (!this.npcQueue) {
-      this.npcQueue = new Queue(this.queueNPCHitName, {
+      this.npcQueue = new Queue(this.queueNPCHitName(scene), {
         connection: this.connection,
       });
 
@@ -99,7 +98,7 @@ export class HitTarget {
     }
 
     if (!this.characterQueue) {
-      this.characterQueue = new Queue(this.queueCharacterHitName, {
+      this.characterQueue = new Queue(this.queueCharacterHitName(scene), {
         connection: this.connection,
       });
 
@@ -115,7 +114,7 @@ export class HitTarget {
 
     if (!this.worker) {
       this.worker = new Worker(
-        this.queueCharacterHitName,
+        this.queueCharacterHitName(scene),
         async (job) => {
           const { attacker, target, magicAttack, bonusDamage, spellHit } = job.data;
 
@@ -126,7 +125,7 @@ export class HitTarget {
         }
       );
       this.worker = new Worker(
-        this.queueNPCHitName,
+        this.queueNPCHitName(scene),
         async (job) => {
           try {
             const { attacker, target, magicAttack, bonusDamage, spellHit } = job.data;
@@ -168,7 +167,7 @@ export class HitTarget {
     }
 
     if (!this.npcQueue || !this.characterQueue || !this.worker || !this.connection) {
-      this.init();
+      this.init(attacker.type === EntityType.Character ? (attacker as ICharacter).scene : (target as ICharacter).scene);
     }
 
     if (!attacker || !target) {
@@ -177,7 +176,7 @@ export class HitTarget {
 
     if (attacker.type === EntityType.Character) {
       await this.characterQueue?.add(
-        this.queueCharacterHitName,
+        this.queueCharacterHitName((attacker as ICharacter).scene),
         { attacker, target, magicAttack, bonusDamage, spellHit },
         {
           removeOnComplete: true,
@@ -191,7 +190,7 @@ export class HitTarget {
       );
     } else {
       await this.npcQueue?.add(
-        this.queueNPCHitName,
+        this.queueNPCHitName((attacker as INPC).scene),
         { attacker, target, magicAttack, bonusDamage, spellHit },
         {
           removeOnComplete: true,
@@ -214,10 +213,6 @@ export class HitTarget {
 
   public async clearAllQueueJobs(): Promise<void> {
     try {
-      if (!this.npcQueue || !this.characterQueue) {
-        this.init();
-      }
-
       const jobs = (await this.npcQueue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
       for (const job of jobs) {
         await job?.remove();
