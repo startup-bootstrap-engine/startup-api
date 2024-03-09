@@ -129,7 +129,7 @@ export class BattleCharacterAttack {
       }
 
       if (!character) {
-        throw new Error("Failed to find character");
+        return false;
       }
 
       const checkRangeAndAttack = await this.battleAttackTarget.checkRangeAndAttack(character, target);

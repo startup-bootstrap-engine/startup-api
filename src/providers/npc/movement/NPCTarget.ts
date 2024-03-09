@@ -122,7 +122,7 @@ export class NPCTarget {
       const character = await Character.findById(minDistanceCharacter.id).lean();
 
       if (!character) {
-        throw new Error(`Error in ${npc.key}: Failed to find character to set as target!`);
+        return;
       }
 
       const isRaid = npc.raidKey !== undefined;
@@ -192,9 +192,9 @@ export class NPCTarget {
         return;
       }
 
-      const char = await Character.findById(character.id).lean();
+      const char = await Character.findById(character._id).lean();
       if (!char) {
-        throw new Error(`Error in ${npc.key}: Failed to find character to set as target!`);
+        return;
       }
 
       await NPC.updateOne({ _id: npc._id }, { $set: { targetCharacter: char._id } });
