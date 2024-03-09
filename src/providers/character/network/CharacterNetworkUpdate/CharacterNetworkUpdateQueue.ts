@@ -30,8 +30,6 @@ import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/Ne
 import { Queue, Worker } from "bullmq";
 import dayjs from "dayjs";
 import random from "lodash/random";
-import { v4 as uuidv4 } from "uuid";
-import { CharacterView } from "../../CharacterView";
 import { CharacterMovementValidation } from "../../characterMovement/CharacterMovementValidation";
 import { CharacterMovementWarn } from "../../characterMovement/CharacterMovementWarn";
 
@@ -40,9 +38,9 @@ export class CharacterNetworkUpdateQueue {
   private queue: Queue<any, any, string> | null = null;
   private worker: Worker | null = null;
   private connection: any;
-  private queueName: string = `character-network-update-${uuidv4()}-${
-    appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
-  }`;
+
+  private queueName = (scene: string): string =>
+    `character-network-update-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
 
   constructor(
     private socketMessaging: SocketMessaging,
@@ -53,26 +51,25 @@ export class CharacterNetworkUpdateQueue {
     private characterMovementValidation: CharacterMovementValidation,
     private characterMovementWarn: CharacterMovementWarn,
     private mathHelper: MathHelper,
-    private characterView: CharacterView,
     private newRelic: NewRelic,
     private locker: Locker,
     private mapTransition: MapTransition,
     private redisManager: RedisManager
   ) {}
 
-  public initQueue(): void {
+  public initQueue(scene: string): void {
     if (!this.connection) {
       this.connection = this.redisManager.client;
     }
 
     if (!this.queue) {
-      this.queue = new Queue(this.queueName, {
+      this.queue = new Queue(this.queueName(scene), {
         connection: this.connection,
       });
 
       if (!appEnv.general.IS_UNIT_TEST) {
         this.queue.on("error", async (error) => {
-          console.error(`Error in the ${this.queueName}:`, error);
+          console.error(`Error in the ${this.queueName(scene)}:`, error);
 
           await this.queue?.close();
           this.queue = null;
@@ -82,14 +79,14 @@ export class CharacterNetworkUpdateQueue {
 
     if (!this.worker) {
       this.worker = new Worker(
-        this.queueName,
+        this.queueName(scene),
         async (job) => {
           const { character, data } = job.data;
 
           try {
             await this.handlePositionUpdateRequest(data, character);
           } catch (err) {
-            console.error(`Error processing ${this.queueName} for Character ${character.name}:`, err);
+            console.error(`Error processing ${this.queueName(scene)} for Character ${character.name}:`, err);
             throw err;
           }
         },
@@ -100,7 +97,7 @@ export class CharacterNetworkUpdateQueue {
 
       if (!appEnv.general.IS_UNIT_TEST) {
         this.worker.on("failed", async (job, err) => {
-          console.log(`${this.queueName} job ${job?.id} failed with error ${err.message}`);
+          console.log(`${this.queueName(scene)} job ${job?.id} failed with error ${err.message}`);
 
           await this.worker?.close();
           this.worker = null;
@@ -110,10 +107,6 @@ export class CharacterNetworkUpdateQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    if (!this.connection || !this.queue || !this.worker) {
-      this.initQueue();
-    }
-
     const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
     for (const job of jobs) {
       try {
@@ -134,11 +127,11 @@ export class CharacterNetworkUpdateQueue {
 
   public async addToQueue(data: ICharacterPositionUpdateFromClient, character: ICharacter): Promise<void> {
     if (!this.connection || !this.queue || !this.worker) {
-      this.initQueue();
+      this.initQueue(character.scene);
     }
 
     await this.queue?.add(
-      this.queueName,
+      this.queueName(character.scene),
       {
         data,
         character,
