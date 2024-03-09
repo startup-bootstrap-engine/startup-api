@@ -42,6 +42,10 @@ export class SpellArea {
     magicPower: MagicPower,
     options: ISpellAreaCastOptions
   ): Promise<void> {
+    if (!target) {
+      return;
+    }
+
     let {
       spellAreaGrid,
       effectAnimationKey,
