@@ -25,6 +25,7 @@ import {
   ItemSubType,
 } from "@rpg-engine/shared";
 
+import { TrackClassExecutionTime } from "@jonit-dev/decorators-utils";
 import { appEnv } from "@providers/config/env";
 import { BONUS_DAMAGE_MULTIPLIER, GENERATE_BLOOD_GROUND_ON_HIT } from "@providers/constants/BattleConstants";
 import { RedisManager } from "@providers/database/RedisManager";
@@ -38,6 +39,8 @@ import { BattleAttackTargetDeath } from "./BattleAttackTarget/BattleAttackTarget
 import { BattleDamageCalculator } from "./BattleDamageCalculator";
 import { BattleEffects } from "./BattleEffects";
 import { BattleEvent } from "./BattleEvent";
+
+@TrackClassExecutionTime()
 @provideSingleton(HitTarget)
 export class HitTarget {
   private npcQueue: Queue | null = null;
@@ -392,15 +395,18 @@ export class HitTarget {
     baseDamage: number;
     updatedHealth: number;
   }> {
-    let baseDamage = await this.battleDamageCalculator.calculateHitDamage(attacker, target, magicAttack);
+    const [baseDamage, updatedHealth] = await Promise.all([
+      this.battleDamageCalculator.calculateHitDamage(attacker, target, magicAttack),
+      this.fetchLatestHealth(target),
+    ]);
+
+    let finalBaseDamage = baseDamage;
 
     if (bonusDamage) {
-      baseDamage += bonusDamage * BONUS_DAMAGE_MULTIPLIER;
+      finalBaseDamage += bonusDamage * BONUS_DAMAGE_MULTIPLIER;
     }
 
-    let damage = this.battleDamageCalculator.getCriticalHitDamageIfSucceed(baseDamage);
-
-    const updatedHealth = await this.fetchLatestHealth(target);
+    let damage = this.battleDamageCalculator.getCriticalHitDamageIfSucceed(finalBaseDamage);
 
     target.health = updatedHealth;
 
@@ -411,7 +417,7 @@ export class HitTarget {
       throw new Error("Damage is not a number");
     }
 
-    return { damage, baseDamage, updatedHealth };
+    return { damage, baseDamage: finalBaseDamage, updatedHealth };
   }
 
   private async fetchLatestHealth(target: ICharacter | INPC): Promise<number> {
@@ -444,17 +450,6 @@ export class HitTarget {
   }
 
   private async sendBattleEvent(character: ICharacter, battleEventPayload: IBattleEventFromServer): Promise<void> {
-    const nearbyCharacters = await this.characterView.getCharactersInView(character);
-
-    const channelIds = nearbyCharacters
-      .filter((nearbyCharacter) => nearbyCharacter.channelId)
-      .map((nearbyCharacter) => nearbyCharacter.channelId!);
-
-    // If character.channelId is not in the list, add it.
-    if (character.channelId && !channelIds.includes(character.channelId)) {
-      channelIds.push(character.channelId);
-    }
-
     await this.socketMessaging.sendEventToCharactersAroundCharacter(
       character,
       BattleSocketEvents.BattleEvent,
