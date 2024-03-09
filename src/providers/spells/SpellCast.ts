@@ -437,29 +437,38 @@ export class SpellCast {
     };
 
     this.socketMessaging.sendEventToUser(updatedCharacter.channelId!, CharacterSocketEvents.AttributeChanged, payload);
-    await this.socketMessaging.sendEventToCharactersAroundCharacter(
-      updatedCharacter,
-      CharacterSocketEvents.AttributeChanged,
-      payload
-    );
+
+    const sendEventsPromises = [
+      this.socketMessaging.sendEventToCharactersAroundCharacter(
+        updatedCharacter,
+        CharacterSocketEvents.AttributeChanged,
+        payload
+      ),
+    ];
 
     if (target) {
       if (spell.projectileAnimationKey) {
-        await this.animationEffect.sendProjectileAnimationEventToCharacter(
-          updatedCharacter,
-          updatedCharacter._id,
-          target._id,
-          spell.projectileAnimationKey
+        sendEventsPromises.push(
+          this.animationEffect.sendProjectileAnimationEventToCharacter(
+            updatedCharacter,
+            updatedCharacter._id,
+            target._id,
+            spell.projectileAnimationKey
+          )
         );
       }
 
       if (spell.targetHitAnimationKey) {
-        await this.animationEffect.sendAnimationEventToCharacter(
-          target as ICharacter,
-          spell.targetHitAnimationKey as AnimationEffectKeys
+        sendEventsPromises.push(
+          this.animationEffect.sendAnimationEventToCharacter(
+            target as ICharacter,
+            spell.targetHitAnimationKey as AnimationEffectKeys
+          )
         );
       }
     }
+
+    await Promise.all(sendEventsPromises);
   }
 
   private sendIdentifyTargetEvent(character: ICharacter, data: ISpellCast): void {
