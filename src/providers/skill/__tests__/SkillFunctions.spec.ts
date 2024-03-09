@@ -3,14 +3,14 @@ import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { CharacterBuffActivator } from "@providers/character/characterBuff/CharacterBuffActivator";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { BasicAttribute, CharacterBuffDurationType, CharacterBuffType, CraftingSkill } from "@rpg-engine/shared";
-import { SkillUpdaterQueue } from "../SkillUpdaterQueue";
+import { SkillFunctions } from "../SkillFunctions";
 
 describe("SkillFunctions", () => {
   let testCharacter: ICharacter;
-  let skillFunctions: SkillUpdaterQueue;
+  let skillFunctions: SkillFunctions;
 
   beforeAll(() => {
-    skillFunctions = container.get<SkillUpdaterQueue>(SkillUpdaterQueue);
+    skillFunctions = container.get<SkillFunctions>(SkillFunctions);
   });
 
   beforeEach(async () => {

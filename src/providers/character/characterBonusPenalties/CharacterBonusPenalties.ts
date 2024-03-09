@@ -1,7 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { SkillUpdaterQueue } from "@providers/skill/SkillUpdaterQueue";
+import { SkillFunctions } from "@providers/skill/SkillFunctions";
 import { CharacterClass, IIncreaseSPResult, LifeBringerRaces, SKILLS_MAP, ShadowWalkerRaces } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { CharacterBasicAttributesBonusPenalties } from "./CharacterBasicAttributesBonusPenalties";
@@ -16,7 +16,7 @@ export class CharacterBonusPenalties {
     private characterBasicAttributesBonusPenalties: CharacterBasicAttributesBonusPenalties,
     private characterCombatBonusPenalties: CharacterCombatBonusPenalties,
     private characterCraftingBonusPenalties: CharacterCraftingBonusPenalties,
-    private skillFunctions: SkillUpdaterQueue,
+    private skillFunctions: SkillFunctions,
     private characterClassBonusOrPenalties: CharacterClassBonusOrPenalties,
     private characterRaceBonusOrPenalties: CharacterRaceBonusOrPenalties
   ) {}

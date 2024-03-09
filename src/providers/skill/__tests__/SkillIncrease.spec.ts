@@ -19,8 +19,8 @@ import {
   calculateSPToNextLevel,
   calculateXPToNextLevel,
 } from "@rpg-engine/shared";
+import { SkillFunctions } from "../SkillFunctions";
 import { SkillIncrease } from "../SkillIncrease";
-import { SkillUpdaterQueue } from "../SkillUpdaterQueue";
 import { CraftingSkillsMap } from "../constants";
 
 type TestCase = {
@@ -210,7 +210,7 @@ describe("SkillIncrease.spec.ts | increaseShieldingSP, increaseSkillsOnBattle & 
     expect(spToLvl3).toBeGreaterThan(spToLvl2);
     expect(xpToLvl2).toBeGreaterThan(0);
 
-    sendSkillLevelUpEvents = jest.spyOn(SkillUpdaterQueue.prototype, "sendSkillLevelUpEvents" as any);
+    sendSkillLevelUpEvents = jest.spyOn(SkillFunctions.prototype, "sendSkillLevelUpEvents" as any);
     // @ts-ignore
     sendExpLevelUpEvents = jest.spyOn(skillIncrease.npcExperience, "sendExpLevelUpEvents" as any);
     spellLearnMock = jest.spyOn(SpellLearn.prototype, "learnLatestSkillLevelSpells");

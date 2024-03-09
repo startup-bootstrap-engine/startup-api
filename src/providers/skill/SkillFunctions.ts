@@ -6,17 +6,13 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { CharacterBuffSkill } from "@providers/character/characterBuff/CharacterBuffSkill";
 import { CharacterBaseSpeed } from "@providers/character/characterMovement/CharacterBaseSpeed";
-import { appEnv } from "@providers/config/env";
 import { SP_INCREASE_BASE, SP_MAGIC_INCREASE_TIMES_MANA } from "@providers/constants/SkillConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
-import { RedisManager } from "@providers/database/RedisManager";
-import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { NumberFormatter } from "@providers/text/NumberFormatter";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import {
   AnimationEffectKeys,
-  EnvType,
   IIncreaseSPResult,
   ISkillDetails,
   ISkillEventFromServer,
@@ -26,21 +22,14 @@ import {
   SkillType,
   UISocketEvents,
 } from "@rpg-engine/shared";
-import { Queue, Worker } from "bullmq";
+import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
 import { clearCacheForKey } from "speedgoose";
 import { SkillBuff } from "./SkillBuff";
 import { SkillCalculator } from "./SkillCalculator";
 
-@provideSingleton(SkillUpdaterQueue)
-export class SkillUpdaterQueue {
-  private queue: Queue<any, any, string> | null = null;
-  private worker: Worker | null = null;
-  private connection: any;
-
-  private queueName = (scene: string): string =>
-    `skill-updater-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
-
+@provide(SkillFunctions)
+export class SkillFunctions {
   constructor(
     private skillCalculator: SkillCalculator,
     private animationEffect: AnimationEffect,
@@ -50,109 +39,12 @@ export class SkillUpdaterQueue {
     private skillBuff: SkillBuff,
     private inMemoryHashTable: InMemoryHashTable,
     private newRelic: NewRelic,
-    private characterBaseSpeed: CharacterBaseSpeed,
-    private redisManager: RedisManager
+    private characterBaseSpeed: CharacterBaseSpeed
   ) {}
 
-  public initQueue(scene: string): void {
-    if (!this.connection) {
-      this.connection = this.redisManager.client;
-    }
-
-    if (!this.queue) {
-      this.queue = new Queue(this.queueName(scene), {
-        connection: this.connection,
-      });
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.queue.on("error", async (error) => {
-          console.error(`Error in the ${this.queueName(scene)}:`, error);
-
-          await this.queue?.close();
-          this.queue = null;
-        });
-      }
-    }
-
-    if (!this.worker) {
-      this.worker = new Worker(
-        this.queueName(scene),
-        async (job) => {
-          const { skills, character } = job.data;
-
-          console.log("processing job", skills._id, character._id);
-
-          try {
-            await this.execUpdateSkills(skills, character);
-          } catch (err) {
-            console.error(`Error processing ${this.queueName(scene)} for Character ${character.name}:`, err);
-            throw err;
-          }
-        },
-        {
-          connection: this.connection,
-        }
-      );
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.worker.on("failed", async (job, err) => {
-          console.log(`${this.queueName(scene)} job ${job?.id} failed with error ${err.message}`);
-
-          await this.worker?.close();
-          this.worker = null;
-        });
-      }
-    }
-  }
-
-  public async clearAllJobs(): Promise<void> {
-    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
-    for (const job of jobs) {
-      try {
-        await job?.remove();
-      } catch (err) {
-        console.error(`Error removing job ${job?.id}:`, err.message);
-      }
-    }
-  }
-
-  public async shutdown(): Promise<void> {
-    await this.queue?.close();
-    await this.worker?.close();
-
-    this.queue = null;
-    this.worker = null;
-  }
-
-  public async updateSkills(skills: ISkill, character: ICharacter): Promise<void> {
-    if (appEnv.general.IS_UNIT_TEST) {
-      await this.execUpdateSkills(skills, character);
-      return;
-    }
-
-    if (!this.connection || !this.queue || !this.worker) {
-      this.initQueue(character.scene);
-    }
-
-    console.log("sending to queue, ids", skills._id, character._id);
-
-    await this.queue?.add(
-      this.queueName(character.scene),
-      {
-        skills,
-        character,
-      },
-      {
-        removeOnComplete: true,
-        removeOnFail: true,
-      }
-    );
-  }
-
   @TrackNewRelicTransaction()
-  private async execUpdateSkills(skills: ISkill, character: ICharacter): Promise<void> {
+  public async updateSkills(skills: ISkill, character: ICharacter): Promise<void> {
     try {
-      await clearCacheForKey(`${character._id}-skills`);
       //! Warning: Chaching this causes the skill not to update
       await Skill.findByIdAndUpdate(skills._id, skills).lean({ virtuals: true, defaults: true });
 

@@ -31,8 +31,8 @@ import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
 import { SkillCalculator } from "./SkillCalculator";
 import { SkillCraftingMapper } from "./SkillCraftingMapper";
+import { SkillFunctions } from "./SkillFunctions";
 import { SkillGainValidation } from "./SkillGainValidation";
-import { SkillUpdaterQueue } from "./SkillUpdaterQueue";
 import { CraftingSkillsMap } from "./constants";
 
 @provide(SkillIncrease)
@@ -40,7 +40,7 @@ export class SkillIncrease {
   constructor(
     private skillCalculator: SkillCalculator,
     private characterBonusPenalties: CharacterBonusPenalties,
-    private skillFunctions: SkillUpdaterQueue,
+    private skillFunctions: SkillFunctions,
     private skillGainValidation: SkillGainValidation,
     private characterWeapon: CharacterWeapon,
     private inMemoryHashTable: InMemoryHashTable,

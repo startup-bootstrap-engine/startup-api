@@ -2,13 +2,13 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { DiscordBot } from "@providers/discord/DiscordBot";
-import { SkillUpdaterQueue } from "@providers/skill/SkillUpdaterQueue";
+import { SkillFunctions } from "@providers/skill/SkillFunctions";
 import { ICraftingSkillsBonusAndPenalties, IIncreaseSPResult } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
 @provide(CharacterCraftingBonusPenalties)
 export class CharacterCraftingBonusPenalties {
-  constructor(private skillFunctions: SkillUpdaterQueue, private discordBot: DiscordBot) {}
+  constructor(private skillFunctions: SkillFunctions, private discordBot: DiscordBot) {}
 
   @TrackNewRelicTransaction()
   public async updateCraftingSkills(

@@ -12,13 +12,13 @@ import {
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { SkillCalculator } from "./SkillCalculator";
-import { SkillUpdaterQueue } from "./SkillUpdaterQueue";
+import { SkillFunctions } from "./SkillFunctions";
 
 @provide(SkillDecrease)
 export class SkillDecrease {
   constructor(
     private skillCalculator: SkillCalculator,
-    private skillFunctions: SkillUpdaterQueue,
+    private skillFunctions: SkillFunctions,
     private characterDeathCalculator: CharacterDeathCalculator
   ) {}
 
