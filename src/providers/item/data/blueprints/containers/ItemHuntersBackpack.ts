@@ -9,7 +9,7 @@ export const itemHuntersBackpack: Partial<IBaseItemContainerBlueprint> = {
   texturePath: "containers/hunters-backpack.png",
   name: "Hunters Backpack",
   description:
-    "You see a hunters backpack. It has been made using sturdy materials, perfect for long hunting trips. It has a total of 60 slots.",
+    "You see a hunters backpack. It has been made using sturdy materials, perfect for long hunting trips. It has a total of 45 slots.",
   weight: 3,
   canSell: false,
   isItemContainer: true,
