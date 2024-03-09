@@ -254,24 +254,12 @@ export class HitTarget {
     };
 
     if (battleEvent === BattleEventType.Hit) {
-      let baseDamage = await this.battleDamageCalculator.calculateHitDamage(attacker, target, magicAttack);
-
-      if (bonusDamage) {
-        baseDamage += bonusDamage * BONUS_DAMAGE_MULTIPLIER;
-      }
-
-      let damage = this.battleDamageCalculator.getCriticalHitDamageIfSucceed(baseDamage);
-
-      const updatedHealth = await this.fetchLatestHealth(target);
-
-      target.health = updatedHealth;
-
-      const maxDamage = updatedHealth;
-      damage = Math.min(damage, maxDamage);
-
-      if (isNaN(damage)) {
-        throw new Error("Damage is not a number");
-      }
+      const { damage, baseDamage, updatedHealth } = await this.getCalculatedDamage(
+        attacker,
+        target,
+        bonusDamage!,
+        magicAttack!
+      );
 
       const damageRelatedPromises: any[] = [];
 
@@ -392,6 +380,38 @@ export class HitTarget {
     remainingPromises.push(this.battleAttackTargetDeath.handleDeathAfterHit(attacker, target));
 
     await Promise.all(remainingPromises);
+  }
+
+  private async getCalculatedDamage(
+    attacker: ICharacter | INPC,
+    target: ICharacter | INPC,
+    bonusDamage: number,
+    magicAttack: boolean
+  ): Promise<{
+    damage: number;
+    baseDamage: number;
+    updatedHealth: number;
+  }> {
+    let baseDamage = await this.battleDamageCalculator.calculateHitDamage(attacker, target, magicAttack);
+
+    if (bonusDamage) {
+      baseDamage += bonusDamage * BONUS_DAMAGE_MULTIPLIER;
+    }
+
+    let damage = this.battleDamageCalculator.getCriticalHitDamageIfSucceed(baseDamage);
+
+    const updatedHealth = await this.fetchLatestHealth(target);
+
+    target.health = updatedHealth;
+
+    const maxDamage = updatedHealth;
+    damage = Math.min(damage, maxDamage);
+
+    if (isNaN(damage)) {
+      throw new Error("Damage is not a number");
+    }
+
+    return { damage, baseDamage, updatedHealth };
   }
 
   private async fetchLatestHealth(target: ICharacter | INPC): Promise<number> {
