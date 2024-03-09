@@ -1,7 +1,6 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
-import { TrackClassExecutionTime } from "@jonit-dev/decorators-utils";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
@@ -39,7 +38,6 @@ export interface ICharacterHealth {
   health: number;
 }
 
-@TrackClassExecutionTime()
 @provide(NPCMovementMoveTowardsQueue)
 export class NPCMovementMoveTowardsQueue {
   private queue: Queue | null = null;
