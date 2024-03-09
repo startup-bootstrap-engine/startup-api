@@ -29,6 +29,7 @@ import { NPCFreezer } from "@providers/npc/NPCFreezer";
 import { NPCMovementMoveTowardsQueue } from "@providers/npc/movement/NPCMovementMoveTowardsQueue";
 import PartyManagement from "@providers/party/PartyManagement";
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
+import { SkillUpdaterQueue } from "@providers/skill/SkillUpdaterQueue";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import SpellSilence from "@providers/spells/data/logic/mage/druid/SpellSilence";
 import { BullStrength } from "@providers/spells/data/logic/minotaur/BullStrength";
@@ -72,7 +73,8 @@ export class ServerBootstrap {
     private errorHandlingTracker: ErrorHandlingTracker,
     private bullStrength: BullStrength,
     private npcMovementMoveTowardsQueue: NPCMovementMoveTowardsQueue,
-    private npcDeathQueue: NPCDeathQueue
+    private npcDeathQueue: NPCDeathQueue,
+    private skillUpdaterQueue: SkillUpdaterQueue
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -117,6 +119,7 @@ export class ServerBootstrap {
       await this.spellNetworkCast.shutdown();
       await this.npcMovementMoveTowardsQueue.shutdown();
       await this.npcDeathQueue.shutdown();
+      await this.skillUpdaterQueue.shutdown();
     };
 
     process.on("SIGTERM", async () => {
@@ -199,6 +202,7 @@ export class ServerBootstrap {
     await this.chatNetworkGlobalMessaging.clearAllJobs();
     await this.spellNetworkCast.clearAllJobs();
     await this.npcDeathQueue.clearAllJobs();
+    await this.skillUpdaterQueue.clearAllJobs();
 
     console.log("🧹 BullMQ queues cleared...");
   }

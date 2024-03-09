@@ -1,7 +1,7 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
-import { SkillFunctions } from "@providers/skill/SkillFunctions";
+import { SkillUpdaterQueue } from "@providers/skill/SkillUpdaterQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
   BasicAttribute,
@@ -21,7 +21,7 @@ describe("Case CharacterBonusPenalties", () => {
 
   beforeAll(() => {
     characterBonusPenalties = container.get<CharacterBonusPenalties>(CharacterBonusPenalties);
-    sendSkillLevelUpEvents = jest.spyOn(SkillFunctions.prototype, "sendSkillLevelUpEvents" as any);
+    sendSkillLevelUpEvents = jest.spyOn(SkillUpdaterQueue.prototype, "sendSkillLevelUpEvents" as any);
   });
 
   beforeEach(async () => {

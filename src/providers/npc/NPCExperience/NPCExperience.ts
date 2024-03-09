@@ -15,8 +15,8 @@ import { Locker } from "@providers/locks/Locker";
 import PartyManagement from "@providers/party/PartyManagement";
 import { SkillBuff } from "@providers/skill/SkillBuff";
 import { SkillCalculator } from "@providers/skill/SkillCalculator";
-import { SkillFunctions } from "@providers/skill/SkillFunctions";
 import { SkillStatsIncrease } from "@providers/skill/SkillStatsIncrease";
+import { SkillUpdaterQueue } from "@providers/skill/SkillUpdaterQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { NumberFormatter } from "@providers/text/NumberFormatter";
 import { Time } from "@providers/time/Time";
@@ -52,7 +52,7 @@ import { NPCExperienceLimiter } from "./NPCExperienceLimiter";
 export class NPCExperience {
   constructor(
     private skillCalculator: SkillCalculator,
-    private skillFunctions: SkillFunctions,
+    private skillFunctions: SkillUpdaterQueue,
     private socketMessaging: SocketMessaging,
     private numberFormatter: NumberFormatter,
     private characterBuffSkill: CharacterBuffSkill,
