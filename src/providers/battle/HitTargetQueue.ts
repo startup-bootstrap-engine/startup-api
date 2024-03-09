@@ -30,6 +30,7 @@ import { BONUS_DAMAGE_MULTIPLIER, GENERATE_BLOOD_GROUND_ON_HIT } from "@provider
 import { RedisManager } from "@providers/database/RedisManager";
 import { blueprintManager } from "@providers/inversify/container";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { Queue, Worker } from "bullmq";
 import random from "lodash/random";
 import { BattleAttackTargetDeath } from "./BattleAttackTarget/BattleAttackTargetDeath";
@@ -37,8 +38,8 @@ import { BattleDamageCalculator } from "./BattleDamageCalculator";
 import { BattleEffects } from "./BattleEffects";
 import { BattleEvent } from "./BattleEvent";
 
-@provideSingleton(HitTarget)
-export class HitTarget {
+@provideSingleton(HitTargetQueue)
+export class HitTargetQueue {
   private npcQueue: Queue | null = null;
   private characterQueue: Queue | null = null;
   private worker: Worker | null = null;
@@ -68,7 +69,8 @@ export class HitTarget {
     private socketMessaging: SocketMessaging,
     private entityEffectUse: EntityEffectUse,
     private battleDamageCalculator: BattleDamageCalculator,
-    private redisManager: RedisManager
+    private redisManager: RedisManager,
+    private queueCleaner: QueueCleaner
   ) {}
 
   public init(scene: string): void {
@@ -116,6 +118,8 @@ export class HitTarget {
         async (job) => {
           const { attacker, target, magicAttack, bonusDamage, spellHit } = job.data;
 
+          await this.queueCleaner.updateQueueActivity(this.queueCharacterHitName(scene));
+
           await this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
         },
         {
@@ -127,6 +131,8 @@ export class HitTarget {
         async (job) => {
           try {
             const { attacker, target, magicAttack, bonusDamage, spellHit } = job.data;
+
+            await this.queueCleaner.updateQueueActivity(this.queueNPCHitName(scene));
 
             await this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
           } catch (error) {

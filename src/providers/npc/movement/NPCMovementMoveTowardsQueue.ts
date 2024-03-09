@@ -23,7 +23,6 @@ import {
   ToGridY,
 } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
-import { provide } from "inversify-binding-decorators";
 import _, { debounce } from "lodash";
 import { NPCBattleCycleQueue } from "../NPCBattleCycleQueue";
 import { NPCFreezer } from "../NPCFreezer";
@@ -32,12 +31,14 @@ import { NPCMovement } from "./NPCMovement";
 import { NPCTarget } from "./NPCTarget";
 
 import { RedisManager } from "@providers/database/RedisManager";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { QueueCleaner } from "@providers/queue/QueueCleaner";
 export interface ICharacterHealth {
   id: string;
   health: number;
 }
 
-@provide(NPCMovementMoveTowardsQueue)
+@provideSingleton(NPCMovementMoveTowardsQueue)
 export class NPCMovementMoveTowardsQueue {
   private queue: Queue | null = null;
   private worker: Worker | null = null;
@@ -60,7 +61,8 @@ export class NPCMovementMoveTowardsQueue {
     private locker: Locker,
     private npcBattleCycleQueue: NPCBattleCycleQueue,
     private inMemoryHashTable: InMemoryHashTable,
-    private npcFreezer: NPCFreezer
+    private npcFreezer: NPCFreezer,
+    private queueCleaner: QueueCleaner
   ) {}
 
   public init(scene: string): void {
@@ -94,6 +96,8 @@ export class NPCMovementMoveTowardsQueue {
           const { npc } = job.data;
 
           try {
+            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
+
             await this.execStartMoveTowardsMovement(npc);
           } catch (err) {
             console.error(`Error processing ${this.queueName(scene)} for NPC ${npc.key}:`, err);

@@ -1,15 +1,17 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { EnvType, ISpellCast, SpellSocketEvents } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
-import { provide } from "inversify-binding-decorators";
 import { v4 as uuidv4 } from "uuid";
 import { SpellCast } from "../SpellCast";
-@provide(SpellNetworkCast)
-export class SpellNetworkCast {
+
+@provideSingleton(SpellNetworkCastQueue)
+export class SpellNetworkCastQueue {
   private queue: Queue<any, any, string> | null = null;
   private worker: Worker | null = null;
   private connection: any;
@@ -17,7 +19,12 @@ export class SpellNetworkCast {
     appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
   }`;
 
-  constructor(private socketAuth: SocketAuth, private spellCast: SpellCast, private redisManager: RedisManager) {}
+  constructor(
+    private socketAuth: SocketAuth,
+    private spellCast: SpellCast,
+    private redisManager: RedisManager,
+    private queueCleaner: QueueCleaner
+  ) {}
 
   public onSpellCast(channel: SocketChannel): void {
     this.socketAuth.authCharacterOn(
@@ -73,6 +80,8 @@ export class SpellNetworkCast {
           }
 
           try {
+            await this.queueCleaner.updateQueueActivity(this.queueName);
+
             await this.spellCast.castSpell(data, character);
           } catch (err) {
             console.error(`Error processing ${this.queueName} for Character ${character.name}:`, err);

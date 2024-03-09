@@ -9,9 +9,9 @@ import {
   NPC_HOSTILE_FREEZE_CHECK_CHANCE,
 } from "@providers/constants/NPCConstants";
 import { RedisManager } from "@providers/database/RedisManager";
-import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
+import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { Stun } from "@providers/spells/data/logic/warrior/Stun";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { EnvType, NPCAlignment, NPCMovementType, NPCPathOrientation, ToGridX, ToGridY } from "@rpg-engine/shared";
@@ -36,7 +36,6 @@ export class NPCCycleQueue {
   }`;
 
   constructor(
-    private specialEffect: SpecialEffect,
     private npcView: NPCView,
     private npcFreezer: NPCFreezer,
     private npcMovement: NPCMovement,
@@ -48,7 +47,8 @@ export class NPCCycleQueue {
     private stun: Stun,
     private newRelic: NewRelic,
     private locker: Locker,
-    private redisManager: RedisManager
+    private redisManager: RedisManager,
+    private queueCleaner: QueueCleaner
   ) {}
 
   public init(): void {
@@ -78,6 +78,8 @@ export class NPCCycleQueue {
           const { npc, npcSkills } = job.data;
 
           try {
+            await this.queueCleaner.updateQueueActivity(this.queueName);
+
             await this.execNpcCycle(npc, npcSkills);
           } catch (err) {
             console.error(`Error processing ${this.queueName} for NPC ${npc.key}:`, err);

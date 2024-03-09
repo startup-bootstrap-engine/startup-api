@@ -5,19 +5,19 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { AnimationEffectKeys, EnvType, IItemUpdate, ItemSocketEvents, ItemSubType, ItemType } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
-import { provide } from "inversify-binding-decorators";
 import { v4 as uuidv4 } from "uuid";
 import { CharacterInventory } from "./CharacterInventory";
 import { CharacterValidation } from "./CharacterValidation";
 import { CharacterView } from "./CharacterView";
 import { CharacterItemContainer } from "./characterItems/CharacterItemContainer";
-import { CharacterItemSlots } from "./characterItems/CharacterItemSlots";
 
-@provide(CharacterAutoLoot)
-export class CharacterAutoLoot {
+@provideSingleton(CharacterAutoLootQueue)
+export class CharacterAutoLootQueue {
   private queue: Queue<any, any, string> | null = null;
   private worker: Worker | null = null;
   private connection: any;
@@ -33,7 +33,7 @@ export class CharacterAutoLoot {
     private characterView: CharacterView,
     private animationEffect: AnimationEffect,
     private redisManager: RedisManager,
-    private characterItemSlots: CharacterItemSlots
+    private queueCleaner: QueueCleaner
   ) {}
 
   public init(): void {
@@ -63,6 +63,8 @@ export class CharacterAutoLoot {
           const { character, itemIdsToLoot } = job.data;
 
           try {
+            await this.queueCleaner.updateQueueActivity(this.queueName);
+
             await this.execAutoLoot(character, itemIdsToLoot);
           } catch (err) {
             console.error(err);

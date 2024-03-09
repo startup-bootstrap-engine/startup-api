@@ -1,6 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { HitTarget } from "@providers/battle/HitTarget";
+import { HitTargetQueue } from "@providers/battle/HitTargetQueue";
 import { EntityEffectUse } from "@providers/entityEffects/EntityEffectUse";
 import { entityEffectBleeding } from "@providers/entityEffects/data/blueprints/entityEffectBleeding";
 import { container } from "@providers/inversify/container";
@@ -37,7 +37,7 @@ export const spellBleedingEdge: Partial<ISpell> = {
 
   usableEffect: async (character: ICharacter, target: ICharacter | INPC) => {
     const entityEffectUse = container.get(EntityEffectUse);
-    const hitTarget = container.get(HitTarget);
+    const hitTarget = container.get(HitTargetQueue);
     const spellCalculator = container.get(SpellCalculator);
 
     const skillDamage = await spellCalculator.spellDamageCalculator(character, BasicAttribute.Strength, {

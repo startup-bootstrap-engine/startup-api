@@ -18,6 +18,7 @@ import { NPCCrons } from "./NPCCrons";
 
 import { PlantCrons } from "./PlantCrons";
 import { PremiumAccountCrons } from "./PremiumAccountCrons";
+import { QueueCrons } from "./QueueCrons";
 import { RankingCrons } from "./RankingCrons";
 import { RedisCrons } from "./RedisCrons";
 import { ReferralBonusCrons } from "./ReferralBonusCrons";
@@ -49,7 +50,8 @@ export class Cronjob {
     private resourceGatheringCronJobs: ResourceGatheringCrons,
     private premiumAccountCrons: PremiumAccountCrons,
     private referralBonusCrons: ReferralBonusCrons,
-    private plantCrons: PlantCrons
+    private plantCrons: PlantCrons,
+    private queueCrons: QueueCrons
   ) {}
 
   public start(): void {
@@ -81,6 +83,7 @@ export class Cronjob {
         this.premiumAccountCrons.schedule();
         this.referralBonusCrons.schedule();
         this.plantCrons.schedule();
+        this.queueCrons.schedule();
         break;
       case EnvType.Staging:
       case EnvType.Production:
@@ -107,6 +110,7 @@ export class Cronjob {
           this.premiumAccountCrons.schedule();
           this.referralBonusCrons.schedule();
           this.plantCrons.schedule();
+          this.queueCrons.schedule();
         }
         break;
     }

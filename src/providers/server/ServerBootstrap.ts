@@ -9,12 +9,12 @@ import { PushNotificationHelper } from "@providers/pushNotification/PushNotifica
 import { Seeder } from "@providers/seeds/Seeder";
 
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { HitTarget } from "@providers/battle/HitTarget";
+import { HitTargetQueue } from "@providers/battle/HitTargetQueue";
 import { CharacterActionsTracker } from "@providers/character/CharacterActionsTracker";
 import { CharacterConsumptionControl } from "@providers/character/CharacterConsumptionControl";
 import { CharacterMonitorCallbackTracker } from "@providers/character/CharacterMonitorInterval/CharacterMonitorCallbackTracker";
 import { CharacterNetworkUpdateQueue } from "@providers/character/network/CharacterNetworkUpdate/CharacterNetworkUpdateQueue";
-import { ChatNetworkGlobalMessaging } from "@providers/chat/network/ChatNetworkGlobalMessaging";
+import { ChatNetworkGlobalMessagingQueue } from "@providers/chat/network/ChatNetworkGlobalMessagingQueue";
 import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DiscordBot } from "@providers/discord/DiscordBot";
@@ -33,7 +33,7 @@ import { SkillFunctions } from "@providers/skill/SkillFunctions";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import SpellSilence from "@providers/spells/data/logic/mage/druid/SpellSilence";
 import { BullStrength } from "@providers/spells/data/logic/minotaur/BullStrength";
-import { SpellNetworkCast } from "@providers/spells/network/SpellNetworkCast";
+import { SpellNetworkCastQueue } from "@providers/spells/network/SpellNetworkCastQueue";
 import { UseWithTileQueue } from "@providers/useWith/abstractions/UseWithTileQueue";
 import { EnvType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -56,7 +56,7 @@ export class ServerBootstrap {
     private locker: Locker,
     private partyManagement: PartyManagement,
     private inMemoryHashTable: InMemoryHashTable,
-    private hitTarget: HitTarget,
+    private hitTarget: HitTargetQueue,
     private discordBot: DiscordBot,
     private socketSessionControl: SocketSessionControl,
     private npcBattleCycleQueue: NPCBattleCycleQueue,
@@ -67,8 +67,8 @@ export class ServerBootstrap {
     private characterNetworkUpdateQueue: CharacterNetworkUpdateQueue,
     private patreonAPI: PatreonAPI,
     private useWithTileQueue: UseWithTileQueue,
-    private chatNetworkGlobalMessaging: ChatNetworkGlobalMessaging,
-    private spellNetworkCast: SpellNetworkCast,
+    private chatNetworkGlobalMessaging: ChatNetworkGlobalMessagingQueue,
+    private spellNetworkCast: SpellNetworkCastQueue,
     private characterActionsTracker: CharacterActionsTracker,
     private errorHandlingTracker: ErrorHandlingTracker,
     private bullStrength: BullStrength,

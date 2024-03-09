@@ -10,7 +10,7 @@ import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MovementHelper } from "@providers/movement/MovementHelper";
-import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { EnvType, NPCAlignment } from "@rpg-engine/shared";
@@ -38,7 +38,7 @@ export class NPCBattleCycleQueue {
     private battleAttackTarget: BattleAttackTarget,
     private npcView: NPCView,
     private redisManager: RedisManager,
-    private socketMessaging: SocketMessaging
+    private queueCleaner: QueueCleaner
   ) {}
 
   public init(): void {
@@ -68,6 +68,8 @@ export class NPCBattleCycleQueue {
           const { npc, npcSkills } = job.data;
 
           try {
+            await this.queueCleaner.updateQueueActivity(this.queueName);
+
             await this.execBattleCycle(npc, npcSkills);
           } catch (err) {
             console.error(`Error processing ${this.queueName} for NPC ${npc.key}:`, err);

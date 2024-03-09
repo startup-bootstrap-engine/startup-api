@@ -4,6 +4,7 @@ import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
+import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { EnvType } from "@rpg-engine/shared";
 import { Job, Queue, Worker } from "bullmq";
 import { v4 as uuidv4 } from "uuid";
@@ -23,7 +24,8 @@ export class PathfindingQueue {
     private redisManager: RedisManager,
     private pathfinder: Pathfinder,
     private pathfindingResults: PathfindingResults,
-    private locker: Locker
+    private locker: Locker,
+    private queueCleaner: QueueCleaner
   ) {}
 
   public init(): void {
@@ -57,6 +59,8 @@ export class PathfindingQueue {
           const { npc, target, startGridX, startGridY, endGridX, endGridY } = job.data;
 
           try {
+            await this.queueCleaner.updateQueueActivity(this.queueName);
+
             const path = await this.pathfinder.findShortestPath(
               npc as INPC,
               target,

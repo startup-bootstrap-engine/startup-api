@@ -1,16 +1,16 @@
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { provide } from "inversify-binding-decorators";
-import { SpellNetworkCast } from "./SpellNetworkCast";
-import { SpellNetworkReadInfo } from "./SpellNetworkReadInfo";
+import { SpellNetworkCastQueue } from "./SpellNetworkCastQueue";
+import { SpellNetworkCooldowns } from "./SpellNetworkCooldowns";
 import { SpellNetworkDetails } from "./SpellNetworkDetails";
 import { SpellNetworkLearned } from "./SpellNetworkLearned";
-import { SpellNetworkCooldowns } from "./SpellNetworkCooldowns";
+import { SpellNetworkReadInfo } from "./SpellNetworkReadInfo";
 
 @provide(SpellNetwork)
 export class SpellNetwork {
   constructor(
     private spellNetworkReadInfo: SpellNetworkReadInfo,
-    private spellNetworkCast: SpellNetworkCast,
+    private spellNetworkCast: SpellNetworkCastQueue,
     private spellNetworkDetails: SpellNetworkDetails,
     private spellNetworkLearned: SpellNetworkLearned,
     private spellNetworkCooldowns: SpellNetworkCooldowns

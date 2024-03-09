@@ -15,7 +15,7 @@ import { RaidManager } from "@providers/raid/RaidManager";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { EntityType, FromGridX, FromGridY, MagicPower, NPCAlignment, ToGridX, ToGridY } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { HitTarget } from "../../battle/HitTarget";
+import { HitTargetQueue } from "../../battle/HitTargetQueue";
 import {
   IAffectedTarget,
   ISpellAreaCalculateEffectOptions,
@@ -27,7 +27,7 @@ import {
 export class SpellArea {
   constructor(
     private entityEffectUse: EntityEffectUse,
-    private hitTarget: HitTarget,
+    private hitTarget: HitTargetQueue,
     private animationEffect: AnimationEffect,
     private mapNonPVPZone: MapNonPVPZone,
     private socketMessaging: SocketMessaging,

@@ -3,10 +3,12 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { appEnv } from "@providers/config/env";
 import { TILE_MAX_REACH_DISTANCE_IN_GRID } from "@providers/constants/TileConstants";
 import { RedisManager } from "@providers/database/RedisManager";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { ItemCraftable } from "@providers/item/ItemCraftable";
 import { itemsBlueprintIndex } from "@providers/item/data/index";
 import { MapTiles } from "@providers/map/MapTiles";
 import { MovementHelper } from "@providers/movement/MovementHelper";
+import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -23,12 +25,11 @@ import {
   UseWithSocketEvents,
 } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
-import { provide } from "inversify-binding-decorators";
 import { v4 as uuidv4 } from "uuid";
 import { UseWithHelper } from "../libs/UseWithHelper";
 import { IItemUseWith, IUseWithTileValidationResponse } from "../useWithTypes";
 
-@provide(UseWithTileQueue)
+@provideSingleton(UseWithTileQueue)
 export class UseWithTileQueue {
   private queue: Queue<any, any, string> | null = null;
   private worker: Worker | null = null;
@@ -45,7 +46,8 @@ export class UseWithTileQueue {
     private movementHelper: MovementHelper,
     private itemCraftable: ItemCraftable,
     private skillIncrease: SkillIncrease,
-    private redisManager: RedisManager
+    private redisManager: RedisManager,
+    private queueCleaner: QueueCleaner
   ) {}
 
   public initQueue(): void {
@@ -75,6 +77,8 @@ export class UseWithTileQueue {
           const { character, useWithTileData } = job.data;
 
           try {
+            await this.queueCleaner.updateQueueActivity(this.queueName);
+
             await this.onExecuteUseWithTile(character, useWithTileData);
           } catch (err) {
             console.error(`Error processing ${this.queueName} for Character ${character.name}:`, err);

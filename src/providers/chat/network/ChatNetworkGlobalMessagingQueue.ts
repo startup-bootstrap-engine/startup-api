@@ -21,13 +21,14 @@ import {
   SOCKET_TRANSMISSION_ZONE_WIDTH,
 } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
-import { provide } from "inversify-binding-decorators";
 import { ChatUtils } from "./ChatUtils";
 
+import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { v4 as uuidv4 } from "uuid";
 
-@provide(ChatNetworkGlobalMessaging)
-export class ChatNetworkGlobalMessaging {
+@provideSingleton(ChatNetworkGlobalMessagingQueue)
+export class ChatNetworkGlobalMessagingQueue {
   private queue: Queue<any, any, string> | null = null;
   private worker: Worker | null = null;
   private connection: any;
@@ -43,7 +44,8 @@ export class ChatNetworkGlobalMessaging {
     private spellCast: SpellCast,
     private characterValidation: CharacterValidation,
     private chatUtils: ChatUtils,
-    private redisManager: RedisManager
+    private redisManager: RedisManager,
+    private queueCleaner: QueueCleaner
   ) {}
 
   public initQueue(): void {
@@ -71,6 +73,8 @@ export class ChatNetworkGlobalMessaging {
         this.queueName,
         async (job) => {
           const { character, data } = job.data;
+
+          await this.queueCleaner.updateQueueActivity(this.queueName);
 
           await this.execGlobalMessaging(data, character);
         },

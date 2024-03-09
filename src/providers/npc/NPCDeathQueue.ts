@@ -1,7 +1,6 @@
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
-import { CharacterView } from "@providers/character/CharacterView";
 
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { CharacterParty, ICharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
@@ -22,7 +21,6 @@ import {
   INPCLoot,
 } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
-import { provide } from "inversify-binding-decorators";
 import { Types } from "mongoose";
 import { NPCExperience } from "./NPCExperience/NPCExperience";
 import { NPCFreezer } from "./NPCFreezer";
@@ -30,10 +28,13 @@ import { NPCLoot } from "./NPCLoot";
 import { NPCSpawn } from "./NPCSpawn";
 import { NPCTarget } from "./movement/NPCTarget";
 
+import { CharacterView } from "@providers/character/CharacterView";
 import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { v4 as uuidv4 } from "uuid";
-@provide(NPCDeathQueue)
+@provideSingleton(NPCDeathQueue)
 export class NPCDeathQueue {
   private queue: Queue | null = null;
   private worker: Worker | null = null;
@@ -54,7 +55,8 @@ export class NPCDeathQueue {
     private npcExperience: NPCExperience,
     private locker: Locker,
     private newRelic: NewRelic,
-    private npcLoot: NPCLoot
+    private npcLoot: NPCLoot,
+    private queueCleaner: QueueCleaner
   ) {}
 
   public init(): void {
@@ -88,6 +90,8 @@ export class NPCDeathQueue {
           const { killer, npc } = job.data;
 
           try {
+            await this.queueCleaner.updateQueueActivity(this.queueName);
+
             await this.execHandleNPCDeath(killer, npc);
           } catch (err) {
             console.error(`Error processing ${this.queueName} for NPC ${npc.key}:`, err);

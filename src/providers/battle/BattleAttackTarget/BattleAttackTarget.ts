@@ -17,7 +17,7 @@ import {
 } from "@rpg-engine/shared";
 import { EntityAttackType, EntityType } from "@rpg-engine/shared/dist/types/entity.types";
 import { provide } from "inversify-binding-decorators";
-import { HitTarget } from "../HitTarget";
+import { HitTargetQueue } from "../HitTargetQueue";
 import { BattleNetworkStopTargeting } from "../network/BattleNetworkStopTargetting";
 import { BattleAttackRanged } from "./BattleAttackRanged";
 import { BattleAttackValidator } from "./BattleAttackValidator";
@@ -33,7 +33,7 @@ export class BattleAttackTarget {
     private battleRangedAttack: BattleAttackRanged,
     private characterWeapon: CharacterWeapon,
     private battleAttackValidator: BattleAttackValidator,
-    private hitTarget: HitTarget,
+    private hitTarget: HitTargetQueue,
     private npcSpellArea: NPCSpellArea
   ) {}
 

@@ -2,6 +2,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { EnvType } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
 import { v4 as uuidv4 } from "uuid";
@@ -19,7 +20,7 @@ export class ItemUseCycleQueue {
     appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
   }`;
 
-  constructor(private redisManager: RedisManager) {}
+  constructor(private redisManager: RedisManager, private queueCleaner: QueueCleaner) {}
 
   public init(): void {
     if (!this.connection) {
@@ -48,6 +49,8 @@ export class ItemUseCycleQueue {
           let { characterId, itemKey, iterations, intervalDurationMs } = job.data;
 
           try {
+            await this.queueCleaner.updateQueueActivity(this.queueName);
+
             const callback = this.itemCallbacks.get(`${characterId}-${itemKey}`);
 
             if (!callback) {

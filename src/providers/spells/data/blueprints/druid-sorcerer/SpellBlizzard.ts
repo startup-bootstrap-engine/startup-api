@@ -1,6 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { HitTarget } from "@providers/battle/HitTarget";
+import { HitTargetQueue } from "@providers/battle/HitTargetQueue";
 import { SPELL_AREA_DIAMOND_BLAST_RADIUS } from "@providers/constants/SpellConstants";
 import { entityEffectFreezing } from "@providers/entityEffects/data/blueprints/entityEffectFreezing";
 import { characterBuffActivator, container } from "@providers/inversify/container";
@@ -49,7 +49,7 @@ export const spellBlizzard: Partial<ISpell> = {
       entityEffect: entityEffectFreezing,
       customFn: async (target: ICharacter | INPC, intensity: number) => {
         const spellCalculator = container.get(SpellCalculator);
-        const hitTarget = container.get(HitTarget);
+        const hitTarget = container.get(HitTargetQueue);
 
         await hitTarget.hit(character, target, true, MagicPower.UltraHigh + intensity, true);
 
