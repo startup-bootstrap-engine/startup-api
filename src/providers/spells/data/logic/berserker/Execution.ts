@@ -2,7 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterDeath } from "@providers/character/CharacterDeath";
-import { NPCDeath } from "@providers/npc/NPCDeath";
+import { NPCDeathQueue } from "@providers/npc/NPCDeathQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { EntityType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -10,7 +10,7 @@ import { provide } from "inversify-binding-decorators";
 @provide(Execution)
 export class Execution {
   constructor(
-    private npcDeath: NPCDeath,
+    private npcDeath: NPCDeathQueue,
     private characterDeath: CharacterDeath,
     private socketMessaging: SocketMessaging
   ) {}

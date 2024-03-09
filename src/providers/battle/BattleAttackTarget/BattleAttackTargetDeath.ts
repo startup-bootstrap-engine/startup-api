@@ -4,7 +4,7 @@ import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterDeath } from "@providers/character/CharacterDeath";
 import { GENERATE_BLOOD_ON_DEATH } from "@providers/constants/BattleConstants";
-import { NPCDeath } from "@providers/npc/NPCDeath";
+import { NPCDeathQueue } from "@providers/npc/NPCDeathQueue";
 import { NPCExperience } from "@providers/npc/NPCExperience/NPCExperience";
 import { NPCTarget } from "@providers/npc/movement/NPCTarget";
 import { QuestSystem } from "@providers/quest/QuestSystem";
@@ -21,7 +21,7 @@ export class BattleAttackTargetDeath {
     private battleEffects: BattleEffects,
     private characterDeath: CharacterDeath,
     private npcTarget: NPCTarget,
-    private npcDeath: NPCDeath,
+    private npcDeath: NPCDeathQueue,
     private questSystem: QuestSystem,
     private battleNetworkStopTargeting: BattleNetworkStopTargeting,
     private npcExperience: NPCExperience,

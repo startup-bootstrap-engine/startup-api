@@ -3,7 +3,7 @@ import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { CharacterDeath } from "@providers/character/CharacterDeath";
 import { GENERATE_BLOOD_GROUND_ON_HIT } from "@providers/constants/BattleConstants";
-import { NPCDeath } from "@providers/npc/NPCDeath";
+import { NPCDeathQueue } from "@providers/npc/NPCDeathQueue";
 import { NPCExperience } from "@providers/npc/NPCExperience/NPCExperience";
 import { QuestSystem } from "@providers/quest/QuestSystem";
 import { NewRelicTransactionCategory } from "@providers/types/NewRelicTypes";
@@ -16,7 +16,7 @@ import { BattleEffects } from "./BattleEffects";
 export class OnTargetHit {
   constructor(
     private characterDeath: CharacterDeath,
-    private npcDeath: NPCDeath,
+    private npcDeath: NPCDeathQueue,
     private questSystem: QuestSystem,
     private battleEffects: BattleEffects,
     private newRelic: NewRelic,

@@ -118,6 +118,13 @@ export class NPCMovementMoveTowardsQueue {
     }
   }
 
+  public async shutdown(): Promise<void> {
+    await this.queue?.close();
+    await this.worker?.close();
+    this.queue = null;
+    this.worker = null;
+  }
+
   public async clearAllJobs(): Promise<void> {
     if (!this.connection || !this.queue || !this.worker) {
       this.init();

@@ -15,15 +15,15 @@ import {
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { FromGridX, FromGridY, IItem } from "@rpg-engine/shared";
 import _ from "lodash";
-import { NPCDeath } from "../NPCDeath";
+import { NPCDeathQueue } from "../NPCDeathQueue";
 
 describe("NPCDeath.ts", () => {
-  let npcDeath: NPCDeath;
+  let npcDeath: NPCDeathQueue;
   let testNPC: INPC;
   let testCharacter: ICharacter;
 
   beforeAll(() => {
-    npcDeath = container.get<NPCDeath>(NPCDeath);
+    npcDeath = container.get<NPCDeathQueue>(NPCDeathQueue);
   });
 
   beforeEach(async () => {

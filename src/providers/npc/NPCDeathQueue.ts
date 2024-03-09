@@ -13,7 +13,15 @@ import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTy
 import { Locker } from "@providers/locks/Locker";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
-import { BattleSocketEvents, CharacterPartyBenefits, EntityType, IBattleDeath, INPCLoot } from "@rpg-engine/shared";
+import {
+  BattleSocketEvents,
+  CharacterPartyBenefits,
+  EntityType,
+  EnvType,
+  IBattleDeath,
+  INPCLoot,
+} from "@rpg-engine/shared";
+import { Queue, Worker } from "bullmq";
 import { provide } from "inversify-binding-decorators";
 import { Types } from "mongoose";
 import { NPCExperience } from "./NPCExperience/NPCExperience";
@@ -22,9 +30,21 @@ import { NPCLoot } from "./NPCLoot";
 import { NPCSpawn } from "./NPCSpawn";
 import { NPCTarget } from "./movement/NPCTarget";
 
-@provide(NPCDeath)
-export class NPCDeath {
+import { appEnv } from "@providers/config/env";
+import { RedisManager } from "@providers/database/RedisManager";
+import { v4 as uuidv4 } from "uuid";
+@provide(NPCDeathQueue)
+export class NPCDeathQueue {
+  private queue: Queue | null = null;
+  private worker: Worker | null = null;
+  private connection;
+
+  private queueName: string = `np-death-${uuidv4()}-${
+    appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
+  }`;
+
   constructor(
+    private redisManager: RedisManager,
     private socketMessaging: SocketMessaging,
     private characterView: CharacterView,
     private npcTarget: NPCTarget,
@@ -37,8 +57,96 @@ export class NPCDeath {
     private npcLoot: NPCLoot
   ) {}
 
-  @TrackNewRelicTransaction()
+  public init(): void {
+    if (appEnv.general.IS_UNIT_TEST) {
+      return;
+    }
+
+    if (!this.connection) {
+      this.connection = this.redisManager.client;
+    }
+
+    if (!this.queue) {
+      this.queue = new Queue(this.queueName, {
+        connection: this.connection,
+      });
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.queue.on("error", async (error) => {
+          console.error("Error in the pathfindingQueue:", error);
+
+          await this.queue?.close();
+          this.queue = null;
+        });
+      }
+    }
+
+    if (!this.worker) {
+      this.worker = new Worker(
+        this.queueName,
+        async (job) => {
+          const { killer, npc } = job.data;
+
+          try {
+            await this.execHandleNPCDeath(killer, npc);
+          } catch (err) {
+            console.error(`Error processing ${this.queueName} for NPC ${npc.key}:`, err);
+            throw err;
+          }
+        },
+        {
+          connection: this.connection,
+        }
+      );
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.worker.on("failed", async (job, err) => {
+          console.log(`Pathfinding job ${job?.id} failed with error ${err.message}`);
+
+          await this.worker?.close();
+          this.worker = null;
+        });
+      }
+    }
+  }
+
+  public async clearAllJobs(): Promise<void> {
+    if (!this.connection || !this.queue || !this.worker) {
+      this.init();
+    }
+
+    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
+    for (const job of jobs) {
+      try {
+        await job?.remove();
+      } catch (err) {
+        console.error(`Error removing job ${job?.id}:`, err.message);
+      }
+    }
+  }
+
+  public async shutdown(): Promise<void> {
+    await this.queue?.close();
+    await this.worker?.close();
+    this.queue = null;
+    this.worker = null;
+  }
+
   public async handleNPCDeath(killer: ICharacter, npc: INPC): Promise<void> {
+    if (appEnv.general.IS_UNIT_TEST) {
+      await this.execHandleNPCDeath(killer, npc);
+      return;
+    }
+
+    if (!this.connection || !this.queue || !this.worker) {
+      this.init();
+    }
+
+    await this.queue?.add(this.queueName, { killer, npc });
+  }
+
+  @TrackNewRelicTransaction()
+  public async execHandleNPCDeath(killer: ICharacter, npc: INPC): Promise<void> {
     try {
       await this.npcFreezer.freezeNPC(npc, "NPCDeath");
       const hasLocked = await this.locker.lock(`npc-death-${npc._id}`);
@@ -96,16 +204,10 @@ export class NPCDeath {
   }
 
   private async notifyCharactersOfNPCDeath(npc: INPC): Promise<void> {
-    const nearbyCharacters = await this.characterView.getCharactersAroundXYPosition(npc.x, npc.y, npc.scene);
-
-    const notifications = nearbyCharacters.map((nearbyCharacter) =>
-      this.socketMessaging.sendEventToUser<IBattleDeath>(nearbyCharacter.channelId!, BattleSocketEvents.BattleDeath, {
-        id: npc.id,
-        type: "NPC",
-      })
-    );
-
-    await Promise.all(notifications);
+    await this.socketMessaging.sendEventToCharactersAroundNPC<IBattleDeath>(npc, BattleSocketEvents.BattleDeath, {
+      id: npc._id,
+      type: "NPC",
+    });
   }
 
   private async getNPCWithSkills(npc: INPC): Promise<INPC> {

@@ -24,6 +24,7 @@ import { ItemUseCycleQueue } from "@providers/item/ItemUseCycleQueue";
 import { Locker } from "@providers/locks/Locker";
 import { NPCBattleCycleQueue } from "@providers/npc/NPCBattleCycleQueue";
 import { NPCCycleQueue } from "@providers/npc/NPCCycleQueue";
+import { NPCDeathQueue } from "@providers/npc/NPCDeathQueue";
 import { NPCFreezer } from "@providers/npc/NPCFreezer";
 import { NPCMovementMoveTowardsQueue } from "@providers/npc/movement/NPCMovementMoveTowardsQueue";
 import PartyManagement from "@providers/party/PartyManagement";
@@ -70,7 +71,8 @@ export class ServerBootstrap {
     private characterActionsTracker: CharacterActionsTracker,
     private errorHandlingTracker: ErrorHandlingTracker,
     private bullStrength: BullStrength,
-    private npcMovementMoveTowards: NPCMovementMoveTowardsQueue
+    private npcMovementMoveTowardsQueue: NPCMovementMoveTowardsQueue,
+    private npcDeathQueue: NPCDeathQueue
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -113,6 +115,8 @@ export class ServerBootstrap {
       await this.useWithTileQueue.shutdown();
       await this.chatNetworkGlobalMessaging.shutdown();
       await this.spellNetworkCast.shutdown();
+      await this.npcMovementMoveTowardsQueue.shutdown();
+      await this.npcDeathQueue.shutdown();
     };
 
     process.on("SIGTERM", async () => {
@@ -186,7 +190,7 @@ export class ServerBootstrap {
 
   private async clearSomeQueues(): Promise<void> {
     await this.pathfindingQueue.clearAllJobs();
-    await this.npcMovementMoveTowards.clearAllJobs();
+    await this.npcMovementMoveTowardsQueue.clearAllJobs();
     await this.hitTarget.clearAllQueueJobs();
     await this.itemUseCycleQueue.clearAllJobs();
     await this.npcBattleCycleQueue.clearAllJobs();
@@ -194,6 +198,7 @@ export class ServerBootstrap {
     await this.useWithTileQueue.clearAllJobs();
     await this.chatNetworkGlobalMessaging.clearAllJobs();
     await this.spellNetworkCast.clearAllJobs();
+    await this.npcDeathQueue.clearAllJobs();
 
     console.log("🧹 BullMQ queues cleared...");
   }
