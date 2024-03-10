@@ -100,6 +100,10 @@ import { npcOrcBerserker } from "./tier7/NPCOrcBerserker";
 import { npcOrcMage } from "./tier7/NPCOrcMage";
 import { npcForestWalker } from "./tier8/NPCForestWalker";
 import { npcDwarfMage } from "./tier9/NPCDwarfMage";
+import { npcBlackOrc } from "./tier26/NPCBlackOrc";
+import { npcIceOrc } from "./tier26/NPCIceOrc";
+import { npcFireOrc } from "./tier27/NPCFireOrc";
+import { npcForestOrc } from "./tier27/NPCForestOrc";
 
 export const hostileNPCs = {
   [HostileNPCsBlueprint.Orc]: npcOrc,
@@ -203,4 +207,8 @@ export const hostileNPCs = {
   [HostileNPCsBlueprint.CorruptedKobold]: npcCorruptedKobold,
   [HostileNPCsBlueprint.ForestKobold]: npcForestKobold,
   [HostileNPCsBlueprint.AncientDragon]: npcAncientDragon,
+  [HostileNPCsBlueprint.BlackOrc]: npcBlackOrc,
+  [HostileNPCsBlueprint.IceOrc]: npcIceOrc,
+  [HostileNPCsBlueprint.FireOrc]: npcFireOrc,
+  [HostileNPCsBlueprint.ForestOrc]: npcForestOrc,
 };
