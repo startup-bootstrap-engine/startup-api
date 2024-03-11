@@ -18,7 +18,7 @@ export const itemCarrotSeed: IUseWithItemBlueprint = {
   description: "A small seed that grows into a carrot. It requires fertile soil and enough water to grow.",
   weight: 0.01,
   hasUseWith: true,
-  basePrice: 10,
+  basePrice: 8,
   rangeType: EntityAttackType.None,
   useWithMaxDistanceGrid: RangeTypes.Short,
   canSell: true,
