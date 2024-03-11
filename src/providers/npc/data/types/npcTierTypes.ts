@@ -162,6 +162,10 @@ const tierProperties = {
     baseHealth: [7770, 7970, 8170, 8370] as const,
     skillLevel: [718, 738, 758, 778] as const,
   },
+  27: {
+    baseHealth: [8570, 8770, 8970, 9170] as const,
+    skillLevel: [798, 818, 838, 858] as const,
+  },
 };
 
 type Tier = keyof typeof tierProperties;

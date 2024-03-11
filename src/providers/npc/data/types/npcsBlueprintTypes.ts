@@ -178,6 +178,10 @@ export enum HostileNPCsBlueprint {
   CorruptedKobold = "corrupted-kobold",
   BlackKobold = "black-kobold",
   ForestKobold = "forest-kobold",
+  BlackOrc = "black-orc",
+  IceOrc = "ice-orc",
+  FireOrc = "fire-orc",
+  ForestOrc = "forest-orc",
   // Trainer
   BattleCompanion = "battle-companion",
   BattleCompanionMagic = "battle-companion-magic",

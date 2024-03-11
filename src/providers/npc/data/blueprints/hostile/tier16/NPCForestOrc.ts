@@ -2,9 +2,13 @@ import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
+  AccessoriesBlueprint,
   AxesBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
+  FoodsBlueprint,
+  HelmetsBlueprint,
+  LegsBlueprint,
   MacesBlueprint,
   PotionsBlueprint,
   ShieldsBlueprint,
@@ -17,6 +21,7 @@ import {
   AnimationEffectKeys,
   MagicPower,
   NPCAlignment,
+  NPCCustomDeathPenalties,
   NPCSubtype,
   RangeTypes,
   SpellsBlueprint,
@@ -24,45 +29,73 @@ import {
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcForestNaga: INPCTierBlueprint<18> = {
+export const npcForestOrc: INPCTierBlueprint<16> = {
   ...generateMoveTowardsMovement(),
-  name: "Forest Naga",
-  key: HostileNPCsBlueprint.ForestNaga,
-  textureKey: HostileNPCsBlueprint.ForestNaga,
+  name: "Forest Orc",
+  key: HostileNPCsBlueprint.ForestOrc,
+  subType: NPCSubtype.Animal,
+  textureKey: HostileNPCsBlueprint.ForestOrc,
   alignment: NPCAlignment.Hostile,
-  attackType: EntityAttackType.Ranged,
+  attackType: EntityAttackType.MeleeRanged,
   ammoKey: AnimationEffectKeys.FireBall,
+  tier: 16,
   maxRangeAttack: RangeTypes.High,
-  speed: MovementSpeed.Standard,
-  tier: 18,
-  subType: NPCSubtype.Humanoid,
-  baseHealth: 2770,
+  speed: MovementSpeed.ExtraFast,
+
+  baseHealth: 1970,
   healthRandomizerDice: Dice.D20,
   skillRandomizerDice: Dice.D20,
-  canSwitchToRandomTarget: true,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   canSwitchToLowHealthTarget: true,
+  canSwitchToRandomTarget: true,
+  hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
+
   isMagic: true,
   skills: {
-    level: 218,
+    level: 138,
     strength: {
-      level: 218,
+      level: 138,
     },
     dexterity: {
-      level: 218,
+      level: 138,
     },
     resistance: {
-      level: 218,
+      level: 138,
     },
     magicResistance: {
-      level: 218,
+      level: 138,
     },
     magic: {
-      level: 218,
+      level: 138,
     },
   },
-  fleeOnLowHealth: true,
   loots: [
+    {
+      itemBlueprintKey: FoodsBlueprint.Cookie,
+      chance: LootProbability.VeryCommon,
+      quantityRange: [1, 10],
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.VerdantDagger,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.VikingHelmet,
+      chance: LootProbability.Uncommon,
+    },
+
+    {
+      itemBlueprintKey: SwordsBlueprint.LightingSword,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.RubyRing,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: LegsBlueprint.KingsGuardLegs,
+      chance: LootProbability.Rare,
+    },
     {
       itemBlueprintKey: DaggersBlueprint.CorruptionDagger,
       chance: LootProbability.Uncommon,
@@ -124,22 +157,22 @@ export const npcForestNaga: INPCTierBlueprint<18> = {
       chance: LootProbability.Uncommon,
     },
   ],
-  entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
+  entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.VineGrasp],
   areaSpells: [
     {
-      spellKey: SpellsBlueprint.VampiricStorm,
-      probability: 50,
-      power: MagicPower.High,
+      spellKey: SpellsBlueprint.PoisonArrowCreationSpell,
+      probability: 40,
+      power: MagicPower.Medium,
     },
     {
-      spellKey: SpellsBlueprint.CorruptionWave,
+      spellKey: SpellsBlueprint.PoisonRuneCreationSpell,
       probability: 70,
       power: MagicPower.UltraHigh,
     },
     {
-      spellKey: SpellsBlueprint.FireStorm,
-      probability: 40,
-      power: MagicPower.Medium,
+      spellKey: SpellsBlueprint.CorruptionBolt,
+      probability: 70,
+      power: MagicPower.UltraHigh,
     },
   ],
 };

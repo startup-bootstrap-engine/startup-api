@@ -9,6 +9,7 @@ import { npcWolf } from "./tier1/NPCWolf";
 import { npcIceFox } from "./tier10/NPCIceFox";
 import { npcMudGolem } from "./tier10/NPCMudGolem";
 import { npcFireFox } from "./tier11/NPCFireFox";
+import { npcIceOrc } from "./tier11/NPCIceOrc";
 import { npcIceTroll } from "./tier11/NPCIceTroll";
 import { npcDwarfGuardian } from "./tier12/NPCDwarfGuardian";
 import { npcMinotaurArcher } from "./tier12/NPCMinotaursArcher";
@@ -24,6 +25,7 @@ import { npcWildTroll } from "./tier13/NPCWildTroll";
 import { npcCyclops } from "./tier14/NPCCyclops";
 import { npcLitch } from "./tier14/NPCLitch";
 import { npcTrollWarrior } from "./tier14/NPCTrollWarrior";
+import { npcBlackOrc } from "./tier15/NPCBlackOrc";
 import { npcCaveCyclops } from "./tier15/NPCCaveCyclops";
 import { npcCondessa } from "./tier15/NPCCondessa";
 import { npcDarkKnight } from "./tier15/NPCDarkKnight";
@@ -35,6 +37,8 @@ import { npcTrollBerserker } from "./tier15/NPCTrollBerserker";
 import { npcConde } from "./tier16/NPCConde";
 import { npcDarkElf } from "./tier16/NPCDarkElf";
 import { npcDragonKnight } from "./tier16/NPCDragonKnight";
+import { npcFireOrc } from "./tier16/NPCFireOrc";
+import { npcForestOrc } from "./tier16/NPCForestOrc";
 import { npcGiantSpider } from "./tier16/NPCGiantSpider";
 import { npcOrcWarlord } from "./tier16/NPCOrcWarlord";
 import { npcStoneGolem } from "./tier16/NPCStoneGolem";
@@ -203,4 +207,8 @@ export const hostileNPCs = {
   [HostileNPCsBlueprint.CorruptedKobold]: npcCorruptedKobold,
   [HostileNPCsBlueprint.ForestKobold]: npcForestKobold,
   [HostileNPCsBlueprint.AncientDragon]: npcAncientDragon,
+  [HostileNPCsBlueprint.BlackOrc]: npcBlackOrc,
+  [HostileNPCsBlueprint.IceOrc]: npcIceOrc,
+  [HostileNPCsBlueprint.FireOrc]: npcFireOrc,
+  [HostileNPCsBlueprint.ForestOrc]: npcForestOrc,
 };

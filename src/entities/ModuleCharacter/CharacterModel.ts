@@ -276,6 +276,9 @@ const characterSchema = createLeanSchema(
     lastDayPlayed: Type.date({
       required: false,
     }),
+    isFarmingMode: Type.boolean({
+      default: false,
+    }),
   },
   {
     timestamps: { createdAt: true, updatedAt: true },
