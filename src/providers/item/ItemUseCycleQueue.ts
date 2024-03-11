@@ -2,6 +2,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { Locker } from "@providers/locks/Locker";
 import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { EnvType } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
@@ -20,7 +21,7 @@ export class ItemUseCycleQueue {
     appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
   }`;
 
-  constructor(private redisManager: RedisManager, private queueCleaner: QueueCleaner) {}
+  constructor(private redisManager: RedisManager, private queueCleaner: QueueCleaner, private locker: Locker) {}
 
   public init(): void {
     if (!this.connection) {
@@ -125,12 +126,24 @@ export class ItemUseCycleQueue {
     intervalDurationMs: number,
     callback: CallbackRecord
   ): Promise<void> {
-    this.itemCallbacks.set(`${characterId}-${itemKey}`, callback);
+    try {
+      const isLocked = await this.locker.lock(`item-use-cycle-${characterId}-${itemKey}`);
 
-    // execute first callback
-    await callback();
+      if (!isLocked) {
+        return;
+      }
 
-    await this.add(characterId, itemKey, iterations, intervalDurationMs);
+      this.itemCallbacks.set(`${characterId}-${itemKey}`, callback);
+
+      // execute first callback
+      await callback();
+
+      await this.add(characterId, itemKey, iterations, intervalDurationMs);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      await this.locker.unlock(`item-use-cycle-${characterId}-${itemKey}`);
+    }
   }
 
   private async add(
