@@ -71,6 +71,10 @@ export class NPCTarget {
   @TrackNewRelicTransaction()
   public async tryToSetTarget(npc: INPC): Promise<void> {
     try {
+      if (npc.targetCharacter) {
+        return;
+      }
+
       const canProceed = await this.locker.lock(`npc-try-set-target-${npc._id}`);
 
       if (!canProceed) {

@@ -72,13 +72,7 @@ export class SpellCast {
 
       const spell = this.getSpell(data.magicWords) as ISpell;
 
-      if (!spell) {
-        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, spell not available.");
-        return false;
-      }
-
       if (!(await this.isSpellCastingValid(spell, character))) {
-        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you cannot cast this spell.");
         return false;
       }
 
