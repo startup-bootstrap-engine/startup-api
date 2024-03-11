@@ -12,37 +12,7 @@ export const npcTraderFood = {
   isTrader: true,
   traderItems: [
     {
-      key: FoodsBlueprint.Cheese,
-    },
-    {
-      key: FoodsBlueprint.Bread,
-    },
-    {
       key: FoodsBlueprint.Cookie,
-    },
-    {
-      key: FoodsBlueprint.ChickensMeat,
-    },
-    {
-      key: FoodsBlueprint.Banana,
-    },
-    {
-      key: FoodsBlueprint.Mushroom,
-    },
-    {
-      key: FoodsBlueprint.Egg,
-    },
-    {
-      key: FoodsBlueprint.Fish,
-    },
-    {
-      key: FoodsBlueprint.Salmon,
-    },
-    {
-      key: FoodsBlueprint.Pineapple,
-    },
-    {
-      key: FoodsBlueprint.Coconut,
     },
   ],
 } as Partial<INPC>;

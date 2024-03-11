@@ -15,4 +15,4 @@ export const LOOT_CRAFTING_MATERIAL_DROP_CHANCE = 0.75; // chance that a mob dro
 
 // Food
 
-export const LOOT_FOOD_DROP_CHANCE = 0.25; // chance that a mob drops food. Static chance. Do not suffer influence of NPC_LOOT_CHANCE_MULTIPLIER
+export const LOOT_FOOD_DROP_CHANCE = 0.05; // chance that a mob drops food. Static chance. Do not suffer influence of NPC_LOOT_CHANCE_MULTIPLIER
