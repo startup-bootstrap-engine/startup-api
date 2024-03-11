@@ -12,6 +12,7 @@ describe("CharacterSkull.ts", () => {
   let testCharacterWithWhiteSkull: ICharacter;
   let testCharacterWithRedSkull: ICharacter;
   let testCharacterWithYellowSkull: ICharacter;
+  let isSamePartySpy: jest.SpyInstance;
 
   beforeAll(() => {
     characterSkull = container.get<CharacterSkull>(CharacterSkull);
@@ -75,6 +76,9 @@ describe("CharacterSkull.ts", () => {
   });
 
   it("should know if target is not unjustify attack when target has skull", async () => {
+    // @ts-ignore
+    isSamePartySpy = jest.spyOn(characterSkull.partyManagement, "checkIfCharacterAndTargetOnTheSameParty");
+
     testCharacter.faction = CharacterFactions.LifeBringer;
     testCharacter.hasSkull = false;
     testTargetCharacter.faction = CharacterFactions.LifeBringer;
@@ -85,6 +89,7 @@ describe("CharacterSkull.ts", () => {
     );
 
     expect(isTargetUnjustifiedAttack).toBeFalsy;
+    expect(isSamePartySpy).toHaveBeenCalled();
   });
 
   it("should update to yellow skull when white skull kills a character", async () => {
