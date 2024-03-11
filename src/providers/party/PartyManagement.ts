@@ -621,6 +621,19 @@ export default class PartyManagement {
   }
 
   // PARTY VALIDATIONS
+  public async checkIfCharacterAndTargetOnTheSameParty(character: ICharacter, target: ICharacter): Promise<boolean> {
+    const party = await this.getPartyByCharacterId(character._id);
+
+    if (!party) return false;
+
+    const theyAreInSameParty = this.areBothInSameParty(party, character, target);
+    console.log(theyAreInSameParty);
+
+    if (theyAreInSameParty) return true;
+
+    return false;
+  }
+
   private checkIfIsLeader(party: ICharacterParty, eventCaller: ICharacter): boolean {
     if (!party) {
       return false;

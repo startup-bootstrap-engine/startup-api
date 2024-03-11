@@ -397,4 +397,18 @@ describe("Party Management", () => {
       type: "info",
     });
   });
+
+  it("should return true when check if both characters are on same party", async () => {
+    // @ts-ignore
+    const party = await partyManagement.createParty(characterLeader, firstMember, 2);
+
+    expect(party).toBeDefined;
+
+    const areBothOnSameParty = await partyManagement.checkIfCharacterAndTargetOnTheSameParty(
+      characterLeader,
+      firstMember
+    );
+
+    expect(areBothOnSameParty).toBe(true);
+  });
 });

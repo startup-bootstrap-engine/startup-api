@@ -1,4 +1,5 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
@@ -12,7 +13,13 @@ import { IPlantItem } from "@providers/plant/data/blueprints/PlantItem";
 import { SimpleTutorial } from "@providers/simpleTutorial/SimpleTutorial";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { IEquipmentAndInventoryUpdatePayload, IItemContainer, ItemSocketEvents, ItemType } from "@rpg-engine/shared";
+import {
+  IBaseItemBlueprint,
+  IEquipmentAndInventoryUpdatePayload,
+  IItemContainer,
+  ItemSocketEvents,
+  ItemType,
+} from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
 
@@ -44,6 +51,21 @@ export class UseWithItemToSeed {
     const blueprintManager = container.get<BlueprintManager>(BlueprintManager);
 
     try {
+      const itemBlueprint = (await blueprintManager.getBlueprint("items", originItemKey)) as IBaseItemBlueprint;
+
+      if (itemBlueprint?.minRequirements) {
+        const meetsMinRequirements = await this.checkMinimumRequirements(character, itemBlueprint);
+
+        if (!meetsMinRequirements) {
+          const { level, skill } = itemBlueprint.minRequirements!;
+
+          const message = `Sorry, this seed requires level ${level} and ${skill.level} level in ${skill.name}`;
+
+          this.socketMessaging.sendErrorMessageToCharacter(character, message);
+          return;
+        }
+      }
+
       const blueprint = (await blueprintManager.getBlueprint("plants", key)) as IPlantItem;
 
       if (!blueprint) {
@@ -81,6 +103,26 @@ export class UseWithItemToSeed {
 
   private async cacheClear(character: ICharacter): Promise<void> {
     await clearCacheForKey(`${character._id}-inventory`);
+  }
+
+  private async checkMinimumRequirements(character: ICharacter, itemBlueprint: IBaseItemBlueprint): Promise<boolean> {
+    const skill = (await Skill.findById(character.skills)
+      .lean()
+      .cacheQuery({
+        cacheKey: `${character?._id}-skills`,
+      })) as unknown as ISkill as ISkill;
+
+    const minRequirements = itemBlueprint?.minRequirements;
+
+    if (!minRequirements) return true;
+
+    if (skill.level < minRequirements.level) return false;
+
+    const skillsLevel: number = skill[minRequirements.skill.name]?.level ?? 0;
+
+    if (skillsLevel < minRequirements.skill.level) return false;
+
+    return true;
   }
 
   private async refreshInventory(character: ICharacter): Promise<void> {
