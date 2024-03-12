@@ -3,8 +3,9 @@ import { CharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { SPELL_AREA_MEDIUM_BLAST_RADIUS } from "@providers/constants/SpellConstants";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { entityEffectBurning } from "@providers/entityEffects/data/blueprints/entityEffectBurning";
-import { container, unitTestHelper } from "@providers/inversify/container";
+import { container, inMemoryHashTable, unitTestHelper } from "@providers/inversify/container";
 import { FriendlyNPCsBlueprint, HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import {
   AnimationEffectKeys,
@@ -22,9 +23,11 @@ describe("SpellArea", () => {
   let testCharacterTarget: ICharacter;
   let testNPC: INPC;
   let spellArea: SpellArea;
+  let inMemoryHashTable: InMemoryHashTable;
 
   beforeAll(() => {
     spellArea = container.get(SpellArea);
+    inMemoryHashTable = container.get(InMemoryHashTable);
   });
 
   beforeEach(async () => {
@@ -419,6 +422,9 @@ describe("SpellArea - PVP", () => {
       benefits: [],
     });
     await party.save();
+
+    //! Ideally, party members should be fully stored on redis. Meanwhile, this ugly hack is necessary.
+    await inMemoryHashTable.set("party-members", party._id.toString(), [testCharacter._id, testAnotherCharacter._id]);
 
     const result = await spellArea.cast(testCharacter, testAnotherCharacter, MagicPower.High, testSpellAreaOptions);
 
