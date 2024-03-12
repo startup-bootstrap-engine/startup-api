@@ -6,6 +6,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { CharacterLastAction } from "@providers/character/CharacterLastAction";
 import { CharacterBuffActivator } from "@providers/character/characterBuff/CharacterBuffActivator";
 import { PARTY_BONUS_RATIO } from "@providers/constants/PartyConstants";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
   BasicAttribute,
@@ -39,7 +40,8 @@ export default class PartyManagement {
   constructor(
     private socketMessaging: SocketMessaging,
     private characterBuffActivator: CharacterBuffActivator,
-    private characterLastAction: CharacterLastAction
+    private characterLastAction: CharacterLastAction,
+    private inMemoryHashTable: InMemoryHashTable
   ) {}
 
   // PARTY MANAGEMENT
@@ -134,6 +136,10 @@ export default class PartyManagement {
     const message = `${target.name} joined the party!`;
     await this.sendMessageToAllMembers(message, updatedParty);
 
+    const partyMembers = updatedParty.members.map((member) => member._id.toString());
+
+    await this.inMemoryHashTable.set("party-members", updatedParty._id.toString(), partyMembers);
+
     return updatedParty;
   }
 
@@ -181,6 +187,8 @@ export default class PartyManagement {
         await this.handleAllBuffInParty(party, isAdding);
         const message = `${target.name} joined the party!`;
         await this.sendMessageToAllMembers(message, party);
+
+        await this.inMemoryHashTable.set("party-members", party._id.toString(), [leader._id, target._id]);
 
         return party;
       }
@@ -274,7 +282,7 @@ export default class PartyManagement {
     return await this.removeMemberFromParty(party, targetOfEvent);
   }
 
-  private async removeMemberFromParty(party: ICharacterParty, eventCaller: ICharacter): Promise<boolean> {
+  public async removeMemberFromParty(party: ICharacterParty, character: ICharacter): Promise<boolean> {
     if (!party) {
       return false;
     }
@@ -282,17 +290,17 @@ export default class PartyManagement {
     let isAdding = false;
     await this.handleAllBuffInParty(party, isAdding);
 
-    party.members = party.members.filter((member) => member._id.toString() !== eventCaller._id.toString());
+    party.members = party.members.filter((member) => member._id.toString() !== character._id.toString());
 
     const partySize = party.size || party.members.length + 1;
     party.benefits = this.calculatePartyBenefits(partySize, this.getDifferentClasses(party));
 
     if (party.members.length === 0) {
-      await this.deleteParty(eventCaller._id);
+      await this.deleteParty(character._id);
       const message = "Party Deleted!";
       await this.sendMessageToAllMembers(message, party);
 
-      await this.partyPayloadSend(null, [eventCaller._id, party.leader._id]);
+      await this.partyPayloadSend(null, [character._id, party.leader._id]);
 
       return true;
     }
@@ -302,11 +310,17 @@ export default class PartyManagement {
     isAdding = true;
     await this.handleAllBuffInParty(updatedParty, isAdding);
 
-    const message = `${eventCaller.name} left the party!`;
+    const message = `${character.name} left the party!`;
     await this.sendMessageToAllMembers(message, updatedParty);
 
     await this.partyPayloadSend(updatedParty);
-    await this.partyPayloadSend(null, [eventCaller._id]);
+    await this.partyPayloadSend(null, [character._id]);
+
+    await this.inMemoryHashTable.set(
+      "party-members",
+      updatedParty._id.toString(),
+      updatedParty.members.map((member) => member._id)
+    );
 
     return true;
   }
@@ -325,6 +339,8 @@ export default class PartyManagement {
     await CharacterParty.deleteOne({ _id: party._id });
     const updatedParty = (await CharacterParty.findById(party._id)) as ICharacterParty;
     await this.partyPayloadSend(updatedParty);
+
+    await this.inMemoryHashTable.delete("party-members", updatedParty._id.toString());
   }
 
   @TrackNewRelicTransaction()
@@ -626,12 +642,10 @@ export default class PartyManagement {
 
     if (!party) return false;
 
-    const theyAreInSameParty = this.areBothInSameParty(party, character, target);
-    console.log(theyAreInSameParty);
+    const partyMembers = (await this.inMemoryHashTable.get("party-members", party._id.toString())) as string[];
+    const theyAreInSameParty = partyMembers?.includes(target._id.toString());
 
-    if (theyAreInSameParty) return true;
-
-    return false;
+    return theyAreInSameParty || false;
   }
 
   private checkIfIsLeader(party: ICharacterParty, eventCaller: ICharacter): boolean {
@@ -793,5 +807,7 @@ export default class PartyManagement {
     });
 
     await Promise.all(removeTasks);
+
+    await this.inMemoryHashTable.deleteAll("party-members");
   }
 }

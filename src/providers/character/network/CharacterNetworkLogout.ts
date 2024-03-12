@@ -47,13 +47,18 @@ export class CharacterNetworkLogout {
   }
 
   private async handleLogout(data: ICharacterLogout, character: ICharacter, channel: SocketChannel): Promise<void> {
-    await this.unwatchCharacter(character);
-    await this.notifyNearbyCharacters(data, character);
-    await this.updateTextureKeysAndStatus(data, character);
-    await this.performCleanup(data, character);
-    await this.updateSkillsAndStats(character);
-    await this.leavePartyIfExists(character);
-    await this.finalizeLogout(character, channel);
+    try {
+      await this.leavePartyIfExists(character);
+      await this.unwatchCharacter(character);
+      await this.updateTextureKeysAndStatus(data, character);
+      await this.performCleanup(data, character);
+      await this.updateSkillsAndStats(character);
+      await this.notifyNearbyCharacters(data, character);
+
+      await this.finalizeLogout(character, channel);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   private async unwatchCharacter(character: ICharacter): Promise<void> {
@@ -114,7 +119,7 @@ export class CharacterNetworkLogout {
   private async leavePartyIfExists(character: ICharacter): Promise<void> {
     const party = (await this.partyManagement.getPartyByCharacterId(character._id)) as ICharacterParty;
     if (party) {
-      await this.partyManagement.leaveParty(party._id, character, character);
+      await this.partyManagement.removeMemberFromParty(party, character);
     }
   }
 
