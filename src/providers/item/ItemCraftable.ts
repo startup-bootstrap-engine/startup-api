@@ -1,6 +1,5 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
-import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
@@ -18,15 +17,16 @@ import { IUseWithCraftingRecipe } from "@providers/useWith/useWithTypes";
 import {
   AnimationEffectKeys,
   CraftingSkill,
+  EnvType,
   ICraftItemPayload,
   IEquipmentAndInventoryUpdatePayload,
   IItemContainer,
   IUIShowMessage,
   ItemRarities,
   ItemSocketEvents,
+  ItemType,
   UISocketEvents,
 } from "@rpg-engine/shared";
-import { provide } from "inversify-binding-decorators";
 import random from "lodash/random";
 import shuffle from "lodash/shuffle";
 import throttle from "lodash/throttle";
@@ -42,12 +42,25 @@ import { TraitGetter } from "@providers/skill/TraitGetter";
 import { AvailableBlueprints } from "./data/types/itemsBlueprintTypes";
 
 import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
+import { appEnv } from "@providers/config/env";
+import { RedisManager } from "@providers/database/RedisManager";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { Locker } from "@providers/locks/Locker";
+import { QueueCleaner } from "@providers/queue/QueueCleaner";
+import { Queue, Worker } from "bullmq";
 import _ from "lodash";
 import { ItemCraftbook } from "./ItemCraftbook";
 import { ItemCraftingRecipes } from "./ItemCraftingRecipes";
 
-@provide(ItemCraftable)
+@provideSingleton(ItemCraftable)
 export class ItemCraftable {
+  private queue: Queue<any, any, string> | null = null;
+  private worker: Worker | null = null;
+  private connection: any;
+
+  private queueName = (scene: string): string =>
+    `item-craftable-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
+
   constructor(
     private socketMessaging: SocketMessaging,
     private characterItemContainer: CharacterItemContainer,
@@ -62,100 +75,211 @@ export class ItemCraftable {
     private traitGetter: TraitGetter,
     private itemCraftingRecipes: ItemCraftingRecipes,
     private itemCraftbook: ItemCraftbook,
-    private characterPremiumAccount: CharacterPremiumAccount
+    private characterPremiumAccount: CharacterPremiumAccount,
+    private redisManager: RedisManager,
+    private queueCleaner: QueueCleaner,
+    private locker: Locker
   ) {}
 
-  @TrackNewRelicTransaction()
+  public initQueue(scene: string): void {
+    if (!this.connection) {
+      this.connection = this.redisManager.client;
+    }
+
+    if (!this.queue) {
+      this.queue = new Queue(this.queueName(scene), {
+        connection: this.connection,
+      });
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.queue.on("error", async (error) => {
+          console.error(`Error in the ${this.queueName(scene)}:`, error);
+
+          await this.queue?.close();
+          this.queue = null;
+        });
+      }
+    }
+
+    if (!this.worker) {
+      this.worker = new Worker(
+        this.queueName(scene),
+        async (job) => {
+          const { character, itemToCraft } = job.data;
+
+          try {
+            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
+
+            await this.execCraftItem(itemToCraft, character);
+          } catch (err) {
+            console.error(`Error processing ${this.queueName(scene)} for Character ${character.name}:`, err);
+            throw err;
+          }
+        },
+        {
+          connection: this.connection,
+        }
+      );
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.worker.on("failed", async (job, err) => {
+          console.log(`${this.queueName(scene)} job ${job?.id} failed with error ${err.message}`);
+
+          await this.worker?.close();
+          this.worker = null;
+        });
+      }
+    }
+  }
+
+  public async clearAllJobs(): Promise<void> {
+    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
+    for (const job of jobs) {
+      try {
+        await job?.remove();
+      } catch (err) {
+        console.error(`Error removing job ${job?.id}:`, err.message);
+      }
+    }
+  }
+
+  public async shutdown(): Promise<void> {
+    await this.queue?.close();
+    await this.worker?.close();
+
+    this.queue = null;
+    this.worker = null;
+  }
+
   public async craftItem(itemToCraft: ICraftItemPayload, character: ICharacter): Promise<void> {
-    if (!character.skills) {
+    if (appEnv.general.IS_UNIT_TEST) {
+      await this.execCraftItem(itemToCraft, character);
       return;
     }
 
-    if (!itemToCraft.itemKey) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "You must select at least one item to craft.");
-
-      return;
+    if (!this.connection || !this.queue || !this.worker) {
+      this.initQueue(character.scene);
     }
 
-    if (!(character.skills as ISkill)?.level) {
-      const skills = (await Skill.findOne({ owner: character._id })
-        .lean()
-        .cacheQuery({
-          cacheKey: `${character._id}-skills`,
-        })) as ISkill;
-      character.skills = skills;
-    }
-
-    if (!this.characterValidation.hasBasicValidation(character)) {
-      return;
-    }
-
-    const blueprint = await blueprintManager.getBlueprint("items", itemToCraft.itemKey as AvailableBlueprints);
-    const recipe = this.itemCraftingRecipes.getAllRecipes()[itemToCraft.itemKey];
-
-    if (!blueprint || !recipe) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, this item can not be crafted.");
-      return;
-    }
-
-    const inventoryInfo = await this.itemCraftingRecipes.getCharacterInventoryIngredients(character);
-
-    if (!this.itemCraftingRecipes.canCraftRecipe(inventoryInfo, recipe)) {
-      this.socketMessaging.sendErrorMessageToCharacter(
+    await this.queue?.add(
+      this.queueName(character.scene),
+      {
         character,
-        "Sorry, you do not have required items in your inventory."
-      );
-      return;
-    }
-
-    const inventory = await this.characterInventory.getInventory(character);
-
-    if (!inventory) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, the inventory is not available.");
-      return;
-    }
-
-    const inventoryContainer = await ItemContainer.findById(inventory.itemContainer);
-
-    if (!inventoryContainer) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, the item container is not available.");
-      return;
-    }
-
-    const qty = await this.getQty(character, recipe);
-
-    const itemToBeAdded = {
-      ...blueprint,
-      stackQty: qty,
-    };
-
-    // Check if the character meets the minimum skill requirements for crafting
-    const hasMinimumSkills = await this.itemCraftingRecipes.haveMinimumSkills(character.skills as ISkill, recipe);
-
-    if (!hasMinimumSkills) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        "Sorry, you do not have the required skills ot craft this item."
-      );
-      return;
-    }
-
-    // Check if the character has available slots
-
-    const hasAvailableSlots = await this.characterItemSlots.hasAvailableSlot(
-      inventoryContainer._id,
-      itemToBeAdded as IItem,
-      true
+        itemToCraft,
+      },
+      {
+        removeOnComplete: true,
+        removeOnFail: true,
+      }
     );
+  }
 
-    if (!hasAvailableSlots) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, no more available slots.");
+  @TrackNewRelicTransaction()
+  public async execCraftItem(itemToCraft: ICraftItemPayload, character: ICharacter): Promise<void> {
+    const canProceed = await this.locker.lock(`craft-item-${character._id}`);
+
+    if (!canProceed) {
       return;
     }
 
-    await this.inMemoryHashTable.delete("load-craftable-items", character._id);
+    try {
+      const hasBasicValidation = this.characterValidation.hasBasicValidation(character);
 
-    await this.performCrafting(recipe, character, itemToCraft.itemSubType);
+      if (!hasBasicValidation) {
+        return;
+      }
+
+      if (!itemToCraft.itemKey) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "You must select at least one item to craft.");
+        return;
+      }
+
+      if (!(character.skills as ISkill)?.level) {
+        const skills = await Skill.findOne({ owner: character._id })
+          .lean()
+          .cacheQuery({
+            cacheKey: `${character._id}-skills`,
+          });
+
+        if (!skills) {
+          return;
+        }
+
+        character.skills = skills as ISkill;
+      }
+
+      const blueprint = blueprintManager.getBlueprint("items", itemToCraft.itemKey as AvailableBlueprints);
+      const recipe = this.itemCraftingRecipes.getAllRecipes()[itemToCraft.itemKey];
+
+      if (!blueprint || !recipe) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, this item can not be crafted.");
+        return;
+      }
+
+      const inventoryInfoPromise = this.itemCraftingRecipes.getCharacterInventoryIngredients(character);
+      const inventoryContainerPromise = this.characterInventory.getInventoryItemContainer(character);
+      const qtyPromise = this.getQty(character, recipe);
+
+      const [inventoryInfo, inventoryContainer, qty] = await Promise.all([
+        inventoryInfoPromise,
+        inventoryContainerPromise,
+        qtyPromise,
+      ]);
+
+      if (!inventoryContainer) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you do not have an inventory.");
+        return;
+      }
+
+      if (!this.itemCraftingRecipes.canCraftRecipe(inventoryInfo, recipe)) {
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          "Sorry, you do not have required items in your inventory."
+        );
+        return;
+      }
+
+      const itemToBeAdded = {
+        ...blueprint,
+        stackQty: qty,
+      };
+
+      const hasMinimumSkillsPromise = this.itemCraftingRecipes.haveMinimumSkills(character.skills as ISkill, recipe);
+      const hasAvailableSlotsPromise = this.characterItemSlots.hasAvailableSlot(
+        inventoryContainer._id,
+        itemToBeAdded as IItem,
+        true
+      );
+
+      const [hasMinimumSkills, hasAvailableSlots] = await Promise.all([
+        hasMinimumSkillsPromise,
+        hasAvailableSlotsPromise,
+      ]);
+
+      if (!hasAvailableSlots) {
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          "Sorry, you do not have enough space in your inventory."
+        );
+        return;
+      }
+
+      if (!hasMinimumSkills) {
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          "Sorry, you do not have the required skills ot craft this item."
+        );
+        return;
+      }
+
+      await this.inMemoryHashTable.delete("load-craftable-items", character._id);
+
+      await this.performCrafting(recipe, character, itemToCraft.itemSubType);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      await this.locker.unlock(`craft-item-${character._id}`);
+    }
   }
 
   /**
@@ -266,6 +390,7 @@ export class ItemCraftable {
     do {
       const props: Partial<IItem> = {
         owner: character._id,
+        isItemContainer: blueprint.type === ItemType.Container,
       };
 
       if (blueprint.maxStackSize > 1) {

@@ -238,6 +238,8 @@ describe("ItemCraftable.ts", () => {
     testCharacter.skills = undefined;
     await testCharacter.save();
 
+    await Skill.findByIdAndDelete(skill._id);
+
     // Mock the isCraftSuccessful function to always return true
     const craftChanceMock = jest.spyOn(ItemCraftable.prototype as any, "isCraftSuccessful");
     craftChanceMock.mockImplementation(() => {

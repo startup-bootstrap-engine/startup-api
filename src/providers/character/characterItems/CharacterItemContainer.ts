@@ -97,6 +97,10 @@ export class CharacterItemContainer {
     options?: IAddItemToContainerOptions
   ): Promise<boolean> {
     try {
+      if (!item) {
+        return false;
+      }
+
       const hasLock = await this.locker.lock(`item-${item._id}-add-item-to-container`);
 
       if (!hasLock) {
@@ -222,11 +226,11 @@ export class CharacterItemContainer {
       return result;
     } catch (error) {
       console.error(error);
-      await this.locker.unlock(`item-${item._id}-add-item-to-container`);
+      await this.locker.unlock(`item-${item?._id}-add-item-to-container`);
 
       return false;
     } finally {
-      await this.locker.unlock(`item-${item._id}-add-item-to-container`);
+      await this.locker.unlock(`item-${item?._id}-add-item-to-container`);
     }
   }
 
