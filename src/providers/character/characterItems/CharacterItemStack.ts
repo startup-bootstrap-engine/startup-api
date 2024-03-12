@@ -130,6 +130,16 @@ export class CharacterItemStack {
 
       // create a new item with the difference
       itemToBeAdded.stackQty = difference;
+
+      if (!itemToBeAdded.save) {
+        itemToBeAdded = (await Item.findById(itemToBeAdded._id)) as IItem;
+
+        if (!itemToBeAdded) {
+          console.error("No item found");
+          return;
+        }
+      }
+
       await itemToBeAdded.save();
 
       await Item.updateOne(

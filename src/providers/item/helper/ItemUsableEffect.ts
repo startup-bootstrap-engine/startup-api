@@ -21,58 +21,61 @@ export class ItemUsableEffect {
   @TrackNewRelicTransaction()
   public async apply(target: ICharacter | INPC, attr: EffectableAttribute, value: number): Promise<void> {
     try {
-      if (!target) {
-        throw new Error("Invalid target: target must be a valid entity");
-      }
-      if (isNaN(value)) {
-        throw new Error("Invalid value: value must be a number");
-      }
+      this.validateTargetAndValue(target, value);
 
-      target[attr] += value;
-      const updateObj: any = {};
-      switch (attr) {
-        case EffectableAttribute.Health:
-          const maxAttrHealth = EffectableMaxAttribute.Health;
-          if (target[attr] > target[maxAttrHealth]) {
-            target[attr] = target[maxAttrHealth];
-          } else if (target[attr] < 0) {
-            target[attr] = 0;
-          }
-          updateObj[attr] = target[attr];
-          break;
+      const updateObj: any = this.calculateAttributeUpdate(target, attr, value);
 
-        case EffectableAttribute.Mana:
-          const maxAttrMana = EffectableMaxAttribute.Mana;
-          if (target[attr] > target[maxAttrMana]) {
-            target[attr] = target[maxAttrMana];
-          } else if (target[attr] < 0) {
-            target[attr] = 0;
-          }
-          updateObj[attr] = target[attr];
-          break;
-
-        case EffectableAttribute.Speed:
-          const dataCharacter = target as ICharacter;
-          if (dataCharacter.baseSpeed === MovementSpeed.Slow || dataCharacter.baseSpeed === MovementSpeed.ExtraSlow) {
-            dataCharacter.baseSpeed = value;
-          }
-          // eslint-disable-next-line dot-notation
-          updateObj["baseSpeed"] = dataCharacter.baseSpeed;
-          break;
-
-        default:
-          break;
-      }
-
-      if (target.type === EntityType.Character) {
-        await Character.updateOne({ _id: target._id }, { $set: updateObj });
-      } else {
-        await NPC.updateOne({ _id: target._id }, { $set: updateObj });
-      }
+      await this.updateEntity(target, updateObj);
     } catch (error) {
       console.error("Failed to update entity:", error);
       throw error;
     }
+  }
+
+  private validateTargetAndValue(target: ICharacter | INPC, value: number): void {
+    if (!target) {
+      throw new Error("Invalid target: target must be a valid entity");
+    }
+    if (isNaN(value)) {
+      throw new Error("Invalid value: value must be a number");
+    }
+  }
+
+  private calculateAttributeUpdate(target: ICharacter | INPC, attr: EffectableAttribute, value: number): any {
+    const updateObj: any = {};
+    target[attr] += value;
+
+    switch (attr) {
+      case EffectableAttribute.Health:
+      case EffectableAttribute.Mana:
+        this.updateHealthOrMana(target, attr, updateObj);
+        break;
+      case EffectableAttribute.Speed:
+        this.updateSpeed(target as ICharacter, value, updateObj);
+        break;
+      default:
+        break;
+    }
+
+    return updateObj;
+  }
+
+  private updateHealthOrMana(target: ICharacter | INPC, attr: EffectableAttribute, updateObj: any): void {
+    const maxAttr = attr === EffectableAttribute.Health ? EffectableMaxAttribute.Health : EffectableMaxAttribute.Mana;
+    target[attr] = Math.max(0, Math.min(target[attr], target[maxAttr]));
+    updateObj[attr] = target[attr];
+  }
+
+  private updateSpeed(target: ICharacter, value: number, updateObj: any): void {
+    if (target.baseSpeed === MovementSpeed.Slow || target.baseSpeed === MovementSpeed.ExtraSlow) {
+      target.baseSpeed = value;
+    }
+    updateObj.baseSpeed = target.baseSpeed;
+  }
+
+  private async updateEntity(target: ICharacter | INPC, updateObj: any): Promise<void> {
+    const model = target.type === EntityType.Character ? Character : NPC;
+    await model.updateOne({ _id: target._id }, { $set: updateObj });
   }
 
   @TrackNewRelicTransaction()

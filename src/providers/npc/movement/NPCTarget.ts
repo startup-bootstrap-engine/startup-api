@@ -165,7 +165,8 @@ export class NPCTarget {
     const targetCharacter = await Character.findById(npc.targetCharacter).lean();
 
     if (!targetCharacter) {
-      throw new Error(`Error in ${npc.key}: Failed to find targetCharacter!`);
+      console.debug(`Error in ${npc.key}: Failed to find targetCharacter!`);
+      return;
     }
 
     const rangeThresholdDefinition = this.getRangeThreshold(npc);
@@ -192,7 +193,7 @@ export class NPCTarget {
   @TrackNewRelicTransaction()
   public async setTarget(npc: INPC, character: ICharacter): Promise<void> {
     try {
-      if (!npc.isAlive) {
+      if (!npc.isAlive || character?.health === 0) {
         return;
       }
 

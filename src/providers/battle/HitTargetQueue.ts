@@ -393,18 +393,15 @@ export class HitTargetQueue {
     baseDamage: number;
     updatedHealth: number;
   }> {
-    const [baseDamage, updatedHealth] = await Promise.all([
-      this.battleDamageCalculator.calculateHitDamage(attacker, target, magicAttack),
-      this.fetchLatestHealth(target),
-    ]);
-
-    let finalBaseDamage = baseDamage;
+    let baseDamage = await this.battleDamageCalculator.calculateHitDamage(attacker, target, magicAttack);
 
     if (bonusDamage) {
-      finalBaseDamage += bonusDamage * BONUS_DAMAGE_MULTIPLIER;
+      baseDamage += bonusDamage * BONUS_DAMAGE_MULTIPLIER;
     }
 
-    let damage = this.battleDamageCalculator.getCriticalHitDamageIfSucceed(finalBaseDamage);
+    let damage = this.battleDamageCalculator.getCriticalHitDamageIfSucceed(baseDamage);
+
+    const updatedHealth = await this.fetchLatestHealth(target);
 
     target.health = updatedHealth;
 
@@ -415,7 +412,7 @@ export class HitTargetQueue {
       throw new Error("Damage is not a number");
     }
 
-    return { damage, baseDamage: finalBaseDamage, updatedHealth };
+    return { damage, baseDamage, updatedHealth };
   }
 
   private async fetchLatestHealth(target: ICharacter | INPC): Promise<number> {

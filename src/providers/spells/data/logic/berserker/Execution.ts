@@ -17,8 +17,13 @@ export class Execution {
 
   @TrackNewRelicTransaction()
   public async handleExecution(attacker: ICharacter, target: ICharacter | INPC): Promise<boolean> {
-    const targetId = target._id;
-    const targetType = target.type as EntityType;
+    if (!attacker || !target) {
+      console.debug(`Invalid attacker or target: ${attacker} - ${target}`);
+      return false;
+    }
+
+    const targetId = target?._id;
+    const targetType = target?.type as EntityType;
 
     try {
       if (!attacker || !targetId || !targetType) {

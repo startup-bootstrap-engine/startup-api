@@ -77,7 +77,9 @@ export class BattleNetworkInitTargeting {
                 type: data.type,
               }
             );
-            throw new Error(`Failed to set target on NPC ${data.targetId}`);
+
+            console.debug(`Failed to set target on NPC ${data.targetId}`);
+            return;
           }
 
           const isValidTarget = await this.isValidTarget(target, character);

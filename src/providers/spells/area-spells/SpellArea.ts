@@ -43,7 +43,7 @@ export class SpellArea {
     magicPower: MagicPower,
     options: ISpellAreaCastOptions
   ): Promise<void> {
-    if (!target) {
+    if (!target || !caster) {
       return;
     }
 

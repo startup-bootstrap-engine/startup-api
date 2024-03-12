@@ -99,6 +99,8 @@ export class ServerBootstrap {
 
     await this.clearSomeQueues();
 
+    this.errorHandlingTracker.overrideDebugHandling();
+
     if (appEnv.general.ENV === EnvType.Production) {
       this.errorHandlingTracker.overrideErrorHandling();
 
