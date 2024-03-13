@@ -4,6 +4,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { blueprintManager } from "@providers/inversify/container";
 import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { NumberFormatter } from "@providers/text/NumberFormatter";
 import {
   CharacterTradeSocketEvents,
   ICharacterNPCTradeInitBuyResponse,
@@ -24,7 +25,8 @@ export class CharacterTradingNPCBuy {
     private characterTradingBalance: CharacterTradingBalance,
     private characterTradingBuy: CharacterTradingBuy,
     private characterTradingValidation: CharacterTradingValidation,
-    private characterTarget: CharacterTarget
+    private characterTarget: CharacterTarget,
+    private numberFormatter: NumberFormatter
   ) {}
 
   @TrackNewRelicTransaction()
@@ -39,7 +41,7 @@ export class CharacterTradingNPCBuy {
 
     npc?.traderItems?.forEach(async ({ key }) => {
       const item = await blueprintManager.getBlueprint<any>("items", key as AvailableBlueprints);
-      const price = await this.characterTradingBalance.getItemBuyPrice(key);
+      const price = this.numberFormatter.formatNumber(await this.characterTradingBalance.getItemBuyPrice(key, npc));
 
       if (price) {
         traderItems.push({ ...item, price });
@@ -65,6 +67,6 @@ export class CharacterTradingNPCBuy {
 
   @TrackNewRelicTransaction()
   public buyItemsFromNPC(character: ICharacter, npc: INPC, items: ITradeRequestItem[]): Promise<boolean> {
-    return this.characterTradingBuy.buyItems(character, npc, items, TradingEntity.NPC);
+    return this.characterTradingBuy.buyItems(character, npc, items, TradingEntity.NPC, npc);
   }
 }

@@ -24,6 +24,7 @@ import { capitalize } from "lodash";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterInventory } from "./CharacterInventory";
 import { CharacterTradingBalance } from "./CharacterTradingBalance";
+import { CharacterTradingPriceControl } from "./CharacterTradingPriceControl";
 import { CharacterTradingValidation } from "./CharacterTradingValidation";
 import { CharacterUser } from "./CharacterUser";
 import { CharacterItemContainer } from "./characterItems/CharacterItemContainer";
@@ -43,7 +44,8 @@ export class CharacterTradingBuy {
     private newRelic: NewRelic,
     private characterUser: CharacterUser,
     private simpleTutorial: SimpleTutorial,
-    private inMemoryHashTable: InMemoryHashTable
+    private inMemoryHashTable: InMemoryHashTable,
+    private characterTradingPriceControl: CharacterTradingPriceControl
   ) {}
 
   @TrackNewRelicTransaction()
@@ -51,7 +53,8 @@ export class CharacterTradingBuy {
     character: ICharacter,
     tradingEntity: INPC,
     items: ITradeRequestItem[],
-    tradingEntityType: TradingEntity
+    tradingEntityType: TradingEntity,
+    npc: INPC
   ): Promise<boolean> {
     const inventory = await this.characterInventory.getInventory(character);
     const inventoryContainerId = inventory?.itemContainer as unknown as string;
@@ -61,7 +64,13 @@ export class CharacterTradingBuy {
       return false;
     }
 
-    const isBuyTransactionValid = await this.validateBuyTransaction(character, tradingEntity, items, tradingEntityType);
+    const isBuyTransactionValid = await this.validateBuyTransaction(
+      character,
+      tradingEntity,
+      items,
+      tradingEntityType,
+      npc
+    );
 
     if (!isBuyTransactionValid) {
       return false;
@@ -144,7 +153,7 @@ export class CharacterTradingBuy {
       }
 
       if (wasItemAddedToContainer) {
-        const itemPrice = await this.characterTradingBalance.getItemBuyPrice(purchasedItem.key, priceMultiplier);
+        const itemPrice = await this.characterTradingBalance.getItemBuyPrice(purchasedItem.key, npc, priceMultiplier);
 
         if (!itemPrice) {
           this.socketMessaging.sendErrorMessageToCharacter(
@@ -171,6 +180,14 @@ export class CharacterTradingBuy {
           );
           return false;
         }
+
+        await this.characterTradingPriceControl.recordCharacterNPCTradeOperation(
+          npc,
+          purchasedItem.key,
+          decrementQty,
+          purchasedItem.qty,
+          "buy"
+        );
       }
 
       if (itemBlueprint.subType === ItemSubType.Seed) {
@@ -216,7 +233,8 @@ export class CharacterTradingBuy {
     character: ICharacter,
     tradingEntity: INPC,
     itemsToPurchase: ITradeRequestItem[],
-    tradingEntityType: TradingEntity
+    tradingEntityType: TradingEntity,
+    npc: INPC
   ): Promise<boolean> {
     let isBaseTransactionValid = false;
     let priceModifier = 1;
@@ -282,7 +300,8 @@ export class CharacterTradingBuy {
     const totalCost = await this.characterTradingBalance.calculateItemsTotalPrice(
       tradingItems,
       itemsToPurchase,
-      priceModifier
+      priceModifier,
+      npc
     );
 
     const characterTotalGoldInventory = await this.characterTradingBalance.getTotalGoldInInventory(character);

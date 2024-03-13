@@ -22,11 +22,6 @@ export class SpecialEffect {
     namespace: SpecialEffectNamespace,
     onEffectEnd?: Function
   ): Promise<boolean> {
-    if (!target) {
-      console.debug("SpecialEffect.applyEffect: target is null");
-      return false;
-    }
-
     const entityType = target.type as EntityType;
     if (entityType === EntityType.Item) {
       return false;

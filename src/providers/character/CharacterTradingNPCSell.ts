@@ -33,7 +33,7 @@ export class CharacterTradingNPCSell {
       return;
     }
 
-    const characterItems = await this.characterTradingSell.getCharacterItemsToSell(character, TradingEntity.NPC);
+    const characterItems = await this.characterTradingSell.getCharacterItemsToSell(character, TradingEntity.NPC, npc);
     if (!characterItems) {
       return;
     }
