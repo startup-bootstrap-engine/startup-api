@@ -81,7 +81,7 @@ export class CharacterTradingBalance {
     const basePrice = (await blueprintManager.getBlueprint<IItem>("items", key as AvailableBlueprints)).basePrice ?? 0;
     return (
       this.mathHelper.fixPrecision(basePrice * multiplier) *
-      (await this.characterTradingPriceControl.getPriceAdjustmentRatio(npc, key, tradingType))
+      ((await this.characterTradingPriceControl.getPriceAdjustmentRatio(npc, key, tradingType)) ?? 1)
     );
   }
 }

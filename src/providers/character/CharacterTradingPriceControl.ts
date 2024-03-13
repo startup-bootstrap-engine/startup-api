@@ -48,6 +48,10 @@ export class CharacterTradingPriceControl {
       dayjs(trade.boughtAt).isAfter(dayjs().subtract(TRADING_PRICE_CONTROL_PRICE_RATIO_DATA_WINDOW_DAYS, "day"))
     );
 
+    if (recentTrades.length === 0) {
+      return 1; // No adjustment if no recent trades
+    }
+
     const { totalBoughtValue, totalSoldValue } = recentTrades.reduce(
       (acc, trade) => {
         if (trade.tradeType === "buy") {
@@ -71,9 +75,9 @@ export class CharacterTradingPriceControl {
     let adjustmentRatio = 1;
 
     if (operationType === "buy") {
-      adjustmentRatio += (totalBoughtValue / ema) * TRADING_PRICE_CONTROL_RATIO_SENSITIVITY;
+      adjustmentRatio += Math.log(totalBoughtValue / ema + 1) * TRADING_PRICE_CONTROL_RATIO_SENSITIVITY;
     } else if (operationType === "sell") {
-      adjustmentRatio -= (totalSoldValue / ema) * TRADING_PRICE_CONTROL_RATIO_SENSITIVITY;
+      adjustmentRatio -= Math.log(totalSoldValue / ema + 1) * TRADING_PRICE_CONTROL_RATIO_SENSITIVITY;
     }
 
     adjustmentRatio = Math.max(adjustmentRatio, TRADING_PRICE_CONTROL_RATIO_MIN_VALUE);
