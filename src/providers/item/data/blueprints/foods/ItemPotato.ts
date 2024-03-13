@@ -15,7 +15,7 @@ export const itemPotato: IConsumableItemBlueprint = {
     "The Potato is a vegetable that grows underground in the form of a tuber. It comes in a variety of colors, sizes, and shapes, depending on the type of potato.",
   weight: 1,
   maxStackSize: 999,
-  basePrice: 45 * FARMING_HARVEST_PRICE_RATIO,
+  basePrice: 80 * FARMING_HARVEST_PRICE_RATIO,
   canSell: true,
   usableEffectKey: UsableEffectsBlueprint.SuperStrongEatingEffect,
 };

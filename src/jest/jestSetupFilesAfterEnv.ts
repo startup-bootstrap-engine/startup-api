@@ -230,6 +230,7 @@ jest.mock("@providers/constants/FarmingConstants", () => ({
   HIGH_GROWTH_FACTOR: 2.5,
   SUPER_GROWTH_FACTOR: 3,
   FARMING_HARVEST_PRICE_RATIO: 1,
+  FARMING_SEED_PRICE_RATIO: 1,
   DEFAULT_PLANT_CYCLE: {
     Seed: 5,
     Sprout: 10,

@@ -13,7 +13,7 @@ export const itemEggPlant: IConsumableItemBlueprint = {
   description: "A fruit that is known for its unique taste and texture, often used in cooking.",
   weight: 0.1,
   maxStackSize: 999,
-  basePrice: 30 * FARMING_HARVEST_PRICE_RATIO,
+  basePrice: 65 * FARMING_HARVEST_PRICE_RATIO,
   canSell: true,
   usableEffectKey: UsableEffectsBlueprint.StrongEatingEffect,
 };

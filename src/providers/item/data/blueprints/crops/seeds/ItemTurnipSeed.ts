@@ -1,4 +1,5 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { FARMING_SEED_PRICE_RATIO } from "@providers/constants/FarmingConstants";
 import { container } from "@providers/inversify/container";
 import { ItemCraftable } from "@providers/item/ItemCraftable";
 import { SeedsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -18,7 +19,7 @@ export const itemTurnipSeed: IUseWithItemBlueprint = {
   description: "A small seed that grows into a turnip. It requires fertile soil and enough water to grow.",
   weight: 0.01,
   hasUseWith: true,
-  basePrice: 10,
+  basePrice: 10 * FARMING_SEED_PRICE_RATIO,
   rangeType: EntityAttackType.None,
   useWithMaxDistanceGrid: RangeTypes.Short,
   canSell: true,

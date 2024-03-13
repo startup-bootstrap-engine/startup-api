@@ -13,7 +13,7 @@ export const itemCarrot: IConsumableItemBlueprint = {
   description: "The carrot is a hardy, cool-season vegetable that thrives in fertile, well-drained soil.",
   weight: 0.5,
   maxStackSize: 999,
-  basePrice: 12 * FARMING_HARVEST_PRICE_RATIO,
+  basePrice: 29 * FARMING_HARVEST_PRICE_RATIO,
   canSell: true,
   usableEffectKey: UsableEffectsBlueprint.ModerateEatingEffect,
 };

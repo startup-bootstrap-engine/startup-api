@@ -13,7 +13,7 @@ export const itemRedGrape: IConsumableItemBlueprint = {
   description: "A fruit that can be found in temperate areas.",
   weight: 0.01,
   maxStackSize: 999,
-  basePrice: 18 * FARMING_HARVEST_PRICE_RATIO,
+  basePrice: 55 * FARMING_HARVEST_PRICE_RATIO,
   canSell: true,
   usableEffectKey: UsableEffectsBlueprint.ModerateEatingEffect,
 };

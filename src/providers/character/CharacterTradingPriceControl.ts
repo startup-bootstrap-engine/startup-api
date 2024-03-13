@@ -4,6 +4,7 @@ import {
   TRADING_PRICE_CONTROL_RATIO_MAX_VALUE,
   TRADING_PRICE_CONTROL_RATIO_MIN_VALUE,
   TRADING_PRICE_CONTROL_RATIO_SENSITIVITY,
+  TRADING_PRICE_CONTROL_SKIP_CONTROL,
   TRADING_PRICE_CONTROL_TRADING_HISTORY_MAX_DAYS,
 } from "@providers/constants/CharacterTradingPriceControlConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
@@ -32,6 +33,10 @@ export class CharacterTradingPriceControl {
     itemKey: string,
     operationType: CharacterNPCTradeType
   ): Promise<number> {
+    if (TRADING_PRICE_CONTROL_SKIP_CONTROL.includes(itemKey as any)) {
+      return 1; // Skip control for certain items
+    }
+
     const currentTradingHistory: INPCTradingHistory =
       (await this.inMemoryHashTable.get("npc-trading-history", npc._id)) || ({} as INPCTradingHistory);
 

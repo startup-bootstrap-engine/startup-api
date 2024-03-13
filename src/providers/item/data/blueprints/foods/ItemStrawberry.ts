@@ -13,7 +13,7 @@ export const itemStrawberry: IConsumableItemBlueprint = {
   description: "A fruit that can be found in cold areas.",
   weight: 0.01,
   maxStackSize: 999,
-  basePrice: 15 * FARMING_HARVEST_PRICE_RATIO,
+  basePrice: 40 * FARMING_HARVEST_PRICE_RATIO,
   canSell: true,
   usableEffectKey: UsableEffectsBlueprint.ModerateEatingEffect,
 };

@@ -13,7 +13,7 @@ export const itemPumpkin: IConsumableItemBlueprint = {
   description: "A large round vegetable with a thick orange rind, often used in cooking and decoration.",
   weight: 0.5,
   maxStackSize: 999,
-  basePrice: 48 * FARMING_HARVEST_PRICE_RATIO,
+  basePrice: 75 * FARMING_HARVEST_PRICE_RATIO,
   canSell: true,
   usableEffectKey: UsableEffectsBlueprint.SuperStrongEatingEffect,
 };

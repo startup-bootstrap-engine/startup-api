@@ -13,7 +13,7 @@ export const itemWatermelon: IConsumableItemBlueprint = {
   description: "A fruit that can be found in temperate areas.",
   weight: 0.5,
   maxStackSize: 999,
-  basePrice: 40 * FARMING_HARVEST_PRICE_RATIO,
+  basePrice: 70 * FARMING_HARVEST_PRICE_RATIO,
   canSell: true,
   usableEffectKey: UsableEffectsBlueprint.StrongEatingEffect,
 };
