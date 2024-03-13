@@ -67,7 +67,6 @@ export class QueueCleaner {
           await queue.close(); // Close the queue
           await queue.obliterate({ force: true }); // Remove the queue and its data from Redis
           await this.inMemoryHashTable.delete(this.queueActivityNamespace, queueName); // Remove the queue record from tracking
-          console.log(`Closed and removed inactive queue: ${queueName}`);
         } catch (error) {
           console.error(`Failed to remove inactive queue: ${queueName}`, error);
         }
