@@ -30,14 +30,14 @@ export class BattleAttackTargetDeath {
 
   @TrackNewRelicTransaction()
   public async handleDeathAfterHit(attacker: ICharacter | INPC, target: ICharacter | INPC): Promise<void> {
-    if (!target.isAlive) {
+    if (!target.isAlive || target.health <= 0) {
       const n = random(0, 100);
 
       if (n <= GENERATE_BLOOD_ON_DEATH) {
         await this.battleEffects.generateBloodOnGround(target);
       }
 
-      if (target.type === "Character") {
+      if (target.type === EntityType.Character) {
         await this.handleCharacterDeath(attacker, target as ICharacter);
 
         if (attacker.type === EntityType.Character) {
@@ -55,7 +55,7 @@ export class BattleAttackTargetDeath {
   private async handleCharacterDeath(attacker: ICharacter | INPC, targetCharacter: ICharacter): Promise<void> {
     await this.characterDeath.handleCharacterDeath(attacker, targetCharacter);
 
-    if (attacker.type === "NPC") {
+    if (attacker.type === EntityType.NPC) {
       await this.npcTarget.clearTarget(attacker as INPC);
       await this.npcTarget.tryToSetTarget(attacker as INPC);
     } else {

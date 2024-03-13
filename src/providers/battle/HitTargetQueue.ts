@@ -378,9 +378,10 @@ export class HitTargetQueue {
     const character = attacker.type === "Character" ? (attacker as ICharacter) : (target as ICharacter);
 
     remainingPromises.push(this.sendBattleEvent(character, battleEventPayload as IBattleEventFromServer));
-    remainingPromises.push(this.battleAttackTargetDeath.handleDeathAfterHit(attacker, target));
 
     await Promise.all(remainingPromises);
+
+    await this.battleAttackTargetDeath.handleDeathAfterHit(attacker, target);
   }
 
   private async getCalculatedDamage(

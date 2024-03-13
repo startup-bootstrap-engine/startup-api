@@ -25,7 +25,6 @@ import { Locker } from "@providers/locks/Locker";
 import { NPCTarget } from "@providers/npc/movement/NPCTarget";
 import { SkillDecrease } from "@providers/skill/SkillDecrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { Time } from "@providers/time/Time";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import {
   BattleSocketEvents,
@@ -82,7 +81,6 @@ export class CharacterDeath {
     private characterBuffActivator: CharacterBuffActivator,
     private locker: Locker,
     private newRelic: NewRelic,
-    private time: Time,
     private equipmentSlots: EquipmentSlots,
     private characterSkull: CharacterSkull,
     private discordBot: DiscordBot
@@ -91,17 +89,19 @@ export class CharacterDeath {
   @TrackNewRelicTransaction()
   public async handleCharacterDeath(killer: INPC | ICharacter | null, character: ICharacter): Promise<void> {
     try {
-      const isLocked = await this.locker.hasLock(`character-death-${character.id}`);
-      if (isLocked) return;
+      const isLocked = await this.locker.lock(`character-death-${character._id}`);
 
-      await this.locker.lock(`character-death-${character.id}`, 3);
+      if (!isLocked) {
+        return;
+      }
+
       const characterBody = await this.generateCharacterBody(character);
 
+      await this.sendBattleDeathEvents(character);
+
       // Run these tasks concurrently as they don't depend on each other
-      await Promise.all([
-        this.handleKiller(killer, character),
-        this.handleCharacterMode(character, characterBody, killer),
-      ]);
+
+      await this.handleCharacterMode(character, characterBody, killer);
 
       await this.characterWeight.updateCharacterWeight(character);
       await this.sendRefreshEquipmentEvent(character);
@@ -110,13 +110,15 @@ export class CharacterDeath {
     } catch (err) {
       console.error(err);
     } finally {
-      await this.sendBattleDeathEvents(character);
       // Run these tasks concurrently as they don't depend on each other
       await Promise.all([
         entityEffectUse.clearAllEntityEffects(character), // make sure to clear all entity effects before respawn
         this.clearCache(character),
         this.respawnCharacter(character),
+        this.handleKiller(killer, character),
       ]);
+
+      await this.locker.unlock(`character-death-${character._id}`);
     }
   }
 
@@ -142,11 +144,10 @@ export class CharacterDeath {
       y: character.y,
       createdAt: new Date(),
     });
+    await characterDeathLog.save();
 
     if (!characterDeathLog.isJustify) {
-      await Promise.all([characterDeathLog.save(), this.characterSkull.updateSkullAfterKill(killer._id.toString())]);
-    } else {
-      await characterDeathLog.save();
+      await this.characterSkull.updateSkullAfterKill(killer._id.toString());
     }
   }
 
@@ -185,11 +186,11 @@ export class CharacterDeath {
 
   @TrackNewRelicTransaction()
   public async generateCharacterBody(character: ICharacter): Promise<IItem> {
-    const blueprintData = await blueprintManager.getBlueprint<IItem>("items", BodiesBlueprint.CharacterBody);
+    const blueprintData = blueprintManager.getBlueprint<IItem>("items", BodiesBlueprint.CharacterBody);
 
     const charBody = new Item({
       ...blueprintData,
-      bodyFromId: character.id,
+      bodyFromId: character._id,
       name: `${character.name}'s body`,
       scene: character.scene,
       texturePath: `${character.textureKey}/death/0.png`,
