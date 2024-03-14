@@ -44,6 +44,8 @@ import { recipeMoonlightCrescent } from "./tier17/recipeMoonlightCrescent";
 import { recipeStormbreaker } from "./tier17/recipeStormbreaker";
 import { recipeThunderclapKatana } from "./tier17/recipeThunderclapKatana";
 import { recipeThunderstormEdge } from "./tier17/recipeThunderstormEdge";
+import { recipeCelestialDefender } from "./tier18/recipeCelestialDefender";
+import { recipeFrostbiteSaber } from "./tier18/recipeFrostbiteSaber";
 import { recipeCopperBroadsword } from "./tier2/recipeCopperBroadsword";
 import { recipeIceSword } from "./tier2/recipeIceSword";
 import { recipeBasiliskSword } from "./tier3/recipeBasiliskSword";
@@ -132,4 +134,6 @@ export const recipeSwordsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [SwordsBlueprint.Stormbreaker]: [recipeStormbreaker],
   [SwordsBlueprint.ThunderclapKatana]: [recipeThunderclapKatana],
   [SwordsBlueprint.ThunderstormEdge]: [recipeThunderstormEdge],
+  [SwordsBlueprint.CelestialDefender]: [recipeCelestialDefender],
+  [SwordsBlueprint.FrostbiteSaber]: [recipeFrostbiteSaber],
 };

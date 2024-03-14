@@ -120,10 +120,6 @@ export const npcFellbeast: INPCTierBlueprint<17> = {
     },
 
     {
-      itemBlueprintKey: SwordsBlueprint.ThunderstormEdge,
-      chance: LootProbability.Uncommon,
-    },
-    {
       itemBlueprintKey: AccessoriesBlueprint.RubyglintNecklace,
       chance: LootProbability.VeryRare,
     },

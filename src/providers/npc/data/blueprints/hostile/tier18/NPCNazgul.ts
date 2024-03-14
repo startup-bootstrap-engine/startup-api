@@ -145,15 +145,7 @@ export const npcNazgul: INPCTierBlueprint<18> = {
       chance: LootProbability.VeryRare,
     },
     {
-      itemBlueprintKey: SwordsBlueprint.FrostbiteSaber,
-      chance: LootProbability.VeryRare,
-    },
-    {
       itemBlueprintKey: SwordsBlueprint.FrostfangDagger,
-      chance: LootProbability.VeryRare,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.CelestialDefender,
       chance: LootProbability.VeryRare,
     },
     {
