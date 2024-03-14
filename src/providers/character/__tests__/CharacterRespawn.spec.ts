@@ -1,9 +1,9 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { CharacterDeath } from "../CharacterDeath";
+import { INITIAL_STARTING_POINTS } from "@providers/constants/CharacterConstants";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { CharacterFactions } from "@rpg-engine/shared";
-import { INITIAL_STARTING_POINTS } from "@providers/constants/CharacterConstants";
 import mongoose from "mongoose";
+import { CharacterDeath } from "../CharacterDeath";
 
 describe("Character Respawn", () => {
   let characterDeath: CharacterDeath;
@@ -30,5 +30,14 @@ describe("Character Respawn", () => {
     expect(updatedCharacter?.x).toEqual(1600);
     expect(updatedCharacter?.y).toEqual(240);
     expect(updatedCharacter?.scene).toEqual(INITIAL_STARTING_POINTS["Shadow Walker"].scene);
+  });
+
+  it("should respawn the character in farming scene if farming mode is true", async () => {
+    testCharacter.isFarmingMode = true;
+    await characterDeath.respawnCharacter(testCharacter);
+
+    const updatedCharacter = await Character.findById(testCharacter._id).lean();
+
+    expect(updatedCharacter?.scene).toEqual(INITIAL_STARTING_POINTS["Farming Mode"]?.scene);
   });
 });

@@ -274,6 +274,14 @@ jest.mock("@providers/constants/CharacterConstants", () => ({
       gridY: 15,
       scene: "shadowlands-sewer",
     },
+    "Farming Mode": {
+      gridX: 36,
+      gridY: 18,
+      scene: "farm-land",
+    },
+  },
+  CharacterGameMode: {
+    Farming: "Farming Mode",
   },
 }));
 
