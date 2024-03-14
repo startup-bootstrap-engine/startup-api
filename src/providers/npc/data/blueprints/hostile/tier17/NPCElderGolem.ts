@@ -12,13 +12,13 @@ import {
   StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { SpellsBlueprint } from "@providers/spells/data/types/SpellsBlueprintTypes";
 import { MagicPower, NPCAlignment, NPCSubtype, RangeTypes } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcElderGolem: INPCTierBlueprint<17> = {
   ...generateMoveTowardsMovement(),
@@ -94,18 +94,12 @@ export const npcElderGolem: INPCTierBlueprint<17> = {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
       chance: LootProbability.Uncommon,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.MoonlightCrescent,
-      chance: LootProbability.Uncommon,
-    },
+
     {
       itemBlueprintKey: SwordsBlueprint.Stormbreaker,
       chance: LootProbability.Uncommon,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.ThunderclapKatana,
-      chance: LootProbability.Uncommon,
-    },
+
     {
       itemBlueprintKey: AccessoriesBlueprint.GarnetNecklace,
       chance: LootProbability.VeryRare,

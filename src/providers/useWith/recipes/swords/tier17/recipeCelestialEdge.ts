@@ -2,8 +2,8 @@ import { CraftingResourcesBlueprint, SwordsBlueprint } from "@providers/item/dat
 import { CraftingSkill, MagicsBlueprint } from "@rpg-engine/shared";
 import { IUseWithCraftingRecipe } from "../../../useWithTypes";
 
-export const recipeThunderousClaymore: IUseWithCraftingRecipe = {
-  outputKey: SwordsBlueprint.ThunderousClaymore,
+export const recipeCelestialEdge: IUseWithCraftingRecipe = {
+  outputKey: SwordsBlueprint.CelestialEdge,
   outputQtyRange: [1, 1],
   requiredItems: [
     {
@@ -19,17 +19,21 @@ export const recipeThunderousClaymore: IUseWithCraftingRecipe = {
       qty: 350,
     },
     {
-      key: CraftingResourcesBlueprint.CopperIngot,
-      qty: 250,
+      key: CraftingResourcesBlueprint.Diamond,
+      qty: 100,
     },
     {
-      key: MagicsBlueprint.ThunderRune,
-      qty: 350,
+      key: CraftingResourcesBlueprint.ColoredFeather,
+      qty: 50,
     },
     {
-      key: SwordsBlueprint.ThunderboltCutlass,
-      qty: 1,
+      key: MagicsBlueprint.HealRune,
+      qty: 500,
+    },
+    {
+      key: CraftingResourcesBlueprint.DragonHead,
+      qty: 10,
     },
   ],
-  minCraftingRequirements: [CraftingSkill.Blacksmithing, 71],
+  minCraftingRequirements: [CraftingSkill.Blacksmithing, 72],
 };

@@ -37,6 +37,12 @@ import { recipeFrostheartBroadsword } from "./tier16/recipeFrostheartBroadsword"
 import { recipeSeraphicSaber } from "./tier16/recipeSeraphicSabre";
 import { recipeSeraphicScimitar } from "./tier16/recipeSeraphicScimitar";
 import { recipeThunderousClaymore } from "./tier16/recipeThunderousClaymore";
+import { recipeCelestialEdge } from "./tier17/recipeCelestialEdge";
+import { recipeCelestialSaber } from "./tier17/recipeCelestialSaber";
+import { recipeFrostfireLongblade } from "./tier17/recipeFrostfireLongblade";
+import { recipeMoonlightCrescent } from "./tier17/recipeMoonlightCrescent";
+import { recipeStormbreaker } from "./tier17/recipeStormbreaker";
+import { recipeThunderclapKatana } from "./tier17/recipeThunderclapKatana";
 import { recipeCopperBroadsword } from "./tier2/recipeCopperBroadsword";
 import { recipeIceSword } from "./tier2/recipeIceSword";
 import { recipeBasiliskSword } from "./tier3/recipeBasiliskSword";
@@ -118,4 +124,10 @@ export const recipeSwordsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [SwordsBlueprint.SeraphicSabre]: [recipeSeraphicSaber],
   [SwordsBlueprint.SeraphicScimitar]: [recipeSeraphicScimitar],
   [SwordsBlueprint.ThunderousClaymore]: [recipeThunderousClaymore],
+  [SwordsBlueprint.CelestialEdge]: [recipeCelestialEdge],
+  [SwordsBlueprint.CelestialSaber]: [recipeCelestialSaber],
+  [SwordsBlueprint.FrostfireLongblade]: [recipeFrostfireLongblade],
+  [SwordsBlueprint.MoonlightCrescent]: [recipeMoonlightCrescent],
+  [SwordsBlueprint.Stormbreaker]: [recipeStormbreaker],
+  [SwordsBlueprint.ThunderclapKatana]: [recipeThunderclapKatana],
 };
