@@ -15,6 +15,7 @@ import {
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import {
@@ -27,7 +28,6 @@ import {
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcCrimsonNaga: INPCTierBlueprint<21> = {
   ...generateMoveTowardsMovement(),
@@ -74,10 +74,6 @@ export const npcCrimsonNaga: INPCTierBlueprint<21> = {
       chance: LootProbability.Rare,
     },
 
-    {
-      itemBlueprintKey: SwordsBlueprint.YggdrasilJianSword,
-      chance: LootProbability.Rare,
-    },
     {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
       chance: LootProbability.SemiCommon,

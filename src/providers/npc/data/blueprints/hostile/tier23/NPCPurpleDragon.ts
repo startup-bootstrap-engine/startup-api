@@ -93,10 +93,7 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
       chance: LootProbability.VeryCommon,
       quantityRange: [5, 10],
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.YggdrasilJianSword,
-      chance: LootProbability.VeryRare,
-    },
+
     {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
       chance: LootProbability.Uncommon,

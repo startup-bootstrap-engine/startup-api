@@ -88,10 +88,7 @@ export const npcRedDragon: INPCTierBlueprint<20> = {
       itemBlueprintKey: ArmorsBlueprint.TemplarsPlate,
       chance: LootProbability.VeryRare,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.YggdrasilJianSword,
-      chance: LootProbability.VeryRare,
-    },
+
     {
       itemBlueprintKey: ShieldsBlueprint.TemporalRoundShield,
       chance: LootProbability.VeryRare,

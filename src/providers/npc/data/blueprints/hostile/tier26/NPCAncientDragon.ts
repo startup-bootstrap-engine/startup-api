@@ -94,10 +94,7 @@ export const npcAncientDragon: INPCTierBlueprint<26> = {
       chance: LootProbability.VeryCommon,
       quantityRange: [5, 10],
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.YggdrasilJianSword,
-      chance: LootProbability.VeryRare,
-    },
+
     {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
       chance: LootProbability.Uncommon,
