@@ -72,10 +72,6 @@ export const npcVenomNaga: INPCTierBlueprint<21> = {
       itemBlueprintKey: SwordsBlueprint.DragonsSword,
       chance: LootProbability.Common,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.InfernoCleaver,
-      chance: LootProbability.Uncommon,
-    },
 
     {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,

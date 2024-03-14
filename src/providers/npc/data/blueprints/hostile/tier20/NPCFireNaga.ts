@@ -72,10 +72,6 @@ export const npcFireNaga: INPCTierBlueprint<20> = {
       itemBlueprintKey: SwordsBlueprint.DragonsSword,
       chance: LootProbability.SemiCommon,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.InfernoCleaver,
-      chance: LootProbability.Rare,
-    },
 
     {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,

@@ -47,6 +47,8 @@ import { recipeThunderstormEdge } from "./tier17/recipeThunderstormEdge";
 import { recipeCelestialDefender } from "./tier18/recipeCelestialDefender";
 import { recipeFrostbiteSaber } from "./tier18/recipeFrostbiteSaber";
 import { recipeFrostfireGladius } from "./tier18/recipeFrostfireGladius";
+import { recipeFrostwindCutter } from "./tier18/recipeFrostwindCutter";
+import { recipeInfernalSlicer } from "./tier18/recipeInfernalSlicer";
 import { recipeCopperBroadsword } from "./tier2/recipeCopperBroadsword";
 import { recipeIceSword } from "./tier2/recipeIceSword";
 import { recipeBasiliskSword } from "./tier3/recipeBasiliskSword";
@@ -138,4 +140,6 @@ export const recipeSwordsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [SwordsBlueprint.CelestialDefender]: [recipeCelestialDefender],
   [SwordsBlueprint.FrostbiteSaber]: [recipeFrostbiteSaber],
   [SwordsBlueprint.FrostfireGladius]: [recipeFrostfireGladius],
+  [SwordsBlueprint.FrostwindCutter]: [recipeFrostwindCutter],
+  [SwordsBlueprint.InfernalSlicer]: [recipeInfernalSlicer],
 };

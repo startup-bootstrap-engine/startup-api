@@ -73,11 +73,6 @@ export const npcCorruptedNaga: INPCTierBlueprint<20> = {
       chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: SwordsBlueprint.InfernoCleaver,
-      chance: LootProbability.VeryRare,
-    },
-
-    {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
       chance: LootProbability.SemiCommon,
     },

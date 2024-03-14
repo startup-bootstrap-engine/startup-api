@@ -85,10 +85,6 @@ export const npcYellowDragon: INPCTierBlueprint<22> = {
       chance: LootProbability.Rare,
     },
     {
-      itemBlueprintKey: SwordsBlueprint.InfernalSlicer,
-      chance: LootProbability.Uncommon,
-    },
-    {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,
       chance: LootProbability.VeryCommon,
     },

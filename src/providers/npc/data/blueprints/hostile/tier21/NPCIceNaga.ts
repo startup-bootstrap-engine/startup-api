@@ -70,10 +70,7 @@ export const npcIceNaga: INPCTierBlueprint<21> = {
       itemBlueprintKey: SwordsBlueprint.DragonsSword,
       chance: LootProbability.SemiCommon,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.InfernoCleaver,
-      chance: LootProbability.Uncommon,
-    },
+
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,
       chance: LootProbability.VeryCommon,

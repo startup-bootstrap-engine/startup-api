@@ -193,12 +193,6 @@ export const npcDragonServant: INPCTierBlueprint<18> = {
       itemBlueprintKey: GemsBlueprint.CoralReefGem,
       chance: LootProbability.VeryRare,
     },
-
-    {
-      itemBlueprintKey: SwordsBlueprint.FrostwindCutter,
-      chance: LootProbability.Uncommon,
-    },
-
     {
       itemBlueprintKey: AccessoriesBlueprint.SapphireStrandNecklace,
       chance: LootProbability.VeryRare,
