@@ -1,4 +1,8 @@
-import { CraftingResourcesBlueprint, PotionsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import {
+  CraftingResourcesBlueprint,
+  FoodsBlueprint,
+  PotionsBlueprint,
+} from "@providers/item/data/types/itemsBlueprintTypes";
 import { IUseWithCraftingRecipe } from "@providers/useWith/useWithTypes";
 import { CraftingSkill } from "@rpg-engine/shared";
 
@@ -7,7 +11,11 @@ export const recipeManaPotion: IUseWithCraftingRecipe = {
   outputQtyRange: [5, 10],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.BlueFeather,
+      key: FoodsBlueprint.Eggplant,
+      qty: 2,
+    },
+    {
+      key: FoodsBlueprint.Turnip,
       qty: 2,
     },
     {

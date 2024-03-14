@@ -126,10 +126,7 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
       itemBlueprintKey: HammersBlueprint.WarHammer,
       chance: LootProbability.Uncommon,
     },
-    {
-      itemBlueprintKey: AccessoriesBlueprint.PendantOfLife,
-      chance: LootProbability.VeryRare,
-    },
+
     {
       itemBlueprintKey: HelmetsBlueprint.InfantryHelmet,
       chance: LootProbability.Uncommon,

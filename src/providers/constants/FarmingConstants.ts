@@ -6,7 +6,7 @@ export const FARMING_MEDIUM_YIELD_FACTOR = 2;
 export const FARMING_HIGH_YIELD_FACTOR = 3;
 export const FARMING_SUPER_YIELD_FACTOR = 4;
 
-export const FARMING_HARVEST_PRICE_RATIO = 4;
+export const FARMING_HARVEST_PRICE_RATIO = 10;
 export const FARMING_SEED_PRICE_RATIO = 1;
 
 export const MAX_HOURS_NO_WATER_DEAD = 6;
