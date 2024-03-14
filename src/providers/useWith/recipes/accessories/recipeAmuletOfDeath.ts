@@ -7,33 +7,9 @@ export const recipeAmuletOfDeath: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 1],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.Rope,
-      qty: 25,
-    },
-    {
-      key: CraftingResourcesBlueprint.Skull,
-      qty: 100,
-    },
-    {
-      key: CraftingResourcesBlueprint.BlueSapphire,
-      qty: 100,
-    },
-    {
-      key: CraftingResourcesBlueprint.RedSapphire,
-      qty: 100,
-    },
-    {
-      key: CraftingResourcesBlueprint.Jade,
-      qty: 50,
-    },
-    {
-      key: CraftingResourcesBlueprint.PhoenixFeather,
-      qty: 25,
-    },
-    {
-      key: CraftingResourcesBlueprint.CorruptionIngot,
+      key: CraftingResourcesBlueprint.SocialCrystal,
       qty: 50,
     },
   ],
-  minCraftingRequirements: [CraftingSkill.Blacksmithing, 30],
+  minCraftingRequirements: [CraftingSkill.Blacksmithing, 25],
 };
