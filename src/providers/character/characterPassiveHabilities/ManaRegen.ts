@@ -140,13 +140,15 @@ export class ManaRegen {
   }
 
   private calculateManaRegenAmount(character: ICharacter, magicLvl: number, accountType: UserAccountTypes): number {
-    const manaRegenPercent = PREMIUM_ACCOUNT_METADATA[accountType]?.manaRegenPercent ?? 1;
-    let amountAdded = magicLvl / MANA_REGEN_MAGIC_LEVEL_DIVISOR;
+    const premiumRegenPercentBuff = PREMIUM_ACCOUNT_METADATA[accountType]?.manaRegenPercent ?? 1;
+
+    const baseRegen = magicLvl / MANA_REGEN_MAGIC_LEVEL_DIVISOR;
+    let amountAdded = baseRegen;
 
     if (character.class === CharacterClass.Sorcerer || character.class === CharacterClass.Druid) {
-      amountAdded += (magicLvl / MANA_REGEN_MAGIC_LEVEL_DIVISOR) * manaRegenPercent;
+      amountAdded += baseRegen * (premiumRegenPercentBuff - 1);
     } else {
-      amountAdded *= manaRegenPercent;
+      amountAdded *= premiumRegenPercentBuff;
     }
 
     return Math.max(Math.floor(amountAdded), MANA_REGEN_MIN_MANA_REGEN);
