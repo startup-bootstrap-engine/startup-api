@@ -19,7 +19,6 @@ import {
   ShieldsBlueprint,
   SpearsBlueprint,
   StaffsBlueprint,
-  SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -264,11 +263,6 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
       itemBlueprintKey: DaggersBlueprint.StarshardDagger,
       chance: LootProbability.Uncommon,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.ThunderousClaymore,
-      chance: LootProbability.Uncommon,
-    },
-
     {
       itemBlueprintKey: AccessoriesBlueprint.AzureNecklace,
       chance: LootProbability.VeryRare,
