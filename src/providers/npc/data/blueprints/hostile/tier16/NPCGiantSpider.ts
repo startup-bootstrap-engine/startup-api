@@ -268,10 +268,7 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
       itemBlueprintKey: SwordsBlueprint.ThunderousClaymore,
       chance: LootProbability.Uncommon,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.EmberglowRapier,
-      chance: LootProbability.Uncommon,
-    },
+
     {
       itemBlueprintKey: AccessoriesBlueprint.AzureNecklace,
       chance: LootProbability.VeryRare,
