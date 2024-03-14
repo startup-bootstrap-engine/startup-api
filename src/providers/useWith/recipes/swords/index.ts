@@ -20,6 +20,10 @@ import { recipePhoenixSword } from "./tier12/recipePhoenixSword";
 import { recipeWarlordBroadsword } from "./tier12/recipeWarlordBroadsword";
 import { recipeZenBroadsword } from "./tier12/recipeZenBroadsword";
 import { recipeYggdrasilJianSword } from "./tier13/recipeYggdrasilJianSword";
+import { recipeFrostbitFang } from "./tier14/recipeFrostbiteFang";
+import { recipeShadowstrikeFalchion } from "./tier14/recipeShadowstrikeFalchion";
+import { recipeVenomousBlade } from "./tier14/recipeVenomousBlade";
+import { recipeVenomousSinger } from "./tier14/recipeVenomousStinger";
 import { recipeCopperBroadsword } from "./tier2/recipeCopperBroadsword";
 import { recipeIceSword } from "./tier2/recipeIceSword";
 import { recipeBasiliskSword } from "./tier3/recipeBasiliskSword";
@@ -84,4 +88,8 @@ export const recipeSwordsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [SwordsBlueprint.YggdrasilBroadsword]: [recipeYggdrasilBroadsword],
   [SwordsBlueprint.WarlordBroadsword]: [recipeWarlordBroadsword],
   [SwordsBlueprint.YggdrasilJianSword]: [recipeYggdrasilJianSword],
+  [SwordsBlueprint.FrostbiteFang]: [recipeFrostbitFang],
+  [SwordsBlueprint.ShadowstrikeFalchion]: [recipeShadowstrikeFalchion],
+  [SwordsBlueprint.VenomousBlade]: [recipeVenomousBlade],
+  [SwordsBlueprint.VenomousStinger]: [recipeVenomousSinger],
 };
