@@ -15,7 +15,12 @@ export class MarketplaceTracker {
       return;
     }
 
-    this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Marketplace, "TotalItemsListed", total);
+    this.newRelic.trackMetric(
+      NewRelicMetricCategory.Count,
+      NewRelicSubCategory.Marketplace,
+      "MarketplaceTotalItemsListed",
+      total
+    );
   }
 
   public async trackMedianPriceOfListedItems(): Promise<void> {
@@ -28,6 +33,11 @@ export class MarketplaceTracker {
 
     const median = statistics.median(prices);
 
-    this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Marketplace, "MedianPrice", median);
+    this.newRelic.trackMetric(
+      NewRelicMetricCategory.Count,
+      NewRelicSubCategory.Marketplace,
+      "MarketplaceMedianPrice",
+      median
+    );
   }
 }
