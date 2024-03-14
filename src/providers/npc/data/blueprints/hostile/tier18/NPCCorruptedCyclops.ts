@@ -123,10 +123,6 @@ export const npcCorruptedCyclops: INPCTierBlueprint<18> = {
       itemBlueprintKey: GemsBlueprint.EarthstoneGem,
       chance: LootProbability.VeryRare,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.FrostfangDagger,
-      chance: LootProbability.VeryRare,
-    },
 
     {
       itemBlueprintKey: AccessoriesBlueprint.GoldenRubyNecklace,

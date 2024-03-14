@@ -73,10 +73,6 @@ export const npcRedDragon: INPCTierBlueprint<20> = {
   },
   loots: [
     {
-      itemBlueprintKey: SwordsBlueprint.FrostfireGladius,
-      chance: LootProbability.VeryRare,
-    },
-    {
       itemBlueprintKey: SwordsBlueprint.DragonsSword,
       chance: LootProbability.Uncommon,
     },

@@ -10,12 +10,12 @@ import {
   ItemSubType,
   ItemType,
 } from "@rpg-engine/shared";
-import { SwordsBlueprint } from "../../../types/itemsBlueprintTypes";
+import { DaggersBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemFrostfangDagger: IEquippableMeleeTier18WeaponBlueprint = {
-  key: SwordsBlueprint.FrostfangDagger,
+  key: DaggersBlueprint.FrostfangDagger,
   type: ItemType.Weapon,
-  subType: ItemSubType.Sword,
+  subType: ItemSubType.Dagger,
   textureAtlas: "items",
   texturePath: "swords/frostfang-dagger.png",
   name: "Frostfang Dagger",
