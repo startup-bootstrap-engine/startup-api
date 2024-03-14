@@ -155,10 +155,7 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
       itemBlueprintKey: AxesBlueprint.GuardianAxe,
       chance: LootProbability.Uncommon,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.YggdrasilTemplarSword,
-      chance: LootProbability.Uncommon,
-    },
+
     {
       itemBlueprintKey: MacesBlueprint.SunderingClub,
       chance: LootProbability.Common,

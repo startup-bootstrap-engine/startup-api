@@ -10,7 +10,6 @@ import {
   RangedWeaponsBlueprint,
   ShieldsBlueprint,
   StaffsBlueprint,
-  SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -114,11 +113,6 @@ export const npcCondessa: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
-      chance: LootProbability.Uncommon,
-    },
-
-    {
-      itemBlueprintKey: SwordsBlueprint.VenomousFang,
       chance: LootProbability.Uncommon,
     },
   ],

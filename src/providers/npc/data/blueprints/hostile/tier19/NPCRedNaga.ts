@@ -137,10 +137,7 @@ export const npcRedNaga: INPCTierBlueprint<19> = {
       itemBlueprintKey: AxesBlueprint.GuardianAxe,
       chance: LootProbability.Uncommon,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.YggdrasilTemplarSword,
-      chance: LootProbability.SemiCommon,
-    },
+
     {
       itemBlueprintKey: MacesBlueprint.SunderingClub,
       chance: LootProbability.VeryCommon,
