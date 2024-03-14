@@ -7,7 +7,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
 import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
-import { INITIAL_STARTING_POINTS } from "@providers/constants/CharacterConstants";
+import { CharacterGameMode, INITIAL_STARTING_POINTS } from "@providers/constants/CharacterConstants";
 import { blueprintManager } from "@providers/inversify/container";
 import {
   AccessoriesBlueprint,
@@ -53,7 +53,13 @@ export class CharacterRepository extends CRUD {
 
     let extraProps: Partial<ICharacter> = {};
 
-    const startingPoint = INITIAL_STARTING_POINTS[newCharacter.faction];
+    let startingPoint;
+
+    if (newCharacter.isFarmingMode) {
+      startingPoint = INITIAL_STARTING_POINTS[CharacterGameMode.Farming];
+    } else {
+      startingPoint = INITIAL_STARTING_POINTS[newCharacter.faction];
+    }
 
     extraProps = {
       x: FromGridX(startingPoint.gridX),

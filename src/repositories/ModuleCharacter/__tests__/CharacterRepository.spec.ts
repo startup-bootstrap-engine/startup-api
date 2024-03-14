@@ -1,5 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
+import { INITIAL_STARTING_POINTS } from "@providers/constants/CharacterConstants";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import {
   AccessoriesBlueprint,
@@ -12,7 +13,7 @@ import {
   StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
-import { CharacterClass } from "@rpg-engine/shared";
+import { CharacterClass, CharacterFactions, Modes } from "@rpg-engine/shared";
 import { CharacterRepository } from "../CharacterRepository";
 
 describe("CharacterRepository.spec.ts", () => {
@@ -61,5 +62,22 @@ describe("CharacterRepository.spec.ts", () => {
     expect(jacket?.key).toEqual(ArmorsBlueprint.Jacket);
     expect(cap?.key).toEqual(HelmetsBlueprint.Cap);
     expect(bandana?.key).toEqual(AccessoriesBlueprint.Bandana);
+  });
+
+  it("should generate correct starting scene for farming mode", async () => {
+    const characterDto = {
+      name: "test",
+      class: CharacterClass.Rogue,
+      race: "Human",
+      faction: CharacterFactions.LifeBringer,
+      mode: Modes.SoftMode,
+      isFarmingMode: true,
+      textureKey: "test",
+    };
+
+    const owner = testCharacter.owner as string;
+
+    const character = await characterRepository.createCharacter(characterDto, owner);
+    expect(character?.scene).toEqual(INITIAL_STARTING_POINTS["Farming Mode"]?.scene);
   });
 });

@@ -9,7 +9,7 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { INITIAL_STARTING_POINTS } from "@providers/constants/CharacterConstants";
+import { CharacterGameMode, INITIAL_STARTING_POINTS } from "@providers/constants/CharacterConstants";
 import { DROP_EQUIPMENT_CHANCE } from "@providers/constants/DeathConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DiscordBot } from "@providers/discord/DiscordBot";
@@ -208,7 +208,13 @@ export class CharacterDeath {
   public async respawnCharacter(character: ICharacter): Promise<void> {
     let extraProps: Partial<ICharacter> = {};
 
-    const startingPoint = INITIAL_STARTING_POINTS[character.faction];
+    let startingPoint;
+
+    if (character.isFarmingMode) {
+      startingPoint = INITIAL_STARTING_POINTS[CharacterGameMode.Farming];
+    } else {
+      startingPoint = INITIAL_STARTING_POINTS[character.faction];
+    }
 
     extraProps = {
       x: FromGridX(startingPoint.gridX),
