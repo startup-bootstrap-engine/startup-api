@@ -1,5 +1,6 @@
-import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
+import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
 import { INITIAL_STARTING_POINTS } from "@providers/constants/CharacterConstants";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import {
@@ -9,9 +10,11 @@ import {
   ContainersBlueprint,
   DaggersBlueprint,
   HelmetsBlueprint,
+  SeedsBlueprint,
   SpearsBlueprint,
   StaffsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { CharacterClass, CharacterFactions, Modes } from "@rpg-engine/shared";
 import { CharacterRepository } from "../CharacterRepository";
@@ -19,8 +22,10 @@ import { CharacterRepository } from "../CharacterRepository";
 describe("CharacterRepository.spec.ts", () => {
   let characterRepository: CharacterRepository;
   let testCharacter: ICharacter;
+  let characterInventory: CharacterItemInventory;
   beforeAll(() => {
     characterRepository = container.get<CharacterRepository>(CharacterRepository);
+    characterInventory = container.get<CharacterItemInventory>(CharacterItemInventory);
   });
 
   beforeEach(async () => {
@@ -79,5 +84,22 @@ describe("CharacterRepository.spec.ts", () => {
 
     const character = await characterRepository.createCharacter(characterDto, owner);
     expect(character?.scene).toEqual(INITIAL_STARTING_POINTS["Farming Mode"]?.scene);
+  });
+
+  it("should generate correct basic seed and watering can if farming mode is enabled", async () => {
+    testCharacter.isFarmingMode = true;
+
+    // @ts-ignore
+    await characterRepository.generateInventoryItems(testCharacter);
+
+    const updatedCharacter = await Character.findById(testCharacter._id);
+
+    const items = await characterInventory.getAllItemsFromInventoryNested(updatedCharacter as ICharacter);
+
+    const seedItem = items.find((item) => item.key === SeedsBlueprint.CarrotSeed);
+    const wateringCanItem = items.find((item) => item.key === ToolsBlueprint.WateringCan);
+
+    expect(seedItem).not.toBeNull();
+    expect(wateringCanItem).not.toBeNull();
   });
 });
