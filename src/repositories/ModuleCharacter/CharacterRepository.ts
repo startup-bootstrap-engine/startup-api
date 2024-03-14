@@ -22,6 +22,7 @@ import {
   HelmetsBlueprint,
   MacesBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   SpearsBlueprint,
   StaffsBlueprint,
   SwordsBlueprint,
@@ -204,6 +205,12 @@ export class CharacterRepository extends CRUD {
       await this.characterItemInventory.addItemToInventory(RangedWeaponsBlueprint.Stone, character, {
         stackQty: 100,
       });
+    }
+    if (character.isFarmingMode) {
+      await this.characterItemInventory.addItemToInventory(SeedsBlueprint.CarrotSeed, character, {
+        stackQty: 10,
+      });
+      await this.characterItemInventory.addItemToInventory(ToolsBlueprint.WateringCan, character);
     }
   }
 }
