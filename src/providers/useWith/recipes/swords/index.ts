@@ -30,6 +30,9 @@ import { recipeShadowblade } from "./tier15/recipeShadowblade";
 import { recipeThunderCutlass } from "./tier15/recipeThunderCutlass";
 import { recipeVenomousFang } from "./tier15/recipeVenomousFang";
 import { recipeYggdrasilTemplarSword } from "./tier15/recipeYggdrasilTemplarSword";
+import { recipeBloodmoonBlade } from "./tier16/recipeBloodmoonBlade";
+import { recipeEmberbrandClaymore } from "./tier16/recipeEmberbrandClaymore";
+import { recipeEmberglowRapier } from "./tier16/recipeEmberglowRapier";
 import { recipeCopperBroadsword } from "./tier2/recipeCopperBroadsword";
 import { recipeIceSword } from "./tier2/recipeIceSword";
 import { recipeBasiliskSword } from "./tier3/recipeBasiliskSword";
@@ -104,4 +107,7 @@ export const recipeSwordsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [SwordsBlueprint.ThunderboltCutlass]: [recipeThunderCutlass],
   [SwordsBlueprint.VenomousFang]: [recipeVenomousFang],
   [SwordsBlueprint.YggdrasilTemplarSword]: [recipeYggdrasilTemplarSword],
+  [SwordsBlueprint.BloodmoonBlade]: [recipeBloodmoonBlade],
+  [SwordsBlueprint.EmberbrandClaymore]: [recipeEmberbrandClaymore],
+  [SwordsBlueprint.EmberglowRapier]: [recipeEmberglowRapier],
 };
