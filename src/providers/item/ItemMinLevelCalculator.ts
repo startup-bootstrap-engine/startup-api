@@ -91,11 +91,11 @@ export function getMinSeedRequirements(blueprintKey: string, skillName: string):
   }
 
   const levelMultiplier = 0.1;
-  const skillMultiplier = 0.1;
+  const skillMultiplier = 0.2;
   const regrowsAfterHarvestMultiplier = 4.5;
   const growthFactorMultiplier = 1.5;
   const yieldFactorMultiplier = 1.5;
-  const finalMultiplier = 0.75;
+  const finalMultiplier = 1.4;
 
   const plantKey = seedToPlantMapping[blueprintKey];
 
