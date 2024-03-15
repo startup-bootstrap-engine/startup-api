@@ -1,13 +1,13 @@
 // Harvesting yields
 export const FARMING_BASE_YIELD = 1;
-export const FARMING_SKILL_FACTOR = 0.8;
+export const FARMING_SKILL_FACTOR = 0.5;
 export const FARMING_LOW_YIELD_FACTOR = 1;
 export const FARMING_MEDIUM_YIELD_FACTOR = 2;
 export const FARMING_HIGH_YIELD_FACTOR = 3;
 export const FARMING_SUPER_YIELD_FACTOR = 4;
 
 // Economics
-export const FARMING_HARVEST_PRICE_RATIO = 3;
+export const FARMING_HARVEST_PRICE_RATIO = 2;
 export const FARMING_SEED_PRICE_RATIO = 1.5;
 
 // Cycle timing

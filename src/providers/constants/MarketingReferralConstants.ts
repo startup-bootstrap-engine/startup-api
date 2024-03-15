@@ -1,6 +1,6 @@
 // Marketing
 
-export const CRAFTING_SOCIAL_CRYSTAL_REQUIREMENT_RATIO = 1.5; // higher than 1 means more social crystals required to craft items
+export const CRAFTING_SOCIAL_CRYSTAL_REQUIREMENT_RATIO = 1.75; // higher than 1 means more social crystals required to craft items
 
 export const CRAFTING_SOCIAL_CRYSTAL_MIN_TIER_REQUIREMENT = 8; // minimum tier to require social crystals to craft items
 

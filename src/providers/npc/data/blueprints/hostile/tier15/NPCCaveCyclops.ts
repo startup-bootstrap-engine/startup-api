@@ -9,6 +9,7 @@ import {
   DaggersBlueprint,
   MacesBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
@@ -50,6 +51,11 @@ export const npcCaveCyclops: INPCTierBlueprint<15> = {
     {
       itemBlueprintKey: AxesBlueprint.GoldenAxe,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.TurnipSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: DaggersBlueprint.PhoenixDagger,

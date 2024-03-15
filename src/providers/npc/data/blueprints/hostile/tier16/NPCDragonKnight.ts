@@ -11,6 +11,7 @@ import {
   HelmetsBlueprint,
   MacesBlueprint,
   OthersBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -58,7 +59,11 @@ export const npcDragonKnight: INPCTierBlueprint<16> = {
       chance: LootProbability.VeryCommon,
       quantityRange: [1, 10],
     },
-
+    {
+      itemBlueprintKey: SeedsBlueprint.PotatoSeed,
+      chance: LootProbability.Rare,
+      quantityRange: [1, 5],
+    },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,
       chance: LootProbability.Uncommon,

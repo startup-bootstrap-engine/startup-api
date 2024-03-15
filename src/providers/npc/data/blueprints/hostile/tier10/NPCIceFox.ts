@@ -10,12 +10,12 @@ import {
   RangedWeaponsBlueprint,
   ShieldsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { AnimationEffectKeys, NPCAlignment, NPCSubtype, RangeTypes } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcIceFox: INPCTierBlueprint<10> = {
   ...generateMoveTowardsMovement(),
@@ -53,6 +53,7 @@ export const npcIceFox: INPCTierBlueprint<10> = {
       itemBlueprintKey: RangedWeaponsBlueprint.FrostBow,
       chance: LootProbability.Uncommon,
     },
+
     {
       itemBlueprintKey: RangedWeaponsBlueprint.FrostArrow,
       chance: LootProbability.Uncommon,

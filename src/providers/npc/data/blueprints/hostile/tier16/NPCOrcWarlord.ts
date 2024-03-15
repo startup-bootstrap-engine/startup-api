@@ -10,14 +10,15 @@ import {
   HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
+  SeedsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { MagicPower, NPCAlignment, NPCCustomDeathPenalties, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcOrcWarlord: INPCTierBlueprint<16> = {
   ...generateMoveTowardsMovement(),
@@ -62,6 +63,11 @@ export const npcOrcWarlord: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: HelmetsBlueprint.VikingHelmet,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.WatermelonSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 3],
     },
 
     {

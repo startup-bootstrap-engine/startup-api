@@ -10,6 +10,7 @@ import {
   HammersBlueprint,
   HelmetsBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   StaffsBlueprint,
   SwordsBlueprint,
@@ -64,6 +65,11 @@ export const npcIceTroll: INPCTierBlueprint<10> = {
     {
       itemBlueprintKey: AxesBlueprint.DwarvenWaraxe,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.CabbageSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: ShieldsBlueprint.FrostShield,

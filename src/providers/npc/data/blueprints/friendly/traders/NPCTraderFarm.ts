@@ -23,34 +23,7 @@ export const npcTraderFarm = {
       key: SeedsBlueprint.CarrotSeed,
     },
     {
-      key: SeedsBlueprint.TurnipSeed,
-    },
-    {
       key: SeedsBlueprint.TomatoSeed,
-    },
-    {
-      key: SeedsBlueprint.StrawberrySeed,
-    },
-    {
-      key: SeedsBlueprint.RedGrapeSeed,
-    },
-    {
-      key: SeedsBlueprint.GreenGrapeSeed,
-    },
-    {
-      key: SeedsBlueprint.CabbageSeed,
-    },
-    {
-      key: SeedsBlueprint.EggplantSeed,
-    },
-    {
-      key: SeedsBlueprint.PumpkinSeed,
-    },
-    {
-      key: SeedsBlueprint.WatermelonSeed,
-    },
-    {
-      key: SeedsBlueprint.PotatoSeed,
     },
   ],
 } as Partial<INPC>;

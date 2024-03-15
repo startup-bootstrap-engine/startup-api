@@ -7,16 +7,17 @@ import {
   FoodsBlueprint,
   GlovesBlueprint,
   HammersBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   SpearsBlueprint,
   StaffsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcMudGolem: INPCTierBlueprint<10> = {
   ...generateMoveTowardsMovement(),
@@ -55,6 +56,11 @@ export const npcMudGolem: INPCTierBlueprint<10> = {
     {
       itemBlueprintKey: BootsBlueprint.CopperBoots,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.CabbageSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: SpearsBlueprint.RoyalSpear,

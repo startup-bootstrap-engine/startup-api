@@ -43,7 +43,7 @@ export const plantItemTomato: IPlantItem = {
     },
   },
   harvestableItemKey: FoodsBlueprint.Tomato,
-  regrowsAfterHarvest: true,
+  regrowsAfterHarvest: false,
   growthFactor: ULTRA_LOW_GROWTH_FACTOR,
   yieldFactor: FARMING_HIGH_YIELD_FACTOR,
   availableOnlyOnSeasons: [],

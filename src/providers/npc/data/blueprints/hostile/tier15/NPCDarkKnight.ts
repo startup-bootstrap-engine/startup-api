@@ -13,6 +13,7 @@ import {
   LegsBlueprint,
   OthersBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   SpearsBlueprint,
   StaffsBlueprint,
@@ -62,7 +63,11 @@ export const npcDarkKnight: INPCTierBlueprint<15> = {
       chance: LootProbability.VeryCommon,
       quantityRange: [1, 10],
     },
-
+    {
+      itemBlueprintKey: SeedsBlueprint.PumpkinSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 3],
+    },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,
       chance: LootProbability.Uncommon,

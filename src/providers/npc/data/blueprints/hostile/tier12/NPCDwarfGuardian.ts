@@ -14,17 +14,18 @@ import {
   HelmetsBlueprint,
   MacesBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   SpearsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { SpellsBlueprint } from "@providers/spells/data/types/SpellsBlueprintTypes";
 import { MagicPower, NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcDwarfGuardian: INPCTierBlueprint<12> = {
   ...generateMoveTowardsMovement(),
@@ -59,6 +60,11 @@ export const npcDwarfGuardian: INPCTierBlueprint<12> = {
     {
       itemBlueprintKey: ContainersBlueprint.Backpack,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.TurnipSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 5],
     },
 
     {

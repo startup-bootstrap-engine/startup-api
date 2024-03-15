@@ -8,6 +8,7 @@ import {
   DaggersBlueprint,
   HelmetsBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   StaffsBlueprint,
   SwordsBlueprint,
@@ -78,6 +79,11 @@ export const npcConde: INPCTierBlueprint<16> = {
       itemBlueprintKey: CraftingResourcesBlueprint.Silk,
       chance: LootProbability.SemiCommon,
       quantityRange: [1, 10],
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.PumpkinSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: DaggersBlueprint.HellishDagger,

@@ -12,6 +12,7 @@ import {
   LegsBlueprint,
   MacesBlueprint,
   PotionsBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -75,6 +76,11 @@ export const npcCorruptedKobold: INPCTierBlueprint<18> = {
     {
       itemBlueprintKey: SwordsBlueprint.FalconsSword,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.PotatoSeed,
+      chance: LootProbability.Rare,
+      quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: SwordsBlueprint.LongSword,

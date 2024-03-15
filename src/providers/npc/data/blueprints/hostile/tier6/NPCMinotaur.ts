@@ -10,17 +10,18 @@ import {
   HammersBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
+  SeedsBlueprint,
   SpearsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcMinotaur: INPCTierBlueprint<6> = {
   ...generateMoveTowardsMovement(),
@@ -65,6 +66,11 @@ export const npcMinotaur: INPCTierBlueprint<6> = {
     {
       itemBlueprintKey: DaggersBlueprint.IronDagger,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.RedGrapeSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 5],
     },
 
     {

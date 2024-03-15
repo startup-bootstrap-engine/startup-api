@@ -16,6 +16,7 @@ import {
   HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   SpearsBlueprint,
   StaffsBlueprint,
@@ -77,6 +78,11 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: ContainersBlueprint.Backpack,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.WatermelonSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 3],
     },
 
     {

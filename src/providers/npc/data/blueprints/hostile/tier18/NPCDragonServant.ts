@@ -14,6 +14,7 @@ import {
   LegsBlueprint,
   MacesBlueprint,
   OthersBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   StaffsBlueprint,
   SwordsBlueprint,
@@ -72,6 +73,11 @@ export const npcDragonServant: INPCTierBlueprint<18> = {
     {
       itemBlueprintKey: ShieldsBlueprint.DemonShield,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.WatermelonSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: SwordsBlueprint.YggdrasilGladius,

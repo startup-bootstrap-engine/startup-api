@@ -10,6 +10,7 @@ import {
   LegsBlueprint,
   MacesBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -61,6 +62,11 @@ export const npcForestCyclops: INPCTierBlueprint<15> = {
     {
       itemBlueprintKey: HelmetsBlueprint.AmethystHelmet,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.TurnipSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: ShieldsBlueprint.BanditShield,

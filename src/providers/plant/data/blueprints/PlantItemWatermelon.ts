@@ -1,4 +1,8 @@
-import { FARMING_LOW_YIELD_FACTOR, FAST_PLANT_CYCLE, SUPER_GROWTH_FACTOR } from "@providers/constants/FarmingConstants";
+import {
+  FARMING_HIGH_YIELD_FACTOR,
+  FAST_PLANT_CYCLE,
+  SUPER_GROWTH_FACTOR,
+} from "@providers/constants/FarmingConstants";
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemSubType, ItemType } from "@rpg-engine/shared";
 import { PlantItemBlueprint, PlantLifeCycle } from "../types/PlantTypes";
@@ -39,9 +43,9 @@ export const plantItemWatermelon: IPlantItem = {
     },
   },
   harvestableItemKey: FoodsBlueprint.Watermelon,
-  regrowsAfterHarvest: true,
+  regrowsAfterHarvest: false,
   growthFactor: SUPER_GROWTH_FACTOR,
-  yieldFactor: FARMING_LOW_YIELD_FACTOR,
+  yieldFactor: FARMING_HIGH_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
 };

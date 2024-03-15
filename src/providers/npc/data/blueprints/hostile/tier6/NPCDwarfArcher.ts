@@ -6,14 +6,15 @@ import {
   BootsBlueprint,
   CraftingResourcesBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype, RangeTypes } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcDwarfArcher: INPCTierBlueprint<6> = {
   ...generateMoveTowardsMovement(),
@@ -63,6 +64,11 @@ export const npcDwarfArcher: INPCTierBlueprint<6> = {
     {
       itemBlueprintKey: RangedWeaponsBlueprint.Crossbow,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.GreenGrapeSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 10],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,

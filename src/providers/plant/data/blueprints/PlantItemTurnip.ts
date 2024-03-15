@@ -44,7 +44,7 @@ export const plantItemTurnip: IPlantItem = {
     },
   },
   harvestableItemKey: FoodsBlueprint.Turnip,
-  regrowsAfterHarvest: true,
+  regrowsAfterHarvest: false,
   growthFactor: ULTRA_LOW_GROWTH_FACTOR,
   yieldFactor: FARMING_MEDIUM_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
