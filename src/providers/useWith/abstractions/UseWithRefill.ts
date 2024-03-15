@@ -93,7 +93,7 @@ export class UseWithRefill {
       if (targetItem.owner?.toString() !== character.id) {
         this.socketMessaging.sendErrorMessageToCharacter(
           character,
-          `Sorry, You can only ${resourceKey} that you own ${targetType}s.`
+          `Sorry, You can only ${resourceKey} the ${targetType} that you own.`
         );
         return;
       }
