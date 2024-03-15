@@ -382,6 +382,7 @@ export enum FoodsBlueprint {
 }
 export enum CraftingResourcesBlueprint {
   SocialCrystal = "social-crystal",
+  PrimordialRelic = "primordial-relic",
   Rope = "rope",
   SeaShell = "sea-shell",
   BlueSapphire = "blue-sapphire",

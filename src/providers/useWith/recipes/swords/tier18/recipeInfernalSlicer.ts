@@ -38,6 +38,10 @@ export const recipeInfernalSlicer: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.DragonHead,
       qty: 20,
     },
+    {
+      key: CraftingResourcesBlueprint.PrimordialRelic,
+      qty: 1,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Blacksmithing, 80],
 };

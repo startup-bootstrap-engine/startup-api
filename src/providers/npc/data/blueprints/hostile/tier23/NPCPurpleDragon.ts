@@ -77,6 +77,10 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
       chance: LootProbability.Uncommon,
     },
     {
+      itemBlueprintKey: CraftingResourcesBlueprint.PrimordialRelic,
+      chance: LootProbability.VeryRare,
+    },
+    {
       itemBlueprintKey: SwordsBlueprint.InfernoCleaver,
       chance: LootProbability.VeryRare,
     },

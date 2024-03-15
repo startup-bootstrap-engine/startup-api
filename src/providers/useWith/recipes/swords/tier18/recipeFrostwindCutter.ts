@@ -34,6 +34,10 @@ export const recipeFrostwindCutter: IUseWithCraftingRecipe = {
       key: MagicsBlueprint.CorruptionRune,
       qty: 450,
     },
+    {
+      key: CraftingResourcesBlueprint.PrimordialRelic,
+      qty: 1,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Blacksmithing, 78],
 };

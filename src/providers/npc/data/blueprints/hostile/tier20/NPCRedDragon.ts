@@ -94,6 +94,10 @@ export const npcRedDragon: INPCTierBlueprint<20> = {
       chance: LootProbability.SemiCommon,
     },
     {
+      itemBlueprintKey: CraftingResourcesBlueprint.PrimordialRelic,
+      chance: LootProbability.VeryRare,
+    },
+    {
       itemBlueprintKey: SwordsBlueprint.LeviathanSword,
       chance: LootProbability.SemiCommon,
     },

@@ -81,6 +81,10 @@ export const npcYellowDragon: INPCTierBlueprint<22> = {
       chance: LootProbability.VeryRare,
     },
     {
+      itemBlueprintKey: CraftingResourcesBlueprint.PrimordialRelic,
+      chance: LootProbability.VeryRare,
+    },
+    {
       itemBlueprintKey: BooksBlueprint.ElementalSphere,
       chance: LootProbability.Rare,
     },

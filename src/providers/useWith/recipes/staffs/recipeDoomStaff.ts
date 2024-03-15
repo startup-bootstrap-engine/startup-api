@@ -15,6 +15,10 @@ export const recipeDoomStaff: IUseWithCraftingRecipe = {
       qty: 5,
     },
     {
+      key: CraftingResourcesBlueprint.PrimordialRelic,
+      qty: 1,
+    },
+    {
       key: CraftingResourcesBlueprint.DragonTooth,
       qty: 20,
     },
