@@ -44,6 +44,7 @@ import { itemPhoenixFeather } from "./itemPhoenixfeather";
 import { itemPolishedStone } from "./itemPolishedStone";
 import { itemRedSapphire } from "./itemRedSapphire";
 import { itemRock } from "./itemRock";
+import { itemSeaShell } from "./ItemSeaShell";
 import { itemSewingThread } from "./itemSewingThread";
 import { itemSilk } from "./ItemSilk";
 import { itemSilverIngot } from "./ItemSilverIngot";
@@ -118,4 +119,5 @@ export const craftingResourcesBlueprintIndex = {
   [CraftingResourcesBlueprint.DragonHead]: itemDragonHead,
   [CraftingResourcesBlueprint.DragonTooth]: itemDragonTooth,
   [CraftingResourcesBlueprint.SocialCrystal]: itemSocialCrystal,
+  [CraftingResourcesBlueprint.SeaShell]: itemSeaShell,
 };

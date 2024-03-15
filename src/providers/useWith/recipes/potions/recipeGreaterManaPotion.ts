@@ -20,7 +20,11 @@ export const recipeGreaterManaPotion: IUseWithCraftingRecipe = {
     },
     {
       key: CraftingResourcesBlueprint.WaterBottle,
-      qty: 4,
+      qty: 2,
+    },
+    {
+      key: CraftingResourcesBlueprint.SeaShell,
+      qty: 1,
     },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 15],

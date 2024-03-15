@@ -22,6 +22,10 @@ export const recipeDoomStaff: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.MagicRecipe,
       qty: 160,
     },
+    {
+      key: CraftingResourcesBlueprint.SeaShell,
+      qty: 30,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 40],
 };

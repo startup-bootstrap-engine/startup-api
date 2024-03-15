@@ -18,6 +18,10 @@ export const recipeFireburstWand: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.MagicRecipe,
       qty: 40,
     },
+    {
+      key: CraftingResourcesBlueprint.SeaShell,
+      qty: 3,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 33],
 };
