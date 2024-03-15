@@ -19,8 +19,8 @@ export const recipeBloodmoonBlade: IUseWithCraftingRecipe = {
       qty: 250,
     },
     {
-      key: CraftingResourcesBlueprint.RedSapphire,
-      qty: 350,
+      key: CraftingResourcesBlueprint.NebulaSeahorn,
+      qty: 3,
     },
     {
       key: CraftingResourcesBlueprint.PhoenixFeather,

@@ -36,6 +36,7 @@ import { itemJade } from "./itemJade";
 
 import { itemLeather } from "./ItemLeather";
 import { itemMagicRecipe } from "./ItemMagicRecipe";
+import { itemNebulaSeahorn } from "./ItemNebulaSeahorn";
 
 import { itemObsidiumIngot } from "./ItemObsidiumIngot";
 import { itemObsidiumOre } from "./ItemObsidiumOre";
@@ -122,4 +123,5 @@ export const craftingResourcesBlueprintIndex = {
   [CraftingResourcesBlueprint.SocialCrystal]: itemSocialCrystal,
   [CraftingResourcesBlueprint.SeaShell]: itemSeaShell,
   [CraftingResourcesBlueprint.PrimordialRelic]: itemPrimordialRelic,
+  [CraftingResourcesBlueprint.NebulaSeahorn]: itemNebulaSeahorn,
 };

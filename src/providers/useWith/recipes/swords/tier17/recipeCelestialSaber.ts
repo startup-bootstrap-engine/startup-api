@@ -23,8 +23,8 @@ export const recipeCelestialSaber: IUseWithCraftingRecipe = {
       qty: 150,
     },
     {
-      key: CraftingResourcesBlueprint.ColoredFeather,
-      qty: 75,
+      key: CraftingResourcesBlueprint.NebulaSeahorn,
+      qty: 2,
     },
     {
       key: MagicsBlueprint.HealRune,

@@ -92,6 +92,11 @@ export const itemMoonlureFishingRod: IToolItemBlueprint = {
             qty: [1, 3],
             chance: await itemCraftable.getCraftChance(character, CraftingSkill.Fishing, 5, rarityOfTool),
           },
+          {
+            key: CraftingResourcesBlueprint.NebulaSeahorn,
+            qty: [1, 3],
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Fishing, 3, rarityOfTool),
+          },
         ],
       },
       skillIncrease

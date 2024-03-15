@@ -439,12 +439,14 @@ export enum CraftingResourcesBlueprint {
   Bandage = "bandage",
   DragonHead = "dragon-head",
   DragonTooth = "dragon-tooth",
+  NebulaSeahorn = "nebula-seahorn",
 }
 
 export enum ToolsBlueprint {
   ButchersKnife = "butchers-knife",
   CarpentersAxe = "carpenters-axe",
   FishingRod = "fishing-rod",
+  MoonlureFishingRod = "moonlure-fishing-rod",
   Pickaxe = "pickaxe",
   Hammer = "hammer",
   UseWithItemTest = "use-with-item-test",
