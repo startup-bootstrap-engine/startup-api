@@ -7,6 +7,7 @@ import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { FARMING_BASE_YIELD, FARMING_SKILL_FACTOR } from "@providers/constants/FarmingConstants";
+import { CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { TraitGetter } from "@providers/skill/TraitGetter";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -23,6 +24,7 @@ import {
   ItemType,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import { random } from "lodash";
 import { IPlantItem } from "./data/blueprints/PlantItem";
 import { PlantLifeCycle } from "./data/types/PlantTypes";
 
@@ -67,6 +69,7 @@ export class PlantHarvest {
     const harvestableItemQuantity = this.calculateCropYield(skillLevel, blueprint);
 
     const harvestedItemBlueprint = await this.getHarvestedItemBlueprint(blueprint);
+
     const inventoryContainerId = await this.getInventoryContainerId(character);
 
     if (!inventoryContainerId) {
@@ -81,6 +84,14 @@ export class PlantHarvest {
 
     const newItem = await this.createAndSaveNewItem(harvestedItemBlueprint, harvestableItemQuantity);
     const wasItemAddedToContainer = await this.addItemToContainer(newItem, character, inventoryContainerId);
+
+    const n = Math.floor(Math.random() * 100);
+
+    if (n < 25) {
+      const extraReward = await this.getExtraReward();
+      const extraRewardItem = await this.createAndSaveNewItem(extraReward, random(1, harvestableItemQuantity));
+      await this.addItemToContainer(extraRewardItem, character, inventoryContainerId);
+    }
 
     if (!wasItemAddedToContainer) {
       this.sendErrorMessage(character, "An error occurred while processing your harvest.");
@@ -115,6 +126,18 @@ export class PlantHarvest {
 
   private getHarvestedItemBlueprint(blueprint: IPlantItem): Promise<IItem | null> {
     return this.blueprintManager.getBlueprint("items", blueprint.harvestableItemKey);
+  }
+
+  private getExtraReward(): Promise<IItem> {
+    const potentialExtraRewards = [
+      CraftingResourcesBlueprint.Herb,
+      CraftingResourcesBlueprint.ElvenLeaf,
+      CraftingResourcesBlueprint.Worm,
+    ];
+
+    const randomReward = potentialExtraRewards[Math.floor(Math.random() * potentialExtraRewards.length)];
+
+    return this.blueprintManager.getBlueprint("items", randomReward);
   }
 
   private async getInventoryContainerId(character: ICharacter): Promise<string | undefined> {

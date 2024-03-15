@@ -15,12 +15,8 @@ export const recipeLightLifePotion: IUseWithCraftingRecipe = {
       qty: 3,
     },
     {
-      key: FoodsBlueprint.Potato,
-      qty: 1,
-    },
-    {
-      key: FoodsBlueprint.Strawberry,
-      qty: 1,
+      key: FoodsBlueprint.Carrot,
+      qty: 2,
     },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 1],

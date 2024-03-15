@@ -15,7 +15,7 @@ export const recipeLifePotion: IUseWithCraftingRecipe = {
       qty: 4,
     },
     {
-      key: FoodsBlueprint.Potato,
+      key: CraftingResourcesBlueprint.ElvenLeaf,
       qty: 2,
     },
     {

@@ -146,7 +146,7 @@ describe("UseWithRefill.ts", () => {
 
     expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
       testCharacter,
-      `Sorry, You can only ${resourceKey} that you own ${useWithRefillData.targetType}s.`
+      `Sorry, You can only ${resourceKey} ${useWithRefillData.targetType}s that you own.`
     );
   });
 
@@ -172,7 +172,12 @@ describe("UseWithRefill.ts", () => {
 
     expect(updatedRefillItem?.remainingUses).toEqual(currentRemainingUses - decrementQty);
 
-    expect(sendRandomMessageToCharacterMock).toBeCalledWith(testCharacter, useWithRefillData.successMessages, true);
+    expect(sendRandomMessageToCharacterMock).toBeCalledWith(
+      testCharacter,
+      useWithRefillData.successMessages,
+      true,
+      expect.any(Object)
+    );
 
     expect(mockSocketMessaging.sendEventToUser).toBeCalledWith(
       testCharacter.channelId!,

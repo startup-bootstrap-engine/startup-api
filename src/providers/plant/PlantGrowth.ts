@@ -16,6 +16,11 @@ interface IPlantGrowthStatus {
   canWater: boolean;
 }
 
+export interface IGrowthInfo {
+  growthPoints: number;
+  requiredGrowthPoints: number;
+}
+
 @provide(PlantGrowth)
 export class PlantGrowth {
   constructor(private socketMessaging: SocketMessaging) {}
@@ -28,10 +33,11 @@ export class PlantGrowth {
         return false;
       }
 
-      const blueprint = (await this.getPlantBlueprint(plant)) as IPlantItem;
+      const blueprint = this.getPlantBlueprint(plant) as IPlantItem;
+
       const { canGrow, canWater } = this.canPlantGrow(plant);
 
-      if (!this.handleWateringStatus(canWater, character)) {
+      if (!this.handleWateringStatus(canWater, character, plant.lastWatering ?? new Date())) {
         return false;
       }
 
@@ -40,14 +46,16 @@ export class PlantGrowth {
       }
 
       const currentGrowthPoints = plant.growthPoints ?? 0;
+
       const requiredGrowthPoints =
         blueprint.stagesRequirements[plant.currentPlantCycle ?? PlantLifeCycle.Seed].requiredGrowthPoints;
 
       if (currentGrowthPoints < requiredGrowthPoints) {
-        return await this.updateGrowthPoints(plant, currentGrowthPoints, blueprint);
+        await this.updateGrowthPoints(plant, currentGrowthPoints, blueprint);
       }
 
       const { updatedGrowthPoints, nextCycle } = this.calculateGrowth(plant, blueprint);
+
       const updatedPlant = await this.updatePlantData(plant, updatedGrowthPoints, nextCycle, blueprint);
 
       if (!updatedPlant) {
@@ -55,11 +63,12 @@ export class PlantGrowth {
         return false;
       }
 
-      const itemToUpdate = this.prepareItemToUpdate(updatedPlant);
-
       if (plant.owner) {
         const ownerCharacter = (await Character.findById(plant.owner).lean()) as ICharacter;
+
         if (ownerCharacter) {
+          const itemToUpdate = this.prepareItemToUpdate(updatedPlant);
+
           await this.notifyCharactersAroundCharacter(ownerCharacter, itemToUpdate);
         } else {
           console.error("Character not found");
@@ -122,13 +131,12 @@ export class PlantGrowth {
     blueprint: IPlantItem
   ): { updatedGrowthPoints: number; nextCycle: PlantLifeCycle } {
     const currentGrowthPoints = plant.growthPoints ?? 0;
-    const requiredGrowthPoints =
-      blueprint.stagesRequirements[plant.currentPlantCycle ?? PlantLifeCycle.Seed].requiredGrowthPoints;
+    const requiredGrowthPoints = this.getRequiredGrowthPoints(plant, blueprint);
 
     if (currentGrowthPoints < requiredGrowthPoints) {
       return {
         updatedGrowthPoints: currentGrowthPoints + blueprint.growthFactor,
-        nextCycle: plant.currentPlantCycle as PlantLifeCycle,
+        nextCycle: (plant.currentPlantCycle as PlantLifeCycle) ?? PlantLifeCycle.Seed,
       };
     }
 
@@ -141,14 +149,33 @@ export class PlantGrowth {
     return { updatedGrowthPoints, nextCycle };
   }
 
+  public getGrowthInfo(plant: IItem): {
+    growthPoints: number;
+    requiredGrowthPoints: number;
+  } {
+    return {
+      growthPoints: plant.growthPoints ?? 0,
+      requiredGrowthPoints: this.getRequiredGrowthPoints(plant, this.getPlantBlueprint(plant) as IPlantItem),
+    };
+  }
+
+  private getRequiredGrowthPoints(plant: IItem, blueprint: IPlantItem): number {
+    return blueprint.stagesRequirements[plant.currentPlantCycle ?? PlantLifeCycle.Seed].requiredGrowthPoints;
+  }
+
   private async updateLastWatering(plant: IItem): Promise<boolean> {
     await Item.updateOne({ _id: plant._id }, { $set: { lastWatering: new Date() } });
     return true;
   }
 
-  private handleWateringStatus(canWater: boolean, character: ICharacter): boolean {
+  private handleWateringStatus(canWater: boolean, character: ICharacter, lastWatering: Date): boolean {
     if (!canWater) {
-      this.notifyCharacter(character, "Sorry, the plant is not ready to be watered. Try again in a few minutes.");
+      const remainingMinutesToWater = MINIMUM_MINUTES_FOR_WATERING - dayjs().diff(dayjs(lastWatering), "minute");
+
+      this.notifyCharacter(
+        character,
+        `Sorry, the plant is not ready to be watered. Try again in ${remainingMinutesToWater} minutes.`
+      );
       return false;
     }
     return true;
@@ -158,10 +185,11 @@ export class PlantGrowth {
     this.socketMessaging.sendErrorMessageToCharacter(character, message);
   }
 
-  private async getPlantBlueprint(plant: IItem): Promise<IPlantItem | null> {
-    const blueprintManager = container.get<BlueprintManager>(BlueprintManager);
+  private getPlantBlueprint(plant: IItem): IPlantItem | null {
     try {
-      return (await blueprintManager.getBlueprint("plants", plant.baseKey)) as IPlantItem;
+      const blueprintManager = container.get(BlueprintManager);
+
+      return blueprintManager.getBlueprint("plants", plant.key) as IPlantItem;
     } catch (error) {
       console.error("Failed to get plant blueprint:", error);
       return null;
@@ -169,6 +197,12 @@ export class PlantGrowth {
   }
 
   private prepareItemToUpdate(item: IItem): IItemUpdate {
+    const itemBlueprint = this.getPlantBlueprint(item);
+
+    if (!itemBlueprint) {
+      throw new Error(`Failed to get blueprint for item ${item.baseKey}`);
+    }
+
     return {
       id: item._id,
       texturePath: item.texturePath,
@@ -182,6 +216,9 @@ export class PlantGrowth {
       stackQty: item.stackQty || 0,
       isDeadBodyLootable: item.isDeadBodyLootable,
       lastWatering: item.lastWatering!,
+      growthPoints: item.growthPoints!,
+      requiredGrowthPoints: this.getRequiredGrowthPoints(item, itemBlueprint),
+      isTileTinted: item.isTileTinted,
     };
   }
 
@@ -213,7 +250,10 @@ export class PlantGrowth {
     const cycleOrder = [PlantLifeCycle.Seed, PlantLifeCycle.Sprout, PlantLifeCycle.Young, PlantLifeCycle.Mature];
 
     const currentIndex = cycleOrder.indexOf(currentCycle);
-    return cycleOrder[currentIndex + 1] || currentCycle;
+
+    const result = cycleOrder[currentIndex + 1] || currentCycle;
+
+    return result;
   }
 
   private canPlantGrow(plant: IItem): IPlantGrowthStatus {
@@ -266,11 +306,29 @@ export class PlantGrowth {
       lastWatering: { $lt: wateringCutoffTime },
     }).lean<IItem[]>({ virtuals: true, defaults: true });
 
+    await this.warnOwnersAboutWateringTime(plantsNeedingUpdate);
+
     // Update the tinted tile status for all plants that need to be updated
     await this.bulkUpdateTintedTileStatus(plantsNeedingUpdate);
 
+    const updatedPlants = (await Item.find({
+      _id: { $in: plantsNeedingUpdate.map((plant) => plant._id) },
+    }).lean()) as IItem[];
+
     // Update the texture for each plant that needs to be updated
-    await Promise.all(plantsNeedingUpdate.map((plant) => this.updatePlantTexture(plant)));
+    await Promise.all(updatedPlants.map((plant) => this.updatePlantTexture(plant)));
+  }
+
+  private async warnOwnersAboutWateringTime(plantsNeedingUpdate: IItem[]): Promise<void> {
+    const ownerIds = plantsNeedingUpdate.map((plant) => plant.owner);
+    const uniqueOwnerIds = [...new Set(ownerIds)];
+    const owners: ICharacter[] = await Character.find({
+      _id: { $in: uniqueOwnerIds },
+    });
+
+    for (const owner of owners) {
+      this.socketMessaging.sendErrorMessageToCharacter(owner, "🌱 Your plants need to be watered.");
+    }
   }
 
   private async bulkUpdateTintedTileStatus(plants: IItem[]): Promise<void> {

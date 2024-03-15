@@ -18,6 +18,7 @@ import {
   ItemType,
 } from "@rpg-engine/shared";
 import { itemsBlueprintIndex } from "./data";
+import { SeedsBlueprint } from "./data/types/itemsBlueprintTypes";
 
 export function getMinRequirements(blueprintKey: string, skillName: string): IItemMinRequirements {
   const levelMultiplier = 1.5;
@@ -78,12 +79,23 @@ export function getMinRequirements(blueprintKey: string, skillName: string): IIt
 }
 
 export function getMinSeedRequirements(blueprintKey: string, skillName: string): IItemMinRequirements {
+  if (blueprintKey === SeedsBlueprint.CarrotSeed) {
+    // initial shouldnt require skills
+    return {
+      level: 0,
+      skill: {
+        name: skillName,
+        level: 0,
+      },
+    };
+  }
+
   const levelMultiplier = 0.1;
-  const skillMultiplier = 0.8;
+  const skillMultiplier = 0.1;
   const regrowsAfterHarvestMultiplier = 4.5;
-  const growthFactorMultiplier = 1.2;
-  const yieldFactorMultiplier = 1.2;
-  const finalMultiplier = 0.5;
+  const growthFactorMultiplier = 1.5;
+  const yieldFactorMultiplier = 1.5;
+  const finalMultiplier = 0.75;
 
   const plantKey = seedToPlantMapping[blueprintKey];
 
