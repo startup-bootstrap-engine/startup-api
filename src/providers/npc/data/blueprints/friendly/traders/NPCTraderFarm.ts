@@ -17,13 +17,16 @@ export const npcTraderFarm = {
       key: ToolsBlueprint.WateringCan,
     },
     {
-      key: ToolsBlueprint.Scythe,
+      key: ToolsBlueprint.CrimsonWateringCan,
     },
     {
       key: SeedsBlueprint.CarrotSeed,
     },
     {
       key: SeedsBlueprint.TomatoSeed,
+    },
+    {
+      key: ToolsBlueprint.Scythe,
     },
   ],
 } as Partial<INPC>;

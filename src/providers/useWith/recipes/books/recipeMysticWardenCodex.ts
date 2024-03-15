@@ -23,6 +23,10 @@ export const recipeMysticWardenCodex: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.BlueLeather,
       qty: 10,
     },
+    {
+      key: CraftingResourcesBlueprint.WhisperrootEntwiner,
+      qty: 8,
+    },
   ],
   minCraftingRequirements: [
     CraftingSkill.Alchemy,

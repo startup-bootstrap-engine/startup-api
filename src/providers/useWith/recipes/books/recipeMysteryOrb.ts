@@ -28,8 +28,8 @@ export const recipeMysteryOrb: IUseWithCraftingRecipe = {
       qty: 99,
     },
     {
-      key: CraftingResourcesBlueprint.Jade,
-      qty: 99,
+      key: CraftingResourcesBlueprint.NautilusShell,
+      qty: 2,
     },
   ],
   minCraftingRequirements: [
@@ -38,7 +38,8 @@ export const recipeMysteryOrb: IUseWithCraftingRecipe = {
       [CraftingResourcesBlueprint.MagicRecipe, 10],
       [CraftingResourcesBlueprint.ObsidiumIngot, 30],
       [CraftingResourcesBlueprint.BlueFeather, 50],
-      [CraftingResourcesBlueprint.Jade, 99],
+      [MagicsBlueprint.ThunderRune, 99],
+      [CraftingResourcesBlueprint.NautilusShell, 2],
     ]),
   ],
 };

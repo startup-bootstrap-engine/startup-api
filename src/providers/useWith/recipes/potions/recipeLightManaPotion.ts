@@ -11,10 +11,6 @@ export const recipeLightManaPotion: IUseWithCraftingRecipe = {
   outputQtyRange: [5, 10],
   requiredItems: [
     {
-      key: FoodsBlueprint.Eggplant,
-      qty: 1,
-    },
-    {
       key: FoodsBlueprint.Turnip,
       qty: 1,
     },

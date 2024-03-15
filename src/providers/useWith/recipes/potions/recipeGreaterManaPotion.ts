@@ -11,20 +11,16 @@ export const recipeGreaterManaPotion: IUseWithCraftingRecipe = {
   outputQtyRange: [3, 5],
   requiredItems: [
     {
-      key: FoodsBlueprint.Eggplant,
-      qty: 3,
-    },
-    {
       key: FoodsBlueprint.Turnip,
-      qty: 3,
+      qty: 4,
     },
     {
       key: CraftingResourcesBlueprint.WaterBottle,
-      qty: 2,
+      qty: 3,
     },
     {
       key: CraftingResourcesBlueprint.SeaShell,
-      qty: 1,
+      qty: 2,
     },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 15],

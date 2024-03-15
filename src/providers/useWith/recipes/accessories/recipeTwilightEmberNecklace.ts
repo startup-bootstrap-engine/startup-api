@@ -35,6 +35,10 @@ export const recipeTwilightEmberNecklace: IUseWithCraftingRecipe = {
       qty: 130,
     },
     {
+      key: CraftingResourcesBlueprint.WhisperrootEntwiner,
+      qty: 8,
+    },
+    {
       key: CraftingResourcesBlueprint.Silk,
       qty: 130,
     },
