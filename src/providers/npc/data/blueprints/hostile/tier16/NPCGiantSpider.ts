@@ -20,6 +20,7 @@ import {
   ShieldsBlueprint,
   SpearsBlueprint,
   StaffsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -143,6 +144,10 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: LegsBlueprint.MithrilLegs,
+      chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.MoonlureFishingRod,
       chance: LootProbability.VeryRare,
     },
     {

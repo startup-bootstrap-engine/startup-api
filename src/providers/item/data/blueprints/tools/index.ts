@@ -3,6 +3,7 @@ import { itemButchersKnife } from "./ItemButchersKnife";
 import { itemCarpentersAxe } from "./ItemCarpentersAxe";
 import { itemFishingRod } from "./ItemFishingRod";
 import { itemHammer } from "./ItemHammer";
+import { itemMoonlureFishingRod } from "./ItemMoonlureFishingRod";
 import { itemPickaxe } from "./ItemPickaxe";
 import { itemScythe } from "./ItemScythe";
 import { itemUseWithTileTest } from "./ItemUseWithTileTest";
@@ -17,4 +18,5 @@ export const toolsBlueprintIndex = {
   [ToolsBlueprint.UseWithTileTest]: itemUseWithTileTest, //! UNIT TEST ONLY
   [ToolsBlueprint.Scythe]: itemScythe,
   [ToolsBlueprint.WateringCan]: itemWateringCan,
+  [ToolsBlueprint.MoonlureFishingRod]: itemMoonlureFishingRod,
 };

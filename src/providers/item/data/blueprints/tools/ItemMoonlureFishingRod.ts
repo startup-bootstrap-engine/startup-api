@@ -18,18 +18,18 @@ import {
 } from "@rpg-engine/shared";
 import { CraftingResourcesBlueprint, FoodsBlueprint, ToolsBlueprint } from "../../types/itemsBlueprintTypes";
 
-export const itemFishingRod: IToolItemBlueprint = {
-  key: ToolsBlueprint.FishingRod,
+export const itemMoonlureFishingRod: IToolItemBlueprint = {
+  key: ToolsBlueprint.MoonlureFishingRod,
   type: ItemType.Tool,
   subType: ItemSubType.Tool,
   textureAtlas: "items",
-  texturePath: "tools/fishing-rod.png",
+  texturePath: "tools/moonlure-fishing-rod.png",
   name: "Fishing Rod",
-  description: "A tool primarily used to catch fish. It requires a worm as bait to be effective.",
+  description: "A tool primarily used to catch fish and crafting materials. It uses a moon-like lure to attract fish.",
   weight: 0.1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   hasUseWith: true,
-  basePrice: 70,
+  basePrice: 500,
   rangeType: EntityAttackType.Melee,
   useWithMaxDistanceGrid: RangeTypes.Medium,
   canSell: false,
@@ -50,41 +50,46 @@ export const itemFishingRod: IToolItemBlueprint = {
         targetTile,
         requiredResource: {
           key: CraftingResourcesBlueprint.Worm,
-          decrementQty: 1,
-          errorMessage: "Sorry, you need a worm to fish.",
+          decrementQty: 2,
+          errorMessage: "Sorry, you need 2x worms to fish.",
         },
         targetTileAnimationEffectKey: "fishing",
 
         successAnimationEffectKey: AnimationEffectKeys.LevelUp,
         errorAnimationEffectKey: "miss",
         errorMessages: [
-          "Hmm... Nothing here.",
-          "You didn't catch anything.",
-          "You didn't catch anything. Try again.",
-          "Oops! The fish got away.",
-          "Erm... Nothing!",
+          "Hmm... The moonlure didn't attract any fish.",
+          "You didn't catch anything, even with the moonlure.",
+          "The moonlure didn't work this time. Try again.",
+          "Oops! The fish was attracted by the moonlure, but it got away.",
+          "Erm... Nothing! Maybe the moonlure isn't glowing enough?",
         ],
         successMessages: [
-          "You caught a fish!",
-          "You caught a big one!",
-          "You're getting good at this!",
-          "Woooaah! You caught a big fish!",
+          "You caught a fish with the moonlure!",
+          "The moonlure attracted a big one! You caught a big fish!",
+          "You're getting good at this moonlure fishing!",
+          "Woooaah! The moonlure attracted a huge fish! You caught a big one!",
         ],
 
         rewards: [
           {
             key: FoodsBlueprint.WildSalmon,
             qty: [1, 3],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Fishing, 2.5, rarityOfTool),
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Fishing, 5, rarityOfTool),
           },
           {
             key: FoodsBlueprint.Tuna,
             qty: [2, 3],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Fishing, 3, rarityOfTool),
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Fishing, 7, rarityOfTool),
           },
           {
             key: FoodsBlueprint.BrownFish,
             qty: [1, 2],
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Fishing, 10, rarityOfTool),
+          },
+          {
+            key: CraftingResourcesBlueprint.SeaShell,
+            qty: [1, 3],
             chance: await itemCraftable.getCraftChance(character, CraftingSkill.Fishing, 5, rarityOfTool),
           },
         ],
@@ -92,5 +97,5 @@ export const itemFishingRod: IToolItemBlueprint = {
       skillIncrease
     );
   },
-  usableEffectDescription: "Use it on a fishing spot with a worm to catch a fish",
+  usableEffectDescription: "Use it on a fishing spot with a worm to catch a fish or crafting ingredients.",
 };
