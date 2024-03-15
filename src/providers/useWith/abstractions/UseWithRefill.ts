@@ -148,23 +148,19 @@ export class UseWithRefill {
     character: ICharacter,
     randomMessages: string[],
     isSuccess: boolean,
-    targetItem: IItem
+    targetItem: IItem | null
   ): void {
-    const growthInfo = this.plantGrowth.getGrowthInfo(targetItem);
+    let message = randomMessages[random(0, randomMessages.length - 1)];
+
+    if (targetItem && targetItem.type === ItemType.Plant) {
+      const growthInfo = this.plantGrowth.getGrowthInfo(targetItem);
+      message += ` Growth: (${growthInfo.growthPoints}/${growthInfo.requiredGrowthPoints})`;
+    }
+
     if (isSuccess) {
-      this.socketMessaging.sendMessageToCharacter(
-        character,
-        `${randomMessages[random(0, randomMessages.length - 1)]} Growth: (${growthInfo.growthPoints}/${
-          growthInfo.requiredGrowthPoints
-        })`
-      );
+      this.socketMessaging.sendMessageToCharacter(character, message);
     } else {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        `${randomMessages[random(0, randomMessages.length - 1)]} Growth: (${growthInfo.growthPoints}/${
-          growthInfo.requiredGrowthPoints
-        }) `
-      );
+      this.socketMessaging.sendErrorMessageToCharacter(character, message);
     }
   }
 
@@ -173,7 +169,7 @@ export class UseWithRefill {
     options: IUseWithRefill,
     skillIncrease: SkillIncrease
   ): Promise<void> {
-    const { originItem, targetItem, successMessages } = options;
+    const { originItem, successMessages } = options;
 
     try {
       const blueprintManager = container.get<BlueprintManager>(BlueprintManager);
@@ -192,7 +188,7 @@ export class UseWithRefill {
       }
 
       if (successMessages) {
-        this.sendRandomMessageToCharacter(character, successMessages, true, targetItem as IItem);
+        this.sendRandomMessageToCharacter(character, successMessages, true, null);
       }
 
       await this.animationEffect.sendAnimationEventToCharacter(character, AnimationEffectKeys.SkillLevelUp);

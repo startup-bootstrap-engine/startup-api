@@ -154,7 +154,7 @@ export class PlantGrowth {
     requiredGrowthPoints: number;
   } {
     return {
-      growthPoints: plant.growthPoints ?? 0,
+      growthPoints: plant?.growthPoints ?? 0,
       requiredGrowthPoints: this.getRequiredGrowthPoints(plant, this.getPlantBlueprint(plant) as IPlantItem),
     };
   }
