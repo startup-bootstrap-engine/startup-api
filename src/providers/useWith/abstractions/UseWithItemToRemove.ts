@@ -34,11 +34,6 @@ export class UseWithItemToRemove {
       return;
     }
 
-    if (!targetItem.isDead) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you can only remove dead plants.");
-      return;
-    }
-
     const chance = 75;
     const n = _.random(0, 100);
     if (n >= chance) {
