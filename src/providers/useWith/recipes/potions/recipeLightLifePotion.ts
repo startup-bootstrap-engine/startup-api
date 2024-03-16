@@ -14,6 +14,10 @@ export const recipeLightLifePotion: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.WaterBottle,
       qty: 1,
     },
+    {
+      key: CraftingResourcesBlueprint.BloodrootBlossomFlower,
+      qty: 5,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 1],
 };

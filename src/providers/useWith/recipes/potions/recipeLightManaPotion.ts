@@ -14,6 +14,10 @@ export const recipeLightManaPotion: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.WaterBottle,
       qty: 1,
     },
+    {
+      key: CraftingResourcesBlueprint.DuskwispHerbFlower,
+      qty: 6,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 1],
 };

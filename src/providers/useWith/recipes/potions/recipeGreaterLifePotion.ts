@@ -14,6 +14,10 @@ export const recipeGreaterLifePotion: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.WaterBottle,
       qty: 2,
     },
+    {
+      key: CraftingResourcesBlueprint.BloodrootBlossomFlower,
+      qty: 12,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 10],
 };

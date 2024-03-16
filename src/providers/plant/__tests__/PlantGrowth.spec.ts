@@ -1,9 +1,9 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
-import { MAXIMUM_MINUTES_FOR_GROW, MINIMUM_MINUTES_FOR_WATERING } from "@providers/constants/FarmingConstants";
+import { MAXIMUM_MINUTES_FOR_GROW } from "@providers/constants/FarmingConstants";
 import { container, unitTestHelper } from "@providers/inversify/container";
-import { ItemSocketEvents, ItemSubType, ItemType } from "@rpg-engine/shared";
+import { ItemSocketEvents, ItemSubType, ItemType, MINIMUM_MINUTES_FOR_WATERING } from "@rpg-engine/shared";
 import dayjs from "dayjs";
 import _ from "lodash";
 import { PlantGrowth } from "../PlantGrowth";

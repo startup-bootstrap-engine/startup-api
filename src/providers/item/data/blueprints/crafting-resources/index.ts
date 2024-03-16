@@ -2,6 +2,7 @@ import { CraftingResourcesBlueprint } from "../../types/itemsBlueprintTypes";
 import { itemRope } from "../tools/ItemRope";
 import { itemBandage } from "./ItemBandage";
 import { itemBatsWing } from "./ItemBatsWing";
+import { itemBloodrootBlossomFlower } from "./ItemBloodrootBlossomFlower";
 import { itemBlueFeather } from "./ItemBlueFeather";
 import { itemBlueLeather } from "./itemBlueLeather";
 import { itemBlueSapphire } from "./ItemBlueSapphire";
@@ -16,6 +17,7 @@ import { itemCorruptionOre } from "./ItemCorruptionOre";
 import { itemDiamond } from "./ItemDiamond";
 import { itemDragonHead } from "./ItemDragonHead";
 import { itemDragonTooth } from "./ItemDragonTooth";
+import { itemDuskwispHerbFlower } from "./ItemDuskwispHerbFlower";
 import { itemElvenLeaf } from "./itemElvenLeaf";
 import { itemElvenWood } from "./itemElvenWood";
 import { itemEye } from "./ItemEye";
@@ -53,6 +55,7 @@ import { itemSmallWoodenStick } from "./itemSmallWoodenStick";
 import { itemSmallWorm } from "./itemSmallWorm";
 import { itemSocialCrystal } from "./ItemSocialCrystal";
 import { itemSteelIngot } from "./itemSteelIngot";
+import { itemSunspireLotusFlower } from "./ItemSunspireLotusFlower";
 import { itemWaterBottle } from "./itemWaterBottle";
 import { itemWeaponRecipe } from "./ItemWeaponRecipe";
 import { itemWheat } from "./ItemWheat";
@@ -118,4 +121,7 @@ export const craftingResourcesBlueprintIndex = {
   [CraftingResourcesBlueprint.DragonHead]: itemDragonHead,
   [CraftingResourcesBlueprint.DragonTooth]: itemDragonTooth,
   [CraftingResourcesBlueprint.SocialCrystal]: itemSocialCrystal,
+  [CraftingResourcesBlueprint.BloodrootBlossomFlower]: itemBloodrootBlossomFlower,
+  [CraftingResourcesBlueprint.DuskwispHerbFlower]: itemDuskwispHerbFlower,
+  [CraftingResourcesBlueprint.SunspireLotusFlower]: itemSunspireLotusFlower,
 };

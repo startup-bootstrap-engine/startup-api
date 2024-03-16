@@ -13,7 +13,6 @@ export const MAX_HOURS_NO_WATER_DEAD = 6;
 export const DEAD_PLANT_REMOVE_HOURS = 1;
 
 export const MAXIMUM_MINUTES_FOR_GROW: number = 240;
-export const MINIMUM_MINUTES_FOR_WATERING: number = 20;
 
 export const ULTRA_LOW_GROWTH_FACTOR = 1;
 export const LOW_GROWTH_FACTOR = 1.5;

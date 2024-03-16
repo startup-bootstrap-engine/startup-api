@@ -14,6 +14,10 @@ export const recipeGreaterManaPotion: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.WaterBottle,
       qty: 4,
     },
+    {
+      key: CraftingResourcesBlueprint.DuskwispHerbFlower,
+      qty: 15,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 15],
 };
