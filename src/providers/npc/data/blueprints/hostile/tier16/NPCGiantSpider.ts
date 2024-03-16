@@ -82,8 +82,8 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.WatermelonSeed,
-      chance: LootProbability.Uncommon,
-      quantityRange: [1, 3],
+      chance: LootProbability.SemiCommon,
+      quantityRange: [1, 10],
     },
 
     {

@@ -80,7 +80,7 @@ export const npcMinotaurMage: INPCTierBlueprint<15> = {
     {
       itemBlueprintKey: SeedsBlueprint.PumpkinSeed,
       chance: LootProbability.Uncommon,
-      quantityRange: [1, 3],
+      quantityRange: [1, 15],
     },
     {
       itemBlueprintKey: StaffsBlueprint.MoonsStaff,

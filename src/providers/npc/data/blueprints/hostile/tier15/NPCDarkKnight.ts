@@ -71,7 +71,7 @@ export const npcDarkKnight: INPCTierBlueprint<15> = {
     {
       itemBlueprintKey: SeedsBlueprint.PumpkinSeed,
       chance: LootProbability.Uncommon,
-      quantityRange: [1, 3],
+      quantityRange: [1, 10],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,

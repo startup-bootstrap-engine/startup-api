@@ -62,7 +62,7 @@ export const npcTroll: INPCTierBlueprint<12> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.PotatoSeed,
-      chance: LootProbability.Rare,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 5],
     },
     {

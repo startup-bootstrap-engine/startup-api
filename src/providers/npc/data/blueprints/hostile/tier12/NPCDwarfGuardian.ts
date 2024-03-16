@@ -64,7 +64,7 @@ export const npcDwarfGuardian: INPCTierBlueprint<12> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.TurnipSeed,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Common,
       quantityRange: [1, 5],
     },
 

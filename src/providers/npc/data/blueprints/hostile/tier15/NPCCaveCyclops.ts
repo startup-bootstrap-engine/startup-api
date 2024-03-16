@@ -54,8 +54,8 @@ export const npcCaveCyclops: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.TurnipSeed,
-      chance: LootProbability.Uncommon,
-      quantityRange: [1, 5],
+      chance: LootProbability.Common,
+      quantityRange: [1, 8],
     },
     {
       itemBlueprintKey: DaggersBlueprint.PhoenixDagger,

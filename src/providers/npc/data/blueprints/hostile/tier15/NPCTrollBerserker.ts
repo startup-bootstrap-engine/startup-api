@@ -73,8 +73,8 @@ export const npcTrollBerserker: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.PotatoSeed,
-      chance: LootProbability.Rare,
-      quantityRange: [1, 5],
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 10],
     },
     {
       itemBlueprintKey: ShieldsBlueprint.PaviseShield,

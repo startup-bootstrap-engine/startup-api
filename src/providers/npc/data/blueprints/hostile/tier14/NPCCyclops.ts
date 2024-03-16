@@ -58,8 +58,8 @@ export const npcCyclops: INPCTierBlueprint<14> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.TurnipSeed,
-      chance: LootProbability.Uncommon,
-      quantityRange: [1, 5],
+      chance: LootProbability.Common,
+      quantityRange: [1, 7],
     },
     {
       itemBlueprintKey: ShieldsBlueprint.FalconsShield,

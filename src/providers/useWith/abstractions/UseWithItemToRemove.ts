@@ -1,10 +1,10 @@
-import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
-import { CharacterSkull } from "@providers/character/CharacterSkull";
+import { CharacterPlantActions } from "@providers/plant/CharacterPlantActions";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { AnimationEffectKeys, CharacterSkullType, ItemType } from "@rpg-engine/shared";
+import { AnimationEffectKeys, ItemType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import _, { random } from "lodash";
 export interface IUseWithRemove {
@@ -20,18 +20,11 @@ export class UseWithItemToRemove {
   constructor(
     private socketMessaging: SocketMessaging,
     private animationEffect: AnimationEffect,
-    private characterSkull: CharacterSkull
+    private characterPlantActions: CharacterPlantActions
   ) {}
 
   public async executeUse(character: ICharacter, options: IUseWithRemove, skillIncrease: SkillIncrease): Promise<void> {
-    const {
-      targetItem,
-      originItem,
-      successAnimationEffectKey,
-      errorAnimationEffectKey,
-      errorMessages,
-      successMessages,
-    } = options;
+    const { targetItem, successAnimationEffectKey, errorMessages, successMessages } = options;
 
     // for now we can remove only plants
     if (targetItem.type !== ItemType.Plant) {
@@ -39,22 +32,36 @@ export class UseWithItemToRemove {
       return;
     }
 
-    if (!this.isOwner(targetItem, character)) {
-      const plantOwner = (await Character.findOne({ _id: targetItem.owner }).lean()) as ICharacter;
+    if (!this.isOwner(targetItem, character) && !targetItem.isDead) {
+      const canPerformActionOnUnowedPlant = await this.characterPlantActions.canPerformActionOnUnowedPlant(
+        character,
+        targetItem,
+        `💀 ${character.name} is destroying your crops!`
+      );
 
-      if (plantOwner) {
-        this.socketMessaging.sendErrorMessageToCharacter(plantOwner, `💀 ${character.name} is destroying your crops!`);
-      }
-
-      if (
-        !character.hasSkull &&
-        character.skullType !== CharacterSkullType.YellowSkull &&
-        character.skullType !== CharacterSkullType.RedSkull
-      ) {
-        await this.characterSkull.setSkull(character, CharacterSkullType.WhiteSkull);
+      if (!canPerformActionOnUnowedPlant) {
+        return;
       }
     }
 
+    await this.tryToDestroyPlant(
+      character,
+      targetItem,
+      successAnimationEffectKey!,
+      errorMessages!,
+      successMessages!,
+      skillIncrease
+    );
+  }
+
+  private async tryToDestroyPlant(
+    character: ICharacter,
+    targetItem: IItem,
+    successAnimationEffectKey: AnimationEffectKeys,
+    errorMessages: string[],
+    successMessages: string[],
+    skillIncrease: SkillIncrease
+  ): Promise<void> {
     const chance = 75;
     const n = _.random(0, 100);
     if (n >= chance) {

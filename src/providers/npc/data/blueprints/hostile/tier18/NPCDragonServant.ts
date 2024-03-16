@@ -76,8 +76,8 @@ export const npcDragonServant: INPCTierBlueprint<18> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.WatermelonSeed,
-      chance: LootProbability.Uncommon,
-      quantityRange: [1, 3],
+      chance: LootProbability.Common,
+      quantityRange: [1, 15],
     },
     {
       itemBlueprintKey: SwordsBlueprint.YggdrasilGladius,

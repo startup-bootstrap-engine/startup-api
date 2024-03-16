@@ -61,8 +61,8 @@ export const npcDragonKnight: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.PotatoSeed,
-      chance: LootProbability.Rare,
-      quantityRange: [1, 5],
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 15],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,

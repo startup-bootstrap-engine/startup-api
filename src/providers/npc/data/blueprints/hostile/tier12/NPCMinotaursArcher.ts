@@ -55,7 +55,7 @@ export const npcMinotaurArcher: INPCTierBlueprint<12> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.PotatoSeed,
-      chance: LootProbability.Rare,
+      chance: LootProbability.Uncommon,
       quantityRange: [1, 10],
     },
     {

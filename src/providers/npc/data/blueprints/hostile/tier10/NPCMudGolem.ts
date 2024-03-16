@@ -59,7 +59,7 @@ export const npcMudGolem: INPCTierBlueprint<10> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.CabbageSeed,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Common,
       quantityRange: [1, 3],
     },
     {

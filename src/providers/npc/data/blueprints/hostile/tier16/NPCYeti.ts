@@ -74,8 +74,8 @@ export const npcYeti: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.WatermelonSeed,
-      chance: LootProbability.Uncommon,
-      quantityRange: [1, 3],
+      chance: LootProbability.Common,
+      quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: SpearsBlueprint.RoyalSpear,
