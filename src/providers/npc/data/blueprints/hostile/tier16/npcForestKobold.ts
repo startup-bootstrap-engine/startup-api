@@ -94,15 +94,15 @@ export const npcForestKobold: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: BootsBlueprint.SolarflareBoots,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.StarfirMaulClub,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.SpikedClub,
@@ -110,19 +110,19 @@ export const npcForestKobold: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: AxesBlueprint.CleaverAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.CrownedAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
@@ -130,7 +130,7 @@ export const npcForestKobold: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.AstralDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
 
     {
@@ -159,27 +159,27 @@ export const npcForestKobold: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: ShieldsBlueprint.DemonShield,
-      chance: LootProbability.Common,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.MithrilArmor,
-      chance: LootProbability.Common,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: LegsBlueprint.MithrilLegs,
-      chance: LootProbability.Common,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: LegsBlueprint.GoldenLegs,
-      chance: LootProbability.Common,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: BootsBlueprint.GoldenBoots,
-      chance: LootProbability.VeryCommon,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.RoyalHelmet,
-      chance: LootProbability.VeryCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.SaviorsHelmet,
@@ -191,7 +191,7 @@ export const npcForestKobold: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: HelmetsBlueprint.RoyalKnightHelmet,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.SilverShield,

@@ -58,7 +58,7 @@ export const npcOrcWarlord: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.VerdantDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.VikingHelmet,
@@ -92,31 +92,31 @@ export const npcOrcWarlord: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: MacesBlueprint.MetalStoneScepter,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.GrimHarbingerClub,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.DualImpactAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.CrownSplitterAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.GoldenRubyNecklace,

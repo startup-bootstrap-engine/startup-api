@@ -3,13 +3,15 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   AccessoriesBlueprint,
+  AxesBlueprint,
   BootsBlueprint,
-  CraftingResourcesBlueprint,
   DaggersBlueprint,
   FoodsBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
+  PotionsBlueprint,
+  ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
@@ -73,7 +75,7 @@ export const npcFireOrc: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.VerdantDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.VikingHelmet,
@@ -93,53 +95,64 @@ export const npcFireOrc: INPCTierBlueprint<16> = {
       chance: LootProbability.Rare,
     },
     {
-      itemBlueprintKey: MacesBlueprint.StonefangCleaverClub,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.MetalMasherClub,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.MetalStoneScepter,
+      itemBlueprintKey: DaggersBlueprint.CorruptionDagger,
       chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: MacesBlueprint.GrimHarbingerClub,
+      itemBlueprintKey: SwordsBlueprint.FalconsSword,
       chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: FoodsBlueprint.Fish,
-      chance: LootProbability.VeryCommon,
-      quantityRange: [1, 5],
-    },
-
-    {
-      itemBlueprintKey: CraftingResourcesBlueprint.RedSapphire,
-      chance: LootProbability.Rare,
-      quantityRange: [1, 4],
-    },
-    {
-      itemBlueprintKey: BootsBlueprint.IronBoots,
+      itemBlueprintKey: SwordsBlueprint.LongSword,
       chance: LootProbability.Uncommon,
     },
-
     {
-      itemBlueprintKey: CraftingResourcesBlueprint.BlueSapphire,
-      chance: LootProbability.SemiCommon,
-      quantityRange: [1, 3],
+      itemBlueprintKey: ShieldsBlueprint.KiteShield,
+      chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: LegsBlueprint.BronzeLegs,
+      itemBlueprintKey: PotionsBlueprint.LightEndurancePotion,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.EonGuardianSword,
       chance: LootProbability.VeryRare,
     },
     {
-      itemBlueprintKey: SwordsBlueprint.CorruptionSword,
+      itemBlueprintKey: BootsBlueprint.SolarflareBoots,
       chance: LootProbability.VeryRare,
     },
     {
-      itemBlueprintKey: BootsBlueprint.CopperBoots,
+      itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.StarfirMaulClub,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.SpikedClub,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.CleaverAxe,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.MaulAxe,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.CrownedAxe,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding],

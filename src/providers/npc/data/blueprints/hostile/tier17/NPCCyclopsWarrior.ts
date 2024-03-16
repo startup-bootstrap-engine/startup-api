@@ -4,14 +4,15 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   AccessoriesBlueprint,
+  ArmorsBlueprint,
   AxesBlueprint,
   BooksBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
   HelmetsBlueprint,
+  LegsBlueprint,
   MacesBlueprint,
   PotionsBlueprint,
-  SeedsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -63,11 +64,6 @@ export const npcCyclopsWarrior: INPCTierBlueprint<17> = {
       chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: SeedsBlueprint.TurnipSeed,
-      chance: LootProbability.Common,
-      quantityRange: [1, 5],
-    },
-    {
       itemBlueprintKey: SwordsBlueprint.LongSword,
       chance: LootProbability.Uncommon,
     },
@@ -85,15 +81,15 @@ export const npcCyclopsWarrior: INPCTierBlueprint<17> = {
     },
     {
       itemBlueprintKey: BootsBlueprint.SolarflareBoots,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.StarfirMaulClub,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.SpikedClub,
@@ -105,23 +101,23 @@ export const npcCyclopsWarrior: INPCTierBlueprint<17> = {
     },
     {
       itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.CrownedAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.AstralDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
 
     {
@@ -147,6 +143,50 @@ export const npcCyclopsWarrior: INPCTierBlueprint<17> = {
     {
       itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
       chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: ShieldsBlueprint.DemonShield,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: ArmorsBlueprint.MithrilArmor,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: LegsBlueprint.MithrilLegs,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: LegsBlueprint.GoldenLegs,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: BootsBlueprint.GoldenBoots,
+      chance: LootProbability.VeryCommon,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.RoyalHelmet,
+      chance: LootProbability.VeryCommon,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.SaviorsHelmet,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.CorruptionSword,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.RoyalKnightHelmet,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: ShieldsBlueprint.SilverShield,
+      chance: LootProbability.VeryCommon,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.GuardianAxe,
+      chance: LootProbability.SemiCommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

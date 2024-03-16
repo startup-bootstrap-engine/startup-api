@@ -64,6 +64,7 @@ export const npcWildCyclops: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: PotionsBlueprint.ManaPotion,
       chance: LootProbability.SemiCommon,
+      quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.IronArrow,
@@ -72,7 +73,7 @@ export const npcWildCyclops: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.PhoenixBow,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
 
     {
@@ -94,11 +95,11 @@ export const npcWildCyclops: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.StarshardDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.RubyglintNecklace,

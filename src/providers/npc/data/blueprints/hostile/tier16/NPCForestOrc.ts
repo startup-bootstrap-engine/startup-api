@@ -77,7 +77,7 @@ export const npcForestOrc: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.VerdantDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.VikingHelmet,
@@ -122,15 +122,15 @@ export const npcForestOrc: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: BootsBlueprint.SolarflareBoots,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.StarfirMaulClub,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.SpikedClub,
@@ -138,23 +138,23 @@ export const npcForestOrc: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: AxesBlueprint.CleaverAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.CrownedAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.VineGrasp],
