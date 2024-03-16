@@ -53,6 +53,7 @@ describe("ItemCraftable.ts", () => {
       await unitTestHelper.createMockItemFromBlueprint(FoodsBlueprint.Eggplant, { stackQty: 2 }),
       await unitTestHelper.createMockItemFromBlueprint(FoodsBlueprint.Turnip, { stackQty: 2 }),
       await unitTestHelper.createMockItemFromBlueprint(CraftingResourcesBlueprint.WaterBottle, { stackQty: 1 }),
+      await unitTestHelper.createMockItemFromBlueprint(CraftingResourcesBlueprint.DuskwispHerbFlower, { stackQty: 10 }),
     ];
 
     await unitTestHelper.addItemsToContainer(inventoryContainer, 6, items);
