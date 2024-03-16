@@ -12,12 +12,11 @@ export const FARMING_SEED_PRICE_RATIO = 1.5;
 
 // Cycle timing
 export const MAXIMUM_MINUTES_FOR_GROW: number = 40; // Its a growth BETWEEN Cycles. Careful... its not the total time it takes! The total would be the sum of all cycles.
+export const MINIMUM_MINUTES_FOR_WATERING: number = 5; // You'll need to water a plant based on this interval
 
 // Cleanup
 export const MAX_HOURS_NO_WATER_DEAD = 2;
 export const DEAD_PLANT_REMOVE_HOURS = 1;
-
-// export const MAXIMUM_MINUTES_FOR_GROW: number = 240;
 
 const GROWTH_FACTOR_BASE_RATIO = 3;
 

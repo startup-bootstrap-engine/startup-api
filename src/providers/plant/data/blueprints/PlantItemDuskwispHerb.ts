@@ -24,7 +24,7 @@ export const plantItemDuskwispHerb: IPlantItem = {
     [PlantLifeCycle.Seed]: {
       requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Seed,
       textureAtlas: "crops",
-      texturePath: "seeds/seed-white-1.png.png",
+      texturePath: "seeds/seed-white-1.png",
     },
     [PlantLifeCycle.Sprout]: {
       requiredGrowthPoints: DEFAULT_PLANT_CYCLE.Sprout,

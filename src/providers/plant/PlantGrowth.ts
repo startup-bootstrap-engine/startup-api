@@ -2,17 +2,10 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
-import { MAXIMUM_MINUTES_FOR_GROW } from "@providers/constants/FarmingConstants";
+import { MAXIMUM_MINUTES_FOR_GROW, MINIMUM_MINUTES_FOR_WATERING } from "@providers/constants/FarmingConstants";
 import { container } from "@providers/inversify/container";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import {
-  IItemUpdate,
-  IItemUpdateAll,
-  ItemSocketEvents,
-  ItemSubType,
-  ItemType,
-  MINIMUM_MINUTES_FOR_WATERING,
-} from "@rpg-engine/shared";
+import { IItemUpdate, IItemUpdateAll, ItemSocketEvents, ItemSubType, ItemType } from "@rpg-engine/shared";
 import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 import { IPlantItem } from "./data/blueprints/PlantItem";
