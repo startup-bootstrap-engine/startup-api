@@ -7,15 +7,16 @@ import {
   DaggersBlueprint,
   FoodsBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { MagicPower, NPCAlignment, NPCSubtype, RangeTypes, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcMinotaurArcher: INPCTierBlueprint<12> = {
   ...generateMoveTowardsMovement(),
@@ -51,6 +52,11 @@ export const npcMinotaurArcher: INPCTierBlueprint<12> = {
     {
       itemBlueprintKey: BootsBlueprint.RoyalBoots,
       chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.PotatoSeed,
+      chance: LootProbability.Rare,
+      quantityRange: [1, 10],
     },
     {
       itemBlueprintKey: DaggersBlueprint.IronJitte,

@@ -6,7 +6,7 @@
   "example": 19.4,
   "unit-test-map-negative-coordinate": 2.6,
   "unit-test-map": 2.8,
-  "ilya-graveyard-01": 19.4,
+  "ilya-graveyard-01": 19.5,
   "dragons-lair": 17.9,
   "minotaurs-island": 24.3,
   "ilya-village-sewer": 19.5,
@@ -29,6 +29,6 @@
   "ilya-dwarf-island": 0.8,
   "training-grounds-one": 1.6,
   "training-grounds-two": 1.6,
-  "farm-land": 2.3,
+  "farm-land": 2.5,
   "farm-land-interiors": 0.7
 }

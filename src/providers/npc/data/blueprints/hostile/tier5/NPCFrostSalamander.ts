@@ -4,15 +4,16 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   CraftingResourcesBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcFrostSalamander: INPCTierBlueprint<5> = {
   ...generateMoveTowardsMovement(),
@@ -48,6 +49,11 @@ export const npcFrostSalamander: INPCTierBlueprint<5> = {
     {
       itemBlueprintKey: SwordsBlueprint.IceSword,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.EggplantSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: SwordsBlueprint.DoubleEdgedSword,

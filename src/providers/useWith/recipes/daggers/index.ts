@@ -1,15 +1,16 @@
 import { DaggersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { IUseWithCraftingRecipe } from "@providers/useWith/useWithTypes";
-import { recipeFrostDagger } from "./recipeFrostDagger";
-import { recipeHexBladeDagger } from "./recipeHexBladeDagger";
-import { recipeSpiritBlade } from "./recipeSpiritBlade";
-import { recipeWoodenDagger } from "./recipeWoodenDagger";
-import { recipeAzureDagger } from "./recipeAzureDagger";
-import { recipeGoldenDagger } from "./recipeGoldenDagger";
+import { recipeFrostbiteBlade } from "../swords/tier3/recipeFrostbiteBlade";
 import { recipeAstralDagger } from "./recipeAstralDagger";
+import { recipeAzureDagger } from "./recipeAzureDagger";
+import { recipeFrostDagger } from "./recipeFrostDagger";
+import { recipeGoldenDagger } from "./recipeGoldenDagger";
+import { recipeHexBladeDagger } from "./recipeHexBladeDagger";
 import { recipeMistfireDagger } from "./recipeMistfireDagger";
+import { recipeSpiritBlade } from "./recipeSpiritBlade";
 import { recipeStarshardDagger } from "./recipeStarshardDagger";
 import { recipeStormswiftDagger } from "./recipeStormswiftDagger";
+import { recipeWoodenDagger } from "./recipeWoodenDagger";
 
 export const recipeDaggersIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [DaggersBlueprint.FrostDagger]: [recipeFrostDagger],
@@ -22,4 +23,5 @@ export const recipeDaggersIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [DaggersBlueprint.MistfireDagger]: [recipeMistfireDagger],
   [DaggersBlueprint.StarshardDagger]: [recipeStarshardDagger],
   [DaggersBlueprint.StormswiftDagger]: [recipeStormswiftDagger],
+  [DaggersBlueprint.FrostBiteDagger]: [recipeFrostbiteBlade],
 };

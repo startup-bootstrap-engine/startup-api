@@ -188,6 +188,7 @@ export class DiscordCronJobs {
       - Greater Mana potions (100x)
       - Greater Life potions (100x)
       - Character name change
+      - Social Crystals (50x)
       
       Ingredients:
       

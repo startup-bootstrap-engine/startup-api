@@ -29,7 +29,7 @@ export const itemWateringCan: IRefillableItem = {
   animationKey: AnimationEffectKeys.Blue,
   projectileAnimationKey: AnimationEffectKeys.Energy,
   name: "Watering Can",
-  description: "A tool used for watering plants.",
+  description: "A tool used for watering plants. It has 60 charges and can be refilled with water.",
   weight: 0.1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   hasUseWith: true,

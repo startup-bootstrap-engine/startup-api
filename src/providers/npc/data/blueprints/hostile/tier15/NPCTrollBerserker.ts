@@ -25,11 +25,12 @@ import {
   LegsBlueprint,
   MagicsBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
-import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 
 export const npcTrollBerserker: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
@@ -70,7 +71,11 @@ export const npcTrollBerserker: INPCTierBlueprint<15> = {
       itemBlueprintKey: GlovesBlueprint.PlateGloves,
       chance: LootProbability.SemiCommon,
     },
-
+    {
+      itemBlueprintKey: SeedsBlueprint.PotatoSeed,
+      chance: LootProbability.Rare,
+      quantityRange: [1, 5],
+    },
     {
       itemBlueprintKey: ShieldsBlueprint.PaviseShield,
       chance: LootProbability.Rare,

@@ -92,7 +92,6 @@ export enum SwordsBlueprint {
   CelestialDefender = "celestial-defender",
   ShadowstrikeFalchion = "shadowstrike-falchion",
   BloodmoonBlade = "bloodmoon-blade",
-  FrostfangDagger = "frostfang-dagger",
   ThunderboltCutlass = "thunderbolt-cutlass",
   InfernoCleaver = "inferno-cleaver",
   MoonshadowBlade = "moonshadow-blade",
@@ -201,6 +200,7 @@ export enum DaggersBlueprint {
   AstralDagger = "astral-dagger",
   ArrowheadDagger = "arrowhead-dagger",
   StarshardDagger = "starshard-dagger",
+  FrostfangDagger = "frostfang-dagger",
 }
 
 export enum ArmorsBlueprint {

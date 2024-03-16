@@ -23,9 +23,6 @@ export const npcTraderFarm = {
       key: SeedsBlueprint.CarrotSeed,
     },
     {
-      key: SeedsBlueprint.TurnipSeed,
-    },
-    {
       key: SeedsBlueprint.TomatoSeed,
     },
     {

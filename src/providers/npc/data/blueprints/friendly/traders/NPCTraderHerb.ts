@@ -12,9 +12,6 @@ export const npcTraderHerbalist = {
   isTrader: true,
   traderItems: [
     {
-      key: CraftingResourcesBlueprint.Herb,
-    },
-    {
       key: CraftingResourcesBlueprint.Silk,
     },
     {

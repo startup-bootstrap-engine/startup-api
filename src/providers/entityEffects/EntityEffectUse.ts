@@ -32,6 +32,10 @@ export class EntityEffectUse {
     entityEffect?: IEntityEffect
   ): Promise<void> {
     try {
+      if (!target || !attacker) {
+        return;
+      }
+
       if (entityEffect) {
         await this.applyEntityEffect(entityEffect, target, attacker, true);
         return;

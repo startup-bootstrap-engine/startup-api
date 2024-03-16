@@ -22,7 +22,7 @@ import {
 import _ from "lodash";
 import { ItemCraftable } from "../ItemCraftable";
 import { itemManaPotion } from "../data/blueprints/potions/ItemManaPotion";
-import { CraftingResourcesBlueprint, PotionsBlueprint } from "../data/types/itemsBlueprintTypes";
+import { CraftingResourcesBlueprint, FoodsBlueprint, PotionsBlueprint } from "../data/types/itemsBlueprintTypes";
 
 describe("ItemCraftable.ts", () => {
   let craftableItem: ItemCraftable;
@@ -50,7 +50,8 @@ describe("ItemCraftable.ts", () => {
     inventoryContainer = (await ItemContainer.findById(inventory.itemContainer)) as unknown as IItemContainer;
 
     items = [
-      await unitTestHelper.createMockItemFromBlueprint(CraftingResourcesBlueprint.BlueFeather, { stackQty: 2 }),
+      await unitTestHelper.createMockItemFromBlueprint(FoodsBlueprint.Eggplant, { stackQty: 2 }),
+      await unitTestHelper.createMockItemFromBlueprint(FoodsBlueprint.Turnip, { stackQty: 2 }),
       await unitTestHelper.createMockItemFromBlueprint(CraftingResourcesBlueprint.WaterBottle, { stackQty: 1 }),
     ];
 
@@ -290,7 +291,7 @@ describe("ItemCraftable.ts", () => {
 
     const itemKeys = (await container.items).map((item) => item.key);
 
-    expect(itemKeys.includes(CraftingResourcesBlueprint.BlueFeather)).toBe(true);
+    expect(itemKeys.includes(FoodsBlueprint.Eggplant)).toBe(true);
     expect(itemKeys.includes(CraftingResourcesBlueprint.WaterBottle)).toBe(true);
     expect(itemKeys.includes(PotionsBlueprint.ManaPotion)).toBe(false);
 

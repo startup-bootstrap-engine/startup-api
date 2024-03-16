@@ -13,17 +13,18 @@ import {
   LegsBlueprint,
   OthersBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   SpearsBlueprint,
   StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { MagicPower, NPCAlignment, NPCCustomDeathPenalties, RangeTypes, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcDarkKnight: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
@@ -62,7 +63,11 @@ export const npcDarkKnight: INPCTierBlueprint<15> = {
       chance: LootProbability.VeryCommon,
       quantityRange: [1, 10],
     },
-
+    {
+      itemBlueprintKey: SeedsBlueprint.PumpkinSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 3],
+    },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,
       chance: LootProbability.Uncommon,
@@ -201,14 +206,6 @@ export const npcDarkKnight: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.FrostbiteFang,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.ShadowstrikeFalchion,
       chance: LootProbability.Uncommon,
     },
   ],

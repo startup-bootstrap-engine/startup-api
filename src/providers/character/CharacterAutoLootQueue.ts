@@ -202,6 +202,10 @@ export class CharacterAutoLootQueue {
       })
       .select("slots");
 
+    if (!updatedBodyItem?.slots) {
+      return;
+    }
+
     const areAllSlotsEmpty = Object.values(updatedBodyItem.slots as Record<string, IItem>).every((x) => !x);
 
     if (!areAllSlotsEmpty) {

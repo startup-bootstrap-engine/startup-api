@@ -117,6 +117,7 @@ export class UseWithTileQueue {
         this.skillIncrease
       );
     }
+
     if (!useWithData || useWithData.originItem.subType !== ItemSubType.Tool || useWithData.originItem.isRefillable) {
       this.socketMessaging.sendEventToUser<IUseWithTileValidation>(
         character.channelId!,
