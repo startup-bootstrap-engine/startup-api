@@ -1,10 +1,11 @@
-import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
+import { CharacterSkull } from "@providers/character/CharacterSkull";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { FARMING_BASE_YIELD, FARMING_SKILL_FACTOR } from "@providers/constants/FarmingConstants";
 import { CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -14,6 +15,7 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SpellCalculator } from "@providers/spells/data/abstractions/SpellCalculator";
 import {
   AnimationEffectKeys,
+  CharacterSkullType,
   CraftingSkill,
   IEquipmentAndInventoryUpdatePayload,
   IItemContainer,
@@ -38,7 +40,8 @@ export class PlantHarvest {
     private characterItemContainer: CharacterItemContainer,
     private animationEffect: AnimationEffect,
     private skillIncrease: SkillIncrease,
-    private traitGetter: TraitGetter
+    private traitGetter: TraitGetter,
+    private characterSkull: CharacterSkull
   ) {}
 
   @TrackNewRelicTransaction()
@@ -49,8 +52,19 @@ export class PlantHarvest {
     }
 
     if (!this.isPlantOwner(plant, character)) {
-      this.sendErrorMessage(character, "Sorry, only the owner can harvest this plant.");
-      return;
+      const plantOwner = (await Character.findOne({ _id: plant.owner }).lean()) as ICharacter;
+
+      if (plantOwner) {
+        this.socketMessaging.sendErrorMessageToCharacter(plantOwner, `💀 ${character.name} is stealing your plants!`);
+      }
+
+      if (
+        !character.hasSkull &&
+        character.skullType !== CharacterSkullType.YellowSkull &&
+        character.skullType !== CharacterSkullType.RedSkull
+      ) {
+        await this.characterSkull.setSkull(character, CharacterSkullType.WhiteSkull);
+      }
     }
 
     if (!this.isPlantMature(plant)) {

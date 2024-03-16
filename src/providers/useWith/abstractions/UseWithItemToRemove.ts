@@ -1,9 +1,10 @@
-import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
+import { CharacterSkull } from "@providers/character/CharacterSkull";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { AnimationEffectKeys, ItemType } from "@rpg-engine/shared";
+import { AnimationEffectKeys, CharacterSkullType, ItemType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import _, { random } from "lodash";
 export interface IUseWithRemove {
@@ -16,7 +17,11 @@ export interface IUseWithRemove {
 }
 @provide(UseWithItemToRemove)
 export class UseWithItemToRemove {
-  constructor(private socketMessaging: SocketMessaging, private animationEffect: AnimationEffect) {}
+  constructor(
+    private socketMessaging: SocketMessaging,
+    private animationEffect: AnimationEffect,
+    private characterSkull: CharacterSkull
+  ) {}
 
   public async executeUse(character: ICharacter, options: IUseWithRemove, skillIncrease: SkillIncrease): Promise<void> {
     const {
@@ -32,6 +37,22 @@ export class UseWithItemToRemove {
     if (targetItem.type !== ItemType.Plant) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you can only remove plants.");
       return;
+    }
+
+    if (!this.isOwner(targetItem, character)) {
+      const plantOwner = (await Character.findOne({ _id: targetItem.owner }).lean()) as ICharacter;
+
+      if (plantOwner) {
+        this.socketMessaging.sendErrorMessageToCharacter(plantOwner, `💀 ${character.name} is destroying your crops!`);
+      }
+
+      if (
+        !character.hasSkull &&
+        character.skullType !== CharacterSkullType.YellowSkull &&
+        character.skullType !== CharacterSkullType.RedSkull
+      ) {
+        await this.characterSkull.setSkull(character, CharacterSkullType.WhiteSkull);
+      }
     }
 
     const chance = 75;
