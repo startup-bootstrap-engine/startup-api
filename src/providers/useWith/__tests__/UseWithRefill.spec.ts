@@ -225,5 +225,30 @@ describe("UseWithRefill.ts", () => {
         "Sorry, the blueprint could not be found."
       );
     });
+
+    it("should sends an message when refilling is successful", async () => {
+      // @ts-expect-error
+      const sendRandomMessageToCharacterMock = jest.spyOn(useWithRefill, "sendRandomMessageToCharacter");
+
+      await useWithRefill.executeRefill(testCharacter, useWithRefillData, skillIncrease);
+
+      expect(sendRandomMessageToCharacterMock).toBeCalledWith(
+        testCharacter,
+        useWithRefillData.successMessages,
+        true,
+        null
+      );
+    });
+
+    it("should sends an message already refilled", async () => {
+      useWithRefillData.originItem.remainingUses = testRefillItemBlueprint.initialRemainingUses;
+
+      await useWithRefill.executeRefill(testCharacter, useWithRefillData, skillIncrease);
+
+      expect(mockSocketMessaging.sendMessageToCharacter).toBeCalledWith(
+        testCharacter,
+        "You have already refilled your watering can. 🌊"
+      );
+    });
   });
 });
