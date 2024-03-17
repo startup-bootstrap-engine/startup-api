@@ -50,6 +50,11 @@ export class PlantHarvest {
       return;
     }
 
+    if (!this.isPlantMature(plant)) {
+      this.sendErrorMessage(character, "Sorry, your plant is not mature enough to be harvested.");
+      return;
+    }
+
     if (!this.isPlantOwner(plant, character)) {
       const canPerformActionsOnUnownedPlant = await this.characterPlantActions.canPerformActionOnUnowedPlant(
         character,
@@ -60,11 +65,6 @@ export class PlantHarvest {
       if (!canPerformActionsOnUnownedPlant) {
         return;
       }
-    }
-
-    if (!this.isPlantMature(plant)) {
-      this.sendErrorMessage(character, "Sorry, your plant is not mature enough to be harvested.");
-      return;
     }
 
     const blueprint = await this.getPlantBlueprint(plant);
