@@ -6,7 +6,14 @@ import { SeedsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { IUseWithItemToSeedOptions, UseWithItemToSeed } from "@providers/useWith/abstractions/UseWithItemToSeed";
 import { IUseWithTargetSeed } from "@providers/useWith/useWithTypes";
-import { EntityAttackType, IUseWithItemBlueprint, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
+import {
+  CraftingSkill,
+  EntityAttackType,
+  IUseWithItemBlueprint,
+  ItemSubType,
+  ItemType,
+  RangeTypes,
+} from "@rpg-engine/shared";
 
 export const itemRedGrapeSeed: IUseWithItemBlueprint = {
   key: SeedsBlueprint.RedGrapeSeed,
@@ -45,4 +52,11 @@ export const itemRedGrapeSeed: IUseWithItemBlueprint = {
     await useWithItemToSeed.execute(character, options, skillIncrease);
   },
   usableEffectDescription: "Use it on a fertile soil to plant a red grape vine",
+  minRequirements: {
+    level: 5,
+    skill: {
+      name: CraftingSkill.Farming,
+      level: 12,
+    },
+  },
 };
