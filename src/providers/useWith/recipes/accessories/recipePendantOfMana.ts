@@ -19,6 +19,10 @@ export const recipePendantOfMana: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.Skull,
       qty: 25,
     },
+    {
+      key: CraftingResourcesBlueprint.WhisperrootEntwiner,
+      qty: 8,
+    },
   ],
   minCraftingRequirements: [
     CraftingSkill.Blacksmithing,

@@ -25,6 +25,7 @@ import {
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { random } from "lodash";
+import { CharacterPlantActions } from "./CharacterPlantActions";
 import { IPlantItem } from "./data/blueprints/PlantItem";
 import { PlantLifeCycle } from "./data/types/PlantTypes";
 
@@ -38,7 +39,8 @@ export class PlantHarvest {
     private characterItemContainer: CharacterItemContainer,
     private animationEffect: AnimationEffect,
     private skillIncrease: SkillIncrease,
-    private traitGetter: TraitGetter
+    private traitGetter: TraitGetter,
+    private characterPlantActions: CharacterPlantActions
   ) {}
 
   @TrackNewRelicTransaction()
@@ -48,14 +50,21 @@ export class PlantHarvest {
       return;
     }
 
-    if (!this.isPlantOwner(plant, character)) {
-      this.sendErrorMessage(character, "Sorry, only the owner can harvest this plant.");
-      return;
-    }
-
     if (!this.isPlantMature(plant)) {
       this.sendErrorMessage(character, "Sorry, your plant is not mature enough to be harvested.");
       return;
+    }
+
+    if (!this.isPlantOwner(plant, character)) {
+      const canPerformActionsOnUnownedPlant = await this.characterPlantActions.canPerformActionOnUnowedPlant(
+        character,
+        plant,
+        `💀 ${character.name} is stealing your plants!`
+      );
+
+      if (!canPerformActionsOnUnownedPlant) {
+        return;
+      }
     }
 
     const blueprint = await this.getPlantBlueprint(plant);
@@ -133,6 +142,7 @@ export class PlantHarvest {
       CraftingResourcesBlueprint.Herb,
       CraftingResourcesBlueprint.ElvenLeaf,
       CraftingResourcesBlueprint.Worm,
+      CraftingResourcesBlueprint.MedicinalLeaf,
     ];
 
     const randomReward = potentialExtraRewards[Math.floor(Math.random() * potentialExtraRewards.length)];

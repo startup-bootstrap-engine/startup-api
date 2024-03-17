@@ -34,6 +34,10 @@ export const recipeCelestialDefender: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.DragonHead,
       qty: 10,
     },
+    {
+      key: CraftingResourcesBlueprint.PrimordialRelic,
+      qty: 1,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Blacksmithing, 74],
 };

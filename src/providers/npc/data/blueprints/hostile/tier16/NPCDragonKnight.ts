@@ -61,8 +61,8 @@ export const npcDragonKnight: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.PotatoSeed,
-      chance: LootProbability.Rare,
-      quantityRange: [1, 5],
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 15],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,
@@ -130,19 +130,19 @@ export const npcDragonKnight: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: AxesBlueprint.SpikeToppedAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.SeraphicScimitar,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.EmberglowNecklace,

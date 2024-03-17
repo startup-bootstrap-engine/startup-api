@@ -19,11 +19,11 @@ import {
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { generateMoveTowardsMovement } from "@providers/npc/data/abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCCustomDeathPenalties, NPCSubtype, RangeTypes } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcGorgok: INPCTierBlueprint<17> = {
   ...generateMoveTowardsMovement(),
@@ -82,7 +82,7 @@ export const npcGorgok: INPCTierBlueprint<17> = {
     },
     {
       itemBlueprintKey: StaffsBlueprint.SangriaStaff,
-      chance: LootProbability.Rare,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
@@ -141,27 +141,27 @@ export const npcGorgok: INPCTierBlueprint<17> = {
     },
     {
       itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.SemiCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.IroncladCleaver,
-      chance: LootProbability.Common,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Common,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.AstralDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.EmberStrandNecklace,

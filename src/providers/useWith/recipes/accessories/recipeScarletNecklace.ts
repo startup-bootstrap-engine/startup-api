@@ -42,6 +42,10 @@ export const recipeScarletNecklace: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.ObsidiumIngot,
       qty: 120,
     },
+    {
+      key: CraftingResourcesBlueprint.WhisperrootEntwiner,
+      qty: 8,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Blacksmithing, 52],
 };

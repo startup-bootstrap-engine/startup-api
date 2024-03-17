@@ -381,8 +381,11 @@ export enum FoodsBlueprint {
   Pumpkin = "pumpkin",
 }
 export enum CraftingResourcesBlueprint {
+  MedicinalLeaf = "medicinal-leaf",
   SocialCrystal = "social-crystal",
+  PrimordialRelic = "primordial-relic",
   Rope = "rope",
+  SeaShell = "sea-shell",
   BlueSapphire = "blue-sapphire",
   BlueFeather = "blue-feather",
   Leather = "leather",
@@ -440,18 +443,23 @@ export enum CraftingResourcesBlueprint {
   BloodrootBlossomFlower = "bloodroot-blossom-flower",
   DuskwispHerbFlower = "duskwisp-herb-flower",
   SunspireLotusFlower = "sunspire-lotus-flower",
+  NebulaSeahorn = "nebula-seahorn",
+  NautilusShell = "nautilus-shell",
+  WhisperrootEntwiner = "whisperroot-entwiner",
 }
 
 export enum ToolsBlueprint {
   ButchersKnife = "butchers-knife",
   CarpentersAxe = "carpenters-axe",
   FishingRod = "fishing-rod",
+  MoonlureFishingRod = "moonlure-fishing-rod",
   Pickaxe = "pickaxe",
   Hammer = "hammer",
   UseWithItemTest = "use-with-item-test",
   UseWithTileTest = "use-with-tile-test",
   Scythe = "scythe",
   WateringCan = "watering-can",
+  CrimsonWateringCan = "crimson-watering-can",
 }
 
 export enum SeedsBlueprint {

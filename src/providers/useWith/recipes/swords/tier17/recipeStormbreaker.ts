@@ -23,8 +23,8 @@ export const recipeStormbreaker: IUseWithCraftingRecipe = {
       qty: 150,
     },
     {
-      key: CraftingResourcesBlueprint.ColoredFeather,
-      qty: 120,
+      key: CraftingResourcesBlueprint.NebulaSeahorn,
+      qty: 2,
     },
     {
       key: MagicsBlueprint.ThunderRune,

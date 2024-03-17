@@ -23,6 +23,10 @@ export const recipeMysticCape: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.Leather,
       qty: 25,
     },
+    {
+      key: CraftingResourcesBlueprint.WhisperrootEntwiner,
+      qty: 8,
+    },
   ],
   minCraftingRequirements: [
     CraftingSkill.Alchemy,

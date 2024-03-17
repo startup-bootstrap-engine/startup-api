@@ -1,6 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
+import { CharacterPlantActions } from "@providers/plant/CharacterPlantActions";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { AnimationEffectKeys, ItemType } from "@rpg-engine/shared";
@@ -16,17 +17,14 @@ export interface IUseWithRemove {
 }
 @provide(UseWithItemToRemove)
 export class UseWithItemToRemove {
-  constructor(private socketMessaging: SocketMessaging, private animationEffect: AnimationEffect) {}
+  constructor(
+    private socketMessaging: SocketMessaging,
+    private animationEffect: AnimationEffect,
+    private characterPlantActions: CharacterPlantActions
+  ) {}
 
   public async executeUse(character: ICharacter, options: IUseWithRemove, skillIncrease: SkillIncrease): Promise<void> {
-    const {
-      targetItem,
-      originItem,
-      successAnimationEffectKey,
-      errorAnimationEffectKey,
-      errorMessages,
-      successMessages,
-    } = options;
+    const { targetItem, successAnimationEffectKey, errorMessages, successMessages } = options;
 
     // for now we can remove only plants
     if (targetItem.type !== ItemType.Plant) {
@@ -34,11 +32,36 @@ export class UseWithItemToRemove {
       return;
     }
 
-    if (!targetItem.isDead) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you can only remove dead plants.");
-      return;
+    if (!this.isOwner(targetItem, character) && !targetItem.isDead) {
+      const canPerformActionOnUnowedPlant = await this.characterPlantActions.canPerformActionOnUnowedPlant(
+        character,
+        targetItem,
+        `💀 ${character.name} is destroying your crops!`
+      );
+
+      if (!canPerformActionOnUnowedPlant) {
+        return;
+      }
     }
 
+    await this.tryToDestroyPlant(
+      character,
+      targetItem,
+      successAnimationEffectKey!,
+      errorMessages!,
+      successMessages!,
+      skillIncrease
+    );
+  }
+
+  private async tryToDestroyPlant(
+    character: ICharacter,
+    targetItem: IItem,
+    successAnimationEffectKey: AnimationEffectKeys,
+    errorMessages: string[],
+    successMessages: string[],
+    skillIncrease: SkillIncrease
+  ): Promise<void> {
     const chance = 75;
     const n = _.random(0, 100);
     if (n >= chance) {

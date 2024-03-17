@@ -59,6 +59,10 @@ export const npcIceTroll: INPCTierBlueprint<10> = {
       chance: LootProbability.Rare,
     },
     {
+      itemBlueprintKey: SwordsBlueprint.GlacialSword,
+      chance: LootProbability.Rare,
+    },
+    {
       itemBlueprintKey: AxesBlueprint.FrostDoubleAxe,
       chance: LootProbability.Rare,
     },
@@ -68,7 +72,7 @@ export const npcIceTroll: INPCTierBlueprint<10> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.CabbageSeed,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Common,
       quantityRange: [1, 3],
     },
     {

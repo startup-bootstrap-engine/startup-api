@@ -79,8 +79,8 @@ export const npcCorruptedKobold: INPCTierBlueprint<18> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.PotatoSeed,
-      chance: LootProbability.Rare,
-      quantityRange: [1, 5],
+      chance: LootProbability.Common,
+      quantityRange: [1, 15],
     },
     {
       itemBlueprintKey: SwordsBlueprint.LongSword,

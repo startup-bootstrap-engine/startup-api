@@ -50,8 +50,7 @@ describe("ItemCraftable.ts", () => {
     inventoryContainer = (await ItemContainer.findById(inventory.itemContainer)) as unknown as IItemContainer;
 
     items = [
-      await unitTestHelper.createMockItemFromBlueprint(FoodsBlueprint.Eggplant, { stackQty: 2 }),
-      await unitTestHelper.createMockItemFromBlueprint(FoodsBlueprint.Turnip, { stackQty: 2 }),
+      await unitTestHelper.createMockItemFromBlueprint(FoodsBlueprint.Turnip, { stackQty: 3 }),
       await unitTestHelper.createMockItemFromBlueprint(CraftingResourcesBlueprint.WaterBottle, { stackQty: 1 }),
       await unitTestHelper.createMockItemFromBlueprint(CraftingResourcesBlueprint.DuskwispHerbFlower, { stackQty: 10 }),
     ];
@@ -292,7 +291,6 @@ describe("ItemCraftable.ts", () => {
 
     const itemKeys = (await container.items).map((item) => item.key);
 
-    expect(itemKeys.includes(FoodsBlueprint.Eggplant)).toBe(true);
     expect(itemKeys.includes(CraftingResourcesBlueprint.WaterBottle)).toBe(true);
     expect(itemKeys.includes(PotionsBlueprint.ManaPotion)).toBe(false);
 

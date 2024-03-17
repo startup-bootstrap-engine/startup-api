@@ -54,12 +54,12 @@ export const npcCaveCyclops: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.TurnipSeed,
-      chance: LootProbability.Uncommon,
-      quantityRange: [1, 5],
+      chance: LootProbability.Common,
+      quantityRange: [1, 8],
     },
     {
       itemBlueprintKey: DaggersBlueprint.PhoenixDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.HellishBow,
@@ -73,7 +73,7 @@ export const npcCaveCyclops: INPCTierBlueprint<15> = {
 
     {
       itemBlueprintKey: AccessoriesBlueprint.SapphireRing,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.TwinFangClub,
@@ -89,20 +89,20 @@ export const npcCaveCyclops: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.SpikeToppedAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
 
     {
       itemBlueprintKey: SwordsBlueprint.Shadowblade,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

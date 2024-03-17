@@ -1,5 +1,5 @@
 import { CraftingResourcesBlueprint, SwordsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
-import { CraftingSkill, MagicsBlueprint } from "@rpg-engine/shared";
+import { CraftingSkill } from "@rpg-engine/shared";
 import { IUseWithCraftingRecipe } from "../../../useWithTypes";
 
 export const recipeCelestialEdge: IUseWithCraftingRecipe = {
@@ -27,8 +27,8 @@ export const recipeCelestialEdge: IUseWithCraftingRecipe = {
       qty: 50,
     },
     {
-      key: MagicsBlueprint.HealRune,
-      qty: 500,
+      key: CraftingResourcesBlueprint.NebulaSeahorn,
+      qty: 2,
     },
     {
       key: CraftingResourcesBlueprint.DragonHead,

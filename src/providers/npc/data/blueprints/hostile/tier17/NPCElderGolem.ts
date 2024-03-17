@@ -84,20 +84,20 @@ export const npcElderGolem: INPCTierBlueprint<17> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
 
     {
       itemBlueprintKey: SwordsBlueprint.Stormbreaker,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
 
     {

@@ -18,6 +18,10 @@ export const recipeNaturesWand: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.MagicRecipe,
       qty: 20,
     },
+    {
+      key: CraftingResourcesBlueprint.SeaShell,
+      qty: 3,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 30],
 };

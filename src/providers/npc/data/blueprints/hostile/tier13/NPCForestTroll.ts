@@ -61,7 +61,7 @@ export const npcForestTroll: INPCTierBlueprint<14> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.EggplantSeed,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Common,
       quantityRange: [1, 3],
     },
     {
@@ -133,7 +133,7 @@ export const npcForestTroll: INPCTierBlueprint<14> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],

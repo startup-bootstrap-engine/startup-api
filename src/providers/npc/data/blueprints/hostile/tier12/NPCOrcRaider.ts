@@ -66,7 +66,7 @@ export const npcOrcRaider: INPCTierBlueprint<12> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.TurnipSeed,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Common,
       quantityRange: [1, 5],
     },
     {
@@ -109,7 +109,7 @@ export const npcOrcRaider: INPCTierBlueprint<12> = {
     },
     {
       itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: BootsBlueprint.CopperBoots,

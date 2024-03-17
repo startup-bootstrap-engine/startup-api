@@ -44,4 +44,5 @@ export const itemFrostfireGladius: IEquippableMeleeTier18WeaponBlueprint = {
       durationType: CharacterBuffDurationType.Permanent,
     },
   ],
+  equippedBuffDescription: "Increases sword skill and resistance by 30%.",
 };

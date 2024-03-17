@@ -60,16 +60,6 @@ describe("PlantHarvest.ts", () => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
   });
-  it("should return false if the plant is not owned by the character", async () => {
-    plant.owner = undefined;
-
-    await plantHarvest.harvestPlant(plant, testCharacter);
-
-    expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
-      testCharacter,
-      "Sorry, only the owner can harvest this plant."
-    );
-  });
 
   it("should return false if the plant is not mature", async () => {
     plant.currentPlantCycle = undefined;

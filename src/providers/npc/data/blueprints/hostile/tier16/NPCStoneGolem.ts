@@ -170,7 +170,7 @@ export const npcStoneGolem: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.RubyRing,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: LegsBlueprint.KingsGuardLegs,
@@ -198,11 +198,11 @@ export const npcStoneGolem: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.RubyNeckles,

@@ -69,22 +69,22 @@ export const npcGoblin: INPCTierBlueprint<3> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.StrawberrySeed,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Common,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: SeedsBlueprint.CabbageSeed,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Common,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: SeedsBlueprint.GreenGrapeSeed,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Common,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: SeedsBlueprint.CarrotSeed,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Common,
       quantityRange: [1, 5],
     },
     {

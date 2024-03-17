@@ -1,4 +1,5 @@
 import { CraftingResourcesBlueprint } from "../../types/itemsBlueprintTypes";
+import { itemWhisperWindBow } from "../ranged-weapons/tier6/ItemWhisperWindBow";
 import { itemRope } from "../tools/ItemRope";
 import { itemBandage } from "./ItemBandage";
 import { itemBatsWing } from "./ItemBatsWing";
@@ -38,14 +39,19 @@ import { itemJade } from "./itemJade";
 
 import { itemLeather } from "./ItemLeather";
 import { itemMagicRecipe } from "./ItemMagicRecipe";
+import { itemMedicinalLeft } from "./ItemMedicinalLeaf";
+import { itemNautilusShell } from "./ItemNautilusShell";
+import { itemNebulaSeahorn } from "./ItemNebulaSeahorn";
 
 import { itemObsidiumIngot } from "./ItemObsidiumIngot";
 import { itemObsidiumOre } from "./ItemObsidiumOre";
 import { itemPhoenixFeather } from "./itemPhoenixfeather";
 
 import { itemPolishedStone } from "./itemPolishedStone";
+import { itemPrimordialRelic } from "./ItemPrimordialRelic";
 import { itemRedSapphire } from "./itemRedSapphire";
 import { itemRock } from "./itemRock";
+import { itemSeaShell } from "./ItemSeaShell";
 import { itemSewingThread } from "./itemSewingThread";
 import { itemSilk } from "./ItemSilk";
 import { itemSilverIngot } from "./ItemSilverIngot";
@@ -124,4 +130,10 @@ export const craftingResourcesBlueprintIndex = {
   [CraftingResourcesBlueprint.BloodrootBlossomFlower]: itemBloodrootBlossomFlower,
   [CraftingResourcesBlueprint.DuskwispHerbFlower]: itemDuskwispHerbFlower,
   [CraftingResourcesBlueprint.SunspireLotusFlower]: itemSunspireLotusFlower,
+  [CraftingResourcesBlueprint.SeaShell]: itemSeaShell,
+  [CraftingResourcesBlueprint.PrimordialRelic]: itemPrimordialRelic,
+  [CraftingResourcesBlueprint.NebulaSeahorn]: itemNebulaSeahorn,
+  [CraftingResourcesBlueprint.NautilusShell]: itemNautilusShell,
+  [CraftingResourcesBlueprint.MedicinalLeaf]: itemMedicinalLeft,
+  [CraftingResourcesBlueprint.WhisperrootEntwiner]: itemWhisperWindBow,
 };

@@ -62,7 +62,7 @@ export const npcFireFox: INPCTierBlueprint<11> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.EggplantSeed,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Common,
       quantityRange: [1, 3],
     },
     {

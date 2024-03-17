@@ -78,6 +78,11 @@ export const npcOrcMage: INPCTierBlueprint<7> = {
       quantityRange: [1, 5],
     },
     {
+      itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
+      chance: LootProbability.Common,
+      quantityRange: [1, 10],
+    },
+    {
       itemBlueprintKey: CraftingResourcesBlueprint.BlueSapphire,
       chance: LootProbability.SemiCommon,
       quantityRange: [1, 3],

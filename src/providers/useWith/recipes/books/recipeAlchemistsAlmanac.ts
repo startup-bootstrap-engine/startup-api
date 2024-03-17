@@ -26,6 +26,14 @@ export const recipeAlchemistsAlmanac: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.MagicRecipe,
       qty: 20,
     },
+    {
+      key: CraftingResourcesBlueprint.NautilusShell,
+      qty: 2,
+    },
+    {
+      key: CraftingResourcesBlueprint.WhisperrootEntwiner,
+      qty: 8,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 22],
 };

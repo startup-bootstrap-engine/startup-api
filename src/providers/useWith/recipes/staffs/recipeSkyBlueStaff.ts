@@ -23,6 +23,10 @@ export const recipeBlueSkyStaff: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.BlueSilk,
       qty: 3,
     },
+    {
+      key: CraftingResourcesBlueprint.SeaShell,
+      qty: 3,
+    },
   ],
   minCraftingRequirements: [
     CraftingSkill.Alchemy,

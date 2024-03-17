@@ -74,13 +74,13 @@ export const npcMinotaurMage: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Common,
       quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: SeedsBlueprint.PumpkinSeed,
       chance: LootProbability.Uncommon,
-      quantityRange: [1, 3],
+      quantityRange: [1, 15],
     },
     {
       itemBlueprintKey: StaffsBlueprint.MoonsStaff,
@@ -173,7 +173,7 @@ export const npcMinotaurMage: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Freezing],

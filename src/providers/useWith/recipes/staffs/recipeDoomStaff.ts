@@ -15,12 +15,20 @@ export const recipeDoomStaff: IUseWithCraftingRecipe = {
       qty: 5,
     },
     {
+      key: CraftingResourcesBlueprint.PrimordialRelic,
+      qty: 1,
+    },
+    {
       key: CraftingResourcesBlueprint.DragonTooth,
       qty: 20,
     },
     {
       key: CraftingResourcesBlueprint.MagicRecipe,
       qty: 160,
+    },
+    {
+      key: CraftingResourcesBlueprint.SeaShell,
+      qty: 30,
     },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 40],

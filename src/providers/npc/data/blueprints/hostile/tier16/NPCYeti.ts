@@ -74,8 +74,8 @@ export const npcYeti: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.WatermelonSeed,
-      chance: LootProbability.Uncommon,
-      quantityRange: [1, 3],
+      chance: LootProbability.Common,
+      quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: SpearsBlueprint.RoyalSpear,
@@ -101,7 +101,7 @@ export const npcYeti: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: AxesBlueprint.RoyalDoubleAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: BootsBlueprint.CopperBoots,
@@ -184,23 +184,23 @@ export const npcYeti: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.TwinEdgeAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.DanishAxe,
-      chance: LootProbability.SemiCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.EarthstoneEmeraldNecklace,

@@ -35,6 +35,10 @@ export const recipeTartarusStaff: IUseWithCraftingRecipe = {
       qty: 2,
     },
     {
+      key: CraftingResourcesBlueprint.SeaShell,
+      qty: 10,
+    },
+    {
       key: CraftingResourcesBlueprint.PhoenixFeather,
       qty: 5,
     },

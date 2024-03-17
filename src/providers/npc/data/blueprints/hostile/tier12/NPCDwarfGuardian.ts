@@ -18,6 +18,7 @@ import {
   ShieldsBlueprint,
   SpearsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -63,13 +64,17 @@ export const npcDwarfGuardian: INPCTierBlueprint<12> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.TurnipSeed,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Common,
       quantityRange: [1, 5],
     },
 
     {
       itemBlueprintKey: MacesBlueprint.SpikedClub,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.MoonlureFishingRod,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.ScutumShield,

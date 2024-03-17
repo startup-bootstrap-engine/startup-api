@@ -15,6 +15,7 @@ import {
   MacesBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -73,8 +74,16 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
   },
   loots: [
     {
+      itemBlueprintKey: ToolsBlueprint.MoonlureFishingRod,
+      chance: LootProbability.SemiCommon,
+    },
+    {
       itemBlueprintKey: SwordsBlueprint.DragonsSword,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: CraftingResourcesBlueprint.PrimordialRelic,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.InfernoCleaver,

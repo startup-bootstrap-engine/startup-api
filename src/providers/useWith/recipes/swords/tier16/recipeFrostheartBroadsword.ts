@@ -20,7 +20,11 @@ export const recipeFrostheartBroadsword: IUseWithCraftingRecipe = {
     },
     {
       key: CraftingResourcesBlueprint.MagicRecipe,
-      qty: 99,
+      qty: 40,
+    },
+    {
+      key: CraftingResourcesBlueprint.NebulaSeahorn,
+      qty: 3,
     },
     {
       key: CraftingResourcesBlueprint.Jade,

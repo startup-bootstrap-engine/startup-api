@@ -18,6 +18,10 @@ export const recipeBlueCape: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.BlueSapphire,
       qty: 8,
     },
+    {
+      key: CraftingResourcesBlueprint.WhisperrootEntwiner,
+      qty: 8,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 10],
 };

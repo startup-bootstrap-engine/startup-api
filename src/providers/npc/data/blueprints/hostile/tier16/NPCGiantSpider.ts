@@ -20,6 +20,7 @@ import {
   ShieldsBlueprint,
   SpearsBlueprint,
   StaffsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -81,8 +82,8 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.WatermelonSeed,
-      chance: LootProbability.Uncommon,
-      quantityRange: [1, 3],
+      chance: LootProbability.SemiCommon,
+      quantityRange: [1, 10],
     },
 
     {
@@ -143,6 +144,10 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: LegsBlueprint.MithrilLegs,
+      chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.MoonlureFishingRod,
       chance: LootProbability.VeryRare,
     },
     {
@@ -232,39 +237,36 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: MacesBlueprint.MetalStoneScepter,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
-    {
-      itemBlueprintKey: MacesBlueprint.DragonScalCleaverClub,
-      chance: LootProbability.Uncommon,
-    },
+
     {
       itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.SpikedCleaverAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.TimberSplitterAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.AstralDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.StarshardDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.AzureNecklace,
@@ -292,6 +294,11 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
     {
       spellKey: SpellsBlueprint.NaturesRevenge,
       probability: 10,
+      power: MagicPower.High,
+    },
+    {
+      spellKey: SpellsBlueprint.VampiricStorm,
+      probability: 50,
       power: MagicPower.High,
     },
   ],

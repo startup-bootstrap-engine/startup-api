@@ -50,7 +50,7 @@ export const npcCyclops: INPCTierBlueprint<14> = {
   loots: [
     {
       itemBlueprintKey: MacesBlueprint.HellishKingMace,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.CrownHelmet,
@@ -58,8 +58,8 @@ export const npcCyclops: INPCTierBlueprint<14> = {
     },
     {
       itemBlueprintKey: SeedsBlueprint.TurnipSeed,
-      chance: LootProbability.Uncommon,
-      quantityRange: [1, 5],
+      chance: LootProbability.Common,
+      quantityRange: [1, 7],
     },
     {
       itemBlueprintKey: ShieldsBlueprint.FalconsShield,
@@ -80,7 +80,7 @@ export const npcCyclops: INPCTierBlueprint<14> = {
     },
     {
       itemBlueprintKey: MacesBlueprint.StarfirMaulClub,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.SpikedClub,
@@ -88,15 +88,15 @@ export const npcCyclops: INPCTierBlueprint<14> = {
     },
     {
       itemBlueprintKey: AxesBlueprint.BoneReaperAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

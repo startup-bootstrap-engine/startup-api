@@ -22,6 +22,10 @@ export const recipePotioncraftPrimer: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.BlueLeather,
       qty: 20,
     },
+    {
+      key: CraftingResourcesBlueprint.NautilusShell,
+      qty: 2,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 18],
 };

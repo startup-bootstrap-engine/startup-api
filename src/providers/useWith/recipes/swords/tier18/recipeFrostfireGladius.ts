@@ -34,6 +34,10 @@ export const recipeFrostfireGladius: IUseWithCraftingRecipe = {
       key: MagicsBlueprint.FireBoltRune,
       qty: 999,
     },
+    {
+      key: CraftingResourcesBlueprint.PrimordialRelic,
+      qty: 1,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Blacksmithing, 77],
 };

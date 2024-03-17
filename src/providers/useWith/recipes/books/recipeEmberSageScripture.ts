@@ -19,6 +19,10 @@ export const recipeEmberSageScripture: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.BlueLeather,
       qty: 30,
     },
+    {
+      key: CraftingResourcesBlueprint.WhisperrootEntwiner,
+      qty: 8,
+    },
   ],
   minCraftingRequirements: [
     CraftingSkill.Alchemy,

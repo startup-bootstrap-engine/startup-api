@@ -11,11 +11,7 @@ export const recipeGreaterLifePotion: IUseWithCraftingRecipe = {
   outputQtyRange: [3, 5],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.Herb,
-      qty: 7,
-    },
-    {
-      key: CraftingResourcesBlueprint.ElvenLeaf,
+      key: CraftingResourcesBlueprint.MedicinalLeaf,
       qty: 3,
     },
     {
@@ -24,8 +20,8 @@ export const recipeGreaterLifePotion: IUseWithCraftingRecipe = {
     },
     {
       key: CraftingResourcesBlueprint.BloodrootBlossomFlower,
-      qty: 12,
+      qty: 3,
     },
   ],
-  minCraftingRequirements: [CraftingSkill.Alchemy, 10],
+  minCraftingRequirements: [CraftingSkill.Alchemy, 15],
 };

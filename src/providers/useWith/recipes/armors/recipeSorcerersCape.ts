@@ -23,6 +23,10 @@ export const recipeSorcerersCape: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.PhoenixFeather,
       qty: 10,
     },
+    {
+      key: CraftingResourcesBlueprint.WhisperrootEntwiner,
+      qty: 8,
+    },
   ],
   minCraftingRequirements: [
     CraftingSkill.Alchemy,

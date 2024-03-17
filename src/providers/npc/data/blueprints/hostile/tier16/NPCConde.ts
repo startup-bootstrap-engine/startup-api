@@ -99,15 +99,15 @@ export const npcConde: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.EmberbrandClaymore,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
 
     {

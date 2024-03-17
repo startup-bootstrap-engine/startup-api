@@ -18,6 +18,7 @@ import {
   SpearsBlueprint,
   StaffsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -64,9 +65,13 @@ export const npcDarkKnight: INPCTierBlueprint<15> = {
       quantityRange: [1, 10],
     },
     {
+      itemBlueprintKey: ToolsBlueprint.MoonlureFishingRod,
+      chance: LootProbability.Rare,
+    },
+    {
       itemBlueprintKey: SeedsBlueprint.PumpkinSeed,
       chance: LootProbability.Uncommon,
-      quantityRange: [1, 3],
+      quantityRange: [1, 10],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,
@@ -206,7 +211,7 @@ export const npcDarkKnight: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],

@@ -64,7 +64,7 @@ export const npcOrc: INPCTierBlueprint<4> = {
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
       quantityRange: [2, 4],
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Common,
     },
     {
       itemBlueprintKey: SeedsBlueprint.StrawberrySeed,

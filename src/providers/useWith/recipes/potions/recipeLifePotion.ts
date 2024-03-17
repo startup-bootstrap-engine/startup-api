@@ -11,20 +11,12 @@ export const recipeLifePotion: IUseWithCraftingRecipe = {
   outputQtyRange: [5, 10],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.Herb,
-      qty: 4,
-    },
-    {
-      key: CraftingResourcesBlueprint.ElvenLeaf,
-      qty: 2,
-    },
-    {
       key: FoodsBlueprint.Strawberry,
       qty: 2,
     },
     {
       key: CraftingResourcesBlueprint.BloodrootBlossomFlower,
-      qty: 8,
+      qty: 2,
     },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 5],

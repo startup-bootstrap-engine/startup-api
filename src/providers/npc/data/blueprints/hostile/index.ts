@@ -32,7 +32,7 @@ import { npcDarkKnight } from "./tier15/NPCDarkKnight";
 import { npcDarkWraith } from "./tier15/NPCDarkWraith";
 import { npcForestCyclops } from "./tier15/NPCForestCyclops";
 import { npcIceCyclops } from "./tier15/NPCIceCyclop";
-import { npcMinotaurMage } from "./tier15/NPCMinotaursMage";
+import { npcMinotaurMage } from "./tier15/NPCMinotaurMage";
 import { npcTrollBerserker } from "./tier15/NPCTrollBerserker";
 import { npcConde } from "./tier16/NPCConde";
 import { npcDarkElf } from "./tier16/NPCDarkElf";

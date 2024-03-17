@@ -111,7 +111,7 @@ export class CharacterSkull {
     return null;
   }
 
-  private async setSkull(character: ICharacter, skullType: CharacterSkullType): Promise<void> {
+  public async setSkull(character: ICharacter, skullType: CharacterSkullType): Promise<void> {
     let timeExpired = new Date();
     switch (skullType) {
       case CharacterSkullType.WhiteSkull:
@@ -124,13 +124,20 @@ export class CharacterSkull {
         timeExpired = dayjs().add(CHARACTER_SKULL_RED_SKULL_DURATION, "millisecond").toDate();
         break;
     }
-    character.hasSkull = true;
-    character.skullType = skullType;
-    character.skullExpiredAt = timeExpired;
-    await character.save();
-    await this.sendSkullEventToUser(character);
+    await Character.updateOne(
+      { _id: character._id },
+      {
+        $set: {
+          hasSkull: true,
+          skullType: skullType,
+          skullExpiredAt: timeExpired,
+        },
+      }
+    );
 
-    // send skull warning
+    character.skullType = skullType;
+
+    await this.sendSkullEventToUser(character);
   }
 
   @TrackNewRelicTransaction()

@@ -42,6 +42,10 @@ export const recipeSapphireSerenadeRing: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.Diamond,
       qty: 10,
     },
+    {
+      key: CraftingResourcesBlueprint.WhisperrootEntwiner,
+      qty: 8,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Blacksmithing, 62],
 };

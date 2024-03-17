@@ -57,7 +57,7 @@ export const npcAsterion: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: SwordsBlueprint.MinotaurSword,
-      chance: LootProbability.VeryRare,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: SpearsBlueprint.RoyalSpear,
@@ -112,7 +112,7 @@ export const npcAsterion: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
 };
