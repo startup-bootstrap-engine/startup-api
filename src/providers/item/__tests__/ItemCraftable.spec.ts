@@ -22,7 +22,7 @@ import {
 import _ from "lodash";
 import { ItemCraftable } from "../ItemCraftable";
 import { itemManaPotion } from "../data/blueprints/potions/ItemManaPotion";
-import { CraftingResourcesBlueprint, FoodsBlueprint, PotionsBlueprint } from "../data/types/itemsBlueprintTypes";
+import { CraftingResourcesBlueprint, PotionsBlueprint } from "../data/types/itemsBlueprintTypes";
 
 describe("ItemCraftable.ts", () => {
   let craftableItem: ItemCraftable;
@@ -50,9 +50,8 @@ describe("ItemCraftable.ts", () => {
     inventoryContainer = (await ItemContainer.findById(inventory.itemContainer)) as unknown as IItemContainer;
 
     items = [
-      await unitTestHelper.createMockItemFromBlueprint(FoodsBlueprint.Turnip, { stackQty: 3 }),
       await unitTestHelper.createMockItemFromBlueprint(CraftingResourcesBlueprint.WaterBottle, { stackQty: 1 }),
-      await unitTestHelper.createMockItemFromBlueprint(CraftingResourcesBlueprint.DuskwispHerbFlower, { stackQty: 10 }),
+      await unitTestHelper.createMockItemFromBlueprint(CraftingResourcesBlueprint.DuskwispHerbFlower, { stackQty: 3 }),
     ];
 
     await unitTestHelper.addItemsToContainer(inventoryContainer, 6, items);
