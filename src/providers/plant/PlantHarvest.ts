@@ -236,6 +236,7 @@ export class PlantHarvest {
       layer: item.layer!,
       stackQty: item.stackQty || 0,
       isDeadBodyLootable: item.isDeadBodyLootable,
+      isTileTinted: item.isTileTinted,
       lastWatering: item.lastWatering!,
     };
   }

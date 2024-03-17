@@ -15,18 +15,18 @@ import {
   RangeTypes,
 } from "@rpg-engine/shared";
 
-export const itemGreenGrapeSeed: IUseWithItemBlueprint = {
-  key: SeedsBlueprint.GreenGrapeSeed,
+export const itemSunspireLotusSeed: IUseWithItemBlueprint = {
+  key: SeedsBlueprint.SunspireLotusSeed,
   type: ItemType.Other,
   subType: ItemSubType.Seed,
   maxStackSize: 999,
   textureAtlas: "items",
-  texturePath: "farm/seed-packs/seed-pack-green.png",
-  name: "Green Grape Seed",
-  description: "A small seed that grows into a green grape vine. It requires fertile soil and enough water to grow.",
+  texturePath: "farm/seed-packs/seed-pack-brown.png",
+  name: "Sunspire Lotus Seed",
+  description: "A small seed that grows into a sunspire lotus seed. It requires fertile soil and enough water to grow.",
   weight: 0.01,
   hasUseWith: true,
-  basePrice: 35 * FARMING_SEED_PRICE_RATIO,
+  basePrice: 60 * FARMING_SEED_PRICE_RATIO,
   rangeType: EntityAttackType.None,
   useWithMaxDistanceGrid: RangeTypes.Short,
   canSell: true,
@@ -51,12 +51,12 @@ export const itemGreenGrapeSeed: IUseWithItemBlueprint = {
 
     await useWithItemToSeed.execute(character, options, skillIncrease);
   },
-  usableEffectDescription: "Use it on a fertile soil to plant a green grape vine",
+  usableEffectDescription: "Use it on a fertile soil to plant a cabbage",
   minRequirements: {
-    level: 5,
+    level: 8,
     skill: {
       name: CraftingSkill.Farming,
-      level: 12,
+      level: 15,
     },
   },
 };
