@@ -101,7 +101,7 @@ export const itemMoonlureFishingRod: IToolItemBlueprint = {
           },
           {
             key: CraftingResourcesBlueprint.NautilusShell,
-            qty: [1, 3],
+            qty: [1, 4],
             chance: await itemCraftable.getCraftChance(character, CraftingSkill.Fishing, 2, rarityOfTool),
           },
         ],
