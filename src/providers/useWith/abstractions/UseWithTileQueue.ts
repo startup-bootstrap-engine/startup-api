@@ -3,6 +3,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { appEnv } from "@providers/config/env";
 import { TILE_MAX_REACH_DISTANCE_IN_GRID } from "@providers/constants/TileConstants";
 import { RedisManager } from "@providers/database/RedisManager";
+import { blueprintManager } from "@providers/inversify/container";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { ItemCraftable } from "@providers/item/ItemCraftable";
 import { itemsBlueprintIndex } from "@providers/item/data/index";
@@ -269,7 +270,9 @@ export class UseWithTileQueue {
         return;
       }
 
-      if (originItem.baseKey !== useWithKey) {
+      const originItemBlueprint = blueprintManager.getBlueprint("items", originItem.baseKey) as Record<string, unknown>;
+
+      if (originItem.baseKey !== useWithKey && originItemBlueprint?.toolCategory !== useWithKey) {
         this.socketMessaging.sendErrorMessageToCharacter(
           character,
           `Invalid item to use with tile. It should be a '${useWithKey}', but the selected item is a '${originItem.baseKey}'!`

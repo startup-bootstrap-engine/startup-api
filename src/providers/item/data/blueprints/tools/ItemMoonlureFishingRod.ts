@@ -23,6 +23,7 @@ export const itemMoonlureFishingRod: IToolItemBlueprint = {
   type: ItemType.Tool,
   subType: ItemSubType.Tool,
   textureAtlas: "items",
+  toolCategory: ToolsBlueprint.FishingRod,
   texturePath: "tools/moonlure-fishing-rod.png",
   name: "Moonlure Fishing Rod",
   description: "A tool primarily used to catch fish and crafting materials. It uses a moon-like lure to attract fish.",
