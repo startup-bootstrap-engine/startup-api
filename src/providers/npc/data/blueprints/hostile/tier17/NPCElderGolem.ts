@@ -15,8 +15,7 @@ import {
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { SpellsBlueprint } from "@providers/spells/data/types/SpellsBlueprintTypes";
-import { MagicPower, NPCAlignment, NPCSubtype, RangeTypes } from "@rpg-engine/shared";
+import { MagicPower, NPCAlignment, NPCSubtype, RangeTypes, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
@@ -25,12 +24,14 @@ export const npcElderGolem: INPCTierBlueprint<17> = {
   name: "Elder Golem",
   key: HostileNPCsBlueprint.ElderGolem,
   subType: NPCSubtype.Elemental,
-  textureKey: HostileNPCsBlueprint.ElderGolem,
+  textureKey: HostileNPCsBlueprint.StoneGolem,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   maxRangeAttack: RangeTypes.High,
+  isGiantForm: true,
   tier: 17,
-  baseHealth: 2370,
+  // @ts-ignore
+  baseHealth: 10000,
   healthRandomizerDice: Dice.D6,
   skillRandomizerDice: Dice.D4,
   skillsToBeRandomized: ["level", "strength", "dexterity"],
@@ -130,6 +131,11 @@ export const npcElderGolem: INPCTierBlueprint<17> = {
       spellKey: SpellsBlueprint.CleavingStomp,
       probability: 50,
       power: MagicPower.High,
+    },
+    {
+      spellKey: SpellsBlueprint.NaturesRevenge,
+      probability: 5,
+      power: MagicPower.Low,
     },
   ],
 };
