@@ -17,7 +17,6 @@ import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/Ne
 import { EnvType, NPCAlignment, NPCMovementType, NPCPathOrientation, ToGridX, ToGridY } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
 import { random } from "lodash";
-import { v4 as uuidv4 } from "uuid";
 import { NPCFreezer } from "./NPCFreezer";
 import { NPCView } from "./NPCView";
 import { NPCMovement } from "./movement/NPCMovement";
@@ -31,9 +30,8 @@ export class NPCCycleQueue {
   private queue: Queue<any, any, string> | null = null;
   private worker: Worker | null = null;
   private connection: any;
-  private queueName: string = `npc-cycle-queue-${uuidv4()}-${
-    appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
-  }`;
+  private queueName = (scene: string): string =>
+    `npc-cycle-queue-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
 
   constructor(
     private npcView: NPCView,
@@ -51,13 +49,13 @@ export class NPCCycleQueue {
     private queueCleaner: QueueCleaner
   ) {}
 
-  public init(): void {
+  public init(scene: string): void {
     if (!this.connection) {
       this.connection = this.redisManager.client;
     }
 
     if (!this.queue) {
-      this.queue = new Queue(this.queueName, {
+      this.queue = new Queue(this.queueName(scene), {
         connection: this.connection,
       });
 
@@ -73,12 +71,12 @@ export class NPCCycleQueue {
 
     if (!this.worker) {
       this.worker = new Worker(
-        this.queueName,
+        this.queueName(scene),
         async (job) => {
           const { npc, npcSkills } = job.data;
 
           try {
-            await this.queueCleaner.updateQueueActivity(this.queueName);
+            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
 
             await this.execNpcCycle(npc, npcSkills);
           } catch (err) {
@@ -110,7 +108,7 @@ export class NPCCycleQueue {
     }
 
     if (!this.connection || !this.queue || !this.worker) {
-      this.init();
+      this.init(npc.scene);
     }
 
     const isJobBeingProcessed = await this.isJobBeingProcessed(npc._id);
@@ -120,7 +118,7 @@ export class NPCCycleQueue {
     }
 
     await this.queue?.add(
-      this.queueName,
+      this.queueName(npc.scene),
       {
         npcId: npc._id,
         npc,
@@ -135,10 +133,6 @@ export class NPCCycleQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    if (!this.queue) {
-      await this.init();
-    }
-
     const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
     for (const job of jobs) {
       try {
