@@ -29,6 +29,9 @@ export const npcTraderFarm = {
       key: ToolsBlueprint.Scythe,
     },
     {
+      key: ToolsBlueprint.MoonlureFishingRod,
+    },
+    {
       key: SeedsBlueprint.CarrotSeed,
     },
     {

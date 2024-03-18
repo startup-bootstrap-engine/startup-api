@@ -29,7 +29,7 @@ export const itemMoonlureFishingRod: IToolItemBlueprint = {
   weight: 0.1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   hasUseWith: true,
-  basePrice: 500,
+  basePrice: 25000,
   rangeType: EntityAttackType.Melee,
   useWithMaxDistanceGrid: RangeTypes.Medium,
   canSell: false,
