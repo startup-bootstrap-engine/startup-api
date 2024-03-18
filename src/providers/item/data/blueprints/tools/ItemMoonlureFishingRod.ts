@@ -24,7 +24,7 @@ export const itemMoonlureFishingRod: IToolItemBlueprint = {
   subType: ItemSubType.Tool,
   textureAtlas: "items",
   texturePath: "tools/moonlure-fishing-rod.png",
-  name: "Fishing Rod",
+  name: "Moonlure Fishing Rod",
   description: "A tool primarily used to catch fish and crafting materials. It uses a moon-like lure to attract fish.",
   weight: 0.1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
@@ -32,6 +32,7 @@ export const itemMoonlureFishingRod: IToolItemBlueprint = {
   basePrice: 25000,
   rangeType: EntityAttackType.Melee,
   useWithMaxDistanceGrid: RangeTypes.Medium,
+
   canSell: false,
   useWithTileEffect: async (
     originItem: IItem,

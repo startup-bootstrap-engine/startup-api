@@ -34,12 +34,22 @@ export const RESOURCE_LEVEL_REQUIREMENTS: IResourceLevelRequirement = {
   [FoodsBlueprint.BrownFish]: { minLevel: 5, type: CraftingSkill.Fishing, item: ToolsBlueprint.FishingRod },
   [FoodsBlueprint.WildSalmon]: { minLevel: 15, type: CraftingSkill.Fishing, item: ToolsBlueprint.FishingRod },
   [FoodsBlueprint.Salmon]: { minLevel: 25, type: CraftingSkill.Fishing, item: ToolsBlueprint.FishingRod },
-  [CraftingResourcesBlueprint.SeaShell]: { minLevel: 35, type: CraftingSkill.Fishing, item: ToolsBlueprint.FishingRod },
+  [CraftingResourcesBlueprint.SeaShell]: {
+    minLevel: 35,
+    type: CraftingSkill.Fishing,
+    item: ToolsBlueprint.MoonlureFishingRod,
+  },
   [CraftingResourcesBlueprint.NebulaSeahorn]: {
     minLevel: 45,
     type: CraftingSkill.Fishing,
-    item: ToolsBlueprint.FishingRod,
+    item: ToolsBlueprint.MoonlureFishingRod,
   },
+  [CraftingResourcesBlueprint.NautilusShell]: {
+    minLevel: 60,
+    type: CraftingSkill.Fishing,
+    item: ToolsBlueprint.MoonlureFishingRod,
+  },
+
   [CraftingResourcesBlueprint.SmallWoodenStick]: {
     minLevel: 1,
     type: CraftingSkill.Lumberjacking,
