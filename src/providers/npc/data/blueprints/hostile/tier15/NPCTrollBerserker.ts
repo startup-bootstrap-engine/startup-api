@@ -162,7 +162,7 @@ export const npcTrollBerserker: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

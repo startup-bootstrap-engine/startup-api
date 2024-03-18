@@ -78,7 +78,7 @@ export const npcFellbeast: INPCTierBlueprint<17> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.CorruptionDagger,
-      chance: LootProbability.Rare,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Skull,
@@ -108,15 +108,15 @@ export const npcFellbeast: INPCTierBlueprint<17> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
 
     {

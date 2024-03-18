@@ -1,8 +1,4 @@
-import {
-  CraftingResourcesBlueprint,
-  FoodsBlueprint,
-  PotionsBlueprint,
-} from "@providers/item/data/types/itemsBlueprintTypes";
+import { CraftingResourcesBlueprint, PotionsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { IUseWithCraftingRecipe } from "@providers/useWith/useWithTypes";
 import { CraftingSkill } from "@rpg-engine/shared";
 
@@ -11,10 +7,6 @@ export const recipeGreaterManaPotion: IUseWithCraftingRecipe = {
   outputQtyRange: [3, 5],
   requiredItems: [
     {
-      key: FoodsBlueprint.Turnip,
-      qty: 4,
-    },
-    {
       key: CraftingResourcesBlueprint.ElvenLeaf,
       qty: 2,
     },
@@ -22,6 +14,10 @@ export const recipeGreaterManaPotion: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.WaterBottle,
       qty: 4,
     },
+    {
+      key: CraftingResourcesBlueprint.DuskwispHerbFlower,
+      qty: 5,
+    },
   ],
-  minCraftingRequirements: [CraftingSkill.Alchemy, 15],
+  minCraftingRequirements: [CraftingSkill.Alchemy, 20],
 };

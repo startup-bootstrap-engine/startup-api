@@ -74,7 +74,7 @@ export const npcMinotaurMage: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Common,
       quantityRange: [1, 5],
     },
     {
@@ -173,7 +173,7 @@ export const npcMinotaurMage: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Freezing],

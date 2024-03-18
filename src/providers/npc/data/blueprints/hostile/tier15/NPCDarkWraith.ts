@@ -123,7 +123,7 @@ export const npcDarkWraith: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.StarshardDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],

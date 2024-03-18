@@ -94,19 +94,19 @@ export const npcForestCyclops: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: AxesBlueprint.TimberSplitterAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.Shadowblade,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison, EntityEffectBlueprint.Bleeding],

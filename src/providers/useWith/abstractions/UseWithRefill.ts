@@ -185,6 +185,8 @@ export class UseWithRefill {
 
       if (originItem.remainingUses !== initialRemainingUses) {
         await Item.updateOne({ _id: originItem._id }, { $set: { remainingUses: initialRemainingUses } });
+      } else {
+        this.socketMessaging.sendMessageToCharacter(character, "You have already refilled your watering can. 🌊");
       }
 
       if (successMessages) {

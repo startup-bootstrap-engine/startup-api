@@ -1,5 +1,4 @@
 export const EXTERIOR_LIGHTENING_MAPS = [
-  "dragons-lair",
   "frozen-island",
   "ilya",
   "minotaurs island",

@@ -18,8 +18,6 @@ export const MINIMUM_MINUTES_FOR_WATERING: number = 5; // You'll need to water a
 export const MAX_HOURS_NO_WATER_DEAD = 2;
 export const DEAD_PLANT_REMOVE_HOURS = 1;
 
-// Crop growth and cycles
-
 const GROWTH_FACTOR_BASE_RATIO = 3;
 
 export const ULTRA_LOW_GROWTH_FACTOR = 1 * GROWTH_FACTOR_BASE_RATIO;

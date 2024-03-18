@@ -7,7 +7,6 @@ import {
   AxesBlueprint,
   BooksBlueprint,
   BootsBlueprint,
-  CraftingResourcesBlueprint,
   DaggersBlueprint,
   GemsBlueprint,
   HelmetsBlueprint,
@@ -72,22 +71,12 @@ export const npcIceNaga: INPCTierBlueprint<21> = {
     },
 
     {
-      itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: CraftingResourcesBlueprint.DragonTooth,
-      chance: LootProbability.VeryCommon,
-      quantityRange: [5, 10],
-    },
-
-    {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
-      chance: LootProbability.Common,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.DarkArmor,
-      chance: LootProbability.Common,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.LeviathanSword,
@@ -95,15 +84,15 @@ export const npcIceNaga: INPCTierBlueprint<21> = {
     },
     {
       itemBlueprintKey: ArmorsBlueprint.TemplarsPlate,
-      chance: LootProbability.SemiCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.DemonShield,
-      chance: LootProbability.Common,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.MithrilArmor,
-      chance: LootProbability.Common,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: LegsBlueprint.MithrilLegs,
@@ -119,7 +108,7 @@ export const npcIceNaga: INPCTierBlueprint<21> = {
     },
     {
       itemBlueprintKey: HelmetsBlueprint.RoyalHelmet,
-      chance: LootProbability.Common,
+      chance: LootProbability.VeryCommon,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.SaviorsHelmet,
@@ -131,7 +120,7 @@ export const npcIceNaga: INPCTierBlueprint<21> = {
     },
     {
       itemBlueprintKey: HelmetsBlueprint.RoyalKnightHelmet,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.SilverShield,
@@ -152,35 +141,35 @@ export const npcIceNaga: INPCTierBlueprint<21> = {
     },
     {
       itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
-      chance: LootProbability.VeryCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
-      chance: LootProbability.VeryCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.GrimHarbingerClub,
-      chance: LootProbability.VeryCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.TwinFangClub,
-      chance: LootProbability.VeryCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
-      chance: LootProbability.VeryCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.MetalMasherClub,
-      chance: LootProbability.VeryCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.CleaverAxe,
-      chance: LootProbability.VeryCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.WarAxe,
-      chance: LootProbability.VeryCommon,
+      chance: LootProbability.Common,
     },
     {
       itemBlueprintKey: AxesBlueprint.DanishAxe,
@@ -188,35 +177,35 @@ export const npcIceNaga: INPCTierBlueprint<21> = {
     },
     {
       itemBlueprintKey: AxesBlueprint.SpikedCleaverAxe,
-      chance: LootProbability.VeryCommon,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AxesBlueprint.TimberSplitterAxe,
-      chance: LootProbability.VeryCommon,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.VeryCommon,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AxesBlueprint.BrutalChopperAxe,
-      chance: LootProbability.VeryCommon,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
-      chance: LootProbability.VeryCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
-      chance: LootProbability.VeryCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.AstralDagger,
-      chance: LootProbability.VeryCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.StarshardDagger,
-      chance: LootProbability.VeryCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: GemsBlueprint.AmethystGem,
@@ -228,23 +217,23 @@ export const npcIceNaga: INPCTierBlueprint<21> = {
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.EarthstoneEmeraldNecklace,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.SapphireStrandNecklace,
-      chance: LootProbability.SemiCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.RubyNeckles,
-      chance: LootProbability.SemiCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.GoldenRubyNecklace,
-      chance: LootProbability.SemiCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.SunlitRubyNecklace,
-      chance: LootProbability.SemiCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: BooksBlueprint.ElementalCodex,
@@ -260,7 +249,7 @@ export const npcIceNaga: INPCTierBlueprint<21> = {
     },
     {
       itemBlueprintKey: BooksBlueprint.PotioncraftPrimer,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.ArcaneAdepthat,

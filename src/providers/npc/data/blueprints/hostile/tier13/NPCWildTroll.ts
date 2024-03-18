@@ -101,7 +101,7 @@ export const npcWildTroll: INPCTierBlueprint<13> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.VineGrasp],

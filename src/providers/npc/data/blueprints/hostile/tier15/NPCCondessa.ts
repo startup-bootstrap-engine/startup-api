@@ -109,11 +109,11 @@ export const npcCondessa: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: AxesBlueprint.CrownSplitterAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

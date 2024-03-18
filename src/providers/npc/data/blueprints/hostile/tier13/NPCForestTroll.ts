@@ -133,7 +133,7 @@ export const npcForestTroll: INPCTierBlueprint<14> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],

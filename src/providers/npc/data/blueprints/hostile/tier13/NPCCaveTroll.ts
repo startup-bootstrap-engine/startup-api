@@ -128,7 +128,7 @@ export const npcCaveTroll: INPCTierBlueprint<13> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

@@ -440,6 +440,9 @@ export enum CraftingResourcesBlueprint {
   Bandage = "bandage",
   DragonHead = "dragon-head",
   DragonTooth = "dragon-tooth",
+  BloodrootBlossomFlower = "bloodroot-blossom-flower",
+  DuskwispHerbFlower = "duskwisp-herb-flower",
+  SunspireLotusFlower = "sunspire-lotus-flower",
   NebulaSeahorn = "nebula-seahorn",
   NautilusShell = "nautilus-shell",
   WhisperrootEntwiner = "whisperroot-entwiner",
@@ -471,6 +474,9 @@ export enum SeedsBlueprint {
   PumpkinSeed = "pumpkin-seed",
   WatermelonSeed = "watermelon-seed",
   PotatoSeed = "potato-seed",
+  BloodrootBlossomSeed = "bloodroot-blossom-seed",
+  DuskwispHerbSeed = "duskwisp-herb-seed",
+  SunspireLotusSeed = "sunspire-lotus-seed",
 }
 
 export enum SpearsBlueprint {

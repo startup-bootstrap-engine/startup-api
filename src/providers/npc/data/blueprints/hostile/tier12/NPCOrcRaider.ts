@@ -109,7 +109,7 @@ export const npcOrcRaider: INPCTierBlueprint<12> = {
     },
     {
       itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: BootsBlueprint.CopperBoots,
