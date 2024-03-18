@@ -40,7 +40,7 @@ export class NPCDeathQueue {
   private worker: Worker | null = null;
   private connection;
 
-  private queueName: string = `np-death-${uuidv4()}-${
+  private queueName: string = `npc-death-${uuidv4()}-${
     appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
   }`;
 
