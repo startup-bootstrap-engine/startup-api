@@ -12,10 +12,10 @@
   "ilya-village-sewer": 19.5,
   "ilya": 29,
   "ilya-village-interiors": 19.2,
-  "caves-03": 24.7,
+  "caves-03": 25,
   "frozen-island": 20.3,
   "frozen-castle-dungeon": 17.7,
-  "frost-island-caves": 19.2,
+  "frost-island-caves": 19.5,
   "wildwood": 12.6,
   "wildwood-dungeon": 11.3,
   "caves-04": 6.8,
@@ -30,5 +30,6 @@
   "training-grounds-one": 1.6,
   "training-grounds-two": 1.6,
   "farm-land": 2.5,
-  "farm-land-interiors": 0.7
+  "farm-land-interiors": 0.7,
+  "caves-shadowlands-02": 0.3
 }

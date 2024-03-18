@@ -21,7 +21,6 @@ export class PlantCrons {
     });
 
     this.cronJobScheduler.uniqueSchedule("plant-tile-tint-cron", "* * * * *", async () => {
-      console.log("Checking and updating tinted tile plants");
       await this.plantGrowth.checkAndUpdateTintedTilePlants();
     });
   }
