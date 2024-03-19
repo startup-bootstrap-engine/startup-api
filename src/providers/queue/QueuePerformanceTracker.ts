@@ -42,8 +42,6 @@ export class QueuePerformanceTracker {
         clogRatio
       );
 
-      console.log(`Queue/${queueName}/ClogRatio: ${clogRatio} - Total: ${totalJobs} - Waiting: ${waitingJobs}`);
-
       this.removeQueue(queueName);
     }
   }
