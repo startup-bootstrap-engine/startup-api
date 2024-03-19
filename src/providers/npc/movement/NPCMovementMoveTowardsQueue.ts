@@ -172,55 +172,63 @@ export class NPCMovementMoveTowardsQueue {
 
   @TrackNewRelicTransaction()
   private async execStartMoveTowardsMovement(npc: INPC): Promise<void> {
-    const targetCharacter = (await Character.findById(npc.targetCharacter)
+    const targetCharacter = await this.getTargetCharacter(npc);
+
+    if (!this.isValidTarget(npc, targetCharacter)) {
+      await this.handleInvalidTarget(npc);
+      return;
+    }
+
+    await this.handleValidTarget(npc, targetCharacter);
+  }
+
+  private async getTargetCharacter(npc: INPC): Promise<ICharacter> {
+    return (await Character.findById(npc.targetCharacter)
       .lean()
-      .select("_id x y scene health isOnline isBanned target")) as ICharacter | null;
+      .select("_id x y scene health isOnline isBanned target")) as ICharacter;
+  }
 
-    // Early exit if the target is not valid
-    if (
-      !targetCharacter ||
-      !targetCharacter.isOnline ||
-      targetCharacter.scene !== npc.scene ||
-      targetCharacter.isBanned
-    ) {
-      await Promise.all([this.npcTarget.tryToSetTarget(npc), this.tryToFreezeIfTooManyFailedTargetChecks(npc)]);
-      return;
-    }
+  private isValidTarget(npc: INPC, targetCharacter: ICharacter | null): boolean {
+    return (targetCharacter &&
+      targetCharacter.isOnline &&
+      targetCharacter.scene === npc.scene &&
+      !targetCharacter.isBanned &&
+      npc.targetCharacter) as boolean;
+  }
 
-    if (!npc.targetCharacter) {
-      await this.tryToFreezeIfTooManyFailedTargetChecks(npc);
-      return;
-    }
+  private async handleInvalidTarget(npc: INPC): Promise<void> {
+    await Promise.all([this.npcTarget.tryToSetTarget(npc), this.tryToFreezeIfTooManyFailedTargetChecks(npc)]);
+  }
 
-    // Ensuring target is within range and clearing out-of-range targets
+  private async handleValidTarget(npc: INPC, targetCharacter: ICharacter): Promise<void> {
     await this.npcTarget.tryToClearOutOfRangeTargets(npc);
 
-    // Initiate or clear battle cycle based on NPC's attack type and range
     const attackRange = npc.attackType === EntityAttackType.Melee ? 2 : npc.maxRangeAttack;
     await this.initOrClearBattleCycle(npc, targetCharacter, attackRange);
 
-    // Check for low health and flee if necessary
     await this.fleeIfHealthIsLow(npc);
 
-    const reachedTarget = this.reachedTarget(npc, targetCharacter);
+    if (this.reachedTarget(npc, targetCharacter)) {
+      await this.handleReachedTarget(npc, targetCharacter);
+    } else {
+      await this.handleNotReachedTarget(npc, targetCharacter);
+    }
+  }
 
-    if (reachedTarget) {
-      // Handling when the NPC has reached the target
-      if (npc.pathOrientation === NPCPathOrientation.Backward) {
-        await NPC.updateOne({ _id: npc.id }, { pathOrientation: NPCPathOrientation.Forward });
-      }
-
-      if (appEnv.general.IS_UNIT_TEST) {
-        await this.faceTarget(npc, targetCharacter);
-      } else {
-        this.debouncedFaceTarget = debounce(this.faceTarget, 300);
-        await this.debouncedFaceTarget(npc, targetCharacter);
-      }
-
-      return;
+  private async handleReachedTarget(npc: INPC, targetCharacter: ICharacter): Promise<void> {
+    if (npc.pathOrientation === NPCPathOrientation.Backward) {
+      await NPC.updateOne({ _id: npc.id }, { pathOrientation: NPCPathOrientation.Forward });
     }
 
-    // Movement logic when the target hasn't been reached
+    if (appEnv.general.IS_UNIT_TEST) {
+      await this.faceTarget(npc, targetCharacter);
+    } else {
+      this.debouncedFaceTarget = debounce(this.faceTarget, 300);
+      await this.debouncedFaceTarget(npc, targetCharacter);
+    }
+  }
+
+  private async handleNotReachedTarget(npc: INPC, targetCharacter: ICharacter): Promise<void> {
     if (npc.pathOrientation === NPCPathOrientation.Forward) {
       const isUnderOriginalPositionRange = this.movementHelper.isUnderRange(
         npc.x,
@@ -230,10 +238,8 @@ export class NPCMovementMoveTowardsQueue {
         npc.maxAntiLuringRangeInGridCells ?? RangeTypes.Medium
       );
 
-      if (isUnderOriginalPositionRange) {
-        if (npc.scene === targetCharacter.scene) {
-          await this.moveTowardsPosition(npc, targetCharacter, targetCharacter.x, targetCharacter.y);
-        }
+      if (isUnderOriginalPositionRange && npc.scene === targetCharacter.scene) {
+        await this.moveTowardsPosition(npc, targetCharacter, targetCharacter.x, targetCharacter.y);
       } else {
         npc.pathOrientation = NPCPathOrientation.Backward;
         await NPC.updateOne({ _id: npc.id }, { pathOrientation: NPCPathOrientation.Backward });
