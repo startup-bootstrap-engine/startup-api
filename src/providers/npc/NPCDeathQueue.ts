@@ -28,6 +28,7 @@ import { NPCLoot } from "./NPCLoot";
 import { NPCSpawn } from "./NPCSpawn";
 import { NPCTarget } from "./movement/NPCTarget";
 
+import { CharacterView } from "@providers/character/CharacterView";
 import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
@@ -52,7 +53,8 @@ export class NPCDeathQueue {
     private locker: Locker,
     private newRelic: NewRelic,
     private npcLoot: NPCLoot,
-    private queueCleaner: QueueCleaner
+    private queueCleaner: QueueCleaner,
+    private characterView: CharacterView
   ) {}
 
   public init(scene: string): void {
