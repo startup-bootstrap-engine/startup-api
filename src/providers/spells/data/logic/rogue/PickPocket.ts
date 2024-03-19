@@ -5,7 +5,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { blueprintManager } from "@providers/inversify/container";
 import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -21,7 +21,7 @@ export class PickPocket {
     private characterItemInventory: CharacterItemInventory,
     private socketMessaging: SocketMessaging,
     private characterItemsContainer: CharacterItemContainer,
-    private characterWeight: CharacterWeight
+    private characterWeight: CharacterWeightQueue
   ) {}
 
   @TrackNewRelicTransaction()

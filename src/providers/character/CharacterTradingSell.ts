@@ -29,7 +29,7 @@ import { CharacterTradingValidation } from "./CharacterTradingValidation";
 import { CharacterItemContainer } from "./characterItems/CharacterItemContainer";
 import { CharacterItemInventory } from "./characterItems/CharacterItemInventory";
 import { CharacterItemSlots } from "./characterItems/CharacterItemSlots";
-import { CharacterWeight } from "./weight/CharacterWeight";
+import { CharacterWeightQueue } from "./weight/CharacterWeightQueue";
 
 @provide(CharacterTradingSell)
 export class CharacterTradingSell {
@@ -37,7 +37,7 @@ export class CharacterTradingSell {
     private socketMessaging: SocketMessaging,
     private characterItemContainer: CharacterItemContainer,
     private characterItemInventory: CharacterItemInventory,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private characterTradingValidation: CharacterTradingValidation,
     private mathHelper: MathHelper,
     private characterItemSlots: CharacterItemSlots,

@@ -6,7 +6,7 @@ import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { CharacterGameMode, INITIAL_STARTING_POINTS } from "@providers/constants/CharacterConstants";
 import { blueprintManager } from "@providers/inversify/container";
 import {
@@ -39,7 +39,7 @@ import { provide } from "inversify-binding-decorators";
 export class CharacterRepository extends CRUD {
   constructor(
     private analyticsHelper: AnalyticsHelper,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private spellLearn: SpellLearn,
     private characterInventory: CharacterInventory,
     private characterItemInventory: CharacterItemInventory

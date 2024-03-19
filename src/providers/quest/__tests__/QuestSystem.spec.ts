@@ -7,7 +7,7 @@ import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { IQuest } from "@entities/ModuleQuest/QuestModel";
 import { QuestRecord } from "@entities/ModuleQuest/QuestRecordModel";
 import { CharacterItems } from "@providers/character/characterItems/CharacterItems";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { EquipmentSlots } from "@providers/equipment/EquipmentSlots";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { ItemDrop } from "@providers/item/ItemDrop";
@@ -150,7 +150,7 @@ describe("QuestSystem.ts", () => {
 
     const characterWeightMock = {
       addWeight: jest.fn(),
-    } as unknown as CharacterWeight;
+    } as unknown as CharacterWeightQueue;
 
     const equipmentSlotsMock = {
       addToSlot: jest.fn(),

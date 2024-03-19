@@ -6,7 +6,7 @@ import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { blueprintManager } from "@providers/inversify/container";
 import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
@@ -50,7 +50,7 @@ export class UseWithItemToEntity {
     private characterItemInventory: CharacterItemInventory,
     private socketMessaging: SocketMessaging,
     private characterItemContainer: CharacterItemContainer,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private characterInventory: CharacterInventory
   ) {}
 

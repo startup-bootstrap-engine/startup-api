@@ -3,7 +3,8 @@ import { IItemContainer as IItemContainerModel, ItemContainer } from "@entities/
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { ItemDrop } from "@providers/item/ItemDrop";
 import { ItemOwnership } from "@providers/item/ItemOwnership";
 import { ItemUpdater } from "@providers/item/ItemUpdater";
@@ -13,7 +14,6 @@ import { IDepotContainerWithdraw, IEquipmentAndInventoryUpdatePayload, IItemCont
 import { provide } from "inversify-binding-decorators";
 import { DepotSystem } from "./DepotSystem";
 import { OpenDepot } from "./OpenDepot";
-import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 
 @provide(WithdrawItem)
 export class WithdrawItem {
@@ -24,7 +24,7 @@ export class WithdrawItem {
     private itemDrop: ItemDrop,
     private characterItemSlots: CharacterItemSlots,
     private socketMessaging: SocketMessaging,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private itemOwnership: ItemOwnership,
     private itemUpdater: ItemUpdater,
     private inMemoryHashTable: InMemoryHashTable

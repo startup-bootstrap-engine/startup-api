@@ -29,7 +29,7 @@ import { CharacterTradingValidation } from "./CharacterTradingValidation";
 import { CharacterUser } from "./CharacterUser";
 import { CharacterItemContainer } from "./characterItems/CharacterItemContainer";
 import { CharacterItemInventory } from "./characterItems/CharacterItemInventory";
-import { CharacterWeight } from "./weight/CharacterWeight";
+import { CharacterWeightQueue } from "./weight/CharacterWeightQueue";
 
 @provide(CharacterTradingBuy)
 export class CharacterTradingBuy {
@@ -38,7 +38,7 @@ export class CharacterTradingBuy {
     private characterTradingBalance: CharacterTradingBalance,
     private characterItemContainer: CharacterItemContainer,
     private characterItemInventory: CharacterItemInventory,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private characterTradingValidation: CharacterTradingValidation,
     private characterInventory: CharacterInventory,
     private newRelic: NewRelic,

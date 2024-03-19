@@ -28,6 +28,7 @@ import { NPCLoot } from "./NPCLoot";
 import { NPCSpawn } from "./NPCSpawn";
 import { NPCTarget } from "./movement/NPCTarget";
 
+import { CharacterView } from "@providers/character/CharacterView";
 import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
@@ -46,6 +47,8 @@ export class NPCDeathQueue {
     private socketMessaging: SocketMessaging,
     private npcTarget: NPCTarget,
     private itemOwnership: ItemOwnership,
+    private characterView: CharacterView,
+
     private npcFreezer: NPCFreezer,
     private npcSpawn: NPCSpawn,
     private npcExperience: NPCExperience,

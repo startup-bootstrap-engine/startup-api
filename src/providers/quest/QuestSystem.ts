@@ -13,7 +13,7 @@ import { IQuestRecord, QuestRecord } from "@entities/ModuleQuest/QuestRecordMode
 import { IQuestReward, QuestReward } from "@entities/ModuleQuest/QuestRewardModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterItems, IItemByKeyResult } from "@providers/character/characterItems/CharacterItems";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { EquipmentSlots } from "@providers/equipment/EquipmentSlots";
 import { blueprintManager } from "@providers/inversify/container";
 import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -50,7 +50,7 @@ interface IConsumeCharacterItem extends IItemByKeyResult {
 export class QuestSystem {
   constructor(
     private socketMessaging: SocketMessaging,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private equipmentSlots: EquipmentSlots,
     private movementHelper: MovementHelper,
     private itemDrop: ItemDrop,

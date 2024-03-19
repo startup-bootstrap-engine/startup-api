@@ -6,7 +6,7 @@ import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { RESOURCE_GATHERING_SKIP_TILES_IF_DESCRIPTION } from "@providers/constants/ResourceGatheringConstants";
 import {
   RESOURCE_LEVEL_REQUIREMENTS,
@@ -61,7 +61,7 @@ export class UseWithItemToTile {
     private characterItemInventory: CharacterItemInventory,
     private socketMessaging: SocketMessaging,
     private characterItemContainer: CharacterItemContainer,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private characterInventory: CharacterInventory,
     private useWithTileExhaustionControl: UseWithTileExhaustionControl,
     private mapTiles: MapTiles

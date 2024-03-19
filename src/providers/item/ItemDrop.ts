@@ -5,7 +5,7 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { EquipmentSlots } from "@providers/equipment/EquipmentSlots";
 import { IPosition, MovementHelper } from "@providers/movement/MovementHelper";
@@ -35,7 +35,7 @@ export class ItemDrop {
     private equipmentSlots: EquipmentSlots,
     private characterValidation: CharacterValidation,
     private movementHelper: MovementHelper,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private itemOwnership: ItemOwnership,
     private characterInventory: CharacterInventory,
     private itemCleanup: ItemDropCleanup,

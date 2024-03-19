@@ -5,7 +5,7 @@ import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterWeapon } from "@providers/character/CharacterWeapon";
 import { CharacterBonusPenalties } from "@providers/character/characterBonusPenalties/CharacterBonusPenalties";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import {
   LOW_SKILL_LEVEL_SP_INCREASE_BONUS,
   ML_INCREASE_RATIO_MAGE,
@@ -44,7 +44,7 @@ export class SkillIncrease {
     private skillGainValidation: SkillGainValidation,
     private characterWeapon: CharacterWeapon,
     private inMemoryHashTable: InMemoryHashTable,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private skillMapper: SkillCraftingMapper,
     private numberFormatter: NumberFormatter,
     private npcExperience: NPCExperience,

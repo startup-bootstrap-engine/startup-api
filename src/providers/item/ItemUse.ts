@@ -3,7 +3,7 @@ import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemCon
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterView } from "@providers/character/CharacterView";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { EquipmentEquip } from "@providers/equipment/EquipmentEquip";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { ItemValidation } from "./validation/ItemValidation";
@@ -36,7 +36,7 @@ export class ItemUse {
     private itemValidation: ItemValidation,
     private socketMessaging: SocketMessaging,
     private equipmentEquip: EquipmentEquip,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private characterView: CharacterView,
     private animationEffect: AnimationEffect,
     private characterItemInventory: CharacterItemInventory,

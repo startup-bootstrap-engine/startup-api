@@ -1,7 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { EquipmentSlots } from "@providers/equipment/EquipmentSlots";
 import { ItemContainerHelper } from "@providers/itemContainer/ItemContainerHelper";
@@ -19,7 +19,7 @@ import { clearCacheForKey } from "speedgoose";
 @provide(ItemPickupUpdater)
 export class ItemPickupUpdater {
   constructor(
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private equipmentSlots: EquipmentSlots,
     private socketMessaging: SocketMessaging,
     private itemContainerHelper: ItemContainerHelper,

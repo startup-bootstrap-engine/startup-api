@@ -5,7 +5,7 @@ import { Item } from "@entities/ModuleInventory/ItemModel";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { container } from "@providers/inversify/container";
 
 import { IPosition } from "@providers/movement/MovementHelper";
@@ -37,7 +37,7 @@ export class UseWithItemToSeed {
   constructor(
     private socketMessaging: SocketMessaging,
     private characterItemInventory: CharacterItemInventory,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private characterInventory: CharacterInventory,
     private simpleTutorial: SimpleTutorial
   ) {}

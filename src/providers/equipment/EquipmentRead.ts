@@ -1,7 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Equipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { EquipmentSocketEvents, IEquipmentRead, IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
@@ -14,7 +14,7 @@ export class EquipmentRead {
   constructor(
     private socketMessaging: SocketMessaging,
     private equipmentSlots: EquipmentSlots,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private inMemoryHashTable: InMemoryHashTable
   ) {}
 
