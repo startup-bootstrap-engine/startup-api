@@ -14,13 +14,13 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { TraitGetter } from "@providers/skill/TraitGetter";
 import { Job, Queue, Worker } from "bullmq";
-import { provide } from "inversify-binding-decorators";
 import { CharacterWeightCalculator } from "./CharacterWeightCalculator";
 
-@provide(CharacterWeightQueue)
+@provideSingleton(CharacterWeightQueue)
 export class CharacterWeightQueue {
   private queue: Queue<any, any, string> | null = null;
   private worker: Worker | null = null;
