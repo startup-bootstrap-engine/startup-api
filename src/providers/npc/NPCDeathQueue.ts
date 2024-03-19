@@ -55,7 +55,8 @@ export class NPCDeathQueue {
     private locker: Locker,
     private newRelic: NewRelic,
     private npcLoot: NPCLoot,
-    private queueCleaner: QueueCleaner
+    private queueCleaner: QueueCleaner,
+    private characterView: CharacterView
   ) {}
 
   public init(scene: string): void {
