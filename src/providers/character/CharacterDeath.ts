@@ -89,7 +89,7 @@ export class CharacterDeath {
   @TrackNewRelicTransaction()
   public async handleCharacterDeath(killer: INPC | ICharacter | null, character: ICharacter): Promise<void> {
     try {
-      const isLocked = await this.locker.lock(`character-death-${character._id}`);
+      const isLocked = await this.locker.lock(`character-death-${character._id}`, 3);
 
       if (!isLocked) {
         return;
