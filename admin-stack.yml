@@ -42,8 +42,6 @@ services:
       - "--entryPoints.web.transport.respondingTimeouts.readTimeout=15s"
       - "--entryPoints.web.transport.respondingTimeouts.writeTimeout=15s"
       - "--entryPoints.web.transport.respondingTimeouts.idleTimeout=10m"
-      - "--entryPoints.websecure.http.tls=true"
-      - "--entryPoints.websecure.http.tls.minVersion=VersionTLS13"
 
       # Logging & Debugging
       - --accesslog=true
