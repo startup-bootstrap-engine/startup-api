@@ -5,6 +5,7 @@ import { NewRelic } from "@providers/analytics/NewRelic";
 import { appEnv } from "@providers/config/env";
 import { SOCKET_IO_CONFIG } from "@providers/constants/SocketsConstants";
 import { SocketIOAuthMiddleware } from "@providers/middlewares/SocketIOAuthMiddleware";
+import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { EnvType, ISocket } from "@rpg-engine/shared";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { provide } from "inversify-binding-decorators";
@@ -74,6 +75,18 @@ export class SocketIO implements ISocket {
   public onConnect(onConnectFn: (channel) => void): void {
     this.socket.on("connection", (channel) => {
       onConnectFn(channel);
+
+      channel.on("disconnect", (reason: string) => {
+        console.log(`Client disconnected: ${channel.id}, Reason: ${reason}`);
+
+        // Log the disconnection reason with NewRelic or any other monitoring tool you're using
+        this.newRelic.trackMetric(
+          NewRelicMetricCategory.Count,
+          NewRelicSubCategory.Server,
+          `SocketIODisconnect/${reason}`,
+          1
+        );
+      });
     });
   }
 
