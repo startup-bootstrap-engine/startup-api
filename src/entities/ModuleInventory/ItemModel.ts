@@ -126,10 +126,6 @@ const itemSchema = createLeanSchema(
 
     equippedBuffDescription: Type.string({ required: false }),
 
-    droppedBy: Type.objectId({
-      ref: "Character",
-    }),
-
     entityEffects: Type.array().of(
       Type.string({
         typeof: EntityEffectBlueprint,
