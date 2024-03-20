@@ -12,7 +12,6 @@ import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { SpellLearn } from "@providers/spells/SpellLearn";
 import { NamespaceRedisControl } from "@providers/spells/data/types/SpellsBlueprintTypes";
-import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { CharacterSocketEvents, ICharacterLogout, SpellsBlueprint } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
@@ -75,7 +74,6 @@ export class CharacterNetworkLogout {
       );
     }
     console.log(`🚪: Character id ${data.id} (${character.name}) has disconnected`);
-    this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Server, "SocketDisconnect", 1);
   }
 
   private async updateTextureKeysAndStatus(data: ICharacterLogout, character: ICharacter): Promise<void> {
