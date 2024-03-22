@@ -71,7 +71,7 @@ export class MarketplaceItemAddRemove {
     await this.sendRefreshItemsEvent(character);
 
     await new MarketplaceItem({
-      price: marketplaceItem.price,
+      price: Math.floor(marketplaceItem.price),
       item: item._id,
       owner: character._id,
     }).save();
@@ -82,12 +82,11 @@ export class MarketplaceItemAddRemove {
 
     const hasStackQtyLargerThan1 = item.stackQty && item.stackQty > 1;
 
-    await this.discordBot.sendMessage(
-      `**${character.name}** IS SELLING **${item.name}** ${
-        hasStackQtyLargerThan1 ? `(${item.stackQty}x)` : ""
-      } on the marketplace for **${marketplaceItem.price}** gold.`,
-      "marketplaceBotNotifications"
-    );
+    const message = `**${character.name}** IS SELLING **${item.name}** ${
+      hasStackQtyLargerThan1 ? `(${item.stackQty}x)` : ""
+    } on the marketplace for **${Math.floor(marketplaceItem.price)}** gold.`;
+
+    await this.discordBot.sendMessage(message, "marketplaceBotNotifications");
 
     return true;
   }

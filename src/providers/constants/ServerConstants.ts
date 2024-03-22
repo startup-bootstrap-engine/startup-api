@@ -14,6 +14,9 @@ export const USER_CONTROL_ONLINE = {
   MAX_NUMBER_ACC_PER_USER: 20,
 };
 
+// 10 min
+export const SERVER_DISCONNECT_IDLE_TIMEOUT = 60 * 10 * 1000; // how many minutes does a character needs to be inactive to be disconnected
+
 export const USER_EXHAUST_TIMEOUT = 1500;
 
 export const EXHAUSTABLE_EVENTS = [

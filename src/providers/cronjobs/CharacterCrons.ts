@@ -2,6 +2,7 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { CharacterLastAction } from "@providers/character/CharacterLastAction";
 import { CharacterRetentionTracker } from "@providers/character/CharacterRetentionTracker";
+import { SERVER_DISCONNECT_IDLE_TIMEOUT } from "@providers/constants/ServerConstants";
 import { SocketAdapter } from "@providers/sockets/SocketAdapter";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
@@ -94,7 +95,7 @@ export class CharacterCrons {
 
       const diff = now.diff(lastActivity, "minute");
 
-      if (diff >= 10) {
+      if (diff >= SERVER_DISCONNECT_IDLE_TIMEOUT) {
         console.log(`🚪: Character id ${character._id} (${character.name}) has disconnected due to inactivity...`);
         this.socketMessaging.sendEventToUser(character.channelId!, CharacterSocketEvents.CharacterForceDisconnect, {
           reason: "You have were disconnected due to inactivity!",

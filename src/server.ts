@@ -71,5 +71,3 @@ const server = app.listen(port, async () => {
     appEnv.general.ENV === EnvType.Development
   );
 });
-
-serverHelper.gracefullyShutdown(server);
