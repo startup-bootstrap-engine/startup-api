@@ -1,12 +1,14 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
+import { TrackClassExecutionTime } from "@jonit-dev/decorators-utils";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { isSameKey } from "@providers/dataStructures/KeyHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 
 import { provide } from "inversify-binding-decorators";
 
+@TrackClassExecutionTime()
 @provide(CharacterItemSlots)
 export class CharacterItemSlots {
   constructor(private socketMessaging: SocketMessaging) {}
@@ -377,10 +379,16 @@ export class CharacterItemSlots {
 
       // if inventory is full, just drop the item on the ground
 
-      selectedItem.x = character.x;
-      selectedItem.y = character.y;
-      selectedItem.scene = character.scene;
-      await selectedItem.save();
+      await Item.updateOne(
+        { _id: selectedItem._id },
+        {
+          $set: {
+            x: character.x,
+            y: character.y,
+            scene: character.scene,
+          },
+        }
+      );
 
       return true;
     }
