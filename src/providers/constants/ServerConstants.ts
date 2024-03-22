@@ -10,7 +10,7 @@ import {
 import os from "os";
 
 export const USER_CONTROL_ONLINE = {
-  MAX_NUMBER_OF_PLAYERS: 50,
+  MAX_NUMBER_OF_PLAYERS: 100,
   MAX_NUMBER_ACC_PER_USER: 20,
 };
 
