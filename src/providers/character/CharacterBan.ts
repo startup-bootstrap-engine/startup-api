@@ -82,19 +82,22 @@ export class CharacterBan {
     character.penalty = Math.floor(character.penalty / 10) * 10 + 10;
 
     if (character.penalty % 10 === 0) {
-      character.isBanned = true;
-      character.isOnline = false;
-      character.banRemovalDate = dayjs(new Date()).add(character.penalty, "day").toDate();
-      await character.save();
+      const updateData: Partial<ICharacter> = {
+        penalty: character.penalty,
+        isBanned: true,
+        isOnline: false,
+        banRemovalDate: dayjs().add(character.penalty, "day").toDate(),
+      };
+
+      if (character.penalty > 30) {
+        updateData.hasPermanentBan = true;
+      }
+
+      await Character.updateOne({ _id: character._id }, updateData);
 
       this.socketMessaging.sendEventToUser(character.channelId!, CharacterSocketEvents.CharacterForceDisconnect, {
         reason: "Your character is now banned.",
       });
-
-      if (character.penalty > 30) {
-        character.hasPermanentBan = true;
-        await character.save();
-      }
 
       this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Characters, "Banned", 1);
     }

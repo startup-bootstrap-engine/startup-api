@@ -5,7 +5,7 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { EquipmentSlots } from "@providers/equipment/EquipmentSlots";
 import { IPosition, MovementHelper } from "@providers/movement/MovementHelper";
@@ -24,7 +24,7 @@ import { clearCacheForKey } from "speedgoose";
 import { CharacterItems } from "../character/characterItems/CharacterItems";
 
 import { Locker } from "@providers/locks/Locker";
-import { ItemDropCleanup } from "./ItemDropCleanup";
+import { ItemDropVerifier } from "./ItemDropVerifier";
 import { ItemOwnership } from "./ItemOwnership";
 
 @provide(ItemDrop)
@@ -35,12 +35,13 @@ export class ItemDrop {
     private equipmentSlots: EquipmentSlots,
     private characterValidation: CharacterValidation,
     private movementHelper: MovementHelper,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private itemOwnership: ItemOwnership,
     private characterInventory: CharacterInventory,
-    private itemCleanup: ItemDropCleanup,
+
     private inMemoryHashTable: InMemoryHashTable,
-    private locker: Locker
+    private locker: Locker,
+    private itemDropVerifier: ItemDropVerifier
   ) {}
 
   //! For now, only a drop from inventory or equipment set is allowed.
@@ -168,7 +169,7 @@ export class ItemDrop {
 
     // Perform cleanup, status update, and ownership removal concurrently
     await Promise.all([
-      this.cleanupDroppedItems(character),
+      this.itemDropVerifier.trackDrop(character, dropItem._id),
       this.updateItemStatus(dropItem),
       this.removeItemOwnership(dropItem),
     ]);
@@ -203,7 +204,6 @@ export class ItemDrop {
           x: targetPosition.x,
           y: targetPosition.y,
           scene: character.scene,
-          droppedBy: character._id,
           isInContainer: false,
           updatedAt: new Date(), // explicitly update it, so we avoid the cron cleaner deleting items that are dropped just before the cron runs
         },
@@ -212,10 +212,6 @@ export class ItemDrop {
         },
       }
     );
-  }
-
-  private async cleanupDroppedItems(character: ICharacter): Promise<void> {
-    await this.itemCleanup.tryCharacterDroppedItemsCleanup(character);
   }
 
   private async updateItemStatus(dropItem: IItem): Promise<void> {

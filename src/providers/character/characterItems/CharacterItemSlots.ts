@@ -3,14 +3,13 @@ import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemCon
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { isSameKey } from "@providers/dataStructures/KeyHelper";
-import { ItemDropCleanup } from "@providers/item/ItemDropCleanup";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 
 import { provide } from "inversify-binding-decorators";
 
 @provide(CharacterItemSlots)
 export class CharacterItemSlots {
-  constructor(private socketMessaging: SocketMessaging, private itemCleanup: ItemDropCleanup) {}
+  constructor(private socketMessaging: SocketMessaging) {}
 
   @TrackNewRelicTransaction()
   public async getTotalQty(targetContainer: IItemContainer, itemKey: string, itemRarity: string): Promise<number> {
@@ -381,10 +380,7 @@ export class CharacterItemSlots {
       selectedItem.x = character.x;
       selectedItem.y = character.y;
       selectedItem.scene = character.scene;
-      selectedItem.droppedBy = character._id;
       await selectedItem.save();
-
-      await this.itemCleanup.tryCharacterDroppedItemsCleanup(character);
 
       return true;
     }

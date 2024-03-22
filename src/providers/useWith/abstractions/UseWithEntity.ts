@@ -9,7 +9,7 @@ import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterBonusPenalties } from "@providers/character/characterBonusPenalties/CharacterBonusPenalties";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { EntityUtil } from "@providers/entityEffects/EntityUtil";
 import { blueprintManager } from "@providers/inversify/container";
@@ -45,7 +45,7 @@ export class UseWithEntity {
 
     private socketAuth: SocketAuth,
     private characterItemInventory: CharacterItemInventory,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private animationEffect: AnimationEffect,
     private characterItemContainer: CharacterItemContainer,
     private skillIncrease: SkillIncrease,

@@ -7,7 +7,6 @@ import { Locker } from "@providers/locks/Locker";
 import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { EnvType } from "@rpg-engine/shared";
 import { Job, Queue, Worker } from "bullmq";
-import { v4 as uuidv4 } from "uuid";
 import { Pathfinder } from "./Pathfinder";
 import { PathfindingResults } from "./PathfindingResults";
 @provideSingleton(PathfindingQueue)
@@ -16,9 +15,8 @@ export class PathfindingQueue {
   private worker: Worker | null = null;
   private connection;
 
-  private queueName: string = `npc-pathfinding-${uuidv4()}-${
-    appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
-  }`;
+  private queueName = (scene: string): string =>
+    `npc-pathfinding-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
 
   constructor(
     private redisManager: RedisManager,
@@ -28,7 +26,7 @@ export class PathfindingQueue {
     private queueCleaner: QueueCleaner
   ) {}
 
-  public init(): void {
+  public init(scene: string): void {
     if (appEnv.general.IS_UNIT_TEST) {
       return;
     }
@@ -38,7 +36,7 @@ export class PathfindingQueue {
     }
 
     if (!this.queue) {
-      this.queue = new Queue(this.queueName, {
+      this.queue = new Queue(this.queueName(scene), {
         connection: this.connection,
       });
 
@@ -54,12 +52,12 @@ export class PathfindingQueue {
 
     if (!this.worker) {
       this.worker = new Worker(
-        this.queueName,
+        this.queueName(scene),
         async (job) => {
           const { npc, target, startGridX, startGridY, endGridX, endGridY } = job.data;
 
           try {
-            await this.queueCleaner.updateQueueActivity(this.queueName);
+            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
 
             const path = await this.pathfinder.findShortestPath(
               npc as INPC,
@@ -98,10 +96,6 @@ export class PathfindingQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    if (!this.connection || !this.queue || !this.worker) {
-      this.init();
-    }
-
     const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
     for (const job of jobs) {
       try {
@@ -121,7 +115,7 @@ export class PathfindingQueue {
     endGridY: number
   ): Promise<Job | undefined> {
     if (!this.connection || !this.queue || !this.worker) {
-      this.init();
+      this.init(npc.scene);
     }
 
     try {

@@ -6,7 +6,7 @@ import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
 import { CharacterItems } from "@providers/character/characterItems/CharacterItems";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { ITEM_PICKUP_DISTANCE_THRESHOLD } from "@providers/constants/ItemConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { EquipmentEquip } from "@providers/equipment/EquipmentEquip";
@@ -25,7 +25,7 @@ export class ItemPickupValidator {
     private socketMessaging: SocketMessaging,
     private characterItemSlots: CharacterItemSlots,
     private mapHelper: MapHelper,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private movementHelper: MovementHelper,
     private characterItems: CharacterItems,
     private characterValidation: CharacterValidation,

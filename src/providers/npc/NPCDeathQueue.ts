@@ -33,23 +33,22 @@ import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { QueueCleaner } from "@providers/queue/QueueCleaner";
-import { v4 as uuidv4 } from "uuid";
 @provideSingleton(NPCDeathQueue)
 export class NPCDeathQueue {
   private queue: Queue | null = null;
   private worker: Worker | null = null;
   private connection;
 
-  private queueName: string = `np-death-${uuidv4()}-${
-    appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
-  }`;
+  private queueName = (scene: string): string =>
+    `npc-death-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
 
   constructor(
     private redisManager: RedisManager,
     private socketMessaging: SocketMessaging,
-    private characterView: CharacterView,
     private npcTarget: NPCTarget,
     private itemOwnership: ItemOwnership,
+    private characterView: CharacterView,
+
     private npcFreezer: NPCFreezer,
     private npcSpawn: NPCSpawn,
     private npcExperience: NPCExperience,
@@ -59,7 +58,7 @@ export class NPCDeathQueue {
     private queueCleaner: QueueCleaner
   ) {}
 
-  public init(): void {
+  public init(scene: string): void {
     if (appEnv.general.IS_UNIT_TEST) {
       return;
     }
@@ -69,7 +68,7 @@ export class NPCDeathQueue {
     }
 
     if (!this.queue) {
-      this.queue = new Queue(this.queueName, {
+      this.queue = new Queue(this.queueName(scene), {
         connection: this.connection,
       });
 
@@ -85,12 +84,12 @@ export class NPCDeathQueue {
 
     if (!this.worker) {
       this.worker = new Worker(
-        this.queueName,
+        this.queueName(scene),
         async (job) => {
           const { killer, npc } = job.data;
 
           try {
-            await this.queueCleaner.updateQueueActivity(this.queueName);
+            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
 
             await this.execHandleNPCDeath(killer, npc);
           } catch (err) {
@@ -115,10 +114,6 @@ export class NPCDeathQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    if (!this.connection || !this.queue || !this.worker) {
-      this.init();
-    }
-
     const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
     for (const job of jobs) {
       try {
@@ -143,10 +138,10 @@ export class NPCDeathQueue {
     }
 
     if (!this.connection || !this.queue || !this.worker) {
-      this.init();
+      this.init(npc.scene);
     }
 
-    await this.queue?.add(this.queueName, { killer, npc });
+    await this.queue?.add(this.queueName(npc.scene), { killer, npc });
   }
 
   @TrackNewRelicTransaction()

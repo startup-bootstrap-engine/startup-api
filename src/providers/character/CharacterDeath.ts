@@ -51,7 +51,7 @@ import { CharacterSkull } from "./CharacterSkull";
 import { CharacterTarget } from "./CharacterTarget";
 import { CharacterBuffActivator } from "./characterBuff/CharacterBuffActivator";
 import { CharacterItemContainer } from "./characterItems/CharacterItemContainer";
-import { CharacterWeight } from "./weight/CharacterWeight";
+import { CharacterWeightQueue } from "./weight/CharacterWeightQueue";
 
 export const DROPPABLE_EQUIPMENT = [
   "head",
@@ -73,7 +73,7 @@ export class CharacterDeath {
     private npcTarget: NPCTarget,
     private characterInventory: CharacterInventory,
     private itemOwnership: ItemOwnership,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private skillDecrease: SkillDecrease,
     private characterDeathCalculator: CharacterDeathCalculator,
     private characterItemContainer: CharacterItemContainer,
@@ -89,7 +89,7 @@ export class CharacterDeath {
   @TrackNewRelicTransaction()
   public async handleCharacterDeath(killer: INPC | ICharacter | null, character: ICharacter): Promise<void> {
     try {
-      const isLocked = await this.locker.lock(`character-death-${character._id}`);
+      const isLocked = await this.locker.lock(`character-death-${character._id}`, 3);
 
       if (!isLocked) {
         return;

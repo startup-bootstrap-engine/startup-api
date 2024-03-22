@@ -1,7 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { EquipmentSlots } from "@providers/equipment/EquipmentSlots";
 import { ItemContainerHelper } from "@providers/itemContainer/ItemContainerHelper";
@@ -15,15 +15,17 @@ import {
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
+import { ItemDropVerifier } from "../ItemDropVerifier";
 
 @provide(ItemPickupUpdater)
 export class ItemPickupUpdater {
   constructor(
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private equipmentSlots: EquipmentSlots,
     private socketMessaging: SocketMessaging,
     private itemContainerHelper: ItemContainerHelper,
-    private inMemoryHashTable: InMemoryHashTable
+    private inMemoryHashTable: InMemoryHashTable,
+    private itemDropVerifier: ItemDropVerifier
   ) {}
 
   @TrackNewRelicTransaction()
@@ -33,6 +35,7 @@ export class ItemPickupUpdater {
       this.inMemoryHashTable.delete("container-all-items", item.itemContainer as string),
       this.inMemoryHashTable.delete("inventory-weight", character._id),
       this.inMemoryHashTable.delete("character-max-weights", character._id),
+      this.itemDropVerifier.deleteItemFromCharacterFromDrop(character, item._id),
     ]);
 
     await this.characterWeight.updateCharacterWeight(character);

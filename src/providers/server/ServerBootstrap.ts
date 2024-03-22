@@ -20,6 +20,7 @@ import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DiscordBot } from "@providers/discord/DiscordBot";
 import { EntityEffectDurationControl } from "@providers/entityEffects/EntityEffectDurationControl";
 import { ErrorHandlingTracker } from "@providers/errorHandling/ErrorHandlingTracker";
+import { ItemDropVerifier } from "@providers/item/ItemDropVerifier";
 import { ItemUseCycleQueue } from "@providers/item/ItemUseCycleQueue";
 import { Locker } from "@providers/locks/Locker";
 import { NPCBattleCycleQueue } from "@providers/npc/NPCBattleCycleQueue";
@@ -29,7 +30,6 @@ import { NPCFreezer } from "@providers/npc/NPCFreezer";
 import { NPCMovementMoveTowardsQueue } from "@providers/npc/movement/NPCMovementMoveTowardsQueue";
 import PartyManagement from "@providers/party/PartyManagement";
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
-import { SkillFunctions } from "@providers/skill/SkillFunctions";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import SpellSilence from "@providers/spells/data/logic/mage/druid/SpellSilence";
 import { BullStrength } from "@providers/spells/data/logic/minotaur/BullStrength";
@@ -74,7 +74,7 @@ export class ServerBootstrap {
     private bullStrength: BullStrength,
     private npcMovementMoveTowardsQueue: NPCMovementMoveTowardsQueue,
     private npcDeathQueue: NPCDeathQueue,
-    private skillUpdaterQueue: SkillFunctions
+    private itemDropVerifier: ItemDropVerifier
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -162,6 +162,8 @@ export class ServerBootstrap {
     await this.inMemoryHashTable.deleteAll("use-item-to-tile");
     await this.inMemoryHashTable.deleteAll("character-bonus-penalties");
     await this.inMemoryHashTable.deleteAll("skills-with-buff");
+
+    await this.itemDropVerifier.clearAllItemDrops();
 
     await this.entityEffectDuration.clearAll();
     await this.characterMonitorCallbackTracker.clearAll();

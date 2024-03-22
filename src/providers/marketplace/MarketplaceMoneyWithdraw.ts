@@ -6,7 +6,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { blueprintManager } from "@providers/inversify/container";
 import { OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { MathHelper } from "@providers/math/MathHelper";
@@ -27,7 +27,7 @@ export class MarketplaceMoneyWithdraw {
     private characterItemContainer: CharacterItemContainer,
     private socketMessaging: SocketMessaging,
     private marketplaceValidation: MarketplaceValidation,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private mathHelper: MathHelper,
     private characterItemSlots: CharacterItemSlots
   ) {}

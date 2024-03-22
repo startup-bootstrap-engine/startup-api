@@ -5,7 +5,7 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { ItemOwnership } from "@providers/item/ItemOwnership";
 import { ItemUpdater } from "@providers/item/ItemUpdater";
@@ -22,7 +22,7 @@ export class DepositItem {
   constructor(
     private openDepot: OpenDepot,
     private itemView: ItemView,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private depotSystem: DepotSystem,
     private mapHelper: MapHelper,
     private socketMessaging: SocketMessaging,

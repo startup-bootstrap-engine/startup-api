@@ -8,7 +8,7 @@ import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { blueprintManager } from "@providers/inversify/container";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
@@ -67,7 +67,7 @@ export class ItemCraftable {
     private characterValidation: CharacterValidation,
     private characterItemInventory: CharacterItemInventory,
     private characterItemSlots: CharacterItemSlots,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private animationEffect: AnimationEffect,
     private skillIncrease: SkillIncrease,
     private characterInventory: CharacterInventory,

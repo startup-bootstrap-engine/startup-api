@@ -9,7 +9,7 @@ import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterBuffValidation } from "@providers/character/characterBuff/CharacterBuffValidation";
 import { CharacterItemBuff } from "@providers/character/characterBuff/CharacterItemBuff";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { blueprintManager } from "@providers/inversify/container";
 import { ItemOwnership } from "@providers/item/ItemOwnership";
@@ -46,7 +46,7 @@ export class EquipmentEquip {
     private characterInventory: CharacterInventory,
     private inMemoryHashTable: InMemoryHashTable,
     private itemView: ItemView,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private itemPickupUpdater: ItemPickupUpdater,
     private characterItemBuff: CharacterItemBuff,
     private equipmentCharacterClass: EquipmentCharacterClass,
