@@ -2,6 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { TrackClassExecutionTime } from "@jonit-dev/decorators-utils";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
@@ -21,6 +22,7 @@ export class ItemContainerTransaction {
     private locker: Locker
   ) {}
 
+  @TrackNewRelicTransaction()
   public async transferToContainer(
     item: IItem,
     character: ICharacter,
