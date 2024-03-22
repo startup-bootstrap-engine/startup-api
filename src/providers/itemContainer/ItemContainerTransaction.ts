@@ -1,14 +1,16 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
+import { TrackClassExecutionTime } from "@jonit-dev/decorators-utils";
+import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
-import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { ITEM_CONTAINER_ROLLBACK_MAX_TRIES } from "@providers/constants/ItemContainerConstants";
 import { Locker } from "@providers/locks/Locker";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { provide } from "inversify-binding-decorators";
 
+@TrackClassExecutionTime()
 @provide(ItemContainerTransaction)
 export class ItemContainerTransaction {
   constructor(

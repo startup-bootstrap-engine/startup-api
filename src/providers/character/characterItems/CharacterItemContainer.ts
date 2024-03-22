@@ -5,6 +5,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { EquipmentEquipInventory } from "@providers/equipment/EquipmentEquipInventory";
 
+import { TrackClassExecutionTime } from "@jonit-dev/decorators-utils";
 import { ItemMap } from "@providers/item/ItemMap";
 import { ItemOwnership } from "@providers/item/ItemOwnership";
 import { Locker } from "@providers/locks/Locker";
@@ -21,6 +22,7 @@ interface IAddItemToContainerOptions {
   dropOnMapIfFull?: boolean;
 }
 
+@TrackClassExecutionTime()
 @provide(CharacterItemContainer)
 export class CharacterItemContainer {
   constructor(
