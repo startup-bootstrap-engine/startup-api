@@ -57,7 +57,7 @@ describe("ItemContainerOpen.ts", () => {
   });
 
   it("should automatically create  a container, if the item being saved is a container", async () => {
-    const newContainer = await unitTestHelper.createMockItemContainerBody(testCharacter);
+    const newContainer = await unitTestHelper.createMockCharacterDeadBody(testCharacter);
 
     expect(newContainer.isItemContainer).toBe(true);
 
@@ -91,7 +91,7 @@ describe("ItemContainerOpen.ts", () => {
       // @ts-ignore
       jest.spyOn(itemContainerOpen.socketMessaging, "sendEventToUser" as any);
 
-      const item = await unitTestHelper.createMockItemContainerBody(testCharacter);
+      const item = await unitTestHelper.createMockCharacterDeadBody(testCharacter);
 
       const itemContainer = await ItemContainer.findOne({
         parentItem: item._id,
@@ -127,7 +127,7 @@ describe("ItemContainerOpen.ts", () => {
       // @ts-ignore
       jest.spyOn(itemContainerOpen.socketMessaging, "sendEventToUser" as any);
 
-      const item = await unitTestHelper.createMockItemContainerBody(testCharacter);
+      const item = await unitTestHelper.createMockCharacterDeadBody(testCharacter);
 
       const itemContainer = await ItemContainer.findOne({
         parentItem: item._id,
@@ -164,7 +164,7 @@ describe("ItemContainerOpen.ts", () => {
         { new: true }
       ).lean()) as ICharacter;
 
-      const item = await unitTestHelper.createMockItemContainerBody(updateChar);
+      const item = await unitTestHelper.createMockCharacterDeadBody(updateChar);
 
       const roolbackCharPosition = (await Character.findByIdAndUpdate(
         testCharacter._id,
@@ -192,7 +192,7 @@ describe("ItemContainerOpen.ts", () => {
       // @ts-ignore
       jest.spyOn(itemContainerOpen.socketMessaging, "sendEventToUser" as any);
 
-      const item = await unitTestHelper.createMockItemContainerBody(testCharacter);
+      const item = await unitTestHelper.createMockCharacterDeadBody(testCharacter);
 
       testCharacter.isOnline = false;
       await testCharacter.save();
@@ -214,7 +214,7 @@ describe("ItemContainerOpen.ts", () => {
       // @ts-ignore
       jest.spyOn(itemContainerOpen.socketMessaging, "sendEventToUser" as any);
 
-      const item = await unitTestHelper.createMockItemContainerBody(testCharacter);
+      const item = await unitTestHelper.createMockCharacterDeadBody(testCharacter);
 
       testCharacter.isBanned = true;
       await testCharacter.save();
