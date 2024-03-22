@@ -93,18 +93,18 @@ export class CharacterItemSlots {
     };
 
     try {
-      // Updating the container in the database
-      await ItemContainer.updateOne(
-        { _id: targetContainer._id },
-        {
-          $set: {
-            slots: targetContainer.slots,
-          },
-        }
-      );
-
-      // Updating the item in the database
-      await Item.updateOne({ _id: slotItem._id }, { $set: { ...payload } });
+      // Updating the container and the item in the database concurrently
+      await Promise.all([
+        ItemContainer.updateOne(
+          { _id: targetContainer._id },
+          {
+            $set: {
+              [`slots.${slotIndex}`]: targetContainer.slots[slotIndex],
+            },
+          }
+        ),
+        Item.updateOne({ _id: slotItem._id }, { $set: { ...payload } }),
+      ]);
     } catch (error) {
       // Error handling
       console.error(error);
@@ -324,7 +324,7 @@ export class CharacterItemSlots {
     itemToBeAdded: IItem,
     slotIndex: number
   ): Promise<boolean> {
-    const targetContainerItem = (await ItemContainer.findById(targetContainer.id)) as unknown as IItemContainer;
+    const targetContainerItem = (await ItemContainer.findById(targetContainer.id).lean()) as unknown as IItemContainer;
 
     if (!targetContainerItem) {
       return false;
@@ -357,16 +357,10 @@ export class CharacterItemSlots {
     targetContainer: IItemContainer,
     dropOnMapIfFull: boolean = true
   ): Promise<boolean> {
-    //! Avoid duplicate items on slots
-    // if selectedItem is not stackable, do not add it.
-    const isStackable = selectedItem.maxStackSize > 1;
+    const hasSameItemOnSlot = await this.findItemOnSlots(targetContainer, selectedItem._id);
 
-    if (!isStackable) {
-      const hasSameItemOnSlot = await this.findItemOnSlots(targetContainer, selectedItem._id);
-
-      if (hasSameItemOnSlot) {
-        return false;
-      }
+    if (hasSameItemOnSlot && selectedItem.maxStackSize === 1) {
+      return false;
     }
 
     const firstAvailableSlotIndex = await this.getFirstAvailableSlotIndex(targetContainer, selectedItem);
@@ -378,17 +372,11 @@ export class CharacterItemSlots {
       }
 
       // if inventory is full, just drop the item on the ground
-
-      await Item.updateOne(
-        { _id: selectedItem._id },
-        {
-          $set: {
-            x: character.x,
-            y: character.y,
-            scene: character.scene,
-          },
-        }
-      );
+      // we must do a .save operation here to send the related events
+      selectedItem.x = character.x;
+      selectedItem.y = character.y;
+      selectedItem.scene = character.scene;
+      await selectedItem.save();
 
       return true;
     }
@@ -401,14 +389,8 @@ export class CharacterItemSlots {
       }
 
       await ItemContainer.updateOne(
-        {
-          _id: targetContainer.id,
-        },
-        {
-          $set: {
-            slots: targetContainer.slots,
-          },
-        }
+        { _id: targetContainer._id },
+        { $set: { [`slots.${firstAvailableSlotIndex}`]: selectedItem } }
       );
 
       return true;
