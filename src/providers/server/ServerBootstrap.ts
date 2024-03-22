@@ -22,6 +22,7 @@ import { EntityEffectDurationControl } from "@providers/entityEffects/EntityEffe
 import { ErrorHandlingTracker } from "@providers/errorHandling/ErrorHandlingTracker";
 import { ItemDropVerifier } from "@providers/item/ItemDropVerifier";
 import { ItemUseCycleQueue } from "@providers/item/ItemUseCycleQueue";
+import { ItemContainerTransactionQueue } from "@providers/itemContainer/ItemContainerTransactionQueue";
 import { Locker } from "@providers/locks/Locker";
 import { NPCBattleCycleQueue } from "@providers/npc/NPCBattleCycleQueue";
 import { NPCCycleQueue } from "@providers/npc/NPCCycleQueue";
@@ -74,6 +75,7 @@ export class ServerBootstrap {
     private bullStrength: BullStrength,
     private npcMovementMoveTowardsQueue: NPCMovementMoveTowardsQueue,
     private npcDeathQueue: NPCDeathQueue,
+    private itemContainerTransactionQueue: ItemContainerTransactionQueue,
     private itemDropVerifier: ItemDropVerifier
   ) {}
 
@@ -121,6 +123,7 @@ export class ServerBootstrap {
       await this.spellNetworkCast.shutdown();
       await this.npcMovementMoveTowardsQueue.shutdown();
       await this.npcDeathQueue.shutdown();
+      await this.itemContainerTransactionQueue.shutdown();
     };
 
     process.on("SIGTERM", async () => {

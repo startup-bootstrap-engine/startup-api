@@ -3,18 +3,18 @@ import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemCon
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { container, unitTestHelper } from "@providers/inversify/container";
-import { ItemContainerTransaction } from "../ItemContainerTransaction";
+import { ItemContainerTransactionQueue } from "../ItemContainerTransactionQueue";
 
 describe("ItemContainerTransaction", () => {
   let originContainer: IItemContainer;
   let targetContainer: IItemContainer;
   let testCharacter: ICharacter;
   let testItem: IItem;
-  let itemContainerTransaction: ItemContainerTransaction;
+  let itemContainerTransaction: ItemContainerTransactionQueue;
   let characterItemContainer: CharacterItemContainer;
 
   beforeAll(() => {
-    itemContainerTransaction = container.resolve(ItemContainerTransaction);
+    itemContainerTransaction = container.resolve(ItemContainerTransactionQueue);
     characterItemContainer = container.get(CharacterItemContainer);
   });
 
