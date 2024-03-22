@@ -1,7 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
-import { TrackClassExecutionTime } from "@jonit-dev/decorators-utils";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
@@ -11,7 +10,6 @@ import { Locker } from "@providers/locks/Locker";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { provide } from "inversify-binding-decorators";
 
-@TrackClassExecutionTime()
 @provide(ItemContainerTransaction)
 export class ItemContainerTransaction {
   constructor(
@@ -31,7 +29,7 @@ export class ItemContainerTransaction {
   ): Promise<boolean> {
     try {
       const canProceed = await this.locker.lock(
-        `${originContainer._id}-to-${targetContainer._id}-item-container-transfer`
+        `${originContainer?._id}-to-${targetContainer?._id}-item-container-transfer`
       );
 
       if (!canProceed) {
@@ -49,51 +47,62 @@ export class ItemContainerTransaction {
         return false;
       }
 
-      const addItemSuccessful = await this.characterItemContainer.addItemToContainer(
-        item,
-        character,
-        targetContainer._id
-      );
+      const result = await this.performTransaction(item, character, originContainer, targetContainer);
 
-      if (!addItemSuccessful) {
-        console.error("Failed to add item to target container.");
-        return false;
-      }
-
-      const removeItemSuccessful = await this.characterItemContainer.removeItemFromContainer(
-        item,
-        character,
-        originContainer
-      );
-
-      if (!removeItemSuccessful) {
-        this.socketMessaging.sendErrorMessageToCharacter(
-          character,
-          "Failed to remove original item from origin container."
-        );
-
-        // Attempt rollback by removing the item from the target container
-        const rollbackSuccessful = await this.retryOperation(async () => {
-          return await this.characterItemContainer.removeItemFromContainer(item, character, targetContainer._id);
-        });
-
-        if (!rollbackSuccessful) {
-          this.socketMessaging.sendErrorMessageToCharacter(
-            character,
-            "Failed to rollback item addition to target container. Please check your inventory."
-          );
-        }
-
-        return false;
-      }
-
-      return true;
+      return result;
     } catch (error) {
       console.error(error);
       return false;
     } finally {
-      await this.locker.unlock(`${originContainer._id}-to-${targetContainer._id}-item-container-transfer`);
+      await this.locker.unlock(`${originContainer?._id}-to-${targetContainer?._id}-item-container-transfer`);
     }
+  }
+
+  private async performTransaction(
+    item: IItem,
+    character: ICharacter,
+    originContainer: IItemContainer,
+    targetContainer: IItemContainer
+  ): Promise<boolean> {
+    const addItemSuccessful = await this.characterItemContainer.addItemToContainer(
+      item,
+      character,
+      targetContainer._id
+    );
+
+    if (!addItemSuccessful) {
+      console.error("Failed to add item to target container.");
+      return false;
+    }
+
+    const removeItemSuccessful = await this.characterItemContainer.removeItemFromContainer(
+      item,
+      character,
+      originContainer
+    );
+
+    if (!removeItemSuccessful) {
+      this.socketMessaging.sendErrorMessageToCharacter(
+        character,
+        "Failed to remove original item from origin container."
+      );
+
+      // Attempt rollback by removing the item from the target container
+      const rollbackSuccessful = await this.retryOperation(async () => {
+        return await this.characterItemContainer.removeItemFromContainer(item, character, targetContainer._id);
+      });
+
+      if (!rollbackSuccessful) {
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          "Failed to rollback item addition to target container. Please check your inventory."
+        );
+      }
+
+      return false;
+    }
+
+    return true;
   }
 
   private async retryOperation(operation: () => Promise<boolean>): Promise<boolean> {
@@ -124,6 +133,16 @@ export class ItemContainerTransaction {
       this.socketMessaging.sendErrorMessageToCharacter(
         character,
         "Sorry, the origin container wasn't found for this owner."
+      );
+      return false;
+    }
+
+    const doesOriginContainerHasItem = this.characterItemSlots.findItemWithSameKey(originContainer, item.key);
+
+    if (!doesOriginContainerHasItem) {
+      this.socketMessaging.sendErrorMessageToCharacter(
+        character,
+        "Sorry, the item wasn't found in the origin container."
       );
       return false;
     }

@@ -1,14 +1,12 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
-import { TrackClassExecutionTime } from "@jonit-dev/decorators-utils";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { isSameKey } from "@providers/dataStructures/KeyHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 
 import { provide } from "inversify-binding-decorators";
 
-@TrackClassExecutionTime()
 @provide(CharacterItemSlots)
 export class CharacterItemSlots {
   constructor(private socketMessaging: SocketMessaging) {}
@@ -115,7 +113,7 @@ export class CharacterItemSlots {
   @TrackNewRelicTransaction()
   public async findItemSlotIndex(targetContainer: IItemContainer, itemId: string): Promise<number | undefined> {
     try {
-      const container = (await ItemContainer.findById(targetContainer.id)) as unknown as IItemContainer;
+      const container = (await ItemContainer.findById(targetContainer.id).lean()) as unknown as IItemContainer;
 
       if (!container) {
         throw new Error("Container not found");
@@ -137,25 +135,16 @@ export class CharacterItemSlots {
     }
   }
 
-  @TrackNewRelicTransaction()
-  public async findItemWithSameKey(targetContainer: IItemContainer, itemKey: string): Promise<IItem | undefined> {
+  public findItemWithSameKey(targetContainer: IItemContainer, itemKey: string): IItem | undefined {
     try {
-      const container = (await ItemContainer.findById(targetContainer.id)) as unknown as IItemContainer;
+      for (let i = 0; i < targetContainer.slotQty; i++) {
+        const slotItem = targetContainer.slots?.[i];
 
-      if (!container) {
-        throw new Error("Container not found");
-      }
+        if (!slotItem) continue;
 
-      if (container) {
-        for (let i = 0; i < container.slotQty; i++) {
-          const slotItem = container.slots?.[i] as unknown as IItem;
-
-          if (!slotItem) continue;
-
-          // TODO: Find a better way to do this
-          if (slotItem.key.replace(/-\d+$/, "") === itemKey.replace(/-\d+$/, "")) {
-            return slotItem;
-          }
+        // TODO: Find a better way to do this
+        if (slotItem.key.replace(/-\d+$/, "") === itemKey.replace(/-\d+$/, "")) {
+          return slotItem;
         }
       }
     } catch (error) {
