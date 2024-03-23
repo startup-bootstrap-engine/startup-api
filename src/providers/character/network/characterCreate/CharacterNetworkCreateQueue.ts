@@ -154,7 +154,6 @@ export class CharacterNetworkCreateQueue {
       {
         character,
         data,
-        channel: String(channel.id),
       },
       {
         removeOnComplete: true,
