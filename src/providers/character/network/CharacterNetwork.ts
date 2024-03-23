@@ -1,12 +1,12 @@
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { provide } from "inversify-binding-decorators";
 import { CharacterNetworkAutoLoot } from "./CharacterNetworkAutoLoot";
-import { CharacterNetworkCreate } from "./CharacterNetworkCreate";
 import { CharacterNetworkLogout } from "./CharacterNetworkLogout";
 import { CharacterNetworkPing } from "./CharacterNetworkPing";
 import { CharacterNetworkSearch } from "./CharacterNetworkSearch";
 import { CharacterNetworkTrading } from "./CharacterNetworkTrading";
 import { CharacterNetworkUpdateQueue } from "./CharacterNetworkUpdate/CharacterNetworkUpdateQueue";
+import { CharacterNetworkCreate } from "./characterCreate/CharacterNetworkCreate";
 
 @provide(CharacterNetwork)
 export class CharacterNetwork {
