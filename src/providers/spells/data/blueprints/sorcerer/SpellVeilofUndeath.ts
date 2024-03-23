@@ -10,9 +10,9 @@ import {
   CharacterClass,
   ISpell,
   SpellCastingType,
+  SpellsBlueprint,
 } from "@rpg-engine/shared";
 import { SpellCalculator } from "../../abstractions/SpellCalculator";
-import { SpellsBlueprint } from "../../types/SpellsBlueprintTypes";
 
 export const spellVeilofUndeath: Partial<ISpell> = {
   key: SpellsBlueprint.SorcererVeilofUndeath,
