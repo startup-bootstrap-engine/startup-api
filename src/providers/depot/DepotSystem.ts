@@ -41,7 +41,7 @@ export class DepotSystem {
 
   @TrackNewRelicTransaction()
   public async removeFromContainer(containerId: string, item: IItem): Promise<IItemContainerModel> {
-    const fromContainer = (await ItemContainer.findById(containerId)) as unknown as IItemContainerModel;
+    const fromContainer = (await ItemContainer.findById(containerId).lean()) as unknown as IItemContainerModel;
 
     if (!fromContainer) {
       throw new Error(`DepotSystem > ItemContainer not found: ${containerId}`);

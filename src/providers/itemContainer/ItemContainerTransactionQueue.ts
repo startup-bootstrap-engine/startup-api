@@ -5,15 +5,17 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { appEnv } from "@providers/config/env";
 import { ITEM_CONTAINER_ROLLBACK_MAX_TRIES } from "@providers/constants/ItemContainerConstants";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { EnvType, IItemContainerRead, ItemContainerType, ItemSocketEvents } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
-import { provide } from "inversify-binding-decorators";
 
 interface IItemContainerTransactionRead {
   itemContainerId: string;
@@ -22,9 +24,13 @@ interface IItemContainerTransactionRead {
 
 interface IItemContainerTransactionOption {
   readContainersAfterTransaction?: IItemContainerTransactionRead[];
+  shouldAddOwnership?: boolean;
+  clearContainersCacheAfterTransaction?: boolean;
+  updateCharacterWeightAfterTransaction?: boolean;
+  executeFnAfterTransaction?: () => void | Promise<void>;
 }
 
-@provide(ItemContainerTransactionQueue)
+@provideSingleton(ItemContainerTransactionQueue)
 export class ItemContainerTransactionQueue {
   private queue: Queue<any, any, string> | null = null;
   private worker: Worker | null = null;
@@ -39,7 +45,9 @@ export class ItemContainerTransactionQueue {
     private characterValidation: CharacterValidation,
     private locker: Locker,
     private redisManager: RedisManager,
-    private queueCleaner: QueueCleaner
+    private queueCleaner: QueueCleaner,
+    private inMemoryHashTable: InMemoryHashTable,
+    private characterWeightQueue: CharacterWeightQueue
   ) {}
 
   public init(scene: string): void {
@@ -98,7 +106,11 @@ export class ItemContainerTransactionQueue {
     character: ICharacter,
     originContainer: IItemContainer,
     targetContainer: IItemContainer,
-    options?: IItemContainerTransactionOption
+    options: IItemContainerTransactionOption = {
+      shouldAddOwnership: true,
+      clearContainersCacheAfterTransaction: true,
+      updateCharacterWeightAfterTransaction: true,
+    }
   ): Promise<boolean> {
     if (appEnv.general.IS_UNIT_TEST) {
       return await this.execTransferToContainer(item, character, originContainer, targetContainer, options!);
@@ -147,7 +159,7 @@ export class ItemContainerTransactionQueue {
         return false;
       }
 
-      const result = await this.performTransaction(item, character, originContainer, targetContainer);
+      const result = await this.performTransaction(item, character, originContainer, targetContainer, options);
 
       if (result && options?.readContainersAfterTransaction) {
         await this.readAndRefreshContainersAfterTransaction(character, options.readContainersAfterTransaction);
@@ -159,6 +171,23 @@ export class ItemContainerTransactionQueue {
       return false;
     } finally {
       await this.locker.unlock(`${originContainer?._id}-to-${targetContainer?._id}-item-container-transfer`);
+
+      if (options.clearContainersCacheAfterTransaction) {
+        await Promise.all([
+          this.inMemoryHashTable.delete("container-all-items", originContainer._id.toString()),
+          this.inMemoryHashTable.delete("container-all-items", targetContainer._id.toString()),
+          this.inMemoryHashTable.delete("inventory-weight", originContainer.owner!.toString()!),
+          this.inMemoryHashTable.delete("load-craftable-items", originContainer.owner?.toString()!),
+        ]);
+      }
+
+      if (options.updateCharacterWeightAfterTransaction) {
+        await this.characterWeightQueue.updateCharacterWeight(character);
+      }
+
+      if (options.executeFnAfterTransaction) {
+        await options.executeFnAfterTransaction();
+      }
     }
   }
 
@@ -192,12 +221,16 @@ export class ItemContainerTransactionQueue {
     item: IItem,
     character: ICharacter,
     originContainer: IItemContainer,
-    targetContainer: IItemContainer
+    targetContainer: IItemContainer,
+    options: IItemContainerTransactionOption
   ): Promise<boolean> {
     const addItemSuccessful = await this.characterItemContainer.addItemToContainer(
       item,
       character,
-      targetContainer._id
+      targetContainer._id,
+      {
+        shouldAddOwnership: options.shouldAddOwnership,
+      }
     );
 
     if (!addItemSuccessful) {

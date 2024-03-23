@@ -1,5 +1,7 @@
 import { Character } from "@entities/ModuleCharacter/CharacterModel";
 import { Skill } from "@entities/ModuleCharacter/SkillsModel";
+import { Depot } from "@entities/ModuleDepot/DepotModel";
+import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
@@ -140,5 +142,18 @@ export class ScriptsUseCase {
     } catch (error) {
       console.error(error);
     }
+  }
+
+  public async fixDepotOwnership(): Promise<void> {
+    const depots = await Depot.find({}).lean();
+
+    const updateOperations = depots.map((depot) => ({
+      updateOne: {
+        filter: { _id: depot.itemContainer },
+        update: { $set: { owner: depot.owner } },
+      },
+    }));
+
+    await ItemContainer.bulkWrite(updateOperations);
   }
 }

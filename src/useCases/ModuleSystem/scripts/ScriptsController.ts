@@ -92,4 +92,13 @@ export class ScriptsController implements interfaces.Controller {
       message: "Farming skills updated!",
     });
   }
+
+  @httpGet("/fix-depot-ownership")
+  public async fixDepotOwnership(@response() res): Promise<void> {
+    await this.scriptsUseCase.fixDepotOwnership();
+
+    return res.status(200).send({
+      message: "Depot ownership fixed!",
+    });
+  }
 }
