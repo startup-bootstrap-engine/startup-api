@@ -29,27 +29,23 @@ import {
 import { provide } from "inversify-binding-decorators";
 import { CharacterView } from "../CharacterView";
 
-import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { BattleTargeting } from "@providers/battle/BattleTargeting";
 import { appEnv } from "@providers/config/env";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { RedisManager } from "@providers/database/RedisManager";
-import { socketEventsBinderControl } from "@providers/inversify/container";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { Locker } from "@providers/locks/Locker";
 import { QueueCleaner } from "@providers/queue/QueueCleaner";
-import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
-import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { Queue, Worker } from "bullmq";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterDailyPlayTracker } from "../CharacterDailyPlayTracker";
-import { CharacterDeath } from "../CharacterDeath";
 import { CharacterPremiumAccount } from "../CharacterPremiumAccount";
 import { CharacterValidation } from "../CharacterValidation";
 import { CharacterBuffTracker } from "../characterBuff/CharacterBuffTracker";
 import { CharacterBuffValidation } from "../characterBuff/CharacterBuffValidation";
+import { CharacterCreateSocketHandler } from "../characterCreate/CharacterCreateSocketHandler";
 import { CharacterBaseSpeed } from "../characterMovement/CharacterBaseSpeed";
 import { ManaRegen } from "../characterPassiveHabilities/ManaRegen";
 import { WarriorPassiveHabilities } from "../characterPassiveHabilities/WarriorPassiveHabilities";
@@ -77,9 +73,7 @@ export class CharacterNetworkCreate {
     private warriorPassiveHabilities: WarriorPassiveHabilities,
     private manaRegen: ManaRegen,
     private inMemoryHashTable: InMemoryHashTable,
-    private socketSessionControl: SocketSessionControl,
 
-    private characterDeath: CharacterDeath,
     private itemMissingReferenceCleaner: ItemMissingReferenceCleaner,
     private characterBuffValidation: CharacterBuffValidation,
     private battleTargeting: BattleTargeting,
@@ -90,11 +84,12 @@ export class CharacterNetworkCreate {
     private characterPremiumAccount: CharacterPremiumAccount,
     private characterDailyPlayTracker: CharacterDailyPlayTracker,
 
-    private newRelic: NewRelic,
     private redisManager: RedisManager,
     private queueCleaner: QueueCleaner,
 
-    private characterValidation: CharacterValidation
+    private characterValidation: CharacterValidation,
+
+    private characterCreateSocketHandler: CharacterCreateSocketHandler
   ) {}
 
   public onCharacterCreate(channel: SocketChannel): void {
@@ -126,7 +121,7 @@ export class CharacterNetworkCreate {
       this.refreshBattleState(character),
       this.characterBuffValidation.removeDuplicatedBuffs(character),
       this.gridManager.setWalkable(character.scene, ToGridX(character.x), ToGridY(character.y), false),
-      this.manageSocketConnections(channel, character),
+      this.characterCreateSocketHandler.manageSocketConnections(channel, character),
     ]);
 
     const dataFromServer = await this.prepareDataForServer(character, data);
@@ -217,60 +212,6 @@ export class CharacterNetworkCreate {
   ): Promise<void> {
     this.sendCreatedMessageToCharacterCreator(character.channelId!, dataFromServer);
     await this.sendCreationMessageToCharacters(character.channelId!, dataFromServer, character);
-  }
-
-  private async manageSocketConnections(channel: SocketChannel, character: ICharacter): Promise<void> {
-    const channelId = channel.id?.toString()!;
-
-    const hasSocketConnection = await this.socketSessionControl.hasSession(character._id);
-
-    if (!hasSocketConnection) {
-      await channel.join(channelId);
-      await this.socketSessionControl.setSession(character._id);
-
-      channel.on("disconnect", async (reason: string) => {
-        await this.socketSessionControl.deleteSession(character._id);
-        // @ts-ignore
-        channel.removeAllListeners?.(); // make sure we leave no left overs
-        await socketEventsBinderControl.unbindEvents(channel);
-
-        // make sure isOnline is turned off
-
-        await Character.updateOne(
-          {
-            _id: character._id,
-          },
-          {
-            isOnline: false,
-            channelId: undefined,
-          }
-        );
-
-        console.log(`Client disconnected: ${channel.id}, Reason: ${reason}`);
-
-        /*
-        transport close: This occurs when the client explicitly closes the connection, such as when a user closes their browser tab or the client application terminates the connection.
-
-        ping timeout: Socket.IO uses heartbeats to ensure the connection is alive. If the server doesn't receive any heartbeat from the client within a certain period, it will close the connection due to a timeout.
-
-        transport error: This indicates a problem with the transport layer, such as network issues or WebSockets being blocked or failing.
-
-        io server disconnect: This is emitted when the server programmatically disconnects the socket using socket.disconnect().
-
-        io client disconnect: This is emitted when the client programmatically disconnects the socket using socket.disconnect().
-
-        client namespace disconnect: Emitted when the client disconnects from a namespace explicitly by calling disconnect() on the namespace.
-        */
-
-        // Log the disconnection reason with NewRelic or any other monitoring tool you're using
-        this.newRelic.trackMetric(
-          NewRelicMetricCategory.Count,
-          NewRelicSubCategory.Server,
-          `SocketIODisconnect/${reason}`,
-          1
-        );
-      });
-    }
   }
 
   private sendCreatedMessageToCharacterCreator(channelId: string, dataFromServer: ICharacterCreateFromServer): void {
