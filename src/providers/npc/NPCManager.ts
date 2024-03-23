@@ -37,11 +37,9 @@ export class NPCManager {
 
   @TrackNewRelicTransaction()
   public async startNearbyNPCsBehaviorLoop(character: ICharacter): Promise<void> {
-    const maxActiveNPCs = await this.npcFreezer.maxActiveNPCs();
-
     const nearbyNPCs = await this.npcView.getNPCsInView(character, { isBehaviorEnabled: false });
 
-    let totalActiveNPCs = await NPC.countDocuments({ isBehaviorEnabled: true });
+    const totalActiveNPCs = await NPC.countDocuments({ isBehaviorEnabled: true });
 
     this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.NPCs, "Active", totalActiveNPCs);
 
@@ -54,13 +52,7 @@ export class NPCManager {
         continue;
       }
 
-      if (totalActiveNPCs <= maxActiveNPCs) {
-        // watch out for max NPCs active limit so we don't fry our CPU
-        behaviorLoops.push(this.startBehaviorLoop(npc));
-        totalActiveNPCs++;
-      } else {
-        break; // break out of the loop if we've reached max active NPCs
-      }
+      behaviorLoops.push(this.startBehaviorLoop(npc));
     }
 
     await Promise.map(
