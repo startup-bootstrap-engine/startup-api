@@ -4,16 +4,8 @@ import { BattleNetworkStopTargeting } from "@providers/battle/network/BattleNetw
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { GridManager } from "@providers/map/GridManager";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
-import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
-import {
-  CharacterClass,
-  CharacterSocketEvents,
-  EnvType,
-  ICharacterCreateFromClient,
-  ToGridX,
-  ToGridY,
-} from "@rpg-engine/shared";
+import { CharacterSocketEvents, EnvType, ICharacterCreateFromClient, ToGridX, ToGridY } from "@rpg-engine/shared";
 import { CharacterView } from "../../CharacterView";
 
 import { BattleTargeting } from "@providers/battle/BattleTargeting";
@@ -28,9 +20,8 @@ import { clearCacheForKey } from "speedgoose";
 import { CharacterDailyPlayTracker } from "../../CharacterDailyPlayTracker";
 import { CharacterValidation } from "../../CharacterValidation";
 import { CharacterBuffValidation } from "../../characterBuff/CharacterBuffValidation";
-import { ManaRegen } from "../../characterPassiveHabilities/ManaRegen";
-import { WarriorPassiveHabilities } from "../../characterPassiveHabilities/WarriorPassiveHabilities";
 import { CharacterCreateInteractionManager } from "./CharacterCreateInteractionManager";
+import { CharacterCreateRegen } from "./CharacterCreateRegen";
 import { CharacterCreateSocketHandler } from "./CharacterCreateSocketHandler";
 
 @provideSingleton(CharacterNetworkCreate)
@@ -44,13 +35,11 @@ export class CharacterNetworkCreate {
 
   constructor(
     private socketAuth: SocketAuth,
-    private socketMessaging: SocketMessaging,
 
     private battleNetworkStopTargeting: BattleNetworkStopTargeting,
     private gridManager: GridManager,
     private characterView: CharacterView,
-    private warriorPassiveHabilities: WarriorPassiveHabilities,
-    private manaRegen: ManaRegen,
+
     private inMemoryHashTable: InMemoryHashTable,
 
     private itemMissingReferenceCleaner: ItemMissingReferenceCleaner,
@@ -66,7 +55,8 @@ export class CharacterNetworkCreate {
     private characterValidation: CharacterValidation,
 
     private characterCreateSocketHandler: CharacterCreateSocketHandler,
-    private characterCreateInteractionManager: CharacterCreateInteractionManager
+    private characterCreateInteractionManager: CharacterCreateInteractionManager,
+    private characterCreateRegen: CharacterCreateRegen
   ) {}
 
   public onCharacterCreate(channel: SocketChannel): void {
@@ -106,7 +96,7 @@ export class CharacterNetworkCreate {
       this.characterCreateInteractionManager.startNPCInteractions(character),
       this.characterCreateInteractionManager.sendCharacterCreateMessages(character, dataFromServer),
       this.characterCreateInteractionManager.warnAboutWeatherStatus(character.channelId!),
-      this.handleCharacterRegen(character),
+      this.characterCreateRegen.handleCharacterRegen(character),
     ]);
   }
 
@@ -120,9 +110,7 @@ export class CharacterNetworkCreate {
 
   private validateCharacter(character: ICharacter): boolean {
     const canProceed = this.characterValidation.hasBasicValidation(character);
-    if (!canProceed) {
-      console.log(`Character ${character._id} failed basic validation on character creation`);
-    }
+
     return canProceed;
   }
 
@@ -145,19 +133,5 @@ export class CharacterNetworkCreate {
       this.battleNetworkStopTargeting.stopTargeting(character),
       this.battleTargeting.cancelTargeting(character),
     ]);
-  }
-
-  private async handleCharacterRegen(character: ICharacter): Promise<void> {
-    if (!character) {
-      return;
-    }
-    try {
-      if (character.class === CharacterClass.Warrior) {
-        await this.warriorPassiveHabilities.warriorAutoRegenHealthHandler(character);
-      }
-      await this.manaRegen.autoRegenManaHandler(character);
-    } catch (error) {
-      console.error(`Error regenerating character ${character._id}: ${error}`);
-    }
   }
 }
