@@ -24,8 +24,8 @@ import { CharacterCreateInteractionManager } from "./CharacterCreateInteractionM
 import { CharacterCreateRegen } from "./CharacterCreateRegen";
 import { CharacterCreateSocketHandler } from "./CharacterCreateSocketHandler";
 
-@provideSingleton(CharacterNetworkCreate)
-export class CharacterNetworkCreate {
+@provideSingleton(CharacterNetworkCreateQueue)
+export class CharacterNetworkCreateQueue {
   private queue: Queue<any, any, string> | null = null;
   private worker: Worker | null = null;
   private connection: any;
@@ -64,17 +64,108 @@ export class CharacterNetworkCreate {
       channel,
       CharacterSocketEvents.CharacterCreate,
       async (data: ICharacterCreateFromClient, connectionCharacter: ICharacter) => {
-        await this.execCharacterCreate(connectionCharacter, data, channel);
+        await this.characterCreate(connectionCharacter, data, channel);
       },
       false
     );
   }
 
-  private async execCharacterCreate(
+  public initQueue(scene: string): void {
+    if (!this.connection) {
+      this.connection = this.redisManager.client;
+    }
+
+    if (!this.queue) {
+      this.queue = new Queue(this.queueName(scene), {
+        connection: this.connection,
+      });
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.queue.on("error", async (error) => {
+          console.error(`Error in the ${this.queueName(scene)}:`, error);
+
+          await this.queue?.close();
+          this.queue = null;
+        });
+      }
+    }
+
+    if (!this.worker) {
+      this.worker = new Worker(
+        this.queueName(scene),
+        async (job) => {
+          const { character, data } = job.data;
+
+          try {
+            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
+
+            await this.execCharacterCreate(character, data);
+          } catch (err) {
+            console.error(`Error processing ${this.queueName(scene)} for Character ${character.name}:`, err);
+            throw err;
+          }
+        },
+        {
+          connection: this.connection,
+        }
+      );
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.worker.on("failed", async (job, err) => {
+          console.log(`${this.queueName(scene)} job ${job?.id} failed with error ${err.message}`);
+
+          await this.worker?.close();
+          this.worker = null;
+        });
+      }
+    }
+  }
+
+  public async clearAllJobs(): Promise<void> {
+    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
+    for (const job of jobs) {
+      try {
+        await job?.remove();
+      } catch (err) {
+        console.error(`Error removing job ${job?.id}:`, err.message);
+      }
+    }
+  }
+
+  public async shutdown(): Promise<void> {
+    await this.queue?.close();
+    await this.worker?.close();
+
+    this.queue = null;
+    this.worker = null;
+  }
+
+  public async characterCreate(
     character: ICharacter,
     data: ICharacterCreateFromClient,
     channel: SocketChannel
   ): Promise<void> {
+    if (!this.connection || !this.queue || !this.worker) {
+      this.initQueue(character.scene);
+    }
+
+    await this.queue?.add(
+      this.queueName(character.scene),
+      {
+        character,
+        data,
+        channel: String(channel.id),
+      },
+      {
+        removeOnComplete: true,
+        removeOnFail: true,
+      }
+    );
+
+    await this.characterCreateSocketHandler.manageSocketConnections(channel, character);
+  }
+
+  private async execCharacterCreate(character: ICharacter, data: ICharacterCreateFromClient): Promise<void> {
     character = await this.updateCharacterStatus(character, data.channelId);
 
     if (!this.validateCharacter(character)) {
@@ -88,7 +179,6 @@ export class CharacterNetworkCreate {
       this.refreshBattleState(character),
       this.characterBuffValidation.removeDuplicatedBuffs(character),
       this.gridManager.setWalkable(character.scene, ToGridX(character.x), ToGridY(character.y), false),
-      this.characterCreateSocketHandler.manageSocketConnections(channel, character),
     ]);
 
     const dataFromServer = await this.characterCreateInteractionManager.prepareDataForServer(character, data);

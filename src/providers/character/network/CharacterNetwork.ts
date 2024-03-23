@@ -6,12 +6,12 @@ import { CharacterNetworkPing } from "./CharacterNetworkPing";
 import { CharacterNetworkSearch } from "./CharacterNetworkSearch";
 import { CharacterNetworkTrading } from "./CharacterNetworkTrading";
 import { CharacterNetworkUpdateQueue } from "./CharacterNetworkUpdate/CharacterNetworkUpdateQueue";
-import { CharacterNetworkCreate } from "./characterCreate/CharacterNetworkCreate";
+import { CharacterNetworkCreateQueue } from "./characterCreate/CharacterNetworkCreateQueue";
 
 @provide(CharacterNetwork)
 export class CharacterNetwork {
   constructor(
-    private characterCreate: CharacterNetworkCreate,
+    private characterCreate: CharacterNetworkCreateQueue,
     private characterLogout: CharacterNetworkLogout,
     private characterUpdate: CharacterNetworkUpdateQueue,
     private characterPing: CharacterNetworkPing,

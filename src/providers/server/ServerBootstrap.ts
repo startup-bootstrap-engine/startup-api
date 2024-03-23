@@ -14,6 +14,7 @@ import { CharacterActionsTracker } from "@providers/character/CharacterActionsTr
 import { CharacterConsumptionControl } from "@providers/character/CharacterConsumptionControl";
 import { CharacterMonitorCallbackTracker } from "@providers/character/CharacterMonitorInterval/CharacterMonitorCallbackTracker";
 import { CharacterNetworkUpdateQueue } from "@providers/character/network/CharacterNetworkUpdate/CharacterNetworkUpdateQueue";
+import { CharacterNetworkCreateQueue } from "@providers/character/network/characterCreate/CharacterNetworkCreateQueue";
 import { ChatNetworkGlobalMessagingQueue } from "@providers/chat/network/ChatNetworkGlobalMessagingQueue";
 import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
@@ -66,6 +67,7 @@ export class ServerBootstrap {
     private entityEffectDuration: EntityEffectDurationControl,
     private characterMonitorCallbackTracker: CharacterMonitorCallbackTracker,
     private characterNetworkUpdateQueue: CharacterNetworkUpdateQueue,
+    private characterNetworkCreateQueue: CharacterNetworkCreateQueue,
     private patreonAPI: PatreonAPI,
     private useWithTileQueue: UseWithTileQueue,
     private chatNetworkGlobalMessaging: ChatNetworkGlobalMessagingQueue,
@@ -124,6 +126,7 @@ export class ServerBootstrap {
       await this.npcMovementMoveTowardsQueue.shutdown();
       await this.npcDeathQueue.shutdown();
       await this.itemContainerTransactionQueue.shutdown();
+      await this.characterNetworkCreateQueue.shutdown();
     };
 
     process.on("SIGTERM", async () => {
@@ -208,6 +211,7 @@ export class ServerBootstrap {
     await this.chatNetworkGlobalMessaging.clearAllJobs();
     await this.spellNetworkCast.clearAllJobs();
     await this.npcDeathQueue.clearAllJobs();
+    await this.characterNetworkCreateQueue.clearAllJobs();
 
     console.log("🧹 BullMQ queues cleared!");
   }
