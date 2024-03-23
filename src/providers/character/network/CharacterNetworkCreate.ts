@@ -16,6 +16,7 @@ import {
   CharacterClass,
   CharacterSkullType,
   CharacterSocketEvents,
+  EnvType,
   ICharacterCreateFromClient,
   ICharacterCreateFromServer,
   IControlTime,
@@ -31,17 +32,22 @@ import { CharacterView } from "../CharacterView";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { BattleTargeting } from "@providers/battle/BattleTargeting";
+import { appEnv } from "@providers/config/env";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
+import { RedisManager } from "@providers/database/RedisManager";
 import { socketEventsBinderControl } from "@providers/inversify/container";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { Locker } from "@providers/locks/Locker";
+import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
+import { Queue, Worker } from "bullmq";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterDailyPlayTracker } from "../CharacterDailyPlayTracker";
 import { CharacterDeath } from "../CharacterDeath";
 import { CharacterPremiumAccount } from "../CharacterPremiumAccount";
+import { CharacterValidation } from "../CharacterValidation";
 import { CharacterBuffTracker } from "../characterBuff/CharacterBuffTracker";
 import { CharacterBuffValidation } from "../characterBuff/CharacterBuffValidation";
 import { CharacterBaseSpeed } from "../characterMovement/CharacterBaseSpeed";
@@ -50,6 +56,13 @@ import { WarriorPassiveHabilities } from "../characterPassiveHabilities/WarriorP
 
 @provide(CharacterNetworkCreate)
 export class CharacterNetworkCreate {
+  private queue: Queue<any, any, string> | null = null;
+  private worker: Worker | null = null;
+  private connection: any;
+
+  private queueName = (scene: string): string =>
+    `character-network-create-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
+
   constructor(
     private socketAuth: SocketAuth,
     private playerView: CharacterView,
@@ -77,7 +90,11 @@ export class CharacterNetworkCreate {
     private characterPremiumAccount: CharacterPremiumAccount,
     private characterDailyPlayTracker: CharacterDailyPlayTracker,
 
-    private newRelic: NewRelic
+    private newRelic: NewRelic,
+    private redisManager: RedisManager,
+    private queueCleaner: QueueCleaner,
+
+    private characterValidation: CharacterValidation
   ) {}
 
   public onCharacterCreate(channel: SocketChannel): void {
@@ -85,119 +102,107 @@ export class CharacterNetworkCreate {
       channel,
       CharacterSocketEvents.CharacterCreate,
       async (data: ICharacterCreateFromClient, connectionCharacter: ICharacter) => {
-        await Character.findOneAndUpdate(
-          { _id: connectionCharacter._id },
-          {
-            target: undefined,
-            isOnline: true,
-            channelId: data.channelId,
-          }
-        );
-
-        let character = (await Character.findById(connectionCharacter._id)) as ICharacter;
-
-        if (!character) {
-          console.log(`🚫 ${connectionCharacter.name} tried to create its instance but it was not found!`);
-
-          this.socketMessaging.sendEventToUser(data.channelId, CharacterSocketEvents.CharacterForceDisconnect, {
-            reason: "Failed to find your character. Please contact the admin on discord.",
-          });
-
-          return;
-        }
-
-        await this.characterDailyPlayTracker.updateCharacterDailyPlay(character._id);
-
-        // update baseSpeed according to skill level
-
-        const { speed: updatedSpeed } = await this.recalculateSpeed(character);
-
-        await clearCacheForKey(`characterBuffs_${character._id}`);
-
-        await this.characterView.clearCharacterView(character);
-
-        await this.itemMissingReferenceCleaner.clearMissingReferences(character);
-
-        await this.inMemoryHashTable.delete("character-weapon", character._id);
-        await this.locker.unlock(`character-changing-scene-${character._id}`);
-
-        // refresh battle
-        await this.locker.unlock(`character-${character._id}-battle-targeting`);
-        await this.battleNetworkStopTargeting.stopTargeting(character);
-        await this.battleTargeting.cancelTargeting(character);
-
-        await this.characterBuffValidation.removeDuplicatedBuffs(character);
-
-        const map = character.scene;
-
-        await this.gridManager.setWalkable(map, ToGridX(character.x), ToGridY(character.y), false);
-
-        await this.manageSocketConnections(channel, character);
-
-        if (character.isBanned) {
-          console.log(`🚫 ${character.name} tried to create its instance while banned!`);
-
-          this.socketMessaging.sendEventToUser(character.channelId!, CharacterSocketEvents.CharacterForceDisconnect, {
-            reason: "You cannot use this character while banned.",
-          });
-
-          return;
-        }
-
-        if (!character.isAlive) {
-          await this.characterDeath.respawnCharacter(character);
-
-          character = (await Character.findById(connectionCharacter._id)) as ICharacter;
-        }
-
-        /*
-        Here we inject our server side character properties,
-        to make sure the client is not hacking anything
-        */
-
-        const accountType = await this.characterPremiumAccount.getPremiumAccountType(character);
-
-        const dataFromServer: ICharacterCreateFromServer = {
-          ...data,
-          id: character._id.toString(),
-          name: character.name,
-          x: character.x!,
-          y: character.y!,
-          direction: character.direction as AnimationDirection,
-          layer: character.layer,
-          speed: updatedSpeed,
-          movementIntervalMs: character.movementIntervalMs,
-          health: character.health,
-          maxHealth: character.maxHealth,
-          mana: character.mana,
-          maxMana: character.maxMana,
-          textureKey: character.textureKey,
-          alpha: await this.stealth.getOpacity(character),
-          isGiantForm: character.isGiantForm,
-          hasSkull: character.hasSkull,
-          skullType: character.skullType as CharacterSkullType,
-          owner: {
-            accountType: accountType ?? UserAccountTypes.Free,
-          },
-        };
-
-        void this.npcManager.startNearbyNPCsBehaviorLoop(character);
-
-        void this.npcWarn.warnCharacterAboutNPCsInView(character, { always: true });
-
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this.itemView.warnCharacterAboutItemsInView(character, { always: true }); // dont await this because if there's a ton of garbage in the server, the character will be stuck waiting for this to finish
-
-        await this.sendCreatedMessageToCharacterCreator(data.channelId, dataFromServer);
-
-        await this.sendCreationMessageToCharacters(data.channelId, dataFromServer, character);
-
-        await this.warnAboutWeatherStatus(character.channelId!);
-
-        await this.handleCharacterRegen(character);
+        await this.execCharacterCreate(connectionCharacter, data, channel);
       },
       false
     );
+  }
+
+  private async execCharacterCreate(
+    character: ICharacter,
+    data: ICharacterCreateFromClient,
+    channel: SocketChannel
+  ): Promise<void> {
+    character = (await Character.findOneAndUpdate(
+      { _id: character._id },
+      {
+        target: undefined,
+        isOnline: true,
+        channelId: data.channelId,
+      },
+      { new: true }
+    )) as ICharacter;
+
+    const canProceed = this.characterValidation.hasBasicValidation(character);
+
+    if (!canProceed) {
+      console.log(`Character ${character._id} failed basic validation on character creation`);
+      return;
+    }
+
+    await this.characterDailyPlayTracker.updateCharacterDailyPlay(character._id);
+
+    // update baseSpeed according to skill level
+
+    const { speed: updatedSpeed } = await this.recalculateSpeed(character);
+
+    await clearCacheForKey(`characterBuffs_${character._id}`);
+
+    await this.characterView.clearCharacterView(character);
+
+    await this.itemMissingReferenceCleaner.clearMissingReferences(character);
+
+    await this.inMemoryHashTable.delete("character-weapon", character._id);
+    await this.locker.unlock(`character-changing-scene-${character._id}`);
+
+    // refresh battle
+    await this.locker.unlock(`character-${character._id}-battle-targeting`);
+    await this.battleNetworkStopTargeting.stopTargeting(character);
+    await this.battleTargeting.cancelTargeting(character);
+
+    await this.characterBuffValidation.removeDuplicatedBuffs(character);
+
+    const map = character.scene;
+
+    await this.gridManager.setWalkable(map, ToGridX(character.x), ToGridY(character.y), false);
+
+    await this.manageSocketConnections(channel, character);
+
+    /*
+    Here we inject our server side character properties,
+    to make sure the client is not hacking anything
+    */
+
+    const accountType = await this.characterPremiumAccount.getPremiumAccountType(character);
+
+    const dataFromServer: ICharacterCreateFromServer = {
+      ...data,
+      id: character._id.toString(),
+      name: character.name,
+      x: character.x!,
+      y: character.y!,
+      direction: character.direction as AnimationDirection,
+      layer: character.layer,
+      speed: updatedSpeed,
+      movementIntervalMs: character.movementIntervalMs,
+      health: character.health,
+      maxHealth: character.maxHealth,
+      mana: character.mana,
+      maxMana: character.maxMana,
+      textureKey: character.textureKey,
+      alpha: await this.stealth.getOpacity(character),
+      isGiantForm: character.isGiantForm,
+      hasSkull: character.hasSkull,
+      skullType: character.skullType as CharacterSkullType,
+      owner: {
+        accountType: accountType ?? UserAccountTypes.Free,
+      },
+    };
+
+    void this.npcManager.startNearbyNPCsBehaviorLoop(character);
+
+    void this.npcWarn.warnCharacterAboutNPCsInView(character, { always: true });
+
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    this.itemView.warnCharacterAboutItemsInView(character, { always: true }); // dont await this because if there's a ton of garbage in the server, the character will be stuck waiting for this to finish
+
+    await this.sendCreatedMessageToCharacterCreator(data.channelId, dataFromServer);
+
+    await this.sendCreationMessageToCharacters(data.channelId, dataFromServer, character);
+
+    await this.warnAboutWeatherStatus(character.channelId!);
+
+    await this.handleCharacterRegen(character);
   }
 
   private async manageSocketConnections(channel: SocketChannel, character: ICharacter): Promise<void> {
