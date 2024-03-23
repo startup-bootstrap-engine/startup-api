@@ -113,60 +113,77 @@ export class CharacterNetworkCreate {
     data: ICharacterCreateFromClient,
     channel: SocketChannel
   ): Promise<void> {
-    character = (await Character.findOneAndUpdate(
-      { _id: character._id },
-      {
-        target: undefined,
-        isOnline: true,
-        channelId: data.channelId,
-      },
-      { new: true }
-    )) as ICharacter;
+    character = await this.updateCharacterStatus(character, data.channelId);
 
-    const canProceed = this.characterValidation.hasBasicValidation(character);
-
-    if (!canProceed) {
-      console.log(`Character ${character._id} failed basic validation on character creation`);
+    if (!this.validateCharacter(character)) {
       return;
     }
 
-    await this.characterDailyPlayTracker.updateCharacterDailyPlay(character._id);
+    await Promise.all([
+      this.characterDailyPlayTracker.updateCharacterDailyPlay(character._id),
+      this.clearCharacterCaches(character),
+      this.unlockCharacterMapTransition(character),
+      this.refreshBattleState(character),
+      this.characterBuffValidation.removeDuplicatedBuffs(character),
+      this.gridManager.setWalkable(character.scene, ToGridX(character.x), ToGridY(character.y), false),
+      this.manageSocketConnections(channel, character),
+    ]);
 
-    // update baseSpeed according to skill level
+    const dataFromServer = await this.prepareDataForServer(character, data);
+    await Promise.all([
+      this.startNPCInteractions(character),
+      this.sendCharacterCreateMessages(character, dataFromServer),
+      this.warnAboutWeatherStatus(character.channelId!),
+      this.handleCharacterRegen(character),
+    ]);
+  }
 
-    const { speed: updatedSpeed } = await this.recalculateSpeed(character);
+  private async updateCharacterStatus(character: ICharacter, channelId: string): Promise<ICharacter> {
+    return (await Character.findOneAndUpdate(
+      { _id: character._id },
+      { target: undefined, isOnline: true, channelId },
+      { new: true }
+    )) as ICharacter;
+  }
 
-    await clearCacheForKey(`characterBuffs_${character._id}`);
+  private validateCharacter(character: ICharacter): boolean {
+    const canProceed = this.characterValidation.hasBasicValidation(character);
+    if (!canProceed) {
+      console.log(`Character ${character._id} failed basic validation on character creation`);
+    }
+    return canProceed;
+  }
 
-    await this.characterView.clearCharacterView(character);
+  private async clearCharacterCaches(character: ICharacter): Promise<void> {
+    await Promise.all([
+      clearCacheForKey(`characterBuffs_${character._id}`),
+      this.characterView.clearCharacterView(character),
+      this.itemMissingReferenceCleaner.clearMissingReferences(character),
+      this.inMemoryHashTable.delete("character-weapon", character._id),
+    ]);
+  }
 
-    await this.itemMissingReferenceCleaner.clearMissingReferences(character);
-
-    await this.inMemoryHashTable.delete("character-weapon", character._id);
+  private async unlockCharacterMapTransition(character: ICharacter): Promise<void> {
     await this.locker.unlock(`character-changing-scene-${character._id}`);
+  }
 
-    // refresh battle
-    await this.locker.unlock(`character-${character._id}-battle-targeting`);
-    await this.battleNetworkStopTargeting.stopTargeting(character);
-    await this.battleTargeting.cancelTargeting(character);
+  private async refreshBattleState(character: ICharacter): Promise<void> {
+    await Promise.all([
+      this.locker.unlock(`character-${character._id}-battle-targeting`),
+      this.battleNetworkStopTargeting.stopTargeting(character),
+      this.battleTargeting.cancelTargeting(character),
+    ]);
+  }
 
-    await this.characterBuffValidation.removeDuplicatedBuffs(character);
-
-    const map = character.scene;
-
-    await this.gridManager.setWalkable(map, ToGridX(character.x), ToGridY(character.y), false);
-
-    await this.manageSocketConnections(channel, character);
-
-    /*
-    Here we inject our server side character properties,
-    to make sure the client is not hacking anything
-    */
-
+  private async prepareDataForServer(
+    character: ICharacter,
+    clientData: ICharacterCreateFromClient
+  ): Promise<ICharacterCreateFromServer> {
+    const updatedSpeed = (await this.recalculateSpeed(character)).speed;
     const accountType = await this.characterPremiumAccount.getPremiumAccountType(character);
 
-    const dataFromServer: ICharacterCreateFromServer = {
-      ...data,
+    return {
+      ...clientData,
       id: character._id.toString(),
       name: character.name,
       x: character.x!,
@@ -184,25 +201,22 @@ export class CharacterNetworkCreate {
       isGiantForm: character.isGiantForm,
       hasSkull: character.hasSkull,
       skullType: character.skullType as CharacterSkullType,
-      owner: {
-        accountType: accountType ?? UserAccountTypes.Free,
-      },
+      owner: { accountType: accountType ?? UserAccountTypes.Free },
     };
+  }
 
+  private startNPCInteractions(character: ICharacter): void {
     void this.npcManager.startNearbyNPCsBehaviorLoop(character);
-
     void this.npcWarn.warnCharacterAboutNPCsInView(character, { always: true });
+    void this.itemView.warnCharacterAboutItemsInView(character, { always: true }); // Don't await to avoid blocking
+  }
 
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.itemView.warnCharacterAboutItemsInView(character, { always: true }); // dont await this because if there's a ton of garbage in the server, the character will be stuck waiting for this to finish
-
-    await this.sendCreatedMessageToCharacterCreator(data.channelId, dataFromServer);
-
-    await this.sendCreationMessageToCharacters(data.channelId, dataFromServer, character);
-
-    await this.warnAboutWeatherStatus(character.channelId!);
-
-    await this.handleCharacterRegen(character);
+  private async sendCharacterCreateMessages(
+    character: ICharacter,
+    dataFromServer: ICharacterCreateFromServer
+  ): Promise<void> {
+    this.sendCreatedMessageToCharacterCreator(character.channelId!, dataFromServer);
+    await this.sendCreationMessageToCharacters(character.channelId!, dataFromServer, character);
   }
 
   private async manageSocketConnections(channel: SocketChannel, character: ICharacter): Promise<void> {
