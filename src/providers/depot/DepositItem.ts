@@ -3,10 +3,6 @@ import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemCon
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
-import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
-import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
-import { ItemOwnership } from "@providers/item/ItemOwnership";
 import { ItemUpdater } from "@providers/item/ItemUpdater";
 import { ItemView } from "@providers/item/ItemView";
 import { ItemContainerTransactionQueue } from "@providers/itemContainer/ItemContainerTransactionQueue";
@@ -14,7 +10,6 @@ import { MapHelper } from "@providers/map/MapHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IDepotDepositItem, ItemContainerType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { DepotSystem } from "./DepotSystem";
 import { OpenDepot } from "./OpenDepot";
 
 @provide(DepositItem)
@@ -22,14 +17,9 @@ export class DepositItem {
   constructor(
     private openDepot: OpenDepot,
     private itemView: ItemView,
-    private characterWeight: CharacterWeightQueue,
-    private depotSystem: DepotSystem,
     private mapHelper: MapHelper,
     private socketMessaging: SocketMessaging,
-    private itemOwnership: ItemOwnership,
     private itemUpdater: ItemUpdater,
-    private characterItemSlots: CharacterItemSlots,
-    private inMemoryHashTable: InMemoryHashTable,
     private itemContainerTransactionQueue: ItemContainerTransactionQueue
   ) {}
 

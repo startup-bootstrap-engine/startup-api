@@ -19,7 +19,7 @@ describe("ItemContainerTransaction", () => {
   });
 
   beforeEach(async () => {
-    testCharacter = await unitTestHelper.createMockCharacter();
+    testCharacter = await unitTestHelper.createMockCharacter(null, { hasEquipment: true });
     testItem = await unitTestHelper.createMockItem();
     originContainer = await unitTestHelper.createMockItemContainer({ owner: testCharacter._id });
     targetContainer = await unitTestHelper.createMockItemContainer({ owner: testCharacter._id });
