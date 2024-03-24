@@ -47,6 +47,7 @@ export class OpenDepot {
         parentItem: newDepot._id,
         name: "Depot",
         slotQty: 40,
+        owner: Types.ObjectId(characterId),
       });
       depotItemContainer = await depotItemContainer.save();
 

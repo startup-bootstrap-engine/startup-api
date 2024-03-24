@@ -720,6 +720,7 @@ export class UnitTestHelper {
 
     let depotItemContainer = new ItemContainer({
       parentItem: newDepot._id,
+      owner: characterId,
       ...extraProps,
     });
     depotItemContainer = await depotItemContainer.save();

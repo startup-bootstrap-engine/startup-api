@@ -3,8 +3,6 @@ import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemCon
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
-import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
-import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { ItemUpdater } from "@providers/item/ItemUpdater";
 import { ItemContainerTransactionQueue } from "@providers/itemContainer/ItemContainerTransactionQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -17,17 +15,16 @@ export class WithdrawItem {
   constructor(
     private openDepot: OpenDepot,
     private characterItemSlots: CharacterItemSlots,
-    private characterWeight: CharacterWeightQueue,
     private itemUpdater: ItemUpdater,
-    private inMemoryHashTable: InMemoryHashTable,
     private itemContainerTransactionQueue: ItemContainerTransactionQueue,
     private socketMessaging: SocketMessaging
   ) {}
 
   @TrackNewRelicTransaction()
-  public async withdraw(character: ICharacter, data: IDepotContainerWithdraw): Promise<IItemContainer | undefined> {
+  public async withdraw(character: ICharacter, data: IDepotContainerWithdraw): Promise<boolean> {
     try {
       const { npcId, itemId, toContainerId } = data;
+
       const originContainer = (await this.openDepot.getContainer(character.id, npcId)) as unknown as IItemContainer;
       if (!originContainer) {
         this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, origin container not found.");
@@ -46,24 +43,33 @@ export class WithdrawItem {
       const item = await Item.findById(itemId);
 
       if (!item) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, item not found.");
         // prevent depot slot from getting stuck
         await this.characterItemSlots.deleteItemOnSlot(originContainer as any, itemId);
         throw new Error(`DepotSystem > Item not found: ${itemId}`);
       }
 
-      await this.itemContainerTransactionQueue.transferToContainer(item, character, originContainer, targetContainer, {
-        readContainersAfterTransaction: [
-          { itemContainerId: originContainer._id.toString(), type: ItemContainerType.Depot },
-          { itemContainerId: targetContainer._id.toString(), type: ItemContainerType.Inventory },
-        ],
-        executeFnAfterTransaction: async () => {
-          await this.markNotIsInDepot(item);
-        },
-      });
+      const result = await this.itemContainerTransactionQueue.transferToContainer(
+        item,
+        character,
+        originContainer,
+        targetContainer,
+        {
+          readContainersAfterTransaction: [
+            { itemContainerId: originContainer._id.toString(), type: ItemContainerType.Depot },
+            { itemContainerId: targetContainer._id.toString(), type: ItemContainerType.Inventory },
+          ],
+          executeFnAfterTransaction: async () => {
+            await this.markNotIsInDepot(item);
+          },
+        }
+      );
 
-      return originContainer as unknown as IItemContainer;
+      return result;
     } catch (error) {
       console.error(error);
+
+      return false;
     }
   }
 

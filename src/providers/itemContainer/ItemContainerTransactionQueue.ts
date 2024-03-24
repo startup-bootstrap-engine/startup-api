@@ -1,3 +1,4 @@
+/* eslint-disable no-async-promise-executor */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
@@ -79,7 +80,19 @@ export class ItemContainerTransactionQueue {
           try {
             await this.queueCleaner.updateQueueActivity(this.queueName(scene));
 
-            await this.execTransferToContainer(item, character, originContainer, targetContainer, options);
+            const result = await this.execTransferToContainer(
+              item,
+              character,
+              originContainer,
+              targetContainer,
+              options
+            );
+
+            await this.inMemoryHashTable.set(
+              "item-container-transfer-results",
+              `${originContainer._id}-to-${targetContainer._id}`,
+              result
+            );
           } catch (err) {
             console.error(err);
             throw err;
@@ -128,7 +141,13 @@ export class ItemContainerTransactionQueue {
       options,
     });
 
-    return true;
+    // we have to do this hack because remember once the job goes to the worker, its processed in a different instance
+    const result = await this.pollForItemContainerTransferResults(
+      originContainer._id.toString(),
+      targetContainer._id.toString()
+    );
+
+    return result;
   }
 
   @TrackNewRelicTransaction()
@@ -189,6 +208,30 @@ export class ItemContainerTransactionQueue {
         await options.executeFnAfterTransaction();
       }
     }
+  }
+
+  public pollForItemContainerTransferResults(originContainerId: string, targetContainerId: string): Promise<boolean> {
+    return new Promise(async (resolve) => {
+      let attempt = 0;
+      while (attempt < 10) {
+        const result = await this.inMemoryHashTable.get(
+          "item-container-transfer-results",
+          `${originContainerId}-to-${targetContainerId}`
+        );
+
+        if (result) {
+          await this.inMemoryHashTable.delete(
+            "item-container-transfer-results",
+            `${originContainerId}-to-${targetContainerId}`
+          );
+          resolve(result as unknown as boolean);
+        }
+
+        attempt++;
+      }
+
+      resolve(false);
+    });
   }
 
   public async shutdown(): Promise<void> {
