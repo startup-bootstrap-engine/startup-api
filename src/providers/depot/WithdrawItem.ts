@@ -26,20 +26,9 @@ export class WithdrawItem {
       const { npcId, itemId, toContainerId } = data;
 
       const originContainer = (await this.openDepot.getContainer(character.id, npcId)) as unknown as IItemContainer;
-      if (!originContainer) {
-        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, origin container not found.");
-        throw new Error(`DepotSystem > Item container not found for character id ${character.id} and npc id ${npcId}`);
-      }
 
-      // check if destination container exists
       const targetContainer = (await ItemContainer.findById(toContainerId)) as unknown as IItemContainer;
 
-      if (!targetContainer) {
-        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, target container not found.");
-        throw new Error(`DepotSystem > Target container not found: ${toContainerId}`);
-      }
-
-      // check if item exists
       const item = await Item.findById(itemId);
 
       if (!item) {
