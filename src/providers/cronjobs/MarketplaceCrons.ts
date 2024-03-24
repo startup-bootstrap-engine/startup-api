@@ -23,14 +23,13 @@ export class MarketplaceCrons {
     });
 
     // once per day, at midnight
-    this.cronJobScheduler.uniqueSchedule("marketplace-cron-track-qty-of-listed-items", "0 0 * * *", async () => {
+    this.cronJobScheduler.uniqueSchedule("marketplace-cron-track-qty-of-listed-items", "0 */12 * * *", async () => {
       await this.marketplaceTracker.trackQtyOfListedItems();
     });
 
-    // once per day, at midnight
     this.cronJobScheduler.uniqueSchedule(
       "marketplace-cron-track-median-price-of-listed-items",
-      "0 0 * * *",
+      "0 */12 * * *",
       async () => {
         await this.marketplaceTracker.trackMedianPriceOfListedItems();
       }
