@@ -206,6 +206,10 @@ export class ItemContainerTransactionQueue {
       return false;
     } finally {
       await this.locker.unlock(`${originContainer?._id}-to-${targetContainer?._id}-item-container-transfer`);
+      await this.inMemoryHashTable.delete(
+        "item-container-transfer-results",
+        `${originContainer?._id}-to-${targetContainer?._id}`
+      );
     }
   }
 
