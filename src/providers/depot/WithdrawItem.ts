@@ -51,6 +51,10 @@ export class WithdrawItem {
         }
       );
 
+      if (result) {
+        await this.markNotIsInDepot(item);
+      }
+
       return result;
     } catch (error) {
       console.error(error);

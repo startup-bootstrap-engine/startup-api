@@ -25,59 +25,94 @@ export class DepositItem {
 
   @TrackNewRelicTransaction()
   public async deposit(character: ICharacter, data: IDepotDepositItem): Promise<boolean> {
+    const { itemId, npcId, fromContainerId } = data;
+
     try {
-      const { itemId, npcId, fromContainerId } = data;
-
-      const originContainer = (await ItemContainer.findById(fromContainerId).lean()) as unknown as IItemContainer;
-
-      // Simultaneously retrieve necessary data to reduce wait times.
-      const [targetContainer, item, npc] = (await Promise.all([
+      const [originContainer, targetContainer, item, npc] = await Promise.all([
+        this.getOriginContainer(fromContainerId!),
         this.openDepot.getContainer(character.id, npcId),
-        Item.findById(itemId) as unknown as IItem,
-        NPC.findById(npcId).lean(),
-      ])) as unknown as [IItemContainer, IItem, INPC];
+        this.getItem(character, itemId),
+        this.getNPC(character, npcId),
+      ]);
 
-      if (!item) {
-        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, item not found.");
-        throw new Error(`DepotSystem > Item not found: ${itemId}`);
-      }
-      if (!npc) {
-        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, NPC not found.");
-        throw new Error(`DepotSystem > NPC not found: ${npcId}`);
+      if (!item || !npc) {
+        return false;
       }
 
-      // Update item key and save only if necessary.
-      if (item.key !== item.baseKey) {
-        item.key = item.baseKey;
-        await item.save();
-      }
+      await this.updateItemKeyIfNeeded(item);
 
-      const result = await this.itemContainerTransactionQueue.transferToContainer(
+      const result = await this.transferItemToContainer(
         item,
         character,
         originContainer,
-        targetContainer,
-        {
-          readContainersAfterTransaction: [
-            { itemContainerId: targetContainer._id.toString(), type: ItemContainerType.Depot },
-            { itemContainerId: originContainer._id.toString(), type: ItemContainerType.Inventory },
-          ],
-        }
+        targetContainer as unknown as IItemContainer
       );
 
       if (result) {
-        await this.markItemAsInDepot(item);
-
-        // Separate handling for map items to keep the deposit logic clean and focused.
-        if (this.isItemFromMap(item)) {
-          await this.removeFromMapContainer(item);
-        }
+        await this.handleItemInDepot(item);
       }
 
       return result;
     } catch (error) {
       console.error(error);
       return false;
+    }
+  }
+
+  private async getOriginContainer(fromContainerId: string): Promise<IItemContainer> {
+    return (await ItemContainer.findById(fromContainerId).lean()) as unknown as IItemContainer;
+  }
+
+  private async getItem(character: ICharacter, itemId: string): Promise<IItem | null> {
+    const item = (await Item.findById(itemId)) as unknown as IItem;
+    if (!item) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, item not found.");
+      throw new Error(`DepotSystem > Item not found: ${itemId}`);
+    }
+    return item;
+  }
+
+  private async getNPC(character: ICharacter, npcId: string): Promise<INPC | null> {
+    const npc = await NPC.findById(npcId).lean();
+    if (!npc) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, NPC not found.");
+      throw new Error(`DepotSystem > NPC not found: ${npcId}`);
+    }
+    return npc as INPC;
+  }
+
+  private async updateItemKeyIfNeeded(item: IItem): Promise<void> {
+    if (item.key !== item.baseKey) {
+      item.key = item.baseKey;
+      await item.save();
+    }
+  }
+
+  private async transferItemToContainer(
+    item: IItem,
+    character: ICharacter,
+    originContainer: IItemContainer,
+    targetContainer: IItemContainer
+  ): Promise<boolean> {
+    return await this.itemContainerTransactionQueue.transferToContainer(
+      item,
+      character,
+      originContainer,
+      targetContainer,
+      {
+        readContainersAfterTransaction: [
+          { itemContainerId: targetContainer._id.toString(), type: ItemContainerType.Depot },
+          { itemContainerId: originContainer._id.toString(), type: ItemContainerType.Inventory },
+        ],
+      }
+    );
+  }
+
+  private async handleItemInDepot(item: IItem): Promise<void> {
+    await this.markItemAsInDepot(item);
+
+    if (this.isItemFromMap(item)) {
+      await this.removeFromMapContainer(item);
     }
   }
 

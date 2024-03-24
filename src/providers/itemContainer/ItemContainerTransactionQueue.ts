@@ -26,7 +26,6 @@ interface IItemContainerTransactionRead {
 interface IItemContainerTransactionOption {
   readContainersAfterTransaction?: IItemContainerTransactionRead[];
   shouldAddOwnership?: boolean;
-  clearContainersCacheAfterTransaction?: boolean;
   updateCharacterWeightAfterTransaction?: boolean;
 }
 
@@ -120,7 +119,6 @@ export class ItemContainerTransactionQueue {
     targetContainer: IItemContainer,
     options: IItemContainerTransactionOption = {
       shouldAddOwnership: true,
-      clearContainersCacheAfterTransaction: true,
       updateCharacterWeightAfterTransaction: true,
     }
   ): Promise<boolean> {
@@ -177,6 +175,8 @@ export class ItemContainerTransactionQueue {
         return false;
       }
 
+      await this.clearContainersCache(originContainer, targetContainer);
+
       const result = await this.performTransaction(item, character, originContainer, targetContainer, options);
 
       const { readContainersAfterTransaction } = options;
@@ -192,14 +192,7 @@ export class ItemContainerTransactionQueue {
     } finally {
       await this.locker.unlock(`${originContainer?._id}-to-${targetContainer?._id}-item-container-transfer`);
 
-      if (options.clearContainersCacheAfterTransaction) {
-        await Promise.all([
-          this.inMemoryHashTable.delete("container-all-items", originContainer._id.toString()),
-          this.inMemoryHashTable.delete("container-all-items", targetContainer._id.toString()),
-          this.inMemoryHashTable.delete("inventory-weight", originContainer.owner!.toString()!),
-          this.inMemoryHashTable.delete("load-craftable-items", originContainer.owner?.toString()!),
-        ]);
-      }
+      await this.clearContainersCache(originContainer, targetContainer);
 
       if (options.updateCharacterWeightAfterTransaction) {
         await this.characterWeightQueue.updateCharacterWeight(character);
@@ -236,6 +229,15 @@ export class ItemContainerTransactionQueue {
     await this.worker?.close();
     this.queue = null;
     this.worker = null;
+  }
+
+  private async clearContainersCache(originContainer: IItemContainer, targetContainer: IItemContainer): Promise<void> {
+    await Promise.all([
+      this.inMemoryHashTable.delete("container-all-items", originContainer._id.toString()),
+      this.inMemoryHashTable.delete("container-all-items", targetContainer._id.toString()),
+      this.inMemoryHashTable.delete("inventory-weight", originContainer.owner!.toString()!),
+      this.inMemoryHashTable.delete("load-craftable-items", originContainer.owner?.toString()!),
+    ]);
   }
 
   private async readAndRefreshContainersAfterTransaction(
