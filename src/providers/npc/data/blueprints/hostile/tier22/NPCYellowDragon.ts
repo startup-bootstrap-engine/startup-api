@@ -187,14 +187,6 @@ export const npcYellowDragon: INPCTierBlueprint<22> = {
       chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: AxesBlueprint.DualImpactAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.SpikeToppedAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
       chance: LootProbability.Common,
     },

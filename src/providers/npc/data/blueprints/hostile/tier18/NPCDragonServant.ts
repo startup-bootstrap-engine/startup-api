@@ -4,7 +4,6 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
-  AxesBlueprint,
   BooksBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
@@ -169,18 +168,6 @@ export const npcDragonServant: INPCTierBlueprint<18> = {
     },
     {
       itemBlueprintKey: MacesBlueprint.IronWoodCrusherClub,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.BoneReaperAxe,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.TwinEdgeAxe,
       chance: LootProbability.SemiCommon,
     },
     {

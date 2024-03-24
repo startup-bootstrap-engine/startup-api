@@ -100,16 +100,8 @@ export const npcCondessa: INPCTierBlueprint<15> = {
       chance: LootProbability.Rare,
     },
     {
-      itemBlueprintKey: AxesBlueprint.DualImpactAxe,
-      chance: LootProbability.Rare,
-    },
-    {
       itemBlueprintKey: AxesBlueprint.BattleAxe,
       chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.CrownSplitterAxe,
-      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.FlameheartDagger,

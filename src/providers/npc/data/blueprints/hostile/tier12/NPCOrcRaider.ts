@@ -127,10 +127,6 @@ export const npcOrcRaider: INPCTierBlueprint<12> = {
       itemBlueprintKey: AxesBlueprint.HammerCleaveAxe,
       chance: LootProbability.Rare,
     },
-    {
-      itemBlueprintKey: AxesBlueprint.RoyalChopperAxe,
-      chance: LootProbability.Rare,
-    },
   ],
   entityEffects: [EntityEffectBlueprint.VineGrasp],
   areaSpells: [

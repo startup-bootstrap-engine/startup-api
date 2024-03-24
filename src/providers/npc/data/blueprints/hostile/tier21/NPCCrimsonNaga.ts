@@ -180,18 +180,6 @@ export const npcCrimsonNaga: INPCTierBlueprint<21> = {
       chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: AxesBlueprint.TimberSplitterAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.BrutalChopperAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
       chance: LootProbability.Rare,
     },

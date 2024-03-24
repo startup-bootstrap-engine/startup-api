@@ -121,19 +121,7 @@ export const npcEloraTheQueen: INPCTierBlueprint<19> = {
       chance: LootProbability.SemiCommon,
     },
     {
-      itemBlueprintKey: AxesBlueprint.DualImpactAxe,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.SemiCommon,
-    },
-    {
       itemBlueprintKey: AxesBlueprint.HammerCleaveAxe,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.RoyalChopperAxe,
       chance: LootProbability.SemiCommon,
     },
     {

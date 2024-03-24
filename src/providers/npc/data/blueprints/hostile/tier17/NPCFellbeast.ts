@@ -4,7 +4,6 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
-  AxesBlueprint,
   BooksBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
@@ -96,14 +95,6 @@ export const npcFellbeast: INPCTierBlueprint<17> = {
     },
     {
       itemBlueprintKey: MacesBlueprint.SunderingClub,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.BrutalChopperAxe,
       chance: LootProbability.Rare,
     },
     {

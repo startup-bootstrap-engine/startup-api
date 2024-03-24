@@ -204,9 +204,18 @@ export class PlantHarvest {
     if (!blueprint.regrowsAfterHarvest) {
       await plant.remove();
     } else {
+      const currentRegrowthCount = (plant.regrowthCount ?? 0) + 1;
+      const regrowAfterHarvestLimit = blueprint.regrowAfterHarvestLimit;
+
+      if (!regrowAfterHarvestLimit || currentRegrowthCount > regrowAfterHarvestLimit) {
+        await plant.remove();
+        return;
+      }
+
       plant.currentPlantCycle = PlantLifeCycle.Seed;
       plant.texturePath = blueprint.stagesRequirements[PlantLifeCycle.Seed]?.texturePath ?? "";
       plant.growthPoints = 0;
+      plant.regrowthCount = currentRegrowthCount;
       await plant.save();
       const itemToUpdate = this.prepareItemToUpdate(plant);
 
