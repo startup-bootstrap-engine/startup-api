@@ -27,7 +27,7 @@ export class WithdrawItem {
 
       const originContainer = (await this.openDepot.getContainer(character.id, npcId)) as unknown as IItemContainer;
 
-      const targetContainer = (await ItemContainer.findById(toContainerId)) as unknown as IItemContainer;
+      const targetContainer = (await ItemContainer.findById(toContainerId).lean()) as unknown as IItemContainer;
 
       const item = await Item.findById(itemId);
 
@@ -48,9 +48,6 @@ export class WithdrawItem {
             { itemContainerId: originContainer._id.toString(), type: ItemContainerType.Depot },
             { itemContainerId: targetContainer._id.toString(), type: ItemContainerType.Inventory },
           ],
-          executeFnAfterTransaction: async () => {
-            await this.markNotIsInDepot(item);
-          },
         }
       );
 

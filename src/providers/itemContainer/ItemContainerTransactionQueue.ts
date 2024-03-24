@@ -3,7 +3,6 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
@@ -12,19 +11,11 @@ import { appEnv } from "@providers/config/env";
 import { ITEM_CONTAINER_ROLLBACK_MAX_TRIES } from "@providers/constants/ItemContainerConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
-import { EquipmentSlots } from "@providers/equipment/EquipmentSlots";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import {
-  EnvType,
-  IEquipmentAndInventoryUpdatePayload,
-  IEquipmentSet,
-  IItemContainerRead,
-  ItemContainerType,
-  ItemSocketEvents,
-} from "@rpg-engine/shared";
+import { EnvType, IItemContainerRead, ItemContainerType, ItemSocketEvents } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
 
 interface IItemContainerTransactionRead {
@@ -34,12 +25,9 @@ interface IItemContainerTransactionRead {
 
 interface IItemContainerTransactionOption {
   readContainersAfterTransaction?: IItemContainerTransactionRead[];
-  readEquipmentAfterTransaction?: boolean;
-  readInventoryAfterTransaction?: boolean;
   shouldAddOwnership?: boolean;
   clearContainersCacheAfterTransaction?: boolean;
   updateCharacterWeightAfterTransaction?: boolean;
-  executeFnAfterTransaction?: () => void | Promise<void>;
 }
 
 @provideSingleton(ItemContainerTransactionQueue)
@@ -59,9 +47,7 @@ export class ItemContainerTransactionQueue {
     private redisManager: RedisManager,
     private queueCleaner: QueueCleaner,
     private inMemoryHashTable: InMemoryHashTable,
-    private characterWeightQueue: CharacterWeightQueue,
-    private characterInventory: CharacterInventory,
-    private equipmentSlots: EquipmentSlots
+    private characterWeightQueue: CharacterWeightQueue
   ) {}
 
   public init(scene: string): void {
@@ -133,7 +119,6 @@ export class ItemContainerTransactionQueue {
     originContainer: IItemContainer,
     targetContainer: IItemContainer,
     options: IItemContainerTransactionOption = {
-      readInventoryAfterTransaction: true,
       shouldAddOwnership: true,
       clearContainersCacheAfterTransaction: true,
       updateCharacterWeightAfterTransaction: true,
@@ -194,14 +179,10 @@ export class ItemContainerTransactionQueue {
 
       const result = await this.performTransaction(item, character, originContainer, targetContainer, options);
 
-      const { readContainersAfterTransaction, readInventoryAfterTransaction, readEquipmentAfterTransaction } = options;
+      const { readContainersAfterTransaction } = options;
 
       if (result && readContainersAfterTransaction) {
         await this.readAndRefreshContainersAfterTransaction(character, readContainersAfterTransaction);
-      }
-
-      if (result && (readInventoryAfterTransaction || readEquipmentAfterTransaction)) {
-        await this.refreshCharacterContainersAfterTransaction(character, options);
       }
 
       return result;
@@ -222,10 +203,6 @@ export class ItemContainerTransactionQueue {
 
       if (options.updateCharacterWeightAfterTransaction) {
         await this.characterWeightQueue.updateCharacterWeight(character);
-      }
-
-      if (options.executeFnAfterTransaction) {
-        await options.executeFnAfterTransaction();
       }
     }
   }
@@ -259,29 +236,6 @@ export class ItemContainerTransactionQueue {
     await this.worker?.close();
     this.queue = null;
     this.worker = null;
-  }
-
-  private async refreshCharacterContainersAfterTransaction(
-    character: ICharacter,
-    options: IItemContainerTransactionOption
-  ): Promise<void> {
-    const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {};
-
-    if (options.readEquipmentAfterTransaction) {
-      const equipment = await this.equipmentSlots.getEquipmentSlots(character._id, character.equipment as string);
-      payloadUpdate.equipment = equipment as unknown as IEquipmentSet;
-    }
-
-    if (options.readInventoryAfterTransaction) {
-      const inventoryContainer = (await this.characterInventory.getInventoryItemContainer(character)) as IItemContainer;
-      payloadUpdate.inventory = inventoryContainer as any;
-    }
-
-    this.socketMessaging.sendEventToUser<IEquipmentAndInventoryUpdatePayload>(
-      character.channelId!,
-      ItemSocketEvents.EquipmentAndInventoryUpdate,
-      payloadUpdate
-    );
   }
 
   private async readAndRefreshContainersAfterTransaction(
