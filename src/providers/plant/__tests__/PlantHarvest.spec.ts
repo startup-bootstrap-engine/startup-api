@@ -120,6 +120,7 @@ describe("PlantHarvest.ts", () => {
   it("should harvest the plant, change PlantLifeCycle to seed and add the item to the character's inventory if regrowsAfterHarvest is true", async () => {
     //
     blueprint.regrowsAfterHarvest = true;
+    blueprint.regrowAfterHarvestLimit = 2;
 
     // @ts-ignore
     const harvestQty = plantHarvest.calculateCropYield(farmingSkillLevel, blueprint);
@@ -147,5 +148,16 @@ describe("PlantHarvest.ts", () => {
       testCharacter,
       "Sorry, you can't harvest the plant because it is already dead."
     );
+  });
+
+  it("should remove the plant if the regrowAfterHarvestLimit is reached", async () => {
+    blueprint.regrowsAfterHarvest = true;
+    blueprint.regrowAfterHarvestLimit = 2;
+
+    plant.regrowthCount = 2;
+
+    await plantHarvest.harvestPlant(plant, testCharacter);
+    const updatedPlant = await Item.findById(plant._id);
+    expect(updatedPlant).toBeNull();
   });
 });
