@@ -113,14 +113,6 @@ export const npcForestKobold: INPCTierBlueprint<16> = {
       chance: LootProbability.Rare,
     },
     {
-      itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.CrownedAxe,
-      chance: LootProbability.Rare,
-    },
-    {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
       chance: LootProbability.Rare,
     },

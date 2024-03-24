@@ -2,34 +2,34 @@ import { AxesBlueprint, CraftingResourcesBlueprint } from "@providers/item/data/
 import { IUseWithCraftingRecipe } from "@providers/useWith/useWithTypes";
 import { CraftingSkill } from "@rpg-engine/shared";
 
-export const recipeCrownedAxe: IUseWithCraftingRecipe = {
-  outputKey: AxesBlueprint.CrownedAxe,
+export const recipeMaulAxe: IUseWithCraftingRecipe = {
+  outputKey: AxesBlueprint.MaulAxe,
   outputQtyRange: [1, 1],
   requiredItems: [
     {
       key: CraftingResourcesBlueprint.ObsidiumIngot,
-      qty: 30,
+      qty: 20,
     },
     {
       key: CraftingResourcesBlueprint.PhoenixFeather,
-      qty: 70,
-    },
-    {
-      key: CraftingResourcesBlueprint.SteelIngot,
       qty: 60,
     },
     {
+      key: CraftingResourcesBlueprint.SteelIngot,
+      qty: 55,
+    },
+    {
       key: CraftingResourcesBlueprint.GreenIngot,
-      qty: 50,
+      qty: 55,
     },
     {
       key: CraftingResourcesBlueprint.WoodenBoard,
-      qty: 80,
+      qty: 75,
     },
     {
       key: CraftingResourcesBlueprint.Diamond,
-      qty: 110,
+      qty: 100,
     },
   ],
-  minCraftingRequirements: [CraftingSkill.Blacksmithing, 48],
+  minCraftingRequirements: [CraftingSkill.Blacksmithing, 50],
 };

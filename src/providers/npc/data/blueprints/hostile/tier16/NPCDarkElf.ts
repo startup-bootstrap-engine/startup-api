@@ -108,10 +108,6 @@ export const npcDarkElf: INPCTierBlueprint<16> = {
       chance: LootProbability.Rare,
     },
     {
-      itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Rare,
-    },
-    {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
       chance: LootProbability.Rare,
     },

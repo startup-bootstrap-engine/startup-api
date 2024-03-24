@@ -182,22 +182,6 @@ export const npcBlueDragon: INPCTierBlueprint<21> = {
       chance: LootProbability.Rare,
     },
     {
-      itemBlueprintKey: AxesBlueprint.BoneReaperAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.IroncladCleaver,
-      chance: LootProbability.Common,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Common,
-    },
-    {
       itemBlueprintKey: AxesBlueprint.ExecutionersAxe,
       chance: LootProbability.Common,
     },

@@ -4,7 +4,6 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
-  AxesBlueprint,
   BootsBlueprint,
   ContainersBlueprint,
   CraftingResourcesBlueprint,
@@ -164,18 +163,6 @@ export const npcLitch: INPCTierBlueprint<14> = {
     },
     {
       itemBlueprintKey: MacesBlueprint.IronWoodCrusherClub,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.BoneReaperAxe,
-      chance: LootProbability.VeryRare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.TwinEdgeAxe,
       chance: LootProbability.Rare,
     },
     {

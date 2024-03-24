@@ -204,18 +204,6 @@ export const npcRedDragon: INPCTierBlueprint<20> = {
       chance: LootProbability.Rare,
     },
     {
-      itemBlueprintKey: AxesBlueprint.TimberSplitterAxe,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.BrutalChopperAxe,
-      chance: LootProbability.Rare,
-    },
-    {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
       chance: LootProbability.Rare,
     },

@@ -1,7 +1,7 @@
 import { calculateMinimumLevel } from "@providers/crafting/CraftingMinLevelCalculator";
 import { AxesBlueprint, CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { CraftingSkill } from "@rpg-engine/shared";
-import { IUseWithCraftingRecipe } from "../../useWithTypes";
+import { IUseWithCraftingRecipe } from "../../../useWithTypes";
 
 export const recipeVikingBattleAxe: IUseWithCraftingRecipe = {
   outputKey: AxesBlueprint.VikingBattleAxe,

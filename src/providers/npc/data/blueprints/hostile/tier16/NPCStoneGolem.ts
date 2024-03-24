@@ -177,22 +177,6 @@ export const npcStoneGolem: INPCTierBlueprint<16> = {
       chance: LootProbability.Rare,
     },
     {
-      itemBlueprintKey: AxesBlueprint.BoneReaperAxe,
-      chance: LootProbability.VeryRare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.TwinEdgeAxe,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.BrutalChopperAxe,
-      chance: LootProbability.Rare,
-    },
-    {
       itemBlueprintKey: AxesBlueprint.ExecutionersAxe,
       chance: LootProbability.Rare,
     },

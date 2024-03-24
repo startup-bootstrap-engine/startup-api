@@ -4,7 +4,6 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
-  AxesBlueprint,
   BooksBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
@@ -15,12 +14,12 @@ import {
   StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCCustomDeathPenalties, RangeTypes } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcMalakarLichKing: INPCTierBlueprint<19> = {
   ...generateMoveTowardsMovement(),
@@ -117,26 +116,6 @@ export const npcMalakarLichKing: INPCTierBlueprint<19> = {
     {
       itemBlueprintKey: SwordsBlueprint.LeviathanSword,
       chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.IroncladCleaver,
-      chance: LootProbability.Common,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Common,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.TwinEdgeAxe,
-      chance: LootProbability.Common,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.SavageSmasher,
-      chance: LootProbability.Common,
     },
     {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,

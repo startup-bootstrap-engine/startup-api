@@ -4,7 +4,6 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   AccessoriesBlueprint,
-  AxesBlueprint,
   DaggersBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
@@ -90,14 +89,6 @@ export const npcForestCyclops: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: MacesBlueprint.IronWoodCrusherClub,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.TimberSplitterAxe,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
       chance: LootProbability.Rare,
     },
     {
