@@ -17,6 +17,7 @@ import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { EnvType, IItemContainerRead, ItemContainerType, ItemSocketEvents } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
+import { clearCacheForKey } from "speedgoose";
 
 interface IItemContainerTransactionRead {
   itemContainerId: string;
@@ -117,11 +118,16 @@ export class ItemContainerTransactionQueue {
     character: ICharacter,
     originContainer: IItemContainer,
     targetContainer: IItemContainer,
-    options: IItemContainerTransactionOption = {
-      shouldAddOwnership: true,
-      updateCharacterWeightAfterTransaction: true,
-    }
+    options: IItemContainerTransactionOption
   ): Promise<boolean> {
+    if (!options.shouldAddOwnership) {
+      options.shouldAddOwnership = true;
+    }
+
+    if (!options.updateCharacterWeightAfterTransaction) {
+      options.updateCharacterWeightAfterTransaction = true;
+    }
+
     if (appEnv.general.IS_UNIT_TEST) {
       return await this.execTransferToContainer(item, character, originContainer, targetContainer, options!);
     }
@@ -185,18 +191,18 @@ export class ItemContainerTransactionQueue {
         await this.readAndRefreshContainersAfterTransaction(character, readContainersAfterTransaction);
       }
 
+      await this.clearContainersCache(originContainer, targetContainer);
+
+      if (options.updateCharacterWeightAfterTransaction) {
+        await this.characterWeightQueue.updateCharacterWeight(character);
+      }
+
       return result;
     } catch (error) {
       console.error(error);
       return false;
     } finally {
       await this.locker.unlock(`${originContainer?._id}-to-${targetContainer?._id}-item-container-transfer`);
-
-      await this.clearContainersCache(originContainer, targetContainer);
-
-      if (options.updateCharacterWeightAfterTransaction) {
-        await this.characterWeightQueue.updateCharacterWeight(character);
-      }
     }
   }
 
@@ -233,10 +239,15 @@ export class ItemContainerTransactionQueue {
 
   private async clearContainersCache(originContainer: IItemContainer, targetContainer: IItemContainer): Promise<void> {
     await Promise.all([
+      clearCacheForKey(`${originContainer.owner!.toString()}-inventory`),
+      this.inMemoryHashTable.delete("inventory-weight", originContainer._id.toString()),
+      this.inMemoryHashTable.delete("equipment-weight", originContainer._id.toString()),
       this.inMemoryHashTable.delete("container-all-items", originContainer._id.toString()),
       this.inMemoryHashTable.delete("container-all-items", targetContainer._id.toString()),
       this.inMemoryHashTable.delete("inventory-weight", originContainer.owner!.toString()!),
       this.inMemoryHashTable.delete("load-craftable-items", originContainer.owner?.toString()!),
+      this.inMemoryHashTable.delete("character-max-weights", originContainer.owner!.toString()!),
+      this.inMemoryHashTable.delete("character-weights", originContainer.owner!.toString()!),
     ]);
   }
 

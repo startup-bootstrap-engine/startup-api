@@ -281,7 +281,7 @@ export class CharacterItemSlots {
     targetContainer: IItemContainer,
     itemToBeAdded?: IItem
   ): Promise<number | null> {
-    const itemContainer = (await ItemContainer.findById(targetContainer.id)) as unknown as IItemContainer;
+    const itemContainer = (await ItemContainer.findById(targetContainer._id)) as unknown as IItemContainer;
 
     if (!itemContainer) {
       return null;
@@ -291,7 +291,7 @@ export class CharacterItemSlots {
       const slotItem = slot as unknown as IItem;
 
       if (itemToBeAdded && slotItem && slotItem.maxStackSize > 1) {
-        if (slotItem.baseKey === itemToBeAdded.baseKey) {
+        if (isSameKey(slotItem.key, itemToBeAdded.key)) {
           const futureStackQty = slotItem.stackQty! + itemToBeAdded.stackQty!;
           if (futureStackQty <= slotItem.maxStackSize) {
             return Number(id);
