@@ -118,7 +118,10 @@ export class ItemContainerTransactionQueue {
     character: ICharacter,
     originContainer: IItemContainer,
     targetContainer: IItemContainer,
-    options: IItemContainerTransactionOption
+    options: IItemContainerTransactionOption = {
+      shouldAddOwnership: true,
+      updateCharacterWeightAfterTransaction: true,
+    }
   ): Promise<boolean> {
     if (!options.shouldAddOwnership) {
       options.shouldAddOwnership = true;
@@ -277,6 +280,8 @@ export class ItemContainerTransactionQueue {
     targetContainer: IItemContainer,
     options: IItemContainerTransactionOption
   ): Promise<boolean> {
+    item.baseKey = item.key.replace(/-\d+$/, ""); // we have to add this because once this comes from the queue worker, the item becomes a JSON and baseKey is a virtual field
+
     const addItemSuccessful = await this.characterItemContainer.addItemToContainer(
       item,
       character,
