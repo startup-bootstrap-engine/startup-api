@@ -7,7 +7,7 @@ export const recipeCelestialDefender: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 1],
   requiredItems: [
     {
-      key: SwordsBlueprint.CelestialDefender,
+      key: SwordsBlueprint.FrostfireLongblade,
       qty: 1,
     },
     {
