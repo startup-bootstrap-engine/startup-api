@@ -167,8 +167,14 @@ export class CharacterNetworkCreateQueue {
       return;
     }
 
+    const hasRespawned = await this.respawnIfNecessary(character);
+
+    if (hasRespawned) {
+      // refresh character state after respawn
+      character = await this.updateCharacterStatus(character, data.channelId);
+    }
+
     await Promise.all([
-      this.respawnIfNecessary(character),
       this.characterDailyPlayTracker.updateCharacterDailyPlay(character._id),
       this.clearCharacterCaches(character),
       this.unlockCharacterMapTransition(character),
@@ -186,10 +192,14 @@ export class CharacterNetworkCreateQueue {
     ]);
   }
 
-  private async respawnIfNecessary(character: ICharacter): Promise<void> {
+  private async respawnIfNecessary(character: ICharacter): Promise<boolean> {
     if (!character.isAlive || character.health <= 0) {
       await this.characterDeath.respawnCharacter(character);
+
+      return true;
     }
+
+    return false;
   }
 
   private async updateCharacterStatus(character: ICharacter, channelId: string): Promise<ICharacter> {

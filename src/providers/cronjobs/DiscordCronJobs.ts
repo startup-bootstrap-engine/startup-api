@@ -7,15 +7,18 @@ export class DiscordCronJobs {
   constructor(private cronJobScheduler: CronJobScheduler, private discordBot: DiscordBot) {}
 
   public schedule(): void {
+    // Every monday
     this.cronJobScheduler.uniqueSchedule("discord-beginners-guide-cron", "0 0 * * 1", async () => {
       await this.sendBeginnersGuideCronJob();
     });
 
+    // Every tue, thu
     this.cronJobScheduler.uniqueSchedule("discord-premium-account-cron", "0 0 * * 2,4", async () => {
       await this.sendPremiumAccountCronJob();
     });
 
-    this.cronJobScheduler.uniqueSchedule("discord-shop-cron", "0 0 * * 6", async () => {
+    // Every wed, sat
+    this.cronJobScheduler.uniqueSchedule("discord-shop-cron", "0 0 * * 3,6", async () => {
       await this.sendShopCronJob();
     });
 
@@ -23,8 +26,14 @@ export class DiscordCronJobs {
       await this.sendReviewRequestCronJob();
     });
 
-    this.cronJobScheduler.uniqueSchedule("discord-training-area-cron", "0 0 * * 7", async () => {
+    // Every tue, sun
+    this.cronJobScheduler.uniqueSchedule("discord-training-area-cron", "0 0 * * 2, 7", async () => {
       await this.sendTrainingAreaCronJob();
+    });
+
+    // every mon, wed
+    this.cronJobScheduler.uniqueSchedule("discord-reviews-prizes", "0 0 * * 1,3", async () => {
+      await this.sendReviewsAndPrizesMessage();
     });
 
     //! Special events
@@ -60,6 +69,38 @@ export class DiscordCronJobs {
     });
   }
 
+  private async sendReviewsAndPrizesMessage(): Promise<void> {
+    try {
+      const message = `⚔️  REVIEWS AND PRIZES ⚔️ 
+
+      Please leave a review on the stores! We work hard everyday to bring you new game updates. This costs a lot of time and money.
+      
+      🔗 [STEAM](https://store.steampowered.com/app/2630100/Definya_2D_MMORPG/?beta=0)
+      🔗 [Google Play](https://play.google.com/store/apps/details?id=com.definya.app)
+      
+      🔥  DM me if you leave a review (with screenshot) there's a surprise for you (PS: You have to submit a friend request to me) 🔥 
+      
+      Also, if you want to learn more about the game, check out [our docs](https://docs.definya.com/)
+      
+      Or just buy a [premium account](https://patreon.com/DefinyaMMORPG)
+      
+      🔥 We're also looking for mappers, devs or community mods. DM Trololo admin!
+      
+      @everyone
+      `;
+
+      await this.discordBot.sendMessageWithColor(
+        message,
+        "announcements",
+        "Reviews x Prizes!",
+        "Green",
+        "https://i.imgur.com/LGdrHYD.png"
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   private async sendReviewRequestCronJob(): Promise<void> {
     try {
       const message = `
@@ -79,7 +120,7 @@ export class DiscordCronJobs {
 
       await this.discordBot.sendMessageWithColor(
         message,
-        "importantNotices",
+        "general",
         "Review Request",
         "Green",
         "https://i.imgur.com/LGdrHYD.png"
@@ -93,13 +134,23 @@ export class DiscordCronJobs {
     try {
       // Your message content
       const message = `Feeling a little bit lost? 
+
+      📚 **Useful links** 📚
         
-        Checkout our BEGINNER'S GUIDE: https://docs.definya.com/`;
+      - **[Definya Wiki](https://docs.definya.com/)**: Your go-to guide for all things Definya.
+        - **[Definya Guide - Starter](https://docs.definya.com/docs/guides/english/StarterGuide)**: Get started on your epic journey.
+        - **[Definya Guide - Hunts](https://docs.definya.com/docs/guides/english/Hunts)**: Master the art of hunting.
+        - **[Definya Guide - Mining](https://docs.definya.com/docs/guides/english/Mining)**: Mining spots
+      - **[Definya Patreon](https://patreon.com/DefinyaMMORPG)**: Support the game and unlock exclusive perks.
+      - **[Definya Steam](https://store.steampowered.com/app/2630100/Definya_2D_MMORPG/?beta=0)**: Download the game on Steam.
+      - **[Definya Google Play](https://play.google.com/store/apps/details?id=com.definya.app)**: Get the game on Google Play.
+      
+      Checkout our BEGINNER'S GUIDE: https://docs.definya.com/`;
 
       await this.discordBot.sendMessageWithColor(
         message,
-        "importantNotices",
-        "Tutorial",
+        "general",
+        "Useful Links",
         "DarkAqua",
         "https://i.imgur.com/DrZ060m.png"
       );
@@ -129,7 +180,7 @@ export class DiscordCronJobs {
 
       await this.discordBot.sendMessageWithColor(
         message,
-        "importantNotices",
+        "general",
         "Training Room",
         "Gold",
         "https://i.imgur.com/LVm6okZ.png"
@@ -166,7 +217,7 @@ export class DiscordCronJobs {
 
       await this.discordBot.sendMessageWithColor(
         message,
-        "importantNotices",
+        "general",
         "Premium Account",
         "Gold",
         "https://i.imgur.com/1oqejn7.png"
@@ -202,7 +253,7 @@ export class DiscordCronJobs {
 
       await this.discordBot.sendMessageWithColor(
         message,
-        "importantNotices",
+        "general",
         "Premium Account",
         "Gold",
         "https://i.imgur.com/87eT8Rn.png"
@@ -225,11 +276,11 @@ export class DiscordCronJobs {
       Happy Holidays!
       - The Definya Team
 
-@everyone`;
+      @everyone`;
 
       await this.discordBot.sendMessageWithColor(
         message,
-        "importantNotices",
+        "announcements",
         "Merry Christmas",
         "Purple",
         "https://i.imgur.com/tut4teS.png"
@@ -250,11 +301,13 @@ export class DiscordCronJobs {
       Here's to health, happiness, and epic adventures in the coming year. Happy New Year, everyone! May it be as magical and rewarding as the realms we explore together.
       
       Cheers to a New Year!
-      - The Definya Team`;
+      - The Definya Team 
+      @everyone
+      `;
 
       await this.discordBot.sendMessageWithColor(
         message,
-        "importantNotices",
+        "announcements",
         "Happy New Year",
         "Purple",
         "https://i.imgur.com/1ZiJo15.png"
@@ -276,11 +329,12 @@ export class DiscordCronJobs {
       
       With love and admiration,
       - The Definya Team
+      @everyone
       `;
 
       await this.discordBot.sendMessageWithColor(
         message,
-        "importantNotices",
+        "announcements",
         "Happy Valentine's Day",
         "Purple",
         "https://i.imgur.com/NKCJCiX.png"
@@ -306,7 +360,7 @@ export class DiscordCronJobs {
 
     await this.discordBot.sendMessageWithColor(
       message,
-      "importantNotices",
+      "announcements",
       "Happy Easter",
       "Purple",
       "https://i.imgur.com/V95swTB.png"
@@ -330,7 +384,7 @@ export class DiscordCronJobs {
 
       await this.discordBot.sendMessageWithColor(
         message,
-        "importantNotices",
+        "announcements",
         "Happy Summer",
         "Purple",
         "https://i.imgur.com/Vq6k2q1.png"
@@ -353,11 +407,13 @@ export class DiscordCronJobs {
       Beware and be brave, for in the shadows lurk both tricks and treats!
       
       Happy Haunting,
-      - The Definya Team`;
+      - The Definya Team
+      @everyone
+      `;
 
       await this.discordBot.sendMessageWithColor(
         message,
-        "importantNotices",
+        "announcements",
         "Happy Halloween",
         "Purple",
         "https://i.imgur.com/Hchoeii.png"

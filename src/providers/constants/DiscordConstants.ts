@@ -7,7 +7,7 @@ export const DISCORD_CHANNEL_IDS = {
   achievements: "1147358878409969746",
   rankings: "1162809636341153904",
   announcements: "1064126085480067132",
-  importantNotices: "1193800882760990720",
+  general: "1063552162459820073",
 };
 
 export type DiscordChannelName = keyof typeof DISCORD_CHANNEL_IDS;
