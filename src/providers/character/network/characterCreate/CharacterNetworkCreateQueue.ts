@@ -9,6 +9,7 @@ import { CharacterSocketEvents, EnvType, ICharacterCreateFromClient, ToGridX, To
 import { CharacterView } from "../../CharacterView";
 
 import { BattleTargeting } from "@providers/battle/BattleTargeting";
+import { CharacterDeath } from "@providers/character/CharacterDeath";
 import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
@@ -39,24 +40,19 @@ export class CharacterNetworkCreateQueue {
     private battleNetworkStopTargeting: BattleNetworkStopTargeting,
     private gridManager: GridManager,
     private characterView: CharacterView,
-
     private inMemoryHashTable: InMemoryHashTable,
-
     private itemMissingReferenceCleaner: ItemMissingReferenceCleaner,
     private characterBuffValidation: CharacterBuffValidation,
     private battleTargeting: BattleTargeting,
     private locker: Locker,
-
     private characterDailyPlayTracker: CharacterDailyPlayTracker,
-
     private redisManager: RedisManager,
     private queueCleaner: QueueCleaner,
-
     private characterValidation: CharacterValidation,
-
     private characterCreateSocketHandler: CharacterCreateSocketHandler,
     private characterCreateInteractionManager: CharacterCreateInteractionManager,
-    private characterCreateRegen: CharacterCreateRegen
+    private characterCreateRegen: CharacterCreateRegen,
+    private characterDeath: CharacterDeath
   ) {}
 
   public onCharacterCreate(channel: SocketChannel): void {
@@ -172,6 +168,7 @@ export class CharacterNetworkCreateQueue {
     }
 
     await Promise.all([
+      this.respawnIfNecessary(character),
       this.characterDailyPlayTracker.updateCharacterDailyPlay(character._id),
       this.clearCharacterCaches(character),
       this.unlockCharacterMapTransition(character),
@@ -187,6 +184,12 @@ export class CharacterNetworkCreateQueue {
       this.characterCreateInteractionManager.warnAboutWeatherStatus(character.channelId!),
       this.characterCreateRegen.handleCharacterRegen(character),
     ]);
+  }
+
+  private async respawnIfNecessary(character: ICharacter): Promise<void> {
+    if (!character.isAlive || character.health <= 0) {
+      await this.characterDeath.respawnCharacter(character);
+    }
   }
 
   private async updateCharacterStatus(character: ICharacter, channelId: string): Promise<ICharacter> {
