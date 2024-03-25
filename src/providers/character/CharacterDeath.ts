@@ -114,9 +114,10 @@ export class CharacterDeath {
       await Promise.all([
         entityEffectUse.clearAllEntityEffects(character), // make sure to clear all entity effects before respawn
         this.clearCache(character),
-        this.respawnCharacter(character),
         this.handleKiller(killer, character),
       ]);
+
+      await this.respawnCharacter(character);
 
       await this.locker.unlock(`character-death-${character._id}`);
     }
