@@ -30,6 +30,7 @@ import { BONUS_DAMAGE_MULTIPLIER, GENERATE_BLOOD_GROUND_ON_HIT } from "@provider
 import { RedisManager } from "@providers/database/RedisManager";
 import { blueprintManager } from "@providers/inversify/container";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { Locker } from "@providers/locks/Locker";
 import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { Queue, Worker } from "bullmq";
 import random from "lodash/random";
@@ -70,7 +71,8 @@ export class HitTargetQueue {
     private entityEffectUse: EntityEffectUse,
     private battleDamageCalculator: BattleDamageCalculator,
     private redisManager: RedisManager,
-    private queueCleaner: QueueCleaner
+    private queueCleaner: QueueCleaner,
+    private locker: Locker
   ) {}
 
   public init(scene: string): void {
@@ -131,6 +133,14 @@ export class HitTargetQueue {
         async (job) => {
           try {
             const { attacker, target, magicAttack, bonusDamage, spellHit } = job.data;
+
+            const hasLock =
+              (await this.locker.hasLock(`${target._id}-applying-usable-effect`)) ||
+              (await this.locker.hasLock(`${target._id}-healing-target`));
+
+            if (hasLock) {
+              return;
+            }
 
             await this.queueCleaner.updateQueueActivity(this.queueNPCHitName(scene));
 
