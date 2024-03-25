@@ -10,7 +10,6 @@ import {
   GemsBlueprint,
   GlovesBlueprint,
   HelmetsBlueprint,
-  LegsBlueprint,
   MacesBlueprint,
   OthersBlueprint,
   SeedsBlueprint,
@@ -146,10 +145,7 @@ export const npcDragonServant: INPCTierBlueprint<18> = {
       itemBlueprintKey: GlovesBlueprint.GenesisGloves,
       chance: LootProbability.VeryRare,
     },
-    {
-      itemBlueprintKey: LegsBlueprint.DragonScaleLegs,
-      chance: LootProbability.Rare,
-    },
+
     {
       itemBlueprintKey: MacesBlueprint.BoneBreakerClub,
       chance: LootProbability.SemiCommon,

@@ -2,6 +2,7 @@ import { LegsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { IUseWithCraftingRecipe } from "@providers/useWith/useWithTypes";
 import { recipeBloodfireLegs } from "./recipeBloodfireLegs";
 import { recipeBlueLegs } from "./recipeBlueLegs";
+import { recipeDragonScaleLegs } from "./recipeDragonScaleLegs";
 import { recipeDwarvenLegs } from "./recipeDwarvenLegs";
 import { recipeFalconLegs } from "./recipeFalconLegs";
 import { recipeHoneyGlowLegs } from "./recipeHoneyGlowLegs";
@@ -26,4 +27,5 @@ export const recipeLegsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [LegsBlueprint.SilvershadeLegs]: [recipeSilvershadeLegs],
   [LegsBlueprint.SolarflareLegs]: [recipeSolarflareLegs],
   [LegsBlueprint.TempestLegs]: [recipeTempestLegs],
+  [LegsBlueprint.DragonScaleLegs]: [recipeDragonScaleLegs],
 };
