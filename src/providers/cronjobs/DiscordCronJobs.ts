@@ -27,7 +27,7 @@ export class DiscordCronJobs {
     });
 
     // Every tue, sun
-    this.cronJobScheduler.uniqueSchedule("discord-training-area-cron", "0 0 * * 2, 7", async () => {
+    this.cronJobScheduler.uniqueSchedule("discord-training-area-cron", "0 0 * * 2,7", async () => {
       await this.sendTrainingAreaCronJob();
     });
 
