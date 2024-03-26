@@ -26,6 +26,11 @@ export class CharacterSkull {
 
   @TrackNewRelicTransaction()
   public async checkForUnjustifiedAttack(character: ICharacter, target: ICharacter): Promise<boolean> {
+    // avoid getting a skull on the arena map
+    if (character.scene.includes("arena")) {
+      return false;
+    }
+
     // Check if the caster is in a party
     const isCharacterAndTargetInParty = await this.partyManagement.checkIfCharacterAndTargetOnTheSameParty(
       character as ICharacter,
