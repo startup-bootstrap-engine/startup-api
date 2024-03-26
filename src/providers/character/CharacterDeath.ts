@@ -99,6 +99,10 @@ export class CharacterDeath {
 
       await this.sendBattleDeathEvents(character);
 
+      if (character.scene.includes("arena")) {
+        return;
+      }
+
       // Run these tasks concurrently as they don't depend on each other
 
       await this.handleCharacterMode(character, characterBody, killer);
@@ -215,6 +219,14 @@ export class CharacterDeath {
       startingPoint = INITIAL_STARTING_POINTS[CharacterGameMode.Farming];
     } else {
       startingPoint = INITIAL_STARTING_POINTS[character.faction];
+    }
+
+    if (character.scene === "arena-hell") {
+      startingPoint = {
+        gridX: 110,
+        gridY: 105,
+        scene: "arena-hell",
+      };
     }
 
     extraProps = {
