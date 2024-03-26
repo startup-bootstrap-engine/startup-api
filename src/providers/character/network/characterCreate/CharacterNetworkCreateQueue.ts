@@ -9,7 +9,7 @@ import { CharacterSocketEvents, EnvType, ICharacterCreateFromClient, ToGridX, To
 import { CharacterView } from "../../CharacterView";
 
 import { BattleTargeting } from "@providers/battle/BattleTargeting";
-import { CharacterDeath } from "@providers/character/CharacterDeath";
+import { CharacterRespawn } from "@providers/character/CharacterRespawn";
 import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
@@ -52,7 +52,7 @@ export class CharacterNetworkCreateQueue {
     private characterCreateSocketHandler: CharacterCreateSocketHandler,
     private characterCreateInteractionManager: CharacterCreateInteractionManager,
     private characterCreateRegen: CharacterCreateRegen,
-    private characterDeath: CharacterDeath
+    private characterRespawn: CharacterRespawn
   ) {}
 
   public onCharacterCreate(channel: SocketChannel): void {
@@ -163,16 +163,7 @@ export class CharacterNetworkCreateQueue {
   private async execCharacterCreate(character: ICharacter, data: ICharacterCreateFromClient): Promise<void> {
     character = await this.updateCharacterStatus(character, data.channelId);
 
-    if (!this.validateCharacter(character)) {
-      return;
-    }
-
-    const hasRespawned = await this.respawnIfNecessary(character);
-
-    if (hasRespawned) {
-      // refresh character state after respawn
-      character = await this.updateCharacterStatus(character, data.channelId);
-    }
+    character = await this.respawnIfNecessary(character);
 
     await Promise.all([
       this.characterDailyPlayTracker.updateCharacterDailyPlay(character._id),
@@ -192,14 +183,14 @@ export class CharacterNetworkCreateQueue {
     ]);
   }
 
-  private async respawnIfNecessary(character: ICharacter): Promise<boolean> {
-    if (!character.isAlive || character.health <= 0) {
-      await this.characterDeath.respawnCharacter(character);
+  private async respawnIfNecessary(character: ICharacter): Promise<ICharacter> {
+    if (character.health <= 0) {
+      character = await this.characterRespawn.respawnCharacter(character, { isOnline: true });
 
-      return true;
+      return character;
     }
 
-    return false;
+    return character;
   }
 
   private async updateCharacterStatus(character: ICharacter, channelId: string): Promise<ICharacter> {
