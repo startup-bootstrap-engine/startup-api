@@ -22,7 +22,7 @@ export class CharacterAutoLootQueue {
   private connection: any;
 
   private queueName = (scene: string): string =>
-    `auto-loot-queue--${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
+    `auto-loot-queue-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
 
   constructor(
     private characterValidation: CharacterValidation,
