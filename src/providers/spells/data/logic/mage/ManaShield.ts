@@ -1,6 +1,5 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { MAGE_MANA_SHIELD_DAMAGE_REDUCTION } from "@providers/constants/BattleConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SpellsBlueprint } from "@rpg-engine/shared";
@@ -43,12 +42,7 @@ export class ManaShield {
         throw new Error(`Invalid damage value: ${damage}`);
       }
 
-      const newMana = character.mana - damage / MAGE_MANA_SHIELD_DAMAGE_REDUCTION;
-      const newHealth = character.health + (newMana < 0 ? newMana : 0);
-
-      if (newMana <= 0 && newHealth <= 0) {
-        return false;
-      }
+      const newMana = character.mana - damage; // Mana absorbs 100% of damage
 
       if (newMana <= 0) {
         const namespace = `${NamespaceRedisControl.CharacterSpell}:${character._id}`;
@@ -58,12 +52,9 @@ export class ManaShield {
 
       const updatedMana = newMana > 0 ? newMana : 0;
 
-      const updatedHealth = newMana < 0 ? Math.max(newHealth, 0) : character.health;
-
-      (await Character.findByIdAndUpdate(character._id, {
+      await Character.findByIdAndUpdate(character._id, {
         mana: updatedMana,
-        health: updatedHealth,
-      }).lean()) as ICharacter;
+      }).lean();
 
       await this.socketMessaging.sendEventAttributeChange(character._id);
 
