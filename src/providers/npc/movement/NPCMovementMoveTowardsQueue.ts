@@ -33,6 +33,7 @@ import { NPCTarget } from "./NPCTarget";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { QueueCleaner } from "@providers/queue/QueueCleaner";
+
 export interface ICharacterHealth {
   id: string;
   health: number;
@@ -192,12 +193,13 @@ export class NPCMovementMoveTowardsQueue {
     return (targetCharacter &&
       targetCharacter.isOnline &&
       targetCharacter.scene === npc.scene &&
-      !targetCharacter.isBanned &&
-      npc.targetCharacter) as boolean;
+      !targetCharacter.isBanned) as boolean;
   }
 
   private async handleInvalidTarget(npc: INPC): Promise<void> {
-    await Promise.all([this.npcTarget.tryToSetTarget(npc), this.tryToFreezeIfTooManyFailedTargetChecks(npc)]);
+    await this.npcTarget.tryToSetTarget(npc);
+
+    await this.tryToFreezeIfTooManyFailedTargetChecks(npc);
   }
 
   private async handleValidTarget(npc: INPC, targetCharacter: ICharacter): Promise<void> {
@@ -358,7 +360,7 @@ export class NPCMovementMoveTowardsQueue {
 
   @TrackNewRelicTransaction()
   private async initBattleCycle(npc: INPC, targetCharacter: ICharacter): Promise<void> {
-    if (!npc.isAlive || !npc.targetCharacter || !npc.isBehaviorEnabled) {
+    if (!(npc.isAlive || npc.health === 0) || !npc.targetCharacter || !npc.isBehaviorEnabled) {
       return;
     }
 

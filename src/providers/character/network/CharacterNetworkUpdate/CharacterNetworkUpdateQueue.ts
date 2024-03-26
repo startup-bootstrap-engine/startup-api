@@ -88,7 +88,7 @@ export class CharacterNetworkUpdateQueue {
           try {
             await this.queueCleaner.updateQueueActivity(this.queueName(scene));
 
-            await this.handlePositionUpdateRequest(data, character);
+            await this.execPositionUpdate(data, character);
           } catch (err) {
             console.error(`Error processing ${this.queueName(scene)} for Character ${character.name}:`, err);
             throw err;
@@ -161,10 +161,7 @@ export class CharacterNetworkUpdateQueue {
     );
   }
 
-  private async handlePositionUpdateRequest(
-    data: ICharacterPositionUpdateFromClient,
-    character: ICharacter
-  ): Promise<void> {
+  private async execPositionUpdate(data: ICharacterPositionUpdateFromClient, character: ICharacter): Promise<void> {
     if (await this.isCharacterChangingScene(character)) {
       return;
     }

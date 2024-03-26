@@ -213,6 +213,7 @@ export class ServerBootstrap {
     await this.spellNetworkCast.clearAllJobs();
     await this.npcDeathQueue.clearAllJobs();
     await this.characterNetworkCreateQueue.clearAllJobs();
+    await this.npcCycleQueue.clearAllJobs();
 
     console.log("🧹 BullMQ queues cleared!");
   }
