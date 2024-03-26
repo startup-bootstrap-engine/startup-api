@@ -3,14 +3,14 @@ import { INITIAL_STARTING_POINTS } from "@providers/constants/CharacterConstants
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { CharacterFactions } from "@rpg-engine/shared";
 import mongoose from "mongoose";
-import { CharacterDeath } from "../CharacterDeath";
+import { CharacterRespawn } from "../CharacterRespawn";
 
 describe("Character Respawn", () => {
-  let characterDeath: CharacterDeath;
   let testCharacter: ICharacter;
+  let characterRespawn: CharacterRespawn;
 
   beforeAll(() => {
-    characterDeath = container.get<CharacterDeath>(CharacterDeath);
+    characterRespawn = container.get<CharacterRespawn>(CharacterRespawn);
   });
 
   beforeEach(async () => {
@@ -23,7 +23,7 @@ describe("Character Respawn", () => {
   });
 
   it("should respawn the character correctly", async () => {
-    await characterDeath.respawnCharacter(testCharacter);
+    await characterRespawn.respawnCharacter(testCharacter);
 
     const updatedCharacter = await Character.findById(testCharacter._id).lean();
 
@@ -34,7 +34,7 @@ describe("Character Respawn", () => {
 
   it("should respawn the character in farming scene if farming mode is true", async () => {
     testCharacter.isFarmingMode = true;
-    await characterDeath.respawnCharacter(testCharacter);
+    await characterRespawn.respawnCharacter(testCharacter);
 
     const updatedCharacter = await Character.findById(testCharacter._id).lean();
 
