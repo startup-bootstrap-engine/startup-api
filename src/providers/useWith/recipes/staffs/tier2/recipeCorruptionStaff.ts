@@ -1,31 +1,31 @@
 import { calculateMinimumLevel } from "@providers/crafting/CraftingMinLevelCalculator";
 import { CraftingResourcesBlueprint, StaffsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { CraftingSkill } from "@rpg-engine/shared";
-import { IUseWithCraftingRecipe } from "../../useWithTypes";
+import { IUseWithCraftingRecipe } from "../../../useWithTypes";
 
-export const recipeSpellbinderWand: IUseWithCraftingRecipe = {
-  outputKey: StaffsBlueprint.SpellbinderWand,
+export const recipeCorruptionStaff: IUseWithCraftingRecipe = {
+  outputKey: StaffsBlueprint.CorruptionStaff,
   outputQtyRange: [1, 1],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.IronIngot,
-      qty: 80,
+      key: CraftingResourcesBlueprint.Jade,
+      qty: 5,
     },
     {
-      key: CraftingResourcesBlueprint.Diamond,
-      qty: 50,
+      key: CraftingResourcesBlueprint.WoodenBoard,
+      qty: 3,
     },
     {
       key: CraftingResourcesBlueprint.MagicRecipe,
-      qty: 40,
+      qty: 6,
     },
   ],
   minCraftingRequirements: [
     CraftingSkill.Alchemy,
     calculateMinimumLevel([
-      [CraftingResourcesBlueprint.IronIngot, 80],
-      [CraftingResourcesBlueprint.Diamond, 50],
-      [CraftingResourcesBlueprint.MagicRecipe, 40],
+      [CraftingResourcesBlueprint.Jade, 5],
+      [CraftingResourcesBlueprint.WoodenBoard, 3],
+      [CraftingResourcesBlueprint.MagicRecipe, 6],
     ]),
   ],
 };

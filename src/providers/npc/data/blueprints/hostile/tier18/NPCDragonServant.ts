@@ -138,10 +138,6 @@ export const npcDragonServant: INPCTierBlueprint<18> = {
       chance: LootProbability.Rare,
     },
     {
-      itemBlueprintKey: StaffsBlueprint.ElementalStaff,
-      chance: LootProbability.VeryRare,
-    },
-    {
       itemBlueprintKey: GlovesBlueprint.GenesisGloves,
       chance: LootProbability.VeryRare,
     },

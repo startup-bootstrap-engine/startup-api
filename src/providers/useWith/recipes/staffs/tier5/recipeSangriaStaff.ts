@@ -1,31 +1,27 @@
 import { CraftingResourcesBlueprint, StaffsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { CraftingSkill } from "@rpg-engine/shared";
-import { IUseWithCraftingRecipe } from "../../useWithTypes";
+import { IUseWithCraftingRecipe } from "../../../useWithTypes";
 
-export const recipeAshwoodStaff: IUseWithCraftingRecipe = {
-  outputKey: StaffsBlueprint.AshwoodStaff,
+export const recipeSangriaStaff: IUseWithCraftingRecipe = {
+  outputKey: StaffsBlueprint.SangriaStaff,
   outputQtyRange: [1, 1],
   requiredItems: [
     {
       key: CraftingResourcesBlueprint.RedSapphire,
-      qty: 12,
+      qty: 80,
     },
     {
       key: CraftingResourcesBlueprint.PhoenixFeather,
-      qty: 12,
+      qty: 100,
     },
     {
       key: CraftingResourcesBlueprint.WoodenBoard,
-      qty: 14,
+      qty: 60,
     },
     {
       key: CraftingResourcesBlueprint.ObsidiumIngot,
-      qty: 8,
-    },
-    {
-      key: CraftingResourcesBlueprint.GreenIngot,
-      qty: 8,
+      qty: 60,
     },
   ],
-  minCraftingRequirements: [CraftingSkill.Alchemy, 54],
+  minCraftingRequirements: [CraftingSkill.Alchemy, 31],
 };

@@ -97,10 +97,6 @@ export const npcMudGolem: INPCTierBlueprint<10> = {
       chance: LootProbability.VeryRare,
     },
     {
-      itemBlueprintKey: StaffsBlueprint.GravityStaff,
-      chance: LootProbability.VeryRare,
-    },
-    {
       itemBlueprintKey: GlovesBlueprint.OsirisGloves,
       chance: LootProbability.VeryRare,
     },

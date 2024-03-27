@@ -1,6 +1,6 @@
 import { CraftingResourcesBlueprint, StaffsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { CraftingSkill } from "@rpg-engine/shared";
-import { IUseWithCraftingRecipe } from "../../useWithTypes";
+import { IUseWithCraftingRecipe } from "../../../useWithTypes";
 
 export const recipeHellishBronzeStaff: IUseWithCraftingRecipe = {
   outputKey: StaffsBlueprint.HellishBronzeStaff,
@@ -23,5 +23,5 @@ export const recipeHellishBronzeStaff: IUseWithCraftingRecipe = {
       qty: 10,
     },
   ],
-  minCraftingRequirements: [CraftingSkill.Alchemy, 38],
+  minCraftingRequirements: [CraftingSkill.Alchemy, 37],
 };

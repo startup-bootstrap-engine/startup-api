@@ -1,14 +1,14 @@
 import { calculateMinimumLevel } from "@providers/crafting/CraftingMinLevelCalculator";
 import { CraftingResourcesBlueprint, StaffsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { CraftingSkill } from "@rpg-engine/shared";
-import { IUseWithCraftingRecipe } from "../../useWithTypes";
+import { IUseWithCraftingRecipe } from "../../../useWithTypes";
 
-export const recipeRubyStaff: IUseWithCraftingRecipe = {
-  outputKey: StaffsBlueprint.RubyStaff,
+export const recipeHellishStaff: IUseWithCraftingRecipe = {
+  outputKey: StaffsBlueprint.HellishStaff,
   outputQtyRange: [1, 1],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.RedSapphire,
+      key: CraftingResourcesBlueprint.GreenIngot,
       qty: 10,
     },
     {
@@ -16,16 +16,16 @@ export const recipeRubyStaff: IUseWithCraftingRecipe = {
       qty: 3,
     },
     {
-      key: CraftingResourcesBlueprint.GreenIngot,
-      qty: 3,
+      key: CraftingResourcesBlueprint.SteelIngot,
+      qty: 30,
     },
   ],
   minCraftingRequirements: [
     CraftingSkill.Alchemy,
     calculateMinimumLevel([
-      [CraftingResourcesBlueprint.RedSapphire, 10],
+      [CraftingResourcesBlueprint.GreenIngot, 10],
       [CraftingResourcesBlueprint.WoodenBoard, 3],
-      [CraftingResourcesBlueprint.GreenIngot, 3],
+      [CraftingResourcesBlueprint.SteelIngot, 30],
     ]),
   ],
 };
