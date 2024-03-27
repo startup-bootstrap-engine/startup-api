@@ -7,8 +7,8 @@ export const FARMING_HIGH_YIELD_FACTOR = 3;
 export const FARMING_SUPER_YIELD_FACTOR = 4;
 
 // Economics
-export const FARMING_HARVEST_PRICE_RATIO = 2;
-export const FARMING_SEED_PRICE_RATIO = 1.5;
+export const FARMING_HARVEST_PRICE_RATIO = 2.5;
+export const FARMING_SEED_PRICE_RATIO = 1.25;
 
 // Cycle timing
 export const MAXIMUM_MINUTES_FOR_GROW: number = 40; // Its a growth BETWEEN Cycles. Careful... its not the total time it takes! The total would be the sum of all cycles.
