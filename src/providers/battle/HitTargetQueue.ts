@@ -292,9 +292,9 @@ export class HitTargetQueue {
         let sorcererManaShield: boolean = false;
         if (target.class === CharacterClass.Sorcerer || target.class === CharacterClass.Druid) {
           const character = target as ICharacter;
-          const manaShieldSpell = this.manaShield.getManaShieldSpell(character);
+          const hasManaShieldSpell = await this.manaShield.getManaShieldSpell(character);
 
-          if (await manaShieldSpell) {
+          if (hasManaShieldSpell) {
             sorcererManaShield = await this.manaShield.handleManaShield(character, damage);
           }
         }

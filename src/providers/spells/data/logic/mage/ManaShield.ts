@@ -2,12 +2,12 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { MAGE_MANA_SHIELD_DAMAGE_REDUCTION } from "@providers/constants/BattleConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SpellsBlueprint } from "@rpg-engine/shared";
-import { provide } from "inversify-binding-decorators";
 import { NamespaceRedisControl } from "../../types/SpellsBlueprintTypes";
 
-@provide(ManaShield)
+@provideSingleton(ManaShield)
 export class ManaShield {
   constructor(private inMemoryHashTable: InMemoryHashTable, private socketMessaging: SocketMessaging) {}
 
@@ -44,7 +44,8 @@ export class ManaShield {
       }
 
       const newMana = character.mana - damage / MAGE_MANA_SHIELD_DAMAGE_REDUCTION;
-      const newHealth = character.health + (newMana < 0 ? newMana : 0);
+      const excessDamage = Math.abs(Math.min(newMana, 0));
+      const newHealth = character.health - excessDamage;
 
       if (newMana <= 0 && newHealth <= 0) {
         return false;
