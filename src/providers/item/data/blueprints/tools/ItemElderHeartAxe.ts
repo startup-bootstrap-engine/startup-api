@@ -32,7 +32,7 @@ export const itemElderHeartAxe: IToolItemBlueprint = {
   weight: 0.5,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   rangeType: EntityAttackType.Melee,
-  basePrice: 150,
+  basePrice: 30000,
   hasUseWith: true,
   useWithMaxDistanceGrid: RangeTypes.Short,
   canSell: false,
