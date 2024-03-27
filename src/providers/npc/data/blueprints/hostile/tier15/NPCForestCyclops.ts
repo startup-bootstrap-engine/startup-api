@@ -12,6 +12,7 @@ import {
   SeedsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -97,6 +98,10 @@ export const npcForestCyclops: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: SwordsBlueprint.Shadowblade,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.WoodsManAxe,
       chance: LootProbability.Rare,
     },
   ],

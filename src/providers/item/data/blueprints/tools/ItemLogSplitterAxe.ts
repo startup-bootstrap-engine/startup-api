@@ -17,20 +17,21 @@ import {
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { CraftingResourcesBlueprint, ToolsBlueprint } from "../../types/itemsBlueprintTypes";
 
-export const itemCarpentersAxe: IToolItemBlueprint = {
-  key: ToolsBlueprint.CarpentersAxe,
+export const itemLogSplitterAxe: IToolItemBlueprint = {
+  key: ToolsBlueprint.LogSplitterAxe,
   type: ItemType.Tool,
   subType: ItemSubType.Tool,
+  toolCategory: ToolsBlueprint.CarpentersAxe,
   textureAtlas: "items",
-  texturePath: "tools/carpenters-axe.png",
-  name: "Carpenter's Axe",
-  description: "An axe designed primarily as a work axe.",
-  attack: 6,
-  defense: 2,
+  texturePath: "tools/log-splitter-axe.png",
+  name: "Log Splitter Axe",
+  description: "Designed with a heavy wedge-shaped head, this axe splits felled logs with brutal efficiency.",
+  attack: 8,
+  defense: 4,
   weight: 0.5,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   rangeType: EntityAttackType.Melee,
-  basePrice: 50,
+  basePrice: 120,
   hasUseWith: true,
   useWithMaxDistanceGrid: RangeTypes.Short,
   canSell: false,
@@ -50,23 +51,32 @@ export const itemCarpentersAxe: IToolItemBlueprint = {
       {
         targetTile,
         targetTileAnimationEffectKey: "cutting-wood",
-        errorMessages: ["Hmm... Nothing here.", "Maybe you should try somewhere else.", "You can't find anything."],
-        successMessages: ["You found some wood!", "You're getting good at this!"],
+        errorMessages: [
+          "You'll need to fell the tree first.",
+          "This axe is for splitting, not chopping.",
+          "Find a felled log to use this on.",
+        ],
+        successMessages: ["Perfect firewood!", "That split cleanly", "One swing, two logs."],
         rewards: [
+          {
+            key: CraftingResourcesBlueprint.GreaterWoodenLog,
+            qty: [1, 2],
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 5, rarityOfTool),
+          },
           {
             key: CraftingResourcesBlueprint.WoodenSticks,
             qty: [2, 3],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 10, rarityOfTool),
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 12, rarityOfTool),
           },
           {
             key: CraftingResourcesBlueprint.SmallWoodenStick,
-            qty: [2, 3],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 10, rarityOfTool),
+            qty: [4, 5],
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 15, rarityOfTool),
           },
         ],
       },
       skillIncrease
     );
   },
-  usableEffectDescription: "Use it on a tree to cut it",
+  usableEffectDescription: "Use on felled logs to split them into usable lumber.",
 };

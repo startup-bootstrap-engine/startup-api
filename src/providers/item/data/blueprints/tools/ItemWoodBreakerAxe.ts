@@ -17,20 +17,21 @@ import {
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { CraftingResourcesBlueprint, ToolsBlueprint } from "../../types/itemsBlueprintTypes";
 
-export const itemCarpentersAxe: IToolItemBlueprint = {
-  key: ToolsBlueprint.CarpentersAxe,
+export const itemWoodBreakerAxe: IToolItemBlueprint = {
+  key: ToolsBlueprint.WoodBreakerAxe,
   type: ItemType.Tool,
   subType: ItemSubType.Tool,
+  toolCategory: ToolsBlueprint.CarpentersAxe,
   textureAtlas: "items",
-  texturePath: "tools/carpenters-axe.png",
-  name: "Carpenter's Axe",
-  description: "An axe designed primarily as a work axe.",
-  attack: 6,
+  texturePath: "tools/wood-breaker-axe.png",
+  name: "Wood Breaker's Axe",
+  description: "A raw and powerful axe, its immense weight and wide head can fell the largest and toughest of trees.",
+  attack: 8,
   defense: 2,
   weight: 0.5,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   rangeType: EntityAttackType.Melee,
-  basePrice: 50,
+  basePrice: 130,
   hasUseWith: true,
   useWithMaxDistanceGrid: RangeTypes.Short,
   canSell: false,
@@ -50,23 +51,36 @@ export const itemCarpentersAxe: IToolItemBlueprint = {
       {
         targetTile,
         targetTileAnimationEffectKey: "cutting-wood",
-        errorMessages: ["Hmm... Nothing here.", "Maybe you should try somewhere else.", "You can't find anything."],
-        successMessages: ["You found some wood!", "You're getting good at this!"],
+        errorMessages: [
+          "This tree is too puny for the Woodbreaker!",
+          "You'll need something stronger for this beast of a tree.",
+          "Ouch! That almost bounced back at you.",
+        ],
+        successMessages: [
+          "Timberrrr!",
+          "The Woodbreaker laughs at this challenge!",
+          "The forest trembles before your might.",
+        ],
         rewards: [
+          {
+            key: CraftingResourcesBlueprint.GreaterWoodenLog,
+            qty: [4, 5],
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 12, rarityOfTool),
+          },
           {
             key: CraftingResourcesBlueprint.WoodenSticks,
             qty: [2, 3],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 10, rarityOfTool),
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 8, rarityOfTool),
           },
           {
-            key: CraftingResourcesBlueprint.SmallWoodenStick,
-            qty: [2, 3],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 10, rarityOfTool),
+            key: CraftingResourcesBlueprint.ElvenWood,
+            qty: [1, 2],
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 5, rarityOfTool),
           },
         ],
       },
       skillIncrease
     );
   },
-  usableEffectDescription: "Use it on a tree to cut it",
+  usableEffectDescription: "Use on the largest, most unyielding trees to obtain strong, sturdy wood.",
 };

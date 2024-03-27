@@ -8,6 +8,7 @@ import {
   FoodsBlueprint,
   RangedWeaponsBlueprint,
   SeedsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 
@@ -99,6 +100,10 @@ export const npcMinotaurArcher: INPCTierBlueprint<12> = {
     {
       itemBlueprintKey: RangedWeaponsBlueprint.EaglesEyeBow,
       chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.LogSplitterAxe,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning],

@@ -15,6 +15,7 @@ import {
   SeedsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -128,6 +129,10 @@ export const npcCaveTroll: INPCTierBlueprint<13> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.WoodBreakerAxe,
       chance: LootProbability.Rare,
     },
   ],

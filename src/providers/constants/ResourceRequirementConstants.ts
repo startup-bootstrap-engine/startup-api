@@ -63,11 +63,11 @@ export const RESOURCE_LEVEL_REQUIREMENTS: IResourceLevelRequirement = {
   [CraftingResourcesBlueprint.GreaterWoodenLog]: {
     minLevel: 5,
     type: CraftingSkill.Lumberjacking,
-    item: ToolsBlueprint.CarpentersAxe,
+    item: ToolsBlueprint.WoodBreakerAxe,
   },
   [CraftingResourcesBlueprint.ElvenWood]: {
     minLevel: 15,
     type: CraftingSkill.Lumberjacking,
-    item: ToolsBlueprint.CarpentersAxe,
+    item: ToolsBlueprint.ElderHeartAxe,
   },
 };

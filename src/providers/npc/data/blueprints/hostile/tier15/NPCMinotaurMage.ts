@@ -12,6 +12,7 @@ import {
   SpearsBlueprint,
   StaffsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 
@@ -173,6 +174,10 @@ export const npcMinotaurMage: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.WoodsManAxe,
       chance: LootProbability.Rare,
     },
   ],

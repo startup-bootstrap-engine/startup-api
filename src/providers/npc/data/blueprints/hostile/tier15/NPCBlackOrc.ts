@@ -14,6 +14,7 @@ import {
   OthersBlueprint,
   RangedWeaponsBlueprint,
   StaffsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -168,6 +169,10 @@ export const npcBlackOrc: INPCTierBlueprint<15> = {
     {
       itemBlueprintKey: LegsBlueprint.StuddedLegs,
       chance: LootProbability.VeryCommon,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.WoodsManAxe,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
