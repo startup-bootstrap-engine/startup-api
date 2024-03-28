@@ -118,7 +118,9 @@ export class HitTargetQueue {
       this.worker = new Worker(
         this.queueCharacterHitName(scene),
         async (job) => {
-          const { attacker, target, magicAttack, bonusDamage, spellHit } = job.data;
+          const { attacker, target, targetType, magicAttack, bonusDamage, spellHit } = job.data;
+
+          target.type = targetType;
 
           await this.queueCleaner.updateQueueActivity(this.queueCharacterHitName(scene));
 
@@ -132,7 +134,9 @@ export class HitTargetQueue {
         this.queueNPCHitName(scene),
         async (job) => {
           try {
-            const { attacker, target, magicAttack, bonusDamage, spellHit } = job.data;
+            const { attacker, target, targetType, magicAttack, bonusDamage, spellHit } = job.data;
+
+            target.type = targetType;
 
             const hasLock =
               (await this.locker.hasLock(`${target._id}-applying-usable-effect`)) ||
@@ -187,10 +191,12 @@ export class HitTargetQueue {
       return;
     }
 
+    const targetType = target.type; // we have to pass this separately because the queue will not read the virtual field later
+
     if (attacker.type === EntityType.Character) {
       await this.characterQueue?.add(
         this.queueCharacterHitName((attacker as ICharacter).scene),
-        { attacker, target, magicAttack, bonusDamage, spellHit },
+        { attacker, target, targetType, magicAttack, bonusDamage, spellHit },
         {
           removeOnComplete: true,
           removeOnFail: true,
@@ -204,7 +210,7 @@ export class HitTargetQueue {
     } else {
       await this.npcQueue?.add(
         this.queueNPCHitName((attacker as INPC).scene),
-        { attacker, target, magicAttack, bonusDamage, spellHit },
+        { attacker, target, targetType, magicAttack, bonusDamage, spellHit },
         {
           removeOnComplete: true,
           removeOnFail: true,
@@ -248,6 +254,8 @@ export class HitTargetQueue {
     bonusDamage?: number,
     spellHit?: boolean
   ): Promise<void> {
+    target.isAlive = target.health > 0;
+
     if (!target.isAlive) {
       return;
     }
