@@ -240,6 +240,7 @@ export class DiscordCronJobs {
       - Greater Life potions (100x)
       - Character name change
       - Social Crystals (50x)
+      - Cleanup PK Skull
       
       Ingredients:
       
