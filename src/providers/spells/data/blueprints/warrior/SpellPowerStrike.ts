@@ -41,7 +41,7 @@ export const spellPowerStrike: Partial<ISpell> = {
 
     const buffPercentage = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
       min: 15,
-      max: 35,
+      max: 60,
     });
 
     await characterBuffActivator.enableTemporaryBuff(character, {

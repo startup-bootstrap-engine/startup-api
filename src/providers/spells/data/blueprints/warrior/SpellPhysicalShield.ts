@@ -16,7 +16,7 @@ import { SpellCalculator } from "../../abstractions/SpellCalculator";
 export const spellPhysicalShield: Partial<ISpell> = {
   key: SpellsBlueprint.SpellPhysicalShield,
   name: "Self Physical Shield",
-  description: "A physical shield that boosts physical resistance by 30%, duration varies with magic level.",
+  description: "A physical shield that boosts physical resistance. Duration varies with magic level.",
   textureAtlas: "icons",
   texturePath: "spell-icons/spell-physical-shield.png",
   castingType: SpellCastingType.SelfCasting,
@@ -40,7 +40,7 @@ export const spellPhysicalShield: Partial<ISpell> = {
 
     const buffPercentage = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
       min: 25,
-      max: 100,
+      max: 120,
     });
 
     await characterBuffActivator.enableTemporaryBuff(character, {

@@ -41,7 +41,7 @@ export const spellElvenArrow: Partial<ISpell> = {
       }),
       spellCalculator.calculateBasedOnSkillLevel(character, CombatSkill.Distance, {
         min: 20,
-        max: 40,
+        max: 60,
       }),
     ]);
 
