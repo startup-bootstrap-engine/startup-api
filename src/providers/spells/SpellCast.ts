@@ -244,7 +244,7 @@ export class SpellCast {
 
     const isTargetAtPZ = this.mapNonPVPZone.isNonPVPZoneAtXY(target.scene, target.x, target.y);
 
-    if (isTargetAtPZ) {
+    if (isTargetAtPZ && target.type === EntityType.Character) {
       this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, your target is at a protected zone.");
 
       return false;
