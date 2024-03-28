@@ -12,6 +12,11 @@ export class DiscordCronJobs {
       await this.sendBeginnersGuideCronJob();
     });
 
+    // Every tuesday
+    this.cronJobScheduler.uniqueSchedule("discord-bug-abuser-hunt-cron", "0 0 * * 2", async () => {
+      await this.bugAbuserHunt();
+    });
+
     // Every tue, thu
     this.cronJobScheduler.uniqueSchedule("discord-premium-account-cron", "0 0 * * 2,4", async () => {
       await this.sendPremiumAccountCronJob();
@@ -224,6 +229,34 @@ export class DiscordCronJobs {
       );
     } catch (error) {
       console.error(`Failed to send Discord message: ${error}`);
+    }
+  }
+
+  private async bugAbuserHunt(): Promise<void> {
+    try {
+      const message = `🔍 **Bug Abuser Hunt!** 🔍
+
+      Have you spotted someone exploiting a game bug to gain an unfair advantage?
+
+      Record the bug abuser in action using a screen recording app and post the video in the #bans channel. Don't forget to tag me.
+
+      If your report is validated by our moderators and myself, you'll be rewarded according to the severity of the bug (1-10 social crystals).
+
+      💀 The punishment can range from a few days of ban to a permaban and account deletion. 💀
+
+      On the other hand, if you discover a bug yourself and report it through a video without exploiting it, you'll also be rewarded with Social Crystals. The quantity of the reward will depend on the severity of the bug.
+
+      @everyone`;
+
+      await this.discordBot.sendMessageWithColor(
+        message,
+        "announcements",
+        "Bug Abuser Hunt",
+        "Red",
+        "https://i.imgur.com/5bZ6l9z.png"
+      );
+    } catch (error) {
+      console.error(error);
     }
   }
 
