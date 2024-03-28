@@ -248,13 +248,7 @@ export class DiscordCronJobs {
 
       @everyone`;
 
-      await this.discordBot.sendMessageWithColor(
-        message,
-        "announcements",
-        "Bug Abuser Hunt",
-        "Red",
-        "https://i.imgur.com/5bZ6l9z.png"
-      );
+      await this.discordBot.sendMessageWithColor(message, "general", "Bug Abuser Hunt", "Red");
     } catch (error) {
       console.error(error);
     }
