@@ -41,7 +41,7 @@ export const spellVeilofUndeath: Partial<ISpell> = {
 
     const buffPercentage = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
       min: 10,
-      max: 20,
+      max: 30,
     });
 
     await characterBuffActivator.enableTemporaryBuff(character, {
