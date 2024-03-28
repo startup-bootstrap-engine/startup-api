@@ -39,9 +39,10 @@ export const plantItemGreenGrape: IPlantItem = {
     },
   },
   harvestableItemKey: FoodsBlueprint.GreenGrape,
-  regrowsAfterHarvest: false,
+  regrowsAfterHarvest: true,
   growthFactor: LOW_GROWTH_FACTOR,
   yieldFactor: FARMING_SUPER_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
+  regrowAfterHarvestLimit: 3,
 };

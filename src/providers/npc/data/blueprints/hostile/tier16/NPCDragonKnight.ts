@@ -128,10 +128,6 @@ export const npcDragonKnight: INPCTierBlueprint<16> = {
       chance: LootProbability.Rare,
     },
     {
-      itemBlueprintKey: AxesBlueprint.SpikeToppedAxe,
-      chance: LootProbability.Rare,
-    },
-    {
       itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
       chance: LootProbability.Rare,
     },

@@ -81,7 +81,7 @@ export class NPCTarget {
         return;
       }
 
-      if (!npc.isAlive) {
+      if (!npc.isAlive || npc.health === 0) {
         return;
       }
 
@@ -193,7 +193,7 @@ export class NPCTarget {
   @TrackNewRelicTransaction()
   public async setTarget(npc: INPC, character: ICharacter): Promise<void> {
     try {
-      if (!npc.isAlive || character?.health === 0) {
+      if (!(npc.isAlive || npc.health === 0) || character?.health === 0) {
         return;
       }
 

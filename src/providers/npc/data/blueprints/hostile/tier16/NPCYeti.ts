@@ -183,14 +183,6 @@ export const npcYeti: INPCTierBlueprint<16> = {
       chance: LootProbability.VeryRare,
     },
     {
-      itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.TwinEdgeAxe,
-      chance: LootProbability.Rare,
-    },
-    {
       itemBlueprintKey: AxesBlueprint.DanishAxe,
       chance: LootProbability.Rare,
     },

@@ -3,7 +3,6 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
-  AxesBlueprint,
   DaggersBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
@@ -11,6 +10,7 @@ import {
   SeedsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -87,15 +87,11 @@ export const npcCyclops: INPCTierBlueprint<14> = {
       chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: AxesBlueprint.BoneReaperAxe,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.Rare,
-    },
-    {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.ElderHeartAxe,
       chance: LootProbability.Rare,
     },
   ],

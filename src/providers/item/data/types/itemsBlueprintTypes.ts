@@ -451,6 +451,10 @@ export enum CraftingResourcesBlueprint {
 export enum ToolsBlueprint {
   ButchersKnife = "butchers-knife",
   CarpentersAxe = "carpenters-axe",
+  ElderHeartAxe = "elder-heart-axe",
+  WoodBreakerAxe = "wood-breaker-axe",
+  LogSplitterAxe = "log-splitter-axe",
+  WoodsManAxe = "woods-man-axe",
   FishingRod = "fishing-rod",
   MoonlureFishingRod = "moonlure-fishing-rod",
   Pickaxe = "pickaxe",

@@ -17,6 +17,7 @@ import {
   SeedsBlueprint,
   StaffsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -130,6 +131,10 @@ export const npcOrcRaider: INPCTierBlueprint<12> = {
     {
       itemBlueprintKey: AxesBlueprint.RoyalChopperAxe,
       chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.LogSplitterAxe,
+      chance: LootProbability.Common,
     },
   ],
   entityEffects: [EntityEffectBlueprint.VineGrasp],

@@ -111,12 +111,6 @@ export class NPCCycleQueue {
       this.init(npc.scene);
     }
 
-    const isJobBeingProcessed = await this.isJobBeingProcessed(npc._id);
-
-    if (isJobBeingProcessed) {
-      return;
-    }
-
     await this.queue?.add(
       this.queueName(npc.scene),
       {
@@ -148,17 +142,6 @@ export class NPCCycleQueue {
     await this.worker?.close();
     this.queue = null;
     this.worker = null;
-  }
-
-  private async isJobBeingProcessed(npcId: string): Promise<boolean> {
-    const existingJobs = (await this.queue?.getJobs(["waiting", "active", "delayed"])) ?? [];
-    const isJobExisting = existingJobs.some((job) => job?.data?.npcId === npcId);
-
-    if (isJobExisting) {
-      return true; // Don't enqueue a new job if one with the same callbackId already exists
-    }
-
-    return false;
   }
 
   @TrackNewRelicTransaction()

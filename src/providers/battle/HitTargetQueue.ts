@@ -30,6 +30,7 @@ import { BONUS_DAMAGE_MULTIPLIER, GENERATE_BLOOD_GROUND_ON_HIT } from "@provider
 import { RedisManager } from "@providers/database/RedisManager";
 import { blueprintManager } from "@providers/inversify/container";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { Locker } from "@providers/locks/Locker";
 import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { Queue, Worker } from "bullmq";
 import random from "lodash/random";
@@ -70,7 +71,8 @@ export class HitTargetQueue {
     private entityEffectUse: EntityEffectUse,
     private battleDamageCalculator: BattleDamageCalculator,
     private redisManager: RedisManager,
-    private queueCleaner: QueueCleaner
+    private queueCleaner: QueueCleaner,
+    private locker: Locker
   ) {}
 
   public init(scene: string): void {
@@ -116,7 +118,9 @@ export class HitTargetQueue {
       this.worker = new Worker(
         this.queueCharacterHitName(scene),
         async (job) => {
-          const { attacker, target, magicAttack, bonusDamage, spellHit } = job.data;
+          const { attacker, target, targetType, magicAttack, bonusDamage, spellHit } = job.data;
+
+          target.type = targetType;
 
           await this.queueCleaner.updateQueueActivity(this.queueCharacterHitName(scene));
 
@@ -130,7 +134,17 @@ export class HitTargetQueue {
         this.queueNPCHitName(scene),
         async (job) => {
           try {
-            const { attacker, target, magicAttack, bonusDamage, spellHit } = job.data;
+            const { attacker, target, targetType, magicAttack, bonusDamage, spellHit } = job.data;
+
+            target.type = targetType;
+
+            const hasLock =
+              (await this.locker.hasLock(`${target._id}-applying-usable-effect`)) ||
+              (await this.locker.hasLock(`${target._id}-healing-target`));
+
+            if (hasLock) {
+              return;
+            }
 
             await this.queueCleaner.updateQueueActivity(this.queueNPCHitName(scene));
 
@@ -177,10 +191,12 @@ export class HitTargetQueue {
       return;
     }
 
+    const targetType = target.type; // we have to pass this separately because the queue will not read the virtual field later
+
     if (attacker.type === EntityType.Character) {
       await this.characterQueue?.add(
         this.queueCharacterHitName((attacker as ICharacter).scene),
-        { attacker, target, magicAttack, bonusDamage, spellHit },
+        { attacker, target, targetType, magicAttack, bonusDamage, spellHit },
         {
           removeOnComplete: true,
           removeOnFail: true,
@@ -194,7 +210,7 @@ export class HitTargetQueue {
     } else {
       await this.npcQueue?.add(
         this.queueNPCHitName((attacker as INPC).scene),
-        { attacker, target, magicAttack, bonusDamage, spellHit },
+        { attacker, target, targetType, magicAttack, bonusDamage, spellHit },
         {
           removeOnComplete: true,
           removeOnFail: true,
@@ -238,6 +254,8 @@ export class HitTargetQueue {
     bonusDamage?: number,
     spellHit?: boolean
   ): Promise<void> {
+    target.isAlive = target.health > 0;
+
     if (!target.isAlive) {
       return;
     }
@@ -282,9 +300,9 @@ export class HitTargetQueue {
         let sorcererManaShield: boolean = false;
         if (target.class === CharacterClass.Sorcerer || target.class === CharacterClass.Druid) {
           const character = target as ICharacter;
-          const manaShieldSpell = this.manaShield.getManaShieldSpell(character);
+          const hasManaShieldSpell = await this.manaShield.getManaShieldSpell(character);
 
-          if (await manaShieldSpell) {
+          if (hasManaShieldSpell) {
             sorcererManaShield = await this.manaShield.handleManaShield(character, damage);
           }
         }

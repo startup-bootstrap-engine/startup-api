@@ -11,15 +11,11 @@ import { NPCView } from "./NPCView";
 
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { PROMISE_DEFAULT_CONCURRENCY } from "@providers/constants/ServerConstants";
 import { Locker } from "@providers/locks/Locker";
 import { MathHelper } from "@providers/math/MathHelper";
 import { RaidManager } from "@providers/raid/RaidManager";
-import { Time } from "@providers/time/Time";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
-import { random } from "lodash";
 import { NPCCycleQueue } from "./NPCCycleQueue";
-import { NPCFreezer } from "./NPCFreezer";
 
 @provide(NPCManager)
 export class NPCManager {
@@ -30,19 +26,14 @@ export class NPCManager {
     private mathHelper: MathHelper,
     private raidManager: RaidManager,
     private npcCycleQueue: NPCCycleQueue,
-    private locker: Locker,
-    private time: Time,
-    private npcFreezer: NPCFreezer
+    private locker: Locker
   ) {}
 
   @TrackNewRelicTransaction()
   public async startNearbyNPCsBehaviorLoop(character: ICharacter): Promise<void> {
-    const maxActiveNPCs = await this.npcFreezer.maxActiveNPCs();
-
     const nearbyNPCs = await this.npcView.getNPCsInView(character, { isBehaviorEnabled: false });
 
-    let totalActiveNPCs = await NPC.countDocuments({ isBehaviorEnabled: true });
-
+    const totalActiveNPCs = await NPC.countDocuments({ isBehaviorEnabled: true });
     this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.NPCs, "Active", totalActiveNPCs);
 
     const behaviorLoops: Promise<void>[] = [];
@@ -54,23 +45,10 @@ export class NPCManager {
         continue;
       }
 
-      if (totalActiveNPCs <= maxActiveNPCs) {
-        // watch out for max NPCs active limit so we don't fry our CPU
-        behaviorLoops.push(this.startBehaviorLoop(npc));
-        totalActiveNPCs++;
-      } else {
-        break; // break out of the loop if we've reached max active NPCs
-      }
+      behaviorLoops.push(this.startBehaviorLoop(npc));
     }
 
-    await Promise.map(
-      behaviorLoops,
-      async (behaviorLoop) => {
-        await this.time.waitForMilliseconds(random(1, nearbyNPCs.length || 10));
-        return behaviorLoop;
-      },
-      { concurrency: PROMISE_DEFAULT_CONCURRENCY }
-    );
+    await Promise.all(behaviorLoops);
   }
 
   @TrackNewRelicTransaction()

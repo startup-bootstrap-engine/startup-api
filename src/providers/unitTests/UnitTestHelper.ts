@@ -207,7 +207,7 @@ export class UnitTestHelper {
     return container;
   }
 
-  public async createMockItemContainer(character: ICharacter): Promise<IItem> {
+  public async createMockCharacterDeadBody(character: ICharacter): Promise<IItem> {
     const blueprintData = await blueprintManager.getBlueprint<IItem>("items", BodiesBlueprint.CharacterBody);
 
     const charBody = new Item({
@@ -530,6 +530,19 @@ export class UnitTestHelper {
     return socketTransmissionZone;
   }
 
+  public async createMockItemContainer(extraProps?: Partial<IItemContainer>): Promise<IItemContainer> {
+    const parentItem = await this.createMockItemFromBlueprint(ContainersBlueprint.Backpack);
+
+    const itemContainer = new ItemContainer({
+      parentItem: parentItem._id,
+      ...extraProps,
+    });
+
+    await itemContainer.save();
+
+    return itemContainer;
+  }
+
   public async createMockBackpackItemContainer(parent: IItem, extraProps?: Partial<IItem>): Promise<IItemContainer> {
     const slotQty: number = 20;
 
@@ -707,6 +720,7 @@ export class UnitTestHelper {
 
     let depotItemContainer = new ItemContainer({
       parentItem: newDepot._id,
+      owner: characterId,
       ...extraProps,
     });
     depotItemContainer = await depotItemContainer.save();

@@ -41,7 +41,7 @@ export const spellQuickFire: Partial<ISpell> = {
 
     const buffPercentage = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
       min: 25,
-      max: 50,
+      max: 60,
     });
 
     await characterBuffActivator.enableTemporaryBuff(character, {

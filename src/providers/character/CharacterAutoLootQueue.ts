@@ -10,7 +10,6 @@ import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { AnimationEffectKeys, EnvType, IItemUpdate, ItemSocketEvents, ItemSubType, ItemType } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
-import { v4 as uuidv4 } from "uuid";
 import { CharacterInventory } from "./CharacterInventory";
 import { CharacterValidation } from "./CharacterValidation";
 import { CharacterView } from "./CharacterView";
@@ -21,9 +20,9 @@ export class CharacterAutoLootQueue {
   private queue: Queue<any, any, string> | null = null;
   private worker: Worker | null = null;
   private connection: any;
-  private queueName: string = `auto-loot-queue-${uuidv4()}-${
-    appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
-  }`;
+
+  private queueName = (scene: string): string =>
+    `auto-loot-queue-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
 
   constructor(
     private characterValidation: CharacterValidation,
@@ -36,13 +35,13 @@ export class CharacterAutoLootQueue {
     private queueCleaner: QueueCleaner
   ) {}
 
-  public init(): void {
+  public init(scene: string): void {
     if (!this.connection) {
       this.connection = this.redisManager.client;
     }
 
     if (!this.queue) {
-      this.queue = new Queue(this.queueName, {
+      this.queue = new Queue(this.queueName(scene), {
         connection: this.connection,
       });
 
@@ -58,12 +57,12 @@ export class CharacterAutoLootQueue {
 
     if (!this.worker) {
       this.worker = new Worker(
-        this.queueName,
+        this.queueName(scene),
         async (job) => {
           const { character, itemIdsToLoot } = job.data;
 
           try {
-            await this.queueCleaner.updateQueueActivity(this.queueName);
+            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
 
             await this.execAutoLoot(character, itemIdsToLoot);
           } catch (err) {
@@ -89,11 +88,11 @@ export class CharacterAutoLootQueue {
 
   public async autoLoot(character: ICharacter, itemIdsToLoot: string[]): Promise<void> {
     if (!this.connection || !this.queue || !this.worker) {
-      this.init();
+      this.init(character.scene);
     }
 
     await this.queue?.add(
-      this.queueName,
+      this.queueName(character.scene),
       { character, itemIdsToLoot },
       {
         removeOnComplete: true,

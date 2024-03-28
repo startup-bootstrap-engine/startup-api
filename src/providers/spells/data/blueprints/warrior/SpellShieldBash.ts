@@ -55,12 +55,12 @@ export const spellShieldBash: Partial<ISpell> = {
 
     const debuffPercentage = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Strength, {
       min: 10,
-      max: 25,
+      max: 60,
     });
 
     const timeout = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Strength, {
-      min: 10,
-      max: 30,
+      min: 15,
+      max: 60,
     });
 
     await characterBuffActivator.enableTemporaryBuff(target as ICharacter, {

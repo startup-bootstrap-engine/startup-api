@@ -4,7 +4,6 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
-  AxesBlueprint,
   BooksBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
@@ -115,18 +114,6 @@ export const npcNazgul: INPCTierBlueprint<18> = {
     {
       itemBlueprintKey: MacesBlueprint.IronWoodCrusherClub,
       chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.DualImpactAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.CrownSplitterAxe,
-      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: DaggersBlueprint.AstralDagger,

@@ -68,11 +68,10 @@ export class CharacterCrons {
       },
     });
 
-    for (const bannedCharacter of bannedCharacters) {
-      console.log(`💡 Character id ${bannedCharacter.id} has been unbanned...`);
-      bannedCharacter.isBanned = false;
-      await bannedCharacter.save();
-    }
+    await Character.updateMany(
+      { _id: { $in: bannedCharacters.map((character) => character._id) } },
+      { $set: { isBanned: false, banRemovalDate: undefined } }
+    );
   }
 
   private async logoutInactiveCharacters(): Promise<void> {

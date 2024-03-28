@@ -119,14 +119,6 @@ export const npcCorruptedKobold: INPCTierBlueprint<18> = {
       chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.CrownedAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
       chance: LootProbability.Uncommon,
     },

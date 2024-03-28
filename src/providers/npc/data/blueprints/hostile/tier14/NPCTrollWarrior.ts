@@ -17,6 +17,7 @@ import {
   RangedWeaponsBlueprint,
   ShieldsBlueprint,
   StaffsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -106,6 +107,10 @@ export const npcTrollWarrior: INPCTierBlueprint<14> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.ElderHeartAxe,
       chance: LootProbability.Rare,
     },
   ],

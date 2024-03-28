@@ -27,7 +27,7 @@ export const BERSERKER_BLOODTHIRST_HEALING_FACTOR = 1.5;
 
 // Mages
 
-export const MAGE_MANA_SHIELD_DAMAGE_REDUCTION = 2; // 50% damage reduction
+export const MAGE_MANA_SHIELD_DAMAGE_REDUCTION = 1; // 100% damage reduction
 
 export const GENERATE_BLOOD_GROUND_ON_HIT = 5; // 5% chance to generate blood on the ground
 

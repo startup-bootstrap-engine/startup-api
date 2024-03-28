@@ -9,7 +9,7 @@ export const EXTERIOR_LIGHTENING_MAPS = [
   "wildwood",
 ];
 
-export const NO_LIGHTENING_MAPS = ["ilya-village-interiors"];
+export const NO_LIGHTENING_MAPS = ["ilya-village-interiors", "arena-hell"];
 
 export const UNIT_TESTING_MAPS = ["unit-test-map.json", "example.json", "unit-test-map-negative-coordinate.json"];
 

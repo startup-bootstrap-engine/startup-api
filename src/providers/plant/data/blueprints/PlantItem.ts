@@ -25,4 +25,5 @@ export interface IPlantItem extends Partial<IItem> {
   availableOnlyOnSeasons: Season[]; // if empty, it means it's available all year round
   fasterGrowthOnSeasons: Season[]; // if empty, it means it grows at the same rate all year round
   harvestableItemKey: string; // item thats generated once its harvested
+  regrowAfterHarvestLimit?: number;
 }

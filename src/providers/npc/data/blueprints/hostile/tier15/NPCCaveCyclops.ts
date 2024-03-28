@@ -88,14 +88,6 @@ export const npcCaveCyclops: INPCTierBlueprint<15> = {
       chance: LootProbability.Rare,
     },
     {
-      itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.SpikeToppedAxe,
-      chance: LootProbability.Rare,
-    },
-    {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
       chance: LootProbability.Rare,
     },

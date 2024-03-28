@@ -52,7 +52,7 @@ export const spellCorruptionBolt: Partial<ISpell> = {
 
     const debuffPercentage = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
       min: 5,
-      max: 10,
+      max: 30,
     });
 
     if (target.type === "Character") {

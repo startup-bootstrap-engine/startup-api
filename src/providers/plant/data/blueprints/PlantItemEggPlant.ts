@@ -44,9 +44,10 @@ export const plantItemEggPlant: IPlantItem = {
     },
   },
   harvestableItemKey: FoodsBlueprint.Eggplant,
-  regrowsAfterHarvest: false,
+  regrowsAfterHarvest: true,
   growthFactor: MEDIUM_GROWTH_FACTOR,
   yieldFactor: FARMING_MEDIUM_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
+  regrowAfterHarvestLimit: 2,
 };

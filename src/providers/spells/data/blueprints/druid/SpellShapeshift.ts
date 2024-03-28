@@ -50,7 +50,7 @@ export const spellShapeshift: Partial<ISpell> = {
       BasicAttribute.Magic,
       {
         min: 5,
-        max: 50,
+        max: 60,
       }
     );
 

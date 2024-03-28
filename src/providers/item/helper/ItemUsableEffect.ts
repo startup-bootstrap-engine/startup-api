@@ -2,6 +2,7 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
+import { Locker } from "@providers/locks/Locker";
 import { EntityType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
@@ -18,9 +19,17 @@ export enum EffectableAttribute {
 
 @provide(ItemUsableEffect)
 export class ItemUsableEffect {
+  constructor(private locker: Locker) {}
+
   @TrackNewRelicTransaction()
   public async apply(target: ICharacter | INPC, attr: EffectableAttribute, value: number): Promise<void> {
     try {
+      const canProceed = await this.locker.lock(`${target._id}-applying-usable-effect`);
+
+      if (!canProceed) {
+        return;
+      }
+
       this.validateTargetAndValue(target, value);
 
       const updateObj: any = this.calculateAttributeUpdate(target, attr, value);
@@ -29,6 +38,8 @@ export class ItemUsableEffect {
     } catch (error) {
       console.error("Failed to update entity:", error);
       throw error;
+    } finally {
+      await this.locker.unlock(`${target._id}-applying-usable-effect`);
     }
   }
 

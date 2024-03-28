@@ -4,14 +4,12 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
-  AxesBlueprint,
   BooksBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
   GemsBlueprint,
   GlovesBlueprint,
   HelmetsBlueprint,
-  LegsBlueprint,
   MacesBlueprint,
   OthersBlueprint,
   SeedsBlueprint,
@@ -140,17 +138,10 @@ export const npcDragonServant: INPCTierBlueprint<18> = {
       chance: LootProbability.Rare,
     },
     {
-      itemBlueprintKey: StaffsBlueprint.ElementalStaff,
-      chance: LootProbability.VeryRare,
-    },
-    {
       itemBlueprintKey: GlovesBlueprint.GenesisGloves,
       chance: LootProbability.VeryRare,
     },
-    {
-      itemBlueprintKey: LegsBlueprint.DragonScaleLegs,
-      chance: LootProbability.Rare,
-    },
+
     {
       itemBlueprintKey: MacesBlueprint.BoneBreakerClub,
       chance: LootProbability.SemiCommon,
@@ -169,18 +160,6 @@ export const npcDragonServant: INPCTierBlueprint<18> = {
     },
     {
       itemBlueprintKey: MacesBlueprint.IronWoodCrusherClub,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.BoneReaperAxe,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.TwinEdgeAxe,
       chance: LootProbability.SemiCommon,
     },
     {

@@ -14,6 +14,7 @@ import { CharacterActionsTracker } from "@providers/character/CharacterActionsTr
 import { CharacterConsumptionControl } from "@providers/character/CharacterConsumptionControl";
 import { CharacterMonitorCallbackTracker } from "@providers/character/CharacterMonitorInterval/CharacterMonitorCallbackTracker";
 import { CharacterNetworkUpdateQueue } from "@providers/character/network/CharacterNetworkUpdate/CharacterNetworkUpdateQueue";
+import { CharacterNetworkCreateQueue } from "@providers/character/network/characterCreate/CharacterNetworkCreateQueue";
 import { ChatNetworkGlobalMessagingQueue } from "@providers/chat/network/ChatNetworkGlobalMessagingQueue";
 import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
@@ -22,6 +23,7 @@ import { EntityEffectDurationControl } from "@providers/entityEffects/EntityEffe
 import { ErrorHandlingTracker } from "@providers/errorHandling/ErrorHandlingTracker";
 import { ItemDropVerifier } from "@providers/item/ItemDropVerifier";
 import { ItemUseCycleQueue } from "@providers/item/ItemUseCycleQueue";
+import { ItemContainerTransactionQueue } from "@providers/itemContainer/ItemContainerTransactionQueue";
 import { Locker } from "@providers/locks/Locker";
 import { NPCBattleCycleQueue } from "@providers/npc/NPCBattleCycleQueue";
 import { NPCCycleQueue } from "@providers/npc/NPCCycleQueue";
@@ -65,6 +67,7 @@ export class ServerBootstrap {
     private entityEffectDuration: EntityEffectDurationControl,
     private characterMonitorCallbackTracker: CharacterMonitorCallbackTracker,
     private characterNetworkUpdateQueue: CharacterNetworkUpdateQueue,
+    private characterNetworkCreateQueue: CharacterNetworkCreateQueue,
     private patreonAPI: PatreonAPI,
     private useWithTileQueue: UseWithTileQueue,
     private chatNetworkGlobalMessaging: ChatNetworkGlobalMessagingQueue,
@@ -74,6 +77,7 @@ export class ServerBootstrap {
     private bullStrength: BullStrength,
     private npcMovementMoveTowardsQueue: NPCMovementMoveTowardsQueue,
     private npcDeathQueue: NPCDeathQueue,
+    private itemContainerTransactionQueue: ItemContainerTransactionQueue,
     private itemDropVerifier: ItemDropVerifier
   ) {}
 
@@ -121,6 +125,8 @@ export class ServerBootstrap {
       await this.spellNetworkCast.shutdown();
       await this.npcMovementMoveTowardsQueue.shutdown();
       await this.npcDeathQueue.shutdown();
+      await this.itemContainerTransactionQueue.shutdown();
+      await this.characterNetworkCreateQueue.shutdown();
     };
 
     process.on("SIGTERM", async () => {
@@ -162,6 +168,7 @@ export class ServerBootstrap {
     await this.inMemoryHashTable.deleteAll("use-item-to-tile");
     await this.inMemoryHashTable.deleteAll("character-bonus-penalties");
     await this.inMemoryHashTable.deleteAll("skills-with-buff");
+    await this.inMemoryHashTable.deleteAll("item-container-transfer-results");
 
     await this.itemDropVerifier.clearAllItemDrops();
 
@@ -205,6 +212,8 @@ export class ServerBootstrap {
     await this.chatNetworkGlobalMessaging.clearAllJobs();
     await this.spellNetworkCast.clearAllJobs();
     await this.npcDeathQueue.clearAllJobs();
+    await this.characterNetworkCreateQueue.clearAllJobs();
+    await this.npcCycleQueue.clearAllJobs();
 
     console.log("🧹 BullMQ queues cleared!");
   }

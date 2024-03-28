@@ -99,11 +99,14 @@ export class SpellCalculator {
         throw new Error(`Unsupported formula type: ${options.formulaType}`);
     }
 
-    // Check if the interpolated value is greater than the maximum value (max).
+    // Check if the interpolated value is less than the minimum value (min) or greater than the maximum value (max).
+    // If it is less, set the interpolated value as the minimum value (min).
     // If it is greater, set the interpolated value as the maximum value (max).
-    const maxInterpolatedValue = Math.min(buffPercentage, options.max);
+    const clampedInterpolatedValue = Math.max(Math.min(buffPercentage, options.max), options.min);
 
-    return maxInterpolatedValue;
+    console.log("clampedInterpolatedValue", clampedInterpolatedValue);
+
+    return clampedInterpolatedValue;
   }
 
   @TrackNewRelicTransaction()

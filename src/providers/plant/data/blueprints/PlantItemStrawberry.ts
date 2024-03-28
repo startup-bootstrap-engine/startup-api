@@ -44,9 +44,10 @@ export const plantItemStrawberry: IPlantItem = {
     },
   },
   harvestableItemKey: FoodsBlueprint.Strawberry,
-  regrowsAfterHarvest: false,
+  regrowsAfterHarvest: true,
   growthFactor: MEDIUM_GROWTH_FACTOR,
   yieldFactor: FARMING_HIGH_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
+  regrowAfterHarvestLimit: 2,
 };

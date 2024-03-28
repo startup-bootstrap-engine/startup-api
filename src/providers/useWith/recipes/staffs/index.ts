@@ -1,28 +1,30 @@
 import { StaffsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { IUseWithCraftingRecipe } from "@providers/useWith/useWithTypes";
-import { recipeCorruptionStaff } from "./recipeCorruptionStaff";
-import { recipeDoomStaff } from "./recipeDoomStaff";
-import { recipeElysianEyeStaff } from "./recipeElysianEyeStaff";
-import { recipeEnchantedStaff } from "./recipeEnchantedStaff";
-import { recipeFireStaff } from "./recipeFireStaff";
-import { recipeFireWand } from "./recipeFireWand";
-import { recipeFireburstWand } from "./recipeFireburstWand";
-import { recipeGaleforceStaff } from "./recipeGaleforceStaff";
-import { recipeHellishBronzeStaff } from "./recipeHellishBronzeStaff";
-import { recipeLunarWand } from "./recipeLunarWand";
-import { recipeNaturesWand } from "./recipeNaturesWand";
-import { recipePoisonWand } from "./recipePoisonWand";
-import { recipeRoyalStaff } from "./recipeRoyalStaff";
-import { recipeRubyStaff } from "./recipeRubyStaff";
-import { recipeSangriaStaff } from "./recipeSangriaStaff";
-import { recipeBlueSkyStaff } from "./recipeSkyBlueStaff";
-import { recipeSolarStaff } from "./recipeSolarStaff";
-import { recipeSpellbinderWand } from "./recipeSpellbinderWand";
-import { recipeTartarusStaff } from "./recipeTartarusStaff";
-import { recipeVortexStaff } from "./recipeVortexStaff";
-import { recipeWinterspireStaff } from "./recipeWinterspireStaff";
-import { recipeWoodenStaff } from "./recipeWoodenStaff";
-import { recipeAshwoodStaff } from "./recipeAshwoodStaff";
+import { recipeCorruptionStaff } from "./tier2/recipeCorruptionStaff";
+import { recipeDoomStaff } from "./tier16/recipeDoomStaff";
+import { recipeElysianEyeStaff } from "./tier16/recipeElysianEyeStaff";
+import { recipeEnchantedStaff } from "./tier4/recipeEnchantedStaff";
+import { recipeFireStaff } from "./tier3/recipeFireStaff";
+import { recipeFireWand } from "./tier1/recipeFireWand";
+import { recipeFireburstWand } from "./tier10/recipeFireburstWand";
+import { recipeGaleforceStaff } from "./tier15/recipeGaleforceStaff";
+import { recipeHellishBronzeStaff } from "./tier14/recipeHellishBronzeStaff";
+import { recipeLunarWand } from "./tier13/recipeLunarWand";
+import { recipeNaturesWand } from "./tier8/recipeNaturesWand";
+import { recipePoisonWand } from "./tier1/recipePoisonWand";
+import { recipeRoyalStaff } from "./tier5/recipeRoyalStaff";
+import { recipeRubyStaff } from "./tier4/recipeRubyStaff";
+import { recipeSangriaStaff } from "./tier5/recipeSangriaStaff";
+import { recipeBlueSkyStaff } from "./tier4/recipeSkyBlueStaff";
+import { recipeSolarStaff } from "./tier11/recipeSolarStaff";
+import { recipeSpellbinderWand } from "./tier7/recipeSpellbinderWand";
+import { recipeTartarusStaff } from "./tier5/recipeTartarusStaff";
+import { recipeVortexStaff } from "./tier12/recipeVortexStaff";
+import { recipeWinterspireStaff } from "./tier10/recipeWinterspireStaff";
+import { recipeWoodenStaff } from "./tier0/recipeWoodenStaff";
+import { recipeAshwoodStaff } from "./tier16/recipeAshwoodStaff";
+import { recipeGravityStaff } from "./tier15/recipeGravityStaff";
+import { recipeElementalStaff } from "./tier14/recipeElementalStaff";
 
 export const recipeStaffsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [StaffsBlueprint.FireStaff]: [recipeFireStaff],
@@ -48,4 +50,6 @@ export const recipeStaffsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [StaffsBlueprint.WinterspireStaff]: [recipeWinterspireStaff],
   [StaffsBlueprint.ElysianEyeStaff]: [recipeElysianEyeStaff],
   [StaffsBlueprint.AshwoodStaff]: [recipeAshwoodStaff],
+  [StaffsBlueprint.GravityStaff]: [recipeGravityStaff],
+  [StaffsBlueprint.ElementalStaff]: [recipeElementalStaff],
 };

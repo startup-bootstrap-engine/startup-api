@@ -5,7 +5,6 @@ import { NewRelic } from "@providers/analytics/NewRelic";
 import { appEnv } from "@providers/config/env";
 import { SOCKET_IO_CONFIG } from "@providers/constants/SocketsConstants";
 import { SocketIOAuthMiddleware } from "@providers/middlewares/SocketIOAuthMiddleware";
-import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { EnvType, ISocket } from "@rpg-engine/shared";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { provide } from "inversify-binding-decorators";
@@ -75,32 +74,6 @@ export class SocketIO implements ISocket {
   public onConnect(onConnectFn: (channel) => void): void {
     this.socket.on("connection", (channel) => {
       onConnectFn(channel);
-
-      channel.on("disconnect", (reason: string) => {
-        console.log(`Client disconnected: ${channel.id}, Reason: ${reason}`);
-
-        /*
-        transport close: This occurs when the client explicitly closes the connection, such as when a user closes their browser tab or the client application terminates the connection.
-
-        ping timeout: Socket.IO uses heartbeats to ensure the connection is alive. If the server doesn't receive any heartbeat from the client within a certain period, it will close the connection due to a timeout.
-
-        transport error: This indicates a problem with the transport layer, such as network issues or WebSockets being blocked or failing.
-
-        io server disconnect: This is emitted when the server programmatically disconnects the socket using socket.disconnect().
-
-        io client disconnect: This is emitted when the client programmatically disconnects the socket using socket.disconnect().
-
-        client namespace disconnect: Emitted when the client disconnects from a namespace explicitly by calling disconnect() on the namespace.
-        */
-
-        // Log the disconnection reason with NewRelic or any other monitoring tool you're using
-        this.newRelic.trackMetric(
-          NewRelicMetricCategory.Count,
-          NewRelicSubCategory.Server,
-          `SocketIODisconnect/${reason}`,
-          1
-        );
-      });
     });
   }
 

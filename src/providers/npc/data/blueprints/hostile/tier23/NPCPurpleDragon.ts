@@ -214,18 +214,6 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
       chance: LootProbability.VeryCommon,
     },
     {
-      itemBlueprintKey: AxesBlueprint.TimberSplitterAxe,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.BrutalChopperAxe,
-      chance: LootProbability.VeryCommon,
-    },
-    {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
       chance: LootProbability.Common,
     },

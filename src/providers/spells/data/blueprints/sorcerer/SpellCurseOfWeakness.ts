@@ -51,7 +51,7 @@ export const spellCurseOfWeakness: Partial<ISpell> = {
 
     const buffPercentage = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
       min: 10,
-      max: 15,
+      max: 30,
     });
 
     await characterBuffActivator.enableTemporaryBuff(target as ICharacter, {

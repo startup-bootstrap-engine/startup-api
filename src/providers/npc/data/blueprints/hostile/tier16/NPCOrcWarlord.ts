@@ -3,7 +3,6 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   AccessoriesBlueprint,
-  AxesBlueprint,
   BooksBlueprint,
   DaggersBlueprint,
   FoodsBlueprint,
@@ -96,18 +95,6 @@ export const npcOrcWarlord: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: MacesBlueprint.GrimHarbingerClub,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.DualImpactAxe,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.CrownSplitterAxe,
       chance: LootProbability.Rare,
     },
     {

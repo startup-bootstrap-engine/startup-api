@@ -54,11 +54,6 @@ export const itemCarpentersAxe: IToolItemBlueprint = {
         successMessages: ["You found some wood!", "You're getting good at this!"],
         rewards: [
           {
-            key: CraftingResourcesBlueprint.GreaterWoodenLog,
-            qty: [3, 4],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 5, rarityOfTool),
-          },
-          {
             key: CraftingResourcesBlueprint.WoodenSticks,
             qty: [2, 3],
             chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 10, rarityOfTool),
@@ -67,11 +62,6 @@ export const itemCarpentersAxe: IToolItemBlueprint = {
             key: CraftingResourcesBlueprint.SmallWoodenStick,
             qty: [2, 3],
             chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 10, rarityOfTool),
-          },
-          {
-            key: CraftingResourcesBlueprint.ElvenWood,
-            qty: [1, 2],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 5, rarityOfTool),
           },
         ],
       },
