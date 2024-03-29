@@ -94,12 +94,12 @@ export class NPCMovementMoveTowardsQueue {
       this.worker = new Worker(
         this.queueName(scene),
         async (job) => {
-          const { npc } = job.data;
+          const { npc, targetCharacter } = job.data;
 
           try {
             await this.queueCleaner.updateQueueActivity(this.queueName(scene));
 
-            await this.execStartMoveTowardsMovement(npc);
+            await this.execStartMoveTowardsMovement(npc, targetCharacter);
           } catch (err) {
             console.error(`Error processing ${this.queueName(scene)} for NPC ${npc.key}:`, err);
             throw err;
@@ -140,8 +140,22 @@ export class NPCMovementMoveTowardsQueue {
   }
 
   public async startMoveTowardsMovement(npc: INPC): Promise<void> {
+    const targetCharacter = await this.getTargetCharacter(npc);
+
+    if (!this.isValidTarget(npc, targetCharacter)) {
+      await this.handleInvalidTarget(npc);
+      return;
+    }
+
+    const hasBattle = await this.locker.hasLock(`npc-${npc._id}-npc-battle-cycle`);
+
+    if (this.reachedTarget(npc, targetCharacter) && hasBattle) {
+      await this.handleReachedTarget(npc, targetCharacter);
+      return;
+    }
+
     if (appEnv.general.IS_UNIT_TEST) {
-      await this.execStartMoveTowardsMovement(npc);
+      await this.execStartMoveTowardsMovement(npc, targetCharacter);
       return;
     }
 
@@ -158,7 +172,7 @@ export class NPCMovementMoveTowardsQueue {
 
       await this.queue?.add(
         this.queueName(npc.scene),
-        { npc },
+        { npc, targetCharacter },
         {
           removeOnComplete: true,
           removeOnFail: true,
@@ -172,14 +186,7 @@ export class NPCMovementMoveTowardsQueue {
   }
 
   @TrackNewRelicTransaction()
-  private async execStartMoveTowardsMovement(npc: INPC): Promise<void> {
-    const targetCharacter = await this.getTargetCharacter(npc);
-
-    if (!this.isValidTarget(npc, targetCharacter)) {
-      await this.handleInvalidTarget(npc);
-      return;
-    }
-
+  private async execStartMoveTowardsMovement(npc: INPC, targetCharacter: ICharacter): Promise<void> {
     await this.handleValidTarget(npc, targetCharacter);
   }
 
@@ -206,7 +213,7 @@ export class NPCMovementMoveTowardsQueue {
     await this.npcTarget.tryToClearOutOfRangeTargets(npc);
 
     const attackRange = npc.attackType === EntityAttackType.Melee ? 2 : npc.maxRangeAttack;
-    await this.initOrClearBattleCycle(npc, targetCharacter, attackRange);
+    await this.initOrClearBattleCycle(npc, targetCharacter, attackRange!);
 
     await this.fleeIfHealthIsLow(npc);
 
@@ -287,8 +294,7 @@ export class NPCMovementMoveTowardsQueue {
   private async initOrClearBattleCycle(
     npc: INPC,
     targetCharacter: ICharacter,
-
-    maxRangeInGridCells
+    maxRangeInGridCells: number
   ): Promise<void> {
     if (npc.alignment === NPCAlignment.Hostile) {
       // if melee, only start battle cycle if target is in melee range
