@@ -30,8 +30,26 @@ export class NPCCycleQueue {
   private queue: Queue<any, any, string> | null = null;
   private worker: Worker | null = null;
   private connection: any;
-  private queueName = (scene: string): string =>
-    `npc-cycle-queue-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
+  private queueName = (scene: string, totalActiveNPCs: number): string => {
+    let envSuffix;
+    let maxQueues;
+    let queueNumber;
+
+    switch (appEnv.general.ENV) {
+      case EnvType.Development:
+        envSuffix = "dev";
+        maxQueues = 1;
+        queueNumber = 1;
+        break;
+      default:
+        envSuffix = process.env.pm_id;
+        maxQueues = Math.floor(totalActiveNPCs / 10) + 1;
+        queueNumber = Math.min(Math.ceil(Math.random() * maxQueues), 100);
+        break;
+    }
+
+    return `npc-cycle-queue-${envSuffix}-${scene}-${queueNumber}`;
+  };
 
   constructor(
     private npcView: NPCView,
@@ -49,19 +67,19 @@ export class NPCCycleQueue {
     private queueCleaner: QueueCleaner
   ) {}
 
-  public init(scene: string): void {
+  public init(queueName: string, totalActiveNPCs: number): void {
     if (!this.connection) {
       this.connection = this.redisManager.client;
     }
 
     if (!this.queue) {
-      this.queue = new Queue(this.queueName(scene), {
+      this.queue = new Queue(queueName, {
         connection: this.connection,
       });
 
       if (!appEnv.general.IS_UNIT_TEST) {
         this.queue.on("error", async (error) => {
-          console.error(`Error in the ${this.queueName} :`, error);
+          console.error(`Error in the ${queueName} :`, error);
 
           await this.queue?.close();
           this.queue = null;
@@ -71,16 +89,16 @@ export class NPCCycleQueue {
 
     if (!this.worker) {
       this.worker = new Worker(
-        this.queueName(scene),
+        queueName,
         async (job) => {
           const { npc, npcSkills } = job.data;
 
           try {
-            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
+            await this.queueCleaner.updateQueueActivity(queueName);
 
-            await this.execNpcCycle(npc, npcSkills);
+            await this.execNpcCycle(npc, npcSkills, totalActiveNPCs);
           } catch (err) {
-            console.error(`Error processing ${this.queueName} for NPC ${npc.key}:`, err);
+            console.error(`Error processing ${queueName} for NPC ${npc.key}:`, err);
             throw err;
           }
         },
@@ -91,7 +109,7 @@ export class NPCCycleQueue {
 
       if (!appEnv.general.IS_UNIT_TEST) {
         this.worker.on("failed", async (job, err) => {
-          console.log(`${this.queueName} job ${job?.id} failed with error ${err.message}`);
+          console.log(`${queueName} job ${job?.id} failed with error ${err.message}`);
 
           await this.worker?.close();
           this.worker = null;
@@ -101,18 +119,20 @@ export class NPCCycleQueue {
   }
 
   @TrackNewRelicTransaction()
-  public async add(npc: INPC, npcSkills: ISkill): Promise<void> {
+  public async add(npc: INPC, npcSkills: ISkill, totalActiveNPCs: number): Promise<void> {
     if (appEnv.general.IS_UNIT_TEST) {
-      await this.execNpcCycle(npc, npcSkills);
+      await this.execNpcCycle(npc, npcSkills, totalActiveNPCs);
       return;
     }
 
+    const queueName = this.queueName(npc.scene, totalActiveNPCs);
+
     if (!this.connection || !this.queue || !this.worker) {
-      this.init(npc.scene);
+      this.init(queueName, totalActiveNPCs);
     }
 
     await this.queue?.add(
-      this.queueName(npc.scene),
+      queueName,
       {
         npc,
         npcSkills,
@@ -144,7 +164,7 @@ export class NPCCycleQueue {
   }
 
   @TrackNewRelicTransaction()
-  private async execNpcCycle(npc: INPC, npcSkills: ISkill): Promise<void> {
+  private async execNpcCycle(npc: INPC, npcSkills: ISkill, totalActiveNPCs: number): Promise<void> {
     this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Server, "NPCCycles", 1);
 
     npc = await NPC.findById(npc._id).lean({
@@ -164,13 +184,13 @@ export class NPCCycleQueue {
     npc.skills = npcSkills;
 
     if (await this.stun.isStun(npc)) {
-      await this.add(npc, npcSkills);
+      await this.add(npc, npcSkills, totalActiveNPCs);
 
       return;
     }
 
     await this.startCoreNPCBehavior(npc);
-    await this.add(npc, npcSkills);
+    await this.add(npc, npcSkills, totalActiveNPCs);
   }
 
   private async stop(npc: INPC): Promise<void> {
