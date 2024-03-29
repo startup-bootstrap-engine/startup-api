@@ -45,8 +45,26 @@ export class NPCMovementMoveTowardsQueue {
   private worker: Worker | null = null;
   private connection;
 
-  private queueName = (scene: string): string =>
-    `npc-movement-move-towards-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
+  private queueName = (scene: string, totalActiveNPCs: number): string => {
+    let envSuffix;
+    let maxQueues;
+    let queueNumber;
+
+    switch (appEnv.general.ENV) {
+      case EnvType.Development:
+        envSuffix = "dev";
+        maxQueues = 1;
+        queueNumber = 1;
+        break;
+      default:
+        envSuffix = process.env.pm_id;
+        maxQueues = Math.floor(totalActiveNPCs / 10) + 1;
+        queueNumber = Math.min(Math.ceil(Math.random() * maxQueues), 100);
+        break;
+    }
+
+    return `npc-movement-move-towards-queue-${envSuffix}-${scene}-${queueNumber}`;
+  };
 
   debouncedFaceTarget: _.DebouncedFunc<(npc: INPC, targetCharacter: ICharacter) => Promise<void>>;
 
@@ -66,7 +84,7 @@ export class NPCMovementMoveTowardsQueue {
     private queueCleaner: QueueCleaner
   ) {}
 
-  public init(scene: string): void {
+  public init(queueName: string): void {
     if (appEnv.general.IS_UNIT_TEST) {
       return;
     }
@@ -76,7 +94,7 @@ export class NPCMovementMoveTowardsQueue {
     }
 
     if (!this.queue) {
-      this.queue = new Queue(this.queueName(scene), {
+      this.queue = new Queue(queueName, {
         connection: this.connection,
       });
 
@@ -92,16 +110,16 @@ export class NPCMovementMoveTowardsQueue {
 
     if (!this.worker) {
       this.worker = new Worker(
-        this.queueName(scene),
+        queueName,
         async (job) => {
           const { npc, targetCharacter } = job.data;
 
           try {
-            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
+            await this.queueCleaner.updateQueueActivity(queueName);
 
             await this.execStartMoveTowardsMovement(npc, targetCharacter);
           } catch (err) {
-            console.error(`Error processing ${this.queueName(scene)} for NPC ${npc.key}:`, err);
+            console.error(`Error processing ${queueName} for NPC ${npc.key}:`, err);
             throw err;
           }
         },
@@ -139,7 +157,7 @@ export class NPCMovementMoveTowardsQueue {
     }
   }
 
-  public async startMoveTowardsMovement(npc: INPC): Promise<void> {
+  public async startMoveTowardsMovement(npc: INPC, totalActiveNPCs: number): Promise<void> {
     const targetCharacter = await this.getTargetCharacter(npc);
 
     if (!this.isValidTarget(npc, targetCharacter)) {
@@ -159,8 +177,10 @@ export class NPCMovementMoveTowardsQueue {
       return;
     }
 
+    const queueName = this.queueName(npc.scene, totalActiveNPCs);
+
     if (!this.connection || !this.queue || !this.worker) {
-      this.init(npc.scene);
+      this.init(queueName);
     }
 
     try {
@@ -171,7 +191,7 @@ export class NPCMovementMoveTowardsQueue {
       }
 
       await this.queue?.add(
-        this.queueName(npc.scene),
+        queueName,
         { npc, targetCharacter },
         {
           removeOnComplete: true,

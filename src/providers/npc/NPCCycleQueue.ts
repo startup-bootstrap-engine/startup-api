@@ -189,7 +189,7 @@ export class NPCCycleQueue {
       return;
     }
 
-    await this.startCoreNPCBehavior(npc);
+    await this.startCoreNPCBehavior(npc, totalActiveNPCs);
     await this.add(npc, npcSkills, totalActiveNPCs);
   }
 
@@ -233,7 +233,7 @@ export class NPCCycleQueue {
   }
 
   @TrackNewRelicTransaction()
-  private async startCoreNPCBehavior(npc: INPC): Promise<void> {
+  private async startCoreNPCBehavior(npc: INPC, totalActiveNPCs: number): Promise<void> {
     switch (npc.currentMovementType) {
       case NPCMovementType.MoveAway:
         await this.npcMovementMoveAway.startMovementMoveAway(npc);
@@ -244,7 +244,7 @@ export class NPCCycleQueue {
         break;
 
       case NPCMovementType.MoveTowards:
-        await this.npcMovementMoveTowards.startMoveTowardsMovement(npc);
+        await this.npcMovementMoveTowards.startMoveTowardsMovement(npc, totalActiveNPCs);
 
         break;
 
