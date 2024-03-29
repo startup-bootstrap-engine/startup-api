@@ -96,6 +96,7 @@ export class NPCMovementMoveTowardsQueue {
     if (!this.queue) {
       this.queue = new Queue(queueName, {
         connection: this.connection,
+        sharedConnection: true,
       });
 
       if (!appEnv.general.IS_UNIT_TEST) {
@@ -125,6 +126,11 @@ export class NPCMovementMoveTowardsQueue {
         },
         {
           connection: this.connection,
+          sharedConnection: true,
+          limiter: {
+            max: 50,
+            duration: 1000,
+          },
         }
       );
 

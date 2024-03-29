@@ -75,6 +75,7 @@ export class NPCCycleQueue {
     if (!this.queue) {
       this.queue = new Queue(queueName, {
         connection: this.connection,
+        sharedConnection: true,
       });
 
       if (!appEnv.general.IS_UNIT_TEST) {
@@ -104,6 +105,11 @@ export class NPCCycleQueue {
         },
         {
           connection: this.connection,
+          sharedConnection: true,
+          limiter: {
+            max: 50,
+            duration: 1000,
+          },
         }
       );
 
