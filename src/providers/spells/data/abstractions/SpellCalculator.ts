@@ -104,8 +104,6 @@ export class SpellCalculator {
     // If it is greater, set the interpolated value as the maximum value (max).
     const clampedInterpolatedValue = Math.max(Math.min(buffPercentage, options.max), options.min);
 
-    console.log("clampedInterpolatedValue", clampedInterpolatedValue);
-
     return clampedInterpolatedValue;
   }
 

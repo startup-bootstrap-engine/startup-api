@@ -114,7 +114,6 @@ export class NPCCycleQueue {
     await this.queue?.add(
       this.queueName(npc.scene),
       {
-        npcId: npc._id,
         npc,
         npcSkills,
       },
@@ -170,7 +169,7 @@ export class NPCCycleQueue {
       return;
     }
 
-    void this.startCoreNPCBehavior(npc);
+    await this.startCoreNPCBehavior(npc);
     await this.add(npc, npcSkills);
   }
 
@@ -217,20 +216,20 @@ export class NPCCycleQueue {
   private async startCoreNPCBehavior(npc: INPC): Promise<void> {
     switch (npc.currentMovementType) {
       case NPCMovementType.MoveAway:
-        void this.npcMovementMoveAway.startMovementMoveAway(npc);
+        await this.npcMovementMoveAway.startMovementMoveAway(npc);
         break;
 
       case NPCMovementType.Stopped:
-        void this.npcMovementStopped.startMovementStopped(npc);
+        await this.npcMovementStopped.startMovementStopped(npc);
         break;
 
       case NPCMovementType.MoveTowards:
-        void this.npcMovementMoveTowards.startMoveTowardsMovement(npc);
+        await this.npcMovementMoveTowards.startMoveTowardsMovement(npc);
 
         break;
 
       case NPCMovementType.Random:
-        void this.npcMovementRandom.startRandomMovement(npc);
+        await this.npcMovementRandom.startRandomMovement(npc);
         break;
       case NPCMovementType.FixedPath:
         let endGridX = npc.fixedPath.endGridX as unknown as number;
