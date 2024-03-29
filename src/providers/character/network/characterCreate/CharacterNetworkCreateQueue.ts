@@ -19,7 +19,6 @@ import { QueueCleaner } from "@providers/queue/QueueCleaner";
 import { Queue, Worker } from "bullmq";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterDailyPlayTracker } from "../../CharacterDailyPlayTracker";
-import { CharacterValidation } from "../../CharacterValidation";
 import { CharacterBuffValidation } from "../../characterBuff/CharacterBuffValidation";
 import { CharacterCreateInteractionManager } from "./CharacterCreateInteractionManager";
 import { CharacterCreateRegen } from "./CharacterCreateRegen";
@@ -48,7 +47,6 @@ export class CharacterNetworkCreateQueue {
     private characterDailyPlayTracker: CharacterDailyPlayTracker,
     private redisManager: RedisManager,
     private queueCleaner: QueueCleaner,
-    private characterValidation: CharacterValidation,
     private characterCreateSocketHandler: CharacterCreateSocketHandler,
     private characterCreateInteractionManager: CharacterCreateInteractionManager,
     private characterCreateRegen: CharacterCreateRegen,
@@ -199,12 +197,6 @@ export class CharacterNetworkCreateQueue {
       { target: undefined, isOnline: true, channelId },
       { new: true }
     )) as ICharacter;
-  }
-
-  private validateCharacter(character: ICharacter): boolean {
-    const canProceed = this.characterValidation.hasBasicValidation(character);
-
-    return canProceed;
   }
 
   private async clearCharacterCaches(character: ICharacter): Promise<void> {
