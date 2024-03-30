@@ -119,7 +119,6 @@ export class HitTargetQueue {
         this.queueCharacterHitName(scene),
         async (job) => {
           const { attacker, target, targetType, magicAttack, bonusDamage, spellHit } = job.data;
-
           target.type = targetType;
 
           await this.queueCleaner.updateQueueActivity(this.queueCharacterHitName(scene));
@@ -135,7 +134,6 @@ export class HitTargetQueue {
         async (job) => {
           try {
             const { attacker, target, targetType, magicAttack, bonusDamage, spellHit } = job.data;
-
             target.type = targetType;
 
             const hasLock =
@@ -160,10 +158,6 @@ export class HitTargetQueue {
 
       if (!appEnv.general.IS_UNIT_TEST) {
         this.worker.on("failed", async (job, err) => {
-          console.log(`HitTarget Job ${job?.id} failed with error ${err.message}`);
-          // log details
-          console.log(job);
-
           await this.worker?.close();
           this.worker = null;
         });
@@ -265,15 +259,15 @@ export class HitTargetQueue {
       : await this.battleEvent.calculateEvent(attacker, target);
 
     let battleEventPayload: Partial<IBattleEventFromServer> = {
-      attackerId: attacker.id,
-      attackerType: attacker.type as "Character" | "NPC",
-      targetId: target.id,
-      targetType: target.type as "Character" | "NPC",
+      attackerId: attacker._id,
+      attackerType: attacker.type as EntityType.Character | EntityType.NPC,
+      targetId: target._id,
+      targetType: target.type as EntityType.Character | EntityType.NPC,
       eventType: battleEvent,
     };
 
     if (battleEvent === BattleEventType.Hit) {
-      const { damage, baseDamage, updatedHealth } = await this.getCalculatedDamage(
+      const { damage, baseDamage, lastestHealth } = await this.getCalculatedDamage(
         attacker,
         target,
         bonusDamage!,
@@ -283,7 +277,11 @@ export class HitTargetQueue {
       const damageRelatedPromises: any[] = [];
 
       if (damage > 0) {
-        if (attacker.type === "Character") {
+        const weapon = (await this.characterWeapon.getWeapon(
+          attacker as ICharacter
+        )) as unknown as ICharacterWeaponResult;
+
+        if (attacker.type === EntityType.Character) {
           const character = attacker as ICharacter;
           await this.skillIncrease.increaseSkillsOnBattle(character, target, damage, spellHit);
         }
@@ -309,7 +307,7 @@ export class HitTargetQueue {
 
         if (!sorcererManaShield) {
           try {
-            const newTargetHealth = updatedHealth - damage;
+            const newTargetHealth = lastestHealth - damage;
             target.health = newTargetHealth <= 0 ? 0 : newTargetHealth;
             target.isAlive = newTargetHealth > 0;
             await this.updateHealthInDatabase(target, target.health);
@@ -337,10 +335,7 @@ export class HitTargetQueue {
           }
         }
 
-        let weapon;
         if (target.type === EntityType.Character) {
-          weapon = (await this.characterWeapon.getWeapon(attacker as ICharacter)) as unknown as ICharacterWeaponResult;
-
           if (
             (weapon?.item && weapon?.item.subType === ItemSubType.Magic) ||
             (weapon?.item && weapon?.item.subType === ItemSubType.Staff)
@@ -357,11 +352,6 @@ export class HitTargetQueue {
 
         if (target.isAlive) {
           if (attacker.type === EntityType.Character) {
-            if (!weapon) {
-              weapon = (await this.characterWeapon.getWeapon(
-                attacker as ICharacter
-              )) as unknown as ICharacterWeaponResult;
-            }
             if (target.appliedEntityEffects?.length! === 0) {
               damageRelatedPromises.push(this.applyEntityEffectsCharacter(attacker as ICharacter, weapon, target));
             }
@@ -381,11 +371,11 @@ export class HitTargetQueue {
 
     const remainingPromises: any[] = [];
 
-    if (battleEvent === BattleEventType.Block && target.type === "Character") {
+    if (battleEvent === BattleEventType.Block && target.type === EntityType.Character) {
       remainingPromises.push(this.skillIncrease.increaseShieldingSP(target as ICharacter));
     }
 
-    if (battleEvent === BattleEventType.Miss && target.type === "Character") {
+    if (battleEvent === BattleEventType.Miss && target.type === EntityType.Character) {
       remainingPromises.push(
         this.skillIncrease.increaseBasicAttributeSP(target as ICharacter, BasicAttribute.Dexterity)
       );
@@ -393,12 +383,10 @@ export class HitTargetQueue {
 
     remainingPromises.push(this.warnCharacterIfNotInView(attacker as ICharacter, target));
 
-    const character = attacker.type === "Character" ? (attacker as ICharacter) : (target as ICharacter);
+    const character = attacker.type === EntityType.Character ? (attacker as ICharacter) : (target as ICharacter);
 
     remainingPromises.push(this.sendBattleEvent(character, battleEventPayload as IBattleEventFromServer));
-
     await Promise.all(remainingPromises);
-
     await this.battleAttackTargetDeath.handleDeathAfterHit(attacker, target);
   }
 
@@ -410,7 +398,7 @@ export class HitTargetQueue {
   ): Promise<{
     damage: number;
     baseDamage: number;
-    updatedHealth: number;
+    lastestHealth: number;
   }> {
     let baseDamage = await this.battleDamageCalculator.calculateHitDamage(attacker, target, magicAttack);
 
@@ -420,18 +408,18 @@ export class HitTargetQueue {
 
     let damage = this.battleDamageCalculator.getCriticalHitDamageIfSucceed(baseDamage);
 
-    const updatedHealth = await this.fetchLatestHealth(target);
+    const lastestHealth = await this.fetchLatestHealth(target);
 
-    target.health = updatedHealth;
+    target.health = lastestHealth;
 
-    const maxDamage = updatedHealth;
+    const maxDamage = lastestHealth;
     damage = Math.min(damage, maxDamage);
 
     if (isNaN(damage)) {
       throw new Error("Damage is not a number");
     }
 
-    return { damage, baseDamage, updatedHealth };
+    return { damage, baseDamage, lastestHealth };
   }
 
   private async fetchLatestHealth(target: ICharacter | INPC): Promise<number> {
@@ -446,17 +434,19 @@ export class HitTargetQueue {
       default:
         throw new Error(`Invalid target type: ${target.type}`);
     }
+
     return data?.health ?? target.health;
   }
 
   private async updateHealthInDatabase(target: ICharacter | INPC, health: number): Promise<void> {
     const updatePayload = { health };
+
     switch (target.type) {
       case EntityType.Character:
-        await Character.updateOne({ _id: target.id, scene: target.scene }, updatePayload);
+        (await Character.updateOne({ _id: target._id, scene: target.scene }, updatePayload).lean()) as ICharacter;
         break;
       case EntityType.NPC:
-        await NPC.updateOne({ _id: target.id, scene: target.scene }, updatePayload);
+        (await NPC.updateOne({ _id: target._id, scene: target.scene }, updatePayload).lean()) as INPC;
         break;
       default:
         throw new Error(`Invalid target type: ${target.type}`);
@@ -515,14 +505,14 @@ export class HitTargetQueue {
   @TrackNewRelicTransaction()
   private async warnCharacterIfNotInView(character: ICharacter, target: ICharacter | INPC): Promise<void> {
     switch (target.type) {
-      case "NPC":
+      case EntityType.NPC:
         const isNPCInView = this.characterView.isOnCharacterView(character._id, target._id, "npcs");
 
         if (!isNPCInView) {
           await this.npcWarn.warnCharacterAboutSingleNPCCreation(target as INPC, character);
         }
         break;
-      case "Character":
+      case EntityType.Character:
         const isCharacterOnCharView = this.characterView.isOnCharacterView(character._id, target._id, "characters");
 
         if (!isCharacterOnCharView) {

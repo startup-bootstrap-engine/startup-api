@@ -129,6 +129,59 @@ export class UnitTestHelper {
     return weatherControl;
   }
 
+  public async createMockHostileNPC(
+    creatureName: any,
+    options: IMockNPCOptions | null = null,
+    movementType: NPCMovementType = NPCMovementType.Random
+  ): Promise<INPC> {
+    const movementTypeMock = {
+      [NPCMovementType.FixedPath]: fixedPathMockNPC,
+      [NPCMovementType.MoveAway]: moveAwayMockNPC,
+      [NPCMovementType.MoveTowards]: moveTowardsMockNPC,
+      [NPCMovementType.Random]: randomMovementMockNPC,
+      [NPCMovementType.Stopped]: stoppedMovementMockNPC,
+    };
+    const creature = new NPC({
+      ...movementTypeMock[movementType],
+      health: creatureName.baseHealth,
+      maxHealth: creatureName.baseHealth,
+      name: creatureName.name,
+      tier: creatureName.tier,
+      subType: creatureName.subType,
+      key: creatureName.key,
+      textureKey: creatureName.textureKey,
+      alignment: creatureName.alignment,
+      attackType: creatureName.attackType,
+      speed: creatureName.speed,
+      baseHealth: creatureName.baseHealth,
+      healthRandomizerDice: creatureName.healthRandomizerDice,
+      canSwitchToRandomTarget: creatureName.canSwitchToRandomTarget,
+      skillRandomizerDice: creatureName.skillRandomizerDice,
+      skillsToBeRandomized: creatureName.skillsToBeRandomized,
+      fleeOnLowHealth: creatureName.fleeOnLowHealth,
+      // loots: creatureName.loots,
+      entityEffects: creatureName.entityEffects,
+    });
+
+    if (options?.hasSkills) {
+      const npcSkills = new Skill({
+        ownerType: "NPC",
+        ...creatureName.skills,
+      });
+
+      npcSkills.owner = creature._id;
+      creature.skills = npcSkills._id;
+      await npcSkills.save();
+    }
+
+    creature.x = 0;
+    creature.y = 0;
+
+    await creature.save();
+
+    return creature;
+  }
+
   public async createMockNPC(
     extraProps: Record<string, unknown> | null = null,
     options: IMockNPCOptions | null = null,

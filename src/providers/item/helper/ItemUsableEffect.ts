@@ -30,6 +30,12 @@ export class ItemUsableEffect {
         return;
       }
 
+      const latestTargetHealth = await this.fetchLatestHealth(target);
+
+      if (target.health !== latestTargetHealth) {
+        target.health = latestTargetHealth;
+      }
+
       this.validateTargetAndValue(target, value);
 
       const updateObj: any = this.calculateAttributeUpdate(target, attr, value);
@@ -43,6 +49,22 @@ export class ItemUsableEffect {
     }
   }
 
+  private async fetchLatestHealth(target: ICharacter | INPC): Promise<number> {
+    let data;
+    switch (target.type) {
+      case EntityType.Character:
+        data = await Character.findOne({ _id: target._id, scene: target.scene }).lean().select("health");
+        break;
+      case EntityType.NPC:
+        data = await NPC.findOne({ _id: target._id, scene: target.scene }).lean().select("health");
+        break;
+      default:
+        throw new Error(`Invalid target type: ${target.type}`);
+    }
+
+    return data?.health ?? target.health;
+  }
+
   private validateTargetAndValue(target: ICharacter | INPC, value: number): void {
     if (!target) {
       throw new Error("Invalid target: target must be a valid entity");
@@ -52,14 +74,18 @@ export class ItemUsableEffect {
     }
   }
 
-  private calculateAttributeUpdate(target: ICharacter | INPC, attr: EffectableAttribute, value: number): any {
+  private calculateAttributeUpdate(
+    target: ICharacter | INPC,
+    effectableAttribute: EffectableAttribute,
+    value: number
+  ): any {
     const updateObj: any = {};
-    target[attr] += value;
+    target[effectableAttribute] += value;
 
-    switch (attr) {
+    switch (effectableAttribute) {
       case EffectableAttribute.Health:
       case EffectableAttribute.Mana:
-        this.updateHealthOrMana(target, attr, updateObj);
+        this.updateHealthOrMana(target, effectableAttribute, updateObj);
         break;
       case EffectableAttribute.Speed:
         this.updateSpeed(target as ICharacter, value, updateObj);
@@ -71,10 +97,15 @@ export class ItemUsableEffect {
     return updateObj;
   }
 
-  private updateHealthOrMana(target: ICharacter | INPC, attr: EffectableAttribute, updateObj: any): void {
-    const maxAttr = attr === EffectableAttribute.Health ? EffectableMaxAttribute.Health : EffectableMaxAttribute.Mana;
-    target[attr] = Math.max(0, Math.min(target[attr], target[maxAttr]));
-    updateObj[attr] = target[attr];
+  private updateHealthOrMana(
+    target: ICharacter | INPC,
+    effectableAttribute: EffectableAttribute,
+    updateObj: any
+  ): void {
+    const maxAttr =
+      effectableAttribute === EffectableAttribute.Health ? EffectableMaxAttribute.Health : EffectableMaxAttribute.Mana;
+    target[effectableAttribute] = Math.max(0, Math.min(target[effectableAttribute], target[maxAttr]));
+    updateObj[effectableAttribute] = target[effectableAttribute];
   }
 
   private updateSpeed(target: ICharacter, value: number, updateObj: any): void {
