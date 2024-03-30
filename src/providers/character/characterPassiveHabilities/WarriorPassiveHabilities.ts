@@ -37,8 +37,8 @@ export class WarriorPassiveHabilities {
         .cacheQuery({
           cacheKey: `${character?._id}-skills`,
         })) as unknown as ISkill;
-      const strengthLvl = await this.traitGetter.getSkillLevelWithBuffs(charSkills as ISkill, BasicAttribute.Strength);
 
+      const strengthLvl = await this.traitGetter.getSkillLevelWithBuffs(charSkills as ISkill, BasicAttribute.Strength);
       const healthRegenAmount = Math.max(Math.floor(strengthLvl / 3), 4);
 
       const intervalMs = await this.spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Strength, {
