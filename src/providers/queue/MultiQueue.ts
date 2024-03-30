@@ -3,20 +3,14 @@ import { QUEUE_DEFAULT_QUEUE_NUMBER } from "@providers/constants/QueueConstants"
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { EnvType } from "@rpg-engine/shared";
-import { DefaultJobOptions, Queue, QueueBaseOptions, Worker } from "bullmq";
+import { DefaultJobOptions, Job, Queue, QueueBaseOptions, Worker } from "bullmq";
 import { QueueActivityMonitor } from "./QueueActivityMonitor";
 
 type QueueJobFn = (job: any) => Promise<void>;
 
 @provideSingleton(MultiQueue)
 export class MultiQueue {
-  constructor(private redisManager: RedisManager, private queueActivityMonitor: QueueActivityMonitor) {
-    setInterval(async () => {
-      const allQueues = await this.queueActivityMonitor.getAllQueues();
-
-      console.log(allQueues);
-    }, 3000);
-  }
+  constructor(private redisManager: RedisManager, private queueActivityMonitor: QueueActivityMonitor) {}
 
   public async addJob(
     prefix: string,
@@ -27,7 +21,7 @@ export class MultiQueue {
     addQueueOptions?: DefaultJobOptions,
     queueOptions?: QueueBaseOptions,
     workerOptions?: QueueBaseOptions
-  ): Promise<void> {
+  ): Promise<Job> {
     const queueName = this.generateQueueName(prefix, scene, queueNumber);
 
     // Check if queue exists in centralized store (Redis) before initializing
@@ -41,7 +35,7 @@ export class MultiQueue {
       ...queueOptions,
     });
 
-    await queue.add(queueName, data, {
+    return await queue.add(queueName, data, {
       removeOnComplete: true,
       removeOnFail: true,
       ...addQueueOptions,
