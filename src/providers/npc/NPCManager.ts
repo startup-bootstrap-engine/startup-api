@@ -84,7 +84,7 @@ export class NPCManager {
         cacheKey: `npc-${npc.id}-skills`,
       })) as unknown as ISkill;
 
-      await this.npcCycleQueue.add(npc, npcSkills, totalActiveNPCs);
+      await this.npcCycleQueue.addToQueue(npc, npcSkills, totalActiveNPCs);
     }
   }
 

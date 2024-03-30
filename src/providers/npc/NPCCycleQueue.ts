@@ -8,14 +8,12 @@ import {
   NPC_FRIENDLY_NEUTRAL_FREEZE_CHECK_CHANCE,
   NPC_HOSTILE_FREEZE_CHECK_CHANCE,
 } from "@providers/constants/NPCConstants";
-import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { QueueCleaner } from "@providers/queue/QueueCleaner";
+import { QueueSceneBased } from "@providers/queue/QueueSceneBased";
 import { Stun } from "@providers/spells/data/logic/warrior/Stun";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
-import { EnvType, NPCAlignment, NPCMovementType, NPCPathOrientation, ToGridX, ToGridY } from "@rpg-engine/shared";
-import { Queue, Worker } from "bullmq";
+import { NPCAlignment, NPCMovementType, NPCPathOrientation, ToGridX, ToGridY } from "@rpg-engine/shared";
 import { random } from "lodash";
 import { NPCFreezer } from "./NPCFreezer";
 import { NPCView } from "./NPCView";
@@ -27,30 +25,6 @@ import { NPCMovementRandomPath } from "./movement/NPCMovementRandomPath";
 import { NPCMovementStopped } from "./movement/NPCMovementStopped";
 @provideSingleton(NPCCycleQueue)
 export class NPCCycleQueue {
-  private queue: Queue<any, any, string> | null = null;
-  private worker: Worker | null = null;
-  private connection: any;
-  private queueName = (scene: string, totalActiveNPCs: number): string => {
-    let envSuffix;
-    let maxQueues;
-    let queueNumber;
-
-    switch (appEnv.general.ENV) {
-      case EnvType.Development:
-        envSuffix = "dev";
-        maxQueues = 1;
-        queueNumber = 1;
-        break;
-      default:
-        envSuffix = process.env.pm_id;
-        maxQueues = Math.floor(totalActiveNPCs / 10) + 1;
-        queueNumber = Math.min(Math.ceil(Math.random() * maxQueues), 100);
-        break;
-    }
-
-    return `npc-cycle-queue-${envSuffix}-${scene}-${queueNumber}`;
-  };
-
   constructor(
     private npcView: NPCView,
     private npcFreezer: NPCFreezer,
@@ -63,86 +37,31 @@ export class NPCCycleQueue {
     private stun: Stun,
     private newRelic: NewRelic,
     private locker: Locker,
-    private redisManager: RedisManager,
-    private queueCleaner: QueueCleaner
+    private queueSceneBased: QueueSceneBased
   ) {}
 
-  public init(queueName: string, totalActiveNPCs: number): void {
-    if (!this.connection) {
-      this.connection = this.redisManager.client;
-    }
-
-    if (!this.queue) {
-      this.queue = new Queue(queueName, {
-        connection: this.connection,
-        sharedConnection: true,
-      });
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.queue.on("error", async (error) => {
-          console.error(`Error in the ${queueName} :`, error);
-
-          await this.queue?.close();
-          this.queue = null;
-        });
-      }
-    }
-
-    if (!this.worker) {
-      this.worker = new Worker(
-        queueName,
-        async (job) => {
-          const { npc, npcSkills } = job.data;
-
-          try {
-            await this.queueCleaner.updateQueueActivity(queueName);
-
-            await this.execNpcCycle(npc, npcSkills, totalActiveNPCs);
-          } catch (err) {
-            console.error(`Error processing ${queueName} for NPC ${npc.key}:`, err);
-            throw err;
-          }
-        },
-        {
-          connection: this.connection,
-          sharedConnection: true,
-          limiter: {
-            max: 50,
-            duration: 1000,
-          },
-        }
-      );
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.worker.on("failed", async (job, err) => {
-          console.log(`${queueName} job ${job?.id} failed with error ${err.message}`);
-
-          await this.worker?.close();
-          this.worker = null;
-        });
-      }
-    }
-  }
-
   @TrackNewRelicTransaction()
-  public async add(npc: INPC, npcSkills: ISkill, totalActiveNPCs: number): Promise<void> {
+  public async addToQueue(npc: INPC, npcSkills: ISkill, totalActiveNPCs: number): Promise<void> {
     if (appEnv.general.IS_UNIT_TEST) {
       await this.execNpcCycle(npc, npcSkills, totalActiveNPCs);
-      return;
     }
 
-    const queueName = this.queueName(npc.scene, totalActiveNPCs);
+    const maxQueues = Math.floor(totalActiveNPCs / 10) + 1;
+    const queueNumber = Math.min(Math.ceil(Math.random() * maxQueues), 100);
 
-    if (!this.connection || !this.queue || !this.worker) {
-      this.init(queueName, totalActiveNPCs);
-    }
+    await this.queueSceneBased.addJob(
+      "npc-cycle-queue",
+      npc.scene,
+      async (job) => {
+        const { npc, npcSkills } = job.data;
 
-    await this.queue?.add(
-      queueName,
+        await this.execNpcCycle(npc, npcSkills, totalActiveNPCs);
+      },
       {
         npc,
         npcSkills,
       },
+      queueNumber,
       {
         delay: (1600 + random(0, 200)) / (npc.speed * 1.6) / NPC_CYCLE_INTERVAL_RATIO,
         removeOnComplete: true,
@@ -152,21 +71,11 @@ export class NPCCycleQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
-    for (const job of jobs) {
-      try {
-        await job?.remove();
-      } catch (err) {
-        console.error(`Error removing job ${job?.id}:`, err.message);
-      }
-    }
+    await this.queueSceneBased.clearAllJobs();
   }
 
   public async shutdown(): Promise<void> {
-    await this.queue?.close();
-    await this.worker?.close();
-    this.queue = null;
-    this.worker = null;
+    await this.queueSceneBased.shutdown();
   }
 
   @TrackNewRelicTransaction()
@@ -190,13 +99,13 @@ export class NPCCycleQueue {
     npc.skills = npcSkills;
 
     if (await this.stun.isStun(npc)) {
-      await this.add(npc, npcSkills, totalActiveNPCs);
+      await this.addToQueue(npc, npcSkills, totalActiveNPCs);
 
       return;
     }
 
     await this.startCoreNPCBehavior(npc, totalActiveNPCs);
-    await this.add(npc, npcSkills, totalActiveNPCs);
+    await this.addToQueue(npc, npcSkills, totalActiveNPCs);
   }
 
   private async stop(npc: INPC): Promise<void> {

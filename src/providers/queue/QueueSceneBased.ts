@@ -80,9 +80,13 @@ export class QueueSceneBased {
       this.worker = new Worker(
         queueName,
         async (job) => {
-          await this.queueCleaner.updateQueueActivity(queueName);
+          try {
+            await this.queueCleaner.updateQueueActivity(queueName);
 
-          await jobFn(job);
+            await jobFn(job);
+          } catch (error) {
+            console.error(`Error processing ${queueName} job ${job.id}: ${error.message}`);
+          }
         },
         {
           connection: this.connection,
@@ -90,6 +94,15 @@ export class QueueSceneBased {
           ...workerOptions,
         }
       );
+
+      if (!appEnv.general.IS_UNIT_TEST) {
+        this.worker.on("failed", async (job, err) => {
+          console.log(`${queueName} job ${job?.id} failed with error ${err.message}`);
+
+          await this.worker?.close();
+          this.worker = null;
+        });
+      }
     }
   }
 
