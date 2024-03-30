@@ -11,7 +11,6 @@ import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
   EntityAttackType,
-  EnvType,
   FromGridX,
   FromGridY,
   NPCAlignment,
@@ -22,7 +21,6 @@ import {
   ToGridX,
   ToGridY,
 } from "@rpg-engine/shared";
-import { Queue, Worker } from "bullmq";
 import _, { debounce } from "lodash";
 import { NPCBattleCycleQueue } from "../NPCBattleCycleQueue";
 import { NPCFreezer } from "../NPCFreezer";
@@ -30,9 +28,8 @@ import { NPCView } from "../NPCView";
 import { NPCMovement } from "./NPCMovement";
 import { NPCTarget } from "./NPCTarget";
 
-import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
+import { MultiQueue } from "@providers/queue/MultiQueue";
 
 export interface ICharacterHealth {
   id: string;
@@ -41,35 +38,9 @@ export interface ICharacterHealth {
 
 @provideSingleton(NPCMovementMoveTowardsQueue)
 export class NPCMovementMoveTowardsQueue {
-  private queue: Queue | null = null;
-  private worker: Worker | null = null;
-  private connection;
-
-  private queueName = (scene: string, totalActiveNPCs: number): string => {
-    let envSuffix;
-    let maxQueues;
-    let queueNumber;
-
-    switch (appEnv.general.ENV) {
-      case EnvType.Development:
-        envSuffix = "dev";
-        maxQueues = 1;
-        queueNumber = 1;
-        break;
-      default:
-        envSuffix = process.env.pm_id;
-        maxQueues = Math.floor(totalActiveNPCs / 10) + 1;
-        queueNumber = Math.min(Math.ceil(Math.random() * maxQueues), 100);
-        break;
-    }
-
-    return `npc-movement-move-towards-queue-${envSuffix}-${scene}-${queueNumber}`;
-  };
-
   debouncedFaceTarget: _.DebouncedFunc<(npc: INPC, targetCharacter: ICharacter) => Promise<void>>;
 
   constructor(
-    private redisManager: RedisManager,
     private movementHelper: MovementHelper,
     private npcMovement: NPCMovement,
     private npcTarget: NPCTarget,
@@ -81,87 +52,8 @@ export class NPCMovementMoveTowardsQueue {
     private npcBattleCycleQueue: NPCBattleCycleQueue,
     private inMemoryHashTable: InMemoryHashTable,
     private npcFreezer: NPCFreezer,
-    private queueActivityMonitor: QueueActivityMonitor
+    private multiQueue: MultiQueue
   ) {}
-
-  public init(queueName: string): void {
-    if (appEnv.general.IS_UNIT_TEST) {
-      return;
-    }
-
-    if (!this.connection) {
-      this.connection = this.redisManager.client;
-    }
-
-    if (!this.queue) {
-      this.queue = new Queue(queueName, {
-        connection: this.connection,
-        sharedConnection: true,
-      });
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.queue.on("error", async (error) => {
-          console.error("Error in the pathfindingQueue:", error);
-
-          await this.queue?.close();
-          this.queue = null;
-        });
-      }
-    }
-
-    if (!this.worker) {
-      this.worker = new Worker(
-        queueName,
-        async (job) => {
-          const { npc, targetCharacter, totalActiveNPCs } = job.data;
-
-          try {
-            await this.queueActivityMonitor.updateQueueActivity(queueName);
-
-            await this.execStartMoveTowardsMovement(npc, totalActiveNPCs, targetCharacter);
-          } catch (err) {
-            console.error(`Error processing ${queueName} for NPC ${npc.key}:`, err);
-            throw err;
-          }
-        },
-        {
-          connection: this.connection,
-          sharedConnection: true,
-          limiter: {
-            max: 50,
-            duration: 1000,
-          },
-        }
-      );
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.worker.on("failed", async (job, err) => {
-          console.log(`Pathfinding job ${job?.id} failed with error ${err.message}`);
-
-          await this.worker?.close();
-          this.worker = null;
-        });
-      }
-    }
-  }
-
-  public async shutdown(): Promise<void> {
-    await this.queue?.close();
-    await this.worker?.close();
-    this.queue = null;
-    this.worker = null;
-  }
-
-  public async clearAllJobs(): Promise<void> {
-    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
-    for (const job of jobs) {
-      try {
-        await job?.remove();
-      } catch (err) {
-        console.error(`Error removing job ${job?.id}:`, err.message);
-      }
-    }
-  }
 
   public async startMoveTowardsMovement(npc: INPC, totalActiveNPCs: number): Promise<void> {
     const targetCharacter = await this.getTargetCharacter(npc);
@@ -183,12 +75,6 @@ export class NPCMovementMoveTowardsQueue {
       return;
     }
 
-    const queueName = this.queueName(npc.scene, totalActiveNPCs);
-
-    if (!this.connection || !this.queue || !this.worker) {
-      this.init(queueName);
-    }
-
     try {
       const canProceed = await this.locker.lock(`movement-move-towards-${npc._id}`);
 
@@ -196,19 +82,37 @@ export class NPCMovementMoveTowardsQueue {
         return;
       }
 
-      await this.queue?.add(
-        queueName,
-        { npc, totalActiveNPCs, targetCharacter },
+      const maxQueues = Math.floor(totalActiveNPCs / 10) + 1;
+      const queueNumber = Math.min(Math.ceil(Math.random() * maxQueues), 100);
+
+      await this.multiQueue.addJob(
+        "npc-movement-move-towards-queue",
+        npc.scene,
+        async (job) => {
+          const { npc, totalActiveNPCs, targetCharacter } = job.data;
+
+          await this.execStartMoveTowardsMovement(npc, totalActiveNPCs, targetCharacter);
+        },
         {
-          removeOnComplete: true,
-          removeOnFail: true,
-        }
+          npc,
+          totalActiveNPCs,
+          targetCharacter,
+        },
+        queueNumber
       );
     } catch (error) {
       console.error(error);
     } finally {
       await this.locker.unlock(`movement-move-towards-${npc._id}`);
     }
+  }
+
+  public async clearAllJobs(): Promise<void> {
+    await this.multiQueue.clearAllJobs();
+  }
+
+  public async shutdown(): Promise<void> {
+    await this.multiQueue.shutdown();
   }
 
   @TrackNewRelicTransaction()
