@@ -45,14 +45,14 @@ export class NPCManager {
         continue;
       }
 
-      behaviorLoops.push(this.startBehaviorLoop(npc));
+      behaviorLoops.push(this.startBehaviorLoop(npc, totalActiveNPCs));
     }
 
     await Promise.all(behaviorLoops);
   }
 
   @TrackNewRelicTransaction()
-  public async startBehaviorLoop(initialNPC: INPC): Promise<void> {
+  public async startBehaviorLoop(initialNPC: INPC, totalActiveNPCs: number): Promise<void> {
     const npc = initialNPC;
 
     if (!npc) {
@@ -84,7 +84,7 @@ export class NPCManager {
         cacheKey: `npc-${npc.id}-skills`,
       })) as unknown as ISkill;
 
-      await this.npcCycleQueue.add(npc, npcSkills);
+      await this.npcCycleQueue.add(npc, npcSkills, totalActiveNPCs);
     }
   }
 
