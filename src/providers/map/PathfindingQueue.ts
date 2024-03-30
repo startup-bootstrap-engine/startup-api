@@ -15,8 +15,26 @@ export class PathfindingQueue {
   private worker: Worker | null = null;
   private connection;
 
-  private queueName = (scene: string): string =>
-    `npc-pathfinding-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
+  private queueName = (scene: string, totalActiveNPCs: number): string => {
+    let envSuffix;
+    let maxQueues;
+    let queueNumber;
+
+    switch (appEnv.general.ENV) {
+      case EnvType.Development:
+        envSuffix = "dev";
+        maxQueues = 1;
+        queueNumber = 1;
+        break;
+      default:
+        envSuffix = process.env.pm_id;
+        maxQueues = Math.floor(totalActiveNPCs / 10) + 1;
+        queueNumber = Math.min(Math.ceil(Math.random() * maxQueues), 100);
+        break;
+    }
+
+    return `npc-pathfinding-${envSuffix}-${scene}-${queueNumber}`;
+  };
 
   constructor(
     private redisManager: RedisManager,
@@ -26,7 +44,7 @@ export class PathfindingQueue {
     private queueCleaner: QueueCleaner
   ) {}
 
-  public init(scene: string): void {
+  public init(queueName: string): void {
     if (appEnv.general.IS_UNIT_TEST) {
       return;
     }
@@ -36,8 +54,9 @@ export class PathfindingQueue {
     }
 
     if (!this.queue) {
-      this.queue = new Queue(this.queueName(scene), {
+      this.queue = new Queue(queueName, {
         connection: this.connection,
+        sharedConnection: true,
       });
 
       if (!appEnv.general.IS_UNIT_TEST) {
@@ -52,12 +71,12 @@ export class PathfindingQueue {
 
     if (!this.worker) {
       this.worker = new Worker(
-        this.queueName(scene),
+        queueName,
         async (job) => {
           const { npc, target, startGridX, startGridY, endGridX, endGridY } = job.data;
 
           try {
-            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
+            await this.queueCleaner.updateQueueActivity(queueName);
 
             const path = await this.pathfinder.findShortestPath(
               npc as INPC,
@@ -81,6 +100,11 @@ export class PathfindingQueue {
         },
         {
           connection: this.connection,
+          sharedConnection: true,
+          limiter: {
+            max: 50,
+            duration: 1000,
+          },
         }
       );
 
@@ -108,6 +132,7 @@ export class PathfindingQueue {
 
   async addPathfindingJob(
     npc: INPC,
+    totalActiveNPCs: number,
     target: ICharacter | null,
     startGridX: number,
     startGridY: number,
@@ -118,6 +143,8 @@ export class PathfindingQueue {
       this.init(npc.scene);
     }
 
+    const queueName = this.queueName(npc.scene, totalActiveNPCs);
+
     try {
       const canProceed = await this.locker.lock(`pathfinding-${npc._id}`);
 
@@ -126,7 +153,7 @@ export class PathfindingQueue {
       }
 
       return await this.queue?.add(
-        "pathfindingJob",
+        queueName,
         { npc, target, startGridX, startGridY, endGridX, endGridY },
         {
           removeOnComplete: true,

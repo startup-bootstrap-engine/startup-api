@@ -51,7 +51,7 @@ describe("NPCMovementMoveTowards.ts", () => {
   });
 
   it("has target correctly set", async () => {
-    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC);
+    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC, 1);
 
     const updatedTestNPC = await NPC.findById(testNPC._id);
 
@@ -60,11 +60,11 @@ describe("NPCMovementMoveTowards.ts", () => {
 
   it("should correctly move towards the target thats within a distance range, if orientation is forwards", async () => {
     testNPC = (await NPC.findById(testNPC._id)) as INPC;
-    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC);
+    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC, 1);
     testNPC = (await NPC.findById(testNPC._id)) as INPC;
-    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC);
+    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC, 1);
     testNPC = (await NPC.findById(testNPC._id)) as INPC;
-    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC);
+    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC, 1);
     testNPC = (await NPC.findById(testNPC._id)) as INPC;
 
     expect(testNPC.x).toBe(FromGridX(13));
@@ -75,7 +75,7 @@ describe("NPCMovementMoveTowards.ts", () => {
     testNPC.x = FromGridX(14);
     testNPC.y = FromGridY(13);
 
-    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC);
+    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC, 1);
 
     expect(testNPC.x).toBe(FromGridX(14));
     expect(testNPC.y).toBe(FromGridY(13));
@@ -101,16 +101,16 @@ describe("NPCMovementMoveTowards.ts", () => {
     testNPC = (await NPC.findById(testNPC._id)) as INPC;
 
     expect(testNPC?.targetCharacter?.toString()).toBe(testCharacter._id.toString());
-    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC);
+    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC, 1);
     testNPC = (await NPC.findById(testNPC._id)) as INPC;
 
-    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC);
+    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC, 1);
     testNPC = (await NPC.findById(testNPC._id)) as INPC;
 
-    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC);
+    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC, 1);
     testNPC = (await NPC.findById(testNPC._id)) as INPC;
 
-    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC);
+    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC, 1);
     testNPC = (await NPC.findById(testNPC._id)) as INPC;
 
     expect(testNPC.x).toBe(FromGridX(14));
@@ -126,7 +126,7 @@ describe("NPCMovementMoveTowards.ts", () => {
     testCharacter.y = FromGridY(12);
     await testCharacter.save();
 
-    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC);
+    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC, 1);
 
     testNPC = (await NPC.findById(testNPC._id)) as INPC;
 
@@ -142,7 +142,7 @@ describe("NPCMovementMoveTowards.ts", () => {
     testCharacter.y = FromGridY(9);
     await testCharacter.save();
 
-    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC);
+    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC, 1);
 
     expect(testNPC.targetCharacter).toBeUndefined();
   });
@@ -155,7 +155,7 @@ describe("NPCMovementMoveTowards.ts", () => {
     testNPC.fleeOnLowHealth = true;
     await testNPC.save();
 
-    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC);
+    await npcMovementMoveTowards.startMoveTowardsMovement(testNPC, 1);
 
     const updatedNPC = await NPC.findById(testNPC._id);
 
@@ -176,7 +176,7 @@ describe("NPCMovementMoveTowards.ts", () => {
       //  @ts-ignore
       const spy = jest.spyOn(npcMovementMoveTowards, "initBattleCycle");
 
-      await npcMovementMoveTowards.startMoveTowardsMovement(testNPC);
+      await npcMovementMoveTowards.startMoveTowardsMovement(testNPC, 1);
 
       expect(spy).toHaveBeenCalledWith(testNPC, expect.objectContaining({ _id: testCharacter._id }));
     });
@@ -196,7 +196,7 @@ describe("NPCMovementMoveTowards.ts", () => {
         npcMovementMoveTowards.faceTarget = jest.fn();
 
         // act
-        await npcMovementMoveTowards.startMoveTowardsMovement(testNPC);
+        await npcMovementMoveTowards.startMoveTowardsMovement(testNPC, 1);
 
         // assert
         // @ts-ignore
