@@ -32,7 +32,7 @@ import { NPCTarget } from "./NPCTarget";
 
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { QueueCleaner } from "@providers/queue/QueueCleaner";
+import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 
 export interface ICharacterHealth {
   id: string;
@@ -81,7 +81,7 @@ export class NPCMovementMoveTowardsQueue {
     private npcBattleCycleQueue: NPCBattleCycleQueue,
     private inMemoryHashTable: InMemoryHashTable,
     private npcFreezer: NPCFreezer,
-    private queueCleaner: QueueCleaner
+    private queueActivityMonitor: QueueActivityMonitor
   ) {}
 
   public init(queueName: string): void {
@@ -116,7 +116,7 @@ export class NPCMovementMoveTowardsQueue {
           const { npc, targetCharacter, totalActiveNPCs } = job.data;
 
           try {
-            await this.queueCleaner.updateQueueActivity(queueName);
+            await this.queueActivityMonitor.updateQueueActivity(queueName);
 
             await this.execStartMoveTowardsMovement(npc, totalActiveNPCs, targetCharacter);
           } catch (err) {

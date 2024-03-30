@@ -32,7 +32,7 @@ import { CharacterView } from "@providers/character/CharacterView";
 import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { QueueCleaner } from "@providers/queue/QueueCleaner";
+import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 @provideSingleton(NPCDeathQueue)
 export class NPCDeathQueue {
   private queue: Queue | null = null;
@@ -55,7 +55,7 @@ export class NPCDeathQueue {
     private locker: Locker,
     private newRelic: NewRelic,
     private npcLoot: NPCLoot,
-    private queueCleaner: QueueCleaner
+    private queueActivityMonitor: QueueActivityMonitor
   ) {}
 
   public init(scene: string): void {
@@ -89,7 +89,7 @@ export class NPCDeathQueue {
           const { killer, npc } = job.data;
 
           try {
-            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
+            await this.queueActivityMonitor.updateQueueActivity(this.queueName(scene));
 
             await this.execHandleNPCDeath(killer, npc);
           } catch (err) {

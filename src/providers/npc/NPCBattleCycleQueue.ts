@@ -10,7 +10,7 @@ import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MovementHelper } from "@providers/movement/MovementHelper";
-import { QueueCleaner } from "@providers/queue/QueueCleaner";
+import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { EnvType, NPCAlignment } from "@rpg-engine/shared";
@@ -37,7 +37,7 @@ export class NPCBattleCycleQueue {
     private battleAttackTarget: BattleAttackTarget,
     private npcView: NPCView,
     private redisManager: RedisManager,
-    private queueCleaner: QueueCleaner
+    private queueActivityMonitor: QueueActivityMonitor
   ) {}
 
   public init(scene: string): void {
@@ -67,7 +67,7 @@ export class NPCBattleCycleQueue {
           const { npc, npcSkills } = job.data;
 
           try {
-            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
+            await this.queueActivityMonitor.updateQueueActivity(this.queueName(scene));
 
             await this.execBattleCycle(npc, npcSkills);
           } catch (err) {

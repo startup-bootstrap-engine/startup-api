@@ -3,7 +3,7 @@ import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { QueueCleaner } from "@providers/queue/QueueCleaner";
+import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { EnvType } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
 import { v4 as uuidv4 } from "uuid";
@@ -21,7 +21,7 @@ export class ItemUseCycleQueue {
     appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
   }`;
 
-  constructor(private redisManager: RedisManager, private queueCleaner: QueueCleaner, private locker: Locker) {}
+  constructor(private redisManager: RedisManager, private queueCleaner: QueueActivityMonitor, private locker: Locker) {}
 
   public init(): void {
     if (!this.connection) {

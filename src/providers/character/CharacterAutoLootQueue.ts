@@ -6,7 +6,7 @@ import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { QueueCleaner } from "@providers/queue/QueueCleaner";
+import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { AnimationEffectKeys, EnvType, IItemUpdate, ItemSocketEvents, ItemSubType, ItemType } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
@@ -32,7 +32,7 @@ export class CharacterAutoLootQueue {
     private characterView: CharacterView,
     private animationEffect: AnimationEffect,
     private redisManager: RedisManager,
-    private queueCleaner: QueueCleaner
+    private queueCleaner: QueueActivityMonitor
   ) {}
 
   public init(scene: string): void {

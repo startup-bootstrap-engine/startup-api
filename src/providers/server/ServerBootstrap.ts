@@ -32,6 +32,7 @@ import { NPCFreezer } from "@providers/npc/NPCFreezer";
 import { NPCMovementMoveTowardsQueue } from "@providers/npc/movement/NPCMovementMoveTowardsQueue";
 import PartyManagement from "@providers/party/PartyManagement";
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
+import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import SpellSilence from "@providers/spells/data/logic/mage/druid/SpellSilence";
 import { BullStrength } from "@providers/spells/data/logic/minotaur/BullStrength";
@@ -78,7 +79,8 @@ export class ServerBootstrap {
     private npcMovementMoveTowardsQueue: NPCMovementMoveTowardsQueue,
     private npcDeathQueue: NPCDeathQueue,
     private itemContainerTransactionQueue: ItemContainerTransactionQueue,
-    private itemDropVerifier: ItemDropVerifier
+    private itemDropVerifier: ItemDropVerifier,
+    private queueActivityMonitor: QueueActivityMonitor
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -202,6 +204,8 @@ export class ServerBootstrap {
   }
 
   private async clearSomeQueues(): Promise<void> {
+    await this.queueActivityMonitor.clearAllQueues();
+
     await this.pathfindingQueue.clearAllJobs();
     await this.npcMovementMoveTowardsQueue.clearAllJobs();
     await this.hitTarget.clearAllQueueJobs();

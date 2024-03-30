@@ -15,7 +15,7 @@ import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { QueueCleaner } from "@providers/queue/QueueCleaner";
+import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { TraitGetter } from "@providers/skill/TraitGetter";
 import { Job, Queue, Worker } from "bullmq";
 import { CharacterWeightCalculator } from "./CharacterWeightCalculator";
@@ -35,7 +35,7 @@ export class CharacterWeightQueue {
     private inMemoryHashTable: InMemoryHashTable,
     private characterWeightCalculator: CharacterWeightCalculator,
     private redisManager: RedisManager,
-    private queueCleaner: QueueCleaner
+    private queueActivityMonitor: QueueActivityMonitor
   ) {}
 
   public init(scene: string): void {
@@ -69,7 +69,7 @@ export class CharacterWeightQueue {
           const { character } = job.data;
 
           try {
-            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
+            await this.queueActivityMonitor.updateQueueActivity(this.queueName(scene));
 
             await this.execUpdateCharacterWeight(character);
           } catch (err) {

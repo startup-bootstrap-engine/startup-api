@@ -26,7 +26,7 @@ import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MapTransition } from "@providers/map/MapTransition/MapTransition";
-import { QueueCleaner } from "@providers/queue/QueueCleaner";
+import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { Queue, Worker } from "bullmq";
 import dayjs from "dayjs";
@@ -56,7 +56,7 @@ export class CharacterNetworkUpdateQueue {
     private locker: Locker,
     private mapTransition: MapTransition,
     private redisManager: RedisManager,
-    private queueCleaner: QueueCleaner
+    private queueActivityMonitor: QueueActivityMonitor
   ) {}
 
   public initQueue(scene: string): void {
@@ -86,7 +86,7 @@ export class CharacterNetworkUpdateQueue {
           const { character, data } = job.data;
 
           try {
-            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
+            await this.queueActivityMonitor.updateQueueActivity(this.queueName(scene));
 
             await this.execPositionUpdate(data, character);
           } catch (err) {

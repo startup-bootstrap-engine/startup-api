@@ -15,7 +15,7 @@ import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { Locker } from "@providers/locks/Locker";
-import { QueueCleaner } from "@providers/queue/QueueCleaner";
+import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { Queue, Worker } from "bullmq";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterDailyPlayTracker } from "../../CharacterDailyPlayTracker";
@@ -46,7 +46,7 @@ export class CharacterNetworkCreateQueue {
     private locker: Locker,
     private characterDailyPlayTracker: CharacterDailyPlayTracker,
     private redisManager: RedisManager,
-    private queueCleaner: QueueCleaner,
+    private queueActivityMonitor: QueueActivityMonitor,
     private characterCreateSocketHandler: CharacterCreateSocketHandler,
     private characterCreateInteractionManager: CharacterCreateInteractionManager,
     private characterCreateRegen: CharacterCreateRegen,
@@ -91,7 +91,7 @@ export class CharacterNetworkCreateQueue {
           const { character, data } = job.data;
 
           try {
-            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
+            await this.queueActivityMonitor.updateQueueActivity(this.queueName(scene));
 
             await this.execCharacterCreate(character, data);
           } catch (err) {

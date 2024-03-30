@@ -1,4 +1,4 @@
-import { QueueCleaner } from "@providers/queue/QueueCleaner";
+import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { QueuePerformanceTracker } from "@providers/queue/QueuePerformanceTracker";
 import { provide } from "inversify-binding-decorators";
 import { CronJobScheduler } from "./CronJobScheduler";
@@ -7,7 +7,7 @@ import { CronJobScheduler } from "./CronJobScheduler";
 export class QueueCrons {
   constructor(
     private cronJobScheduler: CronJobScheduler,
-    private queueCleaner: QueueCleaner,
+    private queueActivityMonitor: QueueActivityMonitor,
     private queuePerformanceTracker: QueuePerformanceTracker
   ) {}
 
@@ -22,7 +22,7 @@ export class QueueCrons {
   }
 
   private async cleanupInactiveQueues(): Promise<void> {
-    await this.queueCleaner.closeInactiveQueues();
+    await this.queueActivityMonitor.closeInactiveQueues();
   }
 
   private async trackQueuePerformanceRatio(): Promise<void> {

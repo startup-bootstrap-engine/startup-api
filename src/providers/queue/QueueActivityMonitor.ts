@@ -7,8 +7,8 @@ import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/Ne
 import { Queue } from "bullmq";
 import dayjs from "dayjs";
 
-@provideSingleton(QueueCleaner)
-export class QueueCleaner {
+@provideSingleton(QueueActivityMonitor)
+export class QueueActivityMonitor {
   connection: any;
   constructor(
     private inMemoryHashTable: InMemoryHashTable,
@@ -22,6 +22,22 @@ export class QueueCleaner {
   public async updateQueueActivity(queueName: string): Promise<void> {
     const now = Date.now();
     await this.inMemoryHashTable.set(this.queueActivityNamespace, queueName, now.toString());
+  }
+
+  public async hasQueueActivity(queueName: string): Promise<boolean> {
+    return await this.inMemoryHashTable.has(this.queueActivityNamespace, queueName);
+  }
+
+  public async getAllQueues(): Promise<string[]> {
+    return await this.inMemoryHashTable.getAllKeys(this.queueActivityNamespace);
+  }
+
+  public async deleteQueueActivity(queueName: string): Promise<void> {
+    await this.inMemoryHashTable.delete(this.queueActivityNamespace, queueName);
+  }
+
+  public async clearAllQueues(): Promise<void> {
+    await this.inMemoryHashTable.deleteAll(this.queueActivityNamespace);
   }
 
   public async closeInactiveQueues(): Promise<void> {
@@ -66,7 +82,7 @@ export class QueueCleaner {
 
           await queue.close(); // Close the queue
           await queue.obliterate({ force: true }); // Remove the queue and its data from Redis
-          await this.inMemoryHashTable.delete(this.queueActivityNamespace, queueName); // Remove the queue record from tracking
+          await this.deleteQueueActivity(queueName); // Remove the queue from the centralized store
         } catch (error) {
           console.error(`Failed to remove inactive queue: ${queueName}`, error);
         }

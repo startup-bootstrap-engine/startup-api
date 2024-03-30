@@ -10,7 +10,7 @@ import {
 } from "@providers/constants/NPCConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { QueueSceneBased } from "@providers/queue/QueueSceneBased";
+import { MultiQueue } from "@providers/queue/MultiQueue";
 import { Stun } from "@providers/spells/data/logic/warrior/Stun";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { NPCAlignment, NPCMovementType, NPCPathOrientation, ToGridX, ToGridY } from "@rpg-engine/shared";
@@ -37,7 +37,7 @@ export class NPCCycleQueue {
     private stun: Stun,
     private newRelic: NewRelic,
     private locker: Locker,
-    private queueSceneBased: QueueSceneBased
+    private multiQueue: MultiQueue
   ) {}
 
   @TrackNewRelicTransaction()
@@ -49,7 +49,7 @@ export class NPCCycleQueue {
     const maxQueues = Math.floor(totalActiveNPCs / 10) + 1;
     const queueNumber = Math.min(Math.ceil(Math.random() * maxQueues), 100);
 
-    await this.queueSceneBased.addJob(
+    await this.multiQueue.addJob(
       "npc-cycle-queue",
       npc.scene,
       async (job) => {
@@ -71,11 +71,11 @@ export class NPCCycleQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    await this.queueSceneBased.clearAllJobs();
+    await this.multiQueue.clearAllJobs();
   }
 
   public async shutdown(): Promise<void> {
-    await this.queueSceneBased.shutdown();
+    await this.multiQueue.shutdown();
   }
 
   @TrackNewRelicTransaction()

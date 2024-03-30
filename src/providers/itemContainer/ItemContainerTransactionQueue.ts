@@ -13,7 +13,7 @@ import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { QueueCleaner } from "@providers/queue/QueueCleaner";
+import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { EnvType, IItemContainerRead, ItemContainerType, ItemSocketEvents } from "@rpg-engine/shared";
 import { Queue, Worker } from "bullmq";
@@ -45,7 +45,7 @@ export class ItemContainerTransactionQueue {
     private characterValidation: CharacterValidation,
     private locker: Locker,
     private redisManager: RedisManager,
-    private queueCleaner: QueueCleaner,
+    private queueActivityMonitor: QueueActivityMonitor,
     private inMemoryHashTable: InMemoryHashTable,
     private characterWeightQueue: CharacterWeightQueue
   ) {}
@@ -77,7 +77,7 @@ export class ItemContainerTransactionQueue {
           const { item, character, originContainer, targetContainer, options } = job.data;
 
           try {
-            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
+            await this.queueActivityMonitor.updateQueueActivity(this.queueName(scene));
 
             const result = await this.execTransferToContainer(
               item,
