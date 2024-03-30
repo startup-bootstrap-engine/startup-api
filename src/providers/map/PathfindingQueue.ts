@@ -94,7 +94,7 @@ export class PathfindingQueue {
 
             await this.pathfindingResults.setResult(job.id!, path);
           } catch (err) {
-            console.error(`Error processing ${this.queueName} for NPC ${npc.key}:`, err);
+            console.error(`Error processing ${queueName} for NPC ${npc.key}:`, err);
             throw err;
           }
         },
