@@ -94,6 +94,10 @@ export const npcCyclops: INPCTierBlueprint<14> = {
       itemBlueprintKey: ToolsBlueprint.ElderHeartAxe,
       chance: LootProbability.Rare,
     },
+    {
+      itemBlueprintKey: ToolsBlueprint.EmberEdgePickaxe,
+      chance: LootProbability.SemiCommon,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
 };

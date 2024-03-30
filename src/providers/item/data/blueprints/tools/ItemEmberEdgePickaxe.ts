@@ -21,20 +21,21 @@ import {
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { CraftingResourcesBlueprint, RangedWeaponsBlueprint, ToolsBlueprint } from "../../types/itemsBlueprintTypes";
 
-export const itemPickaxe: IToolItemBlueprint = {
-  key: ToolsBlueprint.Pickaxe,
+export const itemEmberEdgePickaxe: IToolItemBlueprint = {
+  key: ToolsBlueprint.EmberEdgePickaxe,
   type: ItemType.Tool,
   subType: ItemSubType.Tool,
+  toolCategory: ToolsBlueprint.Pickaxe,
   textureAtlas: "items",
-  texturePath: "tools/pickaxe.png",
-  name: "Pickaxe",
-  description: "A tool used for mining, breaking rocks or even as a weapon.",
-  attack: 4,
-  defense: 2,
+  texturePath: "tools/ember-edge-pickaxe.png",
+  name: "Ember Edge Pickaxe",
+  description: "Primed for delving into molten depths, ideal for uncovering both copper and golden ore treasures.",
+  attack: 6,
+  defense: 4,
   weight: 0.1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   rangeType: EntityAttackType.Melee,
-  basePrice: 60,
+  basePrice: 80,
   hasUseWith: true,
   canSell: false,
   useWithMaxDistanceGrid: RangeTypes.UltraShort,
@@ -53,22 +54,20 @@ export const itemPickaxe: IToolItemBlueprint = {
       targetTile,
       targetTileAnimationEffectKey: "mining",
       errorMessages: [
-        "Hmm... Nothing here.",
-        "You effort is in vain.",
-        "You can't find anything.",
-        "Maybe you should try somewhere else.",
-        "Mining is hard work! Nothing here!",
+        "No ores found in these molten depths.",
+        "Seems like the molten depths are barren of ores.",
+        "Unfortunately, no treasures lie beneath the molten surface.",
       ],
       successMessages: [
-        "You found some ore!",
-        "Wow! You got some ore!",
-        "You found some ore! You can smelt it into ingot bars.",
+        "You've uncovered valuable copper and golden ores!",
+        "Your efforts in the molten depths have paid off with both copper and golden ores!",
+        "Success! Your Ember Edge Pickaxe has unearthed a rich vein of copper and golden ores.",
       ],
       rewards: [
         {
           key: RangedWeaponsBlueprint.Stone,
-          qty: [3, 5],
-          chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 10, rarityOfTool),
+          qty: [1, 2],
+          chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 5, rarityOfTool),
         },
       ],
     };
@@ -76,19 +75,6 @@ export const itemPickaxe: IToolItemBlueprint = {
     let useWithItemToTileOptions: IUseWithItemToTileOptions = baseUseWithItemToTileOptions;
 
     switch (targetName) {
-      case CraftingResourcesBlueprint.IronOre:
-        useWithItemToTileOptions = {
-          ...baseUseWithItemToTileOptions,
-          rewards: [
-            ...baseUseWithItemToTileOptions.rewards,
-            {
-              key: CraftingResourcesBlueprint.IronOre,
-              qty: [5, 7],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 15, rarityOfTool),
-            },
-          ] as IUseWithItemToTileReward[],
-        };
-        break;
       case CraftingResourcesBlueprint.CopperOre:
         useWithItemToTileOptions = {
           ...baseUseWithItemToTileOptions,
@@ -96,22 +82,22 @@ export const itemPickaxe: IToolItemBlueprint = {
             ...baseUseWithItemToTileOptions.rewards,
             {
               key: CraftingResourcesBlueprint.CopperOre,
-              qty: [3, 4],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 10, rarityOfTool),
+              qty: [4, 5],
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 15, rarityOfTool),
             },
           ] as IUseWithItemToTileReward[],
         };
         break;
 
-      case CraftingResourcesBlueprint.SilverOre:
+      case CraftingResourcesBlueprint.GoldenOre:
         useWithItemToTileOptions = {
           ...baseUseWithItemToTileOptions,
           rewards: [
             ...baseUseWithItemToTileOptions.rewards,
             {
-              key: CraftingResourcesBlueprint.SilverOre,
-              qty: [2, 3],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 5, rarityOfTool),
+              key: CraftingResourcesBlueprint.GoldenOre,
+              qty: [3, 4],
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 8, rarityOfTool),
             },
           ] as IUseWithItemToTileReward[],
         };
@@ -120,5 +106,5 @@ export const itemPickaxe: IToolItemBlueprint = {
 
     await useWithItemToTile.execute(character, useWithItemToTileOptions, skillIncrease);
   },
-  usableEffectDescription: "Use it on iron, copper and silver ores to mine them",
+  usableEffectDescription: "Use it on copper and golden ores to mine them",
 };

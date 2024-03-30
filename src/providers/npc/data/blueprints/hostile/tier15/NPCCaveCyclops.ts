@@ -11,6 +11,7 @@ import {
   RangedWeaponsBlueprint,
   SeedsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -95,6 +96,10 @@ export const npcCaveCyclops: INPCTierBlueprint<15> = {
     {
       itemBlueprintKey: SwordsBlueprint.Shadowblade,
       chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.EmeraldEclipsesPickaxe,
+      chance: LootProbability.SemiCommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

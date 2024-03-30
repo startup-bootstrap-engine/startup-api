@@ -217,6 +217,10 @@ export const npcDarkKnight: INPCTierBlueprint<15> = {
       itemBlueprintKey: ToolsBlueprint.WoodsManAxe,
       chance: LootProbability.Common,
     },
+    {
+      itemBlueprintKey: ToolsBlueprint.EmeraldEclipsesPickaxe,
+      chance: LootProbability.Rare,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],
   areaSpells: [

@@ -21,20 +21,22 @@ import {
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { CraftingResourcesBlueprint, RangedWeaponsBlueprint, ToolsBlueprint } from "../../types/itemsBlueprintTypes";
 
-export const itemPickaxe: IToolItemBlueprint = {
-  key: ToolsBlueprint.Pickaxe,
+export const itemEmeraldEclipsesPickaxe: IToolItemBlueprint = {
+  key: ToolsBlueprint.EmeraldEclipsesPickaxe,
   type: ItemType.Tool,
   subType: ItemSubType.Tool,
+  toolCategory: ToolsBlueprint.Pickaxe,
   textureAtlas: "items",
-  texturePath: "tools/pickaxe.png",
-  name: "Pickaxe",
-  description: "A tool used for mining, breaking rocks or even as a weapon.",
-  attack: 4,
-  defense: 2,
-  weight: 0.1,
+  texturePath: "tools/emerald-eclipses-pickaxe.png",
+  name: "Emerald Eclipses Pickaxe",
+  description:
+    "Harnessing the power of celestial events, it eclipses corruption while illuminating the brilliance of green ore.",
+  attack: 10,
+  defense: 4,
+  weight: 0.5,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   rangeType: EntityAttackType.Melee,
-  basePrice: 60,
+  basePrice: 130,
   hasUseWith: true,
   canSell: false,
   useWithMaxDistanceGrid: RangeTypes.UltraShort,
@@ -53,22 +55,20 @@ export const itemPickaxe: IToolItemBlueprint = {
       targetTile,
       targetTileAnimationEffectKey: "mining",
       errorMessages: [
-        "Hmm... Nothing here.",
-        "You effort is in vain.",
-        "You can't find anything.",
-        "Maybe you should try somewhere else.",
-        "Mining is hard work! Nothing here!",
+        "The celestial power didn't reveal any ores this time.",
+        "Seems like the brilliance of the green ore remains hidden under the eclipse.",
+        "No ores illuminated by the celestial event this time.",
       ],
       successMessages: [
-        "You found some ore!",
-        "Wow! You got some ore!",
-        "You found some ore! You can smelt it into ingot bars.",
+        "Your Emerald Eclipses Pickaxe has revealed the brilliance of green ore amidst the celestial event!",
+        "Success! The celestial event has illuminated green ore for extraction with your Emerald Eclipses Pickaxe.",
+        "You've uncovered the brilliance of green ore under the celestial event with your Emerald Eclipses Pickaxe!",
       ],
       rewards: [
         {
           key: RangedWeaponsBlueprint.Stone,
-          qty: [3, 5],
-          chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 10, rarityOfTool),
+          qty: [1, 2],
+          chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 8, rarityOfTool),
         },
       ],
     };
@@ -76,42 +76,28 @@ export const itemPickaxe: IToolItemBlueprint = {
     let useWithItemToTileOptions: IUseWithItemToTileOptions = baseUseWithItemToTileOptions;
 
     switch (targetName) {
-      case CraftingResourcesBlueprint.IronOre:
+      case CraftingResourcesBlueprint.GreenOre:
         useWithItemToTileOptions = {
           ...baseUseWithItemToTileOptions,
           rewards: [
             ...baseUseWithItemToTileOptions.rewards,
             {
-              key: CraftingResourcesBlueprint.IronOre,
-              qty: [5, 7],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 15, rarityOfTool),
-            },
-          ] as IUseWithItemToTileReward[],
-        };
-        break;
-      case CraftingResourcesBlueprint.CopperOre:
-        useWithItemToTileOptions = {
-          ...baseUseWithItemToTileOptions,
-          rewards: [
-            ...baseUseWithItemToTileOptions.rewards,
-            {
-              key: CraftingResourcesBlueprint.CopperOre,
-              qty: [3, 4],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 10, rarityOfTool),
-            },
-          ] as IUseWithItemToTileReward[],
-        };
-        break;
-
-      case CraftingResourcesBlueprint.SilverOre:
-        useWithItemToTileOptions = {
-          ...baseUseWithItemToTileOptions,
-          rewards: [
-            ...baseUseWithItemToTileOptions.rewards,
-            {
-              key: CraftingResourcesBlueprint.SilverOre,
+              key: CraftingResourcesBlueprint.GreenOre,
               qty: [2, 3],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 5, rarityOfTool),
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 4, rarityOfTool),
+            },
+          ] as IUseWithItemToTileReward[],
+        };
+        break;
+      case CraftingResourcesBlueprint.CorruptionOre:
+        useWithItemToTileOptions = {
+          ...baseUseWithItemToTileOptions,
+          rewards: [
+            ...baseUseWithItemToTileOptions.rewards,
+            {
+              key: CraftingResourcesBlueprint.CorruptionOre,
+              qty: [1, 2],
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 2, rarityOfTool),
             },
           ] as IUseWithItemToTileReward[],
         };
@@ -120,5 +106,5 @@ export const itemPickaxe: IToolItemBlueprint = {
 
     await useWithItemToTile.execute(character, useWithItemToTileOptions, skillIncrease);
   },
-  usableEffectDescription: "Use it on iron, copper and silver ores to mine them",
+  usableEffectDescription: "Use it on green and corruption ores to mine them",
 };

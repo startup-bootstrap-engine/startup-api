@@ -1,9 +1,13 @@
 import { ToolsBlueprint } from "../../types/itemsBlueprintTypes";
+import { itemAurumAlloyPickaxe } from "./ItemAurumAlloyPickaxe";
 import { itemButchersKnife } from "./ItemButchersKnife";
 import { itemCarpentersAxe } from "./ItemCarpentersAxe";
 import { itemCrimsonWateringCan } from "./ItemCrimsonWateringCan";
 import { itemElderHeartAxe } from "./ItemElderHeartAxe";
+import { itemEmberEdgePickaxe } from "./ItemEmberEdgePickaxe";
+import { itemEmeraldEclipsesPickaxe } from "./ItemEmeraldEclipsesPickaxe";
 import { itemFishingRod } from "./ItemFishingRod";
+import { itemGildedLavaPickaxe } from "./ItemGildedLavaPickaxe";
 import { itemHammer } from "./ItemHammer";
 import { itemLogSplitterAxe } from "./ItemLogSplitterAxe";
 import { itemMoonlureFishingRod } from "./ItemMoonlureFishingRod";
@@ -22,6 +26,10 @@ export const toolsBlueprintIndex = {
   [ToolsBlueprint.WoodBreakerAxe]: itemWoodBreakerAxe,
   [ToolsBlueprint.WoodsManAxe]: itemWoodsManAxe,
   [ToolsBlueprint.Pickaxe]: itemPickaxe,
+  [ToolsBlueprint.AurumAlloyPickaxe]: itemAurumAlloyPickaxe,
+  [ToolsBlueprint.EmberEdgePickaxe]: itemEmberEdgePickaxe,
+  [ToolsBlueprint.EmeraldEclipsesPickaxe]: itemEmeraldEclipsesPickaxe,
+  [ToolsBlueprint.GildedLavaPickaxe]: itemGildedLavaPickaxe,
   [ToolsBlueprint.Hammer]: itemHammer,
   [ToolsBlueprint.UseWithTileTest]: itemUseWithTileTest, //! UNIT TEST ONLY
 

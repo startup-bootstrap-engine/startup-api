@@ -21,20 +21,22 @@ import {
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { CraftingResourcesBlueprint, RangedWeaponsBlueprint, ToolsBlueprint } from "../../types/itemsBlueprintTypes";
 
-export const itemPickaxe: IToolItemBlueprint = {
-  key: ToolsBlueprint.Pickaxe,
+export const itemGildedLavaPickaxe: IToolItemBlueprint = {
+  key: ToolsBlueprint.GildedLavaPickaxe,
   type: ItemType.Tool,
   subType: ItemSubType.Tool,
+  toolCategory: ToolsBlueprint.Pickaxe,
   textureAtlas: "items",
-  texturePath: "tools/pickaxe.png",
-  name: "Pickaxe",
-  description: "A tool used for mining, breaking rocks or even as a weapon.",
-  attack: 4,
-  defense: 2,
+  texturePath: "tools/gilded-lava-pickaxe.png",
+  name: "Gilded Lava Pickaxe",
+  description:
+    "Its molten core resonates with the allure of gold and the strength of obsidian, perfect for mining both materials.",
+  attack: 10,
+  defense: 6,
   weight: 0.1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   rangeType: EntityAttackType.Melee,
-  basePrice: 60,
+  basePrice: 150,
   hasUseWith: true,
   canSell: false,
   useWithMaxDistanceGrid: RangeTypes.UltraShort,
@@ -67,7 +69,7 @@ export const itemPickaxe: IToolItemBlueprint = {
       rewards: [
         {
           key: RangedWeaponsBlueprint.Stone,
-          qty: [3, 5],
+          qty: [2, 3],
           chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 10, rarityOfTool),
         },
       ],
@@ -76,42 +78,28 @@ export const itemPickaxe: IToolItemBlueprint = {
     let useWithItemToTileOptions: IUseWithItemToTileOptions = baseUseWithItemToTileOptions;
 
     switch (targetName) {
-      case CraftingResourcesBlueprint.IronOre:
+      case CraftingResourcesBlueprint.GoldenOre:
         useWithItemToTileOptions = {
           ...baseUseWithItemToTileOptions,
           rewards: [
             ...baseUseWithItemToTileOptions.rewards,
             {
-              key: CraftingResourcesBlueprint.IronOre,
-              qty: [5, 7],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 15, rarityOfTool),
-            },
-          ] as IUseWithItemToTileReward[],
-        };
-        break;
-      case CraftingResourcesBlueprint.CopperOre:
-        useWithItemToTileOptions = {
-          ...baseUseWithItemToTileOptions,
-          rewards: [
-            ...baseUseWithItemToTileOptions.rewards,
-            {
-              key: CraftingResourcesBlueprint.CopperOre,
-              qty: [3, 4],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 10, rarityOfTool),
-            },
-          ] as IUseWithItemToTileReward[],
-        };
-        break;
-
-      case CraftingResourcesBlueprint.SilverOre:
-        useWithItemToTileOptions = {
-          ...baseUseWithItemToTileOptions,
-          rewards: [
-            ...baseUseWithItemToTileOptions.rewards,
-            {
-              key: CraftingResourcesBlueprint.SilverOre,
-              qty: [2, 3],
+              key: CraftingResourcesBlueprint.GoldenOre,
+              qty: [1, 2],
               chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 5, rarityOfTool),
+            },
+          ] as IUseWithItemToTileReward[],
+        };
+        break;
+      case CraftingResourcesBlueprint.ObsidiumOre:
+        useWithItemToTileOptions = {
+          ...baseUseWithItemToTileOptions,
+          rewards: [
+            ...baseUseWithItemToTileOptions.rewards,
+            {
+              key: CraftingResourcesBlueprint.ObsidiumOre,
+              qty: [2, 3],
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 2, rarityOfTool),
             },
           ] as IUseWithItemToTileReward[],
         };
@@ -120,5 +108,5 @@ export const itemPickaxe: IToolItemBlueprint = {
 
     await useWithItemToTile.execute(character, useWithItemToTileOptions, skillIncrease);
   },
-  usableEffectDescription: "Use it on iron, copper and silver ores to mine them",
+  usableEffectDescription: "Use it on gold and obsidium ores to mine them",
 };

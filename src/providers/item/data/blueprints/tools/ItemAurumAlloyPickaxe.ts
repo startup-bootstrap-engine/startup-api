@@ -21,20 +21,22 @@ import {
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { CraftingResourcesBlueprint, RangedWeaponsBlueprint, ToolsBlueprint } from "../../types/itemsBlueprintTypes";
 
-export const itemPickaxe: IToolItemBlueprint = {
-  key: ToolsBlueprint.Pickaxe,
+export const itemAurumAlloyPickaxe: IToolItemBlueprint = {
+  key: ToolsBlueprint.AurumAlloyPickaxe,
   type: ItemType.Tool,
   subType: ItemSubType.Tool,
+  toolCategory: ToolsBlueprint.Pickaxe,
   textureAtlas: "items",
-  texturePath: "tools/pickaxe.png",
-  name: "Pickaxe",
-  description: "A tool used for mining, breaking rocks or even as a weapon.",
-  attack: 4,
-  defense: 2,
+  texturePath: "tools/aurum-alloy-pickaxe.png",
+  name: "Aurum Alloy Pickaxe",
+  description:
+    "Fashioned from a rare blend of metals, it's ideal for harvesting both golden and iron ores, with proficiency in copper and silver as well.",
+  attack: 8,
+  defense: 3,
   weight: 0.1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   rangeType: EntityAttackType.Melee,
-  basePrice: 60,
+  basePrice: 100,
   hasUseWith: true,
   canSell: false,
   useWithMaxDistanceGrid: RangeTypes.UltraShort,
@@ -53,22 +55,20 @@ export const itemPickaxe: IToolItemBlueprint = {
       targetTile,
       targetTileAnimationEffectKey: "mining",
       errorMessages: [
-        "Hmm... Nothing here.",
-        "You effort is in vain.",
-        "You can't find anything.",
-        "Maybe you should try somewhere else.",
-        "Mining is hard work! Nothing here!",
+        "Seems like there's nothing valuable here.",
+        "Unfortunately, no ores found with the Aurum Alloy Pickaxe.",
+        "The rare blend of metals didn't reveal any ores this time.",
       ],
       successMessages: [
-        "You found some ore!",
-        "Wow! You got some ore!",
-        "You found some ore! You can smelt it into ingot bars.",
+        "Your Aurum Alloy Pickaxe has unearthed a variety of ores including golden and iron!",
+        "Success! The Aurum Alloy Pickaxe has proven its worth with a rich haul of ores, including golden and iron.",
+        "You've struck it rich with your Aurum Alloy Pickaxe, extracting both golden and iron ores!",
       ],
       rewards: [
         {
           key: RangedWeaponsBlueprint.Stone,
-          qty: [3, 5],
-          chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 10, rarityOfTool),
+          qty: [1, 2],
+          chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 4, rarityOfTool),
         },
       ],
     };
@@ -83,7 +83,7 @@ export const itemPickaxe: IToolItemBlueprint = {
             ...baseUseWithItemToTileOptions.rewards,
             {
               key: CraftingResourcesBlueprint.IronOre,
-              qty: [5, 7],
+              qty: [3, 5],
               chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 15, rarityOfTool),
             },
           ] as IUseWithItemToTileReward[],
@@ -116,9 +116,22 @@ export const itemPickaxe: IToolItemBlueprint = {
           ] as IUseWithItemToTileReward[],
         };
         break;
+      case CraftingResourcesBlueprint.GoldenOre:
+        useWithItemToTileOptions = {
+          ...baseUseWithItemToTileOptions,
+          rewards: [
+            ...baseUseWithItemToTileOptions.rewards,
+            {
+              key: CraftingResourcesBlueprint.GoldenOre,
+              qty: [1, 2],
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 5, rarityOfTool),
+            },
+          ] as IUseWithItemToTileReward[],
+        };
+        break;
     }
 
     await useWithItemToTile.execute(character, useWithItemToTileOptions, skillIncrease);
   },
-  usableEffectDescription: "Use it on iron, copper and silver ores to mine them",
+  usableEffectDescription: "Use it on iron, copper, silver and golden ores to mine them",
 };
