@@ -173,8 +173,9 @@ export class CharacterNetworkCreateQueue {
     ]);
 
     const dataFromServer = await this.characterCreateInteractionManager.prepareDataForServer(character, data);
+
+    await this.characterCreateInteractionManager.startNPCInteractions(character);
     await Promise.all([
-      this.characterCreateInteractionManager.startNPCInteractions(character),
       this.characterCreateInteractionManager.sendCharacterCreateMessages(character, dataFromServer),
       this.characterCreateInteractionManager.warnAboutWeatherStatus(character.channelId!),
       this.characterCreateRegen.handleCharacterRegen(character),
