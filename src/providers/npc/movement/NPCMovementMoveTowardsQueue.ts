@@ -324,7 +324,7 @@ export class NPCMovementMoveTowardsQueue {
         ttl: 60 * 60 * 24 * 7,
       })) as ISkill;
 
-    await this.npcBattleCycleQueue.add(npc, npcSkills);
+    await this.npcBattleCycleQueue.addToQueue(npc, npcSkills);
   }
 
   @TrackNewRelicTransaction()
