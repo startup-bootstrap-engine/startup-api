@@ -1,4 +1,5 @@
 import { appEnv } from "@providers/config/env";
+import { QUEUE_DEFAULT_QUEUE_NUMBER } from "@providers/constants/QueueConstants";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { EnvType } from "@rpg-engine/shared";
@@ -21,7 +22,7 @@ export class MultiQueue {
     scene: string,
     jobFn: QueueJobFn,
     data: Record<string, unknown>,
-    queueNumber: number,
+    queueNumber: number = QUEUE_DEFAULT_QUEUE_NUMBER,
     addQueueOptions?: DefaultJobOptions,
     queueOptions?: QueueBaseOptions,
     workerOptions?: QueueBaseOptions

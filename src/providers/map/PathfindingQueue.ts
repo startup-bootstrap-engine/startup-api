@@ -31,6 +31,9 @@ export class PathfindingQueue {
         return;
       }
 
+      const maxQueues = Math.floor(totalActiveNPCs / 10) + 1;
+      const queueNumber = Math.min(Math.ceil(Math.random() * maxQueues), 100);
+
       return await this.multiQueue.addJob(
         "npc-pathfinding-queue",
         npc.scene,
@@ -61,7 +64,7 @@ export class PathfindingQueue {
           endGridX,
           endGridY,
         },
-        totalActiveNPCs
+        queueNumber
       );
     } catch (error) {
       console.error(error);

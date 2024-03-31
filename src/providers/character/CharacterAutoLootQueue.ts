@@ -3,13 +3,10 @@ import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemCon
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
-import { appEnv } from "@providers/config/env";
-import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
+import { MultiQueue } from "@providers/queue/MultiQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { AnimationEffectKeys, EnvType, IItemUpdate, ItemSocketEvents, ItemSubType, ItemType } from "@rpg-engine/shared";
-import { Queue, Worker } from "bullmq";
+import { AnimationEffectKeys, IItemUpdate, ItemSocketEvents, ItemSubType, ItemType } from "@rpg-engine/shared";
 import { CharacterInventory } from "./CharacterInventory";
 import { CharacterValidation } from "./CharacterValidation";
 import { CharacterView } from "./CharacterView";
@@ -17,13 +14,6 @@ import { CharacterItemContainer } from "./characterItems/CharacterItemContainer"
 
 @provideSingleton(CharacterAutoLootQueue)
 export class CharacterAutoLootQueue {
-  private queue: Queue<any, any, string> | null = null;
-  private worker: Worker | null = null;
-  private connection: any;
-
-  private queueName = (scene: string): string =>
-    `auto-loot-queue-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
-
   constructor(
     private characterValidation: CharacterValidation,
     private characterItemContainer: CharacterItemContainer,
@@ -31,73 +21,19 @@ export class CharacterAutoLootQueue {
     private characterInventory: CharacterInventory,
     private characterView: CharacterView,
     private animationEffect: AnimationEffect,
-    private redisManager: RedisManager,
-    private queueCleaner: QueueActivityMonitor
+    private multiQueue: MultiQueue
   ) {}
 
-  public init(scene: string): void {
-    if (!this.connection) {
-      this.connection = this.redisManager.client;
-    }
-
-    if (!this.queue) {
-      this.queue = new Queue(this.queueName(scene), {
-        connection: this.connection,
-      });
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.queue.on("error", async (error) => {
-          console.error(`Error in the ${this.queueName} :`, error);
-
-          await this.queue?.close();
-          this.queue = null;
-        });
-      }
-    }
-
-    if (!this.worker) {
-      this.worker = new Worker(
-        this.queueName(scene),
-        async (job) => {
-          const { character, itemIdsToLoot } = job.data;
-
-          try {
-            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
-
-            await this.execAutoLoot(character, itemIdsToLoot);
-          } catch (err) {
-            console.error(err);
-            throw err;
-          }
-        },
-        {
-          connection: this.connection,
-        }
-      );
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.worker.on("failed", async (job, err) => {
-          console.log(`${this.queueName} job ${job?.id} failed with error ${err.message}`);
-
-          await this.worker?.close();
-          this.worker = null;
-        });
-      }
-    }
-  }
-
   public async autoLoot(character: ICharacter, itemIdsToLoot: string[]): Promise<void> {
-    if (!this.connection || !this.queue || !this.worker) {
-      this.init(character.scene);
-    }
+    await this.multiQueue.addJob(
+      "character-auto-loot",
+      character.scene,
+      async (job) => {
+        const { character, itemIdsToLoot } = job.data;
 
-    await this.queue?.add(
-      this.queueName(character.scene),
-      { character, itemIdsToLoot },
-      {
-        removeOnComplete: true,
-        removeOnFail: true,
-      }
+        await this.execAutoLoot(character, itemIdsToLoot);
+      },
+      { character, itemIdsToLoot }
     );
   }
 
