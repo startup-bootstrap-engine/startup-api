@@ -10,6 +10,8 @@ type QueueJobFn = (job: any) => Promise<void>;
 
 @provideSingleton(MultiQueue)
 export class MultiQueue {
+  private connection: any;
+
   constructor(private redisManager: RedisManager, private queueActivityMonitor: QueueActivityMonitor) {}
 
   public async addJob(
@@ -22,6 +24,10 @@ export class MultiQueue {
     queueOptions?: QueueBaseOptions,
     workerOptions?: QueueBaseOptions
   ): Promise<Job> {
+    if (!this.connection) {
+      this.connection = this.redisManager.client;
+    }
+
     const queueName = this.generateQueueName(prefix, scene, queueNumber);
 
     // Check if queue exists in centralized store (Redis) before initializing
@@ -30,7 +36,7 @@ export class MultiQueue {
     }
 
     const queue = new Queue(queueName, {
-      connection: this.redisManager.client,
+      connection: this.connection,
       sharedConnection: true,
       ...queueOptions,
     });
@@ -46,7 +52,7 @@ export class MultiQueue {
     const allQueues = await this.queueActivityMonitor.getAllQueues();
     for (const queueName of allQueues) {
       const queue = new Queue(queueName, {
-        connection: this.redisManager.client,
+        connection: this.connection,
       });
       const jobs = await queue.getJobs(["waiting", "active", "delayed", "paused"]);
       for (const job of jobs) {
@@ -61,14 +67,14 @@ export class MultiQueue {
     const allQueues = await this.queueActivityMonitor.getAllQueues();
     for (const queueName of allQueues) {
       const worker = new Worker(queueName, async () => {}, {
-        connection: this.redisManager.client,
+        connection: this.connection,
       });
       await worker
         .close()
         .catch((err) => console.error(`Error shutting down worker for queue ${queueName}:`, err.message));
 
       const queue = new Queue(queueName, {
-        connection: this.redisManager.client,
+        connection: this.connection,
       });
       await queue.close().catch((err) => console.error(`Error shutting down queue ${queueName}:`, err.message));
 
@@ -83,7 +89,7 @@ export class MultiQueue {
     workerOptions?: QueueBaseOptions
   ): void {
     new Queue(queueName, {
-      connection: this.redisManager.client,
+      connection: this.connection,
       sharedConnection: true,
       ...queueOptions,
     });
@@ -99,7 +105,7 @@ export class MultiQueue {
         }
       },
       {
-        connection: this.redisManager.client,
+        connection: this.connection,
         sharedConnection: true,
         ...workerOptions,
       }
