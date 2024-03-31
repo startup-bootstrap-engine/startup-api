@@ -14,7 +14,6 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { Locker } from "@providers/locks/Locker";
 import { MathHelper } from "@providers/math/MathHelper";
 import { RaidManager } from "@providers/raid/RaidManager";
-import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { NPCCycleQueue } from "./NPCCycleQueue";
 
 @provide(NPCManager)
@@ -33,8 +32,7 @@ export class NPCManager {
   public async startNearbyNPCsBehaviorLoop(character: ICharacter): Promise<void> {
     const nearbyNPCs = await this.npcView.getNPCsInView(character, { isBehaviorEnabled: false });
 
-    const totalActiveNPCs = await NPC.countDocuments({ isBehaviorEnabled: true });
-    this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.NPCs, "Active", totalActiveNPCs);
+    const totalActiveNPCsOnScene = await NPC.countDocuments({ scene: character.scene, isBehaviorEnabled: true });
 
     const behaviorLoops: Promise<void>[] = [];
 
@@ -45,7 +43,7 @@ export class NPCManager {
         continue;
       }
 
-      behaviorLoops.push(this.startBehaviorLoop(npc, totalActiveNPCs));
+      behaviorLoops.push(this.startBehaviorLoop(npc, totalActiveNPCsOnScene));
     }
 
     await Promise.all(behaviorLoops);

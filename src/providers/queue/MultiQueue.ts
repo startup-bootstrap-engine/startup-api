@@ -32,21 +32,22 @@ export class MultiQueue {
       this.connection = this.redisManager.client;
     }
 
-    if (!this.defaultQueueOptions) {
-      this.defaultQueueOptions = {
-        connection: this.connection,
-        sharedConnection: true,
-        ...queueOptions,
-      };
-    }
-
     const queueName = this.generateQueueName(prefix, scene, queueScaleFactor);
     let queue = this.queues.get(queueName);
 
     if (!queue) {
       console.log(`Creating ${queueName}`);
 
-      queue = this.initQueue(queueName, jobFn, this.defaultQueueOptions, workerOptions);
+      queue = this.initQueue(
+        queueName,
+        jobFn,
+        {
+          connection: this.connection,
+          sharedConnection: true,
+          ...queueOptions,
+        },
+        workerOptions
+      );
       this.queues.set(queueName, queue);
     }
 

@@ -48,7 +48,7 @@ export class NPCCycleQueue {
       return;
     }
 
-    const maxQueues = Math.floor(totalActiveNPCs / 10) + 1;
+    const maxQueues = Math.ceil(totalActiveNPCs / 10) || 1;
     const queueScaleFactor = Math.min(maxQueues, QUEUE_NPC_MAX_SCALE_FACTOR);
 
     await this.multiQueue.addJob(
