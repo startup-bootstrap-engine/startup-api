@@ -1,143 +1,53 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import {
-  BasicAttribute,
-  CharacterClass,
-  CharacterSocketEvents,
-  EnvType,
-  ICharacterAttributeChanged,
-} from "@rpg-engine/shared";
+import { BasicAttribute, CharacterClass, CharacterSocketEvents, ICharacterAttributeChanged } from "@rpg-engine/shared";
 
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
-import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
+import { MultiQueue } from "@providers/queue/MultiQueue";
 import { TraitGetter } from "@providers/skill/TraitGetter";
-import { Job, Queue, Worker } from "bullmq";
+import { Job } from "bullmq";
 import { CharacterWeightCalculator } from "./CharacterWeightCalculator";
 
 @provideSingleton(CharacterWeightQueue)
 export class CharacterWeightQueue {
-  private queue: Queue<any, any, string> | null = null;
-  private worker: Worker | null = null;
-  private connection: any;
-
-  private queueName = (scene: string): string =>
-    `character-weight-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
-
   constructor(
     private socketMessaging: SocketMessaging,
     private traitGetter: TraitGetter,
     private inMemoryHashTable: InMemoryHashTable,
     private characterWeightCalculator: CharacterWeightCalculator,
-    private redisManager: RedisManager,
-    private queueActivityMonitor: QueueActivityMonitor
+    private multiQueue: MultiQueue
   ) {}
 
-  public init(scene: string): void {
-    if (appEnv.general.IS_UNIT_TEST) {
-      return;
-    }
-
-    if (!this.connection) {
-      this.connection = this.redisManager.client;
-    }
-
-    if (!this.queue) {
-      this.queue = new Queue(this.queueName(scene), {
-        connection: this.connection,
-      });
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.queue.on("error", async (error) => {
-          console.error("Error in the pathfindingQueue:", error);
-
-          await this.queue?.close();
-          this.queue = null;
-        });
-      }
-    }
-
-    if (!this.worker) {
-      this.worker = new Worker(
-        this.queueName(scene),
-        async (job) => {
-          const { character } = job.data;
-
-          try {
-            await this.queueActivityMonitor.updateQueueActivity(this.queueName(scene));
-
-            await this.execUpdateCharacterWeight(character);
-          } catch (err) {
-            console.error(
-              `Error processing ${this.queueName} for character ${character._id} (${character.name}):`,
-              err
-            );
-            throw err;
-          }
-        },
-        {
-          connection: this.connection,
-        }
-      );
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.worker.on("failed", async (job, err) => {
-          console.log(`Pathfinding job ${job?.id} failed with error ${err.message}`);
-
-          await this.worker?.close();
-          this.worker = null;
-        });
-      }
-    }
-  }
-
-  public async clearAllJobs(): Promise<void> {
-    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
-    for (const job of jobs) {
-      try {
-        await job?.remove();
-      } catch (err) {
-        console.error(`Error removing job ${job?.id}:`, err.message);
-      }
-    }
-  }
-
   async updateCharacterWeight(character: ICharacter): Promise<Job | undefined> {
-    if (!this.connection || !this.queue || !this.worker) {
-      this.init(character.scene);
-    }
-
     if (appEnv.general.IS_UNIT_TEST) {
       await this.execUpdateCharacterWeight(character);
       return;
     }
 
-    try {
-      return await this.queue?.add(
-        this.queueName(character.scene),
-        {
-          character,
-        },
-        {
-          removeOnComplete: true,
-          removeOnFail: true,
-        }
-      );
-    } catch (error) {
-      console.error(error);
-    }
+    await this.multiQueue.addJob(
+      "character-weight",
+      character.scene,
+      async (job) => {
+        const data = job.data as { character: ICharacter };
+        await this.execUpdateCharacterWeight(data.character);
+      },
+      {
+        character,
+      }
+    );
+  }
+
+  public async clearAllJobs(): Promise<void> {
+    await this.multiQueue.clearAllJobs();
   }
 
   public async shutdown(): Promise<void> {
-    await this.queue?.close();
-    await this.worker?.close();
-    this.queue = null;
-    this.worker = null;
+    await this.multiQueue.shutdown();
   }
 
   @TrackNewRelicTransaction()

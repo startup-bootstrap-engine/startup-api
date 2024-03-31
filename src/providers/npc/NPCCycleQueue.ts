@@ -44,6 +44,7 @@ export class NPCCycleQueue {
   public async addToQueue(npc: INPC, npcSkills: ISkill, totalActiveNPCs: number): Promise<void> {
     if (appEnv.general.IS_UNIT_TEST) {
       await this.execNpcCycle(npc, npcSkills, totalActiveNPCs);
+      return;
     }
 
     const maxQueues = Math.floor(totalActiveNPCs / 10) + 1;
