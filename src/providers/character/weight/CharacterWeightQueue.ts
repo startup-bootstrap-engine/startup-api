@@ -31,7 +31,6 @@ export class CharacterWeightQueue {
 
     await this.multiQueue.addJob(
       "character-weight",
-      character.scene,
       async (job) => {
         const data = job.data as { character: ICharacter };
         await this.execUpdateCharacterWeight(data.character);

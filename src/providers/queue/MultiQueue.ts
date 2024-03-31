@@ -12,7 +12,6 @@ type QueueJobFn = (job: any) => Promise<void>;
 @provideSingleton(MultiQueue)
 export class MultiQueue {
   private connection: any;
-  private defaultQueueOptions: QueueBaseOptions | null = null;
   private queues: Map<string, Queue> = new Map(); // Map to track initialized queues
   private workers: Map<string, Worker> = new Map(); // Map to keep track of workers by queue name
 
@@ -20,10 +19,10 @@ export class MultiQueue {
 
   public async addJob(
     prefix: string,
-    scene: string,
     jobFn: QueueJobFn,
     data: Record<string, unknown>,
     queueScaleFactor: number = QUEUE_SCALE_FACTOR_DEFAULT,
+    scene?: string,
     addQueueOptions?: DefaultJobOptions,
     queueOptions?: QueueBaseOptions,
     workerOptions?: QueueBaseOptions
@@ -32,7 +31,7 @@ export class MultiQueue {
       this.connection = this.redisManager.client;
     }
 
-    const queueName = this.generateQueueName(prefix, scene, queueScaleFactor);
+    const queueName = this.generateQueueName(prefix, queueScaleFactor, scene);
     let queue = this.queues.get(queueName);
 
     if (!queue) {
@@ -120,7 +119,7 @@ export class MultiQueue {
     }
   }
 
-  private generateQueueName(prefix: string, scene: string, queueScaleFactor: number): string {
+  private generateQueueName(prefix: string, queueScaleFactor: number, scene?: string): string {
     let envSuffix;
 
     if (queueScaleFactor > 1) {
@@ -134,6 +133,10 @@ export class MultiQueue {
       default:
         envSuffix = process.env.pm_id || "prod";
         break;
+    }
+
+    if (!scene) {
+      return `${prefix}-${envSuffix}-${queueScaleFactor}`;
     }
 
     return `${prefix}-${envSuffix}-${scene}-${queueScaleFactor}`;

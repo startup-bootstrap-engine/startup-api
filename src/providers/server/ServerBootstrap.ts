@@ -29,7 +29,7 @@ import { NPCBattleCycleQueue } from "@providers/npc/NPCBattleCycleQueue";
 import { NPCCycleQueue } from "@providers/npc/NPCCycleQueue";
 import { NPCDeathQueue } from "@providers/npc/NPCDeathQueue";
 import { NPCFreezer } from "@providers/npc/NPCFreezer";
-import { NPCMovementMoveTowardsQueue } from "@providers/npc/movement/NPCMovementMoveTowardsQueue";
+import { NPCMovementMoveTowards } from "@providers/npc/movement/NPCMovementMoveTowards";
 import PartyManagement from "@providers/party/PartyManagement";
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
 import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
@@ -76,7 +76,7 @@ export class ServerBootstrap {
     private characterActionsTracker: CharacterActionsTracker,
     private errorHandlingTracker: ErrorHandlingTracker,
     private bullStrength: BullStrength,
-    private npcMovementMoveTowardsQueue: NPCMovementMoveTowardsQueue,
+    private npcMovementMoveTowardsQueue: NPCMovementMoveTowards,
     private npcDeathQueue: NPCDeathQueue,
     private itemContainerTransactionQueue: ItemContainerTransactionQueue,
     private itemDropVerifier: ItemDropVerifier,
@@ -125,7 +125,6 @@ export class ServerBootstrap {
       await this.useWithTileQueue.shutdown();
       await this.chatNetworkGlobalMessaging.shutdown();
       await this.spellNetworkCast.shutdown();
-      await this.npcMovementMoveTowardsQueue.shutdown();
       await this.npcDeathQueue.shutdown();
       await this.itemContainerTransactionQueue.shutdown();
       await this.characterNetworkCreateQueue.shutdown();
@@ -207,7 +206,6 @@ export class ServerBootstrap {
     await this.queueActivityMonitor.clearAllQueues();
 
     await this.pathfindingQueue.clearAllJobs();
-    await this.npcMovementMoveTowardsQueue.clearAllJobs();
     await this.hitTarget.clearAllQueueJobs();
     await this.itemUseCycleQueue.clearAllJobs();
     await this.npcBattleCycleQueue.clearAllJobs();

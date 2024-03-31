@@ -28,17 +28,15 @@ import { NPCView } from "../NPCView";
 import { NPCMovement } from "./NPCMovement";
 import { NPCTarget } from "./NPCTarget";
 
-import { QUEUE_NPC_MAX_SCALE_FACTOR } from "@providers/constants/QueueConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { MultiQueue } from "@providers/queue/MultiQueue";
 
 export interface ICharacterHealth {
   id: string;
   health: number;
 }
 
-@provideSingleton(NPCMovementMoveTowardsQueue)
-export class NPCMovementMoveTowardsQueue {
+@provideSingleton(NPCMovementMoveTowards)
+export class NPCMovementMoveTowards {
   debouncedFaceTarget: _.DebouncedFunc<(npc: INPC, targetCharacter: ICharacter) => Promise<void>>;
 
   constructor(
@@ -52,8 +50,7 @@ export class NPCMovementMoveTowardsQueue {
     private locker: Locker,
     private npcBattleCycleQueue: NPCBattleCycleQueue,
     private inMemoryHashTable: InMemoryHashTable,
-    private npcFreezer: NPCFreezer,
-    private multiQueue: MultiQueue
+    private npcFreezer: NPCFreezer
   ) {}
 
   public async startMoveTowardsMovement(npc: INPC, totalActiveNPCs: number): Promise<void> {
@@ -71,11 +68,6 @@ export class NPCMovementMoveTowardsQueue {
       return;
     }
 
-    if (appEnv.general.IS_UNIT_TEST) {
-      await this.execStartMoveTowardsMovement(npc, totalActiveNPCs, targetCharacter);
-      return;
-    }
-
     try {
       const canProceed = await this.locker.lock(`movement-move-towards-${npc._id}`);
 
@@ -83,37 +75,12 @@ export class NPCMovementMoveTowardsQueue {
         return;
       }
 
-      const maxQueues = Math.ceil(totalActiveNPCs / 10) || 1;
-      const queueScaleFactor = Math.min(maxQueues, QUEUE_NPC_MAX_SCALE_FACTOR);
-
-      await this.multiQueue.addJob(
-        "npc-movement-move-towards-queue",
-        npc.scene,
-        async (job) => {
-          const { npc, totalActiveNPCs, targetCharacter } = job.data;
-
-          await this.execStartMoveTowardsMovement(npc, totalActiveNPCs, targetCharacter);
-        },
-        {
-          npc,
-          totalActiveNPCs,
-          targetCharacter,
-        },
-        queueScaleFactor
-      );
+      await this.execStartMoveTowardsMovement(npc, totalActiveNPCs, targetCharacter);
     } catch (error) {
       console.error(error);
     } finally {
       await this.locker.unlock(`movement-move-towards-${npc._id}`);
     }
-  }
-
-  public async clearAllJobs(): Promise<void> {
-    await this.multiQueue.clearAllJobs();
-  }
-
-  public async shutdown(): Promise<void> {
-    await this.multiQueue.shutdown();
   }
 
   @TrackNewRelicTransaction()

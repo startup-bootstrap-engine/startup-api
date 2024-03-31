@@ -16,7 +16,7 @@ import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/Ne
 import { NPCAlignment } from "@rpg-engine/shared";
 import _ from "lodash";
 import { NPCView } from "./NPCView";
-import { ICharacterHealth } from "./movement/NPCMovementMoveTowardsQueue";
+import { ICharacterHealth } from "./movement/NPCMovementMoveTowards";
 import { NPCTarget } from "./movement/NPCTarget";
 @provideSingleton(NPCBattleCycleQueue)
 export class NPCBattleCycleQueue {
@@ -46,7 +46,7 @@ export class NPCBattleCycleQueue {
 
       await this.multiQueue.addJob(
         "npc-battle-queue",
-        npc.scene,
+
         async (job) => {
           const { npc, npcSkills } = job.data;
 
@@ -57,6 +57,7 @@ export class NPCBattleCycleQueue {
           npcSkills,
         },
         QUEUE_SCALE_FACTOR_DEFAULT,
+        npc.scene,
         {
           delay: NPC_BATTLE_CYCLE_INTERVAL,
         }

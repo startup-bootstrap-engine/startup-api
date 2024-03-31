@@ -27,7 +27,7 @@ export class CharacterAutoLootQueue {
   public async autoLoot(character: ICharacter, itemIdsToLoot: string[]): Promise<void> {
     await this.multiQueue.addJob(
       "character-auto-loot",
-      character.scene,
+
       async (job) => {
         const { character, itemIdsToLoot } = job.data;
 

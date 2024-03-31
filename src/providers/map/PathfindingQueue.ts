@@ -37,7 +37,7 @@ export class PathfindingQueue {
 
       return await this.multiQueue.addJob(
         "npc-pathfinding-queue",
-        npc.scene,
+
         async (job) => {
           const { npc, target, startGridX, startGridY, endGridX, endGridY } = job.data;
 
@@ -65,7 +65,8 @@ export class PathfindingQueue {
           endGridX,
           endGridY,
         },
-        queueScaleFactor
+        queueScaleFactor,
+        npc.scene
       );
     } catch (error) {
       console.error(error);

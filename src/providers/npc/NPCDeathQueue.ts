@@ -22,6 +22,7 @@ import { NPCTarget } from "./movement/NPCTarget";
 
 import { CharacterView } from "@providers/character/CharacterView";
 import { appEnv } from "@providers/config/env";
+import { QUEUE_SCALE_FACTOR_DEFAULT } from "@providers/constants/QueueConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { MultiQueue } from "@providers/queue/MultiQueue";
 @provideSingleton(NPCDeathQueue)
@@ -49,13 +50,14 @@ export class NPCDeathQueue {
 
     await this.multiQueue.addJob(
       "npc-death",
-      npc.scene,
       async (job) => {
         const { killer, npc } = job.data;
 
         await this.execHandleNPCDeath(killer, npc);
       },
-      { killer, npc }
+      { killer, npc },
+      QUEUE_SCALE_FACTOR_DEFAULT,
+      npc.scene
     );
   }
 

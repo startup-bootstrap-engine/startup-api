@@ -50,7 +50,7 @@ export class ItemUseCycleQueue {
   ): Promise<void> {
     await this.multiQueue.addJob(
       "item-use-cycle",
-      scene,
+
       async (job) => {
         let { characterId, itemKey, iterations, intervalDurationMs } = job.data;
 
@@ -75,6 +75,7 @@ export class ItemUseCycleQueue {
         intervalDurationMs,
       },
       QUEUE_SCALE_FACTOR_DEFAULT,
+      scene,
       {
         delay: intervalDurationMs,
       }

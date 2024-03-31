@@ -21,7 +21,7 @@ import { NPCView } from "./NPCView";
 import { NPCMovement } from "./movement/NPCMovement";
 import { NPCMovementFixedPath } from "./movement/NPCMovementFixedPath";
 import { NPCMovementMoveAway } from "./movement/NPCMovementMoveAway";
-import { NPCMovementMoveTowardsQueue } from "./movement/NPCMovementMoveTowardsQueue";
+import { NPCMovementMoveTowards } from "./movement/NPCMovementMoveTowards";
 import { NPCMovementRandomPath } from "./movement/NPCMovementRandomPath";
 import { NPCMovementStopped } from "./movement/NPCMovementStopped";
 @provideSingleton(NPCCycleQueue)
@@ -32,7 +32,7 @@ export class NPCCycleQueue {
     private npcMovement: NPCMovement,
     private npcMovementFixedPath: NPCMovementFixedPath,
     private npcMovementRandom: NPCMovementRandomPath,
-    private npcMovementMoveTowards: NPCMovementMoveTowardsQueue,
+    private npcMovementMoveTowards: NPCMovementMoveTowards,
     private npcMovementStopped: NPCMovementStopped,
     private npcMovementMoveAway: NPCMovementMoveAway,
     private stun: Stun,
@@ -53,7 +53,7 @@ export class NPCCycleQueue {
 
     await this.multiQueue.addJob(
       "npc-cycle-queue",
-      npc.scene,
+
       async (job) => {
         const { npc, npcSkills } = job.data;
 
@@ -64,6 +64,7 @@ export class NPCCycleQueue {
         npcSkills,
       },
       queueScaleFactor,
+      npc.scene,
       {
         delay: (1600 + random(0, 200)) / (npc.speed * 1.6) / NPC_CYCLE_INTERVAL_RATIO,
       }
