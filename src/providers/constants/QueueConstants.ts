@@ -4,4 +4,4 @@ export const QUEUE_CLOSE_CHECK_MAX_TRIES = 10; // Set your desired maximum numbe
 
 export const QUEUE_SCALE_FACTOR_DEFAULT = 1; // Careful with this number. Higher it its, more queues will be created and more redis connections, consuming more resources
 
-export const QUEUE_NPC_MAX_SCALE_FACTOR = 100;
+export const QUEUE_NPC_MAX_SCALE_FACTOR = 5;
