@@ -6,7 +6,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { BattleAttackTarget } from "@providers/battle/BattleAttackTarget/BattleAttackTarget";
 import { appEnv } from "@providers/config/env";
 import { NPC_BATTLE_CYCLE_INTERVAL, NPC_MIN_DISTANCE_TO_ACTIVATE } from "@providers/constants/NPCConstants";
-import { QUEUE_DEFAULT_QUEUE_NUMBER } from "@providers/constants/QueueConstants";
+import { QUEUE_SCALE_FACTOR_DEFAULT } from "@providers/constants/QueueConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MovementHelper } from "@providers/movement/MovementHelper";
@@ -56,7 +56,7 @@ export class NPCBattleCycleQueue {
           npc,
           npcSkills,
         },
-        QUEUE_DEFAULT_QUEUE_NUMBER,
+        QUEUE_SCALE_FACTOR_DEFAULT,
         {
           delay: NPC_BATTLE_CYCLE_INTERVAL,
         }

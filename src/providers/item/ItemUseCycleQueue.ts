@@ -1,5 +1,5 @@
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { QUEUE_DEFAULT_QUEUE_NUMBER } from "@providers/constants/QueueConstants";
+import { QUEUE_SCALE_FACTOR_DEFAULT } from "@providers/constants/QueueConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MultiQueue } from "@providers/queue/MultiQueue";
@@ -74,7 +74,7 @@ export class ItemUseCycleQueue {
         iterations,
         intervalDurationMs,
       },
-      QUEUE_DEFAULT_QUEUE_NUMBER,
+      QUEUE_SCALE_FACTOR_DEFAULT,
       {
         delay: intervalDurationMs,
       }

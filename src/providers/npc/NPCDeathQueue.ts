@@ -12,15 +12,7 @@ import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTy
 import { Locker } from "@providers/locks/Locker";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
-import {
-  BattleSocketEvents,
-  CharacterPartyBenefits,
-  EntityType,
-  EnvType,
-  IBattleDeath,
-  INPCLoot,
-} from "@rpg-engine/shared";
-import { Queue, Worker } from "bullmq";
+import { BattleSocketEvents, CharacterPartyBenefits, EntityType, IBattleDeath, INPCLoot } from "@rpg-engine/shared";
 import { Types } from "mongoose";
 import { NPCExperience } from "./NPCExperience/NPCExperience";
 import { NPCFreezer } from "./NPCFreezer";
@@ -30,20 +22,11 @@ import { NPCTarget } from "./movement/NPCTarget";
 
 import { CharacterView } from "@providers/character/CharacterView";
 import { appEnv } from "@providers/config/env";
-import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
+import { MultiQueue } from "@providers/queue/MultiQueue";
 @provideSingleton(NPCDeathQueue)
 export class NPCDeathQueue {
-  private queue: Queue | null = null;
-  private worker: Worker | null = null;
-  private connection;
-
-  private queueName = (scene: string): string =>
-    `npc-death-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
-
   constructor(
-    private redisManager: RedisManager,
     private socketMessaging: SocketMessaging,
     private npcTarget: NPCTarget,
     private itemOwnership: ItemOwnership,
@@ -55,81 +38,8 @@ export class NPCDeathQueue {
     private locker: Locker,
     private newRelic: NewRelic,
     private npcLoot: NPCLoot,
-    private queueActivityMonitor: QueueActivityMonitor
+    private multiQueue: MultiQueue
   ) {}
-
-  public init(scene: string): void {
-    if (appEnv.general.IS_UNIT_TEST) {
-      return;
-    }
-
-    if (!this.connection) {
-      this.connection = this.redisManager.client;
-    }
-
-    if (!this.queue) {
-      this.queue = new Queue(this.queueName(scene), {
-        connection: this.connection,
-      });
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.queue.on("error", async (error) => {
-          console.error("Error in the pathfindingQueue:", error);
-
-          await this.queue?.close();
-          this.queue = null;
-        });
-      }
-    }
-
-    if (!this.worker) {
-      this.worker = new Worker(
-        this.queueName(scene),
-        async (job) => {
-          const { killer, npc } = job.data;
-
-          try {
-            await this.queueActivityMonitor.updateQueueActivity(this.queueName(scene));
-
-            await this.execHandleNPCDeath(killer, npc);
-          } catch (err) {
-            console.error(`Error processing ${this.queueName} for NPC ${npc.key}:`, err);
-            throw err;
-          }
-        },
-        {
-          connection: this.connection,
-        }
-      );
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.worker.on("failed", async (job, err) => {
-          console.log(`Pathfinding job ${job?.id} failed with error ${err.message}`);
-
-          await this.worker?.close();
-          this.worker = null;
-        });
-      }
-    }
-  }
-
-  public async clearAllJobs(): Promise<void> {
-    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
-    for (const job of jobs) {
-      try {
-        await job?.remove();
-      } catch (err) {
-        console.error(`Error removing job ${job?.id}:`, err.message);
-      }
-    }
-  }
-
-  public async shutdown(): Promise<void> {
-    await this.queue?.close();
-    await this.worker?.close();
-    this.queue = null;
-    this.worker = null;
-  }
 
   public async handleNPCDeath(killer: ICharacter, npc: INPC): Promise<void> {
     if (appEnv.general.IS_UNIT_TEST) {
@@ -137,11 +47,16 @@ export class NPCDeathQueue {
       return;
     }
 
-    if (!this.connection || !this.queue || !this.worker) {
-      this.init(npc.scene);
-    }
+    await this.multiQueue.addJob(
+      "npc-death",
+      npc.scene,
+      async (job) => {
+        const { killer, npc } = job.data;
 
-    await this.queue?.add(this.queueName(npc.scene), { killer, npc });
+        await this.execHandleNPCDeath(killer, npc);
+      },
+      { killer, npc }
+    );
   }
 
   @TrackNewRelicTransaction()
@@ -305,5 +220,13 @@ export class NPCDeathQueue {
       return dropRatioBenefit?.value || 0;
     }
     return 0;
+  }
+
+  public async clearAllJobs(): Promise<void> {
+    await this.multiQueue.clearAllJobs();
+  }
+
+  public async shutdown(): Promise<void> {
+    await this.multiQueue.shutdown();
   }
 }

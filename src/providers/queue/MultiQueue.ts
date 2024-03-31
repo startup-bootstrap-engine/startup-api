@@ -1,5 +1,5 @@
 import { appEnv } from "@providers/config/env";
-import { QUEUE_DEFAULT_QUEUE_NUMBER } from "@providers/constants/QueueConstants";
+import { QUEUE_SCALE_FACTOR_DEFAULT } from "@providers/constants/QueueConstants";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { EnvType } from "@rpg-engine/shared";
@@ -22,7 +22,7 @@ export class MultiQueue {
     scene: string,
     jobFn: QueueJobFn,
     data: Record<string, unknown>,
-    queueNumber: number = QUEUE_DEFAULT_QUEUE_NUMBER,
+    queueScaleFactor: number = QUEUE_SCALE_FACTOR_DEFAULT,
     addQueueOptions?: DefaultJobOptions,
     queueOptions?: QueueBaseOptions,
     workerOptions?: QueueBaseOptions
@@ -39,7 +39,7 @@ export class MultiQueue {
       };
     }
 
-    const queueName = this.generateQueueName(prefix, scene, queueNumber);
+    const queueName = this.generateQueueName(prefix, scene, queueScaleFactor);
     let queue = this.queues.get(queueName);
 
     if (!queue) {
@@ -116,7 +116,7 @@ export class MultiQueue {
     }
   }
 
-  private generateQueueName(prefix: string, scene: string, queueNumber: number): string {
+  private generateQueueName(prefix: string, scene: string, queueScaleFactor: number): string {
     let envSuffix;
 
     switch (appEnv.general.ENV) {
@@ -128,6 +128,6 @@ export class MultiQueue {
         break;
     }
 
-    return `${prefix}-${envSuffix}-${scene}-${queueNumber}`;
+    return `${prefix}-${envSuffix}-${scene}-${queueScaleFactor}`;
   }
 }

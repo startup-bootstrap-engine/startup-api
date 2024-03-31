@@ -28,6 +28,7 @@ import { NPCView } from "../NPCView";
 import { NPCMovement } from "./NPCMovement";
 import { NPCTarget } from "./NPCTarget";
 
+import { QUEUE_NPC_MAX_SCALE_FACTOR } from "@providers/constants/QueueConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { MultiQueue } from "@providers/queue/MultiQueue";
 
@@ -83,7 +84,7 @@ export class NPCMovementMoveTowardsQueue {
       }
 
       const maxQueues = Math.floor(totalActiveNPCs / 10) + 1;
-      const queueNumber = Math.min(Math.ceil(Math.random() * maxQueues), 100);
+      const queueScaleFactor = Math.min(Math.ceil(Math.random() * maxQueues), QUEUE_NPC_MAX_SCALE_FACTOR);
 
       await this.multiQueue.addJob(
         "npc-movement-move-towards-queue",
@@ -98,7 +99,7 @@ export class NPCMovementMoveTowardsQueue {
           totalActiveNPCs,
           targetCharacter,
         },
-        queueNumber
+        queueScaleFactor
       );
     } catch (error) {
       console.error(error);

@@ -8,6 +8,7 @@ import {
   NPC_FRIENDLY_NEUTRAL_FREEZE_CHECK_CHANCE,
   NPC_HOSTILE_FREEZE_CHECK_CHANCE,
 } from "@providers/constants/NPCConstants";
+import { QUEUE_NPC_MAX_SCALE_FACTOR } from "@providers/constants/QueueConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MultiQueue } from "@providers/queue/MultiQueue";
@@ -48,7 +49,7 @@ export class NPCCycleQueue {
     }
 
     const maxQueues = Math.floor(totalActiveNPCs / 10) + 1;
-    const queueNumber = Math.min(Math.ceil(Math.random() * maxQueues), 100);
+    const queueScaleFactor = Math.min(Math.ceil(Math.random() * maxQueues), QUEUE_NPC_MAX_SCALE_FACTOR);
 
     await this.multiQueue.addJob(
       "npc-cycle-queue",
@@ -62,7 +63,7 @@ export class NPCCycleQueue {
         npc,
         npcSkills,
       },
-      queueNumber,
+      queueScaleFactor,
       {
         delay: (1600 + random(0, 200)) / (npc.speed * 1.6) / NPC_CYCLE_INTERVAL_RATIO,
       }
