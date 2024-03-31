@@ -1,125 +1,20 @@
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { appEnv } from "@providers/config/env";
-import { RedisManager } from "@providers/database/RedisManager";
+import { QUEUE_DEFAULT_QUEUE_NUMBER } from "@providers/constants/QueueConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
-import { EnvType } from "@rpg-engine/shared";
-import { Queue, Worker } from "bullmq";
-import { v4 as uuidv4 } from "uuid";
+import { MultiQueue } from "@providers/queue/MultiQueue";
 
 type CallbackRecord = () => void;
 
 @provideSingleton(ItemUseCycleQueue)
 export class ItemUseCycleQueue {
   public itemCallbacks = new Map<string, CallbackRecord>();
-  private queue: Queue | null = null;
-  private worker: Worker | null = null;
-  private connection: any;
 
-  private queueName: string = `item-use-cycle-${uuidv4()}-${
-    appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
-  }`;
-
-  constructor(private redisManager: RedisManager, private queueCleaner: QueueActivityMonitor, private locker: Locker) {}
-
-  public init(): void {
-    if (!this.connection) {
-      this.connection = this.redisManager.client;
-    }
-
-    if (!this.queue) {
-      this.queue = new Queue(this.queueName, {
-        connection: this.connection,
-      });
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.queue.on("error", async (error) => {
-          console.error("Error in the ItemUseCycleQueue:", error);
-
-          await this.queue?.close();
-          this.queue = null;
-        });
-      }
-    }
-
-    if (!this.worker) {
-      this.worker = new Worker(
-        this.queueName,
-        async (job) => {
-          let { characterId, itemKey, iterations, intervalDurationMs } = job.data;
-
-          try {
-            await this.queueCleaner.updateQueueActivity(this.queueName);
-
-            const callback = this.itemCallbacks.get(`${characterId}-${itemKey}`);
-
-            if (!callback) {
-              return;
-            }
-
-            await callback();
-
-            iterations--;
-
-            if (iterations > 0) {
-              await this.add(characterId, itemKey, iterations, intervalDurationMs);
-            }
-          } catch (err) {
-            console.error("Error processing item-use-cycle queue", err);
-            throw err;
-          }
-        },
-        {
-          connection: this.connection,
-        }
-      );
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.worker.on("failed", async (job, err) => {
-          console.log(`ItemUseCycle job ${job?.id} failed with error ${err.message}`);
-
-          await this.worker?.close();
-          this.worker = null;
-        });
-      }
-    }
-
-    if (!appEnv.general.IS_UNIT_TEST) {
-      this.worker.on("failed", async (job, err) => {
-        console.log(`ItemUseCycle job ${job?.id} failed with error ${err.message}`);
-
-        await this.worker?.close();
-        this.worker = null;
-      });
-    }
-  }
-
-  public async clearAllJobs(): Promise<void> {
-    if (!this.connection || !this.queue || !this.worker) {
-      this.init();
-    }
-
-    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
-    for (const job of jobs) {
-      try {
-        await job?.remove();
-      } catch (err) {
-        console.error(`Error removing job ${job?.id}:`, err.message);
-      }
-    }
-  }
-
-  public async shutdown(): Promise<void> {
-    await this.queue?.close();
-    await this.worker?.close();
-
-    this.queue = null;
-    this.worker = null;
-  }
+  constructor(private locker: Locker, private multiQueue: MultiQueue) {}
 
   @TrackNewRelicTransaction()
   public async start(
+    scene: string,
     characterId: string,
     itemKey: string,
     iterations: number,
@@ -138,7 +33,7 @@ export class ItemUseCycleQueue {
       // execute first callback
       await callback();
 
-      await this.add(characterId, itemKey, iterations, intervalDurationMs);
+      await this.add(scene, characterId, itemKey, iterations, intervalDurationMs);
     } catch (error) {
       console.error(error);
     } finally {
@@ -147,28 +42,50 @@ export class ItemUseCycleQueue {
   }
 
   private async add(
+    scene: string,
     characterId: string,
     itemKey: string,
     iterations: number,
     intervalDurationMs: number
   ): Promise<void> {
-    if (!this.connection || !this.queue || !this.worker) {
-      this.init();
-    }
+    await this.multiQueue.addJob(
+      "item-use-cycle",
+      scene,
+      async (job) => {
+        let { characterId, itemKey, iterations, intervalDurationMs } = job.data;
 
-    await this.queue?.add(
-      this.queueName,
+        const callback = this.itemCallbacks.get(`${characterId}-${itemKey}`);
+
+        if (!callback) {
+          return;
+        }
+
+        await callback();
+
+        iterations--;
+
+        if (iterations > 0) {
+          await this.add(scene, characterId, itemKey, iterations, intervalDurationMs);
+        }
+      },
       {
         characterId,
         itemKey,
         iterations,
         intervalDurationMs,
       },
+      QUEUE_DEFAULT_QUEUE_NUMBER,
       {
-        removeOnComplete: true,
-        removeOnFail: true,
         delay: intervalDurationMs,
       }
     );
+  }
+
+  public async clearAllJobs(): Promise<void> {
+    await this.multiQueue.clearAllJobs();
+  }
+
+  public async shutdown(): Promise<void> {
+    await this.multiQueue.shutdown();
   }
 }
