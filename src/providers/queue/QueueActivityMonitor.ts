@@ -4,7 +4,7 @@ import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
-import { Queue } from "bullmq";
+import { Queue, Worker } from "bullmq";
 import dayjs from "dayjs";
 
 @provideSingleton(QueueActivityMonitor)
@@ -64,6 +64,12 @@ export class QueueActivityMonitor {
 
         const queue = new Queue(queueName, {
           connection: this.connection,
+          sharedConnection: true,
+        });
+
+        const worker = new Worker(queueName, async () => {}, {
+          connection: this.connection,
+          sharedConnection: true,
         });
 
         try {
@@ -80,6 +86,7 @@ export class QueueActivityMonitor {
             }
           }
 
+          await worker.close(); // Close the worker
           await queue.close(); // Close the queue
           await queue.obliterate({ force: true }); // Remove the queue and its data from Redis
           await this.deleteQueueActivity(queueName); // Remove the queue from the centralized store

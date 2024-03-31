@@ -1,5 +1,4 @@
 import { appEnv } from "@providers/config/env";
-import { QUEUE_DEFAULT_QUEUE_NUMBER } from "@providers/constants/QueueConstants";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { EnvType } from "@rpg-engine/shared";
@@ -11,6 +10,9 @@ type QueueJobFn = (job: any) => Promise<void>;
 @provideSingleton(MultiQueue)
 export class MultiQueue {
   private connection: any;
+  private defaultQueueOptions: QueueBaseOptions | null = null;
+  private queues: Map<string, Queue> = new Map(); // Map to track initialized queues
+  private workers: Map<string, Worker> = new Map(); // Map to keep track of workers by queue name
 
   constructor(private redisManager: RedisManager, private queueActivityMonitor: QueueActivityMonitor) {}
 
@@ -19,7 +21,7 @@ export class MultiQueue {
     scene: string,
     jobFn: QueueJobFn,
     data: Record<string, unknown>,
-    queueNumber: number = QUEUE_DEFAULT_QUEUE_NUMBER,
+    queueNumber: number,
     addQueueOptions?: DefaultJobOptions,
     queueOptions?: QueueBaseOptions,
     workerOptions?: QueueBaseOptions
@@ -28,18 +30,21 @@ export class MultiQueue {
       this.connection = this.redisManager.client;
     }
 
-    const queueName = this.generateQueueName(prefix, scene, queueNumber);
-
-    // Check if queue exists in centralized store (Redis) before initializing
-    if (!(await this.queueActivityMonitor.hasQueueActivity(queueName))) {
-      this.initQueue(queueName, jobFn, queueOptions, workerOptions);
+    if (!this.defaultQueueOptions) {
+      this.defaultQueueOptions = {
+        connection: this.connection,
+        sharedConnection: true,
+        ...queueOptions,
+      };
     }
 
-    const queue = new Queue(queueName, {
-      connection: this.connection,
-      sharedConnection: true,
-      ...queueOptions,
-    });
+    const queueName = this.generateQueueName(prefix, scene, queueNumber);
+    let queue = this.queues.get(queueName);
+
+    if (!queue) {
+      queue = this.initQueue(queueName, jobFn, this.defaultQueueOptions, workerOptions);
+      this.queues.set(queueName, queue);
+    }
 
     return await queue.add(queueName, data, {
       removeOnComplete: true,
@@ -48,57 +53,20 @@ export class MultiQueue {
     });
   }
 
-  public async clearAllJobs(): Promise<void> {
-    const allQueues = await this.queueActivityMonitor.getAllQueues();
-    for (const queueName of allQueues) {
-      const queue = new Queue(queueName, {
-        connection: this.connection,
-      });
-      const jobs = await queue.getJobs(["waiting", "active", "delayed", "paused"]);
-      for (const job of jobs) {
-        await job
-          .remove()
-          .catch((err) => console.error(`Error removing job ${job.id} from queue ${queueName}:`, err.message));
-      }
-    }
-  }
-
-  public async shutdown(): Promise<void> {
-    const allQueues = await this.queueActivityMonitor.getAllQueues();
-    for (const queueName of allQueues) {
-      const worker = new Worker(queueName, async () => {}, {
-        connection: this.connection,
-      });
-      await worker
-        .close()
-        .catch((err) => console.error(`Error shutting down worker for queue ${queueName}:`, err.message));
-
-      const queue = new Queue(queueName, {
-        connection: this.connection,
-      });
-      await queue.close().catch((err) => console.error(`Error shutting down queue ${queueName}:`, err.message));
-
-      await this.queueActivityMonitor.deleteQueueActivity(queueName);
-    }
-  }
-
   private initQueue(
     queueName: string,
     jobFn: QueueJobFn,
-    queueOptions?: QueueBaseOptions,
+    queueOptions: QueueBaseOptions,
     workerOptions?: QueueBaseOptions
-  ): void {
-    new Queue(queueName, {
-      connection: this.connection,
-      sharedConnection: true,
-      ...queueOptions,
-    });
+  ): Queue {
+    const queue = new Queue(queueName, queueOptions);
 
     const worker = new Worker(
       queueName,
       async (job) => {
         try {
           await this.queueActivityMonitor.updateQueueActivity(queueName);
+
           await jobFn(job);
         } catch (error) {
           console.error(`Error processing ${queueName} job ${job.id}: ${error.message}`);
@@ -111,10 +79,39 @@ export class MultiQueue {
       }
     );
 
-    if (!appEnv.general.IS_UNIT_TEST) {
-      worker.on("failed", (job, err) => {
-        console.log(`${queueName} job ${job?.id} failed with error ${err.message}`);
-      });
+    this.workers.set(queueName, worker);
+
+    return queue;
+  }
+
+  public async clearAllJobs(): Promise<void> {
+    for (const [queueName, queue] of this.queues.entries()) {
+      const jobs = await queue.getJobs(["waiting", "active", "delayed", "paused"]);
+      for (const job of jobs) {
+        await job
+          .remove()
+          .catch((err) => console.error(`Error removing job ${job.id} from queue ${queueName}:`, err.message));
+      }
+    }
+  }
+
+  public async shutdown(): Promise<void> {
+    for (const [queueName, queue] of this.queues.entries()) {
+      const worker = this.workers.get(queueName);
+      if (worker) {
+        await worker
+          .close()
+          .catch((err) => console.error(`Error shutting down worker for queue ${queueName}:`, err.message));
+        // Optionally, remove the worker from the workers map if it's no longer needed
+        this.workers.delete(queueName);
+      }
+
+      await queue.close().catch((err) => console.error(`Error shutting down queue ${queueName}:`, err.message));
+      // Optionally, remove the queue from the queues map if it's no longer needed
+      this.queues.delete(queueName);
+
+      // Update the queue activity monitor if necessary
+      await this.queueActivityMonitor.deleteQueueActivity(queueName);
     }
   }
 
