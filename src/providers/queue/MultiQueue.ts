@@ -35,8 +35,6 @@ export class MultiQueue {
     let queue = this.queues.get(queueName);
 
     if (!queue) {
-      console.log(`Creating ${queueName}`);
-
       queue = this.initQueue(
         queueName,
         jobFn,
