@@ -33,7 +33,7 @@ export class PathfindingQueue {
       }
 
       const maxQueues = Math.floor(totalActiveNPCs / 10) + 1;
-      const queueScaleFactor = Math.min(Math.ceil(Math.random() * maxQueues), QUEUE_NPC_MAX_SCALE_FACTOR);
+      const queueScaleFactor = Math.min(maxQueues, QUEUE_NPC_MAX_SCALE_FACTOR);
 
       return await this.multiQueue.addJob(
         "npc-pathfinding-queue",

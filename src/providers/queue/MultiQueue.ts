@@ -4,6 +4,7 @@ import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { EnvType } from "@rpg-engine/shared";
 import { DefaultJobOptions, Job, Queue, QueueBaseOptions, Worker } from "bullmq";
+import { random } from "lodash";
 import { QueueActivityMonitor } from "./QueueActivityMonitor";
 
 type QueueJobFn = (job: any) => Promise<void>;
@@ -43,6 +44,8 @@ export class MultiQueue {
     let queue = this.queues.get(queueName);
 
     if (!queue) {
+      console.log(`Creating ${queueName}`);
+
       queue = this.initQueue(queueName, jobFn, this.defaultQueueOptions, workerOptions);
       this.queues.set(queueName, queue);
     }
@@ -118,6 +121,10 @@ export class MultiQueue {
 
   private generateQueueName(prefix: string, scene: string, queueScaleFactor: number): string {
     let envSuffix;
+
+    if (queueScaleFactor > 1) {
+      queueScaleFactor = random(1, queueScaleFactor);
+    }
 
     switch (appEnv.general.ENV) {
       case EnvType.Development:
