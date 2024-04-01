@@ -24,6 +24,7 @@ describe("PlantGrowth.ts", () => {
   const mockSocketMessaging = {
     sendEventToCharactersAroundCharacter: jest.fn(),
     sendErrorMessageToCharacter: jest.fn(),
+    sendEventToUser: jest.fn(),
   };
 
   beforeAll(() => {
@@ -160,7 +161,14 @@ describe("PlantGrowth.ts", () => {
       await plantGrowth.updatePlantGrowth(plant, testCharacter);
       expect(Item.updateOne).toHaveBeenCalledWith(
         { _id: plant._id },
-        { $set: { growthPoints: growthPoints + blueprint.growthFactor, lastWatering: expect.anything() } }
+        {
+          $set: {
+            growthPoints: growthPoints + blueprint.growthFactor,
+            lastWatering: expect.anything(),
+            requiredGrowthPoints:
+              blueprint.stagesRequirements[plant.currentPlantCycle ?? PlantLifeCycle.Seed].requiredGrowthPoints,
+          },
+        }
       );
     });
 
@@ -220,6 +228,7 @@ describe("PlantGrowth.ts", () => {
             lastPlantCycleRun: expect.anything(),
             lastWatering: expect.anything(),
             texturePath: blueprint.stagesRequirements[PlantLifeCycle.Mature]?.texturePath,
+            requiredGrowthPoints: blueprint.stagesRequirements[PlantLifeCycle.Mature]?.requiredGrowthPoints,
           },
         },
         {
@@ -248,6 +257,7 @@ describe("PlantGrowth.ts", () => {
             lastPlantCycleRun: expect.anything(),
             lastWatering: expect.anything(),
             texturePath: blueprint.stagesRequirements[PlantLifeCycle.Mature]?.texturePath,
+            requiredGrowthPoints: blueprint.stagesRequirements[PlantLifeCycle.Mature]?.requiredGrowthPoints,
           },
         },
         {
@@ -282,6 +292,7 @@ describe("PlantGrowth.ts", () => {
             lastPlantCycleRun: expect.anything(),
             lastWatering: expect.anything(),
             texturePath: blueprint.stagesRequirements[PlantLifeCycle.Mature]?.texturePath,
+            requiredGrowthPoints: blueprint.stagesRequirements[PlantLifeCycle.Mature]?.requiredGrowthPoints,
           },
         },
         {
