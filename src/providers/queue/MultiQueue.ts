@@ -1,5 +1,10 @@
 import { appEnv } from "@providers/config/env";
-import { QueueDefaultScaleFactor } from "@providers/constants/QueueConstants";
+import {
+  QUEUE_CHARACTER_MAX_SCALE_FACTOR,
+  QUEUE_NPC_MAX_SCALE_FACTOR,
+  QueueDefaultScaleFactor,
+} from "@providers/constants/QueueConstants";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { EnvType } from "@rpg-engine/shared";
@@ -9,19 +14,33 @@ import { QueueActivityMonitor } from "./QueueActivityMonitor";
 
 type QueueJobFn = (job: any) => Promise<void>;
 
+type AvailableScaleFactors = "custom" | "active-characters" | "active-npcs";
+
+interface IQueueScaleOptions {
+  queueScaleBy: AvailableScaleFactors;
+  queueScaleFactor?: QueueDefaultScaleFactor;
+  data?: {
+    scene?: string;
+  };
+}
+
 @provideSingleton(MultiQueue)
 export class MultiQueue {
   private connection: any;
   private queues: Map<string, Queue> = new Map();
   private workers: Map<string, Worker> = new Map();
 
-  constructor(private redisManager: RedisManager, private queueActivityMonitor: QueueActivityMonitor) {}
+  constructor(
+    private redisManager: RedisManager,
+    private queueActivityMonitor: QueueActivityMonitor,
+    private inMemoryHashTable: InMemoryHashTable
+  ) {}
 
   public async addJob(
     prefix: string,
     jobFn: QueueJobFn,
     data: Record<string, unknown>,
-    queueScaleFactor: number = QueueDefaultScaleFactor.Low,
+    queueScaleOptions: IQueueScaleOptions = { queueScaleBy: "custom", queueScaleFactor: QueueDefaultScaleFactor.Low },
     addQueueOptions?: DefaultJobOptions,
     queueOptions?: QueueBaseOptions,
     workerOptions?: QueueBaseOptions
@@ -30,7 +49,9 @@ export class MultiQueue {
       this.connection = this.redisManager.client;
     }
 
-    const queueName = this.generateQueueName(prefix, queueScaleFactor);
+    const { queueScaleFactor, queueScaleBy } = queueScaleOptions;
+
+    const queueName = await this.generateQueueName(prefix, queueScaleBy, queueScaleFactor);
 
     const queue = this.initOrFetchQueue(
       queueName,
@@ -129,12 +150,12 @@ export class MultiQueue {
     }
   }
 
-  private generateQueueName(prefix: string, queueScaleFactor: number, scene?: string): string {
+  private async generateQueueName(
+    prefix: string,
+    queueScaleBy: AvailableScaleFactors,
+    queueScaleFactor?: number
+  ): Promise<string> {
     let envSuffix;
-
-    if (queueScaleFactor > 1) {
-      queueScaleFactor = random(1, queueScaleFactor);
-    }
 
     switch (appEnv.general.ENV) {
       case EnvType.Development:
@@ -145,10 +166,33 @@ export class MultiQueue {
         break;
     }
 
-    if (!scene) {
-      return `${prefix}-${envSuffix}-${queueScaleFactor}`;
-    }
+    switch (queueScaleBy) {
+      case "custom":
+        if (!queueScaleFactor) {
+          throw new Error("Queue scale factor is required when scaling by custom");
+        }
 
-    return `${prefix}-${envSuffix}-${scene}-${queueScaleFactor}`;
+        if (queueScaleFactor > 1) {
+          queueScaleFactor = random(1, queueScaleFactor);
+        }
+
+        return `${prefix}-${envSuffix}-${queueScaleFactor}`;
+
+      case "active-characters":
+        const activeCharacters = Number((await this.inMemoryHashTable.get("activity-tracker", "character-count")) || 1);
+
+        const maxCharQueues = Math.ceil(activeCharacters / 10) || 1;
+        const charQueueScaleFactor = Math.min(maxCharQueues, QUEUE_CHARACTER_MAX_SCALE_FACTOR);
+
+        return `${prefix}-${envSuffix}-${charQueueScaleFactor}`;
+
+      case "active-npcs":
+        const activeNPCs = Number((await this.inMemoryHashTable.get("activity-tracker", "npc-count")) || 1);
+
+        const maxNPCQueues = Math.ceil(activeNPCs / 10) || 1;
+        const NPCQueueScaleFactor = Math.min(maxNPCQueues, QUEUE_NPC_MAX_SCALE_FACTOR);
+
+        return `${prefix}-${envSuffix}-${NPCQueueScaleFactor}`;
+    }
   }
 }

@@ -8,7 +8,6 @@ import {
   NPC_FRIENDLY_NEUTRAL_FREEZE_CHECK_CHANCE,
   NPC_HOSTILE_FREEZE_CHECK_CHANCE,
 } from "@providers/constants/NPCConstants";
-import { QUEUE_NPC_MAX_SCALE_FACTOR } from "@providers/constants/QueueConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MultiQueue } from "@providers/queue/MultiQueue";
@@ -42,14 +41,11 @@ export class NPCCycleQueue {
   ) {}
 
   @TrackNewRelicTransaction()
-  public async addToQueue(npc: INPC, npcSkills: ISkill, totalActiveNPCs: number): Promise<void> {
+  public async addToQueue(npc: INPC, npcSkills: ISkill): Promise<void> {
     if (appEnv.general.IS_UNIT_TEST) {
-      await this.execNpcCycle(npc, npcSkills, totalActiveNPCs);
+      await this.execNpcCycle(npc, npcSkills);
       return;
     }
-
-    const maxQueues = Math.ceil(totalActiveNPCs / 10) || 1;
-    const queueScaleFactor = Math.min(maxQueues, QUEUE_NPC_MAX_SCALE_FACTOR);
 
     await this.multiQueue.addJob(
       "npc-cycle-queue",
@@ -57,13 +53,15 @@ export class NPCCycleQueue {
       async (job) => {
         const { npc, npcSkills } = job.data;
 
-        await this.execNpcCycle(npc, npcSkills, totalActiveNPCs);
+        await this.execNpcCycle(npc, npcSkills);
       },
       {
         npc,
         npcSkills,
       },
-      queueScaleFactor,
+      {
+        queueScaleBy: "active-npcs",
+      },
 
       {
         delay: (1600 + random(0, 200)) / (npc.speed * 1.6) / NPC_CYCLE_INTERVAL_RATIO,
@@ -80,7 +78,7 @@ export class NPCCycleQueue {
   }
 
   @TrackNewRelicTransaction()
-  private async execNpcCycle(npc: INPC, npcSkills: ISkill, totalActiveNPCs: number): Promise<void> {
+  private async execNpcCycle(npc: INPC, npcSkills: ISkill): Promise<void> {
     this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Server, "NPCCycles", 1);
 
     npc = await NPC.findById(npc._id).lean({
@@ -100,13 +98,13 @@ export class NPCCycleQueue {
     npc.skills = npcSkills;
 
     if (await this.stun.isStun(npc)) {
-      await this.addToQueue(npc, npcSkills, totalActiveNPCs);
+      await this.addToQueue(npc, npcSkills);
 
       return;
     }
 
-    await this.startCoreNPCBehavior(npc, totalActiveNPCs);
-    await this.addToQueue(npc, npcSkills, totalActiveNPCs);
+    await this.startCoreNPCBehavior(npc);
+    await this.addToQueue(npc, npcSkills);
   }
 
   private async stop(npc: INPC): Promise<void> {
@@ -149,7 +147,7 @@ export class NPCCycleQueue {
   }
 
   @TrackNewRelicTransaction()
-  private async startCoreNPCBehavior(npc: INPC, totalActiveNPCs: number): Promise<void> {
+  private async startCoreNPCBehavior(npc: INPC): Promise<void> {
     switch (npc.currentMovementType) {
       case NPCMovementType.MoveAway:
         await this.npcMovementMoveAway.startMovementMoveAway(npc);
@@ -160,7 +158,7 @@ export class NPCCycleQueue {
         break;
 
       case NPCMovementType.MoveTowards:
-        await this.npcMovementMoveTowards.startMoveTowardsMovement(npc, totalActiveNPCs);
+        await this.npcMovementMoveTowards.startMoveTowardsMovement(npc);
 
         break;
 

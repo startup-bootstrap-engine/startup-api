@@ -1,6 +1,5 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { QUEUE_NPC_MAX_SCALE_FACTOR } from "@providers/constants/QueueConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MultiQueue } from "@providers/queue/MultiQueue";
@@ -18,7 +17,6 @@ export class PathfindingQueue {
 
   async addPathfindingJob(
     npc: INPC,
-    totalActiveNPCs: number,
     target: ICharacter | null,
     startGridX: number,
     startGridY: number,
@@ -31,9 +29,6 @@ export class PathfindingQueue {
       if (!canProceed) {
         return;
       }
-
-      const maxQueues = Math.ceil(totalActiveNPCs / 10) || 1;
-      const queueScaleFactor = Math.min(maxQueues, QUEUE_NPC_MAX_SCALE_FACTOR);
 
       return await this.multiQueue.addJob(
         "npc-pathfinding-queue",
@@ -65,7 +60,9 @@ export class PathfindingQueue {
           endGridX,
           endGridY,
         },
-        queueScaleFactor
+        {
+          queueScaleBy: "active-npcs",
+        }
       );
     } catch (error) {
       console.error(error);

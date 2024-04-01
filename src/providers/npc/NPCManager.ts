@@ -32,8 +32,6 @@ export class NPCManager {
   public async startNearbyNPCsBehaviorLoop(character: ICharacter): Promise<void> {
     const nearbyNPCs = await this.npcView.getNPCsInView(character, { isBehaviorEnabled: false });
 
-    const totalActiveNPCs = await NPC.countDocuments({ isBehaviorEnabled: true });
-
     const behaviorLoops: Promise<void>[] = [];
 
     for (const npc of nearbyNPCs) {
@@ -43,14 +41,14 @@ export class NPCManager {
         continue;
       }
 
-      behaviorLoops.push(this.startBehaviorLoop(npc, totalActiveNPCs));
+      behaviorLoops.push(this.startBehaviorLoop(npc));
     }
 
     await Promise.all(behaviorLoops);
   }
 
   @TrackNewRelicTransaction()
-  public async startBehaviorLoop(initialNPC: INPC, totalActiveNPCs: number): Promise<void> {
+  public async startBehaviorLoop(initialNPC: INPC): Promise<void> {
     const npc = initialNPC;
 
     if (!npc) {
@@ -82,7 +80,7 @@ export class NPCManager {
         cacheKey: `npc-${npc.id}-skills`,
       })) as unknown as ISkill;
 
-      await this.npcCycleQueue.addToQueue(npc, npcSkills, totalActiveNPCs);
+      await this.npcCycleQueue.addToQueue(npc, npcSkills);
     }
   }
 

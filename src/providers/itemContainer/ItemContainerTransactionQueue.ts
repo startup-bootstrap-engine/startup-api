@@ -9,7 +9,6 @@ import { CharacterItemSlots } from "@providers/character/characterItems/Characte
 import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { appEnv } from "@providers/config/env";
 import { ITEM_CONTAINER_ROLLBACK_MAX_TRIES } from "@providers/constants/ItemContainerConstants";
-import { QueueDefaultScaleFactor } from "@providers/constants/QueueConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
@@ -85,7 +84,9 @@ export class ItemContainerTransactionQueue {
         targetContainer,
         options,
       },
-      QueueDefaultScaleFactor.Low
+      {
+        queueScaleBy: "active-characters",
+      }
     );
 
     // we have to do this hack because remember once the job goes to the worker, its processed in a different instance
