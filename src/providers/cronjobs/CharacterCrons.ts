@@ -3,7 +3,6 @@ import { NewRelic } from "@providers/analytics/NewRelic";
 import { CharacterLastAction } from "@providers/character/CharacterLastAction";
 import { CharacterRetentionTracker } from "@providers/character/CharacterRetentionTracker";
 import { SERVER_DISCONNECT_IDLE_TIMEOUT } from "@providers/constants/ServerConstants";
-import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SocketAdapter } from "@providers/sockets/SocketAdapter";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
@@ -22,8 +21,7 @@ export class CharacterCrons {
     private socketAdapter: SocketAdapter,
     private socketSessionControl: SocketSessionControl,
     private cronJobScheduler: CronJobScheduler,
-    private characterRetentionTracker: CharacterRetentionTracker,
-    private inMemoryHashTable: InMemoryHashTable
+    private characterRetentionTracker: CharacterRetentionTracker
   ) {}
 
   public schedule(): void {
@@ -56,10 +54,6 @@ export class CharacterCrons {
 
     this.cronJobScheduler.uniqueSchedule("character-cron-clean-skull-from-character", "* * * * *", async () => {
       await this.cleanSkullCharacters();
-    });
-
-    this.cronJobScheduler.uniqueSchedule("character-cron-count-active-characters", "*/5 * * * *", async () => {
-      await this.countActiveCharacters();
     });
   }
 
@@ -131,12 +125,6 @@ export class CharacterCrons {
         );
       }
     }
-  }
-
-  private async countActiveCharacters(): Promise<void> {
-    const onlineCharactersCount = await Character.countDocuments({ isOnline: true });
-
-    await this.inMemoryHashTable.set("activity-tracker", "character-count", onlineCharactersCount);
   }
 
   private async cleanSkullCharacters(): Promise<void> {
