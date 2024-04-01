@@ -562,6 +562,16 @@ export default class PartyManagement {
     )} fades, reducing your skills by ${buffPercentage}% respectively.`;
 
     for await (const trait of traits) {
+      const existingBuff = await CharacterBuff.findOne({
+        owner: character._id,
+        trait,
+        buffPercentage,
+        durationType: CharacterBuffDurationType.Permanent,
+        originateFrom: "party",
+      });
+
+      if (existingBuff) continue;
+
       const buff = {
         type: CharacterBuffType.Skill,
         trait,
@@ -575,6 +585,7 @@ export default class PartyManagement {
             deactivation: deactivationMessage,
           },
         },
+        originateFrom: "party",
       } as ICharacterPermanentBuff;
 
       await this.characterBuffActivator.enablePermanentBuff(character, buff, true);
