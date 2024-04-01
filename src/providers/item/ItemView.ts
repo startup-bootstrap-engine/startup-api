@@ -142,6 +142,9 @@ export class ItemView {
       isDeadBodyLootable: item.isDeadBodyLootable,
       lastWatering: item.lastWatering!,
       isTileTinted: item.isTileTinted,
+      growthPoints: item.growthPoints,
+      requiredGrowthPoints: item.requiredGrowthPoints,
+      isDead: item.isDead,
     };
   }
 

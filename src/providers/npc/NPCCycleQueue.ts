@@ -8,144 +8,79 @@ import {
   NPC_FRIENDLY_NEUTRAL_FREEZE_CHECK_CHANCE,
   NPC_HOSTILE_FREEZE_CHECK_CHANCE,
 } from "@providers/constants/NPCConstants";
-import { RedisManager } from "@providers/database/RedisManager";
+import { QUEUE_NPC_MAX_SCALE_FACTOR } from "@providers/constants/QueueConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { QueueCleaner } from "@providers/queue/QueueCleaner";
+import { MultiQueue } from "@providers/queue/MultiQueue";
 import { Stun } from "@providers/spells/data/logic/warrior/Stun";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
-import { EnvType, NPCAlignment, NPCMovementType, NPCPathOrientation, ToGridX, ToGridY } from "@rpg-engine/shared";
-import { Queue, Worker } from "bullmq";
+import { NPCAlignment, NPCMovementType, NPCPathOrientation, ToGridX, ToGridY } from "@rpg-engine/shared";
 import { random } from "lodash";
 import { NPCFreezer } from "./NPCFreezer";
 import { NPCView } from "./NPCView";
 import { NPCMovement } from "./movement/NPCMovement";
 import { NPCMovementFixedPath } from "./movement/NPCMovementFixedPath";
 import { NPCMovementMoveAway } from "./movement/NPCMovementMoveAway";
-import { NPCMovementMoveTowardsQueue } from "./movement/NPCMovementMoveTowardsQueue";
+import { NPCMovementMoveTowards } from "./movement/NPCMovementMoveTowards";
 import { NPCMovementRandomPath } from "./movement/NPCMovementRandomPath";
 import { NPCMovementStopped } from "./movement/NPCMovementStopped";
 @provideSingleton(NPCCycleQueue)
 export class NPCCycleQueue {
-  private queue: Queue<any, any, string> | null = null;
-  private worker: Worker | null = null;
-  private connection: any;
-  private queueName = (scene: string): string =>
-    `npc-cycle-queue-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
-
   constructor(
     private npcView: NPCView,
     private npcFreezer: NPCFreezer,
     private npcMovement: NPCMovement,
     private npcMovementFixedPath: NPCMovementFixedPath,
     private npcMovementRandom: NPCMovementRandomPath,
-    private npcMovementMoveTowards: NPCMovementMoveTowardsQueue,
+    private npcMovementMoveTowards: NPCMovementMoveTowards,
     private npcMovementStopped: NPCMovementStopped,
     private npcMovementMoveAway: NPCMovementMoveAway,
     private stun: Stun,
     private newRelic: NewRelic,
     private locker: Locker,
-    private redisManager: RedisManager,
-    private queueCleaner: QueueCleaner
+    private multiQueue: MultiQueue
   ) {}
 
-  public init(scene: string): void {
-    if (!this.connection) {
-      this.connection = this.redisManager.client;
-    }
-
-    if (!this.queue) {
-      this.queue = new Queue(this.queueName(scene), {
-        connection: this.connection,
-      });
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.queue.on("error", async (error) => {
-          console.error(`Error in the ${this.queueName} :`, error);
-
-          await this.queue?.close();
-          this.queue = null;
-        });
-      }
-    }
-
-    if (!this.worker) {
-      this.worker = new Worker(
-        this.queueName(scene),
-        async (job) => {
-          const { npc, npcSkills } = job.data;
-
-          try {
-            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
-
-            await this.execNpcCycle(npc, npcSkills);
-          } catch (err) {
-            console.error(`Error processing ${this.queueName} for NPC ${npc.key}:`, err);
-            throw err;
-          }
-        },
-        {
-          connection: this.connection,
-        }
-      );
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.worker.on("failed", async (job, err) => {
-          console.log(`${this.queueName} job ${job?.id} failed with error ${err.message}`);
-
-          await this.worker?.close();
-          this.worker = null;
-        });
-      }
-    }
-  }
-
   @TrackNewRelicTransaction()
-  public async add(npc: INPC, npcSkills: ISkill): Promise<void> {
+  public async addToQueue(npc: INPC, npcSkills: ISkill, totalActiveNPCs: number): Promise<void> {
     if (appEnv.general.IS_UNIT_TEST) {
-      await this.execNpcCycle(npc, npcSkills);
+      await this.execNpcCycle(npc, npcSkills, totalActiveNPCs);
       return;
     }
 
-    if (!this.connection || !this.queue || !this.worker) {
-      this.init(npc.scene);
-    }
+    const maxQueues = Math.ceil(totalActiveNPCs / 10) || 1;
+    const queueScaleFactor = Math.min(maxQueues, QUEUE_NPC_MAX_SCALE_FACTOR);
 
-    await this.queue?.add(
-      this.queueName(npc.scene),
+    await this.multiQueue.addJob(
+      "npc-cycle-queue",
+
+      async (job) => {
+        const { npc, npcSkills } = job.data;
+
+        await this.execNpcCycle(npc, npcSkills, totalActiveNPCs);
+      },
       {
-        npcId: npc._id,
         npc,
         npcSkills,
       },
+      queueScaleFactor,
+      undefined,
       {
         delay: (1600 + random(0, 200)) / (npc.speed * 1.6) / NPC_CYCLE_INTERVAL_RATIO,
-        removeOnComplete: true,
-        removeOnFail: true,
       }
     );
   }
 
   public async clearAllJobs(): Promise<void> {
-    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
-    for (const job of jobs) {
-      try {
-        await job?.remove();
-      } catch (err) {
-        console.error(`Error removing job ${job?.id}:`, err.message);
-      }
-    }
+    await this.multiQueue.clearAllJobs();
   }
 
   public async shutdown(): Promise<void> {
-    await this.queue?.close();
-    await this.worker?.close();
-    this.queue = null;
-    this.worker = null;
+    await this.multiQueue.shutdown();
   }
 
   @TrackNewRelicTransaction()
-  private async execNpcCycle(npc: INPC, npcSkills: ISkill): Promise<void> {
+  private async execNpcCycle(npc: INPC, npcSkills: ISkill, totalActiveNPCs: number): Promise<void> {
     this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Server, "NPCCycles", 1);
 
     npc = await NPC.findById(npc._id).lean({
@@ -165,13 +100,13 @@ export class NPCCycleQueue {
     npc.skills = npcSkills;
 
     if (await this.stun.isStun(npc)) {
-      await this.add(npc, npcSkills);
+      await this.addToQueue(npc, npcSkills, totalActiveNPCs);
 
       return;
     }
 
-    void this.startCoreNPCBehavior(npc);
-    await this.add(npc, npcSkills);
+    await this.startCoreNPCBehavior(npc, totalActiveNPCs);
+    await this.addToQueue(npc, npcSkills, totalActiveNPCs);
   }
 
   private async stop(npc: INPC): Promise<void> {
@@ -214,23 +149,23 @@ export class NPCCycleQueue {
   }
 
   @TrackNewRelicTransaction()
-  private async startCoreNPCBehavior(npc: INPC): Promise<void> {
+  private async startCoreNPCBehavior(npc: INPC, totalActiveNPCs: number): Promise<void> {
     switch (npc.currentMovementType) {
       case NPCMovementType.MoveAway:
-        void this.npcMovementMoveAway.startMovementMoveAway(npc);
+        await this.npcMovementMoveAway.startMovementMoveAway(npc);
         break;
 
       case NPCMovementType.Stopped:
-        void this.npcMovementStopped.startMovementStopped(npc);
+        await this.npcMovementStopped.startMovementStopped(npc);
         break;
 
       case NPCMovementType.MoveTowards:
-        void this.npcMovementMoveTowards.startMoveTowardsMovement(npc);
+        await this.npcMovementMoveTowards.startMoveTowardsMovement(npc, totalActiveNPCs);
 
         break;
 
       case NPCMovementType.Random:
-        void this.npcMovementRandom.startRandomMovement(npc);
+        await this.npcMovementRandom.startRandomMovement(npc);
         break;
       case NPCMovementType.FixedPath:
         let endGridX = npc.fixedPath.endGridX as unknown as number;

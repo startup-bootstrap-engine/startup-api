@@ -12,6 +12,11 @@ export class DiscordCronJobs {
       await this.sendBeginnersGuideCronJob();
     });
 
+    // Every tuesday
+    this.cronJobScheduler.uniqueSchedule("discord-bug-abuser-hunt-cron", "0 0 * * 2", async () => {
+      await this.bugAbuserHunt();
+    });
+
     // Every tue, thu
     this.cronJobScheduler.uniqueSchedule("discord-premium-account-cron", "0 0 * * 2,4", async () => {
       await this.sendPremiumAccountCronJob();
@@ -132,7 +137,6 @@ export class DiscordCronJobs {
 
   private async sendBeginnersGuideCronJob(): Promise<void> {
     try {
-      // Your message content
       const message = `Feeling a little bit lost? 
 
       📚 **Useful links** 📚
@@ -143,9 +147,7 @@ export class DiscordCronJobs {
         - **[Definya Guide - Mining](https://docs.definya.com/docs/guides/english/Mining)**: Mining spots
       - **[Definya Patreon](https://patreon.com/DefinyaMMORPG)**: Support the game and unlock exclusive perks.
       - **[Definya Steam](https://store.steampowered.com/app/2630100/Definya_2D_MMORPG/?beta=0)**: Download the game on Steam.
-      - **[Definya Google Play](https://play.google.com/store/apps/details?id=com.definya.app)**: Get the game on Google Play.
-      
-      Checkout our BEGINNER'S GUIDE: https://docs.definya.com/`;
+      - **[Definya Google Play](https://play.google.com/store/apps/details?id=com.definya.app)**: Get the game on Google Play.`;
 
       await this.discordBot.sendMessageWithColor(
         message,
@@ -224,6 +226,28 @@ export class DiscordCronJobs {
       );
     } catch (error) {
       console.error(`Failed to send Discord message: ${error}`);
+    }
+  }
+
+  private async bugAbuserHunt(): Promise<void> {
+    try {
+      const message = `🔍 **Bug Abuser Hunt!** 🔍
+
+      Have you spotted someone exploiting a game bug to gain an unfair advantage?
+
+      Record the bug abuser in action using a screen recording app and post the video in the #bans channel. Don't forget to tag me.
+
+      If your report is validated by our moderators and myself, you'll be rewarded according to the severity of the bug (1-10 social crystals).
+
+      💀 The punishment can range from a few days of ban to a permaban and account deletion. 💀
+
+      On the other hand, if you discover a bug yourself and report it through a video without exploiting it, you'll also be rewarded with Social Crystals. The quantity of the reward will depend on the severity of the bug.
+
+      @everyone`;
+
+      await this.discordBot.sendMessageWithColor(message, "general", "Bug Abuser Hunt", "Red");
+    } catch (error) {
+      console.error(error);
     }
   }
 

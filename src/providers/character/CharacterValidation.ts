@@ -27,7 +27,7 @@ export class CharacterValidation {
       return false;
     }
 
-    if (character.health === 0) {
+    if (character.health !== undefined && character.health <= 0) {
       this.socketMessaging.sendEventToUser(character.channelId!, CharacterSocketEvents.CharacterForceDisconnect, {
         reason: msg?.get("not-alive") ?? "Sorry, you are dead.",
       });

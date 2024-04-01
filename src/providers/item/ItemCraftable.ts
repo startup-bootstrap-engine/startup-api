@@ -46,7 +46,7 @@ import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { QueueCleaner } from "@providers/queue/QueueCleaner";
+import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { Queue, Worker } from "bullmq";
 import _ from "lodash";
 import { ItemCraftbook } from "./ItemCraftbook";
@@ -77,7 +77,7 @@ export class ItemCraftable {
     private itemCraftbook: ItemCraftbook,
     private characterPremiumAccount: CharacterPremiumAccount,
     private redisManager: RedisManager,
-    private queueCleaner: QueueCleaner,
+    private queueActivityMonitor: QueueActivityMonitor,
     private locker: Locker
   ) {}
 
@@ -108,7 +108,7 @@ export class ItemCraftable {
           const { character, itemToCraft } = job.data;
 
           try {
-            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
+            await this.queueActivityMonitor.updateQueueActivity(this.queueName(scene));
 
             await this.execCraftItem(itemToCraft, character);
           } catch (err) {

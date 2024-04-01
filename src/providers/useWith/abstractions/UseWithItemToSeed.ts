@@ -10,6 +10,7 @@ import { container } from "@providers/inversify/container";
 
 import { IPosition } from "@providers/movement/MovementHelper";
 import { IPlantItem } from "@providers/plant/data/blueprints/PlantItem";
+import { PlantLifeCycle } from "@providers/plant/data/types/PlantTypes";
 import { SimpleTutorial } from "@providers/simpleTutorial/SimpleTutorial";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -72,6 +73,8 @@ export class UseWithItemToSeed {
         throw new Error(`Cannot find blueprint for key '${key}'`);
       }
 
+      const requiredGrowthPoints = blueprint.stagesRequirements[PlantLifeCycle.Seed]?.requiredGrowthPoints ?? 0;
+
       const plantData = {
         ...blueprint,
         key,
@@ -79,6 +82,7 @@ export class UseWithItemToSeed {
         y: coordinates.y,
         scene: map,
         owner: character.id,
+        requiredGrowthPoints,
       };
 
       const newPlant = new Item(plantData);

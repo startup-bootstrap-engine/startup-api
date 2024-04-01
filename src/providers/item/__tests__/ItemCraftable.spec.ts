@@ -7,7 +7,7 @@ import { container, unitTestHelper } from "@providers/inversify/container";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { recipeSpikedClub } from "@providers/useWith/recipes/maces/recipeSpikedClub";
 import { recipeLifePotion } from "@providers/useWith/recipes/potions/recipeLifePotion";
-import { recipeBolt } from "@providers/useWith/recipes/ranged-weapons/recipeBolt";
+import { recipeBolt } from "@providers/useWith/recipes/ranged-weapons/ammo/tier1/recipeBolt";
 import {
   AnimationEffectKeys,
   AnimationSocketEvents,

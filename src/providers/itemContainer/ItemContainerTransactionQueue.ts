@@ -9,14 +9,13 @@ import { CharacterItemSlots } from "@providers/character/characterItems/Characte
 import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { appEnv } from "@providers/config/env";
 import { ITEM_CONTAINER_ROLLBACK_MAX_TRIES } from "@providers/constants/ItemContainerConstants";
+import { QueueDefaultScaleFactor } from "@providers/constants/QueueConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
-import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { QueueCleaner } from "@providers/queue/QueueCleaner";
+import { MultiQueue } from "@providers/queue/MultiQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { EnvType, IItemContainerRead, ItemContainerType, ItemSocketEvents } from "@rpg-engine/shared";
-import { Queue, Worker } from "bullmq";
+import { IItemContainerRead, ItemContainerType, ItemSocketEvents } from "@rpg-engine/shared";
 import { clearCacheForKey } from "speedgoose";
 
 interface IItemContainerTransactionRead {
@@ -32,86 +31,16 @@ interface IItemContainerTransactionOption {
 
 @provideSingleton(ItemContainerTransactionQueue)
 export class ItemContainerTransactionQueue {
-  private queue: Queue<any, any, string> | null = null;
-  private worker: Worker | null = null;
-  private connection: any;
-  private queueName = (scene: string): string =>
-    `item-container-transaction-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
-
   constructor(
     private characterItemContainer: CharacterItemContainer,
     private characterItemSlots: CharacterItemSlots,
     private socketMessaging: SocketMessaging,
     private characterValidation: CharacterValidation,
     private locker: Locker,
-    private redisManager: RedisManager,
-    private queueCleaner: QueueCleaner,
     private inMemoryHashTable: InMemoryHashTable,
-    private characterWeightQueue: CharacterWeightQueue
+    private characterWeightQueue: CharacterWeightQueue,
+    private multiQueue: MultiQueue
   ) {}
-
-  public init(scene: string): void {
-    if (!this.connection) {
-      this.connection = this.redisManager.client;
-    }
-
-    if (!this.queue) {
-      this.queue = new Queue(this.queueName(scene), {
-        connection: this.connection,
-      });
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.queue.on("error", async (error) => {
-          console.error(`Error in the ${this.queueName} :`, error);
-
-          await this.queue?.close();
-          this.queue = null;
-        });
-      }
-    }
-
-    if (!this.worker) {
-      this.worker = new Worker(
-        this.queueName(scene),
-        async (job) => {
-          const { item, character, originContainer, targetContainer, options } = job.data;
-
-          try {
-            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
-
-            const result = await this.execTransferToContainer(
-              item,
-              character,
-              originContainer,
-              targetContainer,
-              options
-            );
-
-            await this.inMemoryHashTable.set(
-              "item-container-transfer-results",
-              `${originContainer._id}-to-${targetContainer._id}`,
-              result
-            );
-          } catch (err) {
-            console.error(err);
-            throw err;
-          }
-        },
-        {
-          connection: this.connection,
-        }
-      );
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.worker.on("failed", async (job, err) => {
-          console.log(`${this.queueName} job ${job?.id} failed with error ${err.message}`);
-
-          await this.worker?.close();
-          this.worker = null;
-        });
-      }
-    }
-  }
 
   public async transferToContainer(
     item: IItem,
@@ -135,17 +64,30 @@ export class ItemContainerTransactionQueue {
       return await this.execTransferToContainer(item, character, originContainer, targetContainer, options!);
     }
 
-    if (!this.connection || !this.queue || !this.worker) {
-      this.init(character.scene);
-    }
+    await this.multiQueue.addJob(
+      "item-container-transaction-queue",
 
-    await this.queue?.add(this.queueName(character.scene), {
-      item,
-      character,
-      originContainer,
-      targetContainer,
-      options,
-    });
+      async (job) => {
+        const { item, character, originContainer, targetContainer, options } = job.data;
+
+        const result = await this.execTransferToContainer(item, character, originContainer, targetContainer, options);
+
+        await this.inMemoryHashTable.set(
+          "item-container-transfer-results",
+          `${originContainer._id}-to-${targetContainer._id}`,
+          result
+        );
+      },
+      {
+        item,
+        character,
+        originContainer,
+        targetContainer,
+        options,
+      },
+      QueueDefaultScaleFactor.Low,
+      character.scene
+    );
 
     // we have to do this hack because remember once the job goes to the worker, its processed in a different instance
     const result = await this.pollForItemContainerTransferResults(
@@ -154,6 +96,10 @@ export class ItemContainerTransactionQueue {
     );
 
     return result;
+  }
+
+  public shutdown(): Promise<void> {
+    return this.multiQueue.shutdown();
   }
 
   @TrackNewRelicTransaction()
@@ -235,13 +181,6 @@ export class ItemContainerTransactionQueue {
 
       resolve(false);
     });
-  }
-
-  public async shutdown(): Promise<void> {
-    await this.queue?.close();
-    await this.worker?.close();
-    this.queue = null;
-    this.worker = null;
   }
 
   private async clearContainersCache(originContainer: IItemContainer, targetContainer: IItemContainer): Promise<void> {

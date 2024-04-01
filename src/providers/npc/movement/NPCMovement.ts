@@ -138,7 +138,7 @@ export class NPCMovement {
             character.channelId!,
             NPCSocketEvents.NPCPositionUpdate,
             {
-              id: npc.id,
+              id: npc._id,
               x: npc.x,
               y: npc.y,
               direction: chosenMovementDirection,
@@ -166,7 +166,8 @@ export class NPCMovement {
     startGridX: number,
     startGridY: number,
     endGridX: number,
-    endGridY: number
+    endGridY: number,
+    totalActiveNPCs?: number // used in move towards movement
   ): Promise<IShortestPathPositionResult | undefined> {
     try {
       let npcPath;
@@ -183,6 +184,7 @@ export class NPCMovement {
       } else {
         const job = await this.pathfindingQueue.addPathfindingJob(
           npc,
+          totalActiveNPCs ?? 1,
           target,
           startGridX,
           startGridY,

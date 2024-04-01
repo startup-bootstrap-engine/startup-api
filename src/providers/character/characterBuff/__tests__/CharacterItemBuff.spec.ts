@@ -33,4 +33,13 @@ describe("CharacterItemBuff", () => {
 
     expect(characterBuffs).toHaveLength(1);
   });
+  it("should not allow adding the same item buffs twice", async () => {
+    // adding the same item twice
+    await characterItemBuff.enableItemBuff(testCharacter, testItem);
+    await characterItemBuff.enableItemBuff(testCharacter, testItem);
+
+    const characterBuffs = await characterBuffTracker.getAllCharacterBuffs(testCharacter._id);
+
+    expect(characterBuffs).toHaveLength(1);
+  });
 });

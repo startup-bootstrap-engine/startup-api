@@ -4,6 +4,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { MAXIMUM_MINUTES_FOR_GROW, MINIMUM_MINUTES_FOR_WATERING } from "@providers/constants/FarmingConstants";
 import { container } from "@providers/inversify/container";
+import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IItemUpdate, IItemUpdateAll, ItemSocketEvents, ItemSubType, ItemType } from "@rpg-engine/shared";
 import dayjs from "dayjs";
@@ -23,7 +24,7 @@ export interface IGrowthInfo {
 
 @provide(PlantGrowth)
 export class PlantGrowth {
-  constructor(private socketMessaging: SocketMessaging) {}
+  constructor(private socketMessaging: SocketMessaging, private socketAuth: SocketAuth) {}
 
   @TrackNewRelicTransaction()
   public async updatePlantGrowth(plant: IItem, character: ICharacter): Promise<boolean> {
@@ -50,8 +51,11 @@ export class PlantGrowth {
       const requiredGrowthPoints =
         blueprint.stagesRequirements[plant.currentPlantCycle ?? PlantLifeCycle.Seed].requiredGrowthPoints;
 
-      if (currentGrowthPoints < requiredGrowthPoints) {
-        await this.updateGrowthPoints(plant, currentGrowthPoints, blueprint);
+      const nextGrowthPoints = currentGrowthPoints + blueprint.growthFactor;
+
+      if (nextGrowthPoints < requiredGrowthPoints) {
+        await this.updateGrowthPoints(plant, nextGrowthPoints, requiredGrowthPoints);
+        return true;
       }
 
       const { updatedGrowthPoints, nextCycle } = this.calculateGrowth(plant, blueprint);
@@ -98,6 +102,7 @@ export class PlantGrowth {
     blueprint: IPlantItem
   ): Promise<IItem | null> {
     const texturePath = blueprint.stagesRequirements[nextCycle]?.texturePath;
+    const requiredGrowthPoints = blueprint.stagesRequirements[nextCycle]?.requiredGrowthPoints ?? 0;
     if (!texturePath) {
       console.error("Texture path not found for next cycle");
       return null;
@@ -109,6 +114,7 @@ export class PlantGrowth {
         $set: {
           growthPoints: updatedGrowthPoints,
           currentPlantCycle: nextCycle,
+          requiredGrowthPoints,
           lastPlantCycleRun: new Date(),
           lastWatering: new Date(),
           texturePath: texturePath,
@@ -118,10 +124,14 @@ export class PlantGrowth {
     );
   }
 
-  private async updateGrowthPoints(plant: IItem, currentGrowthPoints: number, blueprint: IPlantItem): Promise<boolean> {
+  private async updateGrowthPoints(
+    plant: IItem,
+    nextGrowthPoints: number,
+    requiredGrowthPoints: number
+  ): Promise<boolean> {
     await Item.updateOne(
       { _id: plant._id },
-      { $set: { growthPoints: currentGrowthPoints + blueprint.growthFactor, lastWatering: new Date() } }
+      { $set: { growthPoints: nextGrowthPoints, requiredGrowthPoints, lastWatering: new Date() } }
     );
     return true;
   }
@@ -219,6 +229,7 @@ export class PlantGrowth {
       growthPoints: item.growthPoints!,
       requiredGrowthPoints: this.getRequiredGrowthPoints(item, itemBlueprint),
       isTileTinted: item.isTileTinted,
+      isDead: item.isDead,
     };
   }
 

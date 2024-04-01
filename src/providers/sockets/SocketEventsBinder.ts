@@ -3,21 +3,21 @@ import { CharacterNetwork } from "@providers/character/network/CharacterNetwork"
 import { ChatNetwork } from "@providers/chat/network/ChatNetwork";
 import { DepotNetwork } from "@providers/depot/network/DepotNetwork";
 import { EquipmentNetwork } from "@providers/equipment/network/EquipmentNetwork";
+import { FriendsNetwork } from "@providers/friends/network/FriendsNetwork";
 import { ItemNetwork } from "@providers/item/network/ItemNetwork";
 import { ItemContainerNetwork } from "@providers/itemContainer/network/ItemContainerNetwork";
 import { MacroNetwork } from "@providers/macro/network/MacroNetwork";
+import { MarketplaceNetwork } from "@providers/marketplace/network/MarketplaceNetwork";
 import { NPCNetwork } from "@providers/npc/network/NPCNetwork";
+import { PartyNetwork } from "@providers/party/network/PartyNetwork";
 import { QuestNetwork } from "@providers/quest/network/QuestNetwork";
+import { RankingNetwork } from "@providers/ranking/network/RankingNetwork";
 import { SkillNetwork } from "@providers/skill/network/SkillNetwork";
 import { SpellNetwork } from "@providers/spells/network/SpellNetwork";
 import { UseWithNetwork } from "@providers/useWith/network/UseWithNetwork";
 import { ViewNetwork } from "@providers/view/network/ViewNetwork";
 import { provide } from "inversify-binding-decorators";
 import { SocketChannel } from "./SocketsTypes";
-import { MarketplaceNetwork } from "@providers/marketplace/network/MarketplaceNetwork";
-import { PartyNetwork } from "@providers/party/network/PartyNetwork";
-import { RankingNetwork } from "@providers/ranking/network/RankingNetwork";
-import { FriendsNetwork } from "@providers/friends/network/FriendsNetwork";
 
 @provide(SocketEventsBinder)
 export class SocketEventsBinder {
