@@ -122,7 +122,6 @@ export class HitTargetQueue {
           target.type = targetType;
 
           await this.queueCleaner.updateQueueActivity(this.queueCharacterHitName(scene));
-
           await this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
         },
         {
@@ -248,6 +247,7 @@ export class HitTargetQueue {
     bonusDamage?: number,
     spellHit?: boolean
   ): Promise<void> {
+    let sorcererManaShield: boolean = false;
     target.isAlive = target.health > 0;
 
     if (!target.isAlive) {
@@ -295,24 +295,24 @@ export class HitTargetQueue {
           }
         }
 
-        let sorcererManaShield: boolean = false;
-        if (target.class === CharacterClass.Sorcerer || target.class === CharacterClass.Druid) {
-          const character = target as ICharacter;
-          const hasManaShieldSpell = await this.manaShield.getManaShieldSpell(character);
+        if (target.type === EntityType.NPC) {
+          const updatedTarget = await this.doCalculateAndUpdateOnTargetHealth(target, lastestHealth, damage);
+          target.isAlive = updatedTarget.isAlive;
+          target.health = updatedTarget.health;
+        } else if (target.type === EntityType.Character) {
+          if (target.class === CharacterClass.Sorcerer || target.class === CharacterClass.Druid) {
+            const character = target as ICharacter;
+            const hasManaShieldSpell = await this.manaShield.getManaShieldSpell(character);
 
-          if (hasManaShieldSpell) {
-            sorcererManaShield = await this.manaShield.handleManaShield(character, damage);
+            if (hasManaShieldSpell) {
+              sorcererManaShield = await this.manaShield.handleManaShield(character, damage);
+            }
           }
-        }
 
-        if (!sorcererManaShield) {
-          try {
-            const newTargetHealth = lastestHealth - damage;
-            target.health = newTargetHealth <= 0 ? 0 : newTargetHealth;
-            target.isAlive = newTargetHealth > 0;
-            await this.updateHealthInDatabase(target, target.health);
-          } catch (error) {
-            console.error(`Error processing target health: ${error.message}`);
+          if (!sorcererManaShield) {
+            const updatedTarget = await this.doCalculateAndUpdateOnTargetHealth(target, lastestHealth, damage);
+            target.isAlive = updatedTarget.isAlive;
+            target.health = updatedTarget.health;
           }
         }
 
@@ -386,7 +386,9 @@ export class HitTargetQueue {
     const character = attacker.type === EntityType.Character ? (attacker as ICharacter) : (target as ICharacter);
 
     remainingPromises.push(this.sendBattleEvent(character, battleEventPayload as IBattleEventFromServer));
+
     await Promise.all(remainingPromises);
+
     await this.battleAttackTargetDeath.handleDeathAfterHit(attacker, target);
   }
 
@@ -407,11 +409,8 @@ export class HitTargetQueue {
     }
 
     let damage = this.battleDamageCalculator.getCriticalHitDamageIfSucceed(baseDamage);
-
     const lastestHealth = await this.fetchLatestHealth(target);
-
     target.health = lastestHealth;
-
     const maxDamage = lastestHealth;
     damage = Math.min(damage, maxDamage);
 
@@ -436,6 +435,25 @@ export class HitTargetQueue {
     }
 
     return data?.health ?? target.health;
+  }
+
+  private async doCalculateAndUpdateOnTargetHealth(
+    target: ICharacter | INPC,
+    lastestHealth: number,
+    damage: number
+  ): Promise<ICharacter | INPC> {
+    try {
+      const newTargetHealth = lastestHealth - damage;
+      target.health = newTargetHealth <= 0 ? 0 : newTargetHealth;
+      target.isAlive = newTargetHealth > 0;
+      await this.updateHealthInDatabase(target, target.health);
+
+      return target;
+    } catch (error) {
+      console.error(`Error processing target health: ${error.message}`);
+
+      return target;
+    }
   }
 
   private async updateHealthInDatabase(target: ICharacter | INPC, health: number): Promise<void> {

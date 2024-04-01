@@ -154,7 +154,7 @@ export class NPCDeathQueue {
       }
       const npcWithSkills = await this.getNPCWithSkills(npc);
 
-      console.log("NPCDeath for npc: ", npc.key);
+      console.info("NPCDeath for npc: ", npc.key);
       if (npc.health !== 0) {
         npc = (await NPC.findOneAndUpdate({ _id: npc._id }, { $set: { health: 0 } }, { new: true })) as unknown as INPC;
       }

@@ -3,8 +3,10 @@ import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { Locker } from "@providers/locks/Locker";
+import { Time } from "@providers/time/Time";
 import { EntityType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import random from "lodash/random";
 
 export enum EffectableMaxAttribute {
   Health = "maxHealth",
@@ -19,11 +21,13 @@ export enum EffectableAttribute {
 
 @provide(ItemUsableEffect)
 export class ItemUsableEffect {
-  constructor(private locker: Locker) {}
+  constructor(private locker: Locker, private time: Time) {}
 
   @TrackNewRelicTransaction()
   public async apply(target: ICharacter | INPC, attr: EffectableAttribute, value: number): Promise<void> {
     try {
+      await this.time.waitForMilliseconds(random(10, 20)); // add artificial delay to avoid concurrency
+
       const canProceed = await this.locker.lock(`${target._id}-applying-usable-effect`);
 
       if (!canProceed) {
