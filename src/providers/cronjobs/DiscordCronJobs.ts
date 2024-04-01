@@ -137,7 +137,6 @@ export class DiscordCronJobs {
 
   private async sendBeginnersGuideCronJob(): Promise<void> {
     try {
-      // Your message content
       const message = `Feeling a little bit lost? 
 
       📚 **Useful links** 📚
@@ -148,9 +147,7 @@ export class DiscordCronJobs {
         - **[Definya Guide - Mining](https://docs.definya.com/docs/guides/english/Mining)**: Mining spots
       - **[Definya Patreon](https://patreon.com/DefinyaMMORPG)**: Support the game and unlock exclusive perks.
       - **[Definya Steam](https://store.steampowered.com/app/2630100/Definya_2D_MMORPG/?beta=0)**: Download the game on Steam.
-      - **[Definya Google Play](https://play.google.com/store/apps/details?id=com.definya.app)**: Get the game on Google Play.
-      
-      Checkout our BEGINNER'S GUIDE: https://docs.definya.com/`;
+      - **[Definya Google Play](https://play.google.com/store/apps/details?id=com.definya.app)**: Get the game on Google Play.`;
 
       await this.discordBot.sendMessageWithColor(
         message,
