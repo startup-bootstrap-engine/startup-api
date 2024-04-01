@@ -12,8 +12,8 @@ type QueueJobFn = (job: any) => Promise<void>;
 @provideSingleton(MultiQueue)
 export class MultiQueue {
   private connection: any;
-  private queues: Map<string, Queue> = new Map(); // Map to track initialized queues
-  private workers: Map<string, Worker> = new Map(); // Map to keep track of workers by queue name
+  private queues: Map<string, Queue> = new Map();
+  private workers: Map<string, Worker> = new Map();
 
   constructor(private redisManager: RedisManager, private queueActivityMonitor: QueueActivityMonitor) {}
 
