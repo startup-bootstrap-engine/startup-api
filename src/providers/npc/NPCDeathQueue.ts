@@ -56,8 +56,7 @@ export class NPCDeathQueue {
         await this.execHandleNPCDeath(killer, npc);
       },
       { killer, npc },
-      QueueDefaultScaleFactor.Medium,
-      npc.scene
+      QueueDefaultScaleFactor.Medium
     );
   }
 

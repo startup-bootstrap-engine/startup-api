@@ -32,21 +32,17 @@ export class MultiQueue {
     }
 
     const queueName = this.generateQueueName(prefix, queueScaleFactor, scene);
-    let queue = this.queues.get(queueName);
 
-    if (!queue) {
-      queue = this.initQueue(
-        queueName,
-        jobFn,
-        {
-          connection: this.connection,
-          sharedConnection: true,
-          ...queueOptions,
-        },
-        workerOptions
-      );
-      this.queues.set(queueName, queue);
-    }
+    const queue = this.initOrFetchQueue(
+      queueName,
+      jobFn,
+      {
+        connection: this.connection,
+        sharedConnection: true,
+        ...queueOptions,
+      },
+      workerOptions
+    );
 
     return await queue.add(queueName, data, {
       removeOnComplete: true,
@@ -55,33 +51,50 @@ export class MultiQueue {
     });
   }
 
-  private initQueue(
+  private initOrFetchQueue(
     queueName: string,
     jobFn: QueueJobFn,
     queueOptions: QueueBaseOptions,
     workerOptions?: QueueBaseOptions
   ): Queue {
-    const queue = new Queue(queueName, queueOptions);
+    let queue = this.queues.get(queueName);
 
-    const worker = new Worker(
-      queueName,
-      async (job) => {
-        try {
-          await this.queueActivityMonitor.updateQueueActivity(queueName);
+    if (!queue) {
+      console.log(`💡 Initializing queue ${queueName}`);
+      queue = new Queue(queueName, queueOptions);
+      this.queues.set(queueName, queue);
+    }
 
-          await jobFn(job);
-        } catch (error) {
-          console.error(`Error processing ${queueName} job ${job.id}: ${error.message}`);
+    let worker = this.workers.get(queueName);
+
+    if (!worker) {
+      worker = new Worker(
+        queueName,
+        async (job) => {
+          try {
+            await this.queueActivityMonitor.updateQueueActivity(queueName);
+
+            await jobFn(job);
+          } catch (error) {
+            console.error(`Error processing ${queueName} job ${job.id}: ${error.message}`);
+          }
+        },
+        {
+          connection: this.connection,
+          sharedConnection: true,
+          ...workerOptions,
         }
-      },
-      {
-        connection: this.connection,
-        sharedConnection: true,
-        ...workerOptions,
-      }
-    );
+      );
 
-    this.workers.set(queueName, worker);
+      if (!appEnv.general.IS_UNIT_TEST) {
+        worker.on("failed", async (job, err) => {
+          console.log(`${queueName} job ${job?.id} failed with error ${err.message}`);
+
+          await worker?.close();
+        });
+      }
+      this.workers.set(queueName, worker);
+    }
 
     return queue;
   }
