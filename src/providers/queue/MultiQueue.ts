@@ -53,7 +53,7 @@ export class MultiQueue {
 
     const queueName = await this.generateQueueName(prefix, queueScaleBy, queueScaleFactor);
 
-    const queue = this.initOrFetchQueue(
+    const queue = await this.initOrFetchQueue(
       queueName,
       jobFn,
       {
@@ -71,18 +71,25 @@ export class MultiQueue {
     });
   }
 
-  private initOrFetchQueue(
+  private async initOrFetchQueue(
     queueName: string,
     jobFn: QueueJobFn,
     queueOptions: QueueBaseOptions,
     workerOptions?: QueueBaseOptions
-  ): Queue {
-    let queue = this.queues.get(queueName);
+  ): Promise<Queue> {
+    let queue;
 
-    if (!queue) {
+    // Make sure we fetch queue info from a centralized state, because otherwise we might end up with multiple queues
+    const isQueueInitialized =
+      (await this.queueActivityMonitor.hasQueueActivity(queueName)) || this.queues.has(queueName);
+
+    if (!isQueueInitialized) {
       console.log(`💡 Initializing queue ${queueName}`);
       queue = new Queue(queueName, queueOptions);
       this.queues.set(queueName, queue);
+      await this.queueActivityMonitor.updateQueueActivity(queueName);
+    } else {
+      queue = this.queues.get(queueName);
     }
 
     let worker = this.workers.get(queueName);
