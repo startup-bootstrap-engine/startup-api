@@ -102,23 +102,9 @@ export const itemPickaxe: IToolItemBlueprint = {
           ] as IUseWithItemToTileReward[],
         };
         break;
-
-      case CraftingResourcesBlueprint.SilverOre:
-        useWithItemToTileOptions = {
-          ...baseUseWithItemToTileOptions,
-          rewards: [
-            ...baseUseWithItemToTileOptions.rewards,
-            {
-              key: CraftingResourcesBlueprint.SilverOre,
-              qty: [2, 3],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 5, rarityOfTool),
-            },
-          ] as IUseWithItemToTileReward[],
-        };
-        break;
     }
 
     await useWithItemToTile.execute(character, useWithItemToTileOptions, skillIncrease);
   },
-  usableEffectDescription: "Use it on iron, copper and silver ores to mine them",
+  usableEffectDescription: "Use it on iron, copper ores to mine them",
 };
