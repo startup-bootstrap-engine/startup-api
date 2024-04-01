@@ -15,11 +15,10 @@ import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { Locker } from "@providers/locks/Locker";
-import { QueueCleaner } from "@providers/queue/QueueCleaner";
+import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { Queue, Worker } from "bullmq";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterDailyPlayTracker } from "../../CharacterDailyPlayTracker";
-import { CharacterValidation } from "../../CharacterValidation";
 import { CharacterBuffValidation } from "../../characterBuff/CharacterBuffValidation";
 import { CharacterCreateInteractionManager } from "./CharacterCreateInteractionManager";
 import { CharacterCreateRegen } from "./CharacterCreateRegen";
@@ -47,8 +46,7 @@ export class CharacterNetworkCreateQueue {
     private locker: Locker,
     private characterDailyPlayTracker: CharacterDailyPlayTracker,
     private redisManager: RedisManager,
-    private queueCleaner: QueueCleaner,
-    private characterValidation: CharacterValidation,
+    private queueActivityMonitor: QueueActivityMonitor,
     private characterCreateSocketHandler: CharacterCreateSocketHandler,
     private characterCreateInteractionManager: CharacterCreateInteractionManager,
     private characterCreateRegen: CharacterCreateRegen,
@@ -93,7 +91,7 @@ export class CharacterNetworkCreateQueue {
           const { character, data } = job.data;
 
           try {
-            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
+            await this.queueActivityMonitor.updateQueueActivity(this.queueName(scene));
 
             await this.execCharacterCreate(character, data);
           } catch (err) {
@@ -175,8 +173,9 @@ export class CharacterNetworkCreateQueue {
     ]);
 
     const dataFromServer = await this.characterCreateInteractionManager.prepareDataForServer(character, data);
+
+    await this.characterCreateInteractionManager.startNPCInteractions(character);
     await Promise.all([
-      this.characterCreateInteractionManager.startNPCInteractions(character),
       this.characterCreateInteractionManager.sendCharacterCreateMessages(character, dataFromServer),
       this.characterCreateInteractionManager.warnAboutWeatherStatus(character.channelId!),
       this.characterCreateRegen.handleCharacterRegen(character),
@@ -199,12 +198,6 @@ export class CharacterNetworkCreateQueue {
       { target: undefined, isOnline: true, channelId },
       { new: true }
     )) as ICharacter;
-  }
-
-  private validateCharacter(character: ICharacter): boolean {
-    const canProceed = this.characterValidation.hasBasicValidation(character);
-
-    return canProceed;
   }
 
   private async clearCharacterCaches(character: ICharacter): Promise<void> {

@@ -19,7 +19,7 @@ import { MagicPower, NPCAlignment, NPCSubtype, RangeTypes, SpellsBlueprint } fro
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
-export const npcElderGolem: INPCTierBlueprint<17> = {
+export const npcElderGolem: INPCTierBlueprint<18> = {
   ...generateMoveTowardsMovement(),
   name: "Elder Golem",
   key: HostileNPCsBlueprint.ElderGolem,
@@ -29,23 +29,26 @@ export const npcElderGolem: INPCTierBlueprint<17> = {
   attackType: EntityAttackType.Melee,
   maxRangeAttack: RangeTypes.High,
   isGiantForm: true,
-  tier: 17,
+  tier: 18,
   // @ts-ignore
-  baseHealth: 10000,
+  baseHealth: 30000,
   healthRandomizerDice: Dice.D6,
   skillRandomizerDice: Dice.D4,
   skillsToBeRandomized: ["level", "strength", "dexterity"],
   canSwitchToLowHealthTarget: true,
   skills: {
-    level: 158,
+    level: 218,
     strength: {
-      level: 158,
+      level: 218,
     },
     dexterity: {
-      level: 158,
+      level: 218,
     },
     resistance: {
-      level: 158,
+      level: 218,
+    },
+    magicResistance: {
+      level: 218,
     },
   },
   loots: [

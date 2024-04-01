@@ -11,6 +11,7 @@ import {
   SeedsBlueprint,
   SpearsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 
@@ -123,6 +124,10 @@ export const npcMinotaurBerserker: INPCTierBlueprint<12> = {
     },
     {
       itemBlueprintKey: SwordsBlueprint.StellarBlade,
+      chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.AurumAlloyPickaxe,
       chance: LootProbability.VeryRare,
     },
   ],

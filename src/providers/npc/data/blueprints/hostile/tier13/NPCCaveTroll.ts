@@ -135,6 +135,10 @@ export const npcCaveTroll: INPCTierBlueprint<13> = {
       itemBlueprintKey: ToolsBlueprint.WoodBreakerAxe,
       chance: LootProbability.Rare,
     },
+    {
+      itemBlueprintKey: ToolsBlueprint.EmberEdgePickaxe,
+      chance: LootProbability.Rare,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
 };

@@ -247,6 +247,9 @@ export class PlantHarvest {
       isDeadBodyLootable: item.isDeadBodyLootable,
       isTileTinted: item.isTileTinted,
       lastWatering: item.lastWatering!,
+      growthPoints: item.growthPoints!,
+      requiredGrowthPoints: item.requiredGrowthPoints!,
+      isDead: item.isDead,
     };
   }
 }

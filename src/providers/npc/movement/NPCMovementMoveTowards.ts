@@ -11,7 +11,6 @@ import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
   EntityAttackType,
-  EnvType,
   FromGridX,
   FromGridY,
   NPCAlignment,
@@ -22,7 +21,6 @@ import {
   ToGridX,
   ToGridY,
 } from "@rpg-engine/shared";
-import { Queue, Worker } from "bullmq";
 import _, { debounce } from "lodash";
 import { NPCBattleCycleQueue } from "../NPCBattleCycleQueue";
 import { NPCFreezer } from "../NPCFreezer";
@@ -30,28 +28,18 @@ import { NPCView } from "../NPCView";
 import { NPCMovement } from "./NPCMovement";
 import { NPCTarget } from "./NPCTarget";
 
-import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { QueueCleaner } from "@providers/queue/QueueCleaner";
 
 export interface ICharacterHealth {
   id: string;
   health: number;
 }
 
-@provideSingleton(NPCMovementMoveTowardsQueue)
-export class NPCMovementMoveTowardsQueue {
-  private queue: Queue | null = null;
-  private worker: Worker | null = null;
-  private connection;
-
-  private queueName = (scene: string): string =>
-    `npc-movement-move-towards-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
-
+@provideSingleton(NPCMovementMoveTowards)
+export class NPCMovementMoveTowards {
   debouncedFaceTarget: _.DebouncedFunc<(npc: INPC, targetCharacter: ICharacter) => Promise<void>>;
 
   constructor(
-    private redisManager: RedisManager,
     private movementHelper: MovementHelper,
     private npcMovement: NPCMovement,
     private npcTarget: NPCTarget,
@@ -62,91 +50,22 @@ export class NPCMovementMoveTowardsQueue {
     private locker: Locker,
     private npcBattleCycleQueue: NPCBattleCycleQueue,
     private inMemoryHashTable: InMemoryHashTable,
-    private npcFreezer: NPCFreezer,
-    private queueCleaner: QueueCleaner
+    private npcFreezer: NPCFreezer
   ) {}
 
-  public init(scene: string): void {
-    if (appEnv.general.IS_UNIT_TEST) {
+  public async startMoveTowardsMovement(npc: INPC, totalActiveNPCs: number): Promise<void> {
+    const targetCharacter = await this.getTargetCharacter(npc);
+
+    if (!this.isValidTarget(npc, targetCharacter)) {
+      await this.handleInvalidTarget(npc);
       return;
     }
 
-    if (!this.connection) {
-      this.connection = this.redisManager.client;
-    }
+    const hasBattle = await this.locker.hasLock(`npc-${npc._id}-npc-battle-cycle`);
 
-    if (!this.queue) {
-      this.queue = new Queue(this.queueName(scene), {
-        connection: this.connection,
-      });
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.queue.on("error", async (error) => {
-          console.error("Error in the pathfindingQueue:", error);
-
-          await this.queue?.close();
-          this.queue = null;
-        });
-      }
-    }
-
-    if (!this.worker) {
-      this.worker = new Worker(
-        this.queueName(scene),
-        async (job) => {
-          const { npc } = job.data;
-
-          try {
-            await this.queueCleaner.updateQueueActivity(this.queueName(scene));
-
-            await this.execStartMoveTowardsMovement(npc);
-          } catch (err) {
-            console.error(`Error processing ${this.queueName(scene)} for NPC ${npc.key}:`, err);
-            throw err;
-          }
-        },
-        {
-          connection: this.connection,
-        }
-      );
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.worker.on("failed", async (job, err) => {
-          console.log(`Pathfinding job ${job?.id} failed with error ${err.message}`);
-
-          await this.worker?.close();
-          this.worker = null;
-        });
-      }
-    }
-  }
-
-  public async shutdown(): Promise<void> {
-    await this.queue?.close();
-    await this.worker?.close();
-    this.queue = null;
-    this.worker = null;
-  }
-
-  public async clearAllJobs(): Promise<void> {
-    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
-    for (const job of jobs) {
-      try {
-        await job?.remove();
-      } catch (err) {
-        console.error(`Error removing job ${job?.id}:`, err.message);
-      }
-    }
-  }
-
-  public async startMoveTowardsMovement(npc: INPC): Promise<void> {
-    if (appEnv.general.IS_UNIT_TEST) {
-      await this.execStartMoveTowardsMovement(npc);
+    if (this.reachedTarget(npc, targetCharacter) && hasBattle) {
+      await this.handleReachedTarget(npc, targetCharacter);
       return;
-    }
-
-    if (!this.connection || !this.queue || !this.worker) {
-      this.init(npc.scene);
     }
 
     try {
@@ -156,14 +75,7 @@ export class NPCMovementMoveTowardsQueue {
         return;
       }
 
-      await this.queue?.add(
-        this.queueName(npc.scene),
-        { npc },
-        {
-          removeOnComplete: true,
-          removeOnFail: true,
-        }
-      );
+      await this.execStartMoveTowardsMovement(npc, totalActiveNPCs, targetCharacter);
     } catch (error) {
       console.error(error);
     } finally {
@@ -172,15 +84,12 @@ export class NPCMovementMoveTowardsQueue {
   }
 
   @TrackNewRelicTransaction()
-  private async execStartMoveTowardsMovement(npc: INPC): Promise<void> {
-    const targetCharacter = await this.getTargetCharacter(npc);
-
-    if (!this.isValidTarget(npc, targetCharacter)) {
-      await this.handleInvalidTarget(npc);
-      return;
-    }
-
-    await this.handleValidTarget(npc, targetCharacter);
+  private async execStartMoveTowardsMovement(
+    npc: INPC,
+    totalActiveNPCs: number,
+    targetCharacter: ICharacter
+  ): Promise<void> {
+    await this.handleValidTarget(npc, totalActiveNPCs, targetCharacter);
   }
 
   private async getTargetCharacter(npc: INPC): Promise<ICharacter> {
@@ -202,24 +111,24 @@ export class NPCMovementMoveTowardsQueue {
     await this.tryToFreezeIfTooManyFailedTargetChecks(npc);
   }
 
-  private async handleValidTarget(npc: INPC, targetCharacter: ICharacter): Promise<void> {
+  private async handleValidTarget(npc: INPC, totalActiveNPCs: number, targetCharacter: ICharacter): Promise<void> {
     await this.npcTarget.tryToClearOutOfRangeTargets(npc);
 
     const attackRange = npc.attackType === EntityAttackType.Melee ? 2 : npc.maxRangeAttack;
-    await this.initOrClearBattleCycle(npc, targetCharacter, attackRange);
+    await this.initOrClearBattleCycle(npc, targetCharacter, attackRange!, totalActiveNPCs);
 
     await this.fleeIfHealthIsLow(npc);
 
     if (this.reachedTarget(npc, targetCharacter)) {
       await this.handleReachedTarget(npc, targetCharacter);
     } else {
-      await this.handleNotReachedTarget(npc, targetCharacter);
+      await this.handleNotReachedTarget(npc, totalActiveNPCs, targetCharacter);
     }
   }
 
   private async handleReachedTarget(npc: INPC, targetCharacter: ICharacter): Promise<void> {
     if (npc.pathOrientation === NPCPathOrientation.Backward) {
-      await NPC.updateOne({ _id: npc.id }, { pathOrientation: NPCPathOrientation.Forward });
+      await NPC.updateOne({ _id: npc._id }, { pathOrientation: NPCPathOrientation.Forward });
     }
 
     if (appEnv.general.IS_UNIT_TEST) {
@@ -230,7 +139,7 @@ export class NPCMovementMoveTowardsQueue {
     }
   }
 
-  private async handleNotReachedTarget(npc: INPC, targetCharacter: ICharacter): Promise<void> {
+  private async handleNotReachedTarget(npc: INPC, totalActiveNPCs: number, targetCharacter: ICharacter): Promise<void> {
     if (npc.pathOrientation === NPCPathOrientation.Forward) {
       const isUnderOriginalPositionRange = this.movementHelper.isUnderRange(
         npc.x,
@@ -241,13 +150,13 @@ export class NPCMovementMoveTowardsQueue {
       );
 
       if (isUnderOriginalPositionRange && npc.scene === targetCharacter.scene) {
-        await this.moveTowardsPosition(npc, targetCharacter, targetCharacter.x, targetCharacter.y);
+        await this.moveTowardsPosition(npc, totalActiveNPCs, targetCharacter, targetCharacter.x, targetCharacter.y);
       } else {
         npc.pathOrientation = NPCPathOrientation.Backward;
-        await NPC.updateOne({ _id: npc.id }, { pathOrientation: NPCPathOrientation.Backward });
+        await NPC.updateOne({ _id: npc._id }, { pathOrientation: NPCPathOrientation.Backward });
       }
     } else if (npc.pathOrientation === NPCPathOrientation.Backward) {
-      await this.moveTowardsPosition(npc, targetCharacter, npc.initialX, npc.initialY);
+      await this.moveTowardsPosition(npc, totalActiveNPCs, targetCharacter, npc.initialX, npc.initialY);
     }
   }
 
@@ -273,13 +182,13 @@ export class NPCMovementMoveTowardsQueue {
   }
 
   @TrackNewRelicTransaction()
-  private async moveBackToOriginalPosIfNoTarget(npc: INPC, target: ICharacter): Promise<void> {
+  private async moveBackToOriginalPosIfNoTarget(npc: INPC, totalActiveNPCs: number, target: ICharacter): Promise<void> {
     if (
       !npc.targetCharacter &&
       !this.reachedInitialPosition(npc) &&
       npc.pathOrientation === NPCPathOrientation.Backward
     ) {
-      await this.moveTowardsPosition(npc, target, npc.initialX, npc.initialY);
+      await this.moveTowardsPosition(npc, totalActiveNPCs, target, npc.initialX, npc.initialY);
     }
   }
 
@@ -287,8 +196,8 @@ export class NPCMovementMoveTowardsQueue {
   private async initOrClearBattleCycle(
     npc: INPC,
     targetCharacter: ICharacter,
-
-    maxRangeInGridCells
+    maxRangeInGridCells: number,
+    totalActiveNPCs: number
   ): Promise<void> {
     if (npc.alignment === NPCAlignment.Hostile) {
       // if melee, only start battle cycle if target is in melee range
@@ -302,7 +211,7 @@ export class NPCMovementMoveTowardsQueue {
       );
 
       if (isInRange) {
-        await this.initBattleCycle(npc, targetCharacter);
+        await this.initBattleCycle(npc, targetCharacter, totalActiveNPCs);
       }
     }
   }
@@ -320,7 +229,7 @@ export class NPCMovementMoveTowardsQueue {
       return;
     }
 
-    await NPC.updateOne({ _id: npc.id }, { direction: facingDirection });
+    await NPC.updateOne({ _id: npc._id }, { direction: facingDirection });
 
     const nearbyCharacters = await this.npcView.getCharactersInView(npc);
 
@@ -332,7 +241,7 @@ export class NPCMovementMoveTowardsQueue {
     // Broadcast to all characters needing an update
     for (const character of charactersNeedingUpdates) {
       this.socketMessaging.sendEventToUser(character.channelId!, NPCSocketEvents.NPCDataUpdate, {
-        id: npc.id,
+        id: npc._id,
         direction: npc.direction,
         x: npc.x,
         y: npc.y,
@@ -359,7 +268,7 @@ export class NPCMovementMoveTowardsQueue {
   }
 
   @TrackNewRelicTransaction()
-  private async initBattleCycle(npc: INPC, targetCharacter: ICharacter): Promise<void> {
+  private async initBattleCycle(npc: INPC, targetCharacter: ICharacter, totalActiveNPCs: number): Promise<void> {
     if (!(npc.isAlive || npc.health === 0) || !npc.targetCharacter || !npc.isBehaviorEnabled) {
       return;
     }
@@ -380,15 +289,21 @@ export class NPCMovementMoveTowardsQueue {
     })
       .lean({ virtuals: true, defaults: true })
       .cacheQuery({
-        cacheKey: `${npc.id}-skills`,
+        cacheKey: `${npc._id}-skills`,
         ttl: 60 * 60 * 24 * 7,
       })) as ISkill;
 
-    await this.npcBattleCycleQueue.add(npc, npcSkills);
+    await this.npcBattleCycleQueue.addToQueue(npc, npcSkills, totalActiveNPCs);
   }
 
   @TrackNewRelicTransaction()
-  private async moveTowardsPosition(npc: INPC, target: ICharacter, x: number, y: number): Promise<void> {
+  private async moveTowardsPosition(
+    npc: INPC,
+    totalActiveNPCs: number,
+    target: ICharacter,
+    x: number,
+    y: number
+  ): Promise<void> {
     try {
       const shortestPath = await this.npcMovement.getShortestPathNextPosition(
         npc,
@@ -396,7 +311,8 @@ export class NPCMovementMoveTowardsQueue {
         ToGridX(npc.x),
         ToGridY(npc.y),
         ToGridX(x),
-        ToGridY(y)
+        ToGridY(y),
+        totalActiveNPCs
       );
       if (!shortestPath) {
         // throw new Error("No shortest path found!");

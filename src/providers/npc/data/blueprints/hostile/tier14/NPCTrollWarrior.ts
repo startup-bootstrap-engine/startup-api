@@ -113,6 +113,10 @@ export const npcTrollWarrior: INPCTierBlueprint<14> = {
       itemBlueprintKey: ToolsBlueprint.ElderHeartAxe,
       chance: LootProbability.Rare,
     },
+    {
+      itemBlueprintKey: ToolsBlueprint.AurumAlloyPickaxe,
+      chance: LootProbability.SemiCommon,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
   areaSpells: [

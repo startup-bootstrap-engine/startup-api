@@ -14,7 +14,6 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { Locker } from "@providers/locks/Locker";
 import { MathHelper } from "@providers/math/MathHelper";
 import { RaidManager } from "@providers/raid/RaidManager";
-import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { NPCCycleQueue } from "./NPCCycleQueue";
 
 @provide(NPCManager)
@@ -34,7 +33,6 @@ export class NPCManager {
     const nearbyNPCs = await this.npcView.getNPCsInView(character, { isBehaviorEnabled: false });
 
     const totalActiveNPCs = await NPC.countDocuments({ isBehaviorEnabled: true });
-    this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.NPCs, "Active", totalActiveNPCs);
 
     const behaviorLoops: Promise<void>[] = [];
 
@@ -45,14 +43,14 @@ export class NPCManager {
         continue;
       }
 
-      behaviorLoops.push(this.startBehaviorLoop(npc));
+      behaviorLoops.push(this.startBehaviorLoop(npc, totalActiveNPCs));
     }
 
     await Promise.all(behaviorLoops);
   }
 
   @TrackNewRelicTransaction()
-  public async startBehaviorLoop(initialNPC: INPC): Promise<void> {
+  public async startBehaviorLoop(initialNPC: INPC, totalActiveNPCs: number): Promise<void> {
     const npc = initialNPC;
 
     if (!npc) {
@@ -84,7 +82,7 @@ export class NPCManager {
         cacheKey: `npc-${npc.id}-skills`,
       })) as unknown as ISkill;
 
-      await this.npcCycleQueue.add(npc, npcSkills);
+      await this.npcCycleQueue.addToQueue(npc, npcSkills, totalActiveNPCs);
     }
   }
 

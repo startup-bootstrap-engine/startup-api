@@ -8,6 +8,7 @@ import { NPCRaidSpawn } from "@providers/raid/NPCRaidSpawn";
 import { provide } from "inversify-binding-decorators";
 
 import { NPCDuplicateCleaner } from "@providers/npc/NPCDuplicateCleaner";
+import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { CronJobScheduler } from "./CronJobScheduler";
 
 @provide(NPCCrons)
@@ -42,6 +43,16 @@ export class NPCCrons {
     this.cronJobScheduler.uniqueSchedule("npc-duplicate-checker", "0 0 * * *", async () => {
       await this.npcDuplicateChecker.cleanupDuplicateNPCs();
     });
+
+    this.cronJobScheduler.uniqueSchedule("npc-active-count", "* * * * *", async () => {
+      await this.calculateActiveNPCs();
+    });
+  }
+
+  private async calculateActiveNPCs(): Promise<void> {
+    const totalActiveNPCs = await NPC.countDocuments({ isBehaviorEnabled: true });
+
+    this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.NPCs, "Active", totalActiveNPCs);
   }
 
   private async npcSpawnCron(): Promise<void> {

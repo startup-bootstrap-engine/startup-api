@@ -24,7 +24,7 @@ import { Queue, Worker } from "bullmq";
 import { ChatUtils } from "./ChatUtils";
 
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { QueueCleaner } from "@providers/queue/QueueCleaner";
+import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { v4 as uuidv4 } from "uuid";
 
 @provideSingleton(ChatNetworkGlobalMessagingQueue)
@@ -45,7 +45,7 @@ export class ChatNetworkGlobalMessagingQueue {
     private characterValidation: CharacterValidation,
     private chatUtils: ChatUtils,
     private redisManager: RedisManager,
-    private queueCleaner: QueueCleaner
+    private queueActivityMonitor: QueueActivityMonitor
   ) {}
 
   public initQueue(): void {
@@ -74,7 +74,7 @@ export class ChatNetworkGlobalMessagingQueue {
         async (job) => {
           const { character, data } = job.data;
 
-          await this.queueCleaner.updateQueueActivity(this.queueName);
+          await this.queueActivityMonitor.updateQueueActivity(this.queueName);
 
           await this.execGlobalMessaging(data, character);
         },

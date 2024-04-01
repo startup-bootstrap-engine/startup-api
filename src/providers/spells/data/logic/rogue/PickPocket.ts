@@ -9,7 +9,7 @@ import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeigh
 import { blueprintManager } from "@providers/inversify/container";
 import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { IEquipmentAndInventoryUpdatePayload, IItemContainer, ItemSocketEvents } from "@rpg-engine/shared";
+import { EntityType, IEquipmentAndInventoryUpdatePayload, IItemContainer, ItemSocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
 import { Types } from "mongoose";
@@ -26,8 +26,14 @@ export class PickPocket {
 
   @TrackNewRelicTransaction()
   public async handlePickPocket(character: ICharacter, target: ICharacter): Promise<boolean> {
-    if (target.type !== "Character") {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "You can only stolen from characters!");
+    if (!target) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you should specify a target to steal from.");
+
+      return false;
+    }
+
+    if (target.type !== EntityType.Character) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you can only steal from other characters!");
 
       return false;
     }

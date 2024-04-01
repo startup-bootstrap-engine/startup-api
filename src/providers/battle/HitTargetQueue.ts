@@ -31,7 +31,7 @@ import { RedisManager } from "@providers/database/RedisManager";
 import { blueprintManager } from "@providers/inversify/container";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { QueueCleaner } from "@providers/queue/QueueCleaner";
+import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { Queue, Worker } from "bullmq";
 import random from "lodash/random";
 import { BattleAttackTargetDeath } from "./BattleAttackTarget/BattleAttackTargetDeath";
@@ -71,7 +71,7 @@ export class HitTargetQueue {
     private entityEffectUse: EntityEffectUse,
     private battleDamageCalculator: BattleDamageCalculator,
     private redisManager: RedisManager,
-    private queueCleaner: QueueCleaner,
+    private queueCleaner: QueueActivityMonitor,
     private locker: Locker
   ) {}
 

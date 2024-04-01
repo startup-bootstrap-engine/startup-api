@@ -9,7 +9,7 @@ import { ItemCraftable } from "@providers/item/ItemCraftable";
 import { itemsBlueprintIndex } from "@providers/item/data/index";
 import { MapTiles } from "@providers/map/MapTiles";
 import { MovementHelper } from "@providers/movement/MovementHelper";
-import { QueueCleaner } from "@providers/queue/QueueCleaner";
+import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -48,7 +48,7 @@ export class UseWithTileQueue {
     private itemCraftable: ItemCraftable,
     private skillIncrease: SkillIncrease,
     private redisManager: RedisManager,
-    private queueCleaner: QueueCleaner
+    private queueActivityMonitor: QueueActivityMonitor
   ) {}
 
   public initQueue(): void {
@@ -78,7 +78,7 @@ export class UseWithTileQueue {
           const { character, useWithTileData } = job.data;
 
           try {
-            await this.queueCleaner.updateQueueActivity(this.queueName);
+            await this.queueActivityMonitor.updateQueueActivity(this.queueName);
 
             await this.onExecuteUseWithTile(character, useWithTileData);
           } catch (err) {

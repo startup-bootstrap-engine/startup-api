@@ -2,7 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { QueueCleaner } from "@providers/queue/QueueCleaner";
+import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { EnvType, ISpellCast, SpellSocketEvents } from "@rpg-engine/shared";
@@ -23,7 +23,7 @@ export class SpellNetworkCastQueue {
     private socketAuth: SocketAuth,
     private spellCast: SpellCast,
     private redisManager: RedisManager,
-    private queueCleaner: QueueCleaner
+    private queueActivityMonitor: QueueActivityMonitor
   ) {}
 
   public onSpellCast(channel: SocketChannel): void {
@@ -84,7 +84,7 @@ export class SpellNetworkCastQueue {
           }
 
           try {
-            await this.queueCleaner.updateQueueActivity(this.queueName);
+            await this.queueActivityMonitor.updateQueueActivity(this.queueName);
 
             await this.spellCast.castSpell(data, character);
           } catch (err) {

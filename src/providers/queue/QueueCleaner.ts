@@ -4,7 +4,7 @@ import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
-import { Queue } from "bullmq";
+import { Queue, Worker } from "bullmq";
 import dayjs from "dayjs";
 
 @provideSingleton(QueueCleaner)
@@ -42,6 +42,8 @@ export class QueueCleaner {
       const lastActivityDate = dayjs(Number(lastActivity));
 
       if (now.diff(lastActivityDate, "millisecond") > QUEUE_INACTIVITY_THRESHOLD) {
+        console.log(`Closing inactive queue: ${queueName}`);
+
         if (!this.connection) {
           this.connection = this.redisManager.client;
         }
@@ -49,6 +51,12 @@ export class QueueCleaner {
         const queue = new Queue(queueName, {
           connection: this.connection,
         });
+
+        const worker = new Worker(queueName, async () => {}, {
+          connection: this.connection,
+        });
+
+        await worker.close(); // Close the worker
 
         try {
           // Check for active jobs

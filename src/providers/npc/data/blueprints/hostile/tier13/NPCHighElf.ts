@@ -153,5 +153,9 @@ export const npcHighElf: INPCTierBlueprint<13> = {
       itemBlueprintKey: ToolsBlueprint.WoodBreakerAxe,
       chance: LootProbability.Common,
     },
+    {
+      itemBlueprintKey: ToolsBlueprint.EmeraldEclipsesPickaxe,
+      chance: LootProbability.VeryRare,
+    },
   ],
 };

@@ -194,6 +194,10 @@ export const npcDwarfGuardian: INPCTierBlueprint<12> = {
       itemBlueprintKey: SwordsBlueprint.StellarBlade,
       chance: LootProbability.VeryRare,
     },
+    {
+      itemBlueprintKey: ToolsBlueprint.EmberEdgePickaxe,
+      chance: LootProbability.VeryRare,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
   areaSpells: [

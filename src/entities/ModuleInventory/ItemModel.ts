@@ -138,6 +138,8 @@ const itemSchema = createLeanSchema(
 
     growthPoints: Type.number({ required: false }),
 
+    requiredGrowthPoints: Type.number({ required: false }),
+
     currentPlantCycle: Type.string({ required: false, enum: TypeHelper.enumToStringArray(PlantLifeCycle) }),
 
     lastPlantCycleRun: Type.date({ required: false }),

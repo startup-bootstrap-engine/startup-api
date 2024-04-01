@@ -98,7 +98,7 @@ export class CharacterDeath {
 
       await this.sendBattleDeathEvents(character);
 
-      if (character.scene.includes("arena")) {
+      if (character.scene.includes("arena") || character.scene.includes("training")) {
         return;
       }
 
