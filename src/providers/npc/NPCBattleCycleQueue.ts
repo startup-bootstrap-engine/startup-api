@@ -61,7 +61,7 @@ export class NPCBattleCycleQueue {
           totalActiveNPCs,
         },
         queueScaleFactor,
-        undefined,
+
         {
           delay: NPC_BATTLE_CYCLE_INTERVAL,
         }

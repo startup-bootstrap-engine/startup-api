@@ -81,7 +81,7 @@ export class ItemUseCycleQueue {
         intervalDurationMs,
       },
       queueScaleFactor,
-      undefined,
+
       {
         delay: intervalDurationMs,
       }

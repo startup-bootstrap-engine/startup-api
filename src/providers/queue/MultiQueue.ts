@@ -22,7 +22,6 @@ export class MultiQueue {
     jobFn: QueueJobFn,
     data: Record<string, unknown>,
     queueScaleFactor: number = QueueDefaultScaleFactor.Low,
-    scene?: string,
     addQueueOptions?: DefaultJobOptions,
     queueOptions?: QueueBaseOptions,
     workerOptions?: QueueBaseOptions
@@ -31,7 +30,7 @@ export class MultiQueue {
       this.connection = this.redisManager.client;
     }
 
-    const queueName = this.generateQueueName(prefix, queueScaleFactor, scene);
+    const queueName = this.generateQueueName(prefix, queueScaleFactor);
 
     const queue = this.initOrFetchQueue(
       queueName,

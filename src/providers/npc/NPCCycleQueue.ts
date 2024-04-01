@@ -64,7 +64,7 @@ export class NPCCycleQueue {
         npcSkills,
       },
       queueScaleFactor,
-      undefined,
+
       {
         delay: (1600 + random(0, 200)) / (npc.speed * 1.6) / NPC_CYCLE_INTERVAL_RATIO,
       }

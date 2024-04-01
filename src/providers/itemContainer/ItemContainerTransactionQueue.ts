@@ -85,8 +85,7 @@ export class ItemContainerTransactionQueue {
         targetContainer,
         options,
       },
-      QueueDefaultScaleFactor.Low,
-      character.scene
+      QueueDefaultScaleFactor.Low
     );
 
     // we have to do this hack because remember once the job goes to the worker, its processed in a different instance
