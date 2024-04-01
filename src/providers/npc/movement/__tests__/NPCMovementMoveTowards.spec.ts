@@ -178,7 +178,11 @@ describe("NPCMovementMoveTowards.ts", () => {
 
       await npcMovementMoveTowards.startMoveTowardsMovement(testNPC, 1);
 
-      expect(spy).toHaveBeenCalledWith(testNPC, expect.objectContaining({ _id: testCharacter._id }));
+      expect(spy).toHaveBeenCalledWith(
+        testNPC,
+        expect.objectContaining({ _id: testCharacter._id }),
+        expect.any(Number)
+      );
     });
 
     describe("NPCMovementMoveTowards", () => {
