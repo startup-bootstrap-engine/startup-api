@@ -115,7 +115,7 @@ export class NPCMovementMoveTowards {
     await this.npcTarget.tryToClearOutOfRangeTargets(npc);
 
     const attackRange = npc.attackType === EntityAttackType.Melee ? 2 : npc.maxRangeAttack;
-    await this.initOrClearBattleCycle(npc, targetCharacter, attackRange!);
+    await this.initOrClearBattleCycle(npc, targetCharacter, attackRange!, totalActiveNPCs);
 
     await this.fleeIfHealthIsLow(npc);
 
@@ -196,7 +196,8 @@ export class NPCMovementMoveTowards {
   private async initOrClearBattleCycle(
     npc: INPC,
     targetCharacter: ICharacter,
-    maxRangeInGridCells: number
+    maxRangeInGridCells: number,
+    totalActiveNPCs: number
   ): Promise<void> {
     if (npc.alignment === NPCAlignment.Hostile) {
       // if melee, only start battle cycle if target is in melee range
@@ -210,7 +211,7 @@ export class NPCMovementMoveTowards {
       );
 
       if (isInRange) {
-        await this.initBattleCycle(npc, targetCharacter);
+        await this.initBattleCycle(npc, targetCharacter, totalActiveNPCs);
       }
     }
   }
@@ -267,7 +268,7 @@ export class NPCMovementMoveTowards {
   }
 
   @TrackNewRelicTransaction()
-  private async initBattleCycle(npc: INPC, targetCharacter: ICharacter): Promise<void> {
+  private async initBattleCycle(npc: INPC, targetCharacter: ICharacter, totalActiveNPCs: number): Promise<void> {
     if (!(npc.isAlive || npc.health === 0) || !npc.targetCharacter || !npc.isBehaviorEnabled) {
       return;
     }
@@ -292,7 +293,7 @@ export class NPCMovementMoveTowards {
         ttl: 60 * 60 * 24 * 7,
       })) as ISkill;
 
-    await this.npcBattleCycleQueue.addToQueue(npc, npcSkills);
+    await this.npcBattleCycleQueue.addToQueue(npc, npcSkills, totalActiveNPCs);
   }
 
   @TrackNewRelicTransaction()

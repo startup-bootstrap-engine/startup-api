@@ -1,5 +1,6 @@
+import { Character } from "@entities/ModuleCharacter/CharacterModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { QUEUE_SCALE_FACTOR_DEFAULT } from "@providers/constants/QueueConstants";
+import { QUEUE_CHARACTER_MAX_SCALE_FACTOR } from "@providers/constants/QueueConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MultiQueue } from "@providers/queue/MultiQueue";
@@ -48,6 +49,11 @@ export class ItemUseCycleQueue {
     iterations: number,
     intervalDurationMs: number
   ): Promise<void> {
+    const totalOnlineCharacters = await Character.countDocuments({ isOnline: true });
+
+    const maxQueues = Math.ceil(totalOnlineCharacters / 10) || 1;
+    const queueScaleFactor = Math.min(maxQueues, QUEUE_CHARACTER_MAX_SCALE_FACTOR);
+
     await this.multiQueue.addJob(
       "item-use-cycle",
 
@@ -74,8 +80,8 @@ export class ItemUseCycleQueue {
         iterations,
         intervalDurationMs,
       },
-      QUEUE_SCALE_FACTOR_DEFAULT,
-      scene,
+      queueScaleFactor,
+      undefined,
       {
         delay: intervalDurationMs,
       }

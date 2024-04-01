@@ -1,5 +1,5 @@
 import { appEnv } from "@providers/config/env";
-import { QUEUE_SCALE_FACTOR_DEFAULT } from "@providers/constants/QueueConstants";
+import { QueueDefaultScaleFactor } from "@providers/constants/QueueConstants";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { EnvType } from "@rpg-engine/shared";
@@ -21,7 +21,7 @@ export class MultiQueue {
     prefix: string,
     jobFn: QueueJobFn,
     data: Record<string, unknown>,
-    queueScaleFactor: number = QUEUE_SCALE_FACTOR_DEFAULT,
+    queueScaleFactor: number = QueueDefaultScaleFactor.Low,
     scene?: string,
     addQueueOptions?: DefaultJobOptions,
     queueOptions?: QueueBaseOptions,

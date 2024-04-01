@@ -9,7 +9,7 @@ import { CharacterItemSlots } from "@providers/character/characterItems/Characte
 import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { appEnv } from "@providers/config/env";
 import { ITEM_CONTAINER_ROLLBACK_MAX_TRIES } from "@providers/constants/ItemContainerConstants";
-import { QUEUE_SCALE_FACTOR_DEFAULT } from "@providers/constants/QueueConstants";
+import { QueueDefaultScaleFactor } from "@providers/constants/QueueConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
@@ -85,7 +85,7 @@ export class ItemContainerTransactionQueue {
         targetContainer,
         options,
       },
-      QUEUE_SCALE_FACTOR_DEFAULT,
+      QueueDefaultScaleFactor.Low,
       character.scene
     );
 

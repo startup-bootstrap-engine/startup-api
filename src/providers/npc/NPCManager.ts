@@ -32,7 +32,7 @@ export class NPCManager {
   public async startNearbyNPCsBehaviorLoop(character: ICharacter): Promise<void> {
     const nearbyNPCs = await this.npcView.getNPCsInView(character, { isBehaviorEnabled: false });
 
-    const totalActiveNPCsOnScene = await NPC.countDocuments({ scene: character.scene, isBehaviorEnabled: true });
+    const totalActiveNPCs = await NPC.countDocuments({ isBehaviorEnabled: true });
 
     const behaviorLoops: Promise<void>[] = [];
 
@@ -43,7 +43,7 @@ export class NPCManager {
         continue;
       }
 
-      behaviorLoops.push(this.startBehaviorLoop(npc, totalActiveNPCsOnScene));
+      behaviorLoops.push(this.startBehaviorLoop(npc, totalActiveNPCs));
     }
 
     await Promise.all(behaviorLoops);

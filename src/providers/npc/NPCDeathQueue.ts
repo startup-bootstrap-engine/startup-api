@@ -22,7 +22,7 @@ import { NPCTarget } from "./movement/NPCTarget";
 
 import { CharacterView } from "@providers/character/CharacterView";
 import { appEnv } from "@providers/config/env";
-import { QUEUE_SCALE_FACTOR_DEFAULT } from "@providers/constants/QueueConstants";
+import { QueueDefaultScaleFactor } from "@providers/constants/QueueConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { MultiQueue } from "@providers/queue/MultiQueue";
 @provideSingleton(NPCDeathQueue)
@@ -56,7 +56,7 @@ export class NPCDeathQueue {
         await this.execHandleNPCDeath(killer, npc);
       },
       { killer, npc },
-      QUEUE_SCALE_FACTOR_DEFAULT,
+      QueueDefaultScaleFactor.Medium,
       npc.scene
     );
   }

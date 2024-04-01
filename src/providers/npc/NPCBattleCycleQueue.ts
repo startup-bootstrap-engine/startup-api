@@ -6,7 +6,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { BattleAttackTarget } from "@providers/battle/BattleAttackTarget/BattleAttackTarget";
 import { appEnv } from "@providers/config/env";
 import { NPC_BATTLE_CYCLE_INTERVAL, NPC_MIN_DISTANCE_TO_ACTIVATE } from "@providers/constants/NPCConstants";
-import { QUEUE_SCALE_FACTOR_DEFAULT } from "@providers/constants/QueueConstants";
+import { QUEUE_NPC_MAX_SCALE_FACTOR } from "@providers/constants/QueueConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MovementHelper } from "@providers/movement/MovementHelper";
@@ -31,7 +31,7 @@ export class NPCBattleCycleQueue {
     private multiQueue: MultiQueue
   ) {}
 
-  public async addToQueue(npc: INPC, npcSkills: ISkill): Promise<void> {
+  public async addToQueue(npc: INPC, npcSkills: ISkill, totalActiveNPCs: number): Promise<void> {
     const canProceed = await this.locker.lock(`npc-${npc._id}-npc-add-battle-queue`);
 
     if (!canProceed) {
@@ -40,24 +40,28 @@ export class NPCBattleCycleQueue {
 
     try {
       if (appEnv.general.IS_UNIT_TEST) {
-        await this.execBattleCycle(npc, npcSkills);
+        await this.execBattleCycle(npc, npcSkills, totalActiveNPCs);
         return;
       }
+
+      const maxQueues = Math.ceil(totalActiveNPCs / 10) || 1;
+      const queueScaleFactor = Math.min(maxQueues, QUEUE_NPC_MAX_SCALE_FACTOR);
 
       await this.multiQueue.addJob(
         "npc-battle-queue",
 
         async (job) => {
-          const { npc, npcSkills } = job.data;
+          const { npc, npcSkills, totalActiveNPCs } = job.data;
 
-          await this.execBattleCycle(npc, npcSkills);
+          await this.execBattleCycle(npc, npcSkills, totalActiveNPCs);
         },
         {
           npc,
           npcSkills,
+          totalActiveNPCs,
         },
-        QUEUE_SCALE_FACTOR_DEFAULT,
-        npc.scene,
+        queueScaleFactor,
+        undefined,
         {
           delay: NPC_BATTLE_CYCLE_INTERVAL,
         }
@@ -79,7 +83,7 @@ export class NPCBattleCycleQueue {
   }
 
   @TrackNewRelicTransaction()
-  private async execBattleCycle(npc: INPC, npcSkills: ISkill): Promise<void> {
+  private async execBattleCycle(npc: INPC, npcSkills: ISkill, totalActiveNPCs: number): Promise<void> {
     try {
       const hasLock = await this.locker.hasLock(`npc-${npc._id}-npc-battle-cycle`);
 
@@ -154,7 +158,7 @@ export class NPCBattleCycleQueue {
         await this.tryToSwitchToRandomTarget(npc);
       }
 
-      await this.addToQueue(updatedNPC, npcSkills);
+      await this.addToQueue(updatedNPC, npcSkills, totalActiveNPCs);
     } catch (error) {
       console.error(error);
       await this.locker.unlock(`npc-${npc._id}-npc-battle-cycle`);

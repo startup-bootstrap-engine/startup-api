@@ -65,8 +65,7 @@ export class PathfindingQueue {
           endGridX,
           endGridY,
         },
-        queueScaleFactor,
-        npc.scene
+        queueScaleFactor
       );
     } catch (error) {
       console.error(error);
