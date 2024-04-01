@@ -90,6 +90,10 @@ export class MultiQueue {
       await this.queueActivityMonitor.updateQueueActivity(queueName);
     } else {
       queue = this.queues.get(queueName);
+
+      if (!queue) {
+        queue = new Queue(queueName, queueOptions);
+      }
     }
 
     let worker = this.workers.get(queueName);
