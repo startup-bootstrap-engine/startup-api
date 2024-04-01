@@ -192,7 +192,7 @@ export class MultiQueue {
       case "active-characters":
         const activeCharacters = Number((await this.inMemoryHashTable.get("activity-tracker", "character-count")) || 1);
 
-        const maxCharQueues = Math.ceil(activeCharacters / 10) || 1;
+        const maxCharQueues = Math.ceil(activeCharacters / 20) || 1;
         const charQueueScaleFactor = Math.min(maxCharQueues, QUEUE_CHARACTER_MAX_SCALE_FACTOR);
 
         return `${prefix}-${envSuffix}-${charQueueScaleFactor}`;
@@ -200,7 +200,7 @@ export class MultiQueue {
       case "active-npcs":
         const activeNPCs = Number((await this.inMemoryHashTable.get("activity-tracker", "npc-count")) || 1);
 
-        const maxNPCQueues = Math.ceil(activeNPCs / 10) || 1;
+        const maxNPCQueues = Math.ceil(activeNPCs / 20) || 1;
         const NPCQueueScaleFactor = Math.min(maxNPCQueues, QUEUE_NPC_MAX_SCALE_FACTOR);
 
         return `${prefix}-${envSuffix}-${NPCQueueScaleFactor}`;
