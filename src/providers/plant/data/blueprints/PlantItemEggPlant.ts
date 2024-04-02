@@ -49,5 +49,5 @@ export const plantItemEggPlant: IPlantItem = {
   yieldFactor: FARMING_MEDIUM_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
-  regrowAfterHarvestLimit: 2,
+  regrowAfterHarvestLimit: 1,
 };
