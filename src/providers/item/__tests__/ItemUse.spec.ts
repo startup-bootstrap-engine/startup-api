@@ -184,11 +184,11 @@ describe("ItemUse.ts", () => {
 
     (itemUse as any).applyItemUsage(testCharacter.scene, itemLightLifePotionBlueprint, testCharacter.id);
 
-    await unitTestHelper.wait(0.2);
+    await wait(0.2);
 
     // extra call to make sure cycle is only running for 5 times
     jest.advanceTimersByTime(11000);
-    await unitTestHelper.wait(0.2);
+    await wait(0.2);
 
     expect(sendEventToUser).toBeCalledTimes(1);
 
@@ -321,3 +321,12 @@ describe("ItemUse.ts", () => {
     expect(item2.stackQty).toBe(3);
   });
 });
+
+function wait(sec): Promise<void> {
+  return new Promise<void>((resolve) => {
+    const inter = setInterval(() => {
+      resolve();
+      clearInterval(inter);
+    }, sec * 1000);
+  });
+}

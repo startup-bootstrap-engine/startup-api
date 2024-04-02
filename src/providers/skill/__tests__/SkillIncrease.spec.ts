@@ -258,7 +258,7 @@ describe("SkillIncrease.spec.ts | increaseShieldingSP, increaseSkillsOnBattle & 
 
     expect(spellLearnMock).not.toHaveBeenCalled();
     // faking timers is creating issue with mongo calls
-    await unitTestHelper.wait(5.2);
+    await wait(5.2);
     expect(spellLearnMock).not.toHaveBeenCalled();
   });
 
@@ -280,7 +280,7 @@ describe("SkillIncrease.spec.ts | increaseShieldingSP, increaseSkillsOnBattle & 
 
     expect(spellLearnMock).not.toHaveBeenCalled();
     // faking timers is creating issue with mongo calls
-    await unitTestHelper.wait(5.2);
+    await wait(5.2);
     expect(spellLearnMock).not.toHaveBeenCalled();
   });
 
@@ -304,7 +304,7 @@ describe("SkillIncrease.spec.ts | increaseShieldingSP, increaseSkillsOnBattle & 
     expect(spellLearnMock).not.toHaveBeenCalled();
 
     // faking timers is creating issue with mongo calls
-    await unitTestHelper.wait(5.2);
+    await wait(5.2);
     expect(spellLearnMock).not.toHaveBeenCalled();
   });
 
@@ -367,7 +367,7 @@ describe("SkillIncrease.spec.ts | increaseShieldingSP, increaseSkillsOnBattle & 
 
     expect(spellLearnMock).not.toHaveBeenCalled();
     // faking timers is creating issue with mongo calls
-    await unitTestHelper.wait(5.2);
+    await wait(5.2);
     expect(spellLearnMock).toHaveBeenCalledTimes(1);
     expect(spellLearnMock).toHaveBeenCalledWith(attacker._id, true);
 
@@ -503,3 +503,12 @@ describe("SkillIncrease.spec.ts | increaseShieldingSP, increaseSkillsOnBattle & 
     });
   });
 });
+
+function wait(sec): Promise<void> {
+  return new Promise<void>((resolve) => {
+    const inter = setInterval(() => {
+      resolve();
+      clearInterval(inter);
+    }, sec * 1000);
+  });
+}

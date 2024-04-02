@@ -856,13 +856,4 @@ export class UnitTestHelper {
 
     return bagCont!;
   }
-
-  public wait(sec): Promise<void> {
-    return new Promise<void>((resolve) => {
-      const inter = setInterval(() => {
-        resolve();
-        clearInterval(inter);
-      }, sec * 1000);
-    });
-  }
 }
