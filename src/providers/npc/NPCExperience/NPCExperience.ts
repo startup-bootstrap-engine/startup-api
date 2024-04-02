@@ -26,7 +26,6 @@ import {
   CharacterPartyBenefits,
   CharacterSocketEvents,
   DisplayTextSocketEvents,
-  EntityType,
   ICharacterAttributeChanged,
   IDisplayTextEvent,
   IIncreaseXPResult,
@@ -83,9 +82,9 @@ export class NPCExperience {
       return;
     }
 
-    await this.time.waitForMilliseconds(random(10, 40)); // add artificial delay to avoid concurrency
+    await this.time.waitForMilliseconds(random(0, 50)); // add artificial delay to avoid concurrency
 
-    const hasLock = await this.locker.lock(`npc-${target._id.toString()}-release-xp`);
+    const hasLock = await this.locker.lock(`npc-${target._id}-release-xp`);
 
     if (!hasLock) {
       return;
@@ -95,20 +94,11 @@ export class NPCExperience {
     // Store the xp in the xpToRelease array
     // before adding the character to the array, check if the character already caused some damage
 
-    console.log("TARGET EXP", target.experience);
-
     target.xpToRelease = uniqBy(target.xpToRelease, "xpId");
-    console.log("EXP RELEASED", target.xpToRelease);
-
-    // compare if EXP collected is equal to EXP of mob, if not add EXP
-    // if (target.xpToRelease.xp !== target.experience && ) {
-    //   target.xpToRelease.xp = target.experience;
-    // }
 
     while (target.xpToRelease.length > 0) {
       const record = target.xpToRelease.shift();
       const characterAndSkills = await this.validateCharacterAndSkills(record!.charId);
-
       if (!characterAndSkills) {
         continue;
       }
@@ -177,73 +167,40 @@ export class NPCExperience {
   @TrackNewRelicTransaction()
   public async recordXPinBattle(attacker: ICharacter, target: ICharacter | INPC, damage: number): Promise<void> {
     try {
-      const canProceed = await this.locker.lock(`npc-${target._id.toString()}-record-xp`);
-      console.log("canProceed", canProceed);
+      const canProceed = await this.locker.lock(`npc-${target._id}-record-xp`);
       if (!canProceed) {
         return;
       }
-
-      const skill = await Skill.findOne({ _id: attacker.skills });
-      console.log("ATTACKER TOTAL EXP", skill?.experience);
       // For now, only supported increasing XP when target is NPC
-      if (target.type === EntityType.NPC && damage > 0) {
-        // ensure that xpPerDamage is not undefined since u just need calculate EXP / MAX HEALTH
-        if (target.xpPerDamage === undefined) {
-          target.xpPerDamage = target.experience / target.maxHealth;
-        }
+      if (target.type === "NPC" && damage > 0) {
         // matches both melee and magic battle companions
         // do not give XP for battle companions
         if ((target as INPC).key.includes("battle-companion")) {
           return;
         }
-        console.log("target.experience", target.experience);
-        console.log("target.health", target.health);
-        console.log("target.isAlive", target.isAlive);
-        console.log("attacker._id", attacker._id);
-        console.log("attacker._id -> TYPEOF -> _ID", typeof attacker._id);
-        console.log("attacker.id", attacker.id);
-        console.log("attacker.id -> TYPEOF -> ID", typeof attacker.id);
 
         target = target as INPC;
         target.xpToRelease = uniqBy(target.xpToRelease, "xpId");
-        console.log("GET target.xpToRelease uniqBy xpId", target.xpToRelease);
-        console.log("target.xpPerDamage", target.xpPerDamage);
-        console.log("damage", damage);
-        const party = (await this.partyManagement.getPartyByCharacterId(attacker._id)) as ICharacterParty;
-        console.log("party", party);
+        const party = (await this.partyManagement.getPartyByCharacterId(attacker.id)) as ICharacterParty;
         // Store the xp in the xpToRelease array
         // before adding the character to the array, check if the character already caused some damage
         if (typeof target.xpToRelease !== "undefined") {
           let found = false;
-
           for (const i in target.xpToRelease) {
-            // console.log("target.xpToRelease[i].partyId?.toString()", target.xpToRelease[i].partyId?.toString())
-            // console.log("party._id", party._id)
-            console.log("target.xpToRelease[i].charId?.toString()", target.xpToRelease[i].charId?.toString());
-            console.log("attacker._id", attacker._id);
-            console.log(
-              "target.xpToRelease[i].charId === attacker._id -> _ID CONVERSAO CHARID",
-              target.xpToRelease[i].charId?.toString() === attacker._id.toString()
-            );
-
             const xpCondition = party
-              ? target.xpToRelease[i].partyId?.toString() === party._id.toString()
-              : target.xpToRelease[i].charId?.toString() === attacker._id.toString();
-
+              ? target.xpToRelease[i].partyId?.toString() === party.id
+              : target.xpToRelease[i].charId?.toString() === attacker.id;
             if (xpCondition) {
               found = true;
-              console.log("target.xpToRelease[i].xp BEFORE", target.xpToRelease[i].xp);
               target.xpToRelease[i].xp! += target.xpPerDamage * damage;
-              console.log("target.xpToRelease[i].xp AFTER", target.xpToRelease[i].xp);
               break;
             }
           }
-
           if (!found) {
             target.xpToRelease.push({
               xpId: uuidv4(),
-              charId: attacker._id,
-              partyId: party ? party._id : null, // can be null if the attacker is not in a party
+              charId: attacker.id,
+              partyId: party ? party.id : null, // can be null if the attacker is not in a party
               xp: target.xpPerDamage * damage,
             });
           }
@@ -251,45 +208,33 @@ export class NPCExperience {
           target.xpToRelease = [
             {
               xpId: uuidv4(),
-              charId: attacker._id,
-              partyId: party ? party._id : null, // can be null if the attacker is not in a party
+              charId: attacker.id,
+              partyId: party ? party.id : null, // can be null if the attacker is not in a party
               xp: target.xpPerDamage * damage,
             },
           ];
         }
 
-        console.log("BEFORE isXpInRage -> target.xpToRelease", target.xpToRelease);
-
         const isXpInRange = this.experienceLimiter.isXpInRange(target);
-        console.log("isXpInRange", isXpInRange);
-
         if (isXpInRange) {
-          await NPC.updateOne({ _id: target._id }, { xpToRelease: target.xpToRelease });
-        } else {
-          // E.g. if a creature has 800 experience and last but one xpToRelease has 700 accumulated
-          // and the last xpToRelease has 850 and when you make isXpInRange compare it will be false
-          // because 850 is bigger than 800, so last but one xpToRelease will be returned with 700.
-          // The player has "lost" 100 exp, this validation fixes this behavior.
-          target = this.experienceLimiter.compareAndProcessRightEXP(target);
-          console.log("NEW FIXED EXP IS:", target.xpToRelease);
-
-          await NPC.updateOne({ _id: target._id }, { xpToRelease: target.xpToRelease });
+          await NPC.updateOne({ _id: target.id }, { xpToRelease: target.xpToRelease });
         }
-
-        console.log("isXpInRange HOW MUCH EXP TO RELEASE?", target.xpToRelease);
       }
     } catch (error) {
       console.error(error);
-      await this.locker.unlock(`npc-${target._id.toString()}-record-xp`);
+      await this.locker.unlock(`npc-${target._id}-record-xp`);
     } finally {
-      await this.locker.unlock(`npc-${target._id.toString()}-record-xp`);
+      await this.locker.unlock(`npc-${target._id}-record-xp`);
     }
   }
 
   private async getXPMultiplier(character: ICharacter, target: INPC): Promise<number> {
     const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(character);
+
     const premiumAccountXPMultiplier = premiumAccountData ? premiumAccountData.XPBuff / 100 + 1 : 1;
+
     const characterMode: Modes = Object.values(Modes).find((mode) => mode === character.mode) ?? Modes.SoftMode;
+
     const giantNPCMultiplier = target.isGiantForm ? NPC_GIANT_FORM_EXPERIENCE_MULTIPLIER : 1;
     const characterModeMultiplier = MODE_EXP_MULTIPLIER[characterMode];
 
@@ -323,7 +268,7 @@ export class NPCExperience {
     });
 
     const payload = {
-      characterId: character._id.toString(),
+      characterId: character.id,
       eventType: SkillEventType.LevelUp,
     };
 
@@ -337,12 +282,12 @@ export class NPCExperience {
     const updatedCharacter = await Character.findById(character._id).lean().select("maxHealth maxMana");
 
     if (!updatedCharacter) {
-      throw new Error(`Character ${character._id.toString()} not found.`);
+      throw new Error(`Character ${character._id} not found`);
     }
 
     await Character.updateOne(
       {
-        _id: character._id.toString(),
+        _id: character._id,
       },
       {
         $set: {
@@ -353,7 +298,7 @@ export class NPCExperience {
     );
 
     const HPManaBoostPayload: ICharacterAttributeChanged = {
-      targetId: character._id.toString(),
+      targetId: character.id,
       health: updatedCharacter.maxHealth,
       mana: updatedCharacter.maxMana,
     };
@@ -368,7 +313,7 @@ export class NPCExperience {
 
   private async warnCharactersAroundAboutExpGains(character: ICharacter, exp: number): Promise<void> {
     const levelUpEventPayload: IDisplayTextEvent = {
-      targetId: character._id.toString(),
+      targetId: character.id,
       value: exp,
       prefix: "+",
     };
@@ -407,22 +352,20 @@ export class NPCExperience {
       virtuals: true,
       defaults: true,
     })) as ICharacter;
-
     if (!character) {
       return null;
     }
 
-    await clearCacheForKey(`characterBuffs_${character._id.toString()}`);
+    await clearCacheForKey(`characterBuffs_${character._id}`);
     // Get character skills
     const skills = (await Skill.findById(character.skills)
       .lean()
       .cacheQuery({
-        cacheKey: `${character._id.toString()}-skills`,
+        cacheKey: `${character._id}-skills`,
       })) as ISkill;
     if (!skills) {
       return null;
     }
-
     return { character, skills };
   }
 
