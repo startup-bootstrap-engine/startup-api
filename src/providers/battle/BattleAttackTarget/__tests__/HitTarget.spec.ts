@@ -301,7 +301,7 @@ describe("HitTarget", () => {
       expect(applyEntitySpy).toBeCalledTimes(1);
     });
 
-    it("should call applyEntityEffectsCharacter if the attacker is a Character", async () => {
+    it("should call applyEntityEffectsCharacter if the attacker is a Character and target is a Character", async () => {
       // @ts-ignore
       const applyEntityEffectsCharacter = jest.spyOn(hitTarget, "applyEntityEffectsCharacter");
       // @ts-ignore
@@ -317,11 +317,11 @@ describe("HitTarget", () => {
       // prettier-ignore
       const applyEntityEffectsIfApplicable = jest.spyOn(hitTarget, "applyEntityEffectsIfApplicable").mockResolvedValue(undefined);
 
-      await hitTarget.hit(attackerCharacter, testNPC);
+      await hitTarget.hit(attackerCharacter, targetCharacter);
 
       // return weapon on getWeapon
 
-      expect(applyEntityEffectsCharacter).toHaveBeenCalledWith(attackerCharacter, mockWeapon, testNPC);
+      expect(applyEntityEffectsCharacter).toHaveBeenCalledWith(attackerCharacter, mockWeapon, targetCharacter);
       expect(applyEntityEffectsIfApplicable).not.toHaveBeenCalled();
     });
 
