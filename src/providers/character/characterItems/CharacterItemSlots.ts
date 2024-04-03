@@ -263,7 +263,7 @@ export class CharacterItemSlots {
         const slotItem = slot as unknown as IItem;
 
         if (slotItem.maxStackSize > 1) {
-          if (isSameKey(slotItem.key, itemToBeAdded.key)) {
+          if (isSameKey(slotItem.key, itemToBeAdded.key) && slotItem.rarity === itemToBeAdded.rarity) {
             const futureStackQty = slotItem.stackQty! + itemToBeAdded.stackQty!;
             if (futureStackQty <= slotItem.maxStackSize) {
               return true;
@@ -291,7 +291,7 @@ export class CharacterItemSlots {
       const slotItem = slot as unknown as IItem;
 
       if (itemToBeAdded && slotItem && slotItem.maxStackSize > 1) {
-        if (slotItem.baseKey === itemToBeAdded.baseKey) {
+        if (slotItem.baseKey === itemToBeAdded.baseKey && slotItem.rarity === itemToBeAdded.rarity) {
           const futureStackQty = slotItem.stackQty! + itemToBeAdded.stackQty!;
           if (futureStackQty <= slotItem.maxStackSize) {
             return Number(id);
