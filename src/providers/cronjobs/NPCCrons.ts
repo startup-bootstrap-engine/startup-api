@@ -7,6 +7,7 @@ import { NPCRaidSpawn } from "@providers/raid/NPCRaidSpawn";
 
 import { provide } from "inversify-binding-decorators";
 
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { NPCDuplicateCleaner } from "@providers/npc/NPCDuplicateCleaner";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { CronJobScheduler } from "./CronJobScheduler";
@@ -20,7 +21,8 @@ export class NPCCrons {
     private npcRaidActivator: NPCRaidActivator,
     private npcFreezer: NPCFreezer,
     private cronJobScheduler: CronJobScheduler,
-    private npcDuplicateChecker: NPCDuplicateCleaner
+    private npcDuplicateChecker: NPCDuplicateCleaner,
+    private inMemoryHashTable: InMemoryHashTable
   ) {}
 
   public schedule(): void {
@@ -46,6 +48,10 @@ export class NPCCrons {
 
     this.cronJobScheduler.uniqueSchedule("npc-active-count", "* * * * *", async () => {
       await this.calculateActiveNPCs();
+    });
+
+    this.cronJobScheduler.uniqueSchedule("npc-active-count", "*/5 * * * *", async () => {
+      await this.countActiveNPCs();
     });
   }
 
@@ -74,5 +80,11 @@ export class NPCCrons {
     for (const deadNPC of deadNPCs) {
       await this.npcSpawn.spawn(deadNPC, !!deadNPC.raidKey);
     }
+  }
+
+  private async countActiveNPCs(): Promise<void> {
+    const totalActiveNPCs = await NPC.countDocuments({ isBehaviorEnabled: true });
+
+    await this.inMemoryHashTable.set("activity-tracker", "npc-count", totalActiveNPCs);
   }
 }

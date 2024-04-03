@@ -166,8 +166,7 @@ export class NPCMovement {
     startGridX: number,
     startGridY: number,
     endGridX: number,
-    endGridY: number,
-    totalActiveNPCs?: number // used in move towards movement
+    endGridY: number
   ): Promise<IShortestPathPositionResult | undefined> {
     try {
       let npcPath;
@@ -184,7 +183,7 @@ export class NPCMovement {
       } else {
         const job = await this.pathfindingQueue.addPathfindingJob(
           npc,
-          totalActiveNPCs ?? 1,
+
           target,
           startGridX,
           startGridY,

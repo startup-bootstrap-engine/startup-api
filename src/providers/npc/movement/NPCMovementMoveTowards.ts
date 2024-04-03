@@ -53,7 +53,7 @@ export class NPCMovementMoveTowards {
     private npcFreezer: NPCFreezer
   ) {}
 
-  public async startMoveTowardsMovement(npc: INPC, totalActiveNPCs: number): Promise<void> {
+  public async startMoveTowardsMovement(npc: INPC): Promise<void> {
     const targetCharacter = await this.getTargetCharacter(npc);
 
     if (!this.isValidTarget(npc, targetCharacter)) {
@@ -75,7 +75,7 @@ export class NPCMovementMoveTowards {
         return;
       }
 
-      await this.execStartMoveTowardsMovement(npc, totalActiveNPCs, targetCharacter);
+      await this.execStartMoveTowardsMovement(npc, targetCharacter);
     } catch (error) {
       console.error(error);
     } finally {
@@ -84,12 +84,8 @@ export class NPCMovementMoveTowards {
   }
 
   @TrackNewRelicTransaction()
-  private async execStartMoveTowardsMovement(
-    npc: INPC,
-    totalActiveNPCs: number,
-    targetCharacter: ICharacter
-  ): Promise<void> {
-    await this.handleValidTarget(npc, totalActiveNPCs, targetCharacter);
+  private async execStartMoveTowardsMovement(npc: INPC, targetCharacter: ICharacter): Promise<void> {
+    await this.handleValidTarget(npc, targetCharacter);
   }
 
   private async getTargetCharacter(npc: INPC): Promise<ICharacter> {
@@ -111,18 +107,18 @@ export class NPCMovementMoveTowards {
     await this.tryToFreezeIfTooManyFailedTargetChecks(npc);
   }
 
-  private async handleValidTarget(npc: INPC, totalActiveNPCs: number, targetCharacter: ICharacter): Promise<void> {
+  private async handleValidTarget(npc: INPC, targetCharacter: ICharacter): Promise<void> {
     await this.npcTarget.tryToClearOutOfRangeTargets(npc);
 
     const attackRange = npc.attackType === EntityAttackType.Melee ? 2 : npc.maxRangeAttack;
-    await this.initOrClearBattleCycle(npc, targetCharacter, attackRange!, totalActiveNPCs);
+    await this.initOrClearBattleCycle(npc, targetCharacter, attackRange!);
 
     await this.fleeIfHealthIsLow(npc);
 
     if (this.reachedTarget(npc, targetCharacter)) {
       await this.handleReachedTarget(npc, targetCharacter);
     } else {
-      await this.handleNotReachedTarget(npc, totalActiveNPCs, targetCharacter);
+      await this.handleNotReachedTarget(npc, targetCharacter);
     }
   }
 
@@ -139,7 +135,7 @@ export class NPCMovementMoveTowards {
     }
   }
 
-  private async handleNotReachedTarget(npc: INPC, totalActiveNPCs: number, targetCharacter: ICharacter): Promise<void> {
+  private async handleNotReachedTarget(npc: INPC, targetCharacter: ICharacter): Promise<void> {
     if (npc.pathOrientation === NPCPathOrientation.Forward) {
       const isUnderOriginalPositionRange = this.movementHelper.isUnderRange(
         npc.x,
@@ -150,13 +146,13 @@ export class NPCMovementMoveTowards {
       );
 
       if (isUnderOriginalPositionRange && npc.scene === targetCharacter.scene) {
-        await this.moveTowardsPosition(npc, totalActiveNPCs, targetCharacter, targetCharacter.x, targetCharacter.y);
+        await this.moveTowardsPosition(npc, targetCharacter, targetCharacter.x, targetCharacter.y);
       } else {
         npc.pathOrientation = NPCPathOrientation.Backward;
         await NPC.updateOne({ _id: npc._id }, { pathOrientation: NPCPathOrientation.Backward });
       }
     } else if (npc.pathOrientation === NPCPathOrientation.Backward) {
-      await this.moveTowardsPosition(npc, totalActiveNPCs, targetCharacter, npc.initialX, npc.initialY);
+      await this.moveTowardsPosition(npc, targetCharacter, npc.initialX, npc.initialY);
     }
   }
 
@@ -182,13 +178,13 @@ export class NPCMovementMoveTowards {
   }
 
   @TrackNewRelicTransaction()
-  private async moveBackToOriginalPosIfNoTarget(npc: INPC, totalActiveNPCs: number, target: ICharacter): Promise<void> {
+  private async moveBackToOriginalPosIfNoTarget(npc: INPC, target: ICharacter): Promise<void> {
     if (
       !npc.targetCharacter &&
       !this.reachedInitialPosition(npc) &&
       npc.pathOrientation === NPCPathOrientation.Backward
     ) {
-      await this.moveTowardsPosition(npc, totalActiveNPCs, target, npc.initialX, npc.initialY);
+      await this.moveTowardsPosition(npc, target, npc.initialX, npc.initialY);
     }
   }
 
@@ -196,8 +192,7 @@ export class NPCMovementMoveTowards {
   private async initOrClearBattleCycle(
     npc: INPC,
     targetCharacter: ICharacter,
-    maxRangeInGridCells: number,
-    totalActiveNPCs: number
+    maxRangeInGridCells: number
   ): Promise<void> {
     if (npc.alignment === NPCAlignment.Hostile) {
       // if melee, only start battle cycle if target is in melee range
@@ -211,7 +206,7 @@ export class NPCMovementMoveTowards {
       );
 
       if (isInRange) {
-        await this.initBattleCycle(npc, targetCharacter, totalActiveNPCs);
+        await this.initBattleCycle(npc, targetCharacter);
       }
     }
   }
@@ -268,7 +263,7 @@ export class NPCMovementMoveTowards {
   }
 
   @TrackNewRelicTransaction()
-  private async initBattleCycle(npc: INPC, targetCharacter: ICharacter, totalActiveNPCs: number): Promise<void> {
+  private async initBattleCycle(npc: INPC, targetCharacter: ICharacter): Promise<void> {
     if (!(npc.isAlive || npc.health === 0) || !npc.targetCharacter || !npc.isBehaviorEnabled) {
       return;
     }
@@ -293,17 +288,11 @@ export class NPCMovementMoveTowards {
         ttl: 60 * 60 * 24 * 7,
       })) as ISkill;
 
-    await this.npcBattleCycleQueue.addToQueue(npc, npcSkills, totalActiveNPCs);
+    await this.npcBattleCycleQueue.addToQueue(npc, npcSkills);
   }
 
   @TrackNewRelicTransaction()
-  private async moveTowardsPosition(
-    npc: INPC,
-    totalActiveNPCs: number,
-    target: ICharacter,
-    x: number,
-    y: number
-  ): Promise<void> {
+  private async moveTowardsPosition(npc: INPC, target: ICharacter, x: number, y: number): Promise<void> {
     try {
       const shortestPath = await this.npcMovement.getShortestPathNextPosition(
         npc,
@@ -311,8 +300,7 @@ export class NPCMovementMoveTowards {
         ToGridX(npc.x),
         ToGridY(npc.y),
         ToGridX(x),
-        ToGridY(y),
-        totalActiveNPCs
+        ToGridY(y)
       );
       if (!shortestPath) {
         // throw new Error("No shortest path found!");

@@ -2,9 +2,9 @@ export const QUEUE_INACTIVITY_THRESHOLD = 60 * 10 * 1000; // 10 min
 
 export const QUEUE_CLOSE_CHECK_MAX_TRIES = 10; // Set your desired maximum number of tries
 
-export const QUEUE_NPC_MAX_SCALE_FACTOR = 10;
-
-export const QUEUE_CHARACTER_MAX_SCALE_FACTOR = 10;
+// Remember this is by process and instance. So these numbers can easily skyrocket!
+export const QUEUE_NPC_MAX_SCALE_FACTOR = 3;
+export const QUEUE_CHARACTER_MAX_SCALE_FACTOR = 3;
 
 export enum QueueDefaultScaleFactor {
   Low = 1,

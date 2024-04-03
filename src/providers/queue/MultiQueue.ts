@@ -1,5 +1,10 @@
 import { appEnv } from "@providers/config/env";
-import { QueueDefaultScaleFactor } from "@providers/constants/QueueConstants";
+import {
+  QUEUE_CHARACTER_MAX_SCALE_FACTOR,
+  QUEUE_NPC_MAX_SCALE_FACTOR,
+  QueueDefaultScaleFactor,
+} from "@providers/constants/QueueConstants";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { EnvType } from "@rpg-engine/shared";
@@ -9,20 +14,33 @@ import { QueueActivityMonitor } from "./QueueActivityMonitor";
 
 type QueueJobFn = (job: any) => Promise<void>;
 
+type AvailableScaleFactors = "custom" | "active-characters" | "active-npcs";
+
+interface IQueueScaleOptions {
+  queueScaleBy: AvailableScaleFactors;
+  queueScaleFactor?: QueueDefaultScaleFactor;
+  data?: {
+    scene?: string;
+  };
+}
+
 @provideSingleton(MultiQueue)
 export class MultiQueue {
   private connection: any;
-  private queues: Map<string, Queue> = new Map(); // Map to track initialized queues
-  private workers: Map<string, Worker> = new Map(); // Map to keep track of workers by queue name
+  private queues: Map<string, Queue> = new Map();
+  private workers: Map<string, Worker> = new Map();
 
-  constructor(private redisManager: RedisManager, private queueActivityMonitor: QueueActivityMonitor) {}
+  constructor(
+    private redisManager: RedisManager,
+    private queueActivityMonitor: QueueActivityMonitor,
+    private inMemoryHashTable: InMemoryHashTable
+  ) {}
 
   public async addJob(
     prefix: string,
     jobFn: QueueJobFn,
     data: Record<string, unknown>,
-    queueScaleFactor: number = QueueDefaultScaleFactor.Low,
-    scene?: string,
+    queueScaleOptions: IQueueScaleOptions = { queueScaleBy: "custom", queueScaleFactor: QueueDefaultScaleFactor.Low },
     addQueueOptions?: DefaultJobOptions,
     queueOptions?: QueueBaseOptions,
     workerOptions?: QueueBaseOptions
@@ -31,22 +49,20 @@ export class MultiQueue {
       this.connection = this.redisManager.client;
     }
 
-    const queueName = this.generateQueueName(prefix, queueScaleFactor, scene);
-    let queue = this.queues.get(queueName);
+    const { queueScaleFactor, queueScaleBy } = queueScaleOptions;
 
-    if (!queue) {
-      queue = this.initQueue(
-        queueName,
-        jobFn,
-        {
-          connection: this.connection,
-          sharedConnection: true,
-          ...queueOptions,
-        },
-        workerOptions
-      );
-      this.queues.set(queueName, queue);
-    }
+    const queueName = await this.generateQueueName(prefix, queueScaleBy, queueScaleFactor);
+
+    const queue = await this.initOrFetchQueue(
+      queueName,
+      jobFn,
+      {
+        connection: this.connection,
+        sharedConnection: true,
+        ...queueOptions,
+      },
+      workerOptions
+    );
 
     return await queue.add(queueName, data, {
       removeOnComplete: true,
@@ -55,33 +71,57 @@ export class MultiQueue {
     });
   }
 
-  private initQueue(
+  private async initOrFetchQueue(
     queueName: string,
     jobFn: QueueJobFn,
     queueOptions: QueueBaseOptions,
     workerOptions?: QueueBaseOptions
-  ): Queue {
-    const queue = new Queue(queueName, queueOptions);
+  ): Promise<Queue> {
+    let queue;
 
-    const worker = new Worker(
-      queueName,
-      async (job) => {
-        try {
-          await this.queueActivityMonitor.updateQueueActivity(queueName);
+    // Make sure we fetch queue info from a centralized state, because otherwise we might end up with multiple queues
+    const isQueueInitialized =
+      (await this.queueActivityMonitor.hasQueueActivity(queueName)) || this.queues.has(queueName);
 
-          await jobFn(job);
-        } catch (error) {
-          console.error(`Error processing ${queueName} job ${job.id}: ${error.message}`);
+    if (!isQueueInitialized) {
+      console.log(`💡 Initializing queue ${queueName}`);
+      queue = new Queue(queueName, queueOptions);
+      this.queues.set(queueName, queue);
+      await this.queueActivityMonitor.updateQueueActivity(queueName);
+    } else {
+      queue = this.queues.get(queueName);
+    }
+
+    let worker = this.workers.get(queueName);
+
+    if (!worker) {
+      worker = new Worker(
+        queueName,
+        async (job) => {
+          try {
+            await this.queueActivityMonitor.updateQueueActivity(queueName);
+
+            await jobFn(job);
+          } catch (error) {
+            console.error(`Error processing ${queueName} job ${job.id}: ${error.message}`);
+          }
+        },
+        {
+          connection: this.connection,
+          sharedConnection: true,
+          ...workerOptions,
         }
-      },
-      {
-        connection: this.connection,
-        sharedConnection: true,
-        ...workerOptions,
-      }
-    );
+      );
 
-    this.workers.set(queueName, worker);
+      if (!appEnv.general.IS_UNIT_TEST) {
+        worker.on("failed", async (job, err) => {
+          console.log(`${queueName} job ${job?.id} failed with error ${err.message}`);
+
+          await worker?.close();
+        });
+      }
+      this.workers.set(queueName, worker);
+    }
 
     return queue;
   }
@@ -117,12 +157,12 @@ export class MultiQueue {
     }
   }
 
-  private generateQueueName(prefix: string, queueScaleFactor: number, scene?: string): string {
+  private async generateQueueName(
+    prefix: string,
+    queueScaleBy: AvailableScaleFactors,
+    queueScaleFactor?: number
+  ): Promise<string> {
     let envSuffix;
-
-    if (queueScaleFactor > 1) {
-      queueScaleFactor = random(1, queueScaleFactor);
-    }
 
     switch (appEnv.general.ENV) {
       case EnvType.Development:
@@ -133,10 +173,33 @@ export class MultiQueue {
         break;
     }
 
-    if (!scene) {
-      return `${prefix}-${envSuffix}-${queueScaleFactor}`;
-    }
+    switch (queueScaleBy) {
+      case "custom":
+        if (!queueScaleFactor) {
+          throw new Error("Queue scale factor is required when scaling by custom");
+        }
 
-    return `${prefix}-${envSuffix}-${scene}-${queueScaleFactor}`;
+        if (queueScaleFactor > 1) {
+          queueScaleFactor = random(1, queueScaleFactor);
+        }
+
+        return `${prefix}-${envSuffix}-${queueScaleFactor}`;
+
+      case "active-characters":
+        const activeCharacters = Number((await this.inMemoryHashTable.get("activity-tracker", "character-count")) || 1);
+
+        const maxCharQueues = Math.ceil(activeCharacters / 10) || 1;
+        const charQueueScaleFactor = Math.min(maxCharQueues, QUEUE_CHARACTER_MAX_SCALE_FACTOR);
+
+        return `${prefix}-${envSuffix}-${charQueueScaleFactor}`;
+
+      case "active-npcs":
+        const activeNPCs = Number((await this.inMemoryHashTable.get("activity-tracker", "npc-count")) || 1);
+
+        const maxNPCQueues = Math.ceil(activeNPCs / 10) || 1;
+        const NPCQueueScaleFactor = Math.min(maxNPCQueues, QUEUE_NPC_MAX_SCALE_FACTOR);
+
+        return `${prefix}-${envSuffix}-${NPCQueueScaleFactor}`;
+    }
   }
 }
