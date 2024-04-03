@@ -19,6 +19,5 @@ export const itemStoneSpear: IEquippableTwoHandedTier0WeaponBlueprint = {
   isTwoHanded: true,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   rangeType: EntityAttackType.Melee,
-
   basePrice: 40,
 };
