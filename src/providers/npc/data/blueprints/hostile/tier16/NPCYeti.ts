@@ -37,6 +37,7 @@ export const npcYeti: INPCTierBlueprint<16> = {
   textureKey: HostileNPCsBlueprint.Yeti,
   alignment: NPCAlignment.Hostile,
   speed: MovementSpeed.Fast,
+  isGiantForm: true,
   baseHealth: 1670,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: RangedWeaponsBlueprint.Stone,

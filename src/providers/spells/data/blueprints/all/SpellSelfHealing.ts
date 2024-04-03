@@ -6,13 +6,10 @@ import { SpellCalculator } from "../../abstractions/SpellCalculator";
 
 export const spellSelfHealing: Partial<ISpell> = {
   key: SpellsBlueprint.SelfHealingSpell,
-
   name: "Self Healing Spell",
   description: "A self healing spell.",
-
   textureAtlas: "icons",
   texturePath: "spell-icons/self-healing-spell.png",
-
   castingType: SpellCastingType.SelfCasting,
   magicWords: "talas faenya",
   manaCost: 20,
@@ -23,9 +20,7 @@ export const spellSelfHealing: Partial<ISpell> = {
 
   usableEffect: async (character: ICharacter) => {
     const itemUsableEffect = container.get(ItemUsableEffect);
-
     const spellCalculator = container.get(SpellCalculator);
-
     const percentage = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
       min: 10,
       max: 15,

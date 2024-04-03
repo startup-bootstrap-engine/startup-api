@@ -121,11 +121,11 @@ export class SpellCalculator {
     }
   ): Promise<number> {
     const { bonusDamage = false } = options || {};
-
     const minSkillMultiplier = options?.minSkillMultiplier || SPELL_CALCULATOR_DEFAULT_MIN_SKILL_MULTIPLIER;
     const maxSkillMultiplier = options?.maxSkillMultiplier || SPELL_CALCULATOR_DEFAULT_MAX_SKILL_MULTIPLIER;
 
     const skillLevel = await this.getSkillLevel(character, skillName);
+
     let [minTotalValue, maxTotalValue] = this.calculateSkillDamage(skillLevel, minSkillMultiplier, maxSkillMultiplier);
 
     if (options?.level) {
@@ -139,7 +139,6 @@ export class SpellCalculator {
     }
 
     let damage = this.generateRandomDamage(minTotalValue, maxTotalValue);
-
     if (!bonusDamage) {
       damage /= 2.5;
     }
@@ -149,6 +148,7 @@ export class SpellCalculator {
 
   private async getSkillLevel(character: ICharacter, skillName: SkillsAvailable): Promise<number> {
     const skills = await this.getCharacterSkill(character);
+
     return await this.traitGetter.getSkillLevelWithBuffs(skills, skillName);
   }
 
@@ -160,6 +160,7 @@ export class SpellCalculator {
     const level = await this.getCharacterLevel(character);
     const minMultiplier = options.minLevelMultiplier || DEFAULT_MIN_LEVEL_MULTIPLIER;
     const maxMultiplier = options.maxLevelMultiplier || DEFAULT_MAX_LEVEL_MULTIPLIER;
+
     return [level * minMultiplier, level * maxMultiplier];
   }
 

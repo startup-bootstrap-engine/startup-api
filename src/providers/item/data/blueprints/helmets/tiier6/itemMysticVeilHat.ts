@@ -50,5 +50,5 @@ export const itemMysticVeilHat: IEquippableLightArmorTier6Blueprint = {
       durationType: CharacterBuffDurationType.Permanent,
     },
   ],
-  equippedBuffDescription: "Increases magic and magic resistance by 20% and max health by 20% respectively",
+  equippedBuffDescription: "Increases magic resistance by 15%, magic, max health and max mana by 20% respectively",
 };

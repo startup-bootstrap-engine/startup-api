@@ -93,7 +93,7 @@ export class BattleAttackRanged {
     ammo: IRangedAttackParams
   ): Promise<void> {
     switch (attacker.type) {
-      case "Character":
+      case EntityType.Character:
         const character = attacker as ICharacter;
         await this.animationEffect.sendProjectileAnimationEventToCharacter(
           character,
@@ -103,7 +103,7 @@ export class BattleAttackRanged {
         );
         break;
 
-      case "NPC":
+      case EntityType.NPC:
         const npc = attacker as INPC;
         await this.animationEffect.sendProjectileAnimationEventToNPC(
           npc,

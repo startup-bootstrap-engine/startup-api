@@ -38,10 +38,10 @@ export class BattleDamageCalculator {
     let defenderSkills = target.skills as unknown as ISkill;
 
     if (!attackerSkills?.level) {
-      attackerSkills = (await this.getSkills(attacker.id)) as unknown as ISkill;
+      attackerSkills = (await this.getSkills(attacker._id)) as unknown as ISkill;
     }
     if (!defenderSkills?.level) {
-      defenderSkills = (await this.getSkills(target.id)) as unknown as ISkill;
+      defenderSkills = (await this.getSkills(target._id)) as unknown as ISkill;
     }
 
     const weapon = await this.characterWeapon.getWeapon(attacker as ICharacter);

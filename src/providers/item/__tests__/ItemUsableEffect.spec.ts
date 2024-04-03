@@ -24,7 +24,7 @@ describe("ItemUsableEffect", () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it("should correctly apply health effect on a character", async () => {

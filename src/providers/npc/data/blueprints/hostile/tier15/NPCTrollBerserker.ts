@@ -41,6 +41,7 @@ export const npcTrollBerserker: INPCTierBlueprint<15> = {
   textureKey: HostileNPCsBlueprint.TrollBerserker,
   alignment: NPCAlignment.Hostile,
   speed: MovementSpeed.Standard,
+  isGiantForm: true,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: RangedWeaponsBlueprint.Stone,
   maxRangeAttack: RangeTypes.High,

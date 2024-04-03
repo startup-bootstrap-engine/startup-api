@@ -13,9 +13,9 @@ import {
   ISpell,
   RangeTypes,
   SpellCastingType,
+  SpellsBlueprint,
 } from "@rpg-engine/shared";
 import { SpellCalculator } from "../../abstractions/SpellCalculator";
-import { SpellsBlueprint } from "../../types/SpellsBlueprintTypes";
 
 export const spellPolymorph: Partial<ISpell> = {
   key: SpellsBlueprint.SpellPolymorph,

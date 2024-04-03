@@ -43,6 +43,7 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
   ammoKey: AnimationEffectKeys.FireBall,
   tier: 23,
   maxRangeAttack: RangeTypes.High,
+  isGiantForm: true,
   speed: MovementSpeed.ExtraFast,
   // @ts-ignore
   baseHealth: 100000,

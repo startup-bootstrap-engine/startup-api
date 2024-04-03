@@ -37,6 +37,7 @@ export const npcForestWalker: INPCTierBlueprint<8> = {
   maxRangeAttack: RangeTypes.High,
   speed: MovementSpeed.Slow,
   baseHealth: 390,
+  isGiantForm: true,
   tier: 8,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
