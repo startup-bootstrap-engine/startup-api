@@ -159,13 +159,14 @@ export class CharacterNetworkCreateQueue {
   }
 
   private async execCharacterCreate(character: ICharacter, data: ICharacterCreateFromClient): Promise<void> {
+    await this.clearCharacterCaches(character);
+
     character = await this.updateCharacterStatus(character, data.channelId);
 
     character = await this.respawnIfNecessary(character);
 
     await Promise.all([
       this.characterDailyPlayTracker.updateCharacterDailyPlay(character._id),
-      this.clearCharacterCaches(character),
       this.unlockCharacterMapTransition(character),
       this.refreshBattleState(character),
       this.characterBuffValidation.removeDuplicatedBuffs(character),
