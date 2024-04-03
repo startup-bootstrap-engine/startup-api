@@ -66,8 +66,6 @@ export class CharacterItemStack {
 
         if (!isSameItem) continue;
 
-        console.log(slotItem.rarity, itemToBeAdded.rarity);
-
         // if its same item, but rarity are different, skip
         if (slotItem.rarity !== itemToBeAdded.rarity) {
           continue; // Skip to the next item since the rarities do not match
