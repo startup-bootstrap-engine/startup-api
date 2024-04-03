@@ -157,6 +157,10 @@ export class HitTargetQueue {
 
       if (!appEnv.general.IS_UNIT_TEST) {
         this.worker.on("failed", async (job, err) => {
+          console.log(`HitTarget Job ${job?.id} failed with error ${err.message}`);
+          // log details
+          console.log(job);
+
           await this.worker?.close();
           this.worker = null;
         });
@@ -277,10 +281,6 @@ export class HitTargetQueue {
       const damageRelatedPromises: any[] = [];
 
       if (damage > 0) {
-        const weapon = (await this.characterWeapon.getWeapon(
-          attacker as ICharacter
-        )) as unknown as ICharacterWeaponResult;
-
         if (attacker.type === EntityType.Character) {
           const character = attacker as ICharacter;
           await this.skillIncrease.increaseSkillsOnBattle(character, target, damage, spellHit);
@@ -323,40 +323,41 @@ export class HitTargetQueue {
           isCriticalHit: damage > baseDamage,
         };
 
-        if (attacker.type === EntityType.NPC && target.type === EntityType.Character) {
-          const npc = await blueprintManager.getBlueprint<any>("npcs", (attacker as INPC).baseKey);
-
-          if (npc?.isMagic && (npc?.attackType === EntityAttackType.MeleeRanged || EntityAttackType.Ranged)) {
-            const npcMagicLevel = npc.skills?.magic?.level ?? 15;
-
-            const power = Math.max(15, npcMagicLevel);
-
-            damageRelatedPromises.push(this.skillIncrease.increaseMagicResistanceSP(target as ICharacter, power));
-          }
-        }
-
         if (target.type === EntityType.Character) {
-          if (
-            (weapon?.item && weapon?.item.subType === ItemSubType.Magic) ||
-            (weapon?.item && weapon?.item.subType === ItemSubType.Staff)
-          ) {
-            damageRelatedPromises.push(
-              this.skillIncrease.increaseMagicResistanceSP(target as ICharacter, this.getPower(weapon?.item))
-            );
-          } else {
-            damageRelatedPromises.push(
-              this.skillIncrease.increaseBasicAttributeSP(target as ICharacter, BasicAttribute.Resistance)
-            );
-          }
-        }
+          if (attacker.type === EntityType.NPC) {
+            const npc = await blueprintManager.getBlueprint<any>("npcs", (attacker as INPC).baseKey);
 
-        if (target.isAlive) {
-          if (attacker.type === EntityType.Character) {
-            if (target.appliedEntityEffects?.length! === 0) {
+            if (npc?.isMagic && (npc?.attackType === EntityAttackType.MeleeRanged || EntityAttackType.Ranged)) {
+              const npcMagicLevel = npc.skills?.magic?.level ?? 15;
+              const power = Math.max(15, npcMagicLevel);
+
+              damageRelatedPromises.push(this.skillIncrease.increaseMagicResistanceSP(target as ICharacter, power));
+            }
+
+            if (target.health > 0) {
+              damageRelatedPromises.push(this.applyEntityEffectsIfApplicable(attacker as INPC, target));
+            }
+          } else if (attacker.type === EntityType.Character) {
+            const weapon = (await this.characterWeapon.getWeapon(
+              attacker as ICharacter
+            )) as unknown as ICharacterWeaponResult;
+
+            if (
+              (weapon?.item && weapon?.item.subType === ItemSubType.Magic) ||
+              (weapon?.item && weapon?.item.subType === ItemSubType.Staff)
+            ) {
+              damageRelatedPromises.push(
+                this.skillIncrease.increaseMagicResistanceSP(target as ICharacter, this.getPower(weapon?.item))
+              );
+            } else {
+              damageRelatedPromises.push(
+                this.skillIncrease.increaseBasicAttributeSP(target as ICharacter, BasicAttribute.Resistance)
+              );
+            }
+
+            if (target.health > 0 && target.appliedEntityEffects?.length === 0) {
               damageRelatedPromises.push(this.applyEntityEffectsCharacter(attacker as ICharacter, weapon, target));
             }
-          } else if (attacker.type === EntityType.NPC) {
-            damageRelatedPromises.push(this.applyEntityEffectsIfApplicable(attacker as INPC, target));
           }
         }
 
