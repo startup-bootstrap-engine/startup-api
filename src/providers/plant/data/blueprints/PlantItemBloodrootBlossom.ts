@@ -48,5 +48,5 @@ export const plantItemBloodrootBlossom: IPlantItem = {
   yieldFactor: FARMING_MEDIUM_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
-  regrowAfterHarvestLimit: 3,
+  regrowAfterHarvestLimit: 1,
 };
