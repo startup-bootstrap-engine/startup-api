@@ -34,6 +34,13 @@ export class PlantGrowth {
         return false;
       }
 
+      if (!plant.owner) {
+        this.notifyCharacter(character, "Sorry, plant is not owned by anyone.");
+        return false;
+      }
+
+      const ownerCharacter = (await Character.findById(plant.owner).lean()) as ICharacter;
+
       const blueprint = this.getPlantBlueprint(plant) as IPlantItem;
 
       const { canGrow, canWater } = this.canPlantGrow(plant);
@@ -54,8 +61,14 @@ export class PlantGrowth {
       const nextGrowthPoints = currentGrowthPoints + blueprint.growthFactor;
 
       if (nextGrowthPoints < requiredGrowthPoints) {
-        await this.updateGrowthPoints(plant, nextGrowthPoints, requiredGrowthPoints);
-        return true;
+        const updatedPlant = await this.updateGrowthPoints(plant, nextGrowthPoints, requiredGrowthPoints);
+
+        if (updatedPlant) {
+          const itemToUpdate = this.prepareItemToUpdate(updatedPlant);
+          await this.notifyCharactersAroundCharacter(ownerCharacter, itemToUpdate);
+          return true;
+        }
+        return false;
       }
 
       const { updatedGrowthPoints, nextCycle } = this.calculateGrowth(plant, blueprint);
@@ -67,17 +80,8 @@ export class PlantGrowth {
         return false;
       }
 
-      if (plant.owner) {
-        const ownerCharacter = (await Character.findById(plant.owner).lean()) as ICharacter;
-
-        if (ownerCharacter) {
-          const itemToUpdate = this.prepareItemToUpdate(updatedPlant);
-
-          await this.notifyCharactersAroundCharacter(ownerCharacter, itemToUpdate);
-        } else {
-          console.error("Character not found");
-        }
-      }
+      const itemToUpdate = this.prepareItemToUpdate(updatedPlant);
+      await this.notifyCharactersAroundCharacter(ownerCharacter, itemToUpdate);
 
       return true;
     } catch (error) {
@@ -128,12 +132,18 @@ export class PlantGrowth {
     plant: IItem,
     nextGrowthPoints: number,
     requiredGrowthPoints: number
-  ): Promise<boolean> {
-    await Item.updateOne(
-      { _id: plant._id },
-      { $set: { growthPoints: nextGrowthPoints, requiredGrowthPoints, lastWatering: new Date() } }
+  ): Promise<IItem | null> {
+    return await Item.findByIdAndUpdate(
+      plant._id,
+      {
+        $set: {
+          growthPoints: nextGrowthPoints,
+          requiredGrowthPoints,
+          lastWatering: new Date(),
+        },
+      },
+      { new: true, lean: { virtuals: true, defaults: true } }
     );
-    return true;
   }
 
   private calculateGrowth(
