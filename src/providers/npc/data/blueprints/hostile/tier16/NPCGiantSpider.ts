@@ -50,6 +50,7 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
   maxRangeAttack: RangeTypes.High,
   baseHealth: 1970,
   tier: 16,
+  isGiantForm: true,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,

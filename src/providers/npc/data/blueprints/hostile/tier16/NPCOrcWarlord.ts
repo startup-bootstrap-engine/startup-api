@@ -29,6 +29,7 @@ export const npcOrcWarlord: INPCTierBlueprint<16> = {
   speed: MovementSpeed.ExtraFast,
   baseHealth: 1970,
   tier: 16,
+  isGiantForm: true,
   subType: NPCSubtype.Humanoid,
   healthRandomizerDice: Dice.D20,
   canSwitchToRandomTarget: true,

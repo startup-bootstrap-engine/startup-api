@@ -30,6 +30,7 @@ export const npcGorgok: INPCTierBlueprint<17> = {
   name: "Gorgok, the Chief",
   key: HostileNPCsBlueprint.Gorgok,
   tier: 17,
+  isGiantForm: true,
   subType: NPCSubtype.Humanoid,
   textureKey: HostileNPCsBlueprint.Goblin,
   alignment: NPCAlignment.Hostile,

@@ -45,6 +45,7 @@ export const npcBlueDragon: INPCTierBlueprint<21> = {
   speed: MovementSpeed.ExtraFast,
   // @ts-ignore
   baseHealth: 50000,
+  isGiantForm: true,
   healthRandomizerDice: Dice.D20,
   skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],

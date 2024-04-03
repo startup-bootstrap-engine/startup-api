@@ -38,6 +38,7 @@ export const npcDwarfGuardian: INPCTierBlueprint<12> = {
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Fast,
   baseHealth: 720,
+  isGiantForm: true,
   healthRandomizerDice: Dice.D12,
   canSwitchToRandomTarget: true,
   skills: {

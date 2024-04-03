@@ -42,6 +42,7 @@ export const npcRedDragon: INPCTierBlueprint<20> = {
   ammoKey: AnimationEffectKeys.FireBall,
   maxRangeAttack: RangeTypes.High,
   tier: 20,
+  isGiantForm: true,
   speed: MovementSpeed.ExtraFast,
   // @ts-ignore
   baseHealth: 30000,

@@ -41,7 +41,7 @@ export const npcYellowDragon: INPCTierBlueprint<22> = {
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: AnimationEffectKeys.FireBall,
   hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
-
+  isGiantForm: true,
   maxRangeAttack: RangeTypes.High,
   speed: MovementSpeed.ExtraFast,
   // @ts-ignore

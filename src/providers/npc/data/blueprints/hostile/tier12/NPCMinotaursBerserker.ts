@@ -31,6 +31,7 @@ export const npcMinotaurBerserker: INPCTierBlueprint<12> = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Fast,
+  isGiantForm: true,
   tier: 12,
   canSwitchToLowHealthTarget: true,
   baseHealth: 720,

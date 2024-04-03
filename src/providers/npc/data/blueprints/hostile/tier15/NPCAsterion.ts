@@ -28,6 +28,7 @@ export const npcAsterion: INPCTierBlueprint<15> = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Fast,
+  isGiantForm: true,
   canSwitchToLowHealthTarget: true,
   // @ts-ignore
   baseHealth: 2500,
