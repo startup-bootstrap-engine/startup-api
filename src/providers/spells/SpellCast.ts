@@ -80,7 +80,9 @@ export class SpellCast {
 
       if (this.isRangedSpellWithoutTarget(spell, data)) {
         await this.sendPreSpellCastEvents(spell, character);
+
         this.sendIdentifyTargetEvent(character, data);
+
         return false;
       }
 
@@ -215,10 +217,9 @@ export class SpellCast {
 
     await this.itemUsableEffect.apply(updatedCharacter, EffectableAttribute.Mana, -1 * spell.manaCost);
     await updatedCharacter.save();
-
     await this.sendPostSpellCastEvents(updatedCharacter, spell, target);
-
     await this.skillIncrease.increaseMagicSP(updatedCharacter, spell.manaCost);
+
     if (target?.type === EntityType.Character) {
       await this.skillIncrease.increaseMagicResistanceSP(target as ICharacter, spell.manaCost);
     }
@@ -357,7 +358,7 @@ export class SpellCast {
           `Sorry, the item required to cast this spell is not available: ${spell.requiredItem}`
         );
 
-        console.log(`❌ SpellCast: Missing item blueprint for key ${spell.requiredItem}`);
+        console.info(`❌ SpellCast: Missing item blueprint for key ${spell.requiredItem}`);
         return false;
       }
 

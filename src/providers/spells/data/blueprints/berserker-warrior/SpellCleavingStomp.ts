@@ -12,6 +12,7 @@ import {
   CharacterBuffDurationType,
   CharacterBuffType,
   CharacterClass,
+  EntityType,
   ISpell,
   SpellCastingType,
   SpellsBlueprint,
@@ -55,7 +56,7 @@ export const spellCleavingStomp: Partial<ISpell> = {
 
         await entityEffectUse.applyEntityEffects(target, caster, entityEffectBleeding);
 
-        if (target.type === "Character") {
+        if (target.type === EntityType.Character) {
           const timeout = await spellCalculator.calculateBasedOnSkillLevel(caster, BasicAttribute.Strength, {
             min: 30,
             max: 60,

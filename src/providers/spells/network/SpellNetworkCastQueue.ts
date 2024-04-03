@@ -35,6 +35,10 @@ export class SpellNetworkCastQueue {
           throw new Error("Character ID not found");
         }
 
+        if (character.health <= 0) {
+          throw new Error("Character is not alive");
+        }
+
         if (!data || !character) {
           return;
         }
@@ -95,7 +99,7 @@ export class SpellNetworkCastQueue {
 
       if (!appEnv.general.IS_UNIT_TEST) {
         this.worker.on("failed", async (job, err) => {
-          console.log(`${this.queueName} job ${job?.id} failed with error ${err.message}`);
+          console.info(`${this.queueName} job ${job?.id} failed with error ${err.message}`);
 
           await this.worker?.close();
           this.worker = null;
