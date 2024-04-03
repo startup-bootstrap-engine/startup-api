@@ -12,8 +12,8 @@ export class CharacterItemSlots {
   constructor(private socketMessaging: SocketMessaging) {}
 
   @TrackNewRelicTransaction()
-  public async getTotalQty(targetContainer: IItemContainer, itemKey: string, itemRarity: string): Promise<number> {
-    const allItemsSameKey = await this.getAllItemsFromKey(targetContainer, itemKey);
+  public async getTotalQty(targetContainer: IItemContainer, item: IItem, itemRarity: string): Promise<number> {
+    const allItemsSameKey = await this.getAllItemsFromKey(targetContainer, item);
     let qty = 0;
     for (const item of allItemsSameKey) {
       if (item.stackQty && item.rarity === itemRarity) {
@@ -44,7 +44,7 @@ export class CharacterItemSlots {
   }
 
   @TrackNewRelicTransaction()
-  public async getAllItemsFromKey(targetContainer: IItemContainer, itemKey: string): Promise<IItem[]> {
+  public async getAllItemsFromKey(targetContainer: IItemContainer, item: IItem): Promise<IItem[]> {
     const items: IItem[] = [];
 
     for (let i = 0; i < targetContainer.slotQty; i++) {
@@ -52,7 +52,10 @@ export class CharacterItemSlots {
 
       if (!slotItem) continue;
 
-      if (slotItem.key.replace(/-\d+$/, "").toString() === itemKey.replace(/-\d+$/, "").toString()) {
+      if (
+        slotItem.key.replace(/-\d+$/, "").toString() === item.key.replace(/-\d+$/, "").toString() &&
+        slotItem.rarity === item.rarity
+      ) {
         const dbItem = (await Item.findById(slotItem._id)) as unknown as IItem;
 
         dbItem && items.push(dbItem);
@@ -291,7 +294,7 @@ export class CharacterItemSlots {
       const slotItem = slot as unknown as IItem;
 
       if (itemToBeAdded && slotItem && slotItem.maxStackSize > 1) {
-        if (slotItem.baseKey === itemToBeAdded.baseKey) {
+        if (slotItem.baseKey === itemToBeAdded.baseKey && slotItem.rarity === itemToBeAdded.rarity) {
           const futureStackQty = slotItem.stackQty! + itemToBeAdded.stackQty!;
           if (futureStackQty <= slotItem.maxStackSize) {
             return Number(id);

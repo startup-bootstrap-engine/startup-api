@@ -54,12 +54,12 @@ describe("CharacterItemSlots.ts", () => {
 
       let qty = 0;
       if (firstItem.rarity) {
-        qty = await characterItemSlots.getTotalQty(inventoryContainer, firstItem.key, firstItem.rarity);
+        qty = await characterItemSlots.getTotalQty(inventoryContainer, firstItem, firstItem.rarity);
         expect(qty).toBe(1);
       }
 
       if (secondItem.rarity) {
-        qty = await characterItemSlots.getTotalQty(inventoryContainer, secondItem.key, secondItem.rarity);
+        qty = await characterItemSlots.getTotalQty(inventoryContainer, secondItem, secondItem.rarity);
         expect(qty).toBe(1);
       }
     });
@@ -82,13 +82,13 @@ describe("CharacterItemSlots.ts", () => {
 
       let qty = 0;
       if (firstItem.rarity) {
-        qty = await characterItemSlots.getTotalQty(inventoryContainer, firstItem.key, firstItem.rarity);
+        qty = await characterItemSlots.getTotalQty(inventoryContainer, firstItem, firstItem.rarity);
 
         expect(qty).toBe(25);
       }
 
       if (secondItem.rarity) {
-        qty = await characterItemSlots.getTotalQty(inventoryContainer, secondItem.key, secondItem.rarity);
+        qty = await characterItemSlots.getTotalQty(inventoryContainer, secondItem, secondItem.rarity);
 
         expect(qty).toBe(25);
       }
@@ -110,12 +110,39 @@ describe("CharacterItemSlots.ts", () => {
     };
     await inventoryContainer.save();
 
-    const itemsSameKey = await characterItemSlots.getAllItemsFromKey(inventoryContainer, firstItem.key);
+    const itemsSameKey = await characterItemSlots.getAllItemsFromKey(inventoryContainer, firstItem);
 
     expect(itemsSameKey.length).toBe(2);
 
     expect(itemsSameKey[0].key).toBe(firstItem.key);
     expect(itemsSameKey[1].key).toBe(secondItem.key);
+  });
+
+  it("should get different rarity items as separate slots", async () => {
+    const firstItem = await unitTestHelper.createStackableMockItem({
+      stackQty: 25,
+      rarity: ItemRarities.Legendary,
+    });
+    const secondItem = await unitTestHelper.createStackableMockItem({
+      stackQty: 25,
+      rarity: ItemRarities.Common,
+    });
+    const thirdItem = await unitTestHelper.createStackableMockItem({
+      stackQty: 25,
+      rarity: ItemRarities.Rare,
+    });
+    inventoryContainer.slots = {
+      ...inventoryContainer.slots,
+      0: firstItem.toJSON({ virtuals: true }),
+      1: secondItem.toJSON({ virtuals: true }),
+    };
+    await inventoryContainer.save();
+
+    const itemsSameKeyFirstItem = await characterItemSlots.getAllItemsFromKey(inventoryContainer, firstItem);
+    expect(itemsSameKeyFirstItem.length).toBe(1);
+
+    const itemsSameKeyThirdItem = await characterItemSlots.getAllItemsFromKey(inventoryContainer, thirdItem);
+    expect(itemsSameKeyThirdItem.length).toBe(0);
   });
 
   it("should properly find a specific item in a container slot", async () => {
@@ -235,6 +262,27 @@ describe("CharacterItemSlots.ts", () => {
     const fullStackAvailableSlot = await characterItemSlots.getFirstAvailableSlotIndex(
       inventoryContainer,
       stackableItem
+    );
+
+    expect(fullStackAvailableSlot).toBe(1);
+  });
+
+  it("should properly get the first available slot for a stackable item with deferent rarity", async () => {
+    const stackableItem1 = await unitTestHelper.createStackableMockItem({ stackQty: 1, maxStackSize: 10 });
+
+    inventoryContainer.slotQty = 2;
+    inventoryContainer.slots = {
+      0: stackableItem1.toJSON({ virtuals: true }),
+      1: undefined,
+    };
+    await inventoryContainer.save();
+
+    const stackableItem2 = await unitTestHelper.createStackableMockItem({ stackQty: 1, maxStackSize: 10 });
+    stackableItem2.rarity = ItemRarities.Rare;
+
+    const fullStackAvailableSlot = await characterItemSlots.getFirstAvailableSlotIndex(
+      inventoryContainer,
+      stackableItem2
     );
 
     expect(fullStackAvailableSlot).toBe(1);

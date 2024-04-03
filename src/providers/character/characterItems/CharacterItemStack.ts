@@ -39,7 +39,7 @@ export class CharacterItemStack {
         return false;
       }
 
-      const allItemsSameKey = await this.characterItemSlots.getAllItemsFromKey(targetContainer, itemToBeAdded.key);
+      const allItemsSameKey = await this.characterItemSlots.getAllItemsFromKey(targetContainer, itemToBeAdded);
 
       if (!allItemsSameKey?.length) {
         return false; // create new item, if there are no items with the same key
