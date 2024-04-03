@@ -22,6 +22,7 @@ interface IQueueScaleOptions {
   data?: {
     scene?: string;
   };
+  forceCustomScale?: number;
 }
 
 @provideSingleton(MultiQueue)
@@ -51,14 +52,13 @@ export class MultiQueue {
 
     const { queueScaleFactor, queueScaleBy } = queueScaleOptions;
 
-    const queueName = await this.generateQueueName(prefix, queueScaleBy, queueScaleFactor);
+    const queueName = await this.generateQueueName(prefix, queueScaleBy, queueScaleFactor, queueScaleOptions);
 
     const queue = await this.initOrFetchQueue(
       queueName,
       jobFn,
       {
         connection: this.connection,
-        sharedConnection: true,
         ...queueOptions,
       },
       workerOptions
@@ -112,7 +112,6 @@ export class MultiQueue {
         },
         {
           connection: this.connection,
-          sharedConnection: true,
           ...workerOptions,
         }
       );
@@ -164,7 +163,8 @@ export class MultiQueue {
   private async generateQueueName(
     prefix: string,
     queueScaleBy: AvailableScaleFactors,
-    queueScaleFactor?: number
+    queueScaleFactor?: number,
+    queueScaleOptions?: IQueueScaleOptions
   ): Promise<string> {
     let envSuffix;
 
@@ -193,7 +193,10 @@ export class MultiQueue {
         const activeCharacters = Number((await this.inMemoryHashTable.get("activity-tracker", "character-count")) || 1);
 
         const maxCharQueues = Math.ceil(activeCharacters / 20) || 1;
-        const charQueueScaleFactor = Math.min(maxCharQueues, QUEUE_CHARACTER_MAX_SCALE_FACTOR);
+        const charQueueScaleFactor = Math.min(
+          maxCharQueues,
+          queueScaleOptions?.forceCustomScale || QUEUE_CHARACTER_MAX_SCALE_FACTOR
+        );
 
         return `${prefix}-${envSuffix}-${charQueueScaleFactor}`;
 
@@ -201,8 +204,11 @@ export class MultiQueue {
         const activeNPCs = Number((await this.inMemoryHashTable.get("activity-tracker", "npc-count")) || 1);
 
         const maxNPCQueues = Math.ceil(activeNPCs / 20) || 1;
-        const NPCQueueScaleFactor = Math.min(maxNPCQueues, QUEUE_NPC_MAX_SCALE_FACTOR);
 
+        const NPCQueueScaleFactor = Math.min(
+          maxNPCQueues,
+          queueScaleOptions?.forceCustomScale || QUEUE_NPC_MAX_SCALE_FACTOR
+        );
         return `${prefix}-${envSuffix}-${NPCQueueScaleFactor}`;
     }
   }

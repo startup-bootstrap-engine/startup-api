@@ -108,9 +108,9 @@ export class ScriptsUseCase {
         {},
         {
           $set: {
-            x: FromGridX(110),
+            x: FromGridX(93),
             y: FromGridY(106),
-            initialX: FromGridX(110),
+            initialX: FromGridX(93),
             initialY: FromGridY(106),
             scene: "ilya",
           },
