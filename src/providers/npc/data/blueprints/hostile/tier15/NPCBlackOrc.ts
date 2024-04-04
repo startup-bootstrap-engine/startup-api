@@ -174,10 +174,6 @@ export const npcBlackOrc: INPCTierBlueprint<15> = {
       itemBlueprintKey: ToolsBlueprint.WoodsManAxe,
       chance: LootProbability.Rare,
     },
-    {
-      itemBlueprintKey: ToolsBlueprint.GildedLavaPickaxe,
-      chance: LootProbability.VeryRare,
-    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
   areaSpells: [

@@ -15,6 +15,7 @@ import {
   MacesBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -83,6 +84,10 @@ export const npcYellowDragon: INPCTierBlueprint<22> = {
     {
       itemBlueprintKey: CraftingResourcesBlueprint.PrimordialRelic,
       chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.GildedLavaPickaxe,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: BooksBlueprint.ElementalSphere,

@@ -29,8 +29,7 @@ export const itemAurumAlloyPickaxe: IToolItemBlueprint = {
   textureAtlas: "items",
   texturePath: "tools/aurum-alloy-pickaxe.png",
   name: "Aurum Alloy Pickaxe",
-  description:
-    "Fashioned from a rare blend of metals, it's ideal for harvesting both golden and iron ores, with proficiency in copper and silver as well.",
+  description: "A pickaxe that can mine iron, copper and silver ores.",
   attack: 8,
   defense: 3,
   weight: 0.1,
@@ -111,19 +110,6 @@ export const itemAurumAlloyPickaxe: IToolItemBlueprint = {
             {
               key: CraftingResourcesBlueprint.SilverOre,
               qty: [2, 3],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 5, rarityOfTool),
-            },
-          ] as IUseWithItemToTileReward[],
-        };
-        break;
-      case CraftingResourcesBlueprint.GoldenOre:
-        useWithItemToTileOptions = {
-          ...baseUseWithItemToTileOptions,
-          rewards: [
-            ...baseUseWithItemToTileOptions.rewards,
-            {
-              key: CraftingResourcesBlueprint.GoldenOre,
-              qty: [1, 2],
               chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 5, rarityOfTool),
             },
           ] as IUseWithItemToTileReward[],

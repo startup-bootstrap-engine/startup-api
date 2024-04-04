@@ -28,7 +28,7 @@ export const itemPickaxe: IToolItemBlueprint = {
   textureAtlas: "items",
   texturePath: "tools/pickaxe.png",
   name: "Pickaxe",
-  description: "A tool used for mining, breaking rocks or even as a weapon.",
+  description: "A tool used for mining iron and copper ores.",
   attack: 4,
   defense: 2,
   weight: 0.1,
@@ -84,7 +84,7 @@ export const itemPickaxe: IToolItemBlueprint = {
             {
               key: CraftingResourcesBlueprint.IronOre,
               qty: [5, 7],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 15, rarityOfTool),
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 10, rarityOfTool),
             },
           ] as IUseWithItemToTileReward[],
         };
@@ -97,7 +97,7 @@ export const itemPickaxe: IToolItemBlueprint = {
             {
               key: CraftingResourcesBlueprint.CopperOre,
               qty: [3, 4],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 10, rarityOfTool),
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 5, rarityOfTool),
             },
           ] as IUseWithItemToTileReward[],
         };

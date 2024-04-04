@@ -29,7 +29,7 @@ export const itemEmberEdgePickaxe: IToolItemBlueprint = {
   textureAtlas: "items",
   texturePath: "tools/ember-edge-pickaxe.png",
   name: "Ember Edge Pickaxe",
-  description: "Primed for delving into molten depths, ideal for uncovering both copper and golden ore treasures.",
+  description: "A pickaxe that can mine copper and golden ores.",
   attack: 6,
   defense: 4,
   weight: 0.1,
@@ -75,6 +75,19 @@ export const itemEmberEdgePickaxe: IToolItemBlueprint = {
     let useWithItemToTileOptions: IUseWithItemToTileOptions = baseUseWithItemToTileOptions;
 
     switch (targetName) {
+      case CraftingResourcesBlueprint.IronOre:
+        useWithItemToTileOptions = {
+          ...baseUseWithItemToTileOptions,
+          rewards: [
+            ...baseUseWithItemToTileOptions.rewards,
+            {
+              key: CraftingResourcesBlueprint.IronOre,
+              qty: [3, 5],
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 15, rarityOfTool),
+            },
+          ] as IUseWithItemToTileReward[],
+        };
+        break;
       case CraftingResourcesBlueprint.CopperOre:
         useWithItemToTileOptions = {
           ...baseUseWithItemToTileOptions,
@@ -82,8 +95,22 @@ export const itemEmberEdgePickaxe: IToolItemBlueprint = {
             ...baseUseWithItemToTileOptions.rewards,
             {
               key: CraftingResourcesBlueprint.CopperOre,
-              qty: [4, 5],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 15, rarityOfTool),
+              qty: [3, 4],
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 10, rarityOfTool),
+            },
+          ] as IUseWithItemToTileReward[],
+        };
+        break;
+
+      case CraftingResourcesBlueprint.SilverOre:
+        useWithItemToTileOptions = {
+          ...baseUseWithItemToTileOptions,
+          rewards: [
+            ...baseUseWithItemToTileOptions.rewards,
+            {
+              key: CraftingResourcesBlueprint.SilverOre,
+              qty: [2, 3],
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 12, rarityOfTool),
             },
           ] as IUseWithItemToTileReward[],
         };

@@ -29,8 +29,7 @@ export const itemEmeraldEclipsesPickaxe: IToolItemBlueprint = {
   textureAtlas: "items",
   texturePath: "tools/emerald-eclipses-pickaxe.png",
   name: "Emerald Eclipses Pickaxe",
-  description:
-    "Harnessing the power of celestial events, it eclipses corruption while illuminating the brilliance of green ore.",
+  description: "A pickaxe that can mine iron, copper, silver, golden, green and corruption ores.",
   attack: 10,
   defense: 4,
   weight: 0.5,
@@ -76,6 +75,61 @@ export const itemEmeraldEclipsesPickaxe: IToolItemBlueprint = {
     let useWithItemToTileOptions: IUseWithItemToTileOptions = baseUseWithItemToTileOptions;
 
     switch (targetName) {
+      case CraftingResourcesBlueprint.IronOre:
+        useWithItemToTileOptions = {
+          ...baseUseWithItemToTileOptions,
+          rewards: [
+            ...baseUseWithItemToTileOptions.rewards,
+            {
+              key: CraftingResourcesBlueprint.IronOre,
+              qty: [3, 5],
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 25, rarityOfTool),
+            },
+          ] as IUseWithItemToTileReward[],
+        };
+        break;
+      case CraftingResourcesBlueprint.CopperOre:
+        useWithItemToTileOptions = {
+          ...baseUseWithItemToTileOptions,
+          rewards: [
+            ...baseUseWithItemToTileOptions.rewards,
+            {
+              key: CraftingResourcesBlueprint.CopperOre,
+              qty: [3, 4],
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 20, rarityOfTool),
+            },
+          ] as IUseWithItemToTileReward[],
+        };
+        break;
+
+      case CraftingResourcesBlueprint.SilverOre:
+        useWithItemToTileOptions = {
+          ...baseUseWithItemToTileOptions,
+          rewards: [
+            ...baseUseWithItemToTileOptions.rewards,
+            {
+              key: CraftingResourcesBlueprint.SilverOre,
+              qty: [2, 3],
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 18, rarityOfTool),
+            },
+          ] as IUseWithItemToTileReward[],
+        };
+        break;
+
+      case CraftingResourcesBlueprint.GoldenOre:
+        useWithItemToTileOptions = {
+          ...baseUseWithItemToTileOptions,
+          rewards: [
+            ...baseUseWithItemToTileOptions.rewards,
+            {
+              key: CraftingResourcesBlueprint.GoldenOre,
+              qty: [3, 4],
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 15, rarityOfTool),
+            },
+          ] as IUseWithItemToTileReward[],
+        };
+        break;
+
       case CraftingResourcesBlueprint.GreenOre:
         useWithItemToTileOptions = {
           ...baseUseWithItemToTileOptions,
@@ -84,7 +138,7 @@ export const itemEmeraldEclipsesPickaxe: IToolItemBlueprint = {
             {
               key: CraftingResourcesBlueprint.GreenOre,
               qty: [2, 3],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 4, rarityOfTool),
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 5, rarityOfTool),
             },
           ] as IUseWithItemToTileReward[],
         };
@@ -97,7 +151,7 @@ export const itemEmeraldEclipsesPickaxe: IToolItemBlueprint = {
             {
               key: CraftingResourcesBlueprint.CorruptionOre,
               qty: [1, 2],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 2, rarityOfTool),
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 3, rarityOfTool),
             },
           ] as IUseWithItemToTileReward[],
         };
@@ -106,5 +160,5 @@ export const itemEmeraldEclipsesPickaxe: IToolItemBlueprint = {
 
     await useWithItemToTile.execute(character, useWithItemToTileOptions, skillIncrease);
   },
-  usableEffectDescription: "Use it on green and corruption ores to mine them",
+  usableEffectDescription: "Use it on iron, copper, silver, golden, green and corruption ores to mine them",
 };

@@ -13,6 +13,7 @@ import {
   MacesBlueprint,
   SpearsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -77,6 +78,10 @@ export const npcNazgul: INPCTierBlueprint<18> = {
     },
     {
       itemBlueprintKey: BooksBlueprint.SoulCrystal,
+      chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.GildedLavaPickaxe,
       chance: LootProbability.VeryRare,
     },
     {

@@ -15,6 +15,7 @@ import {
   MacesBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -89,6 +90,10 @@ export const npcRedDragon: INPCTierBlueprint<20> = {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonTooth,
       chance: LootProbability.VeryCommon,
       quantityRange: [1, 3],
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.GildedLavaPickaxe,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,

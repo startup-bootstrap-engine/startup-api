@@ -78,6 +78,47 @@ export const itemGildedLavaPickaxe: IToolItemBlueprint = {
     let useWithItemToTileOptions: IUseWithItemToTileOptions = baseUseWithItemToTileOptions;
 
     switch (targetName) {
+      case CraftingResourcesBlueprint.IronOre:
+        useWithItemToTileOptions = {
+          ...baseUseWithItemToTileOptions,
+          rewards: [
+            ...baseUseWithItemToTileOptions.rewards,
+            {
+              key: CraftingResourcesBlueprint.IronOre,
+              qty: [3, 5],
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 35, rarityOfTool),
+            },
+          ] as IUseWithItemToTileReward[],
+        };
+        break;
+      case CraftingResourcesBlueprint.CopperOre:
+        useWithItemToTileOptions = {
+          ...baseUseWithItemToTileOptions,
+          rewards: [
+            ...baseUseWithItemToTileOptions.rewards,
+            {
+              key: CraftingResourcesBlueprint.CopperOre,
+              qty: [3, 4],
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 25, rarityOfTool),
+            },
+          ] as IUseWithItemToTileReward[],
+        };
+        break;
+
+      case CraftingResourcesBlueprint.SilverOre:
+        useWithItemToTileOptions = {
+          ...baseUseWithItemToTileOptions,
+          rewards: [
+            ...baseUseWithItemToTileOptions.rewards,
+            {
+              key: CraftingResourcesBlueprint.SilverOre,
+              qty: [2, 3],
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 22, rarityOfTool),
+            },
+          ] as IUseWithItemToTileReward[],
+        };
+        break;
+
       case CraftingResourcesBlueprint.GoldenOre:
         useWithItemToTileOptions = {
           ...baseUseWithItemToTileOptions,
@@ -86,11 +127,40 @@ export const itemGildedLavaPickaxe: IToolItemBlueprint = {
             {
               key: CraftingResourcesBlueprint.GoldenOre,
               qty: [1, 2],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 5, rarityOfTool),
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 15, rarityOfTool),
             },
           ] as IUseWithItemToTileReward[],
         };
         break;
+
+      case CraftingResourcesBlueprint.CorruptionOre:
+        useWithItemToTileOptions = {
+          ...baseUseWithItemToTileOptions,
+          rewards: [
+            ...baseUseWithItemToTileOptions.rewards,
+            {
+              key: CraftingResourcesBlueprint.CorruptionOre,
+              qty: [1, 2],
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 10, rarityOfTool),
+            },
+          ] as IUseWithItemToTileReward[],
+        };
+        break;
+
+      case CraftingResourcesBlueprint.GreenOre:
+        useWithItemToTileOptions = {
+          ...baseUseWithItemToTileOptions,
+          rewards: [
+            ...baseUseWithItemToTileOptions.rewards,
+            {
+              key: CraftingResourcesBlueprint.GreenOre,
+              qty: [2, 3],
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 8, rarityOfTool),
+            },
+          ] as IUseWithItemToTileReward[],
+        };
+        break;
+
       case CraftingResourcesBlueprint.ObsidiumOre:
         useWithItemToTileOptions = {
           ...baseUseWithItemToTileOptions,
@@ -99,7 +169,7 @@ export const itemGildedLavaPickaxe: IToolItemBlueprint = {
             {
               key: CraftingResourcesBlueprint.ObsidiumOre,
               qty: [2, 3],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 2, rarityOfTool),
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 5, rarityOfTool),
             },
           ] as IUseWithItemToTileReward[],
         };

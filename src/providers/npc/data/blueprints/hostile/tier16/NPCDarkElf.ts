@@ -12,7 +12,6 @@ import {
   RangedWeaponsBlueprint,
   ShieldsBlueprint,
   StaffsBlueprint,
-  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -136,10 +135,6 @@ export const npcDarkElf: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
       chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: ToolsBlueprint.GildedLavaPickaxe,
-      chance: LootProbability.SemiCommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],
