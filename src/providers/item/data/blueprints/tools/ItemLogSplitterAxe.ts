@@ -84,5 +84,6 @@ export const itemLogSplitterAxe: IToolItemBlueprint = {
       skillIncrease
     );
   },
-  usableEffectDescription: "Use on felled logs to split them into usable lumber.",
+  usableEffectDescription:
+    "Use this tool on a felled tree to gather wooden sticks, small wooden sticks, elven wood, and greater wooden logs.",
 };

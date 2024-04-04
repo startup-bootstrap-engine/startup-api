@@ -83,5 +83,5 @@ export const itemElderHeartAxe: IToolItemBlueprint = {
       skillIncrease
     );
   },
-  usableEffectDescription: "Use on ancient, magically-infused trees to harvest rare and powerful Elderwood.",
+  usableEffectDescription: "Use this tool to gather wooden sticks, small wooden sticks, and elven wood.",
 };

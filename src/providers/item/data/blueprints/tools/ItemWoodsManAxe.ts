@@ -83,5 +83,6 @@ export const itemWoodsManAxe: IToolItemBlueprint = {
       skillIncrease
     );
   },
-  usableEffectDescription: "A balanced axe for felling trees, chopping branches, and basic woodcutting tasks.",
+  usableEffectDescription:
+    "Use this tool to gather wooden sticks, small wooden sticks, elven wood, and greater wooden logs.",
 };

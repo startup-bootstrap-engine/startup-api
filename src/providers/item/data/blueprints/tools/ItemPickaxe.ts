@@ -106,5 +106,5 @@ export const itemPickaxe: IToolItemBlueprint = {
 
     await useWithItemToTile.execute(character, useWithItemToTileOptions, skillIncrease);
   },
-  usableEffectDescription: "Use it on iron, copper ores to mine them",
+  usableEffectDescription: "Use this tool to mine ores.",
 };

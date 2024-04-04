@@ -119,5 +119,5 @@ export const itemAurumAlloyPickaxe: IToolItemBlueprint = {
 
     await useWithItemToTile.execute(character, useWithItemToTileOptions, skillIncrease);
   },
-  usableEffectDescription: "Use it on iron, copper, silver and golden ores to mine them",
+  usableEffectDescription: "Use it on iron, copper, silver ores to mine them",
 };

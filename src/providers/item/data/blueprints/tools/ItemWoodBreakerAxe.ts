@@ -88,5 +88,6 @@ export const itemWoodBreakerAxe: IToolItemBlueprint = {
       skillIncrease
     );
   },
-  usableEffectDescription: "Use on the largest, most unyielding trees to obtain strong, sturdy wood.",
+  usableEffectDescription:
+    "Use this tool on a felled tree to gather wooden sticks, small wooden sticks, elven wood, and greater wooden logs.",
 };

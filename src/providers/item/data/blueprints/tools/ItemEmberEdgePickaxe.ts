@@ -133,5 +133,5 @@ export const itemEmberEdgePickaxe: IToolItemBlueprint = {
 
     await useWithItemToTile.execute(character, useWithItemToTileOptions, skillIncrease);
   },
-  usableEffectDescription: "Use it on copper and golden ores to mine them",
+  usableEffectDescription: "Use it on iron, copper, silver, golden ores to mine them",
 };

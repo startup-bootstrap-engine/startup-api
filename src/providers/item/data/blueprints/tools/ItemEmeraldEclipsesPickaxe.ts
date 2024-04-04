@@ -160,5 +160,5 @@ export const itemEmeraldEclipsesPickaxe: IToolItemBlueprint = {
 
     await useWithItemToTile.execute(character, useWithItemToTileOptions, skillIncrease);
   },
-  usableEffectDescription: "Use it on iron, copper, silver, golden, green and corruption ores to mine them",
+  usableEffectDescription: "Use it on iron, copper, silver, golden, green, corruption ores to mine them",
 };

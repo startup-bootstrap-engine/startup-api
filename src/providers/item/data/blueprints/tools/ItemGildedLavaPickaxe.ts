@@ -178,5 +178,5 @@ export const itemGildedLavaPickaxe: IToolItemBlueprint = {
 
     await useWithItemToTile.execute(character, useWithItemToTileOptions, skillIncrease);
   },
-  usableEffectDescription: "Use it on gold and obsidium ores to mine them",
+  usableEffectDescription: "Use it on iron, copper, silver, golden, corruption, green ores to mine them",
 };
