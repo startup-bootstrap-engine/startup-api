@@ -24,7 +24,7 @@ export const itemCarpentersAxe: IToolItemBlueprint = {
   textureAtlas: "items",
   texturePath: "tools/carpenters-axe.png",
   name: "Carpenter's Axe",
-  description: "An axe designed primarily as a work axe.",
+  description: "A tool used for gathering wooden sticks and small wooden sticks.",
   attack: 6,
   defense: 2,
   weight: 0.5,
@@ -56,12 +56,12 @@ export const itemCarpentersAxe: IToolItemBlueprint = {
           {
             key: CraftingResourcesBlueprint.WoodenSticks,
             qty: [2, 3],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 10, rarityOfTool),
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 7, rarityOfTool),
           },
           {
             key: CraftingResourcesBlueprint.SmallWoodenStick,
             qty: [2, 3],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 10, rarityOfTool),
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 7, rarityOfTool),
           },
         ],
       },

@@ -25,8 +25,7 @@ export const itemElderHeartAxe: IToolItemBlueprint = {
   textureAtlas: "items",
   texturePath: "tools/elder-heart-axe.png",
   name: "Elder Heart Axe",
-  description:
-    "A finely crafted tool imbued with elven magic, designed for harvesting the most sacred and ancient of woods.",
+  description: "A tool used for gathering wooden sticks, small wooden sticks,  and elven wood.",
   attack: 10,
   defense: 4,
   weight: 0.5,
@@ -64,19 +63,20 @@ export const itemElderHeartAxe: IToolItemBlueprint = {
         ],
         rewards: [
           {
-            key: CraftingResourcesBlueprint.GreaterWoodenLog,
-            qty: [3, 4],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 8, rarityOfTool),
-          },
-          {
             key: CraftingResourcesBlueprint.WoodenSticks,
             qty: [2, 3],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 5, rarityOfTool),
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 15, rarityOfTool),
           },
+          {
+            key: CraftingResourcesBlueprint.SmallWoodenStick,
+            qty: [2, 3],
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 15, rarityOfTool),
+          },
+
           {
             key: CraftingResourcesBlueprint.ElvenWood,
             qty: [2, 3],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 12, rarityOfTool),
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 8, rarityOfTool),
           },
         ],
       },

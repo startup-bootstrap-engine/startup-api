@@ -25,7 +25,7 @@ export const itemWoodBreakerAxe: IToolItemBlueprint = {
   textureAtlas: "items",
   texturePath: "tools/wood-breaker-axe.png",
   name: "Wood Breaker's Axe",
-  description: "A raw and powerful axe, its immense weight and wide head can fell the largest and toughest of trees.",
+  description: "A tool used for gathering wooden sticks, small wooden sticks, elven wood, and greater wooden logs.",
   attack: 8,
   defense: 2,
   weight: 0.5,
@@ -63,19 +63,25 @@ export const itemWoodBreakerAxe: IToolItemBlueprint = {
         ],
         rewards: [
           {
-            key: CraftingResourcesBlueprint.GreaterWoodenLog,
-            qty: [4, 5],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 12, rarityOfTool),
-          },
-          {
             key: CraftingResourcesBlueprint.WoodenSticks,
             qty: [2, 3],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 8, rarityOfTool),
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 30, rarityOfTool),
           },
           {
+            key: CraftingResourcesBlueprint.SmallWoodenStick,
+            qty: [2, 3],
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 30, rarityOfTool),
+          },
+
+          {
             key: CraftingResourcesBlueprint.ElvenWood,
+            qty: [2, 3],
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 20, rarityOfTool),
+          },
+          {
+            key: CraftingResourcesBlueprint.GreaterWoodenLog,
             qty: [1, 2],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 5, rarityOfTool),
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 15, rarityOfTool),
           },
         ],
       },
