@@ -322,7 +322,7 @@ afterAll(async () => {
 
   MapLoader.maps.clear();
 
-  await redisManager.client.flushAll();
+  await redisManager.client?.flushall();
 });
 
 beforeEach(async () => {
