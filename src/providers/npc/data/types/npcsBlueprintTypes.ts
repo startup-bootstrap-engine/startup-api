@@ -25,6 +25,7 @@ export enum FriendlyNPCsBlueprint {
   TraderJewelry = "trader-jewelry",
   TraderTeleport = "trader-teleport",
   TraderFarm = "trader-farm",
+  TraderTools = "trader-tools",
   Blacksmith = "blacksmith",
 
   Banker = "banker",

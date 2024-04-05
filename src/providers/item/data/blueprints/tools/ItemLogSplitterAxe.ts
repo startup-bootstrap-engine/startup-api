@@ -31,7 +31,7 @@ export const itemLogSplitterAxe: IToolItemBlueprint = {
   weight: 0.5,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   rangeType: EntityAttackType.Melee,
-  basePrice: 120,
+  basePrice: 60000,
   hasUseWith: true,
   useWithMaxDistanceGrid: RangeTypes.Short,
   canSell: false,
