@@ -93,6 +93,7 @@ export class SpellNetworkCastQueue {
           }
         },
         {
+          name: `${this.queueName}-worker`,
           connection: this.connection,
         }
       );

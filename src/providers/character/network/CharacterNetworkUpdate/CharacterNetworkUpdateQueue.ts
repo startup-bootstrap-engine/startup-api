@@ -95,6 +95,7 @@ export class CharacterNetworkUpdateQueue {
           }
         },
         {
+          name: `${this.queueName(scene)}-worker`,
           connection: this.connection,
         }
       );

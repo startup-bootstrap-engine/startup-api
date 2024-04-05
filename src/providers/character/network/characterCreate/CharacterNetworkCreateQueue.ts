@@ -100,6 +100,7 @@ export class CharacterNetworkCreateQueue {
           }
         },
         {
+          name: `${this.queueName(scene)}-worker`,
           connection: this.connection,
         }
       );

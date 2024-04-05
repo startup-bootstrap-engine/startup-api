@@ -125,6 +125,7 @@ export class HitTargetQueue {
           await this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
         },
         {
+          name: `${this.queueCharacterHitName(scene)}-worker`,
           connection: this.connection,
         }
       );
@@ -151,6 +152,7 @@ export class HitTargetQueue {
           }
         },
         {
+          name: `${this.queueNPCHitName(scene)}-worker`,
           connection: this.connection,
         }
       );

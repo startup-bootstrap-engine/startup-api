@@ -79,6 +79,7 @@ export class ChatNetworkGlobalMessagingQueue {
           await this.execGlobalMessaging(data, character);
         },
         {
+          name: `${this.queueName}-worker`,
           connection: this.connection,
         }
       );

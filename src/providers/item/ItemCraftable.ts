@@ -117,6 +117,7 @@ export class ItemCraftable {
           }
         },
         {
+          name: `${this.queueName(scene)}-worker`,
           connection: this.connection,
         }
       );
