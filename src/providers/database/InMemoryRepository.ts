@@ -1,6 +1,7 @@
 import { RedisManager } from "@providers/database/RedisManager";
 import { IResource } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import { Redis } from "ioredis";
 
 export type RedisRecord<T> = Record<string, T>;
 
@@ -8,14 +9,20 @@ export type RedisResource<T> = T & IResource;
 
 @provide(InMemoryRepository)
 export class InMemoryRepository {
+  private connection: Redis;
+
   constructor(private redisManager: RedisManager) {}
+
+  public async init(): Promise<void> {
+    this.connection = await this.redisManager.getPoolClient("in-memory-repository");
+  }
 
   public async create<T>(namespace: string, resource: RedisResource<T>): Promise<T> {
     if (!resource._id) {
       throw new Error("Resource does not have an id");
     }
 
-    await this.redisManager.client?.set(`${namespace}:${resource._id}`, JSON.stringify(resource));
+    await this.connection?.set(`${namespace}:${resource._id}`, JSON.stringify(resource));
 
     const savedResource = await this.read<T>(namespace, resource._id);
 
@@ -27,7 +34,7 @@ export class InMemoryRepository {
   }
 
   public async read<T>(namespace: string, resourceId: string): Promise<T | undefined> {
-    const resource = await this.redisManager.client?.get(`${namespace}:${resourceId}`);
+    const resource = await this.connection?.get(`${namespace}:${resourceId}`);
 
     if (!resource) {
       return;
@@ -50,7 +57,7 @@ export class InMemoryRepository {
   }
 
   public async update<T>(namespace: string, resource: RedisResource<T>): Promise<T> {
-    await this.redisManager.client?.set(`${namespace}:${resource._id}`, JSON.stringify(resource));
+    await this.connection?.set(`${namespace}:${resource._id}`, JSON.stringify(resource));
 
     const updatedResource = await this.read<T>(namespace, resource._id as string);
 
@@ -69,7 +76,7 @@ export class InMemoryRepository {
         return false;
       }
 
-      await this.redisManager.client?.del(`${namespace}:${resourceId}`);
+      await this.connection?.del(`${namespace}:${resourceId}`);
 
       return true;
     } catch (error) {

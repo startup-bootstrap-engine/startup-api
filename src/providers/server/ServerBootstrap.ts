@@ -29,7 +29,6 @@ import { NPCBattleCycleQueue } from "@providers/npc/NPCBattleCycleQueue";
 import { NPCCycleQueue } from "@providers/npc/NPCCycleQueue";
 import { NPCDeathQueue } from "@providers/npc/NPCDeathQueue";
 import { NPCFreezer } from "@providers/npc/NPCFreezer";
-import { NPCMovementMoveTowards } from "@providers/npc/movement/NPCMovementMoveTowards";
 import PartyManagement from "@providers/party/PartyManagement";
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
 import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
@@ -76,7 +75,6 @@ export class ServerBootstrap {
     private characterActionsTracker: CharacterActionsTracker,
     private errorHandlingTracker: ErrorHandlingTracker,
     private bullStrength: BullStrength,
-    private npcMovementMoveTowardsQueue: NPCMovementMoveTowards,
     private npcDeathQueue: NPCDeathQueue,
     private itemContainerTransactionQueue: ItemContainerTransactionQueue,
     private itemDropVerifier: ItemDropVerifier,
