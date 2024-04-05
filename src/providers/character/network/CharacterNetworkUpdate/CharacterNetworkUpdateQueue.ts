@@ -10,7 +10,6 @@ import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import {
   AnimationDirection,
   CharacterSocketEvents,
-  EnvType,
   GRID_WIDTH,
   ICharacterPositionUpdateConfirm,
   ICharacterPositionUpdateFromClient,
@@ -20,14 +19,12 @@ import {
 } from "@rpg-engine/shared";
 
 import { NewRelic } from "@providers/analytics/NewRelic";
-import { appEnv } from "@providers/config/env";
 import { MAX_PING_TRACKING_THRESHOLD } from "@providers/constants/ServerConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MapTransition } from "@providers/map/MapTransition/MapTransition";
 import { MultiQueue } from "@providers/queue/MultiQueue";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
-import { Queue, Worker } from "bullmq";
 import dayjs from "dayjs";
 import random from "lodash/random";
 import { CharacterMovementValidation } from "../../characterMovement/CharacterMovementValidation";
@@ -35,13 +32,6 @@ import { CharacterMovementWarn } from "../../characterMovement/CharacterMovement
 
 @provideSingleton(CharacterNetworkUpdateQueue)
 export class CharacterNetworkUpdateQueue {
-  private queue: Queue<any, any, string> | null = null;
-  private worker: Worker | null = null;
-  private connection: any;
-
-  private queueName = (scene: string): string =>
-    `character-network-update-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
-
   constructor(
     private socketMessaging: SocketMessaging,
     private socketAuth: SocketAuth,
@@ -57,6 +47,20 @@ export class CharacterNetworkUpdateQueue {
     private multiQueue: MultiQueue
   ) {}
 
+  public onCharacterUpdatePosition(channel: SocketChannel): void {
+    this.socketAuth.authCharacterOn(
+      channel,
+      CharacterSocketEvents.CharacterPositionUpdate,
+      async (data: ICharacterPositionUpdateFromClient, character: ICharacter) => {
+        try {
+          await this.addToQueue(data, character);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    );
+  }
+
   public async addToQueue(data: ICharacterPositionUpdateFromClient, character: ICharacter): Promise<void> {
     await this.multiQueue.addJob(
       "character-network-update",
@@ -68,28 +72,6 @@ export class CharacterNetworkUpdateQueue {
       data as unknown as Record<string, unknown>,
       {
         queueScaleBy: "active-characters",
-      }
-    );
-  }
-
-  public async clearAllJobs(): Promise<void> {
-    await this.multiQueue.clearAllJobs();
-  }
-
-  public async shutdown(): Promise<void> {
-    await this.multiQueue.shutdown();
-  }
-
-  public onCharacterUpdatePosition(channel: SocketChannel): void {
-    this.socketAuth.authCharacterOn(
-      channel,
-      CharacterSocketEvents.CharacterPositionUpdate,
-      async (data: ICharacterPositionUpdateFromClient, character: ICharacter) => {
-        try {
-          await this.addToQueue(data, character);
-        } catch (error) {
-          console.error(error);
-        }
       }
     );
   }
@@ -116,6 +98,14 @@ export class CharacterNetworkUpdateQueue {
     }
 
     await this.processValidCharacterMovement(character, data, isMoving);
+  }
+
+  public async clearAllJobs(): Promise<void> {
+    await this.multiQueue.clearAllJobs();
+  }
+
+  public async shutdown(): Promise<void> {
+    await this.multiQueue.shutdown();
   }
 
   private async isCharacterChangingScene(character: ICharacter): Promise<boolean> {

@@ -11,12 +11,10 @@ import { CharacterView } from "../../CharacterView";
 import { BattleTargeting } from "@providers/battle/BattleTargeting";
 import { CharacterRespawn } from "@providers/character/CharacterRespawn";
 import { appEnv } from "@providers/config/env";
-import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { Locker } from "@providers/locks/Locker";
 import { MultiQueue } from "@providers/queue/MultiQueue";
-import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { Queue, Worker } from "bullmq";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterDailyPlayTracker } from "../../CharacterDailyPlayTracker";
@@ -46,8 +44,7 @@ export class CharacterNetworkCreateQueue {
     private battleTargeting: BattleTargeting,
     private locker: Locker,
     private characterDailyPlayTracker: CharacterDailyPlayTracker,
-    private redisManager: RedisManager,
-    private queueActivityMonitor: QueueActivityMonitor,
+
     private characterCreateSocketHandler: CharacterCreateSocketHandler,
     private characterCreateInteractionManager: CharacterCreateInteractionManager,
     private characterCreateRegen: CharacterCreateRegen,
@@ -87,14 +84,6 @@ export class CharacterNetworkCreateQueue {
     await this.characterCreateSocketHandler.manageSocketConnections(channel, character);
   }
 
-  public async clearAllJobs(): Promise<void> {
-    await this.multiQueue.clearAllJobs();
-  }
-
-  public async shutdown(): Promise<void> {
-    await this.multiQueue.shutdown();
-  }
-
   private async execCharacterCreate(character: ICharacter, data: ICharacterCreateFromClient): Promise<void> {
     await this.clearCharacterCaches(character);
 
@@ -118,6 +107,14 @@ export class CharacterNetworkCreateQueue {
       this.characterCreateInteractionManager.warnAboutWeatherStatus(character.channelId!),
       this.characterCreateRegen.handleCharacterRegen(character),
     ]);
+  }
+
+  public async clearAllJobs(): Promise<void> {
+    await this.multiQueue.clearAllJobs();
+  }
+
+  public async shutdown(): Promise<void> {
+    await this.multiQueue.shutdown();
   }
 
   private async respawnIfNecessary(character: ICharacter): Promise<ICharacter> {
