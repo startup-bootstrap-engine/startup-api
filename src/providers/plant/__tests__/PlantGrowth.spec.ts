@@ -155,12 +155,13 @@ describe("PlantGrowth.ts", () => {
     });
 
     it("should update growth points of plants if necessary", async () => {
+      const findByIdAndUpdateSpy = jest.spyOn(Item, "findByIdAndUpdate");
       const growthPoints = 0;
       plant.growthPoints = growthPoints;
       await plant.save();
       await plantGrowth.updatePlantGrowth(plant, testCharacter);
-      expect(Item.updateOne).toHaveBeenCalledWith(
-        { _id: plant._id },
+      expect(findByIdAndUpdateSpy).toHaveBeenCalledWith(
+        plant._id,
         {
           $set: {
             growthPoints: growthPoints + blueprint.growthFactor,
@@ -168,7 +169,40 @@ describe("PlantGrowth.ts", () => {
             requiredGrowthPoints:
               blueprint.stagesRequirements[plant.currentPlantCycle ?? PlantLifeCycle.Seed].requiredGrowthPoints,
           },
+        },
+        {
+          new: true,
+          lean: { virtuals: true, defaults: true },
         }
+      );
+
+      const updatedPlant = (await Item.findById(plant._id)) as IPlantItem;
+      const character = (await Character.findById(plant.owner).lean()) as ICharacter;
+
+      expect(mockSocketMessaging.sendEventToCharactersAroundCharacter).toBeCalledWith(
+        character,
+        ItemSocketEvents.UpdateAll,
+        {
+          items: [
+            {
+              id: updatedPlant._id,
+              texturePath: updatedPlant.texturePath,
+              textureAtlas: updatedPlant.textureAtlas,
+              type: updatedPlant.type as ItemType,
+              subType: updatedPlant.subType as ItemSubType,
+              name: updatedPlant.name,
+              x: updatedPlant.x!,
+              y: updatedPlant.y!,
+              layer: updatedPlant.layer!,
+              stackQty: updatedPlant.stackQty || 0,
+              isDeadBodyLootable: updatedPlant.isDeadBodyLootable,
+              lastWatering: expect.anything(),
+              growthPoints: growthPoints + blueprint.growthFactor,
+              requiredGrowthPoints: updatedPlant.requiredGrowthPoints,
+            },
+          ],
+        },
+        true
       );
     });
 
