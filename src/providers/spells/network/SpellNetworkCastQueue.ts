@@ -37,11 +37,14 @@ export class SpellNetworkCastQueue {
     await this.multiQueue.addJob(
       "spell-cast",
       async (job) => {
-        const data = job.data as ISpellCast;
+        const { data, character } = job.data;
 
         await this.spellCast.castSpell(data, character);
       },
-      data as unknown as Record<string, unknown>,
+      {
+        character,
+        data,
+      },
       {
         queueScaleBy: "active-characters",
       }
