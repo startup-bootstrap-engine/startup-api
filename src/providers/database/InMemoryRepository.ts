@@ -1,3 +1,4 @@
+import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
 import { IResource } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -14,6 +15,11 @@ export class InMemoryRepository {
   constructor(private redisManager: RedisManager) {}
 
   public async init(): Promise<void> {
+    if (appEnv.general.IS_UNIT_TEST) {
+      this.connection = this.redisManager.client!;
+      return;
+    }
+
     this.connection = await this.redisManager.getPoolClient("in-memory-repository");
   }
 

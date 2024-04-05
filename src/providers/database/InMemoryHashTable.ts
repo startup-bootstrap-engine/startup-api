@@ -10,6 +10,11 @@ export class InMemoryHashTable {
   constructor(private redisManager: RedisManager) {}
 
   public async init(): Promise<void> {
+    if (appEnv.general.IS_UNIT_TEST) {
+      this.connection = this.redisManager.client!;
+      return;
+    }
+
     this.connection = await this.redisManager.getPoolClient("in-memory-hash-table");
   }
 

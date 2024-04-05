@@ -5,7 +5,7 @@ import {
   RACE_BONUS_OR_PENALTIES,
 } from "@providers/character/__tests__/mockConstants/SkillConstants.mock";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
-import { container, redisManager } from "@providers/inversify/container";
+import { container, inMemoryHashTable, inMemoryRepository, redisManager } from "@providers/inversify/container";
 import { MapLoader } from "@providers/map/MapLoader";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
@@ -303,6 +303,9 @@ beforeAll(async () => {
   await mongoose.connection.db.dropDatabase();
 
   await redisManager.connect();
+
+  await inMemoryHashTable.init();
+  await inMemoryRepository.init();
 });
 
 afterAll(async () => {
