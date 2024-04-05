@@ -21,11 +21,9 @@ export class RedisIOClient {
     this.pool = createPool<Redis>(
       {
         create: async () => {
-          console.log("🔌 Redis - Creating client connection");
           return await new IORedis(this.redisConnectionURL, this.getIOClientConfig());
         },
         destroy: async (client) => {
-          console.log("🔌 Redis - Destroying client connection");
           return await client.disconnect();
         },
         validate: async (client) => {
