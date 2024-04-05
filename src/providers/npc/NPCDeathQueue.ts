@@ -81,8 +81,6 @@ export class NPCDeathQueue {
         return;
       }
 
-      await this.notifyCharactersOfNPCDeath(npc);
-
       const goldLoot = this.npcLoot.getGoldLoot(npcWithSkills);
       const totalDropRatioFromParty = await this.calculateTotalDropRatioFromParty(npc);
 
@@ -116,6 +114,8 @@ export class NPCDeathQueue {
       await this.updateNPCAfterDeath(npcWithSkills);
     } catch (error) {
       console.error(error);
+    } finally {
+      await this.notifyCharactersOfNPCDeath(npc);
     }
   }
 
