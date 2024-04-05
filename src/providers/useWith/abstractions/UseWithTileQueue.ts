@@ -52,15 +52,18 @@ export class UseWithTileQueue {
     );
   }
 
-  public async addToQueue(data: IUseWithTile, character: ICharacter): Promise<void> {
+  public async addToQueue(useWithTileData: IUseWithTile, character: ICharacter): Promise<void> {
     await this.multiQueue.addJob(
       "use-with-tile",
       async (job) => {
-        const data = job.data as IUseWithTile;
+        const { useWithTileData, character } = job.data;
 
-        await this.onExecuteUseWithTile(character, data);
+        await this.onExecuteUseWithTile(character, useWithTileData);
       },
-      data as unknown as Record<string, unknown>,
+      {
+        character,
+        useWithTileData,
+      },
       {
         queueScaleBy: "active-characters",
       }

@@ -39,11 +39,14 @@ export class ChatNetworkGlobalMessagingQueue {
     await this.multiQueue.addJob(
       "chat-global-messaging",
       async (job) => {
-        const data = job.data as IChatMessageCreatePayload;
+        const { data, character } = job.data;
 
         await this.execGlobalMessaging(data, character);
       },
-      data as unknown as Record<string, unknown>
+      {
+        character,
+        data,
+      }
     );
   }
 
