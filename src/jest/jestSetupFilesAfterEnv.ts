@@ -179,6 +179,7 @@ jest.mock("@providers/constants/LootConstants", () => ({
   LOOT_FOOD_DROP_CHANCE: 0.5,
   LOOT_GOLD_DROP_CHANCE: 1,
   NPC_LOOT_CHANCE_MULTIPLIER: 1,
+  LOOT_FOOD_DROP_CHANCE_FOR_NOOB: 0.5,
 }));
 
 jest.mock("@providers/constants/CraftingConstants", () => ({

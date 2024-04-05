@@ -8,7 +8,7 @@ export const EXP_RATIO = 1.4;
 
 export const SP_INCREASE_BASE = 0.6;
 
-export const LOW_SKILL_LEVEL_SP_INCREASE_BONUS = 5;
+export const LOW_SKILL_LEVEL_SP_INCREASE_BONUS = 10;
 
 export const SP_CRAFTING_INCREASE_RATIO = SP_INCREASE_BASE * 60;
 
