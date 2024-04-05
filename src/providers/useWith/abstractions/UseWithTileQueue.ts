@@ -143,7 +143,7 @@ export class UseWithTileQueue {
       MAP_LAYERS_TO_ID[data.targetTile.layer]
     );
 
-    if (!tileId) {
+    if (tileId === undefined) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, the selected tile doesn't exist.");
       return;
     }
