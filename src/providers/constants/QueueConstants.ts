@@ -2,7 +2,7 @@ export const QUEUE_INACTIVITY_THRESHOLD_MS = 60 * 3 * 1000; // 3 min
 
 export const QUEUE_CLOSE_CHECK_MAX_TRIES = 10; // Set your desired maximum number of tries
 
-// Remember this is by process and instance. So these numbers can easily skyrocket!
+// Remember this is by process and instance. So these numbers can easily skyrocket! Currently we have 4x 4 CPU instances running, so 16 total for EACH queue on a 1 Factor.
 export const QUEUE_NPC_MAX_SCALE_FACTOR = 2;
 export const QUEUE_CHARACTER_MAX_SCALE_FACTOR = 2;
 
