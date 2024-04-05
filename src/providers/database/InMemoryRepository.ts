@@ -15,7 +15,7 @@ export class InMemoryRepository {
       throw new Error("Resource does not have an id");
     }
 
-    await this.redisManager.client.set(`${namespace}:${resource._id}`, JSON.stringify(resource));
+    await this.redisManager.client?.set(`${namespace}:${resource._id}`, JSON.stringify(resource));
 
     const savedResource = await this.read<T>(namespace, resource._id);
 
@@ -27,7 +27,7 @@ export class InMemoryRepository {
   }
 
   public async read<T>(namespace: string, resourceId: string): Promise<T | undefined> {
-    const resource = await this.redisManager.client.get(`${namespace}:${resourceId}`);
+    const resource = await this.redisManager.client?.get(`${namespace}:${resourceId}`);
 
     if (!resource) {
       return;
@@ -50,7 +50,7 @@ export class InMemoryRepository {
   }
 
   public async update<T>(namespace: string, resource: RedisResource<T>): Promise<T> {
-    await this.redisManager.client.set(`${namespace}:${resource._id}`, JSON.stringify(resource));
+    await this.redisManager.client?.set(`${namespace}:${resource._id}`, JSON.stringify(resource));
 
     const updatedResource = await this.read<T>(namespace, resource._id as string);
 
@@ -69,7 +69,7 @@ export class InMemoryRepository {
         return false;
       }
 
-      await this.redisManager.client.del(`${namespace}:${resourceId}`);
+      await this.redisManager.client?.del(`${namespace}:${resourceId}`);
 
       return true;
     } catch (error) {
