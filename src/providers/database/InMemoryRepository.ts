@@ -16,7 +16,7 @@ export class InMemoryRepository {
 
   public async init(): Promise<void> {
     if (appEnv.general.IS_UNIT_TEST) {
-      this.connection = this.redisManager.client!;
+      this.connection = this.redisManager.client!; // we use this to keep it simple during unit tests. Otherwise we'd need to mock the pool factory and etc.
       return;
     }
 
