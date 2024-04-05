@@ -177,6 +177,10 @@ export class MultiQueue {
           const queue = this.queues.get(queueName);
           const worker = this.workers.get(queueName);
 
+          if (queue || worker) {
+            console.log(`🔒 Releasing connection for queue ${queueName}`);
+          }
+
           await worker?.close(); // Close the worker
           await queue?.close(); // Close the queue
           await queue?.obliterate({ force: true }); // Remove the queue and its data from Redis
