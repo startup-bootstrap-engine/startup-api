@@ -3,8 +3,6 @@ import { ChatLog } from "@entities/ModuleSystem/ChatLogModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterView } from "@providers/character/CharacterView";
-import { appEnv } from "@providers/config/env";
-import { RedisManager } from "@providers/database/RedisManager";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketTransmissionZone } from "@providers/sockets/SocketTransmissionZone";
@@ -13,29 +11,19 @@ import { SpellCast } from "@providers/spells/SpellCast";
 import {
   ChatMessageType,
   ChatSocketEvents,
-  EnvType,
   GRID_HEIGHT,
   GRID_WIDTH,
   IChatMessageCreatePayload,
   IChatMessageReadPayload,
   SOCKET_TRANSMISSION_ZONE_WIDTH,
 } from "@rpg-engine/shared";
-import { Queue, Worker } from "bullmq";
 import { ChatUtils } from "./ChatUtils";
 
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
-import { v4 as uuidv4 } from "uuid";
+import { MultiQueue } from "@providers/queue/MultiQueue";
 
 @provideSingleton(ChatNetworkGlobalMessagingQueue)
 export class ChatNetworkGlobalMessagingQueue {
-  private queue: Queue<any, any, string> | null = null;
-  private worker: Worker | null = null;
-  private connection: any;
-  private queueName: string = `chat-global-messaging-${uuidv4()}-${
-    appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
-  }`;
-
   constructor(
     private socketAuth: SocketAuth,
     private socketMessaging: SocketMessaging,
@@ -44,96 +32,27 @@ export class ChatNetworkGlobalMessagingQueue {
     private spellCast: SpellCast,
     private characterValidation: CharacterValidation,
     private chatUtils: ChatUtils,
-    private redisManager: RedisManager,
-    private queueActivityMonitor: QueueActivityMonitor
+    private multiQueue: MultiQueue
   ) {}
 
-  public initQueue(): void {
-    if (!this.connection) {
-      this.connection = this.redisManager.client;
-    }
-
-    if (!this.queue) {
-      this.queue = new Queue(this.queueName, {
-        connection: this.connection,
-      });
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.queue.on("error", async (error) => {
-          console.error(`Error in the ${this.queueName}:`, error);
-
-          await this.queue?.close();
-          this.queue = null;
-        });
-      }
-    }
-
-    if (!this.worker) {
-      this.worker = new Worker(
-        this.queueName,
-        async (job) => {
-          const { character, data } = job.data;
-
-          await this.queueActivityMonitor.updateQueueActivity(this.queueName);
-
-          await this.execGlobalMessaging(data, character);
-        },
-        {
-          name: `${this.queueName}-worker`,
-          connection: this.connection,
-        }
-      );
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.worker.on("failed", async (job, err) => {
-          console.log(`${this.queueName} job ${job?.id} failed with error ${err.message}`);
-
-          await this.worker?.close();
-          this.worker = null;
-        });
-      }
-    }
-  }
-
   public async addToQueue(data: IChatMessageCreatePayload, character: ICharacter): Promise<void> {
-    if (!this.connection || !this.queue || !this.worker) {
-      this.initQueue();
-    }
+    await this.multiQueue.addJob(
+      "chat-global-messaging",
+      async (job) => {
+        const data = job.data as IChatMessageCreatePayload;
 
-    await this.queue?.add(
-      this.queueName,
-      {
-        character,
-        data,
+        await this.execGlobalMessaging(data, character);
       },
-      {
-        removeOnComplete: true,
-        removeOnFail: true,
-      }
+      data as unknown as Record<string, unknown>
     );
   }
 
-  public async shutdown(): Promise<void> {
-    await this.queue?.close();
-    await this.worker?.close();
-
-    this.queue = null;
-    this.worker = null;
+  public async clearAllJobs(): Promise<void> {
+    await this.multiQueue.clearAllJobs();
   }
 
-  public async clearAllJobs(): Promise<void> {
-    try {
-      if (!this.queue) {
-        this.initQueue();
-      }
-
-      const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
-      for (const job of jobs) {
-        await job?.remove();
-      }
-    } catch (error) {
-      console.error(error);
-    }
+  public async shutdown(): Promise<void> {
+    await this.multiQueue.shutdown();
   }
 
   @TrackNewRelicTransaction()
