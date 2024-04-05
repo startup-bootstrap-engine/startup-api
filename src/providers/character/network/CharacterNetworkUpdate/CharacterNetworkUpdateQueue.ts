@@ -65,11 +65,14 @@ export class CharacterNetworkUpdateQueue {
     await this.multiQueue.addJob(
       "character-network-update",
       async (job) => {
-        const data = job.data as ICharacterPositionUpdateFromClient;
+        const { character, data } = job.data;
 
         await this.execPositionUpdate(data, character);
       },
-      data as unknown as Record<string, unknown>,
+      {
+        character,
+        data,
+      },
       {
         queueScaleBy: "active-characters",
       }

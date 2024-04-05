@@ -6,10 +6,12 @@ import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { Queue } from "bullmq";
 import dayjs from "dayjs";
+import { Redis } from "ioredis";
 
 @provideSingleton(QueueActivityMonitor)
 export class QueueActivityMonitor {
-  connection: any;
+  private connection: Redis | null = null;
+
   constructor(
     private inMemoryHashTable: InMemoryHashTable,
     private newRelic: NewRelic,
@@ -63,7 +65,7 @@ export class QueueActivityMonitor {
 
       if (now.diff(lastActivityDate, "millisecond") > 2000) {
         if (!this.connection) {
-          this.connection = this.redisManager.client;
+          this.connection = await this.redisManager.getPoolClient("queue-activity-monitor");
         }
 
         const queue = new Queue(queueName, {
@@ -90,5 +92,9 @@ export class QueueActivityMonitor {
         }
       }
     }
+
+    await this.redisManager.releasePoolClient(this.connection!);
+
+    this.connection = null;
   }
 }
