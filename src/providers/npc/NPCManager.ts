@@ -5,7 +5,6 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { NPC_MIN_DISTANCE_TO_ACTIVATE } from "@providers/constants/NPCConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
-import { Promise } from "bluebird";
 import { provide } from "inversify-binding-decorators";
 import { NPCView } from "./NPCView";
 
@@ -32,8 +31,6 @@ export class NPCManager {
   public async startNearbyNPCsBehaviorLoop(character: ICharacter): Promise<void> {
     const nearbyNPCs = await this.npcView.getNPCsInView(character, { isBehaviorEnabled: false });
 
-    const behaviorLoops: Promise<void>[] = [];
-
     for (const npc of nearbyNPCs) {
       const distanceToCharacterInGrid = this.mathHelper.getDistanceInGridCells(npc.x, npc.y, character.x, character.y);
 
@@ -41,10 +38,8 @@ export class NPCManager {
         continue;
       }
 
-      behaviorLoops.push(this.startBehaviorLoop(npc));
+      await this.startBehaviorLoop(npc);
     }
-
-    await Promise.all(behaviorLoops);
   }
 
   @TrackNewRelicTransaction()
