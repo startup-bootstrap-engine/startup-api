@@ -1,6 +1,7 @@
 import { appEnv } from "@providers/config/env";
 import {
   QUEUE_CHARACTER_MAX_SCALE_FACTOR,
+  QUEUE_CONNECTION_CHECK_INTERVAL,
   QUEUE_NPC_MAX_SCALE_FACTOR,
   QueueDefaultScaleFactor,
 } from "@providers/constants/QueueConstants";
@@ -8,7 +9,8 @@ import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { EnvType } from "@rpg-engine/shared";
-import { DefaultJobOptions, Job, Queue, QueueBaseOptions, Worker } from "bullmq";
+import { DefaultJobOptions, Job, Queue, QueueBaseOptions, Worker, WorkerOptions } from "bullmq";
+import { Redis } from "ioredis";
 import { random } from "lodash";
 import { QueueActivityMonitor } from "./QueueActivityMonitor";
 
@@ -27,9 +29,9 @@ interface IQueueScaleOptions {
 
 @provideSingleton(MultiQueue)
 export class MultiQueue {
-  private connection: any;
   private queues: Map<string, Queue> = new Map();
   private workers: Map<string, Worker> = new Map();
+  private queueConnections: Map<string, any> = new Map();
 
   constructor(
     private redisManager: RedisManager,
@@ -45,57 +47,79 @@ export class MultiQueue {
     addQueueOptions?: DefaultJobOptions,
     queueOptions?: QueueBaseOptions,
     workerOptions?: QueueBaseOptions
-  ): Promise<Job> {
-    if (!this.connection) {
-      this.connection = this.redisManager.client;
+  ): Promise<Job | undefined> {
+    try {
+      const { queueScaleFactor, queueScaleBy } = queueScaleOptions;
+
+      const queueName = await this.generateQueueName(prefix, queueScaleBy, queueScaleFactor, queueScaleOptions);
+
+      const connection = await this.getQueueConnection(queueName);
+
+      const queue = this.initOrFetchQueue(
+        queueName,
+        jobFn,
+        connection,
+        {
+          connection,
+          ...queueOptions,
+        },
+        workerOptions
+      );
+
+      return await queue.add(queueName, data, {
+        removeOnComplete: true,
+        removeOnFail: true,
+
+        ...addQueueOptions,
+      });
+    } catch (error) {
+      console.error(error);
     }
-
-    const { queueScaleFactor, queueScaleBy } = queueScaleOptions;
-
-    const queueName = await this.generateQueueName(prefix, queueScaleBy, queueScaleFactor, queueScaleOptions);
-
-    const queue = await this.initOrFetchQueue(
-      queueName,
-      jobFn,
-      {
-        connection: this.connection,
-        ...queueOptions,
-      },
-      workerOptions
-    );
-
-    return await queue.add(queueName, data, {
-      removeOnComplete: true,
-      removeOnFail: true,
-      ...addQueueOptions,
-    });
   }
 
-  private async initOrFetchQueue(
+  public async getQueueConnection(queueName: string): Promise<Redis> {
+    let connection = this.queueConnections.get(queueName);
+    if (connection) {
+      return connection;
+    } else {
+      connection = await this.redisManager.getPoolClient(queueName);
+      this.queueConnections.set(queueName, connection);
+    }
+    return connection;
+  }
+
+  private initOrFetchQueue(
     queueName: string,
     jobFn: QueueJobFn,
+    connection: Redis,
     queueOptions: QueueBaseOptions,
     workerOptions?: QueueBaseOptions
-  ): Promise<Queue> {
-    let queue;
+  ): Queue {
+    let queue = this.queues.get(queueName);
 
-    // Make sure we fetch queue info from a centralized state, because otherwise we might end up with multiple queues
-    const isQueueInitialized =
-      (await this.queueActivityMonitor.hasQueueActivity(queueName)) || this.queues.has(queueName);
-
-    if (!isQueueInitialized) {
-      console.log(`💡 Initializing queue ${queueName}`);
+    if (!queue) {
+      console.log(`💡💡💡 Initializing queue ${queueName} 💡💡💡`);
       queue = new Queue(queueName, queueOptions);
       this.queues.set(queueName, queue);
-      await this.queueActivityMonitor.updateQueueActivity(queueName);
-    } else {
-      queue = this.queues.get(queueName);
+      // constantly pool the connection to check if it's still needed
+      this.monitorAndReleaseInactiveQueueRedisConnections(queueName, connection);
 
-      if (!queue) {
-        queue = new Queue(queueName, queueOptions);
-      }
+      queue.on("error", (error) => {
+        console.error(`Queue error: ${error.message}`);
+      });
     }
 
+    this.initOrFetchWorker(queueName, jobFn, connection, workerOptions);
+
+    return queue;
+  }
+
+  private initOrFetchWorker(
+    queueName: string,
+    jobFn: QueueJobFn,
+    connection: Redis,
+    workerOptions?: WorkerOptions
+  ): void {
     let worker = this.workers.get(queueName);
 
     if (!worker) {
@@ -104,60 +128,67 @@ export class MultiQueue {
         async (job) => {
           try {
             await this.queueActivityMonitor.updateQueueActivity(queueName);
-
             await jobFn(job);
           } catch (error) {
             console.error(`Error processing ${queueName} job ${job.id}: ${error.message}`);
           }
         },
         {
-          connection: this.connection,
+          name: `${queueName}-worker`,
+          connection,
           ...workerOptions,
         }
       );
+      this.workers.set(queueName, worker);
 
       if (!appEnv.general.IS_UNIT_TEST) {
         worker.on("failed", async (job, err) => {
           console.log(`${queueName} job ${job?.id} failed with error ${err.message}`);
-
           await worker?.close();
         });
       }
-      this.workers.set(queueName, worker);
-    }
-
-    return queue;
-  }
-
-  public async clearAllJobs(): Promise<void> {
-    for (const [queueName, queue] of this.queues.entries()) {
-      const jobs = await queue.getJobs(["waiting", "active", "delayed", "paused"]);
-      for (const job of jobs) {
-        await job
-          .remove()
-          .catch((err) => console.error(`Error removing job ${job.id} from queue ${queueName}:`, err.message));
-      }
     }
   }
 
-  public async shutdown(): Promise<void> {
-    for (const [queueName, queue] of this.queues.entries()) {
-      const worker = this.workers.get(queueName);
-      if (worker) {
-        await worker
-          .close()
-          .catch((err) => console.error(`Error shutting down worker for queue ${queueName}:`, err.message));
-        // Optionally, remove the worker from the workers map if it's no longer needed
-        this.workers.delete(queueName);
-      }
+  // Remember each redis client connection consume resources, so it's important to release them when they're no longer needed
+  private monitorAndReleaseInactiveQueueRedisConnections(queueName: string, connection: any): void {
+    console.log(`🔎 Monitoring connection for queue ${queueName}`);
 
-      await queue.close().catch((err) => console.error(`Error shutting down queue ${queueName}:`, err.message));
-      // Optionally, remove the queue from the queues map if it's no longer needed
-      this.queues.delete(queueName);
+    this.queueConnections.set(queueName, connection);
 
-      // Update the queue activity monitor if necessary
-      await this.queueActivityMonitor.deleteQueueActivity(queueName);
-    }
+    const queueConnectionInterval = setInterval(
+      async () => {
+        const hasQueueActivity = await this.queueActivityMonitor.hasQueueActivity(queueName);
+
+        if (!hasQueueActivity) {
+          console.log(`🔒 Releasing connection for queue ${queueName}`);
+
+          const connection = this.queueConnections.get(queueName);
+
+          if (!connection) {
+            console.error(`Error releasing connection for queue ${queueName}: Connection not found`);
+            clearInterval(queueConnectionInterval);
+            return;
+          }
+
+          await this.redisManager.releasePoolClient(connection);
+          this.queueConnections.delete(queueName);
+
+          const queue = this.queues.get(queueName);
+          const worker = this.workers.get(queueName);
+
+          await worker?.close(); // Close the worker
+          await queue?.close(); // Close the queue
+          await queue?.obliterate({ force: true }); // Remove the queue and its data from Redis
+
+          this.queues.delete(queueName); // Remove the queue from the queues map as well, since we dont have a connection anymore (this will force a new queue creation on the next job)
+          this.workers.delete(queueName); // Remove the worker from the workers map as well
+          clearInterval(queueConnectionInterval);
+        }
+      },
+
+      QUEUE_CONNECTION_CHECK_INTERVAL
+    );
   }
 
   private async generateQueueName(
@@ -210,6 +241,39 @@ export class MultiQueue {
           queueScaleOptions?.forceCustomScale || QUEUE_NPC_MAX_SCALE_FACTOR
         );
         return `${prefix}-${envSuffix}-${NPCQueueScaleFactor}`;
+    }
+  }
+
+  // Moved down here for readability
+
+  public async clearAllJobs(): Promise<void> {
+    for (const [queueName, queue] of this.queues.entries()) {
+      const jobs = await queue.getJobs(["waiting", "active", "delayed", "paused"]);
+      for (const job of jobs) {
+        await job
+          .remove()
+          .catch((err) => console.error(`Error removing job ${job.id} from queue ${queueName}:`, err.message));
+      }
+    }
+  }
+
+  public async shutdown(): Promise<void> {
+    for (const [queueName, queue] of this.queues.entries()) {
+      const worker = this.workers.get(queueName);
+      if (worker) {
+        await worker
+          .close()
+          .catch((err) => console.error(`Error shutting down worker for queue ${queueName}:`, err.message));
+        // Optionally, remove the worker from the workers map if it's no longer needed
+        this.workers.delete(queueName);
+      }
+
+      await queue.close().catch((err) => console.error(`Error shutting down queue ${queueName}:`, err.message));
+      // Optionally, remove the queue from the queues map if it's no longer needed
+      this.queues.delete(queueName);
+
+      // Update the queue activity monitor if necessary
+      await this.queueActivityMonitor.deleteQueueActivity(queueName);
     }
   }
 }

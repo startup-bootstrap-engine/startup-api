@@ -1,10 +1,10 @@
 import { NewRelic } from "@providers/analytics/NewRelic";
-import { QUEUE_CLOSE_CHECK_MAX_TRIES, QUEUE_INACTIVITY_THRESHOLD } from "@providers/constants/QueueConstants";
+import { QUEUE_CLOSE_CHECK_MAX_TRIES } from "@providers/constants/QueueConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
-import { Queue, Worker } from "bullmq";
+import { Queue } from "bullmq";
 import dayjs from "dayjs";
 
 @provideSingleton(QueueActivityMonitor)
@@ -14,7 +14,11 @@ export class QueueActivityMonitor {
     private inMemoryHashTable: InMemoryHashTable,
     private newRelic: NewRelic,
     private redisManager: RedisManager
-  ) {}
+  ) {
+    setInterval(async () => {
+      console.log(`Active queues: ${await this.getAllQueues()}`);
+    }, 5000);
+  }
 
   private readonly queueActivityNamespace = "queue-activity";
 
@@ -57,19 +61,13 @@ export class QueueActivityMonitor {
       const now = dayjs();
       const lastActivityDate = dayjs(Number(lastActivity));
 
-      if (now.diff(lastActivityDate, "millisecond") > QUEUE_INACTIVITY_THRESHOLD) {
+      if (now.diff(lastActivityDate, "millisecond") > 2000) {
         if (!this.connection) {
           this.connection = this.redisManager.client;
         }
 
         const queue = new Queue(queueName, {
           connection: this.connection,
-          sharedConnection: true,
-        });
-
-        const worker = new Worker(queueName, async () => {}, {
-          connection: this.connection,
-          sharedConnection: true,
         });
 
         try {
@@ -86,9 +84,6 @@ export class QueueActivityMonitor {
             }
           }
 
-          await worker.close(); // Close the worker
-          await queue.close(); // Close the queue
-          await queue.obliterate({ force: true }); // Remove the queue and its data from Redis
           await this.deleteQueueActivity(queueName); // Remove the queue from the centralized store
         } catch (error) {
           console.error(`Failed to remove inactive queue: ${queueName}`, error);
