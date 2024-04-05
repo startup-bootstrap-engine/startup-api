@@ -1,5 +1,5 @@
 import { NewRelic } from "@providers/analytics/NewRelic";
-import { QUEUE_CLOSE_CHECK_MAX_TRIES } from "@providers/constants/QueueConstants";
+import { QUEUE_CLOSE_CHECK_MAX_TRIES, QUEUE_INACTIVITY_THRESHOLD_MS } from "@providers/constants/QueueConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
@@ -16,11 +16,7 @@ export class QueueActivityMonitor {
     private inMemoryHashTable: InMemoryHashTable,
     private newRelic: NewRelic,
     private redisManager: RedisManager
-  ) {
-    setInterval(async () => {
-      console.log(`Active queues: ${await this.getAllQueues()}`);
-    }, 5000);
-  }
+  ) {}
 
   private readonly queueActivityNamespace = "queue-activity";
 
@@ -63,7 +59,7 @@ export class QueueActivityMonitor {
       const now = dayjs();
       const lastActivityDate = dayjs(Number(lastActivity));
 
-      if (now.diff(lastActivityDate, "millisecond") > 2000) {
+      if (now.diff(lastActivityDate, "millisecond") > QUEUE_INACTIVITY_THRESHOLD_MS) {
         if (!this.connection) {
           this.connection = await this.redisManager.getPoolClient("queue-activity-monitor");
         }

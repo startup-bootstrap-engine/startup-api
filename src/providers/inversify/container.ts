@@ -6,6 +6,7 @@ import { CharacterBuffActivator } from "@providers/character/characterBuff/Chara
 import { CharacterBaseSpeed } from "@providers/character/characterMovement/CharacterBaseSpeed";
 import { ContainerSlotsCaching } from "@providers/container/ContainerSlotsCaching";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
+import { InMemoryRepository } from "@providers/database/InMemoryRepository";
 import { RedisManager } from "@providers/database/RedisManager";
 import { EntityEffectUse } from "@providers/entityEffects/EntityEffectUse";
 import { EquipmentSlots } from "@providers/equipment/EquipmentSlots";
@@ -73,6 +74,8 @@ export const characterConnection = container.get<CharacterConnection>(CharacterC
 export const redisManager = container.get<RedisManager>(RedisManager);
 
 export const inMemoryHashTable = container.get<InMemoryHashTable>(InMemoryHashTable);
+
+export const inMemoryRepository = container.get<InMemoryRepository>(InMemoryRepository);
 
 export const pm2Helper = container.get<PM2Helper>(PM2Helper);
 

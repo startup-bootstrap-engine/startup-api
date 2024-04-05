@@ -15,15 +15,7 @@ export class RedisIOClient {
 
   private readonly redisConnectionURL: string = `redis://${appEnv.database.REDIS_CONTAINER}:${appEnv.database.REDIS_PORT}`;
 
-  constructor(private redisConnectionManager: RedisClientConnectionManager) {
-    setInterval(async () => {
-      const connectedClientNames = await this.redisConnectionManager.getConnectedClientListNames(this.client);
-
-      console.log(connectedClientNames, connectedClientNames.length);
-
-      await this.redisConnectionManager.printTotalConnectedClients(this.client);
-    }, 3000);
-  }
+  constructor(private redisConnectionManager: RedisClientConnectionManager) {}
 
   public async connect(): Promise<Redis> {
     this.pool = createPool<Redis>(
