@@ -87,6 +87,7 @@ export class UseWithTileQueue {
           }
         },
         {
+          name: `${this.queueName}-worker`,
           connection: this.connection,
         }
       );
