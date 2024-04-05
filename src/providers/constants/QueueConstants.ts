@@ -13,3 +13,5 @@ export enum QueueDefaultScaleFactor {
 }
 
 export const QUEUE_NPC_CYCLE_CUSTOM_SCALE = 4;
+
+export const QUEUE_CONNECTION_CHECK_INTERVAL = 60 * 1000; // 1 min
