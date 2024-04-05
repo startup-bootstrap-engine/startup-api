@@ -2,7 +2,7 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { NPC } from "@entities/ModuleNPC/NPCModel";
 import { container } from "@providers/inversify/container";
-import { ItemCraftableQueue } from "@providers/item/ItemCraftable";
+import { ItemCraftableQueue } from "@providers/item/ItemCraftableQueue";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {

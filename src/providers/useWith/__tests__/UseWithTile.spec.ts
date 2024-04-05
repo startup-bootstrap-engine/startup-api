@@ -10,7 +10,7 @@ import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
-import { ItemCraftableQueue } from "@providers/item/ItemCraftable";
+import { ItemCraftableQueue } from "@providers/item/ItemCraftableQueue";
 import { FromGridX, FromGridY, IRefillableItem, IUseWithTile, MapLayers } from "@rpg-engine/shared";
 import { UseWithTileQueue } from "../abstractions/UseWithTileQueue";
 describe("UseWithTile.ts", () => {

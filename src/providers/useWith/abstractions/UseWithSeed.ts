@@ -1,6 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
-import { ItemCraftableQueue } from "@providers/item/ItemCraftable";
+import { ItemCraftableQueue } from "@providers/item/ItemCraftableQueue";
 import { itemsBlueprintIndex } from "@providers/item/data";
 import { seedToPlantMapping } from "@providers/plant/data/PlantSeedMap";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";

@@ -26,12 +26,10 @@ import {
 
 import { appEnv } from "@providers/config/env";
 import { BONUS_DAMAGE_MULTIPLIER, GENERATE_BLOOD_GROUND_ON_HIT } from "@providers/constants/BattleConstants";
-import { RedisManager } from "@providers/database/RedisManager";
 import { blueprintManager } from "@providers/inversify/container";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MultiQueue } from "@providers/queue/MultiQueue";
-import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import random from "lodash/random";
 import { BattleAttackTargetDeath } from "./BattleAttackTarget/BattleAttackTargetDeath";
 import { BattleDamageCalculator } from "./BattleDamageCalculator";
@@ -54,8 +52,6 @@ export class HitTargetQueue {
     private socketMessaging: SocketMessaging,
     private entityEffectUse: EntityEffectUse,
     private battleDamageCalculator: BattleDamageCalculator,
-    private redisManager: RedisManager,
-    private queueCleaner: QueueActivityMonitor,
     private locker: Locker,
     private multiQueue: MultiQueue
   ) {}
@@ -100,6 +96,14 @@ export class HitTargetQueue {
           const { attacker, target, targetType, magicAttack, bonusDamage, spellHit } = job.data;
 
           target.type = targetType;
+
+          const hasLock =
+            (await this.locker.hasLock(`${target._id}-applying-usable-effect`)) ||
+            (await this.locker.hasLock(`${target._id}-healing-target`));
+
+          if (hasLock) {
+            return;
+          }
 
           await this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
         },
