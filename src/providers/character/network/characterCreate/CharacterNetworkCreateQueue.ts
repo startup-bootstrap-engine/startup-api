@@ -5,17 +5,15 @@ import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { GridManager } from "@providers/map/GridManager";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
-import { CharacterSocketEvents, EnvType, ICharacterCreateFromClient, ToGridX, ToGridY } from "@rpg-engine/shared";
+import { CharacterSocketEvents, ICharacterCreateFromClient, ToGridX, ToGridY } from "@rpg-engine/shared";
 import { CharacterView } from "../../CharacterView";
 
 import { BattleTargeting } from "@providers/battle/BattleTargeting";
 import { CharacterRespawn } from "@providers/character/CharacterRespawn";
-import { appEnv } from "@providers/config/env";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { Locker } from "@providers/locks/Locker";
 import { MultiQueue } from "@providers/queue/MultiQueue";
-import { Queue, Worker } from "bullmq";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterDailyPlayTracker } from "../../CharacterDailyPlayTracker";
 import { CharacterBuffValidation } from "../../characterBuff/CharacterBuffValidation";
@@ -25,13 +23,6 @@ import { CharacterCreateSocketHandler } from "./CharacterCreateSocketHandler";
 
 @provideSingleton(CharacterNetworkCreateQueue)
 export class CharacterNetworkCreateQueue {
-  private queue: Queue<any, any, string> | null = null;
-  private worker: Worker | null = null;
-  private connection: any;
-
-  private queueName = (scene: string): string =>
-    `character-network-create-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
-
   constructor(
     private socketAuth: SocketAuth,
 
@@ -69,7 +60,7 @@ export class CharacterNetworkCreateQueue {
     channel: SocketChannel
   ): Promise<void> {
     await this.multiQueue.addJob(
-      this.queueName(character.scene),
+      "character-create",
       async (job) => {
         const { character, data } = job.data;
 
