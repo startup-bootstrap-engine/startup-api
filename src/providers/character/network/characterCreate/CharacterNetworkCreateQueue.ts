@@ -15,6 +15,7 @@ import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { Locker } from "@providers/locks/Locker";
+import { MultiQueue } from "@providers/queue/MultiQueue";
 import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { Queue, Worker } from "bullmq";
 import { clearCacheForKey } from "speedgoose";
@@ -50,7 +51,8 @@ export class CharacterNetworkCreateQueue {
     private characterCreateSocketHandler: CharacterCreateSocketHandler,
     private characterCreateInteractionManager: CharacterCreateInteractionManager,
     private characterCreateRegen: CharacterCreateRegen,
-    private characterRespawn: CharacterRespawn
+    private characterRespawn: CharacterRespawn,
+    private multiQueue: MultiQueue
   ) {}
 
   public onCharacterCreate(channel: SocketChannel): void {
@@ -64,99 +66,33 @@ export class CharacterNetworkCreateQueue {
     );
   }
 
-  public initQueue(scene: string): void {
-    if (!this.connection) {
-      this.connection = this.redisManager.client;
-    }
-
-    if (!this.queue) {
-      this.queue = new Queue(this.queueName(scene), {
-        connection: this.connection,
-      });
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.queue.on("error", async (error) => {
-          console.error(`Error in the ${this.queueName(scene)}:`, error);
-
-          await this.queue?.close();
-          this.queue = null;
-        });
-      }
-    }
-
-    if (!this.worker) {
-      this.worker = new Worker(
-        this.queueName(scene),
-        async (job) => {
-          const { character, data } = job.data;
-
-          try {
-            await this.queueActivityMonitor.updateQueueActivity(this.queueName(scene));
-
-            await this.execCharacterCreate(character, data);
-          } catch (err) {
-            console.error(`Error processing ${this.queueName(scene)} for Character ${character.name}:`, err);
-            throw err;
-          }
-        },
-        {
-          name: `${this.queueName(scene)}-worker`,
-          connection: this.connection,
-        }
-      );
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.worker.on("failed", async (job, err) => {
-          console.log(`${this.queueName(scene)} job ${job?.id} failed with error ${err.message}`);
-
-          await this.worker?.close();
-          this.worker = null;
-        });
-      }
-    }
-  }
-
-  public async clearAllJobs(): Promise<void> {
-    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
-    for (const job of jobs) {
-      try {
-        await job?.remove();
-      } catch (err) {
-        console.error(`Error removing job ${job?.id}:`, err.message);
-      }
-    }
-  }
-
-  public async shutdown(): Promise<void> {
-    await this.queue?.close();
-    await this.worker?.close();
-
-    this.queue = null;
-    this.worker = null;
-  }
-
   public async characterCreate(
     character: ICharacter,
     data: ICharacterCreateFromClient,
     channel: SocketChannel
   ): Promise<void> {
-    if (!this.connection || !this.queue || !this.worker) {
-      this.initQueue(character.scene);
-    }
-
-    await this.queue?.add(
+    await this.multiQueue.addJob(
       this.queueName(character.scene),
-      {
-        character,
-        data,
+      async (job) => {
+        const { character, data } = job.data;
+
+        await this.execCharacterCreate(character, data);
       },
+      { character, data },
       {
-        removeOnComplete: true,
-        removeOnFail: true,
+        queueScaleBy: "active-characters",
       }
     );
 
     await this.characterCreateSocketHandler.manageSocketConnections(channel, character);
+  }
+
+  public async clearAllJobs(): Promise<void> {
+    await this.multiQueue.clearAllJobs();
+  }
+
+  public async shutdown(): Promise<void> {
+    await this.multiQueue.shutdown();
   }
 
   private async execCharacterCreate(character: ICharacter, data: ICharacterCreateFromClient): Promise<void> {

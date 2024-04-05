@@ -22,11 +22,10 @@ import {
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { appEnv } from "@providers/config/env";
 import { MAX_PING_TRACKING_THRESHOLD } from "@providers/constants/ServerConstants";
-import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MapTransition } from "@providers/map/MapTransition/MapTransition";
-import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
+import { MultiQueue } from "@providers/queue/MultiQueue";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { Queue, Worker } from "bullmq";
 import dayjs from "dayjs";
@@ -55,97 +54,30 @@ export class CharacterNetworkUpdateQueue {
     private newRelic: NewRelic,
     private locker: Locker,
     private mapTransition: MapTransition,
-    private redisManager: RedisManager,
-    private queueActivityMonitor: QueueActivityMonitor
+    private multiQueue: MultiQueue
   ) {}
 
-  public initQueue(scene: string): void {
-    if (!this.connection) {
-      this.connection = this.redisManager.client;
-    }
+  public async addToQueue(data: ICharacterPositionUpdateFromClient, character: ICharacter): Promise<void> {
+    await this.multiQueue.addJob(
+      "character-network-update",
+      async (job) => {
+        const data = job.data as ICharacterPositionUpdateFromClient;
 
-    if (!this.queue) {
-      this.queue = new Queue(this.queueName(scene), {
-        connection: this.connection,
-      });
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.queue.on("error", async (error) => {
-          console.error(`Error in the ${this.queueName(scene)}:`, error);
-
-          await this.queue?.close();
-          this.queue = null;
-        });
+        await this.execPositionUpdate(data, character);
+      },
+      data as unknown as Record<string, unknown>,
+      {
+        queueScaleBy: "active-characters",
       }
-    }
-
-    if (!this.worker) {
-      this.worker = new Worker(
-        this.queueName(scene),
-        async (job) => {
-          const { character, data } = job.data;
-
-          try {
-            await this.queueActivityMonitor.updateQueueActivity(this.queueName(scene));
-
-            await this.execPositionUpdate(data, character);
-          } catch (err) {
-            console.error(`Error processing ${this.queueName(scene)} for Character ${character.name}:`, err);
-            throw err;
-          }
-        },
-        {
-          name: `${this.queueName(scene)}-worker`,
-          connection: this.connection,
-        }
-      );
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.worker.on("failed", async (job, err) => {
-          console.log(`${this.queueName(scene)} job ${job?.id} failed with error ${err.message}`);
-
-          await this.worker?.close();
-          this.worker = null;
-        });
-      }
-    }
+    );
   }
 
   public async clearAllJobs(): Promise<void> {
-    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
-    for (const job of jobs) {
-      try {
-        await job?.remove();
-      } catch (err) {
-        console.error(`Error removing job ${job?.id}:`, err.message);
-      }
-    }
+    await this.multiQueue.clearAllJobs();
   }
 
   public async shutdown(): Promise<void> {
-    await this.queue?.close();
-    await this.worker?.close();
-
-    this.queue = null;
-    this.worker = null;
-  }
-
-  public async addToQueue(data: ICharacterPositionUpdateFromClient, character: ICharacter): Promise<void> {
-    if (!this.connection || !this.queue || !this.worker) {
-      this.initQueue(character.scene);
-    }
-
-    await this.queue?.add(
-      this.queueName(character.scene),
-      {
-        data,
-        character,
-      },
-      {
-        removeOnComplete: true,
-        removeOnFail: true,
-      }
-    );
+    await this.multiQueue.shutdown();
   }
 
   public onCharacterUpdatePosition(channel: SocketChannel): void {
