@@ -1,7 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { container } from "@providers/inversify/container";
-import { ItemCraftable } from "@providers/item/ItemCraftable";
+import { ItemCraftableQueue } from "@providers/item/ItemCraftable";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { UseWithItemToTile } from "@providers/useWith/abstractions/UseWithItemToTile";
 import { IUseWithTargetTile } from "@providers/useWith/useWithTypes";
@@ -40,7 +40,7 @@ export const itemElderHeartAxe: IToolItemBlueprint = {
     targetTile: IUseWithTargetTile,
     targetName: string,
     character: ICharacter,
-    itemCraftable: ItemCraftable,
+    itemCraftable: ItemCraftableQueue,
     skillIncrease: SkillIncrease
   ): Promise<void> => {
     const useWithItemToTile = container.get<UseWithItemToTile>(UseWithItemToTile);

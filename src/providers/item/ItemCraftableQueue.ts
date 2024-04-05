@@ -17,7 +17,6 @@ import { IUseWithCraftingRecipe } from "@providers/useWith/useWithTypes";
 import {
   AnimationEffectKeys,
   CraftingSkill,
-  EnvType,
   ICraftItemPayload,
   IEquipmentAndInventoryUpdatePayload,
   IItemContainer,
@@ -43,24 +42,15 @@ import { AvailableBlueprints } from "./data/types/itemsBlueprintTypes";
 
 import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
 import { appEnv } from "@providers/config/env";
-import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
-import { Queue, Worker } from "bullmq";
+import { MultiQueue } from "@providers/queue/MultiQueue";
 import _ from "lodash";
 import { ItemCraftbook } from "./ItemCraftbook";
 import { ItemCraftingRecipes } from "./ItemCraftingRecipes";
 
-@provideSingleton(ItemCraftable)
-export class ItemCraftable {
-  private queue: Queue<any, any, string> | null = null;
-  private worker: Worker | null = null;
-  private connection: any;
-
-  private queueName = (scene: string): string =>
-    `item-craftable-${appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id}-${scene}`;
-
+@provideSingleton(ItemCraftableQueue)
+export class ItemCraftableQueue {
   constructor(
     private socketMessaging: SocketMessaging,
     private characterItemContainer: CharacterItemContainer,
@@ -76,81 +66,9 @@ export class ItemCraftable {
     private itemCraftingRecipes: ItemCraftingRecipes,
     private itemCraftbook: ItemCraftbook,
     private characterPremiumAccount: CharacterPremiumAccount,
-    private redisManager: RedisManager,
-    private queueActivityMonitor: QueueActivityMonitor,
-    private locker: Locker
+    private locker: Locker,
+    private multiQueue: MultiQueue
   ) {}
-
-  public initQueue(scene: string): void {
-    if (!this.connection) {
-      this.connection = this.redisManager.client;
-    }
-
-    if (!this.queue) {
-      this.queue = new Queue(this.queueName(scene), {
-        connection: this.connection,
-      });
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.queue.on("error", async (error) => {
-          console.error(`Error in the ${this.queueName(scene)}:`, error);
-
-          await this.queue?.close();
-          this.queue = null;
-        });
-      }
-    }
-
-    if (!this.worker) {
-      this.worker = new Worker(
-        this.queueName(scene),
-        async (job) => {
-          const { character, itemToCraft } = job.data;
-
-          try {
-            await this.queueActivityMonitor.updateQueueActivity(this.queueName(scene));
-
-            await this.execCraftItem(itemToCraft, character);
-          } catch (err) {
-            console.error(`Error processing ${this.queueName(scene)} for Character ${character.name}:`, err);
-            throw err;
-          }
-        },
-        {
-          name: `${this.queueName(scene)}-worker`,
-          connection: this.connection,
-        }
-      );
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.worker.on("failed", async (job, err) => {
-          console.log(`${this.queueName(scene)} job ${job?.id} failed with error ${err.message}`);
-
-          await this.worker?.close();
-          this.worker = null;
-        });
-      }
-    }
-  }
-
-  public async clearAllJobs(): Promise<void> {
-    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
-    for (const job of jobs) {
-      try {
-        await job?.remove();
-      } catch (err) {
-        console.error(`Error removing job ${job?.id}:`, err.message);
-      }
-    }
-  }
-
-  public async shutdown(): Promise<void> {
-    await this.queue?.close();
-    await this.worker?.close();
-
-    this.queue = null;
-    this.worker = null;
-  }
 
   public async craftItem(itemToCraft: ICraftItemPayload, character: ICharacter): Promise<void> {
     if (appEnv.general.IS_UNIT_TEST) {
@@ -158,21 +76,29 @@ export class ItemCraftable {
       return;
     }
 
-    if (!this.connection || !this.queue || !this.worker) {
-      this.initQueue(character.scene);
-    }
+    await this.multiQueue.addJob(
+      "craft-item",
+      async (job) => {
+        const { itemToCraft, character } = job.data;
 
-    await this.queue?.add(
-      this.queueName(character.scene),
-      {
-        character,
-        itemToCraft,
+        await this.execCraftItem(itemToCraft, character);
       },
       {
-        removeOnComplete: true,
-        removeOnFail: true,
+        itemToCraft,
+        character,
+      },
+      {
+        queueScaleBy: "active-characters",
       }
     );
+  }
+
+  public async clearAllJobs(): Promise<void> {
+    await this.multiQueue.clearAllJobs();
+  }
+
+  public async shutdown(): Promise<void> {
+    await this.multiQueue.shutdown();
   }
 
   @TrackNewRelicTransaction()

@@ -1,7 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { container } from "@providers/inversify/container";
-import { ItemCraftable } from "@providers/item/ItemCraftable";
+import { ItemCraftableQueue } from "@providers/item/ItemCraftable";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { IUseWithRefill, UseWithRefill } from "@providers/useWith/abstractions/UseWithRefill";
 import { IUseWithTargetTile } from "@providers/useWith/useWithTypes";
@@ -49,7 +49,7 @@ export const itemCrimsonWateringCan: IRefillableItem = {
     targetTile: IUseWithTargetTile,
     targetName: string,
     character: ICharacter,
-    itemCraftable: ItemCraftable,
+    itemCraftable: ItemCraftableQueue,
     skillIncrease: SkillIncrease
   ): Promise<void> => {
     const useWithRefill = container.get<UseWithRefill>(UseWithRefill);

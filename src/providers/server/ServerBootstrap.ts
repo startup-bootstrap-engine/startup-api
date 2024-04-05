@@ -206,7 +206,7 @@ export class ServerBootstrap {
     await this.queueActivityMonitor.clearAllQueues();
 
     await this.pathfindingQueue.clearAllJobs();
-    await this.hitTarget.clearAllQueueJobs();
+    await this.hitTarget.clearAllJobs();
     await this.itemUseCycleQueue.clearAllJobs();
     await this.npcBattleCycleQueue.clearAllJobs();
     await this.characterNetworkUpdateQueue.clearAllJobs();
