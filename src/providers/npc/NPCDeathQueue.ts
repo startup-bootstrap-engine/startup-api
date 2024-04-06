@@ -54,10 +54,7 @@ export class NPCDeathQueue {
 
         await this.execHandleNPCDeath(killer, npc);
       },
-      { killer, npc },
-      {
-        queueScaleBy: "active-npcs",
-      }
+      { killer, npc }
     );
   }
 

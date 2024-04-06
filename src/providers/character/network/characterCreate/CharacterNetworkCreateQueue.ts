@@ -66,10 +66,7 @@ export class CharacterNetworkCreateQueue {
 
         await this.execCharacterCreate(character, data);
       },
-      { character, data },
-      {
-        queueScaleBy: "active-characters",
-      }
+      { character, data }
     );
 
     await this.characterCreateSocketHandler.manageSocketConnections(channel, character);

@@ -86,9 +86,6 @@ export class ItemCraftableQueue {
       {
         itemToCraft,
         character,
-      },
-      {
-        queueScaleBy: "active-characters",
       }
     );
   }
