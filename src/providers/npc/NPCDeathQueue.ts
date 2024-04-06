@@ -98,7 +98,7 @@ export class NPCDeathQueue {
         npc.isGiantForm
       );
 
-      const removeItemOwnershipPromise = this.itemOwnership.removeItemOwnership(npcBody.id);
+      const removeItemOwnershipPromise = this.itemOwnership.removeItemOwnership(npcBody);
       const clearNPCBehaviorPromise = this.clearNPCBehavior(npc);
       const releaseXPPromise = this.npcExperience.releaseXP(npc as INPC);
 
