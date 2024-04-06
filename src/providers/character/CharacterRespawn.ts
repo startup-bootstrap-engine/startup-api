@@ -38,7 +38,12 @@ export class CharacterRespawn {
     if (character.isFarmingMode) {
       startingPoint = INITIAL_STARTING_POINTS[CharacterGameMode.Farming];
     } else {
-      startingPoint = INITIAL_STARTING_POINTS[character.faction];
+      // temple starting point
+      startingPoint = {
+        gridX: 93,
+        gridY: 106,
+        scene: "ilya",
+      };
     }
 
     if (character.scene === "arena-hell") {
