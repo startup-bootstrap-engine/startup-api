@@ -6,7 +6,7 @@
   "example": 19.4,
   "unit-test-map-negative-coordinate": 2.6,
   "unit-test-map": 2.8,
-  "ilya-graveyard-01": 20.5,
+  "ilya-graveyard-01": 20.6,
   "dragons-lair": 18.5,
   "minotaurs-island": 25.1,
   "ilya-village-sewer": 20.3,
@@ -18,8 +18,8 @@
   "frost-island-caves": 20.1,
   "wildwood": 13.4,
   "wildwood-dungeon": 11.3,
-  "caves-04": 8.7,
-  "trolls-caves": 8.6,
+  "caves-04": 8.8,
+  "trolls-caves": 8.7,
   "shadowlands": 5.5,
   "caves-shadowlands": 5.9,
   "shadowlands-sewer": 4.5,
@@ -34,5 +34,5 @@
   "caves-shadowlands-02": 0.4,
   "arena-hell": 0.1,
   "caves-lavalands": 0.6,
-  "ilya-bandit-island": 2.3
+  "ilya-bandit-island": 2.4
 }
