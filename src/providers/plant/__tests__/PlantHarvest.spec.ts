@@ -138,6 +138,10 @@ describe("PlantHarvest.ts", () => {
     expect(updatedPlant).not.toBeNull();
     expect(updatedPlant?.currentPlantCycle).toEqual(PlantLifeCycle.Seed);
     expect(updatedPlant?.texturePath).toEqual(blueprint.stagesRequirements[PlantLifeCycle.Seed]?.texturePath);
+    expect(updatedPlant?.requiredGrowthPoints).toEqual(
+      blueprint.stagesRequirements[PlantLifeCycle.Seed]?.requiredGrowthPoints
+    );
+    expect(updatedPlant?.growthPoints).toEqual(0);
   });
 
   it("should send an error message to the character if the plant is dead", async () => {
