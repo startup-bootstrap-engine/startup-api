@@ -4,7 +4,7 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { MultiQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/MultiQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { AnimationEffectKeys, IItemUpdate, ItemSocketEvents, ItemSubType, ItemType } from "@rpg-engine/shared";
 import { CharacterInventory } from "./CharacterInventory";
@@ -21,11 +21,11 @@ export class CharacterAutoLootQueue {
     private characterInventory: CharacterInventory,
     private characterView: CharacterView,
     private animationEffect: AnimationEffect,
-    private multiQueue: MultiQueue
+    private dynamicQueue: DynamicQueue
   ) {}
 
   public async autoLoot(character: ICharacter, itemIdsToLoot: string[]): Promise<void> {
-    await this.multiQueue.addJob(
+    await this.dynamicQueue.addJob(
       "character-auto-loot",
 
       async (job) => {

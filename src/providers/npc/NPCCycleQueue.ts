@@ -11,7 +11,7 @@ import {
 import { QUEUE_NPC_CYCLE_CUSTOM_SCALE } from "@providers/constants/QueueConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { MultiQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/MultiQueue";
 import { Stun } from "@providers/spells/data/logic/warrior/Stun";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { NPCAlignment, NPCMovementType, NPCPathOrientation, ToGridX, ToGridY } from "@rpg-engine/shared";
@@ -38,7 +38,7 @@ export class NPCCycleQueue {
     private stun: Stun,
     private newRelic: NewRelic,
     private locker: Locker,
-    private multiQueue: MultiQueue
+    private dynamicQueue: DynamicQueue
   ) {}
 
   @TrackNewRelicTransaction()
@@ -48,7 +48,7 @@ export class NPCCycleQueue {
       return;
     }
 
-    await this.multiQueue.addJob(
+    await this.dynamicQueue.addJob(
       "npc-cycle-queue",
 
       async (job) => {
@@ -72,11 +72,11 @@ export class NPCCycleQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    await this.multiQueue.clearAllJobs();
+    await this.dynamicQueue.clearAllJobs();
   }
 
   public async shutdown(): Promise<void> {
-    await this.multiQueue.shutdown();
+    await this.dynamicQueue.shutdown();
   }
 
   @TrackNewRelicTransaction()

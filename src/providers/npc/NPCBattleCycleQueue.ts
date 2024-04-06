@@ -9,7 +9,7 @@ import { NPC_BATTLE_CYCLE_INTERVAL, NPC_MIN_DISTANCE_TO_ACTIVATE } from "@provid
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MovementHelper } from "@providers/movement/MovementHelper";
-import { MultiQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/MultiQueue";
 import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { NPCAlignment } from "@rpg-engine/shared";
@@ -27,7 +27,7 @@ export class NPCBattleCycleQueue {
     private movementHelper: MovementHelper,
     private battleAttackTarget: BattleAttackTarget,
     private npcView: NPCView,
-    private multiQueue: MultiQueue
+    private dynamicQueue: DynamicQueue
   ) {}
 
   public async addToQueue(npc: INPC, npcSkills: ISkill): Promise<void> {
@@ -43,7 +43,7 @@ export class NPCBattleCycleQueue {
         return;
       }
 
-      await this.multiQueue.addJob(
+      await this.dynamicQueue.addJob(
         "npc-battle-queue",
 
         async (job) => {
@@ -72,11 +72,11 @@ export class NPCBattleCycleQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    await this.multiQueue.clearAllJobs();
+    await this.dynamicQueue.clearAllJobs();
   }
 
   public async shutdown(): Promise<void> {
-    await this.multiQueue.shutdown();
+    await this.dynamicQueue.shutdown();
   }
 
   @TrackNewRelicTransaction()

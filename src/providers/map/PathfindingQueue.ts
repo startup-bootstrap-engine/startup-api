@@ -2,7 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { MultiQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/MultiQueue";
 import { Job } from "bullmq";
 import { Pathfinder } from "./Pathfinder";
 import { PathfindingResults } from "./PathfindingResults";
@@ -12,7 +12,7 @@ export class PathfindingQueue {
     private pathfinder: Pathfinder,
     private pathfindingResults: PathfindingResults,
     private locker: Locker,
-    private multiQueue: MultiQueue
+    private dynamicQueue: DynamicQueue
   ) {}
 
   async addPathfindingJob(
@@ -30,7 +30,7 @@ export class PathfindingQueue {
         return;
       }
 
-      return await this.multiQueue.addJob(
+      return await this.dynamicQueue.addJob(
         "npc-pathfinding-queue",
 
         async (job) => {
@@ -72,10 +72,10 @@ export class PathfindingQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    await this.multiQueue.clearAllJobs();
+    await this.dynamicQueue.clearAllJobs();
   }
 
   public async shutdown(): Promise<void> {
-    await this.multiQueue.shutdown();
+    await this.dynamicQueue.shutdown();
   }
 }

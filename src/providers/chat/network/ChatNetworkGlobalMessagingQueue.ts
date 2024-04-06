@@ -20,7 +20,7 @@ import {
 import { ChatUtils } from "./ChatUtils";
 
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { MultiQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/MultiQueue";
 
 @provideSingleton(ChatNetworkGlobalMessagingQueue)
 export class ChatNetworkGlobalMessagingQueue {
@@ -32,11 +32,11 @@ export class ChatNetworkGlobalMessagingQueue {
     private spellCast: SpellCast,
     private characterValidation: CharacterValidation,
     private chatUtils: ChatUtils,
-    private multiQueue: MultiQueue
+    private dynamicQueue: DynamicQueue
   ) {}
 
   public async addToQueue(data: IChatMessageCreatePayload, character: ICharacter): Promise<void> {
-    await this.multiQueue.addJob(
+    await this.dynamicQueue.addJob(
       "chat-global-messaging",
       async (job) => {
         const { data, character } = job.data;
@@ -54,11 +54,11 @@ export class ChatNetworkGlobalMessagingQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    await this.multiQueue.clearAllJobs();
+    await this.dynamicQueue.clearAllJobs();
   }
 
   public async shutdown(): Promise<void> {
-    await this.multiQueue.shutdown();
+    await this.dynamicQueue.shutdown();
   }
 
   @TrackNewRelicTransaction()

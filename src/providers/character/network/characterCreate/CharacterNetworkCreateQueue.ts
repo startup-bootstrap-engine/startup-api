@@ -13,7 +13,7 @@ import { CharacterRespawn } from "@providers/character/CharacterRespawn";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { Locker } from "@providers/locks/Locker";
-import { MultiQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/MultiQueue";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterDailyPlayTracker } from "../../CharacterDailyPlayTracker";
 import { CharacterBuffValidation } from "../../characterBuff/CharacterBuffValidation";
@@ -40,7 +40,7 @@ export class CharacterNetworkCreateQueue {
     private characterCreateInteractionManager: CharacterCreateInteractionManager,
     private characterCreateRegen: CharacterCreateRegen,
     private characterRespawn: CharacterRespawn,
-    private multiQueue: MultiQueue
+    private dynamicQueue: DynamicQueue
   ) {}
 
   public onCharacterCreate(channel: SocketChannel): void {
@@ -59,7 +59,7 @@ export class CharacterNetworkCreateQueue {
     data: ICharacterCreateFromClient,
     channel: SocketChannel
   ): Promise<void> {
-    await this.multiQueue.addJob(
+    await this.dynamicQueue.addJob(
       "character-create",
       async (job) => {
         const { character, data } = job.data;
@@ -98,11 +98,11 @@ export class CharacterNetworkCreateQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    await this.multiQueue.clearAllJobs();
+    await this.dynamicQueue.clearAllJobs();
   }
 
   public async shutdown(): Promise<void> {
-    await this.multiQueue.shutdown();
+    await this.dynamicQueue.shutdown();
   }
 
   private async respawnIfNecessary(character: ICharacter): Promise<ICharacter> {

@@ -7,7 +7,7 @@ import { ItemCraftableQueue } from "@providers/item/ItemCraftableQueue";
 import { itemsBlueprintIndex } from "@providers/item/data/index";
 import { MapTiles } from "@providers/map/MapTiles";
 import { MovementHelper } from "@providers/movement/MovementHelper";
-import { MultiQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/MultiQueue";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -35,7 +35,7 @@ export class UseWithTileQueue {
     private movementHelper: MovementHelper,
     private itemCraftable: ItemCraftableQueue,
     private skillIncrease: SkillIncrease,
-    private multiQueue: MultiQueue
+    private dynamicQueue: DynamicQueue
   ) {}
 
   public onUseWithTile(channel: SocketChannel): void {
@@ -53,7 +53,7 @@ export class UseWithTileQueue {
   }
 
   public async addToQueue(useWithTileData: IUseWithTile, character: ICharacter): Promise<void> {
-    await this.multiQueue.addJob(
+    await this.dynamicQueue.addJob(
       "use-with-tile",
       async (job) => {
         const { useWithTileData, character } = job.data;
@@ -97,11 +97,11 @@ export class UseWithTileQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    await this.multiQueue.clearAllJobs();
+    await this.dynamicQueue.clearAllJobs();
   }
 
   public async shutdown(): Promise<void> {
-    await this.multiQueue.shutdown();
+    await this.dynamicQueue.shutdown();
   }
 
   /**

@@ -27,8 +27,8 @@ interface IQueueScaleOptions {
   forceCustomScale?: number;
 }
 
-@provideSingleton(MultiQueue)
-export class MultiQueue {
+@provideSingleton(DynamicQueue)
+export class DynamicQueue {
   private queues: Map<string, Queue> = new Map();
   private workers: Map<string, Worker> = new Map();
   private queueConnections: Map<string, any> = new Map();

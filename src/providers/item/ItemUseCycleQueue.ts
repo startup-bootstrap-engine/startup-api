@@ -1,7 +1,7 @@
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { MultiQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/MultiQueue";
 
 type CallbackRecord = () => void;
 
@@ -9,7 +9,7 @@ type CallbackRecord = () => void;
 export class ItemUseCycleQueue {
   public itemCallbacks = new Map<string, CallbackRecord>();
 
-  constructor(private locker: Locker, private multiQueue: MultiQueue) {}
+  constructor(private locker: Locker, private dynamicQueue: DynamicQueue) {}
 
   @TrackNewRelicTransaction()
   public async start(
@@ -47,7 +47,7 @@ export class ItemUseCycleQueue {
     iterations: number,
     intervalDurationMs: number
   ): Promise<void> {
-    await this.multiQueue.addJob(
+    await this.dynamicQueue.addJob(
       "item-use-cycle",
 
       async (job) => {
@@ -84,10 +84,10 @@ export class ItemUseCycleQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    await this.multiQueue.clearAllJobs();
+    await this.dynamicQueue.clearAllJobs();
   }
 
   public async shutdown(): Promise<void> {
-    await this.multiQueue.shutdown();
+    await this.dynamicQueue.shutdown();
   }
 }
