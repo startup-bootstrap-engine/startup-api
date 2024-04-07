@@ -36,6 +36,7 @@ export const CraftingSkillsMap = new Map<string, string>([
   [CraftingResourcesBlueprint.WoodenSticks, CraftingSkill.Lumberjacking],
   [CraftingResourcesBlueprint.SmallWoodenStick, CraftingSkill.Lumberjacking],
   [CraftingResourcesBlueprint.ElvenWood, CraftingSkill.Lumberjacking],
+  [CraftingResourcesBlueprint.WhisperrootEntwiner, CraftingSkill.Lumberjacking],
   [FoodsBlueprint.WildSalmon, CraftingSkill.Fishing],
   [FoodsBlueprint.Tuna, CraftingSkill.Fishing],
   [FoodsBlueprint.BrownFish, CraftingSkill.Fishing],
