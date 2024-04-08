@@ -1,10 +1,10 @@
 import { appEnv } from "@providers/config/env";
 import { EnvType } from "@rpg-engine/shared";
 
-export const NPC_BASE_HEALTH_MULTIPLIER = 0.9;
+export const NPC_BASE_HEALTH_MULTIPLIER = 1;
 export const NPC_SPEED_MULTIPLIER = 0.75;
-export const NPC_SKILL_LEVEL_MULTIPLIER = 1.1;
-export const NPC_SKILL_STRENGTH_MULTIPLIER = 1.1;
+export const NPC_SKILL_LEVEL_MULTIPLIER = 1.2;
+export const NPC_SKILL_STRENGTH_MULTIPLIER = 1.2;
 export const NPC_SKILL_DEXTERITY_MULTIPLIER = 1;
 export const NPC_SKILL_RESISTANCE_MULTIPLIER = 1;
 
