@@ -81,7 +81,7 @@ export const itemElderHeartAxe: IToolItemBlueprint = {
           {
             key: CraftingResourcesBlueprint.WhisperrootEntwiner,
             qty: [3, 5],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 1, rarityOfTool),
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 3, rarityOfTool),
           },
         ],
       },
