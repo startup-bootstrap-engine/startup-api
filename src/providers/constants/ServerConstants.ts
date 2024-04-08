@@ -16,6 +16,8 @@ export const USER_CONTROL_ONLINE = {
 
 export const SERVER_API_NODES_QTY = 4; // 4 nodes on hertzner for API only
 
+export const SERVER_API_NODES_PM2_PROCESSES_QTY = 4; // 4 processes per node
+
 // 10 min
 export const SERVER_DISCONNECT_IDLE_TIMEOUT = 10; // how many minutes does a character needs to be inactive to be disconnected
 

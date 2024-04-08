@@ -1,6 +1,7 @@
 /* eslint-disable no-async-promise-executor */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { appEnv } from "@providers/config/env";
+import { SERVER_API_NODES_PM2_PROCESSES_QTY, SERVER_API_NODES_QTY } from "@providers/constants/ServerConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Pool, createPool } from "generic-pool";
 import IORedis, { Redis, RedisOptions } from "ioredis";
@@ -32,8 +33,8 @@ export class RedisIOClient {
         },
       },
       {
-        max: 38,
-        min: 22,
+        max: Math.round(600 / SERVER_API_NODES_QTY / SERVER_API_NODES_PM2_PROCESSES_QTY),
+        min: Math.round(320 / SERVER_API_NODES_QTY / SERVER_API_NODES_PM2_PROCESSES_QTY),
         testOnBorrow: true,
       }
     );
