@@ -80,7 +80,7 @@ export const itemWoodsManAxe: IToolItemBlueprint = {
           },
           {
             key: CraftingResourcesBlueprint.WhisperrootEntwiner,
-            qty: [1, 2],
+            qty: [3, 7],
             chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 2, rarityOfTool),
           },
         ],

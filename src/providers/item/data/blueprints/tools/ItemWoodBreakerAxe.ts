@@ -80,7 +80,7 @@ export const itemWoodBreakerAxe: IToolItemBlueprint = {
           },
           {
             key: CraftingResourcesBlueprint.GreaterWoodenLog,
-            qty: [1, 2],
+            qty: [5, 10],
             chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 15, rarityOfTool),
           },
           {
