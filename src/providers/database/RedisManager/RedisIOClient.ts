@@ -32,8 +32,8 @@ export class RedisIOClient {
         },
       },
       {
-        max: 100,
-        min: 10,
+        max: 38,
+        min: 22,
         testOnBorrow: true,
       }
     );
