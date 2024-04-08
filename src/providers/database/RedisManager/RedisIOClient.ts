@@ -1,12 +1,12 @@
 /* eslint-disable no-async-promise-executor */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { appEnv } from "@providers/config/env";
+import { SERVER_API_NODES_QTY } from "@providers/constants/ServerConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Pool, createPool } from "generic-pool";
 import IORedis, { Redis, RedisOptions } from "ioredis";
 import mongoose from "mongoose";
 import { applySpeedGooseCacheLayer } from "speedgoose";
-import { RedisClientConnectionManager } from "./RedisClientConnectionManager";
 
 @provideSingleton(RedisIOClient)
 export class RedisIOClient {
@@ -15,7 +15,7 @@ export class RedisIOClient {
 
   private readonly redisConnectionURL: string = `redis://${appEnv.database.REDIS_CONTAINER}:${appEnv.database.REDIS_PORT}`;
 
-  constructor(private redisConnectionManager: RedisClientConnectionManager) {}
+  constructor() {}
 
   public async connect(): Promise<Redis> {
     this.pool = createPool<Redis>(
@@ -33,8 +33,8 @@ export class RedisIOClient {
         },
       },
       {
-        max: 50,
-        min: 2,
+        max: 600 / SERVER_API_NODES_QTY,
+        min: 320 / SERVER_API_NODES_QTY,
         testOnBorrow: true,
       }
     );

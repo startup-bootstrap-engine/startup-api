@@ -14,6 +14,8 @@ export const USER_CONTROL_ONLINE = {
   MAX_NUMBER_ACC_PER_USER: 20,
 };
 
+export const SERVER_API_NODES_QTY = 4; // 4 nodes on hertzner for API only
+
 // 10 min
 export const SERVER_DISCONNECT_IDLE_TIMEOUT = 10; // how many minutes does a character needs to be inactive to be disconnected
 
