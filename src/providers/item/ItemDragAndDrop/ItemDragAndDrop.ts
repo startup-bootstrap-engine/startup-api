@@ -82,6 +82,16 @@ export class ItemDragAndDrop {
             openInventoryOnUpdate: false,
           };
 
+          if (itemToBeMoved.maxStackSize > 1) {
+            await this.verifyAndRollbackStackQty(
+              itemToBeMoved as unknown as IItem,
+              itemToBeMovedTo as unknown as IItem,
+              itemMoveData,
+              character,
+              inventoryContainer
+            );
+          }
+
           this.sendRefreshItemsEvent(payloadUpdate, character);
 
           break;
@@ -93,6 +103,42 @@ export class ItemDragAndDrop {
 
       console.log(err);
       return false;
+    }
+  }
+
+  private async verifyAndRollbackStackQty(
+    itemToBeMoved: IItem,
+    itemToBeMovedTo: IItem,
+    itemMoveData: IItemMove,
+    character: ICharacter,
+    updatedInventoryContainer: IItemContainer
+  ): Promise<void> {
+    const initialFromSlotCount = itemToBeMoved.stackQty || 0;
+    const initialToSlotCount = itemToBeMovedTo?.stackQty || 0;
+    const totalInitialItemCount = initialFromSlotCount + initialToSlotCount;
+
+    // Retrieve updated stack quantities
+    const updatedFromSlotCount = updatedInventoryContainer.slots[itemMoveData.from.slotIndex]?.stackQty || 0;
+    const updatedToSlotCount = updatedInventoryContainer.slots[itemMoveData.to.slotIndex]?.stackQty || 0;
+    const totalUpdatedItemCount = updatedFromSlotCount + updatedToSlotCount;
+
+    // When splitting items or combining items total count of the slots should be equal
+    if (totalInitialItemCount !== totalUpdatedItemCount) {
+      try {
+        await this.characterItemSlots.updateItemOnSlot(itemMoveData.from.slotIndex, updatedInventoryContainer, {
+          stackQty: initialFromSlotCount,
+        });
+        await this.characterItemSlots.updateItemOnSlot(itemMoveData.to.slotIndex, updatedInventoryContainer, {
+          stackQty: initialToSlotCount,
+        });
+      } catch (error) {
+        console.error("Item rollback failed:", error);
+      }
+
+      this.socketMessaging.sendErrorMessageToCharacter(
+        character,
+        "Sorry, item move not successful. rollback to original state."
+      );
     }
   }
 
