@@ -33,8 +33,8 @@ export class RedisIOClient {
         },
       },
       {
-        max: Math.round(600 / SERVER_API_NODES_QTY / SERVER_API_NODES_PM2_PROCESSES_QTY),
-        min: Math.round(320 / SERVER_API_NODES_QTY / SERVER_API_NODES_PM2_PROCESSES_QTY),
+        max: Math.round(500 / SERVER_API_NODES_QTY / SERVER_API_NODES_PM2_PROCESSES_QTY),
+        min: Math.round(220 / SERVER_API_NODES_QTY / SERVER_API_NODES_PM2_PROCESSES_QTY),
         testOnBorrow: true,
       }
     );
