@@ -12,7 +12,7 @@ import { ITEM_CONTAINER_ROLLBACK_MAX_TRIES } from "@providers/constants/ItemCont
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { MultiQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/MultiQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IItemContainerRead, ItemContainerType, ItemSocketEvents } from "@rpg-engine/shared";
 import { clearCacheForKey } from "speedgoose";
@@ -38,7 +38,7 @@ export class ItemContainerTransactionQueue {
     private locker: Locker,
     private inMemoryHashTable: InMemoryHashTable,
     private characterWeightQueue: CharacterWeightQueue,
-    private multiQueue: MultiQueue
+    private dynamicQueue: DynamicQueue
   ) {}
 
   public async transferToContainer(
@@ -63,7 +63,7 @@ export class ItemContainerTransactionQueue {
       return await this.execTransferToContainer(item, character, originContainer, targetContainer, options!);
     }
 
-    await this.multiQueue.addJob(
+    await this.dynamicQueue.addJob(
       "item-container-transaction-queue",
 
       async (job) => {
@@ -99,7 +99,7 @@ export class ItemContainerTransactionQueue {
   }
 
   public shutdown(): Promise<void> {
-    return this.multiQueue.shutdown();
+    return this.dynamicQueue.shutdown();
   }
 
   @TrackNewRelicTransaction()

@@ -44,7 +44,7 @@ import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAc
 import { appEnv } from "@providers/config/env";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { MultiQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/MultiQueue";
 import _ from "lodash";
 import { ItemCraftbook } from "./ItemCraftbook";
 import { ItemCraftingRecipes } from "./ItemCraftingRecipes";
@@ -67,7 +67,7 @@ export class ItemCraftableQueue {
     private itemCraftbook: ItemCraftbook,
     private characterPremiumAccount: CharacterPremiumAccount,
     private locker: Locker,
-    private multiQueue: MultiQueue
+    private dynamicQueue: DynamicQueue
   ) {}
 
   public async craftItem(itemToCraft: ICraftItemPayload, character: ICharacter): Promise<void> {
@@ -76,7 +76,7 @@ export class ItemCraftableQueue {
       return;
     }
 
-    await this.multiQueue.addJob(
+    await this.dynamicQueue.addJob(
       "craft-item",
       async (job) => {
         const { itemToCraft, character } = job.data;
@@ -86,19 +86,16 @@ export class ItemCraftableQueue {
       {
         itemToCraft,
         character,
-      },
-      {
-        queueScaleBy: "active-characters",
       }
     );
   }
 
   public async clearAllJobs(): Promise<void> {
-    await this.multiQueue.clearAllJobs();
+    await this.dynamicQueue.clearAllJobs();
   }
 
   public async shutdown(): Promise<void> {
-    await this.multiQueue.shutdown();
+    await this.dynamicQueue.shutdown();
   }
 
   @TrackNewRelicTransaction()

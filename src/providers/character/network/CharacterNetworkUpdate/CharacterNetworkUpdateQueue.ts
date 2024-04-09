@@ -23,7 +23,7 @@ import { MAX_PING_TRACKING_THRESHOLD } from "@providers/constants/ServerConstant
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MapTransition } from "@providers/map/MapTransition/MapTransition";
-import { MultiQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/MultiQueue";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import dayjs from "dayjs";
 import random from "lodash/random";
@@ -44,7 +44,7 @@ export class CharacterNetworkUpdateQueue {
     private newRelic: NewRelic,
     private locker: Locker,
     private mapTransition: MapTransition,
-    private multiQueue: MultiQueue
+    private dynamicQueue: DynamicQueue
   ) {}
 
   public onCharacterUpdatePosition(channel: SocketChannel): void {
@@ -62,7 +62,7 @@ export class CharacterNetworkUpdateQueue {
   }
 
   public async addToQueue(data: ICharacterPositionUpdateFromClient, character: ICharacter): Promise<void> {
-    await this.multiQueue.addJob(
+    await this.dynamicQueue.addJob(
       "character-network-update",
       async (job) => {
         const { character, data } = job.data;
@@ -104,11 +104,11 @@ export class CharacterNetworkUpdateQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    await this.multiQueue.clearAllJobs();
+    await this.dynamicQueue.clearAllJobs();
   }
 
   public async shutdown(): Promise<void> {
-    await this.multiQueue.shutdown();
+    await this.dynamicQueue.shutdown();
   }
 
   private async isCharacterChangingScene(character: ICharacter): Promise<boolean> {

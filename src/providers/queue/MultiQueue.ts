@@ -16,7 +16,7 @@ import { QueueActivityMonitor } from "./QueueActivityMonitor";
 
 type QueueJobFn = (job: any) => Promise<void>;
 
-type AvailableScaleFactors = "custom" | "active-characters" | "active-npcs";
+type AvailableScaleFactors = "single" | "custom" | "active-characters" | "active-npcs";
 
 interface IQueueScaleOptions {
   queueScaleBy: AvailableScaleFactors;
@@ -27,8 +27,8 @@ interface IQueueScaleOptions {
   forceCustomScale?: number;
 }
 
-@provideSingleton(MultiQueue)
-export class MultiQueue {
+@provideSingleton(DynamicQueue)
+export class DynamicQueue {
   private queues: Map<string, Queue> = new Map();
   private workers: Map<string, Worker> = new Map();
   private queueConnections: Map<string, any> = new Map();
@@ -43,7 +43,7 @@ export class MultiQueue {
     prefix: string,
     jobFn: QueueJobFn,
     data: Record<string, unknown>,
-    queueScaleOptions: IQueueScaleOptions = { queueScaleBy: "custom", queueScaleFactor: QueueDefaultScaleFactor.Low },
+    queueScaleOptions: IQueueScaleOptions = { queueScaleBy: "single" },
     addQueueOptions?: DefaultJobOptions,
     queueOptions?: QueueBaseOptions,
     workerOptions?: QueueBaseOptions
@@ -177,6 +177,10 @@ export class MultiQueue {
           const queue = this.queues.get(queueName);
           const worker = this.workers.get(queueName);
 
+          if (queue || worker) {
+            console.log(`🔒 Releasing connection for queue ${queueName}`);
+          }
+
           await worker?.close(); // Close the worker
           await queue?.close(); // Close the queue
           await queue?.obliterate({ force: true }); // Remove the queue and its data from Redis
@@ -209,6 +213,9 @@ export class MultiQueue {
     }
 
     switch (queueScaleBy) {
+      case "single":
+        return `${prefix}-${envSuffix}`;
+
       case "custom":
         if (!queueScaleFactor) {
           throw new Error("Queue scale factor is required when scaling by custom");

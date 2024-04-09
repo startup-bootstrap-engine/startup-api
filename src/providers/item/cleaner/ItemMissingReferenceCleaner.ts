@@ -80,7 +80,7 @@ export class ItemMissingReferenceCleaner {
       const item = (await Item.findById(itemData._id).lean({ virtuals: true, defaults: true })) as IItem;
 
       if (item && !item?.owner) {
-        await this.itemOwnership.addItemOwnership(item, character._id);
+        await this.itemOwnership.addItemOwnership(item, character);
       }
 
       if (!item) {
@@ -124,7 +124,7 @@ export class ItemMissingReferenceCleaner {
       const item = (await Item.findById(slotData._id).lean({ virtuals: true, defaults: true })) as IItem;
 
       if (item && !item?.owner) {
-        await this.itemOwnership.addItemOwnership(item, character._id);
+        await this.itemOwnership.addItemOwnership(item, character);
       }
 
       if (!item) {

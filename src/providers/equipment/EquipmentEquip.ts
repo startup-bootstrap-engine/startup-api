@@ -71,17 +71,14 @@ export class EquipmentEquip {
       return false;
     }
 
-    const equipment = await Equipment.findById(character.equipment).cacheQuery({
-      cacheKey: `${character._id}-equipment`,
-    });
+    const equipment = await Equipment.findById(character.equipment);
 
     if (!equipment) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, equipment not found.");
       return false;
     }
 
-    equipment.inventory = item._id;
-    await equipment.save();
+    await Equipment.updateOne({ _id: equipment._id }, { $set: { inventory: item._id } });
 
     inventory = await this.characterInventory.getInventory(character);
 
@@ -110,14 +107,13 @@ export class EquipmentEquip {
 
   @TrackNewRelicTransaction()
   public async equip(character: ICharacter, itemId: string, fromItemContainerId: string): Promise<boolean> {
+    const item = await Item.findById(itemId);
+    if (!item) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, item not found.");
+      return false;
+    }
+
     try {
-      const item = await Item.findById(itemId);
-
-      if (!item) {
-        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, item not found.");
-        return false;
-      }
-
       const itemContainer = await ItemContainer.findById(fromItemContainerId);
 
       if (!itemContainer) {
@@ -157,8 +153,6 @@ export class EquipmentEquip {
         return false;
       }
 
-      await item.save();
-
       // refresh itemContainer from which the item was equipped
       const updatedContainer = (await ItemContainer.findById(fromItemContainerId)) as any;
       await this.itemPickupUpdater.sendContainerRead(updatedContainer, character);
@@ -173,6 +167,8 @@ export class EquipmentEquip {
     } catch (error) {
       console.error(error);
       return false;
+    } finally {
+      await item.save();
     }
   }
 

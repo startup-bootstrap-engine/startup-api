@@ -1,6 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { MultiQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/MultiQueue";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { ISpellCast, SpellSocketEvents } from "@rpg-engine/shared";
@@ -8,7 +8,7 @@ import { SpellCast } from "../SpellCast";
 
 @provideSingleton(SpellNetworkCastQueue)
 export class SpellNetworkCastQueue {
-  constructor(private socketAuth: SocketAuth, private spellCast: SpellCast, private multiQueue: MultiQueue) {}
+  constructor(private socketAuth: SocketAuth, private spellCast: SpellCast, private dynamicQueue: DynamicQueue) {}
 
   public onSpellCast(channel: SocketChannel): void {
     this.socketAuth.authCharacterOn(
@@ -34,7 +34,7 @@ export class SpellNetworkCastQueue {
   }
 
   public async addToQueue(data: ISpellCast, character: ICharacter): Promise<void> {
-    await this.multiQueue.addJob(
+    await this.dynamicQueue.addJob(
       "spell-cast",
       async (job) => {
         const { data, character } = job.data;
@@ -52,10 +52,10 @@ export class SpellNetworkCastQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    await this.multiQueue.clearAllJobs();
+    await this.dynamicQueue.clearAllJobs();
   }
 
   public async shutdown(): Promise<void> {
-    await this.multiQueue.shutdown();
+    await this.dynamicQueue.shutdown();
   }
 }

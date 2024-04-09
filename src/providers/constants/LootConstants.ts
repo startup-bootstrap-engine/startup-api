@@ -15,4 +15,6 @@ export const LOOT_CRAFTING_MATERIAL_DROP_CHANCE = 1; // chance that a mob drops 
 
 // Food
 
-export const LOOT_FOOD_DROP_CHANCE = 0.05; // chance that a mob drops food. Static chance. Do not suffer influence of NPC_LOOT_CHANCE_MULTIPLIER
+export const LOOT_FOOD_DROP_CHANCE = 0.1; // chance that a mob drops food. Static chance. Do not suffer influence of NPC_LOOT_CHANCE_MULTIPLIER
+
+export const LOOT_FOOD_DROP_CHANCE_FOR_NOOB = 0.35; // Noobs (< lv 10) have a higher chance of getting food so they can heal themselves

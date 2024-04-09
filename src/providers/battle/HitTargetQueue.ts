@@ -29,7 +29,7 @@ import { BONUS_DAMAGE_MULTIPLIER, GENERATE_BLOOD_GROUND_ON_HIT } from "@provider
 import { blueprintManager } from "@providers/inversify/container";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { MultiQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/MultiQueue";
 import random from "lodash/random";
 import { BattleAttackTargetDeath } from "./BattleAttackTarget/BattleAttackTargetDeath";
 import { BattleDamageCalculator } from "./BattleDamageCalculator";
@@ -53,7 +53,7 @@ export class HitTargetQueue {
     private entityEffectUse: EntityEffectUse,
     private battleDamageCalculator: BattleDamageCalculator,
     private locker: Locker,
-    private multiQueue: MultiQueue
+    private dynamicQueue: DynamicQueue
   ) {}
 
   public async hit(
@@ -75,7 +75,7 @@ export class HitTargetQueue {
     const targetType = target.type; // we have to pass this separately because the queue will not read the virtual field later
 
     if (attacker.type === EntityType.Character) {
-      await this.multiQueue.addJob(
+      await this.dynamicQueue.addJob(
         "character-hit-queue",
         async (job) => {
           const { attacker, target, targetType, magicAttack, bonusDamage, spellHit } = job.data;
@@ -90,7 +90,7 @@ export class HitTargetQueue {
         }
       );
     } else {
-      await this.multiQueue.addJob(
+      await this.dynamicQueue.addJob(
         "npc-hit-queue",
         async (job) => {
           const { attacker, target, targetType, magicAttack, bonusDamage, spellHit } = job.data;
@@ -116,11 +116,11 @@ export class HitTargetQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    await this.multiQueue.clearAllJobs();
+    await this.dynamicQueue.clearAllJobs();
   }
 
   public async shutdown(): Promise<void> {
-    await this.multiQueue.shutdown();
+    await this.dynamicQueue.shutdown();
   }
 
   @TrackNewRelicTransaction()

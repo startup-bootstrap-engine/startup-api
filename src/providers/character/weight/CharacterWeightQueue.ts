@@ -8,7 +8,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { MultiQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/MultiQueue";
 import { TraitGetter } from "@providers/skill/TraitGetter";
 import { Job } from "bullmq";
 import { CharacterWeightCalculator } from "./CharacterWeightCalculator";
@@ -20,7 +20,7 @@ export class CharacterWeightQueue {
     private traitGetter: TraitGetter,
     private inMemoryHashTable: InMemoryHashTable,
     private characterWeightCalculator: CharacterWeightCalculator,
-    private multiQueue: MultiQueue
+    private dynamicQueue: DynamicQueue
   ) {}
 
   async updateCharacterWeight(character: ICharacter): Promise<Job | undefined> {
@@ -29,7 +29,7 @@ export class CharacterWeightQueue {
       return;
     }
 
-    await this.multiQueue.addJob(
+    await this.dynamicQueue.addJob(
       "character-weight",
       async (job) => {
         const data = job.data as { character: ICharacter };
@@ -42,11 +42,11 @@ export class CharacterWeightQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    await this.multiQueue.clearAllJobs();
+    await this.dynamicQueue.clearAllJobs();
   }
 
   public async shutdown(): Promise<void> {
-    await this.multiQueue.shutdown();
+    await this.dynamicQueue.shutdown();
   }
 
   @TrackNewRelicTransaction()

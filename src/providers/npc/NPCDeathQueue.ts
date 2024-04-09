@@ -23,7 +23,7 @@ import { NPCTarget } from "./movement/NPCTarget";
 import { CharacterView } from "@providers/character/CharacterView";
 import { appEnv } from "@providers/config/env";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { MultiQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/MultiQueue";
 @provideSingleton(NPCDeathQueue)
 export class NPCDeathQueue {
   constructor(
@@ -38,7 +38,7 @@ export class NPCDeathQueue {
     private locker: Locker,
     private newRelic: NewRelic,
     private npcLoot: NPCLoot,
-    private multiQueue: MultiQueue
+    private dynamicQueue: DynamicQueue
   ) {}
 
   public async handleNPCDeath(killer: ICharacter, npc: INPC): Promise<void> {
@@ -47,17 +47,14 @@ export class NPCDeathQueue {
       return;
     }
 
-    await this.multiQueue.addJob(
+    await this.dynamicQueue.addJob(
       "npc-death",
       async (job) => {
         const { killer, npc } = job.data;
 
         await this.execHandleNPCDeath(killer, npc);
       },
-      { killer, npc },
-      {
-        queueScaleBy: "active-npcs",
-      }
+      { killer, npc }
     );
   }
 
@@ -98,7 +95,7 @@ export class NPCDeathQueue {
         npc.isGiantForm
       );
 
-      const removeItemOwnershipPromise = this.itemOwnership.removeItemOwnership(npcBody.id);
+      const removeItemOwnershipPromise = this.itemOwnership.removeItemOwnership(npcBody);
       const clearNPCBehaviorPromise = this.clearNPCBehavior(npc);
       const releaseXPPromise = this.npcExperience.releaseXP(npc as INPC);
 
@@ -225,10 +222,10 @@ export class NPCDeathQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    await this.multiQueue.clearAllJobs();
+    await this.dynamicQueue.clearAllJobs();
   }
 
   public async shutdown(): Promise<void> {
-    await this.multiQueue.shutdown();
+    await this.dynamicQueue.shutdown();
   }
 }

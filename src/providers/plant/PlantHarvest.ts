@@ -215,6 +215,7 @@ export class PlantHarvest {
       plant.currentPlantCycle = PlantLifeCycle.Seed;
       plant.texturePath = blueprint.stagesRequirements[PlantLifeCycle.Seed]?.texturePath ?? "";
       plant.growthPoints = 0;
+      plant.requiredGrowthPoints = blueprint.stagesRequirements[PlantLifeCycle.Seed]?.requiredGrowthPoints ?? 0;
       plant.regrowthCount = currentRegrowthCount;
       await plant.save();
       const itemToUpdate = this.prepareItemToUpdate(plant);
