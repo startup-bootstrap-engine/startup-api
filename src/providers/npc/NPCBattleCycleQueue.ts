@@ -61,6 +61,7 @@ export class NPCBattleCycleQueue {
 
         {
           delay: NPC_BATTLE_CYCLE_INTERVAL,
+          priority: 1,
         }
       );
     } catch (error) {

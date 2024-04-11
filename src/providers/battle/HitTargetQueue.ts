@@ -87,6 +87,9 @@ export class HitTargetQueue {
         { attacker, target, targetType, magicAttack, bonusDamage, spellHit },
         {
           queueScaleBy: "active-characters",
+        },
+        {
+          priority: 1,
         }
       );
     } else {
@@ -110,6 +113,9 @@ export class HitTargetQueue {
         { attacker, target, targetType, magicAttack, bonusDamage, spellHit },
         {
           queueScaleBy: "active-npcs",
+        },
+        {
+          priority: 1,
         }
       );
     }
