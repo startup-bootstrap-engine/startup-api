@@ -57,46 +57,14 @@ export class Pathfinder {
       return result;
     }
 
-    const cachedShortestPath = await this.pathfindingCaching.get(map, {
-      start: {
-        x: startGridX,
-        y: startGridY,
-      },
-      end: {
-        x: endGridX,
-        y: endGridY,
-      },
-    });
-
-    const cachedNextStep = cachedShortestPath?.[0];
-
-    const previousNPCPosition = (await this.inMemoryHashTable.get("npc-previous-position", npc._id)) as number[];
-
-    const hasCircularRef = await this.hasCircularReferenceOnPathfinding(
-      npc,
-      map,
-      startGridX,
-      startGridY,
-      endGridX,
-      endGridY,
-      cachedNextStep!,
-      previousNPCPosition
-    );
-
-    if (cachedShortestPath?.length! > 0 && !hasCircularRef) {
-      return cachedShortestPath as number[][];
-    }
-
-    const hasForcedPathfindingCalculation = await this.inMemoryHashTable.get(
-      "npc-force-pathfinding-calculation",
-      npc._id
-    );
-
-    if (!hasForcedPathfindingCalculation && target) {
+    if (target) {
       const isUnderRange = this.movementHelper.isUnderRange(npc.x, npc.y, target.x, target.y, 2);
 
       if (!isUnderRange) {
-        const nearestGridToTarget = await this.getNearestGridToTarget(npc, target.x, target.y, previousNPCPosition);
+        const nearestGridToTarget = await this.getNearestGridToTarget(npc, target.x, target.y, [
+          ToGridX(npc.x),
+          ToGridY(npc.y),
+        ]);
 
         if (nearestGridToTarget?.length) {
           return nearestGridToTarget;
