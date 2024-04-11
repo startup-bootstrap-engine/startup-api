@@ -1,3 +1,4 @@
+import { NewRelic } from "@providers/analytics/NewRelic";
 import { appEnv } from "@providers/config/env";
 import {
   QUEUE_CHARACTER_MAX_SCALE_FACTOR,
@@ -11,6 +12,7 @@ import {
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { EnvType } from "@rpg-engine/shared";
 import { DefaultJobOptions, Job, Queue, QueueBaseOptions, Worker, WorkerOptions } from "bullmq";
 import { Redis } from "ioredis";
@@ -39,7 +41,8 @@ export class DynamicQueue {
   constructor(
     private redisManager: RedisManager,
     private queueActivityMonitor: QueueActivityMonitor,
-    private inMemoryHashTable: InMemoryHashTable
+    private inMemoryHashTable: InMemoryHashTable,
+    private newRelic: NewRelic
   ) {}
 
   public async addJob(
@@ -67,6 +70,13 @@ export class DynamicQueue {
           ...queueOptions,
         },
         workerOptions
+      );
+
+      this.newRelic.trackMetric(
+        NewRelicMetricCategory.Count,
+        NewRelicSubCategory.Server,
+        `QueueExecution/${queueName}`,
+        1
       );
 
       return await queue.add(queueName, data, {
