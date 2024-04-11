@@ -2,7 +2,10 @@ import { appEnv } from "@providers/config/env";
 import {
   QUEUE_CHARACTER_MAX_SCALE_FACTOR,
   QUEUE_CONNECTION_CHECK_INTERVAL,
+  QUEUE_GLOBAL_WORKER_LIMITER_DURATION,
+  QUEUE_GLOBAL_WORKER_LIMITER_MAX,
   QUEUE_NPC_MAX_SCALE_FACTOR,
+  QUEUE_WORKER_CONCURRENCY,
   QueueDefaultScaleFactor,
 } from "@providers/constants/QueueConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
@@ -135,6 +138,11 @@ export class DynamicQueue {
         },
         {
           name: `${queueName}-worker`,
+          concurrency: QUEUE_WORKER_CONCURRENCY,
+          limiter: {
+            max: QUEUE_GLOBAL_WORKER_LIMITER_MAX,
+            duration: QUEUE_GLOBAL_WORKER_LIMITER_DURATION,
+          },
           connection,
           ...workerOptions,
         }
