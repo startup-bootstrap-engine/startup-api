@@ -48,6 +48,8 @@ export class NPCCycleQueue {
       return;
     }
 
+    const npcCycleDelay = Math.max(400, (1600 + random(0, 200)) / (npc.speed * 1.6) / NPC_CYCLE_INTERVAL_RATIO);
+
     await this.dynamicQueue.addJob(
       "npc-cycle-queue",
 
@@ -66,7 +68,8 @@ export class NPCCycleQueue {
       },
 
       {
-        delay: (1600 + random(0, 200)) / (npc.speed * 1.6) / NPC_CYCLE_INTERVAL_RATIO,
+        delay: npcCycleDelay,
+        priority: 1,
       }
     );
   }

@@ -1,4 +1,4 @@
-import { EXP_RATIO } from "@providers/constants/SkillConstants";
+import { EXP_CALCULATION_RATIO } from "@providers/constants/SkillConstants";
 import { container } from "@providers/inversify/container";
 import { NPCExperienceCalculator } from "../NPCExperienceCalculator";
 
@@ -25,7 +25,7 @@ describe("NPCExperienceCalculator", () => {
 
       const result = npcExperience.calculateExperience(baseHealth, skills);
 
-      expect(result).toBe(Math.floor(((50 + 5 + 10 + 15 + 20) * EXP_RATIO) / 5));
+      expect(result).toBe(Math.floor(((50 + 5 + 10 + 15 + 20) * EXP_CALCULATION_RATIO) / 5));
     });
 
     // There are no logic to handle if skills skills object is empty

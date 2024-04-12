@@ -61,6 +61,10 @@ export class NPCFreezer {
       if (charactersAround.length === 0) {
         inactiveNPCPromises.push(this.freezeNPC(npc, "NPCFreezer - No characters around"));
       }
+
+      if (!npc.targetCharacter) {
+        inactiveNPCPromises.push(this.freezeNPC(npc, "NPCFreezer - No target character"));
+      }
     }
 
     await Promise.all(inactiveNPCPromises);

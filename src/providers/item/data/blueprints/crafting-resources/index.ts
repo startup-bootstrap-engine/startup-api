@@ -1,5 +1,4 @@
 import { CraftingResourcesBlueprint } from "../../types/itemsBlueprintTypes";
-import { itemWhisperWindBow } from "../ranged-weapons/tier6/ItemWhisperWindBow";
 import { itemRope } from "../tools/ItemRope";
 import { itemBandage } from "./ItemBandage";
 import { itemBatsWing } from "./ItemBatsWing";
@@ -65,6 +64,7 @@ import { itemSunspireLotusFlower } from "./ItemSunspireLotusFlower";
 import { itemWaterBottle } from "./itemWaterBottle";
 import { itemWeaponRecipe } from "./ItemWeaponRecipe";
 import { itemWheat } from "./ItemWheat";
+import { itemWhisperrootEntwiner } from "./ItemWhisperrootEntwiner";
 import { itemWolfTooth } from "./ItemWolfTooth";
 import { itemWoodenBoard } from "./itemWoodenBoard";
 import { itemWoodenSticks } from "./ItemWoodenSticks";
@@ -135,5 +135,5 @@ export const craftingResourcesBlueprintIndex = {
   [CraftingResourcesBlueprint.NebulaSeahorn]: itemNebulaSeahorn,
   [CraftingResourcesBlueprint.NautilusShell]: itemNautilusShell,
   [CraftingResourcesBlueprint.MedicinalLeaf]: itemMedicinalLeft,
-  [CraftingResourcesBlueprint.WhisperrootEntwiner]: itemWhisperWindBow,
+  [CraftingResourcesBlueprint.WhisperrootEntwiner]: itemWhisperrootEntwiner,
 };

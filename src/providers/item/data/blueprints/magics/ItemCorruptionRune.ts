@@ -17,7 +17,7 @@ export const itemCorruptionRune: IRuneItemBlueprint = {
   texturePath: "magics/corruption-rune.png",
   name: "Corruption Rune",
   description: "The forbidden Corruption of Xoranth, the dark God, corrupts all who succumb to its influence",
-  weight: 0.01,
+  weight: 0.1,
   maxStackSize: 100,
 
   hasUseWith: true,

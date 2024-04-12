@@ -143,6 +143,7 @@ export class PlantHarvest {
       CraftingResourcesBlueprint.ElvenLeaf,
       CraftingResourcesBlueprint.Worm,
       CraftingResourcesBlueprint.MedicinalLeaf,
+      CraftingResourcesBlueprint.WhisperrootEntwiner,
     ];
 
     const randomReward = potentialExtraRewards[Math.floor(Math.random() * potentialExtraRewards.length)];

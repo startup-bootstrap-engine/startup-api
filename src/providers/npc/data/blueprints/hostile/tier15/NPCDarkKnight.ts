@@ -31,6 +31,7 @@ export const npcDarkKnight: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
   name: "Dark Knight",
   key: HostileNPCsBlueprint.DarkKnight,
+  tier: 15,
   // @ts-ignore
   textureKey: "superior-knight",
   alignment: NPCAlignment.Hostile,

@@ -1,13 +1,18 @@
+import { NewRelic } from "@providers/analytics/NewRelic";
 import { appEnv } from "@providers/config/env";
 import {
   QUEUE_CHARACTER_MAX_SCALE_FACTOR,
   QUEUE_CONNECTION_CHECK_INTERVAL,
+  QUEUE_GLOBAL_WORKER_LIMITER_DURATION,
+  QUEUE_GLOBAL_WORKER_LIMITER_MAX,
   QUEUE_NPC_MAX_SCALE_FACTOR,
+  QUEUE_WORKER_CONCURRENCY,
   QueueDefaultScaleFactor,
 } from "@providers/constants/QueueConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { EnvType } from "@rpg-engine/shared";
 import { DefaultJobOptions, Job, Queue, QueueBaseOptions, Worker, WorkerOptions } from "bullmq";
 import { Redis } from "ioredis";
@@ -36,7 +41,8 @@ export class DynamicQueue {
   constructor(
     private redisManager: RedisManager,
     private queueActivityMonitor: QueueActivityMonitor,
-    private inMemoryHashTable: InMemoryHashTable
+    private inMemoryHashTable: InMemoryHashTable,
+    private newRelic: NewRelic
   ) {}
 
   public async addJob(
@@ -55,7 +61,7 @@ export class DynamicQueue {
 
       const connection = await this.getQueueConnection(queueName);
 
-      const queue = this.initOrFetchQueue(
+      const queue = await this.initOrFetchQueue(
         queueName,
         jobFn,
         connection,
@@ -63,13 +69,20 @@ export class DynamicQueue {
           connection,
           ...queueOptions,
         },
-        workerOptions
+        workerOptions,
+        queueScaleOptions
+      );
+
+      this.newRelic.trackMetric(
+        NewRelicMetricCategory.Count,
+        NewRelicSubCategory.Server,
+        `QueueExecution/${prefix}`,
+        1
       );
 
       return await queue.add(queueName, data, {
         removeOnComplete: true,
         removeOnFail: true,
-
         ...addQueueOptions,
       });
     } catch (error) {
@@ -88,13 +101,14 @@ export class DynamicQueue {
     return connection;
   }
 
-  private initOrFetchQueue(
+  private async initOrFetchQueue(
     queueName: string,
     jobFn: QueueJobFn,
     connection: Redis,
     queueOptions: QueueBaseOptions,
-    workerOptions?: QueueBaseOptions
-  ): Queue {
+    workerOptions?: QueueBaseOptions,
+    queueScaleOptions?: IQueueScaleOptions
+  ): Promise<Queue> {
     let queue = this.queues.get(queueName);
 
     if (!queue) {
@@ -109,18 +123,38 @@ export class DynamicQueue {
       });
     }
 
-    this.initOrFetchWorker(queueName, jobFn, connection, workerOptions);
+    await this.initOrFetchWorker(queueName, jobFn, connection, workerOptions, queueScaleOptions);
 
     return queue;
   }
 
-  private initOrFetchWorker(
+  private async initOrFetchWorker(
     queueName: string,
     jobFn: QueueJobFn,
     connection: Redis,
-    workerOptions?: WorkerOptions
-  ): void {
+    workerOptions?: WorkerOptions,
+    queueScaleOptions?: IQueueScaleOptions
+  ): Promise<void> {
     let worker = this.workers.get(queueName);
+
+    let maxWorkerLimiter = QUEUE_GLOBAL_WORKER_LIMITER_MAX;
+
+    switch (queueScaleOptions?.queueScaleBy) {
+      case "active-characters":
+        maxWorkerLimiter = Math.max(
+          (await this.inMemoryHashTable.get("activity-tracker", "character-count")) as unknown as number,
+          QUEUE_GLOBAL_WORKER_LIMITER_MAX
+        );
+
+        break;
+      case "active-npcs":
+        maxWorkerLimiter = Math.max(
+          (await this.inMemoryHashTable.get("activity-tracker", "npc-count")) as unknown as number,
+          QUEUE_GLOBAL_WORKER_LIMITER_MAX
+        );
+
+        break;
+    }
 
     if (!worker) {
       worker = new Worker(
@@ -135,6 +169,11 @@ export class DynamicQueue {
         },
         {
           name: `${queueName}-worker`,
+          concurrency: QUEUE_WORKER_CONCURRENCY,
+          limiter: {
+            max: maxWorkerLimiter,
+            duration: QUEUE_GLOBAL_WORKER_LIMITER_DURATION,
+          },
           connection,
           ...workerOptions,
         }
@@ -186,7 +225,7 @@ export class DynamicQueue {
           await queue?.obliterate({ force: true }); // Remove the queue and its data from Redis
 
           this.queues.delete(queueName); // Remove the queue from the queues map as well, since we dont have a connection anymore (this will force a new queue creation on the next job)
-          this.workers.delete(queueName); // Remove the worker from the workers map as well
+          this.workers.delete(queueName); // Remove the worker from the workers map as well!
           clearInterval(queueConnectionInterval);
         }
       },
@@ -241,7 +280,7 @@ export class DynamicQueue {
       case "active-npcs":
         const activeNPCs = Number((await this.inMemoryHashTable.get("activity-tracker", "npc-count")) || 1);
 
-        const maxNPCQueues = Math.ceil(activeNPCs / 20) || 1;
+        const maxNPCQueues = Math.ceil(activeNPCs / 15) || 1;
 
         const NPCQueueScaleFactor = Math.min(
           maxNPCQueues,
