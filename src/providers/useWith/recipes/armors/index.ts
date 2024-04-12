@@ -1,26 +1,26 @@
 import { ArmorsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { IUseWithCraftingRecipe } from "@providers/useWith/useWithTypes";
-import { recipeBloodfireArmor } from "./recipeBloodfireArmor";
-import { recipeBlueCape } from "./recipeBlueCape";
-import { recipeBrassArmor } from "./recipeBrassArmor";
-import { recipeBronzeArmor } from "./recipeBronzeArmor";
-import { recipeCoat } from "./recipeCoat";
-import { recipeCrownArmor } from "./recipeCrownArmor";
-import { recipeEtherealGuardianMail } from "./recipeEtherealGuardianMail";
-import { recipeFalconsArmor } from "./recipeFalconsArmor";
-import { recipeFarmersJacket } from "./recipeFarmersJacket";
-import { recipeGlacialArmor } from "./recipeGlacialArmor";
-import { recipeIronArmor } from "./recipeIronArmor";
-import { recipeIroncladArmor } from "./recipeIroncladArmor";
-import { recipeJacket } from "./recipeJacket";
-import { recipeKnightArmor } from "./recipeKnightArmor";
-import { recipeLeatherJacket } from "./recipeLeatherJacket";
-import { recipeMysticCape } from "./recipeMysticCape";
-import { recipePlateArmor } from "./recipePlateArmor";
-import { recipeSamuraiArmor } from "./recipeSamuraiArmor";
-import { recipeSorcerersCape } from "./recipeSorcerersCape";
-import { recipeSpellcastersCape } from "./recipeSpellCastersCape";
-import { recipeStuddedArmor } from "./recipeStuddedArmor";
+import { recipeBloodfireArmor } from "./tier5/recipeBloodfireArmor";
+import { recipeBlueCape } from "./tier1/recipeBlueCape";
+import { recipeBrassArmor } from "./tier2/recipeBrassArmor";
+import { recipeBronzeArmor } from "./tier2/recipeBronzeArmor";
+import { recipeCoat } from "./tier0/recipeCoat";
+import { recipeCrownArmor } from "./tier4/recipeCrownArmor";
+import { recipeEtherealGuardianMail } from "./tier9/recipeEtherealGuardianMail";
+import { recipeFalconsArmor } from "./tier4/recipeFalconsArmor";
+import { recipeFarmersJacket } from "./tier0/recipeFarmersJacket";
+import { recipeGlacialArmor } from "./tier3/recipeGlacialArmor";
+import { recipeIronArmor } from "./tier1/recipeIronArmor";
+import { recipeIroncladArmor } from "./tier2/recipeIroncladArmor";
+import { recipeJacket } from "./tier0/recipeJacket";
+import { recipeKnightArmor } from "./tier3/recipeKnightArmor";
+import { recipeLeatherJacket } from "./tier0/recipeLeatherJacket";
+import { recipeMysticCape } from "./tier2/recipeMysticCape";
+import { recipePlateArmor } from "./tier4/recipePlateArmor";
+import { recipeSamuraiArmor } from "./tier6/recipeSamuraiArmor";
+import { recipeSorcerersCape } from "./tier3/recipeSorcerersCape";
+import { recipeSpellcastersCape } from "./tier4/recipeSpellCastersCape";
+import { recipeStuddedArmor } from "./tier1/recipeStuddedArmor";
 
 export const recipeArmorsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [ArmorsBlueprint.StuddedArmor]: [recipeStuddedArmor],

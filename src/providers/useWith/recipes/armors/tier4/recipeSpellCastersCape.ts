@@ -1,7 +1,7 @@
 import { calculateMinimumLevel } from "@providers/crafting/CraftingMinLevelCalculator";
 import { ArmorsBlueprint, CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { CraftingSkill } from "@rpg-engine/shared";
-import { IUseWithCraftingRecipe } from "../../useWithTypes";
+import { IUseWithCraftingRecipe } from "../../../useWithTypes";
 
 export const recipeSpellcastersCape: IUseWithCraftingRecipe = {
   outputKey: ArmorsBlueprint.SpellcastersCape,

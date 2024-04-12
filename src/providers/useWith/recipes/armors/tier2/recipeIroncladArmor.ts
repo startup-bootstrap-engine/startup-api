@@ -1,31 +1,31 @@
 import { calculateMinimumLevel } from "@providers/crafting/CraftingMinLevelCalculator";
 import { ArmorsBlueprint, CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { CraftingSkill } from "@rpg-engine/shared";
-import { IUseWithCraftingRecipe } from "../../useWithTypes";
+import { IUseWithCraftingRecipe } from "../../../useWithTypes";
 
-export const recipeKnightArmor: IUseWithCraftingRecipe = {
-  outputKey: ArmorsBlueprint.KnightArmor,
+export const recipeIroncladArmor: IUseWithCraftingRecipe = {
+  outputKey: ArmorsBlueprint.IroncladArmor,
   outputQtyRange: [1, 1],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.CorruptionIngot,
+      key: CraftingResourcesBlueprint.IronIngot,
       qty: 25,
     },
     {
-      key: CraftingResourcesBlueprint.ObsidiumIngot,
-      qty: 20,
+      key: CraftingResourcesBlueprint.GoldenIngot,
+      qty: 10,
     },
     {
       key: CraftingResourcesBlueprint.Leather,
-      qty: 25,
+      qty: 10,
     },
   ],
   minCraftingRequirements: [
     CraftingSkill.Blacksmithing,
     calculateMinimumLevel([
-      [CraftingResourcesBlueprint.CorruptionIngot, 25],
-      [CraftingResourcesBlueprint.ObsidiumIngot, 20],
-      [CraftingResourcesBlueprint.Leather, 25],
+      [CraftingResourcesBlueprint.IronIngot, 25],
+      [CraftingResourcesBlueprint.GoldenIngot, 10],
+      [CraftingResourcesBlueprint.Leather, 10],
     ]),
   ],
 };
