@@ -49,16 +49,14 @@ export class NPCCrons {
     this.cronJobScheduler.uniqueSchedule("npc-active-count", "* * * * *", async () => {
       await this.calculateActiveNPCs();
     });
-
-    this.cronJobScheduler.uniqueSchedule("npc-active-count", "*/5 * * * *", async () => {
-      await this.countActiveNPCs();
-    });
   }
 
   private async calculateActiveNPCs(): Promise<void> {
     const totalActiveNPCs = await NPC.countDocuments({ isBehaviorEnabled: true });
 
     this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.NPCs, "Active", totalActiveNPCs);
+
+    await this.inMemoryHashTable.set("activity-tracker", "npc-count", totalActiveNPCs);
   }
 
   private async npcSpawnCron(): Promise<void> {
@@ -80,11 +78,5 @@ export class NPCCrons {
     for (const deadNPC of deadNPCs) {
       await this.npcSpawn.spawn(deadNPC, !!deadNPC.raidKey);
     }
-  }
-
-  private async countActiveNPCs(): Promise<void> {
-    const totalActiveNPCs = await NPC.countDocuments({ isBehaviorEnabled: true });
-
-    await this.inMemoryHashTable.set("activity-tracker", "npc-count", totalActiveNPCs);
   }
 }

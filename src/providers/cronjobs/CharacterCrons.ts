@@ -58,7 +58,7 @@ export class CharacterCrons {
       await this.cleanSkullCharacters();
     });
 
-    this.cronJobScheduler.uniqueSchedule("character-cron-count-active-characters", "*/5 * * * *", async () => {
+    this.cronJobScheduler.uniqueSchedule("character-cron-count-active-characters", "* * * * *", async () => {
       await this.countActiveCharacters();
     });
   }

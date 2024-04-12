@@ -4,9 +4,9 @@ import {
   QUEUE_CHARACTER_MAX_SCALE_FACTOR,
   QUEUE_CONNECTION_CHECK_INTERVAL,
   QUEUE_GLOBAL_WORKER_LIMITER_DURATION,
-  QUEUE_GLOBAL_WORKER_LIMITER_MAX,
   QUEUE_NPC_MAX_SCALE_FACTOR,
-  QUEUE_WORKER_CONCURRENCY,
+  QUEUE_WORKER_MIN_CONCURRENCY,
+  QUEUE_WORKER_MIN_JOB_RATE,
   QueueDefaultScaleFactor,
 } from "@providers/constants/QueueConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
@@ -17,6 +17,7 @@ import { EnvType } from "@rpg-engine/shared";
 import { DefaultJobOptions, Job, Queue, QueueBaseOptions, Worker, WorkerOptions } from "bullmq";
 import { Redis } from "ioredis";
 import { random } from "lodash";
+import { EntityQueueScalingCalculator } from "./EntityQueueScalingCalculator";
 import { QueueActivityMonitor } from "./QueueActivityMonitor";
 
 type QueueJobFn = (job: any) => Promise<void>;
@@ -42,7 +43,8 @@ export class DynamicQueue {
     private redisManager: RedisManager,
     private queueActivityMonitor: QueueActivityMonitor,
     private inMemoryHashTable: InMemoryHashTable,
-    private newRelic: NewRelic
+    private newRelic: NewRelic,
+    private entityQueueScalingCalculator: EntityQueueScalingCalculator
   ) {}
 
   public async addJob(
@@ -137,22 +139,24 @@ export class DynamicQueue {
   ): Promise<void> {
     let worker = this.workers.get(queueName);
 
-    let maxWorkerLimiter = QUEUE_GLOBAL_WORKER_LIMITER_MAX;
+    let maxWorkerLimiter = QUEUE_WORKER_MIN_JOB_RATE;
+    let maxWorkerConcurrency = QUEUE_WORKER_MIN_CONCURRENCY;
 
     switch (queueScaleOptions?.queueScaleBy) {
       case "active-characters":
-        maxWorkerLimiter = Math.max(
-          (await this.inMemoryHashTable.get("activity-tracker", "character-count")) as unknown as number,
-          QUEUE_GLOBAL_WORKER_LIMITER_MAX
+        const activeCharacterCount = Number(
+          (await this.inMemoryHashTable.get("activity-tracker", "character-count")) || 1
         );
+
+        maxWorkerLimiter = this.entityQueueScalingCalculator.calculateMaxLimiter(activeCharacterCount);
+
+        maxWorkerConcurrency = this.entityQueueScalingCalculator.calculateConcurrency(activeCharacterCount);
 
         break;
       case "active-npcs":
-        maxWorkerLimiter = Math.max(
-          (await this.inMemoryHashTable.get("activity-tracker", "npc-count")) as unknown as number,
-          QUEUE_GLOBAL_WORKER_LIMITER_MAX
-        );
-
+        const activeNPCsCount = Number((await this.inMemoryHashTable.get("activity-tracker", "npc-count")) || 1);
+        maxWorkerLimiter = this.entityQueueScalingCalculator.calculateMaxLimiter(activeNPCsCount);
+        maxWorkerConcurrency = this.entityQueueScalingCalculator.calculateConcurrency(activeNPCsCount);
         break;
     }
 
@@ -169,7 +173,7 @@ export class DynamicQueue {
         },
         {
           name: `${queueName}-worker`,
-          concurrency: QUEUE_WORKER_CONCURRENCY,
+          concurrency: maxWorkerConcurrency,
           limiter: {
             max: maxWorkerLimiter,
             duration: QUEUE_GLOBAL_WORKER_LIMITER_DURATION,
