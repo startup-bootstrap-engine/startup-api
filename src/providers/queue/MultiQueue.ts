@@ -76,7 +76,7 @@ export class DynamicQueue {
       this.newRelic.trackMetric(
         NewRelicMetricCategory.Count,
         NewRelicSubCategory.Server,
-        `QueueExecution/${queueName}`,
+        `QueueExecution/${prefix}`,
         1
       );
 
