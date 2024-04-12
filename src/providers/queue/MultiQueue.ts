@@ -225,7 +225,7 @@ export class DynamicQueue {
           await queue?.obliterate({ force: true }); // Remove the queue and its data from Redis
 
           this.queues.delete(queueName); // Remove the queue from the queues map as well, since we dont have a connection anymore (this will force a new queue creation on the next job)
-          this.workers.delete(queueName); // Remove the worker from the workers map as well
+          this.workers.delete(queueName); // Remove the worker from the workers map as well!
           clearInterval(queueConnectionInterval);
         }
       },
