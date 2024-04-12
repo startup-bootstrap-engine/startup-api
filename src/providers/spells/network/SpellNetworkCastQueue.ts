@@ -1,6 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { DynamicQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { ISpellCast, SpellSocketEvents } from "@rpg-engine/shared";

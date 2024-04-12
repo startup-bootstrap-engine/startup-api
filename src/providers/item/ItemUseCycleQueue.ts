@@ -1,7 +1,7 @@
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { DynamicQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 
 type CallbackRecord = () => void;
 

@@ -44,7 +44,7 @@ import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAc
 import { appEnv } from "@providers/config/env";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { DynamicQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import _ from "lodash";
 import { ItemCraftbook } from "./ItemCraftbook";
 import { ItemCraftingRecipes } from "./ItemCraftingRecipes";

@@ -20,7 +20,7 @@ import {
 import { ChatUtils } from "./ChatUtils";
 
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { DynamicQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 
 @provideSingleton(ChatNetworkGlobalMessagingQueue)
 export class ChatNetworkGlobalMessagingQueue {

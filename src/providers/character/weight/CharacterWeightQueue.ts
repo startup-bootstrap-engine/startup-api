@@ -8,7 +8,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { DynamicQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { TraitGetter } from "@providers/skill/TraitGetter";
 import { Job } from "bullmq";
 import { CharacterWeightCalculator } from "./CharacterWeightCalculator";

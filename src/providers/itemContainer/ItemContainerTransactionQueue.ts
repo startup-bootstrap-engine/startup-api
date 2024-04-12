@@ -12,7 +12,7 @@ import { ITEM_CONTAINER_ROLLBACK_MAX_TRIES } from "@providers/constants/ItemCont
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { DynamicQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IItemContainerRead, ItemContainerType, ItemSocketEvents } from "@rpg-engine/shared";
 import { clearCacheForKey } from "speedgoose";

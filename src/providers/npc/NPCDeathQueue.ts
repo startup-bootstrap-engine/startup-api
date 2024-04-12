@@ -23,7 +23,7 @@ import { NPCTarget } from "./movement/NPCTarget";
 import { CharacterView } from "@providers/character/CharacterView";
 import { appEnv } from "@providers/config/env";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { DynamicQueue } from "@providers/queue/MultiQueue";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 @provideSingleton(NPCDeathQueue)
 export class NPCDeathQueue {
   constructor(
