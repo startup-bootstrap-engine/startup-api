@@ -17,7 +17,7 @@ export const QUEUE_NPC_CYCLE_CUSTOM_SCALE = 4;
 export const QUEUE_CONNECTION_CHECK_INTERVAL = 60 * 1000; // 1 min
 
 // Rate limiting
-export const QUEUE_GLOBAL_WORKER_LIMITER_MAX = 10;
+export const QUEUE_GLOBAL_WORKER_LIMITER_MAX = 30;
 export const QUEUE_GLOBAL_WORKER_LIMITER_DURATION = 1000;
 
 // Concurrency

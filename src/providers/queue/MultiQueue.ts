@@ -61,7 +61,7 @@ export class DynamicQueue {
 
       const connection = await this.getQueueConnection(queueName);
 
-      const queue = this.initOrFetchQueue(
+      const queue = await this.initOrFetchQueue(
         queueName,
         jobFn,
         connection,
@@ -69,7 +69,8 @@ export class DynamicQueue {
           connection,
           ...queueOptions,
         },
-        workerOptions
+        workerOptions,
+        queueScaleOptions
       );
 
       this.newRelic.trackMetric(
@@ -82,7 +83,6 @@ export class DynamicQueue {
       return await queue.add(queueName, data, {
         removeOnComplete: true,
         removeOnFail: true,
-
         ...addQueueOptions,
       });
     } catch (error) {
@@ -101,13 +101,14 @@ export class DynamicQueue {
     return connection;
   }
 
-  private initOrFetchQueue(
+  private async initOrFetchQueue(
     queueName: string,
     jobFn: QueueJobFn,
     connection: Redis,
     queueOptions: QueueBaseOptions,
-    workerOptions?: QueueBaseOptions
-  ): Queue {
+    workerOptions?: QueueBaseOptions,
+    queueScaleOptions?: IQueueScaleOptions
+  ): Promise<Queue> {
     let queue = this.queues.get(queueName);
 
     if (!queue) {
@@ -122,18 +123,38 @@ export class DynamicQueue {
       });
     }
 
-    this.initOrFetchWorker(queueName, jobFn, connection, workerOptions);
+    await this.initOrFetchWorker(queueName, jobFn, connection, workerOptions, queueScaleOptions);
 
     return queue;
   }
 
-  private initOrFetchWorker(
+  private async initOrFetchWorker(
     queueName: string,
     jobFn: QueueJobFn,
     connection: Redis,
-    workerOptions?: WorkerOptions
-  ): void {
+    workerOptions?: WorkerOptions,
+    queueScaleOptions?: IQueueScaleOptions
+  ): Promise<void> {
     let worker = this.workers.get(queueName);
+
+    let maxWorkerLimiter = QUEUE_GLOBAL_WORKER_LIMITER_MAX;
+
+    switch (queueScaleOptions?.queueScaleBy) {
+      case "active-characters":
+        maxWorkerLimiter = Math.max(
+          (await this.inMemoryHashTable.get("activity-tracker", "character-count")) as unknown as number,
+          QUEUE_GLOBAL_WORKER_LIMITER_MAX
+        );
+
+        break;
+      case "active-npcs":
+        maxWorkerLimiter = Math.max(
+          (await this.inMemoryHashTable.get("activity-tracker", "npc-count")) as unknown as number,
+          QUEUE_GLOBAL_WORKER_LIMITER_MAX
+        );
+
+        break;
+    }
 
     if (!worker) {
       worker = new Worker(
@@ -150,7 +171,7 @@ export class DynamicQueue {
           name: `${queueName}-worker`,
           concurrency: QUEUE_WORKER_CONCURRENCY,
           limiter: {
-            max: QUEUE_GLOBAL_WORKER_LIMITER_MAX,
+            max: maxWorkerLimiter,
             duration: QUEUE_GLOBAL_WORKER_LIMITER_DURATION,
           },
           connection,
@@ -259,7 +280,7 @@ export class DynamicQueue {
       case "active-npcs":
         const activeNPCs = Number((await this.inMemoryHashTable.get("activity-tracker", "npc-count")) || 1);
 
-        const maxNPCQueues = Math.ceil(activeNPCs / 20) || 1;
+        const maxNPCQueues = Math.ceil(activeNPCs / 15) || 1;
 
         const NPCQueueScaleFactor = Math.min(
           maxNPCQueues,
