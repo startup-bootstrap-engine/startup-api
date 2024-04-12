@@ -42,3 +42,9 @@ Content-Type: application/json
 GET {{baseUrl}}/scripts/fix-depot-ownership HTTP/1.1
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
+
+### Scripts :: Dump users email on txt
+GET {{baseUrl}}/scripts/users-emails-dump HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+  

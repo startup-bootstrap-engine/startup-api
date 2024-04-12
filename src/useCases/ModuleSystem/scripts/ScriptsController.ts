@@ -101,4 +101,13 @@ export class ScriptsController implements interfaces.Controller {
       message: "Depot ownership fixed!",
     });
   }
+
+  @httpGet("/users-emails-dump")
+  public async dumpUserEmailsOnTxt(@response() res): Promise<void> {
+    await this.scriptsUseCase.dumpUserEmailsOnCsv();
+
+    return res.status(200).send({
+      message: "Emails dumped!",
+    });
+  }
 }

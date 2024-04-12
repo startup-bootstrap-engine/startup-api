@@ -121,6 +121,7 @@
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-unused-imports": "^1.0.1",
     "express-async-errors": "^3.1.1",
+    "fast-csv": "^5.0.1",
     "firebase-admin": "^9.6.0",
     "google-auth-library": "^7.0.4",
     "husky": "^4.3.0",
