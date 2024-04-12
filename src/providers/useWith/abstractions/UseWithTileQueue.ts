@@ -63,9 +63,6 @@ export class UseWithTileQueue {
       {
         character,
         useWithTileData,
-      },
-      {
-        queueScaleBy: "active-characters",
       }
     );
   }

@@ -73,9 +73,7 @@ export class ItemUseCycleQueue {
         iterations,
         intervalDurationMs,
       },
-      {
-        queueScaleBy: "active-characters",
-      },
+      undefined,
 
       {
         delay: intervalDurationMs,

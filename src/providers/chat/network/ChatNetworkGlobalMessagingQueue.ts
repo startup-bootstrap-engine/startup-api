@@ -46,9 +46,6 @@ export class ChatNetworkGlobalMessagingQueue {
       {
         character,
         data,
-      },
-      {
-        queueScaleBy: "active-characters",
       }
     );
   }
