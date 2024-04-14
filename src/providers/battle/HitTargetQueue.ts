@@ -29,6 +29,7 @@ import { BONUS_DAMAGE_MULTIPLIER, GENERATE_BLOOD_GROUND_ON_HIT } from "@provider
 import { blueprintManager } from "@providers/inversify/container";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
+import { NPCTarget } from "@providers/npc/movement/NPCTarget";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import random from "lodash/random";
 import { BattleAttackTargetDeath } from "./BattleAttackTarget/BattleAttackTargetDeath";
@@ -53,7 +54,8 @@ export class HitTargetQueue {
     private entityEffectUse: EntityEffectUse,
     private battleDamageCalculator: BattleDamageCalculator,
     private locker: Locker,
-    private dynamicQueue: DynamicQueue
+    private dynamicQueue: DynamicQueue,
+    private npcTarget: NPCTarget
   ) {}
 
   public async hit(
@@ -81,6 +83,15 @@ export class HitTargetQueue {
           const { attacker, target, targetType, magicAttack, bonusDamage, spellHit } = job.data;
 
           target.type = targetType;
+
+          // make sure that if the target is an NPC and it doesn't have a target, we set the target as the attacker
+          if (
+            attacker.type === EntityType.Character &&
+            target.type === EntityType.NPC &&
+            !(target as INPC).targetCharacter
+          ) {
+            await this.npcTarget.setTarget(target as INPC, attacker as ICharacter);
+          }
 
           await this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
         },
