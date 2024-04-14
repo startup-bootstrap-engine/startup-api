@@ -11,7 +11,7 @@ import {
   SpearsBlueprint,
   StaffsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
-import { FromGridX, FromGridY, ItemSlotType } from "@rpg-engine/shared";
+import { BattleSocketEvents, FromGridX, FromGridY, ItemSlotType } from "@rpg-engine/shared";
 import { EntityAttackType, EntityType } from "@rpg-engine/shared/dist/types/entity.types";
 import { Types } from "mongoose";
 import { BattleAttackRanged } from "../BattleAttackRanged";
@@ -27,6 +27,10 @@ describe("BattleRangedAttack.spec.ts", () => {
   let characterEquipment: IEquipment;
   let hitTarget: any;
   let bowItem: IItem;
+
+  const mockSocketMessaging = {
+    sendEventToUser: jest.fn(),
+  };
 
   beforeAll(async () => {
     await unitTestHelper.initializeMapLoader();
@@ -69,6 +73,9 @@ describe("BattleRangedAttack.spec.ts", () => {
     testNPC.x = FromGridX(2);
     testNPC.y = FromGridY(2);
     await testNPC.save();
+
+    // @ts-expect-error
+    battleRangedAttack.socketMessaging = mockSocketMessaging;
   });
 
   it("character does not have required ammo", async () => {
@@ -76,6 +83,33 @@ describe("BattleRangedAttack.spec.ts", () => {
     const rangedAttackAmmo = await battleRangedAttack.getAmmoForRangedAttack(testCharacter, characterEquipment);
 
     expect(rangedAttackAmmo).toBeUndefined();
+    expect(mockSocketMessaging.sendEventToUser).toHaveBeenCalledWith(
+      testCharacter.channelId!,
+      BattleSocketEvents.RangedAttackFailure,
+      {
+        targetId: testCharacter.id,
+        type: EntityType.Character,
+        reason: "Oops! Not enough ammo for your ranged attack!",
+      }
+    );
+  });
+
+  it("should return error message to character if character does have incompatible ammo", async () => {
+    // character has a bow and we have bolt witch is incompatible
+    await equipAmmoInEquipmentSlot(characterEquipment, RangedWeaponsBlueprint.Bolt, "accessory", 1);
+    // @ts-ignore
+    const rangedAttackAmmo = await battleRangedAttack.getAmmoForRangedAttack(testCharacter, characterEquipment);
+
+    expect(rangedAttackAmmo).toBeUndefined();
+    expect(mockSocketMessaging.sendEventToUser).toHaveBeenCalledWith(
+      testCharacter.channelId!,
+      BattleSocketEvents.RangedAttackFailure,
+      {
+        targetId: testCharacter.id,
+        type: EntityType.Character,
+        reason: "Oops! Incompatible ammo for your ranged attack!",
+      }
+    );
   });
 
   it("character carries reanged weapon in hand slot", async () => {
