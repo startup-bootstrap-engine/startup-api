@@ -12,6 +12,7 @@ import {
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { Locker } from "@providers/locks/Locker";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { EnvType } from "@rpg-engine/shared";
 import { DefaultJobOptions, Job, Queue, QueueBaseOptions, Worker, WorkerOptions } from "bullmq";
@@ -44,7 +45,8 @@ export class DynamicQueue {
     private queueActivityMonitor: QueueActivityMonitor,
     private inMemoryHashTable: InMemoryHashTable,
     private newRelic: NewRelic,
-    private entityQueueScalingCalculator: EntityQueueScalingCalculator
+    private entityQueueScalingCalculator: EntityQueueScalingCalculator,
+    private locker: Locker
   ) {}
 
   public async addJob(
@@ -118,7 +120,7 @@ export class DynamicQueue {
       queue = new Queue(queueName, queueOptions);
       this.queues.set(queueName, queue);
       // constantly pool the connection to check if it's still needed
-      this.monitorAndReleaseInactiveQueueRedisConnections(queueName, connection);
+      await this.monitorAndReleaseInactiveQueueRedisConnections(queueName, connection);
 
       queue.on("error", (error) => {
         console.error(`Queue error: ${error.message}`);
@@ -194,46 +196,66 @@ export class DynamicQueue {
   }
 
   // Remember each redis client connection consume resources, so it's important to release them when they're no longer needed
-  private monitorAndReleaseInactiveQueueRedisConnections(queueName: string, connection: any): void {
+  private async monitorAndReleaseInactiveQueueRedisConnections(queueName: string, connection: Redis): Promise<void> {
+    const lockKey = `queue-connection-monitor-${queueName}`;
+    const canProceed = await this.locker.lock(lockKey);
+    if (!canProceed) {
+      return;
+    }
+
     this.queueConnections.set(queueName, connection);
 
-    const queueConnectionInterval = setInterval(
-      async () => {
-        const hasQueueActivity = await this.queueActivityMonitor.hasQueueActivity(queueName);
+    try {
+      // Only set the interval once when the lock is acquired.
+      const queueConnectionInterval = setInterval(async () => {
+        try {
+          const hasQueueActivity = await this.queueActivityMonitor.hasQueueActivity(queueName);
+          if (!hasQueueActivity) {
+            console.log(`🔒 No activity detected. Preparing to release resources for queue ${queueName}.`);
 
-        if (!hasQueueActivity) {
-          console.log(`🔒 Releasing connection for queue ${queueName}`);
+            // Perform resource cleanup
+            await this.performResourceCleanup(queueName, connection);
 
-          const connection = this.queueConnections.get(queueName);
-
-          if (!connection) {
-            console.error(`Error releasing connection for queue ${queueName}: Connection not found`);
+            // After cleanup, clear the interval and release the lock
             clearInterval(queueConnectionInterval);
-            return;
+            await this.locker.unlock(lockKey);
           }
-
-          await this.redisManager.releasePoolClient(connection);
-          this.queueConnections.delete(queueName);
-
-          const queue = this.queues.get(queueName);
-          const worker = this.workers.get(queueName);
-
-          if (queue || worker) {
-            console.log(`🔒 Releasing connection for queue ${queueName}`);
-          }
-
-          await worker?.close(); // Close the worker
-          await queue?.close(); // Close the queue
-          await queue?.obliterate({ force: true }); // Remove the queue and its data from Redis
-
-          this.queues.delete(queueName); // Remove the queue from the queues map as well, since we dont have a connection anymore (this will force a new queue creation on the next job)
-          this.workers.delete(queueName); // Remove the worker from the workers map as well!
-          clearInterval(queueConnectionInterval);
+        } catch (error) {
+          console.error(`Error during resource monitoring for queue ${queueName}: ${error}`);
         }
-      },
+      }, QUEUE_CONNECTION_CHECK_INTERVAL);
+    } catch (error) {
+      console.error(`Failed to initiate resource monitoring for queue ${queueName}: ${error}`);
+    } finally {
+      // Ensure the lock is not held indefinitely if an exception occurs before the interval is set.
+      if (!this.queueConnections.has(queueName)) {
+        await this.locker.unlock(lockKey);
+      }
+    }
+  }
 
-      QUEUE_CONNECTION_CHECK_INTERVAL
-    );
+  private async performResourceCleanup(queueName: string, connection: Redis): Promise<void> {
+    try {
+      const worker = this.workers.get(queueName);
+      if (worker) {
+        await worker.close();
+        this.workers.delete(queueName);
+      }
+
+      const queue = this.queues.get(queueName);
+      if (queue) {
+        await queue.close();
+        await queue.obliterate({ force: true });
+        this.queues.delete(queueName);
+      }
+
+      console.log(`🔒 Releasing connection for queue ${queueName}`);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      await this.redisManager.releasePoolClient(connection);
+      this.queueConnections.delete(queueName);
+    }
   }
 
   private async generateQueueName(
