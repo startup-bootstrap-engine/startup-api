@@ -1,9 +1,11 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
+import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { MarketplaceMoney } from "@entities/ModuleMarketplace/MarketplaceMoneyModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
-import { container, unitTestHelper } from "@providers/inversify/container";
+import { CharacterTradingBalance } from "@providers/character/CharacterTradingBalance";
+import { blueprintManager, container, unitTestHelper } from "@providers/inversify/container";
 import { OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { MarketplaceMoneyWithdraw } from "../MarketplaceMoneyWithdraw";
 
@@ -12,10 +14,12 @@ describe("MarketplaceMoneyWithdraw.ts", () => {
   let testCharacter: ICharacter;
   let characterInventory: CharacterInventory;
   let testNPC: INPC;
+  let characterTradingBalance: CharacterTradingBalance;
 
   beforeAll(() => {
     characterInventory = container.get(CharacterInventory);
     marketplaceMoneyWithdraw = container.get(MarketplaceMoneyWithdraw);
+    characterTradingBalance = container.get(CharacterTradingBalance);
   });
 
   beforeEach(async () => {
@@ -134,5 +138,151 @@ describe("MarketplaceMoneyWithdraw.ts", () => {
     const container = await ItemContainer.findById(inventory?.itemContainer);
     expect(container?.slots[0].stackQty).toBe(99999);
     expect(container?.slots[1].stackQty).toBe(99999);
+  });
+
+  it("should not rollback withdraw if update is successful", async () => {
+    const blueprint = blueprintManager.getBlueprint<IItem>("items", OthersBlueprint.GoldCoin);
+    const inventory = await characterInventory.getInventory(testCharacter);
+    const inventoryContainerId = inventory?.itemContainer as unknown as string;
+
+    const initialCharacterAvailableGold = 1000;
+    const updatedGold = 100;
+
+    // update gold is successful
+    const gold = await unitTestHelper.createMockItem({
+      stackQty: initialCharacterAvailableGold + updatedGold,
+      maxStackSize: 10000,
+      key: OthersBlueprint.GoldCoin,
+    });
+
+    await ItemContainer.findByIdAndUpdate(inventory?.itemContainer, {
+      slots: {
+        0: gold,
+      },
+    });
+
+    // @ts-ignore
+    const isRollbackSuccessful = await marketplaceMoneyWithdraw.checkAndRollbackMoneyWithdraw(
+      testCharacter,
+      blueprint,
+      inventoryContainerId,
+      updatedGold,
+      initialCharacterAvailableGold
+    );
+
+    const availableGoldAfterRollback = await characterTradingBalance.getTotalGoldInInventory(testCharacter);
+
+    expect(isRollbackSuccessful).toBe(false);
+    expect(availableGoldAfterRollback).toBe(initialCharacterAvailableGold + updatedGold);
+  });
+
+  it("should rollback withdraw if no update was made", async () => {
+    const blueprint = blueprintManager.getBlueprint<IItem>("items", OthersBlueprint.GoldCoin);
+    const inventory = await characterInventory.getInventory(testCharacter);
+    const inventoryContainerId = inventory?.itemContainer as unknown as string;
+
+    const initialCharacterAvailableGold = 1000;
+    const updatedGold = 100;
+
+    // update gold in inventory is same as initial gold
+    const gold = await unitTestHelper.createMockItem({
+      stackQty: initialCharacterAvailableGold,
+      maxStackSize: 10000,
+      key: OthersBlueprint.GoldCoin,
+    });
+
+    await ItemContainer.findByIdAndUpdate(inventory?.itemContainer, {
+      slots: {
+        0: gold,
+      },
+    });
+
+    // @ts-ignore
+    const isRollbackSuccessful = await marketplaceMoneyWithdraw.checkAndRollbackMoneyWithdraw(
+      testCharacter,
+      blueprint,
+      inventoryContainerId,
+      updatedGold,
+      initialCharacterAvailableGold
+    );
+
+    const availableGoldAfterRollback = await characterTradingBalance.getTotalGoldInInventory(testCharacter);
+
+    expect(isRollbackSuccessful).toBe(true);
+    expect(availableGoldAfterRollback).toBe(initialCharacterAvailableGold);
+  });
+
+  it("should rollback withdraw if update was less than it should be", async () => {
+    const blueprint = blueprintManager.getBlueprint<IItem>("items", OthersBlueprint.GoldCoin);
+    const inventory = await characterInventory.getInventory(testCharacter);
+    const inventoryContainerId = inventory?.itemContainer as unknown as string;
+
+    const initialCharacterAvailableGold = 1000;
+    const updatedGold = 100;
+    const actualUpdatedGold = 50;
+
+    // update gold in less than it should be
+    const gold = await unitTestHelper.createMockItem({
+      stackQty: initialCharacterAvailableGold + actualUpdatedGold,
+      maxStackSize: 10000,
+      key: OthersBlueprint.GoldCoin,
+    });
+
+    await ItemContainer.findByIdAndUpdate(inventory?.itemContainer, {
+      slots: {
+        0: gold,
+      },
+    });
+
+    // @ts-ignore
+    const isRollbackSuccessful = await marketplaceMoneyWithdraw.checkAndRollbackMoneyWithdraw(
+      testCharacter,
+      blueprint,
+      inventoryContainerId,
+      updatedGold,
+      initialCharacterAvailableGold
+    );
+
+    const availableGoldAfterRollback = await characterTradingBalance.getTotalGoldInInventory(testCharacter);
+
+    expect(isRollbackSuccessful).toBe(true);
+    expect(availableGoldAfterRollback).toBe(initialCharacterAvailableGold);
+  });
+
+  it("should rollback withdraw if update was grater than it should be", async () => {
+    const blueprint = blueprintManager.getBlueprint<IItem>("items", OthersBlueprint.GoldCoin);
+    const inventory = await characterInventory.getInventory(testCharacter);
+    const inventoryContainerId = inventory?.itemContainer as unknown as string;
+
+    const initialCharacterAvailableGold = 1000;
+    const updatedGold = 100;
+    const actualUpdatedGold = 150;
+
+    // update gold in grater than it should be
+    const gold = await unitTestHelper.createMockItem({
+      stackQty: initialCharacterAvailableGold + actualUpdatedGold,
+      maxStackSize: 10000,
+      key: OthersBlueprint.GoldCoin,
+    });
+
+    await ItemContainer.findByIdAndUpdate(inventory?.itemContainer, {
+      slots: {
+        0: gold,
+      },
+    });
+
+    // @ts-ignore
+    const isRollbackSuccessful = await marketplaceMoneyWithdraw.checkAndRollbackMoneyWithdraw(
+      testCharacter,
+      blueprint,
+      inventoryContainerId,
+      updatedGold,
+      initialCharacterAvailableGold
+    );
+
+    const availableGoldAfterRollback = await characterTradingBalance.getTotalGoldInInventory(testCharacter);
+
+    expect(isRollbackSuccessful).toBe(true);
+    expect(availableGoldAfterRollback).toBe(initialCharacterAvailableGold);
   });
 });

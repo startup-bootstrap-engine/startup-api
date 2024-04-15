@@ -4,7 +4,9 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { IMarketplaceMoney, MarketplaceMoney } from "@entities/ModuleMarketplace/MarketplaceMoneyModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
+import { CharacterTradingBalance } from "@providers/character/CharacterTradingBalance";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
+import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
 import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { blueprintManager } from "@providers/inversify/container";
@@ -29,7 +31,9 @@ export class MarketplaceMoneyWithdraw {
     private marketplaceValidation: MarketplaceValidation,
     private characterWeight: CharacterWeightQueue,
     private mathHelper: MathHelper,
-    private characterItemSlots: CharacterItemSlots
+    private characterItemSlots: CharacterItemSlots,
+    private characterTradingBalance: CharacterTradingBalance,
+    private characterItemInventory: CharacterItemInventory
   ) {}
 
   @TrackNewRelicTransaction()
@@ -74,9 +78,11 @@ export class MarketplaceMoneyWithdraw {
   }
 
   private async addGoldToInventory(character: ICharacter, marketplaceMoney: IMarketplaceMoney): Promise<boolean> {
-    const blueprint = await blueprintManager.getBlueprint<IItem>("items", OthersBlueprint.GoldCoin);
+    const blueprint = blueprintManager.getBlueprint<IItem>("items", OthersBlueprint.GoldCoin);
     const inventory = await this.characterInventory.getInventory(character);
     const inventoryContainerId = inventory?.itemContainer as unknown as string;
+
+    const initialCharacterAvailableGold = await this.characterTradingBalance.getTotalGoldInInventory(character);
 
     let qty = marketplaceMoney.money;
     let moneyLeft = marketplaceMoney.money;
@@ -107,6 +113,24 @@ export class MarketplaceMoneyWithdraw {
         moneyLeft = qty;
       } else break;
     }
+    const updatedGold = marketplaceMoney.money - moneyLeft;
+
+    const isRollbackSuccessful = await this.checkAndRollbackMoneyWithdraw(
+      character,
+      blueprint,
+      inventoryContainerId,
+      updatedGold,
+      initialCharacterAvailableGold
+    );
+
+    if (isRollbackSuccessful) {
+      this.socketMessaging.sendMessageToCharacter(
+        character,
+        "Sorry, Withdrawal is not successful. Rollback to original state"
+      );
+
+      return false;
+    }
 
     if (moneyLeft > 0) {
       await marketplaceMoney.updateOne({ money: moneyLeft });
@@ -117,6 +141,52 @@ export class MarketplaceMoneyWithdraw {
     await this.characterWeight.updateCharacterWeight(character);
 
     return true;
+  }
+
+  private async checkAndRollbackMoneyWithdraw(
+    character: ICharacter,
+    blueprint: IItem,
+    inventoryContainerId: string,
+    updatedGold: number,
+    initialCharacterAvailableGold: number
+  ): Promise<boolean> {
+    const characterAvailableGold = await this.characterTradingBalance.getTotalGoldInInventory(character);
+
+    if (initialCharacterAvailableGold + updatedGold !== characterAvailableGold) {
+      if (initialCharacterAvailableGold === characterAvailableGold) {
+        return true;
+      }
+
+      if (characterAvailableGold > initialCharacterAvailableGold) {
+        const qty = characterAvailableGold - initialCharacterAvailableGold;
+        await this.characterItemInventory.decrementItemFromNestedInventoryByKey(
+          OthersBlueprint.GoldCoin,
+          character,
+          qty
+        );
+      } else {
+        let qty = initialCharacterAvailableGold - characterAvailableGold;
+        while (qty > 0) {
+          const newItem = new Item({ ...blueprint });
+
+          if (newItem.maxStackSize >= qty) {
+            newItem.stackQty = qty;
+            qty = 0;
+          } else {
+            newItem.stackQty = newItem.maxStackSize;
+            qty = this.mathHelper.fixPrecision(qty - newItem.maxStackSize);
+          }
+
+          await newItem.save();
+
+          await this.characterItemContainer.addItemToContainer(newItem, character, inventoryContainerId);
+        }
+      }
+
+      return true;
+    }
+
+    return false;
   }
 
   private async sendRefreshItemsEvent(character: ICharacter): Promise<void> {
