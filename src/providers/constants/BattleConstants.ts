@@ -15,6 +15,10 @@ export const DAMAGE_REDUCTION_MAX_REDUCTION_PERCENTAGE = 0.4;
 
 export const BATTLE_TOTAL_POTENTIAL_DAMAGE_MODIFIER = 1.25;
 
+// NPC damage reduction
+
+export const NPC_DAMAGE_REDUCTION_RATIO = 0.8; // lower means NPC damage reduction is lower, so the damage it takes becomes higher
+
 // Rogue
 
 export const STEALTH_DETECTION_THRESHOLD = 0.025;
