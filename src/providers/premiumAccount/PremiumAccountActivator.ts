@@ -40,7 +40,7 @@ export class PremiumAccountActivator {
     }
   }
 
-  public async deactivateUserPremiumAccount(user: IUser): Promise<void> {
+  public async deactivateUserPremiumAccount(user: IUser): Promise<boolean> {
     try {
       console.log("😔 Deactivating premium account for user", user.email);
 
@@ -52,8 +52,11 @@ export class PremiumAccountActivator {
           isManuallyControlledPremiumAccount: "",
         },
       });
+
+      return true;
     } catch (error) {
       console.error(error);
+      return false;
     }
   }
 }

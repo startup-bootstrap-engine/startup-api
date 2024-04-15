@@ -1,5 +1,6 @@
 import { IUser, User } from "@entities/ModuleSystem/UserModel";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
+import { BadRequestError } from "@providers/errors/BadRequestError";
 import { AuthMiddleware } from "@providers/middlewares/AuthMiddleware";
 import { isAdminMiddleware } from "@providers/middlewares/IsAdminMiddleware";
 import { PremiumAccountActivator } from "@providers/premiumAccount/PremiumAccountActivator";
@@ -64,12 +65,14 @@ export class PremiumAccountController implements interfaces.Controller {
     const user = (await User.findOne({ email: email }).lean()) as IUser;
 
     if (!user) {
-      return res.status(400).send({
-        message: "User not found!",
-      });
+      new BadRequestError("User not found!");
     }
 
-    await this.premiumAccountActivator.deactivateUserPremiumAccount(email);
+    const result = await this.premiumAccountActivator.deactivateUserPremiumAccount(user);
+
+    if (!result) {
+      new BadRequestError("Error deactivating premium account!");
+    }
 
     return res.status(200).send({
       message: "Premium account deactivated successfully!",
