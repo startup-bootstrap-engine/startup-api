@@ -9,7 +9,7 @@ export const BONUS_DAMAGE_MULTIPLIER = 4;
 
 // Damage Reduction
 export const DAMAGE_REDUCTION_MIN_DAMAGE = 1;
-export const DAMAGE_REDUCTION_MAX_REDUCTION_PERCENTAGE = 0.4;
+export const DAMAGE_REDUCTION_MAX_REDUCTION_PERCENTAGE = 0.6;
 
 // Total potential damage
 
@@ -17,7 +17,7 @@ export const BATTLE_TOTAL_POTENTIAL_DAMAGE_MODIFIER = 1.25;
 
 // NPC damage reduction
 
-export const NPC_DAMAGE_REDUCTION_RATIO = 0.5; // lower means less damage on NPC (more challenging game)
+export const NPC_DAMAGE_REDUCTION_RATIO = 0.7; // lower means less damage on NPC (more challenging game)
 
 // Rogue
 

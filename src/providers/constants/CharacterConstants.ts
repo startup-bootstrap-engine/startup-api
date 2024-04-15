@@ -25,8 +25,8 @@ export const INITIAL_STARTING_POINTS: IInitialSpawnPoints = {
     scene: "ilya-village-sewer",
   },
   [CharacterGameMode.Farming]: {
-    gridX: 36,
-    gridY: 18,
+    gridX: 114,
+    gridY: 46,
     scene: "farm-land",
   },
   [CharacterFactions.ShadowWalker]: {

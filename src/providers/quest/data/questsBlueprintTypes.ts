@@ -17,6 +17,7 @@ export enum QuestsBlueprint {
   InteractionShaman = "interaction-shaman",
   InteractionDurganMiner = "interaction-durgan-miner",
   InteractionRagnarokHornbreaker = "interaction-ragnarok-hornbreaker",
+  InteractionElrichTheHermit = "interaction-elrich-the-hermit",
 
   // Kill quests
 

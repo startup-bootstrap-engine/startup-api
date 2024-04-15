@@ -1,5 +1,6 @@
 import { QuestsBlueprint } from "../../questsBlueprintTypes";
 import { questInteractionDurganMiner } from "./QuestDurganMiner";
+import { questInteractionElrichTheHermit } from "./QuestElrichTheHermit";
 import { questInteractionClimber } from "./QuestInteractionClimber";
 import { questInteractionCrimsonBackpack } from "./QuestInteractionCraftCrimsonBackpack";
 import { questInteractionCraftSword } from "./QuestInteractionCraftSword";
@@ -27,4 +28,5 @@ export const interactionQuests = {
   [QuestsBlueprint.InteractionDurganMiner]: questInteractionDurganMiner,
   [QuestsBlueprint.questInteractionEldenTimberheart]: questInteractionEldenTimberheart,
   [QuestsBlueprint.InteractionRagnarokHornbreaker]: questInteractionRagnarokHornbreaker,
+  [QuestsBlueprint.InteractionElrichTheHermit]: questInteractionElrichTheHermit,
 };
