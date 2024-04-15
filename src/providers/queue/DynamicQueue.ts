@@ -195,8 +195,6 @@ export class DynamicQueue {
 
   // Remember each redis client connection consume resources, so it's important to release them when they're no longer needed
   private monitorAndReleaseInactiveQueueRedisConnections(queueName: string, connection: any): void {
-    console.log(`🔎 Monitoring connection for queue ${queueName}`);
-
     this.queueConnections.set(queueName, connection);
 
     const queueConnectionInterval = setInterval(
