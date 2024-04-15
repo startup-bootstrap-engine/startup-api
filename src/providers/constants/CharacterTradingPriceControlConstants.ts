@@ -7,6 +7,6 @@ export const TRADING_PRICE_CONTROL_RATIO_MAX_VALUE = 10; // The highest value th
 
 export const TRADING_PRICE_CONTROL_PRICE_RATIO_DATA_WINDOW_DAYS = 3; // The amount of days of trading history to consider when calculating the price adjustment ratio
 
-export const TRADING_PRICE_CONTROL_RATIO_SENSITIVITY = 0.015; // The sensitivity of the price adjustment ratio. The higher the value, the more sensitive the price adjustment will be to the amount of items bought or sold
+export const TRADING_PRICE_CONTROL_RATIO_SENSITIVITY = 0.02; // The sensitivity of the price adjustment ratio. The higher the value, the more sensitive the price adjustment will be to the amount of items bought or sold
 
 export const TRADING_PRICE_CONTROL_SKIP_CONTROL = [RangedWeaponsBlueprint.WoodenArrow];
