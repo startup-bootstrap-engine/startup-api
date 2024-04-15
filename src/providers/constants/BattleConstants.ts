@@ -17,7 +17,7 @@ export const BATTLE_TOTAL_POTENTIAL_DAMAGE_MODIFIER = 1.25;
 
 // NPC damage reduction
 
-export const NPC_DAMAGE_REDUCTION_RATIO = 0.8; // lower means NPC damage reduction is lower, so the damage it takes becomes higher
+export const NPC_DAMAGE_REDUCTION_RATIO = 0.5; // lower means less damage on NPC (more challenging game)
 
 // Rogue
 
