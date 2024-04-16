@@ -5,6 +5,7 @@ const MapSchema = createLeanSchema(
   {
     name: Type.string({ required: true }),
     checksum: Type.string({ required: true }),
+    version: Type.string({ required: true }),
   },
   { timestamps: { createdAt: true, updatedAt: true } }
 );

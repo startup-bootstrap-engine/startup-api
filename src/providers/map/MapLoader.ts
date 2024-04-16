@@ -8,9 +8,9 @@ import { ITiled, MAP_REQUIRED_LAYERS } from "@rpg-engine/shared";
 import fs from "fs";
 import { provide } from "inversify-binding-decorators";
 import md5File from "md5-file";
+import mapVersions from "../../../public/config/map-versions.json";
 import { GridManager } from "./GridManager";
 import { createZipMap } from "./MapCompressionHelper";
-
 type MapObject = {
   name: string;
   data: ITiled;
@@ -87,23 +87,34 @@ export class MapLoader {
   }
 
   private async checkMapUpdated(mapPath: string, mapFileName: string, mapObject: object): Promise<boolean> {
-    const mapChecksum = this.checksum(mapPath);
+    const localMapChecksum = this.checksum(mapPath);
+
     const fileName = this.extractFileName(mapFileName);
-    const mapData = await MapModel.findOne({ name: fileName });
+
+    const mapVersion = mapVersions[fileName];
+    if (!mapVersion) {
+      throw new InternalServerError(`❌ Map ${fileName} doesn't have a version in map-versions.json`);
+    }
+
+    const mapMetadata = await MapModel.findOne({ name: fileName });
 
     // Determine if zip file creation is necessary
-    const isZipCreationNeeded =
-      !this.doesMapHasCorrespondingZipFile(fileName) || (mapData && mapData.checksum !== mapChecksum);
+    const isZipCreationNeeded = !this.doesMapHasCorrespondingZipFile(fileName);
 
     // Handle new map creation
-    if (!mapData) {
-      await this.handleNewMapCreation(fileName, mapChecksum, mapObject);
+    if (!mapMetadata) {
+      await this.handleNewMapCreation(fileName, localMapChecksum, mapObject);
       await this.createZipForMap(fileName, mapObject);
       return true;
     }
 
     // Update existing map if checksum differs
-    const wasMapUpdated = await this.updateExistingMapIfChecksumDiffers(mapData, mapChecksum, fileName);
+    const wasMapUpdated = await this.updateDbMapMetadataIfChecksumOrVersionDiffers(
+      mapMetadata,
+      localMapChecksum,
+      mapVersion,
+      fileName
+    );
 
     // Create or update zip if needed
     if (isZipCreationNeeded || wasMapUpdated) {
@@ -113,17 +124,28 @@ export class MapLoader {
     return wasMapUpdated;
   }
 
-  private async updateExistingMapIfChecksumDiffers(
+  private async updateDbMapMetadataIfChecksumOrVersionDiffers(
     mapData: any,
     mapChecksum: string,
+    mapLocalVersion: string,
     fileName: string
   ): Promise<boolean> {
+    const update = {} as Record<string, unknown>;
+
     if (mapData.checksum !== mapChecksum) {
+      update.checksum = mapChecksum;
+    }
+
+    if (String(mapData.version) !== String(mapLocalVersion)) {
+      update.version = mapLocalVersion;
+    }
+
+    if (Object.keys(update).length > 0) {
       console.log(`📦 Map ${fileName} is updated!`);
-      mapData.checksum = mapChecksum;
-      await mapData.save();
+      await MapModel.updateOne({ _id: mapData._id }, { $set: update });
       return true;
     }
+
     return false;
   }
 
