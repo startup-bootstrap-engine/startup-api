@@ -17,6 +17,7 @@ import { CharacterNetworkUpdateQueue } from "@providers/character/network/Charac
 import { CharacterNetworkCreateQueue } from "@providers/character/network/characterCreate/CharacterNetworkCreateQueue";
 import { ChatNetworkGlobalMessagingQueue } from "@providers/chat/network/ChatNetworkGlobalMessagingQueue";
 import { appEnv } from "@providers/config/env";
+import { cache } from "@providers/constants/CacheConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DiscordBot } from "@providers/discord/DiscordBot";
 import { EntityEffectDurationControl } from "@providers/entityEffects/EntityEffectDurationControl";
@@ -97,6 +98,8 @@ export class ServerBootstrap {
 
   @TrackNewRelicTransaction()
   public async performMultipleInstancesOperations(): Promise<void> {
+    cache.clear();
+
     this.discordBot.initialize();
 
     await this.queueShutdownHandling();
