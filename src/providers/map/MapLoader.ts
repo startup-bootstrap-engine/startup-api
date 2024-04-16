@@ -101,7 +101,7 @@ export class MapLoader {
     // Determine if zip file creation is necessary
     const isZipCreationNeeded = !this.doesMapHasCorrespondingZipFile(fileName);
 
-    // Handle new map creation
+    // Handle new map creation.
     if (!mapMetadata) {
       await this.handleNewMapCreation(fileName, localMapChecksum, mapObject);
       await this.createZipForMap(fileName, mapObject);
