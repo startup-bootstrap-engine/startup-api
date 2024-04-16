@@ -23,23 +23,29 @@ export class QuestLoader {
     const questSeedData: IQuestSeedData[] = [];
 
     for (const [mapName, mapData] of MapLoader.maps.entries()) {
-      const NPCs = this.mapObjectsLoader.getObjectLayerData("NPCs", mapData);
+      try {
+        const NPCs = this.mapObjectsLoader.getObjectLayerData("NPCs", mapData);
 
-      if (!NPCs) {
+        if (!NPCs) {
+          continue;
+        }
+
+        const npcQuestKeys = getNpcKeysWithQuests(NPCs);
+
+        const uniqueArrayKeys = Array.from(new Set(npcQuestKeys));
+
+        checkIfQuestBlueprintsExists(uniqueArrayKeys, mapName);
+        await getNPCsIds(uniqueArrayKeys);
+
+        for (const keys of uniqueArrayKeys) {
+          const data = questsBlueprintIndex[keys.questKey] as IQuest;
+          data.npcId = keys.npcId!;
+          questSeedData.push({ ...data });
+        }
+      } catch (error) {
+        console.error(error);
+
         continue;
-      }
-
-      const npcQuestKeys = getNpcKeysWithQuests(NPCs);
-
-      const uniqueArrayKeys = Array.from(new Set(npcQuestKeys));
-
-      checkIfQuestBlueprintsExists(uniqueArrayKeys, mapName);
-      await getNPCsIds(uniqueArrayKeys);
-
-      for (const keys of uniqueArrayKeys) {
-        const data = questsBlueprintIndex[keys.questKey] as IQuest;
-        data.npcId = keys.npcId!;
-        questSeedData.push({ ...data });
       }
     }
     return questSeedData;
