@@ -211,8 +211,6 @@ export class DynamicQueue {
         try {
           const hasQueueActivity = await this.queueActivityMonitor.hasQueueActivity(queueName);
           if (!hasQueueActivity) {
-            console.log(`🔒 No activity detected. Preparing to release resources for queue ${queueName}.`);
-
             // Perform resource cleanup
             await this.performResourceCleanup(queueName, connection);
 
@@ -227,10 +225,7 @@ export class DynamicQueue {
     } catch (error) {
       console.error(`Failed to initiate resource monitoring for queue ${queueName}: ${error}`);
     } finally {
-      // Ensure the lock is not held indefinitely if an exception occurs before the interval is set.
-      if (!this.queueConnections.has(queueName)) {
-        await this.locker.unlock(lockKey);
-      }
+      await this.locker.unlock(lockKey);
     }
   }
 
@@ -245,7 +240,7 @@ export class DynamicQueue {
       const queue = this.queues.get(queueName);
       if (queue) {
         await queue.close();
-        await queue.obliterate({ force: true });
+        await queue.obliterate();
         this.queues.delete(queueName);
       }
 
