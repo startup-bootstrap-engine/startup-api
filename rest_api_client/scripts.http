@@ -48,3 +48,9 @@ GET {{baseUrl}}/scripts/users-emails-dump HTTP/1.1
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
   
+
+### Scripts :: Farmland depot fix
+GET {{baseUrl}}/scripts/farmland-depot-fix HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+  

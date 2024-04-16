@@ -3,6 +3,7 @@ import { Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { Depot } from "@entities/ModuleDepot/DepotModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
+import { NPC } from "@entities/ModuleNPC/NPCModel";
 import { User } from "@entities/ModuleSystem/UserModel";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
@@ -176,5 +177,31 @@ export class ScriptsUseCase {
       csvStream.write({ email: user.email });
     });
     csvStream.end();
+  }
+
+  public async farmlandDepotFix(): Promise<void> {
+    const depots = await Depot.find({
+      key: "trader-farm-7",
+    });
+
+    const updateOperations = depots.map((depot) => ({
+      updateOne: {
+        filter: { _id: depot._id },
+        update: { $set: { key: "trader-farm-71" } },
+      },
+    }));
+
+    // update NPC key from trader-farm-7 to trader-farm-71
+
+    await NPC.updateMany(
+      { key: "trader-farm-7" },
+      {
+        $set: {
+          key: "trader-farm-71",
+        },
+      }
+    );
+
+    await Depot.bulkWrite(updateOperations);
   }
 }

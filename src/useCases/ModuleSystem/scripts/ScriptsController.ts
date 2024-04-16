@@ -110,4 +110,13 @@ export class ScriptsController implements interfaces.Controller {
       message: "Emails dumped!",
     });
   }
+
+  @httpGet("/farmland-depot-fix")
+  public async farmlandDepotFix(@response() res): Promise<void> {
+    await this.scriptsUseCase.farmlandDepotFix();
+
+    return res.status(200).send({
+      message: "Depots fixed!",
+    });
+  }
 }
