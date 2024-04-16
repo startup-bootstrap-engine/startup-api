@@ -103,7 +103,7 @@ export class MapLoader {
 
     // Handle new map creation.
     if (!mapMetadata) {
-      await this.handleNewMapCreation(fileName, localMapChecksum, mapObject);
+      await this.handleNewMapCreation(fileName, localMapChecksum, mapVersion);
       await this.createZipForMap(fileName, mapObject);
       return true;
     }
@@ -158,9 +158,9 @@ export class MapLoader {
     return filePath.replace(".json", "");
   }
 
-  private async handleNewMapCreation(fileName: string, mapChecksum: string, mapObject: object): Promise<boolean> {
+  private async handleNewMapCreation(fileName: string, mapChecksum: string, version: string): Promise<boolean> {
     console.log(`📦 Map ${fileName} is created!`);
-    await MapModel.create({ name: fileName, checksum: mapChecksum });
+    await MapModel.create({ name: fileName, checksum: mapChecksum, version });
 
     return true;
   }
