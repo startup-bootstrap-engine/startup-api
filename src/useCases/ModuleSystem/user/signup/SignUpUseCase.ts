@@ -1,5 +1,4 @@
 import { IUser, User } from "@entities/ModuleSystem/UserModel";
-import { EMAIL_VALIDATION_REGEX } from "@providers/constants/EmailValidationConstants";
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { TS } from "@providers/translation/TranslationHelper";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
@@ -7,6 +6,7 @@ import { provide } from "inversify-binding-decorators";
 
 import { ConflictError } from "../../../../providers/errors/ConflictError";
 import { AuthSignUpDTO } from "../AuthDTO";
+import { validate } from "email-validator";
 
 @provide(SignUpUseCase)
 export class SignUpUseCase {
@@ -25,7 +25,7 @@ export class SignUpUseCase {
       throw new ConflictError(TS.translate("users", "userAlreadyExists", { email }));
     }
 
-    if (!EMAIL_VALIDATION_REGEX.test(email)) {
+    if (!validate(email)) {
       throw new BadRequestError("Sorry, your e-mail is invalid");
     }
 
