@@ -1,8 +1,9 @@
+import { CharacterBuff } from "@entities/ModuleCharacter/CharacterBuffModel";
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { container, unitTestHelper } from "@providers/inversify/container";
-import { CharacterClass, PartySocketEvents, UISocketEvents } from "@rpg-engine/shared";
-import PartyManagement from "../PartyManagement";
 import { CharacterParty, ICharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
+import { container, unitTestHelper } from "@providers/inversify/container";
+import { CharacterBuffDurationType, CharacterClass, PartySocketEvents, UISocketEvents } from "@rpg-engine/shared";
+import PartyManagement from "../PartyManagement";
 
 describe("Party Management", () => {
   let partyManagement: PartyManagement;
@@ -396,5 +397,55 @@ describe("Party Management", () => {
       message: "The party is already full!",
       type: "info",
     });
+  });
+
+  it("should return true when check if both characters are on same party", async () => {
+    // @ts-ignore
+    const party = await partyManagement.createParty(characterLeader, firstMember, 2);
+
+    expect(party).toBeDefined;
+
+    const areBothOnSameParty = await partyManagement.checkIfCharacterAndTargetOnTheSameParty(
+      characterLeader,
+      firstMember
+    );
+
+    expect(areBothOnSameParty).toBe(true);
+  });
+  it("should add buffs to the party once only when call applyCharacterBuff", async () => {
+    const trait = ["strength"];
+
+    // @ts-ignore
+    await partyManagement.applyCharacterBuff(characterLeader, trait, 2);
+    // @ts-ignore
+    await partyManagement.applyCharacterBuff(characterLeader, trait, 2);
+
+    const partyBuffs = await CharacterBuff.find({
+      owner: characterLeader._id,
+      trait: trait[0],
+      durationType: CharacterBuffDurationType.Permanent,
+      originateFrom: "party",
+    }).lean();
+
+    expect(partyBuffs.length).toBe(1);
+  });
+
+  it("should delete all buffs from the party when call removeCharacterBuff", async () => {
+    const trait = ["strength"];
+
+    // @ts-ignore
+    await partyManagement.applyCharacterBuff(characterLeader, trait, 2);
+
+    // @ts-ignore
+    await partyManagement.removeCharacterBuff(characterLeader, trait, 2);
+
+    const partyBuffs = await CharacterBuff.find({
+      owner: characterLeader._id,
+      trait: trait[0],
+      durationType: CharacterBuffDurationType.Permanent,
+      originateFrom: "party",
+    }).lean();
+
+    expect(partyBuffs.length).toBe(0);
   });
 });

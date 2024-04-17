@@ -15,6 +15,7 @@ import {
   MacesBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -43,6 +44,7 @@ export const npcAncientDragon: INPCTierBlueprint<26> = {
   ammoKey: AnimationEffectKeys.FireBall,
   tier: 26,
   maxRangeAttack: RangeTypes.High,
+  isGiantForm: true,
   speed: MovementSpeed.ExtraFast,
   // @ts-ignore
   baseHealth: 500000,
@@ -78,6 +80,10 @@ export const npcAncientDragon: INPCTierBlueprint<26> = {
       chance: LootProbability.Uncommon,
     },
     {
+      itemBlueprintKey: ToolsBlueprint.GildedLavaPickaxe,
+      chance: LootProbability.SemiCommon,
+    },
+    {
       itemBlueprintKey: SwordsBlueprint.InfernoCleaver,
       chance: LootProbability.Uncommon,
     },
@@ -94,10 +100,7 @@ export const npcAncientDragon: INPCTierBlueprint<26> = {
       chance: LootProbability.VeryCommon,
       quantityRange: [5, 10],
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.YggdrasilJianSword,
-      chance: LootProbability.VeryRare,
-    },
+
     {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
       chance: LootProbability.Uncommon,
@@ -159,10 +162,7 @@ export const npcAncientDragon: INPCTierBlueprint<26> = {
       itemBlueprintKey: AxesBlueprint.GuardianAxe,
       chance: LootProbability.Uncommon,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.YggdrasilTemplarSword,
-      chance: LootProbability.Uncommon,
-    },
+
     {
       itemBlueprintKey: MacesBlueprint.SunderingClub,
       chance: LootProbability.Common,
@@ -209,18 +209,6 @@ export const npcAncientDragon: INPCTierBlueprint<26> = {
     },
     {
       itemBlueprintKey: AxesBlueprint.SpikedCleaverAxe,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.TimberSplitterAxe,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.BrutalChopperAxe,
       chance: LootProbability.VeryCommon,
     },
     {

@@ -224,7 +224,7 @@ describe("SpellCast.ts", () => {
   });
 
   it("should cast self healing spell successfully", async () => {
-    const newHealth = testCharacter.health + spellSelfHealing.manaCost!;
+    const oldHealth = testCharacter.health;
     const newMana = testCharacter.mana - spellSelfHealing.manaCost!;
 
     expect(await spellCast.castSpell({ magicWords: "talas faenya" }, testCharacter)).toBeTruthy();
@@ -235,6 +235,7 @@ describe("SpellCast.ts", () => {
     })) as ICharacter;
 
     expect(character.mana).toBe(newMana);
+    expect(character.health).toBeGreaterThan(oldHealth);
 
     expect(sendEventToUser).toHaveBeenCalled();
 

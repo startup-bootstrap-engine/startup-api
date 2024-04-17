@@ -24,7 +24,8 @@ export class CreateCharacterUseCase {
       throw new BadRequestError("Maximum character limit reached");
     }
 
-    const isValidTextureKey = await this.factionRepository.exists(newCharacter.race, newCharacter.textureKey);
+    const trimmedTextureKey = newCharacter.textureKey.trim();
+    const isValidTextureKey = await this.factionRepository.exists(newCharacter.race, trimmedTextureKey);
     if (!isValidTextureKey) {
       throw new BadRequestError(
         TS.translate("validation", "requiredResourceCreate", {
@@ -33,11 +34,15 @@ export class CreateCharacterUseCase {
       );
     }
 
-    if (!isAlphanumeric(newCharacter.name)) {
+    const trimmedName = newCharacter.name.trim();
+    if (!isAlphanumeric(trimmedName)) {
       throw new BadRequestError("Sorry, your character name must use only letters or numbers (alphanumeric)!");
     }
 
-    const createdCharacter = await this.characterRepository.createCharacter(newCharacter, ownerId);
+    const createdCharacter = await this.characterRepository.createCharacter(
+      { ...newCharacter, name: trimmedName, textureKey: trimmedTextureKey },
+      ownerId
+    );
 
     user.characters?.push(createdCharacter._id);
     await user.save();

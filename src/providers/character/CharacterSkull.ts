@@ -1,54 +1,43 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { CharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { CharacterPvPKillLog } from "@entities/ModuleCharacter/CharacterPvPKillLogModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import {
+  CHARACTER_SKULL_AMOUNT_KILLS_NEEDED_TO_RED_SKULL,
+  CHARACTER_SKULL_AMOUNT_KILLS_NEEDED_TO_YELLOW_SKULL,
+  CHARACTER_SKULL_MAX_TIME_UNTIL_UPGRADE_TO_RED_SKULL,
+  CHARACTER_SKULL_RED_SKULL_DURATION,
+  CHARACTER_SKULL_WHITE_SKULL_DURATION,
+  CHARACTER_SKULL_YELLOW_SKULL_DURATION,
+} from "@providers/constants/CharacterSkullConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
+import PartyManagement from "@providers/party/PartyManagement";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { CharacterSkullType, CharacterSocketEvents, ICharacterAttributeChanged, Modes } from "@rpg-engine/shared";
+import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 
 @provide(CharacterSkull)
 export class CharacterSkull {
   constructor(
     private readonly inMemoryHashTable: InMemoryHashTable,
-    private readonly socketMessaging: SocketMessaging
+    private readonly socketMessaging: SocketMessaging,
+    private partyManagement: PartyManagement
   ) {}
 
   @TrackNewRelicTransaction()
   public async checkForUnjustifiedAttack(character: ICharacter, target: ICharacter): Promise<boolean> {
+    // avoid getting a skull on the arena map
+    if (character.scene.includes("arena")) {
+      return false;
+    }
+
     // Check if the caster is in a party
-    const isCharacterAndTargetInParty = await this.isCharacterAndTargetOnTheSameParty(
+    const isCharacterAndTargetInParty = await this.partyManagement.checkIfCharacterAndTargetOnTheSameParty(
       character as ICharacter,
       target as ICharacter
     );
 
     return target.hasSkull !== true && target.faction === character.faction && isCharacterAndTargetInParty !== true;
-  }
-
-  private async isCharacterAndTargetOnTheSameParty(character: ICharacter, target: ICharacter): Promise<boolean> {
-    // First, find a party where the character is the leader and target is a member
-    const partyWithCharacterAsLeader = await CharacterParty.findOne({
-      "leader._id": character._id,
-      "members._id": target._id,
-    }).lean();
-
-    // If found, it means they are in the same party
-    if (partyWithCharacterAsLeader) {
-      return true;
-    }
-
-    // Next, find a party where the target is the leader and character is a member
-    const partyWithTargetAsLeader = await CharacterParty.findOne({
-      "leader._id": target._id,
-      "members._id": character._id,
-    }).lean();
-
-    // If found, it means they are in the same party
-    if (partyWithTargetAsLeader) {
-      return true;
-    }
-    // If neither condition is met, then they are not in the same party
-    return false;
   }
 
   @TrackNewRelicTransaction()
@@ -76,7 +65,7 @@ export class CharacterSkull {
       }
       // Set the last attack target
       await this.inMemoryHashTable.set(namespace, character._id.toString(), targetId);
-      await this.inMemoryHashTable.expire(namespace, 15 * 60, "NX");
+      await this.inMemoryHashTable.expire(namespace, CHARACTER_SKULL_WHITE_SKULL_DURATION / 1000, "NX");
     } catch (err) {
       console.error(`An error occurred while trying to update skull to character ${characterId}`, err);
     }
@@ -127,34 +116,46 @@ export class CharacterSkull {
     return null;
   }
 
-  private async setSkull(character: ICharacter, skullType: CharacterSkullType): Promise<void> {
+  public async setSkull(character: ICharacter, skullType: CharacterSkullType): Promise<void> {
     let timeExpired = new Date();
     switch (skullType) {
       case CharacterSkullType.WhiteSkull:
-        timeExpired = new Date(Date.now() + 15 * 60 * 1000);
-
+        timeExpired = dayjs().add(CHARACTER_SKULL_WHITE_SKULL_DURATION, "millisecond").toDate();
         break;
       case CharacterSkullType.YellowSkull:
-        timeExpired = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        timeExpired = dayjs().add(CHARACTER_SKULL_YELLOW_SKULL_DURATION, "millisecond").toDate();
         break;
       case CharacterSkullType.RedSkull:
-        timeExpired = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+        timeExpired = dayjs().add(CHARACTER_SKULL_RED_SKULL_DURATION, "millisecond").toDate();
         break;
     }
-    character.hasSkull = true;
-    character.skullType = skullType;
-    character.skullExpiredAt = timeExpired;
-    await character.save();
-    await this.sendSkullEventToUser(character);
+    await Character.updateOne(
+      { _id: character._id },
+      {
+        $set: {
+          hasSkull: true,
+          skullType: skullType,
+          skullExpiredAt: timeExpired,
+        },
+      }
+    );
 
-    // send skull warning
+    character.skullType = skullType;
+
+    await this.sendSkullEventToUser(character);
   }
 
   @TrackNewRelicTransaction()
   public async updateSkullAfterKill(characterId: string): Promise<void> {
     const character = await Character.findById(characterId);
-    if (!character) {
-      return;
+    if (!character || !character.skullExpiredAt) return;
+
+    // Reset kill count if skull expired and was yellow or red
+    if (
+      character.skullExpiredAt < new Date() &&
+      (character.skullType === CharacterSkullType.YellowSkull || character.skullType === CharacterSkullType.RedSkull)
+    ) {
+      await this.resetSkull(characterId);
     }
 
     if (character.hasSkull && character.skullType === CharacterSkullType.RedSkull) {
@@ -163,29 +164,43 @@ export class CharacterSkull {
       return;
     }
 
-    // check if character upgrage to red skull
+    // check if character upgrade to red skull
     const totalKillCount10Days = await CharacterPvPKillLog.countDocuments({
       killer: characterId,
       isJustify: false,
       createdAt: {
-        $gte: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+        $gte: dayjs().subtract(CHARACTER_SKULL_MAX_TIME_UNTIL_UPGRADE_TO_RED_SKULL, "millisecond").toDate(),
       },
     });
-    if (totalKillCount10Days > 3) {
+
+    if (totalKillCount10Days > CHARACTER_SKULL_AMOUNT_KILLS_NEEDED_TO_RED_SKULL) {
       // set red skull when total kill in 10 days > 3
       await this.setSkull(character, CharacterSkullType.RedSkull);
     } else {
       const totalKillCount7Days = await CharacterPvPKillLog.countDocuments({
         killer: characterId,
         isJustify: false,
-        createdAt: {
-          $gte: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
-        },
+        createdAt: { $gte: dayjs().subtract(CHARACTER_SKULL_YELLOW_SKULL_DURATION, "millisecond").toDate() },
       });
       // if total kill > 1 => set Yellow skull and reset timer
-      if (totalKillCount7Days > 1) {
+      if (totalKillCount7Days > CHARACTER_SKULL_AMOUNT_KILLS_NEEDED_TO_YELLOW_SKULL) {
         await this.setSkull(character, CharacterSkullType.YellowSkull);
       }
     }
+  }
+
+  private async resetSkull(characterId: string): Promise<void> {
+    await Character.updateOne(
+      { _id: characterId },
+      {
+        $set: {
+          hasSkull: false,
+        },
+        $unset: {
+          skullType: "",
+          skullExpiredAt: "",
+        },
+      }
+    );
   }
 }

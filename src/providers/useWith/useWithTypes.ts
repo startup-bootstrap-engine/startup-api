@@ -1,6 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
-import { ItemCraftable } from "@providers/item/ItemCraftable";
+import { ItemCraftableQueue } from "@providers/item/ItemCraftableQueue";
 import { IPosition } from "@providers/movement/MovementHelper";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { MapLayers } from "@rpg-engine/shared";
@@ -11,7 +11,7 @@ export interface IUseWithTileEffect {
     targetTile: IUseWithTargetTile,
     targetName: string | undefined,
     character: ICharacter,
-    itemCraftable: ItemCraftable,
+    itemCraftable: ItemCraftableQueue,
     skillIncrease: SkillIncrease
   ): Promise<void> | void;
 }
@@ -22,7 +22,7 @@ export interface IUseWithSeedEffect {
     targetTile: IUseWithTargetSeed,
     targetName: string | undefined,
     character: ICharacter,
-    itemCraftable: ItemCraftable,
+    itemCraftable: ItemCraftableQueue,
     skillIncrease: SkillIncrease
   ): Promise<void> | void;
 }

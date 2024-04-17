@@ -12,8 +12,8 @@ import {
   RangedWeaponsBlueprint,
   ShieldsBlueprint,
   StaffsBlueprint,
-  SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import {
@@ -27,7 +27,6 @@ import {
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcDarkElf: INPCTierBlueprint<16> = {
   ...generateMoveTowardsMovement(),
@@ -106,28 +105,17 @@ export const npcDarkElf: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: AxesBlueprint.CleaverAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
       chance: LootProbability.Uncommon,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.EmberglowRapier,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.FrostheartBroadsword,
-      chance: LootProbability.Uncommon,
-    },
+
     {
       itemBlueprintKey: AccessoriesBlueprint.GoldenRubyNecklace,
       chance: LootProbability.VeryRare,

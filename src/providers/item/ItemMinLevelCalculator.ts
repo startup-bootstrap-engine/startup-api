@@ -3,17 +3,22 @@ import {
   ITEM_MIN_REQUIREMENT_LEVEL_MULTIPLIER,
   ITEM_MIN_REQUIREMENT_SKILL_MULTIPLIER,
 } from "@providers/constants/ItemMinRequirementsConstants";
+import { blueprintManager } from "@providers/inversify/container";
+import { seedToPlantMapping } from "@providers/plant/data/PlantSeedMap";
+import { plantsBlueprints } from "@providers/plant/data/blueprints";
+import { IPlantItem } from "@providers/plant/data/blueprints/PlantItem";
 import {
   BasicAttribute,
   CombatSkill,
+  CraftingSkill,
+  IEquippableItemBlueprint,
   IEquippableWeaponBlueprint,
   MinRequirements as IItemMinRequirements,
   ItemSubType,
   ItemType,
-  IEquippableItemBlueprint,
 } from "@rpg-engine/shared";
 import { itemsBlueprintIndex } from "./data";
-import { blueprintManager } from "@providers/inversify/container";
+import { SeedsBlueprint } from "./data/types/itemsBlueprintTypes";
 
 export function getMinRequirements(blueprintKey: string, skillName: string): IItemMinRequirements {
   const levelMultiplier = 1.5;
@@ -73,7 +78,53 @@ export function getMinRequirements(blueprintKey: string, skillName: string): IIt
   return minRequirements;
 }
 
-export const getMinRequiredSkill = async (item: IItem): Promise<BasicAttribute | CombatSkill> => {
+export function getMinSeedRequirements(blueprintKey: string, skillName: string): IItemMinRequirements {
+  if (blueprintKey === SeedsBlueprint.CarrotSeed) {
+    // initial shouldnt require skills
+    return {
+      level: 0,
+      skill: {
+        name: skillName,
+        level: 0,
+      },
+    };
+  }
+
+  const levelMultiplier = 0.1;
+  const skillMultiplier = 0.12;
+  const regrowsAfterHarvestMultiplier = 4.5;
+  const growthFactorMultiplier = 1.25;
+  const yieldFactorMultiplier = 1.25;
+  const finalMultiplier = 0.7;
+
+  const plantKey = seedToPlantMapping[blueprintKey];
+
+  const plantBlueprint = plantsBlueprints[plantKey];
+
+  const { regrowsAfterHarvest, growthFactor, yieldFactor } = plantBlueprint as IPlantItem;
+
+  const regrowsAfterHarvestReq = regrowsAfterHarvest ? regrowsAfterHarvestMultiplier : 0;
+
+  const growthFactorReq = Math.pow(growthFactor, 3) * growthFactorMultiplier;
+  const yieldFactorReq = Math.pow(yieldFactor, 3) * yieldFactorMultiplier;
+
+  const highestReq = Math.max(regrowsAfterHarvestReq, growthFactorReq, yieldFactorReq);
+
+  const levelReq = Math.ceil(highestReq * levelMultiplier * finalMultiplier);
+  const skillReq = Math.ceil(highestReq * skillMultiplier * finalMultiplier);
+
+  const minRequirements: IItemMinRequirements = {
+    level: levelReq,
+    skill: {
+      name: skillName,
+      level: skillReq,
+    },
+  };
+
+  return minRequirements;
+}
+
+export const getMinRequiredSkill = async (item: IItem): Promise<BasicAttribute | CombatSkill | CraftingSkill> => {
   const itemBluePrint = await blueprintManager.getBlueprint<IEquippableItemBlueprint>("items", item.key);
   if (item.type === ItemType.Armor) {
     // return magic level for mages
@@ -138,6 +189,16 @@ export const minItemLevelSkillRequirementsMiddleware = async (data: IItem): Prom
 
     minRequirements.level = Math.ceil(minRequirements.level * ITEM_MIN_REQUIREMENT_LEVEL_MULTIPLIER);
     minRequirements.skill.level = Math.ceil(minRequirements.skill.level * ITEM_MIN_REQUIREMENT_SKILL_MULTIPLIER);
+
+    // @ts-ignore
+    item.minRequirements = minRequirements;
+
+    return item;
+  }
+
+  if (item.subType === ItemSubType.Seed) {
+    const minRequiredSkill = CraftingSkill.Farming;
+    const minRequirements = getMinSeedRequirements(item.key, minRequiredSkill);
 
     // @ts-ignore
     item.minRequirements = minRequirements;

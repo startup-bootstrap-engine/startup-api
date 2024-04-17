@@ -16,7 +16,6 @@ export const entityEffectBleeding: IEntityEffect = {
   type: EntityAttackType.Melee,
   effect: async (target: ICharacter | INPC, attacker: ICharacter | INPC) => {
     const itemUsableEffect = container.get(ItemUsableEffect);
-
     const calculateEffectDamage = container.get(CalculateEffectDamage);
     const effectDamage = await calculateEffectDamage.calculateEffectDamage(attacker, target);
 

@@ -24,14 +24,14 @@ export const itemTerraformLegs: IEquippableLightArmorTier9Blueprint = {
   equippedBuff: {
     type: CharacterBuffType.CharacterAttribute,
     trait: CharacterAttributes.Speed,
-    buffPercentage: 8,
+    buffPercentage: 4,
     durationType: CharacterBuffDurationType.Permanent,
     options: {
       messages: {
-        activation: "You feel the power of speed and quickness flowing through your body. (+8% speed)",
-        deactivation: "You feel the power of speed and quickness leaving your body. (-8% speed)",
+        activation: "You feel the power of speed and quickness flowing through your body. (+4% speed)",
+        deactivation: "You feel the power of speed and quickness leaving your body. (-4% speed)",
       },
     },
   },
-  equippedBuffDescription: "Increases speed by 8%",
+  equippedBuffDescription: "Increases speed by 4%",
 };

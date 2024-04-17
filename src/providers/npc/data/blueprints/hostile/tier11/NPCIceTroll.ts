@@ -6,21 +6,21 @@ import {
   AxesBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
-  DaggersBlueprint,
   FoodsBlueprint,
   HammersBlueprint,
   HelmetsBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcIceTroll: INPCTierBlueprint<10> = {
   ...generateMoveTowardsMovement(),
@@ -59,12 +59,21 @@ export const npcIceTroll: INPCTierBlueprint<10> = {
       chance: LootProbability.Rare,
     },
     {
+      itemBlueprintKey: SwordsBlueprint.GlacialSword,
+      chance: LootProbability.Rare,
+    },
+    {
       itemBlueprintKey: AxesBlueprint.FrostDoubleAxe,
       chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AxesBlueprint.DwarvenWaraxe,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.CabbageSeed,
+      chance: LootProbability.Common,
+      quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: ShieldsBlueprint.FrostShield,
@@ -120,10 +129,7 @@ export const npcIceTroll: INPCTierBlueprint<10> = {
       chance: LootProbability.Uncommon,
       quantityRange: [1, 3],
     },
-    {
-      itemBlueprintKey: DaggersBlueprint.FrostBiteDagger,
-      chance: LootProbability.VeryRare,
-    },
+
     {
       itemBlueprintKey: StaffsBlueprint.FrostbiteWand,
       chance: LootProbability.Rare,

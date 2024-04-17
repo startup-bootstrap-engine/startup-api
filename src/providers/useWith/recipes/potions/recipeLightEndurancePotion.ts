@@ -18,6 +18,10 @@ export const recipeLightEndurancePotion: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.WaterBottle,
       qty: 2,
     },
+    {
+      key: CraftingResourcesBlueprint.SunspireLotusFlower,
+      qty: 6,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 4],
 };

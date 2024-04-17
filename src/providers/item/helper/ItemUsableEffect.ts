@@ -2,8 +2,11 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
+import { Locker } from "@providers/locks/Locker";
+import { Time } from "@providers/time/Time";
 import { EntityType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import random from "lodash/random";
 
 export enum EffectableMaxAttribute {
   Health = "maxHealth",
@@ -18,61 +21,107 @@ export enum EffectableAttribute {
 
 @provide(ItemUsableEffect)
 export class ItemUsableEffect {
+  constructor(private locker: Locker, private time: Time) {}
+
   @TrackNewRelicTransaction()
   public async apply(target: ICharacter | INPC, attr: EffectableAttribute, value: number): Promise<void> {
     try {
-      if (!target) {
-        throw new Error("Invalid target: target must be a valid entity");
-      }
-      if (isNaN(value)) {
-        throw new Error("Invalid value: value must be a number");
-      }
+      await this.time.waitForMilliseconds(random(10, 20)); // add artificial delay to avoid concurrency
 
-      target[attr] += value;
-      const updateObj: any = {};
-      switch (attr) {
-        case EffectableAttribute.Health:
-          const maxAttrHealth = EffectableMaxAttribute.Health;
-          if (target[attr] > target[maxAttrHealth]) {
-            target[attr] = target[maxAttrHealth];
-          } else if (target[attr] < 0) {
-            target[attr] = 0;
-          }
-          updateObj[attr] = target[attr];
-          break;
+      const canProceed = await this.locker.lock(`${target._id}-applying-usable-effect`);
 
-        case EffectableAttribute.Mana:
-          const maxAttrMana = EffectableMaxAttribute.Mana;
-          if (target[attr] > target[maxAttrMana]) {
-            target[attr] = target[maxAttrMana];
-          } else if (target[attr] < 0) {
-            target[attr] = 0;
-          }
-          updateObj[attr] = target[attr];
-          break;
-
-        case EffectableAttribute.Speed:
-          const dataCharacter = target as ICharacter;
-          if (dataCharacter.baseSpeed === MovementSpeed.Slow || dataCharacter.baseSpeed === MovementSpeed.ExtraSlow) {
-            dataCharacter.baseSpeed = value;
-          }
-          // eslint-disable-next-line dot-notation
-          updateObj["baseSpeed"] = dataCharacter.baseSpeed;
-          break;
-
-        default:
-          break;
+      if (!canProceed) {
+        return;
       }
 
-      if (target.type === EntityType.Character) {
-        await Character.updateOne({ _id: target._id }, { $set: updateObj });
-      } else {
-        await NPC.updateOne({ _id: target._id }, { $set: updateObj });
+      const latestTargetHealth = await this.fetchLatestHealth(target);
+
+      if (target.health !== latestTargetHealth) {
+        target.health = latestTargetHealth;
       }
+
+      this.validateTargetAndValue(target, value);
+
+      const updateObj: any = this.calculateAttributeUpdate(target, attr, value);
+
+      await this.updateEntity(target, updateObj);
     } catch (error) {
       console.error("Failed to update entity:", error);
       throw error;
+    } finally {
+      await this.locker.unlock(`${target._id}-applying-usable-effect`);
     }
+  }
+
+  private async fetchLatestHealth(target: ICharacter | INPC): Promise<number> {
+    let data;
+    switch (target.type) {
+      case EntityType.Character:
+        data = await Character.findOne({ _id: target._id, scene: target.scene }).lean().select("health");
+        break;
+      case EntityType.NPC:
+        data = await NPC.findOne({ _id: target._id, scene: target.scene }).lean().select("health");
+        break;
+      default:
+        throw new Error(`Invalid target type: ${target.type}`);
+    }
+
+    return data?.health ?? target.health;
+  }
+
+  private validateTargetAndValue(target: ICharacter | INPC, value: number): void {
+    if (!target) {
+      throw new Error("Invalid target: target must be a valid entity");
+    }
+    if (isNaN(value)) {
+      throw new Error("Invalid value: value must be a number");
+    }
+  }
+
+  private calculateAttributeUpdate(
+    target: ICharacter | INPC,
+    effectableAttribute: EffectableAttribute,
+    value: number
+  ): any {
+    const updateObj: any = {};
+    target[effectableAttribute] += value;
+
+    switch (effectableAttribute) {
+      case EffectableAttribute.Health:
+      case EffectableAttribute.Mana:
+        this.updateHealthOrMana(target, effectableAttribute, updateObj);
+        break;
+      case EffectableAttribute.Speed:
+        this.updateSpeed(target as ICharacter, value, updateObj);
+        break;
+      default:
+        break;
+    }
+
+    return updateObj;
+  }
+
+  private updateHealthOrMana(
+    target: ICharacter | INPC,
+    effectableAttribute: EffectableAttribute,
+    updateObj: any
+  ): void {
+    const maxAttr =
+      effectableAttribute === EffectableAttribute.Health ? EffectableMaxAttribute.Health : EffectableMaxAttribute.Mana;
+    target[effectableAttribute] = Math.max(0, Math.min(target[effectableAttribute], target[maxAttr]));
+    updateObj[effectableAttribute] = target[effectableAttribute];
+  }
+
+  private updateSpeed(target: ICharacter, value: number, updateObj: any): void {
+    if (target.baseSpeed === MovementSpeed.Slow || target.baseSpeed === MovementSpeed.ExtraSlow) {
+      target.baseSpeed = value;
+    }
+    updateObj.baseSpeed = target.baseSpeed;
+  }
+
+  private async updateEntity(target: ICharacter | INPC, updateObj: any): Promise<void> {
+    const model = target.type === EntityType.Character ? Character : NPC;
+    await model.updateOne({ _id: target._id }, { $set: updateObj });
   }
 
   @TrackNewRelicTransaction()

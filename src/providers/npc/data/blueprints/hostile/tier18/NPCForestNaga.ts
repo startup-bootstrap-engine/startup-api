@@ -2,19 +2,15 @@ import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
-  AccessoriesBlueprint,
-  ArmorsBlueprint,
   AxesBlueprint,
-  BooksBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
-  GemsBlueprint,
-  HelmetsBlueprint,
-  LegsBlueprint,
   MacesBlueprint,
+  PotionsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import {
@@ -27,7 +23,6 @@ import {
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcForestNaga: INPCTierBlueprint<18> = {
   ...generateMoveTowardsMovement(),
@@ -69,203 +64,55 @@ export const npcForestNaga: INPCTierBlueprint<18> = {
   fleeOnLowHealth: true,
   loots: [
     {
-      itemBlueprintKey: SwordsBlueprint.DragonsSword,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.InfernoCleaver,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.YggdrasilJianSword,
+      itemBlueprintKey: DaggersBlueprint.CorruptionDagger,
       chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
-      chance: LootProbability.Common,
-    },
-    {
-      itemBlueprintKey: ArmorsBlueprint.DarkArmor,
-      chance: LootProbability.Common,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.LeviathanSword,
-      chance: LootProbability.Common,
-    },
-    {
-      itemBlueprintKey: ArmorsBlueprint.TemplarsPlate,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: ShieldsBlueprint.DemonShield,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: ArmorsBlueprint.MithrilArmor,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: LegsBlueprint.MithrilLegs,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: LegsBlueprint.GoldenLegs,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: BootsBlueprint.GoldenBoots,
-      chance: LootProbability.Common,
-    },
-    {
-      itemBlueprintKey: HelmetsBlueprint.RoyalHelmet,
-      chance: LootProbability.Common,
-    },
-    {
-      itemBlueprintKey: HelmetsBlueprint.SaviorsHelmet,
+      itemBlueprintKey: SwordsBlueprint.FalconsSword,
       chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: SwordsBlueprint.CorruptionSword,
+      itemBlueprintKey: SwordsBlueprint.LongSword,
       chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: HelmetsBlueprint.RoyalKnightHelmet,
+      itemBlueprintKey: ShieldsBlueprint.KiteShield,
       chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: ShieldsBlueprint.SilverShield,
-      chance: LootProbability.Common,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.GuardianAxe,
+      itemBlueprintKey: PotionsBlueprint.LightEndurancePotion,
       chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: SwordsBlueprint.YggdrasilTemplarSword,
+      itemBlueprintKey: SwordsBlueprint.EonGuardianSword,
+      chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: BootsBlueprint.SolarflareBoots,
       chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: MacesBlueprint.SunderingClub,
-      chance: LootProbability.VeryCommon,
+      itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
+      chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: MacesBlueprint.BoneBreakerClub,
-      chance: LootProbability.VeryCommon,
+      itemBlueprintKey: MacesBlueprint.StarfirMaulClub,
+      chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.GrimHarbingerClub,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.TwinFangClub,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.MetalMasherClub,
-      chance: LootProbability.VeryCommon,
+      itemBlueprintKey: MacesBlueprint.SpikedClub,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AxesBlueprint.CleaverAxe,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.WarAxe,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.DanishAxe,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.SpikedCleaverAxe,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.TimberSplitterAxe,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.BrutalChopperAxe,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: DaggersBlueprint.MistfireDagger,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: DaggersBlueprint.AstralDagger,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: DaggersBlueprint.StarshardDagger,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: GemsBlueprint.AmethystGem,
       chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: GemsBlueprint.RubyGem,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: AccessoriesBlueprint.EarthstoneEmeraldNecklace,
+      itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
       chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: AccessoriesBlueprint.SapphireStrandNecklace,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: AccessoriesBlueprint.RubyNeckles,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: AccessoriesBlueprint.GoldenRubyNecklace,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: AccessoriesBlueprint.SunlitRubyNecklace,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: BooksBlueprint.ElementalCodex,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: BooksBlueprint.MysticCompendium,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: BooksBlueprint.SpellboundCodex,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: BooksBlueprint.PotioncraftPrimer,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: HelmetsBlueprint.ArcaneAdepthat,
+      itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
       chance: LootProbability.Uncommon,
     },
   ],

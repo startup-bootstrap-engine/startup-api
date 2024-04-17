@@ -11,7 +11,7 @@ export const itemStoneSpear: IEquippableTwoHandedTier0WeaponBlueprint = {
   texturePath: "spears/stone-spear.png",
   name: "Stone Spear",
   description:
-    "A primitive melee weapon made of a wooden stick and a pointed head made of stone. It is a basic but effective weapon that can be used for thrusting and stabbing attacks.",
+    "A primitive melee weapon made of a wooden stick and a pointed head made of stone. It's a basic but effective weapon that can be used for thrusting and stabbing attacks.",
   attack: 16,
   defense: 8,
   tier: 0,
@@ -19,6 +19,5 @@ export const itemStoneSpear: IEquippableTwoHandedTier0WeaponBlueprint = {
   isTwoHanded: true,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   rangeType: EntityAttackType.Melee,
-
   basePrice: 40,
 };

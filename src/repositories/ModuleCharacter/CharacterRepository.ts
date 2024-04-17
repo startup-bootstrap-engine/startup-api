@@ -6,8 +6,8 @@ import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
-import { INITIAL_STARTING_POINTS } from "@providers/constants/CharacterConstants";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
+import { CharacterGameMode, INITIAL_STARTING_POINTS } from "@providers/constants/CharacterConstants";
 import { blueprintManager } from "@providers/inversify/container";
 import {
   AccessoriesBlueprint,
@@ -22,6 +22,7 @@ import {
   HelmetsBlueprint,
   MacesBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   SpearsBlueprint,
   StaffsBlueprint,
   SwordsBlueprint,
@@ -38,7 +39,7 @@ import { provide } from "inversify-binding-decorators";
 export class CharacterRepository extends CRUD {
   constructor(
     private analyticsHelper: AnalyticsHelper,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private spellLearn: SpellLearn,
     private characterInventory: CharacterInventory,
     private characterItemInventory: CharacterItemInventory
@@ -53,7 +54,13 @@ export class CharacterRepository extends CRUD {
 
     let extraProps: Partial<ICharacter> = {};
 
-    const startingPoint = INITIAL_STARTING_POINTS[newCharacter.faction];
+    let startingPoint;
+
+    if (newCharacter.isFarmingMode) {
+      startingPoint = INITIAL_STARTING_POINTS[CharacterGameMode.Farming];
+    } else {
+      startingPoint = INITIAL_STARTING_POINTS[newCharacter.faction];
+    }
 
     extraProps = {
       x: FromGridX(startingPoint.gridX),
@@ -198,6 +205,12 @@ export class CharacterRepository extends CRUD {
       await this.characterItemInventory.addItemToInventory(RangedWeaponsBlueprint.Stone, character, {
         stackQty: 100,
       });
+    }
+    if (character.isFarmingMode) {
+      await this.characterItemInventory.addItemToInventory(SeedsBlueprint.CarrotSeed, character, {
+        stackQty: 10,
+      });
+      await this.characterItemInventory.addItemToInventory(ToolsBlueprint.WateringCan, character);
     }
   }
 }

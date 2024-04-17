@@ -27,6 +27,10 @@ export const recipeFrostWraithTome: IUseWithCraftingRecipe = {
       key: MagicsBlueprint.CorruptionRune,
       qty: 20,
     },
+    {
+      key: CraftingResourcesBlueprint.WhisperrootEntwiner,
+      qty: 8,
+    },
   ],
   minCraftingRequirements: [
     CraftingSkill.Alchemy,

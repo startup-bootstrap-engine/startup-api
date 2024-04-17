@@ -21,6 +21,33 @@ describe("CharacterItemContainer.ts", () => {
     await inMemoryHashTable.delete("container-all-items", inventoryContainer._id.toString()!);
   });
 
+  describe("addItemToContainer", () => {
+    it("should successfully add an item to the container", async () => {
+      const testItem = await unitTestHelper.createMockItem();
+
+      const result = await characterItemContainer.addItemToContainer(testItem, testCharacter, inventoryContainer._id);
+
+      expect(result).toBeTruthy();
+
+      const updatedContainer = (await ItemContainer.findById(inventoryContainer._id)) as unknown as IItemContainer;
+
+      expect(updatedContainer.slots[0]?._id).toStrictEqual(testItem._id);
+    });
+
+    it("should not add an item to a full container", async () => {
+      await ItemContainer.findByIdAndUpdate(inventoryContainer._id, {
+        $set: {
+          slots: Array(inventoryContainer.slotQty).fill({ _id: "test" }),
+        },
+      });
+
+      const newItem = await unitTestHelper.createMockItem();
+      const result = await characterItemContainer.addItemToContainer(newItem, testCharacter, inventoryContainer._id);
+
+      expect(result).toBeFalsy();
+    });
+  });
+
   it("should successfully remove an item from a container", async () => {
     const testItem = await unitTestHelper.createMockItem();
 

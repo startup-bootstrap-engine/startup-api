@@ -17,9 +17,10 @@ import {
   RangedWeaponsBlueprint,
   ShieldsBlueprint,
   StaffsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
-import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 
 export const npcTrollWarrior: INPCTierBlueprint<14> = {
   ...generateMoveTowardsMovement(),
@@ -106,7 +107,15 @@ export const npcTrollWarrior: INPCTierBlueprint<14> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.ElderHeartAxe,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.AurumAlloyPickaxe,
+      chance: LootProbability.SemiCommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

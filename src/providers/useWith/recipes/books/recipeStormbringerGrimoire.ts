@@ -27,6 +27,10 @@ export const recipeStormbringerGrimoire: IUseWithCraftingRecipe = {
       key: MagicsBlueprint.ThunderRune,
       qty: 19,
     },
+    {
+      key: CraftingResourcesBlueprint.NautilusShell,
+      qty: 2,
+    },
   ],
   minCraftingRequirements: [
     CraftingSkill.Alchemy,
@@ -34,6 +38,8 @@ export const recipeStormbringerGrimoire: IUseWithCraftingRecipe = {
       [CraftingResourcesBlueprint.MagicRecipe, 8],
       [CraftingResourcesBlueprint.ObsidiumIngot, 10],
       [CraftingResourcesBlueprint.BlueFeather, 10],
+      [MagicsBlueprint.ThunderRune, 19],
+      [CraftingResourcesBlueprint.NautilusShell, 2],
     ]),
   ],
 };

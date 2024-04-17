@@ -15,15 +15,15 @@ import {
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { FromGridX, FromGridY, IItem } from "@rpg-engine/shared";
 import _ from "lodash";
-import { NPCDeath } from "../NPCDeath";
+import { NPCDeathQueue } from "../NPCDeathQueue";
 
 describe("NPCDeath.ts", () => {
-  let npcDeath: NPCDeath;
+  let npcDeath: NPCDeathQueue;
   let testNPC: INPC;
   let testCharacter: ICharacter;
 
   beforeAll(() => {
-    npcDeath = container.get<NPCDeath>(NPCDeath);
+    npcDeath = container.get<NPCDeathQueue>(NPCDeathQueue);
   });
 
   beforeEach(async () => {
@@ -46,17 +46,9 @@ describe("NPCDeath.ts", () => {
 
   it("should properly warn characters around, about NPC's death", async () => {
     // @ts-ignore
-    const spyOnNearbyCharacters = jest.spyOn(npcDeath.characterView, "getCharactersAroundXYPosition");
-    // @ts-ignore
-    const spySocketMessaging = jest.spyOn(npcDeath.socketMessaging, "sendEventToUser");
+    const spySocketMessaging = jest.spyOn(npcDeath.socketMessaging, "sendEventToCharactersAroundNPC");
 
     await npcDeath.handleNPCDeath(testCharacter, testNPC);
-
-    expect(spyOnNearbyCharacters).toHaveBeenCalledWith(testNPC.x, testNPC.y, testNPC.scene);
-
-    expect(spyOnNearbyCharacters).toHaveReturnedTimes(1);
-
-    expect(spyOnNearbyCharacters).toHaveBeenCalled();
 
     expect(spySocketMessaging).toHaveBeenCalled();
   });

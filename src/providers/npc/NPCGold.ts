@@ -29,5 +29,5 @@ export const calculateGold = (maxHealth: number, skills: Partial<ISkill>): numbe
     strength * LOOT_GOLD_STRENGTH_WEIGHT +
     resistance * LOOT_GOLD_RESISTANCE_WEIGHT;
 
-  return Math.floor((total * LOOT_GOLD_QTY_RATIO) / 5);
+  return Math.round((total * LOOT_GOLD_QTY_RATIO) / 5);
 };

@@ -93,7 +93,7 @@ export class UseWithRefill {
       if (targetItem.owner?.toString() !== character.id) {
         this.socketMessaging.sendErrorMessageToCharacter(
           character,
-          `Sorry, You can only ${resourceKey} that you own ${targetType}s.`
+          `Sorry, You can only ${resourceKey} ${targetType}s that you own.`
         );
         return;
       }
@@ -134,7 +134,7 @@ export class UseWithRefill {
         await skillIncrease.increaseCraftingSP(character, ItemType.Plant, true);
 
         if (successMessages) {
-          this.sendRandomMessageToCharacter(character, successMessages, true);
+          this.sendRandomMessageToCharacter(character, successMessages, true, targetItem);
         }
 
         await this.animationEffect.sendAnimationEventToCharacter(character, AnimationEffectKeys.SkillLevelUp);
@@ -144,11 +144,23 @@ export class UseWithRefill {
     }
   }
 
-  private sendRandomMessageToCharacter(character: ICharacter, randomMessages: string[], isSuccess: boolean): void {
+  private sendRandomMessageToCharacter(
+    character: ICharacter,
+    randomMessages: string[],
+    isSuccess: boolean,
+    targetItem: IItem | null
+  ): void {
+    let message = randomMessages[random(0, randomMessages.length - 1)];
+
+    if (targetItem && targetItem.type === ItemType.Plant) {
+      const growthInfo = this.plantGrowth.getGrowthInfo(targetItem);
+      message += ` Growth: (${growthInfo.growthPoints}/${growthInfo.requiredGrowthPoints})`;
+    }
+
     if (isSuccess) {
-      this.socketMessaging.sendMessageToCharacter(character, randomMessages[random(0, randomMessages.length - 1)]);
+      this.socketMessaging.sendMessageToCharacter(character, message);
     } else {
-      this.socketMessaging.sendErrorMessageToCharacter(character, randomMessages[random(0, randomMessages.length - 1)]);
+      this.socketMessaging.sendErrorMessageToCharacter(character, message);
     }
   }
 
@@ -173,10 +185,12 @@ export class UseWithRefill {
 
       if (originItem.remainingUses !== initialRemainingUses) {
         await Item.updateOne({ _id: originItem._id }, { $set: { remainingUses: initialRemainingUses } });
+      } else {
+        this.socketMessaging.sendMessageToCharacter(character, "You have already refilled your watering can. 🌊");
       }
 
       if (successMessages) {
-        this.sendRandomMessageToCharacter(character, successMessages, true);
+        this.sendRandomMessageToCharacter(character, successMessages, true, null);
       }
 
       await this.animationEffect.sendAnimationEventToCharacter(character, AnimationEffectKeys.SkillLevelUp);

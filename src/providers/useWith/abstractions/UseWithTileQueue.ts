@@ -1,17 +1,18 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { appEnv } from "@providers/config/env";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { TILE_MAX_REACH_DISTANCE_IN_GRID } from "@providers/constants/TileConstants";
-import { RedisManager } from "@providers/database/RedisManager";
-import { ItemCraftable } from "@providers/item/ItemCraftable";
+import { blueprintManager } from "@providers/inversify/container";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { ItemCraftableQueue } from "@providers/item/ItemCraftableQueue";
 import { itemsBlueprintIndex } from "@providers/item/data/index";
 import { MapTiles } from "@providers/map/MapTiles";
 import { MovementHelper } from "@providers/movement/MovementHelper";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import {
-  EnvType,
   IRefillableItem,
   IUseWithTile,
   IUseWithTileValidation,
@@ -21,81 +22,52 @@ import {
   ToGridY,
   UseWithSocketEvents,
 } from "@rpg-engine/shared";
-import { Queue, Worker } from "bullmq";
-import { provide } from "inversify-binding-decorators";
-import { v4 as uuidv4 } from "uuid";
 import { UseWithHelper } from "../libs/UseWithHelper";
 import { IItemUseWith, IUseWithTileValidationResponse } from "../useWithTypes";
 
-@provide(UseWithTileQueue)
+@provideSingleton(UseWithTileQueue)
 export class UseWithTileQueue {
-  private queue: Queue<any, any, string> | null = null;
-  private worker: Worker | null = null;
-  private connection: any;
-  private queueName: string = `use-with-tile-${uuidv4()}-${
-    appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
-  }`;
-
   constructor(
     private socketAuth: SocketAuth,
     private socketMessaging: SocketMessaging,
     private mapTiles: MapTiles,
     private useWithHelper: UseWithHelper,
     private movementHelper: MovementHelper,
-    private itemCraftable: ItemCraftable,
+    private itemCraftable: ItemCraftableQueue,
     private skillIncrease: SkillIncrease,
-    private redisManager: RedisManager
+    private dynamicQueue: DynamicQueue
   ) {}
 
-  public initQueue(): void {
-    if (!this.connection) {
-      this.connection = this.redisManager.client;
-    }
-
-    if (!this.queue) {
-      this.queue = new Queue(this.queueName, {
-        connection: this.connection,
-      });
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.queue.on("error", async (error) => {
-          console.error(`Error in the ${this.queueName}:`, error);
-
-          await this.queue?.close();
-          this.queue = null;
-        });
-      }
-    }
-
-    if (!this.worker) {
-      this.worker = new Worker(
-        this.queueName,
-        async (job) => {
-          const { character, useWithTileData } = job.data;
-
-          try {
-            await this.onExecuteUseWithTile(character, useWithTileData);
-          } catch (err) {
-            console.error(`Error processing ${this.queueName} for Character ${character.name}:`, err);
-            throw err;
-          }
-        },
-        {
-          connection: this.connection,
+  public onUseWithTile(channel: SocketChannel): void {
+    this.socketAuth.authCharacterOn(
+      channel,
+      UseWithSocketEvents.UseWithTile,
+      async (useWithTileData: IUseWithTile, character) => {
+        try {
+          await this.addToQueue(useWithTileData, character);
+        } catch (error) {
+          console.error(error);
         }
-      );
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.worker.on("failed", async (job, err) => {
-          console.log(`${this.queueName} job ${job?.id} failed with error ${err.message}`);
-
-          await this.worker?.close();
-          this.worker = null;
-        });
       }
-    }
+    );
   }
 
+  public async addToQueue(useWithTileData: IUseWithTile, character: ICharacter): Promise<void> {
+    await this.dynamicQueue.addJob(
+      "use-with-tile",
+      async (job) => {
+        const { useWithTileData, character } = job.data;
+
+        await this.onExecuteUseWithTile(character, useWithTileData);
+      },
+      {
+        character,
+        useWithTileData,
+      }
+    );
+  }
+
+  @TrackNewRelicTransaction()
   public async onExecuteUseWithTile(character: ICharacter, useWithTileData: IUseWithTile): Promise<void> {
     const useWithData = await this.validateData(character, useWithTileData);
 
@@ -111,6 +83,7 @@ export class UseWithTileQueue {
         this.skillIncrease
       );
     }
+
     if (!useWithData || useWithData.originItem.subType !== ItemSubType.Tool || useWithData.originItem.isRefillable) {
       this.socketMessaging.sendEventToUser<IUseWithTileValidation>(
         character.channelId!,
@@ -120,59 +93,12 @@ export class UseWithTileQueue {
     }
   }
 
-  public async addToQueue(useWithTileData: IUseWithTile, character: ICharacter): Promise<void> {
-    if (!this.connection || !this.queue || !this.worker) {
-      this.initQueue();
-    }
-
-    await this.queue?.add(
-      this.queueName,
-      {
-        character,
-        useWithTileData,
-      },
-      {
-        removeOnComplete: true,
-        removeOnFail: true,
-      }
-    );
+  public async clearAllJobs(): Promise<void> {
+    await this.dynamicQueue.clearAllJobs();
   }
 
   public async shutdown(): Promise<void> {
-    await this.queue?.close();
-    await this.worker?.close();
-
-    this.queue = null;
-    this.worker = null;
-  }
-
-  public async clearAllJobs(): Promise<void> {
-    try {
-      if (!this.queue) {
-        this.initQueue();
-      }
-
-      const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
-      for (const job of jobs) {
-        await job?.remove();
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  public onUseWithTile(channel: SocketChannel): void {
-    this.socketAuth.authCharacterOn(
-      channel,
-      UseWithSocketEvents.UseWithTile,
-      async (useWithTileData: IUseWithTile, character) => {
-        try {
-          await this.addToQueue(useWithTileData, character);
-        } catch (error) {
-          console.error(error);
-        }
-      }
-    );
+    await this.dynamicQueue.shutdown();
   }
 
   /**
@@ -214,7 +140,7 @@ export class UseWithTileQueue {
       MAP_LAYERS_TO_ID[data.targetTile.layer]
     );
 
-    if (!tileId) {
+    if (tileId === undefined) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, the selected tile doesn't exist.");
       return;
     }
@@ -262,7 +188,9 @@ export class UseWithTileQueue {
         return;
       }
 
-      if (originItem.baseKey !== useWithKey) {
+      const originItemBlueprint = blueprintManager.getBlueprint("items", originItem.baseKey) as Record<string, unknown>;
+
+      if (originItem.baseKey !== useWithKey && originItemBlueprint?.toolCategory !== useWithKey) {
         this.socketMessaging.sendErrorMessageToCharacter(
           character,
           `Invalid item to use with tile. It should be a '${useWithKey}', but the selected item is a '${originItem.baseKey}'!`

@@ -41,6 +41,7 @@ import { Colors } from "discord.js";
 import { provide } from "inversify-binding-decorators";
 
 import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
+import dayjs from "dayjs";
 import random from "lodash/random";
 import uniqBy from "lodash/uniqBy";
 import { Types } from "mongoose";
@@ -257,6 +258,8 @@ export class NPCExperience {
     const formattedPreviousLevel = this.numberFormatter.formatNumber(previousLevel);
     const formattedCurrentLevel = this.numberFormatter.formatNumber(expData.level);
 
+    this.calculateTimeToLevelUp(character, expData.level);
+
     this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId!, UISocketEvents.ShowMessage, {
       message: `You advanced from level ${formattedPreviousLevel} to level ${formattedCurrentLevel}.`,
       type: "info",
@@ -309,6 +312,21 @@ export class NPCExperience {
       HPManaBoostPayload,
       true
     );
+  }
+
+  private calculateTimeToLevelUp(character: ICharacter, level: number): void {
+    const isNewLevelMultipleOf10 = level % 10 === 0;
+
+    if (isNewLevelMultipleOf10) {
+      const timeToReachLevel = dayjs().diff(character.createdAt, "day");
+
+      this.newRelic.trackMetric(
+        NewRelicMetricCategory.Count,
+        NewRelicSubCategory.Characters,
+        `TimeToReachLevel${level}`,
+        timeToReachLevel
+      );
+    }
   }
 
   private async warnCharactersAroundAboutExpGains(character: ICharacter, exp: number): Promise<void> {

@@ -127,10 +127,6 @@ const itemSchema = createLeanSchema(
 
     equippedBuffDescription: Type.string({ required: false }),
 
-    droppedBy: Type.objectId({
-      ref: "Character",
-    }),
-
     entityEffects: Type.array().of(
       Type.string({
         typeof: EntityEffectBlueprint,
@@ -142,6 +138,8 @@ const itemSchema = createLeanSchema(
     tier: Type.number({ default: 1 }),
 
     growthPoints: Type.number({ required: false }),
+
+    requiredGrowthPoints: Type.number({ required: false }),
 
     currentPlantCycle: Type.string({ required: false, enum: TypeHelper.enumToStringArray(PlantLifeCycle) }),
 
@@ -156,7 +154,10 @@ const itemSchema = createLeanSchema(
     isDead: Type.boolean({ required: false }),
 
     timeOfDeath: Type.date({ required: false }),
+
     isTileTinted: Type.boolean({ required: false }),
+
+    regrowthCount: Type.number({ required: false }),
 
     attachedGems: Type.array({ required: false }).of(GemSchema),
   },
@@ -207,7 +208,7 @@ const warnAboutItemChanges = async (item: IItem, warnType: "changes" | "removal"
 
     for (const character of nearbyCharacters) {
       if (warnType === "changes") {
-        await itemView.warnCharacterAboutItemsInView(character);
+        await itemView.warnCharacterAboutItemsInView(character, { always: true });
       }
 
       if (warnType === "removal") {

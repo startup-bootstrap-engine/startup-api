@@ -45,6 +45,7 @@ export const npcBlueDragon: INPCTierBlueprint<21> = {
   speed: MovementSpeed.ExtraFast,
   // @ts-ignore
   baseHealth: 50000,
+  isGiantForm: true,
   healthRandomizerDice: Dice.D20,
   skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
@@ -180,22 +181,6 @@ export const npcBlueDragon: INPCTierBlueprint<21> = {
     {
       itemBlueprintKey: MacesBlueprint.WhirlWindCrusherClub,
       chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.BoneReaperAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.IroncladCleaver,
-      chance: LootProbability.Common,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Common,
     },
     {
       itemBlueprintKey: AxesBlueprint.ExecutionersAxe,

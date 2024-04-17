@@ -1,100 +1,98 @@
+/* eslint-disable no-async-promise-executor */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { NewRelic } from "@providers/analytics/NewRelic";
 import { appEnv } from "@providers/config/env";
+import { SERVER_API_NODES_PM2_PROCESSES_QTY, SERVER_API_NODES_QTY } from "@providers/constants/ServerConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
-import IORedis from "ioredis";
+import { Pool, createPool } from "generic-pool";
+import IORedis, { Redis, RedisOptions } from "ioredis";
 import mongoose from "mongoose";
 import { applySpeedGooseCacheLayer } from "speedgoose";
 
-//! We use RedisIOClient because it has a built in pooling mechanism
 @provideSingleton(RedisIOClient)
 export class RedisIOClient {
-  public client: IORedis.Redis | null = null;
+  private pool: Pool<Redis>;
+  public client: Redis;
 
-  constructor(private newRelic: NewRelic) {}
+  private readonly redisConnectionURL: string = `redis://${appEnv.database.REDIS_CONTAINER}:${appEnv.database.REDIS_PORT}`;
 
-  public async connect(): Promise<void> {
-    return await new Promise<void>((resolve, reject) => {
-      try {
-        const redisConnectionUrl = `redis://${appEnv.database.REDIS_CONTAINER}:${appEnv.database.REDIS_PORT}`;
+  constructor() {}
 
-        this.client = new IORedis(redisConnectionUrl, {
-          retryStrategy: (times) => {
-            // Exponential backoff with a maximum delay, considering Docker's internal networking
-            return Math.min(times * 100, 3000);
-          },
-          enableAutoPipelining: true, // Maintain command pipelining
-          keepAlive: 10000, // Keep connections alive longer to mitigate Docker networking quirks
-          connectTimeout: 15000, // Allow more time for connections, given potential Docker network delays
-          maxRetriesPerRequest: null, // Must be null for bullmq
-          autoResendUnfulfilledCommands: true, // Ensure command continuity over reconnects
-          reconnectOnError: (err) => {
-            // Broaden reconnection triggers to include common network-related errors in containerized environments
-            return /READONLY|CONNECTION_LOST|ECONNRESET|ETIMEDOUT|ECONNREFUSED|ENETDOWN/i.test(err.message);
-          },
-          // Docker Swarm can cause IP changes; DNS resolution retries help handle service IP updates
-          dnsLookup: (address, callback) => callback(null, address),
-          maxListeners: 50, // Adjust for potential high concurrency within the swarm
-        });
+  public async connect(): Promise<Redis> {
+    this.pool = createPool<Redis>(
+      {
+        create: async () => {
+          return await new IORedis(this.redisConnectionURL, this.getIOClientConfig());
+        },
+        destroy: async (client) => {
+          return await client.disconnect();
+        },
+        validate: async (client) => {
+          const result = await client.ping();
 
-        if (!appEnv.general.IS_UNIT_TEST) {
-          this.client.on("connect", () => {
-            if (!appEnv.general.IS_UNIT_TEST) {
-              console.log("✅ Redis Client Connected");
-            }
-          });
-        }
-
-        this.client.on("error", (err) => {
-          console.log("❌ Redis error:", err);
-
-          this.client?.disconnect();
-          this.client?.removeAllListeners("error");
-
-          this.client = null;
-
-          reject(err);
-        });
-
-        // @ts-ignore
-        void applySpeedGooseCacheLayer(mongoose, {
-          redisUri: redisConnectionUrl,
-        });
-
-        // track new client
-        this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Server, "RedisClient", 1);
-
-        resolve(this.client);
-      } catch (error) {
-        if (!appEnv.general.IS_UNIT_TEST) {
-          this.client?.removeAllListeners("error");
-        }
-
-        console.log("❌ Redis initialization error: ", error);
-        reject(error);
+          return result === "PONG";
+        },
+      },
+      {
+        max: Math.round(450 / SERVER_API_NODES_QTY / SERVER_API_NODES_PM2_PROCESSES_QTY),
+        min: Math.round(170 / SERVER_API_NODES_QTY / SERVER_API_NODES_PM2_PROCESSES_QTY),
+        testOnBorrow: true,
       }
+    );
+
+    this.pool.on("factoryCreateError", (err) => {
+      console.error("Redis Pool Create Error", err);
     });
+
+    this.pool.on("factoryDestroyError", (err) => {
+      console.error("Redis Pool Destroy Error", err);
+    });
+
+    // @ts-ignore
+    void applySpeedGooseCacheLayer(mongoose, {
+      redisUri: this.redisConnectionURL,
+    });
+
+    this.client = await this.getPoolClient("main-connection");
+
+    return this.client;
   }
 
-  public async getTotalConnectedClients(): Promise<number> {
-    let clientCount = 0;
+  public async getPoolClient(connectionName: string): Promise<Redis> {
+    // check if client is already on pool
 
-    try {
-      const clientList = await this.client.client("LIST"); // Assuming this.client is the IORedis client
-      clientCount = clientList.split("\n").length - 1; // Each client info is separated by a newline
+    const client = await this.pool.acquire();
 
-      console.log("📕 Redis - Total connected clients: ", clientCount);
+    // Set a meaningful name for the connection for debugging purposes
+    await client.client("SETNAME", connectionName);
 
-      this.newRelic.trackMetric(
-        NewRelicMetricCategory.Count,
-        NewRelicSubCategory.Server,
-        "RedisClientCount",
-        clientCount
-      );
-    } catch (error) {
-      console.error("Could not fetch the total number of connected clients", error);
+    return client;
+  }
+
+  public isClientOnPool(client: Redis): boolean {
+    return this.pool.isBorrowedResource(client);
+  }
+
+  public async releasePoolClient(client: Redis): Promise<void> {
+    if (this.isClientOnPool(client)) {
+      await this.pool.release(client);
     }
-    return clientCount;
+  }
+
+  private getIOClientConfig(): RedisOptions {
+    return {
+      retryStrategy: (times) => {
+        // Exponential backoff with a maximum delay, considering Docker's internal networking
+        return Math.min(times * 100, 3000);
+      },
+      enableAutoPipelining: true, // Maintain command pipelining
+      keepAlive: 10000, // Keep connections alive longer to mitigate Docker networking quirks
+      connectTimeout: 15000, // Allow more time for connections, given potential Docker network delays
+      maxRetriesPerRequest: null, // Must be null for bullmq
+      autoResendUnfulfilledCommands: true, // Ensure command continuity over reconnects
+      reconnectOnError: (err) => {
+        // Broaden reconnection triggers to include common network-related errors in containerized environments
+        return /READONLY|CONNECTION_LOST|ECONNRESET|ETIMEDOUT|ECONNREFUSED|ENETDOWN/i.test(err.message);
+      },
+    };
   }
 }

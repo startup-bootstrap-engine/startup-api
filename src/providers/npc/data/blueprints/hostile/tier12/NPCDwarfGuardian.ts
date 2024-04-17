@@ -14,17 +14,18 @@ import {
   HelmetsBlueprint,
   MacesBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   SpearsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { SpellsBlueprint } from "@providers/spells/data/types/SpellsBlueprintTypes";
-import { MagicPower, NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
+import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcDwarfGuardian: INPCTierBlueprint<12> = {
   ...generateMoveTowardsMovement(),
@@ -37,6 +38,7 @@ export const npcDwarfGuardian: INPCTierBlueprint<12> = {
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Fast,
   baseHealth: 720,
+  isGiantForm: true,
   healthRandomizerDice: Dice.D12,
   canSwitchToRandomTarget: true,
   skills: {
@@ -60,10 +62,19 @@ export const npcDwarfGuardian: INPCTierBlueprint<12> = {
       itemBlueprintKey: ContainersBlueprint.Backpack,
       chance: LootProbability.Uncommon,
     },
+    {
+      itemBlueprintKey: SeedsBlueprint.TurnipSeed,
+      chance: LootProbability.Common,
+      quantityRange: [1, 5],
+    },
 
     {
       itemBlueprintKey: MacesBlueprint.SpikedClub,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.MoonlureFishingRod,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.ScutumShield,
@@ -182,6 +193,10 @@ export const npcDwarfGuardian: INPCTierBlueprint<12> = {
     },
     {
       itemBlueprintKey: SwordsBlueprint.StellarBlade,
+      chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.EmberEdgePickaxe,
       chance: LootProbability.VeryRare,
     },
   ],

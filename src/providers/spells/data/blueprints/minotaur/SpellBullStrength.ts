@@ -29,7 +29,7 @@ export const spellBullStrength: Partial<ISpell> = {
       }),
       spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Strength, {
         min: 5,
-        max: 40,
+        max: 60,
       }),
     ]);
 

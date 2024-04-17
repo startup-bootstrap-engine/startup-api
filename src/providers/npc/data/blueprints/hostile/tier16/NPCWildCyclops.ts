@@ -11,15 +11,16 @@ import {
   MagicsBlueprint,
   PotionsBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcWildCyclops: INPCTierBlueprint<16> = {
   ...generateMoveTowardsMovement(),
@@ -54,10 +55,16 @@ export const npcWildCyclops: INPCTierBlueprint<16> = {
       itemBlueprintKey: SwordsBlueprint.AzureMachete,
       chance: LootProbability.Uncommon,
     },
+    {
+      itemBlueprintKey: SeedsBlueprint.PotatoSeed,
+      chance: LootProbability.Rare,
+      quantityRange: [1, 5],
+    },
 
     {
       itemBlueprintKey: PotionsBlueprint.ManaPotion,
       chance: LootProbability.SemiCommon,
+      quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.IronArrow,
@@ -66,7 +73,7 @@ export const npcWildCyclops: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.PhoenixBow,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
 
     {
@@ -88,11 +95,11 @@ export const npcWildCyclops: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.StarshardDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.RubyglintNecklace,

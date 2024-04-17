@@ -4,14 +4,7 @@ import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
-import {
-  DepotSocketEvents,
-  IDepotDepositItem,
-  IItemContainer,
-  IItemContainerRead,
-  ItemContainerType,
-  ItemSocketEvents,
-} from "@rpg-engine/shared";
+import { DepotSocketEvents, IDepotDepositItem } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { DepositItem } from "../DepositItem";
 import { DepotSystem } from "../DepotSystem";
@@ -52,16 +45,7 @@ export class DepotNetworkDeposit {
           return;
         }
 
-        const itemContainer = await this.depositItem.deposit(character, data);
-
-        if (!itemContainer) {
-          return;
-        }
-
-        this.socketMessaging.sendEventToUser<IItemContainerRead>(character.channelId!, ItemSocketEvents.ContainerRead, {
-          itemContainer: itemContainer as unknown as IItemContainer,
-          type: ItemContainerType.Depot,
-        });
+        await this.depositItem.deposit(character, data);
       } catch (error) {
         console.error(error);
       }

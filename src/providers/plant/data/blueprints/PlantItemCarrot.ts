@@ -1,6 +1,6 @@
 import {
   DEFAULT_PLANT_CYCLE,
-  FARMING_MEDIUM_YIELD_FACTOR,
+  FARMING_LOW_YIELD_FACTOR,
   ULTRA_LOW_GROWTH_FACTOR,
 } from "@providers/constants/FarmingConstants";
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -44,7 +44,7 @@ export const plantItemCarrot: IPlantItem = {
   },
   growthFactor: ULTRA_LOW_GROWTH_FACTOR,
   regrowsAfterHarvest: false,
-  yieldFactor: FARMING_MEDIUM_YIELD_FACTOR,
+  yieldFactor: FARMING_LOW_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
   harvestableItemKey: FoodsBlueprint.Carrot,

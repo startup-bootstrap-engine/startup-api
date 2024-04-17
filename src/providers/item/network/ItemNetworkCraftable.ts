@@ -3,7 +3,7 @@ import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { ICraftItemPayload, ILoadCraftBookPayload, ItemSocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { ItemCraftable } from "../ItemCraftable";
+import { ItemCraftableQueue } from "../ItemCraftableQueue";
 import { ItemCraftbook } from "../ItemCraftbook";
 
 @provide(ItemNetworkCraftable)
@@ -11,7 +11,7 @@ export class ItemNetworkCraftable {
   constructor(
     private socketAuth: SocketAuth,
     private itemCraftbook: ItemCraftbook,
-    private itemCraftable: ItemCraftable
+    private itemCraftable: ItemCraftableQueue
   ) {}
 
   public onCraftableItemsLoad(channel: SocketChannel): void {

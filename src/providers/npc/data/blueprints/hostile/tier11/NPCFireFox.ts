@@ -7,15 +7,16 @@ import {
   GlovesBlueprint,
   HelmetsBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcFireFox: INPCTierBlueprint<11> = {
   ...generateMoveTowardsMovement(),
@@ -58,6 +59,11 @@ export const npcFireFox: INPCTierBlueprint<11> = {
     {
       itemBlueprintKey: ArmorsBlueprint.PlateArmor,
       chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.EggplantSeed,
+      chance: LootProbability.Common,
+      quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: GlovesBlueprint.ChainGloves,

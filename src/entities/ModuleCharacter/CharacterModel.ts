@@ -137,7 +137,7 @@ const characterSchema = createLeanSchema(
       required: true,
     }),
     initialX: Type.number({
-      default: FromGridX(110),
+      default: FromGridX(93),
       required: true,
     }),
     initialY: Type.number({
@@ -275,6 +275,9 @@ const characterSchema = createLeanSchema(
 
     lastDayPlayed: Type.date({
       required: false,
+    }),
+    isFarmingMode: Type.boolean({
+      default: false,
     }),
   },
   {

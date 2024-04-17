@@ -179,7 +179,7 @@ describe("EntityEffectUse.ts", () => {
     await entityEffectUse.applyEntityEffects(testTarget, testAttacker, poisonEntityEffect);
     expect(characterUpdateSpy).toHaveBeenCalledTimes(1);
     expect(characterUpdateSpy).toHaveBeenCalledWith(
-      { _id: testTarget.id },
+      { _id: testTarget._id },
       { $set: { appliedEntityEffects: testTarget.appliedEntityEffects } }
     );
   });
@@ -189,7 +189,7 @@ describe("EntityEffectUse.ts", () => {
     await entityEffectUse.applyEntityEffects(testTargetNPC, testAttacker, poisonEntityEffect);
     expect(npcUpdateSpy).toHaveBeenCalledTimes(1);
     expect(npcUpdateSpy).toHaveBeenCalledWith(
-      { _id: testTargetNPC.id },
+      { _id: testTargetNPC._id },
       { $set: { appliedEntityEffects: testTargetNPC.appliedEntityEffects } }
     );
   });

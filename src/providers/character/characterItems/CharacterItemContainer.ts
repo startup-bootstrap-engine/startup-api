@@ -97,6 +97,10 @@ export class CharacterItemContainer {
     options?: IAddItemToContainerOptions
   ): Promise<boolean> {
     try {
+      if (!item) {
+        return false;
+      }
+
       const hasLock = await this.locker.lock(`item-${item._id}-add-item-to-container`);
 
       if (!hasLock) {
@@ -105,15 +109,9 @@ export class CharacterItemContainer {
 
       const { shouldAddOwnership = true, isInventoryItem = false, dropOnMapIfFull = false } = options || {};
 
-      const itemToBeAdded = item;
+      item = (await this.ensureItemHasContainer(item)) as IItem;
 
-      if (item.isItemContainer && !item.itemContainer) {
-        // if item does not have itemContainer reference, it means its a lean item that havent triggered the post save hook with the itemContainer creation. So we need to fetch the item again to get the itemContainer reference.
-        item = (await Item.findById(item._id)) as IItem;
-        await item.save();
-      }
-
-      if (!itemToBeAdded) {
+      if (!item) {
         this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The item to be added was not found.");
         return false;
       }
@@ -125,92 +123,26 @@ export class CharacterItemContainer {
         return false;
       }
 
-      const tryToAddItemToContainer = async (): Promise<boolean> => {
-        if (isInventoryItem) {
-          const equipped = await this.equipmentEquipInventory.equipInventory(character, itemToBeAdded);
+      const result = await this.tryToAddItemToContainer(
+        character,
+        item,
+        targetContainer,
+        isInventoryItem,
+        dropOnMapIfFull
+      );
 
-          if (!equipped) {
-            return false;
-          }
-
-          return true;
-        }
-
-        if (targetContainer) {
-          let isNewItem = true;
-
-          // Item Type is valid to add to a container?
-          const isItemTypeValid = targetContainer.allowedItemTypes?.filter((entry) => {
-            return entry === itemToBeAdded?.type;
-          });
-          if (!isItemTypeValid) {
-            this.socketMessaging.sendErrorMessageToCharacter(
-              character,
-              "Oops! The item type is not valid for this container."
-            );
-            return false;
-          }
-
-          // Inventory is empty, slot checking not needed
-          if (targetContainer.isEmpty) isNewItem = true;
-
-          await this.itemMap.clearItemCoordinates(itemToBeAdded, targetContainer as IItemContainer);
-
-          if (itemToBeAdded.maxStackSize > 1) {
-            const wasStacked = await this.characterItemStack.tryAddingItemToStack(
-              character,
-              targetContainer as IItemContainer,
-              itemToBeAdded
-            );
-
-            if (wasStacked || wasStacked === undefined) {
-              //! wasStacked can be undefined if there was an error, on this case we just return true to avoid creating a new item. (duplicate stack bug)
-              return true;
-            } else {
-              isNewItem = true;
-            }
-          }
-
-          // Check's done, need to create new item on char inventory
-          if (isNewItem) {
-            const result = await this.characterItemSlots.tryAddingItemOnFirstSlot(
-              character,
-              itemToBeAdded,
-              targetContainer as IItemContainer,
-              dropOnMapIfFull
-            );
-
-            if (!result) {
-              return false;
-            }
-          }
-
-          return true;
-        }
-
+      if (!result) {
         return false;
-      };
-
-      const result = await tryToAddItemToContainer();
-
-      if (result) {
-        await this.inMemoryHashTable.delete("container-all-items", toContainerId);
-        await this.inMemoryHashTable.delete("character-max-weights", character._id);
       }
 
-      if (result && item.type === ItemType.CraftingResource) {
-        // clear the cache for the craftable items
-        await this.inMemoryHashTable.delete("load-craftable-items", character._id);
-      }
-
-      if (result && shouldAddOwnership) {
-        await this.itemOwnership.addItemOwnership(itemToBeAdded, character);
+      if (shouldAddOwnership) {
+        await this.itemOwnership.addItemOwnership(item, character);
       }
 
       await Item.updateOne(
         {
-          _id: itemToBeAdded._id,
-          scene: itemToBeAdded.scene,
+          _id: item._id,
+          scene: item.scene,
         },
         {
           $set: {
@@ -222,11 +154,69 @@ export class CharacterItemContainer {
       return result;
     } catch (error) {
       console.error(error);
-      await this.locker.unlock(`item-${item._id}-add-item-to-container`);
-
       return false;
     } finally {
-      await this.locker.unlock(`item-${item._id}-add-item-to-container`);
+      await this.clearCache(toContainerId, character._id, item.type as ItemType);
+
+      await this.locker.unlock(`item-${item?._id}-add-item-to-container`);
+    }
+  }
+
+  private async ensureItemHasContainer(item: IItem): Promise<IItem | null> {
+    if (item.isItemContainer && !item.itemContainer) {
+      item = (await Item.findById(item._id)) as IItem;
+      await item.save();
+    }
+
+    return item;
+  }
+
+  private async tryToAddItemToContainer(
+    character: ICharacter,
+    item: IItem,
+    targetContainer: IItemContainer,
+    isInventoryItem: boolean,
+    dropOnMapIfFull: boolean
+  ): Promise<boolean> {
+    if (isInventoryItem) {
+      return await this.equipmentEquipInventory.equipInventory(character, item);
+    }
+
+    if (!this.isItemTypeValid(targetContainer, item)) {
+      this.socketMessaging.sendErrorMessageToCharacter(
+        character,
+        "Oops! The item type is not valid for this container."
+      );
+      return false;
+    }
+
+    await this.itemMap.clearItemCoordinates(item, targetContainer);
+
+    if (item.maxStackSize > 1) {
+      const wasStacked = await this.characterItemStack.tryAddingItemToStack(character, targetContainer, item);
+
+      if (wasStacked || wasStacked === undefined) {
+        return true;
+      }
+    }
+
+    return await this.characterItemSlots.tryAddingItemOnFirstSlot(character, item, targetContainer, dropOnMapIfFull);
+  }
+
+  private isItemTypeValid(targetContainer: IItemContainer, item: IItem): boolean {
+    const isItemTypeValid = targetContainer.allowedItemTypes?.filter((entry) => {
+      return entry === item?.type;
+    });
+
+    return !!isItemTypeValid;
+  }
+
+  private async clearCache(toContainerId: string, characterId: string, itemType: ItemType): Promise<void> {
+    await this.inMemoryHashTable.delete("container-all-items", toContainerId);
+    await this.inMemoryHashTable.delete("character-max-weights", characterId);
+
+    if (itemType === ItemType.CraftingResource) {
+      await this.inMemoryHashTable.delete("load-craftable-items", characterId);
     }
   }
 
@@ -237,6 +227,7 @@ export class CharacterItemContainer {
 
     if (!inventoryContainer) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The character does not have an inventory.");
+      return null;
     }
 
     return inventoryContainer;

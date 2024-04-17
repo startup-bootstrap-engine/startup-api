@@ -15,6 +15,7 @@ import {
   MacesBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -42,6 +43,7 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
   ammoKey: AnimationEffectKeys.FireBall,
   tier: 23,
   maxRangeAttack: RangeTypes.High,
+  isGiantForm: true,
   speed: MovementSpeed.ExtraFast,
   // @ts-ignore
   baseHealth: 100000,
@@ -73,8 +75,20 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
   },
   loots: [
     {
+      itemBlueprintKey: ToolsBlueprint.MoonlureFishingRod,
+      chance: LootProbability.SemiCommon,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.GildedLavaPickaxe,
+      chance: LootProbability.Uncommon,
+    },
+    {
       itemBlueprintKey: SwordsBlueprint.DragonsSword,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: CraftingResourcesBlueprint.PrimordialRelic,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.InfernoCleaver,
@@ -93,10 +107,7 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
       chance: LootProbability.VeryCommon,
       quantityRange: [5, 10],
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.YggdrasilJianSword,
-      chance: LootProbability.VeryRare,
-    },
+
     {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
       chance: LootProbability.Uncommon,
@@ -158,10 +169,7 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
       itemBlueprintKey: AxesBlueprint.GuardianAxe,
       chance: LootProbability.Uncommon,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.YggdrasilTemplarSword,
-      chance: LootProbability.Uncommon,
-    },
+
     {
       itemBlueprintKey: MacesBlueprint.SunderingClub,
       chance: LootProbability.Common,
@@ -208,18 +216,6 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
     },
     {
       itemBlueprintKey: AxesBlueprint.SpikedCleaverAxe,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.TimberSplitterAxe,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.VeryCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.BrutalChopperAxe,
       chance: LootProbability.VeryCommon,
     },
     {

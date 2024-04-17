@@ -9,7 +9,8 @@ import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterBonusPenalties } from "@providers/character/characterBonusPenalties/CharacterBonusPenalties";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { EntityUtil } from "@providers/entityEffects/EntityUtil";
 import { blueprintManager } from "@providers/inversify/container";
 import { AvailableBlueprints, ToolsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -32,6 +33,7 @@ import {
 } from "@rpg-engine/shared";
 import { EntityType } from "@rpg-engine/shared/dist/types/entity.types";
 import { provide } from "inversify-binding-decorators";
+import { clearCacheForKey } from "speedgoose";
 import { IMagicItemUseWithEntity } from "../useWithTypes";
 import { UseWithEntityValidation } from "./UseWithEntityValidation";
 
@@ -43,14 +45,14 @@ export class UseWithEntity {
 
     private socketAuth: SocketAuth,
     private characterItemInventory: CharacterItemInventory,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private animationEffect: AnimationEffect,
     private characterItemContainer: CharacterItemContainer,
     private skillIncrease: SkillIncrease,
     private characterBonusPenalties: CharacterBonusPenalties,
     private onTargetHit: OnTargetHit,
     private battleCharacterAttackValidation: BattleCharacterAttackValidation,
-
+    private inMemoryHashTable: InMemoryHashTable,
     private blueprintManager: BlueprintManager,
     private useWithEntityValidation: UseWithEntityValidation
   ) {}
@@ -162,8 +164,7 @@ export class UseWithEntity {
       target.save(),
       // Handle inventory count and character weight
       this.handleItemCountAndWeight(caster, item),
-      // Send refresh items event to the caster
-      this.sendRefreshItemsEvent(caster),
+
       // Send animation events if applicable based on the blueprint
       this.sendAnimationIfApplicable(caster, target, blueprint),
     ]);
@@ -171,6 +172,8 @@ export class UseWithEntity {
     // Sequential operations due to potential data dependency
     await this.updateTargetState(caster, target, damage, blueprint);
     await this.applyCharacterSpecificEffects(target, blueprint);
+
+    await this.sendRefreshItemsEvent(caster);
   }
 
   // Additional refactored methods to break down the logic
@@ -232,7 +235,18 @@ export class UseWithEntity {
     }
   }
 
+  private async clearCaching(character: ICharacter, inventoryContainerId: string): Promise<void> {
+    await Promise.all([
+      clearCacheForKey(`${character._id}-inventory`),
+      this.inMemoryHashTable.delete("container-all-items", inventoryContainerId),
+    ]);
+  }
+
   private async sendRefreshItemsEvent(character: ICharacter): Promise<void> {
+    const inventoryContainer = await this.characterItemContainer.getInventoryItemContainer(character);
+
+    await this.clearCaching(character, inventoryContainer?._id);
+
     const container = (await this.characterItemContainer.getInventoryItemContainer(
       character
     )) as unknown as IItemContainer;

@@ -5,11 +5,11 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { blueprintManager } from "@providers/inversify/container";
 import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { IEquipmentAndInventoryUpdatePayload, IItemContainer, ItemSocketEvents } from "@rpg-engine/shared";
+import { EntityType, IEquipmentAndInventoryUpdatePayload, IItemContainer, ItemSocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
 import { Types } from "mongoose";
@@ -21,13 +21,19 @@ export class PickPocket {
     private characterItemInventory: CharacterItemInventory,
     private socketMessaging: SocketMessaging,
     private characterItemsContainer: CharacterItemContainer,
-    private characterWeight: CharacterWeight
+    private characterWeight: CharacterWeightQueue
   ) {}
 
   @TrackNewRelicTransaction()
   public async handlePickPocket(character: ICharacter, target: ICharacter): Promise<boolean> {
-    if (target.type !== "Character") {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "You can only stolen from characters!");
+    if (!target) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you should specify a target to steal from.");
+
+      return false;
+    }
+
+    if (target.type !== EntityType.Character) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you can only steal from other characters!");
 
       return false;
     }

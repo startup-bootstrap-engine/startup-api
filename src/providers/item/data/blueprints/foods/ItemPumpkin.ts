@@ -1,3 +1,4 @@
+import { FARMING_HARVEST_PRICE_RATIO } from "@providers/constants/FarmingConstants";
 import { IConsumableItemBlueprint, ItemSubType, ItemType } from "@rpg-engine/shared";
 import { FoodsBlueprint } from "../../types/itemsBlueprintTypes";
 import { UsableEffectsBlueprint } from "../../usableEffects/types";
@@ -12,7 +13,7 @@ export const itemPumpkin: IConsumableItemBlueprint = {
   description: "A large round vegetable with a thick orange rind, often used in cooking and decoration.",
   weight: 0.5,
   maxStackSize: 999,
-  basePrice: 480,
-  canSell: false,
+  basePrice: 75 * FARMING_HARVEST_PRICE_RATIO,
+  canSell: true,
   usableEffectKey: UsableEffectsBlueprint.SuperStrongEatingEffect,
 };

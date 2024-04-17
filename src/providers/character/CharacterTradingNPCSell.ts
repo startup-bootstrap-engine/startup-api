@@ -13,14 +13,14 @@ import { CharacterTarget } from "./CharacterTarget";
 import { CharacterTradingBalance } from "./CharacterTradingBalance";
 import { CharacterTradingSell } from "./CharacterTradingSell";
 import { CharacterTradingValidation } from "./CharacterTradingValidation";
-import { CharacterWeight } from "./weight/CharacterWeight";
+import { CharacterWeightQueue } from "./weight/CharacterWeightQueue";
 
 @provide(CharacterTradingNPCSell)
 export class CharacterTradingNPCSell {
   constructor(
     private socketMessaging: SocketMessaging,
     private characterTradingSell: CharacterTradingSell,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private characterTradingValidation: CharacterTradingValidation,
     private characterTradingBalance: CharacterTradingBalance,
     private characterTarget: CharacterTarget
@@ -33,7 +33,7 @@ export class CharacterTradingNPCSell {
       return;
     }
 
-    const characterItems = await this.characterTradingSell.getCharacterItemsToSell(character, TradingEntity.NPC);
+    const characterItems = await this.characterTradingSell.getCharacterItemsToSell(character, TradingEntity.NPC, npc);
     if (!characterItems) {
       return;
     }

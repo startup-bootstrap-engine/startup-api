@@ -61,18 +61,6 @@ describe("UseWithItemToRemove.ts", () => {
     );
   });
 
-  it("should sends an error message if plant in not dead", async () => {
-    testPlant.isDead = false;
-    await testPlant.save();
-
-    await useWithItemToRemove.executeUse(testCharacter, useWithItemToRemoveData, skillIncrease);
-
-    expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
-      testCharacter,
-      "Sorry, you can only remove dead plants."
-    );
-  });
-
   it("should sends an error message if random number is greater than 75", async () => {
     jest.spyOn(_, "random").mockImplementation(() => 76);
 

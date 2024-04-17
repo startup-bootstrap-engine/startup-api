@@ -15,12 +15,12 @@ import {
   StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { AnimationEffectKeys, NPCAlignment, NPCCustomDeathPenalties, RangeTypes } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcEloraTheQueen: INPCTierBlueprint<19> = {
   ...generateMoveTowardsMovement(),
@@ -66,10 +66,7 @@ export const npcEloraTheQueen: INPCTierBlueprint<19> = {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
       chance: LootProbability.Uncommon,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.CelestialDefender,
-      chance: LootProbability.VeryRare,
-    },
+
     {
       itemBlueprintKey: ShieldsBlueprint.DemonShield,
       chance: LootProbability.Uncommon,
@@ -124,19 +121,7 @@ export const npcEloraTheQueen: INPCTierBlueprint<19> = {
       chance: LootProbability.SemiCommon,
     },
     {
-      itemBlueprintKey: AxesBlueprint.DualImpactAxe,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.SemiCommon,
-    },
-    {
       itemBlueprintKey: AxesBlueprint.HammerCleaveAxe,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.RoyalChopperAxe,
       chance: LootProbability.SemiCommon,
     },
     {

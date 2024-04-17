@@ -1,6 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
-import { ItemCraftable } from "@providers/item/ItemCraftable";
+import { ItemCraftableQueue } from "@providers/item/ItemCraftableQueue";
 import { itemsBlueprintIndex } from "@providers/item/data";
 import { seedToPlantMapping } from "@providers/plant/data/PlantSeedMap";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
@@ -17,7 +17,7 @@ export class UseWithSeed {
     private socketAuth: SocketAuth,
     private socketMessaging: SocketMessaging,
     private useWithHelper: UseWithHelper,
-    private itemCraftable: ItemCraftable,
+    private itemCraftable: ItemCraftableQueue,
     private skillIncrease: SkillIncrease,
     private characterItemInventory: CharacterItemInventory
   ) {}

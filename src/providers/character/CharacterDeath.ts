@@ -9,7 +9,6 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { INITIAL_STARTING_POINTS } from "@providers/constants/CharacterConstants";
 import { DROP_EQUIPMENT_CHANCE } from "@providers/constants/DeathConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DiscordBot } from "@providers/discord/DiscordBot";
@@ -25,15 +24,12 @@ import { Locker } from "@providers/locks/Locker";
 import { NPCTarget } from "@providers/npc/movement/NPCTarget";
 import { SkillDecrease } from "@providers/skill/SkillDecrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { Time } from "@providers/time/Time";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import {
   BattleSocketEvents,
   CharacterBuffType,
   CharacterSkullType,
   EntityType,
-  FromGridX,
-  FromGridY,
   IBattleDeath,
   IEquipmentAndInventoryUpdatePayload,
   IUIShowMessage,
@@ -48,11 +44,12 @@ import { Types } from "mongoose";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterDeathCalculator } from "./CharacterDeathCalculator";
 import { CharacterInventory } from "./CharacterInventory";
+import { CharacterRespawn } from "./CharacterRespawn";
 import { CharacterSkull } from "./CharacterSkull";
 import { CharacterTarget } from "./CharacterTarget";
 import { CharacterBuffActivator } from "./characterBuff/CharacterBuffActivator";
 import { CharacterItemContainer } from "./characterItems/CharacterItemContainer";
-import { CharacterWeight } from "./weight/CharacterWeight";
+import { CharacterWeightQueue } from "./weight/CharacterWeightQueue";
 
 export const DROPPABLE_EQUIPMENT = [
   "head",
@@ -74,7 +71,7 @@ export class CharacterDeath {
     private npcTarget: NPCTarget,
     private characterInventory: CharacterInventory,
     private itemOwnership: ItemOwnership,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private skillDecrease: SkillDecrease,
     private characterDeathCalculator: CharacterDeathCalculator,
     private characterItemContainer: CharacterItemContainer,
@@ -82,28 +79,30 @@ export class CharacterDeath {
     private characterBuffActivator: CharacterBuffActivator,
     private locker: Locker,
     private newRelic: NewRelic,
-    private time: Time,
     private equipmentSlots: EquipmentSlots,
     private characterSkull: CharacterSkull,
-    private discordBot: DiscordBot
+    private discordBot: DiscordBot,
+    private characterRespawn: CharacterRespawn
   ) {}
 
   @TrackNewRelicTransaction()
   public async handleCharacterDeath(killer: INPC | ICharacter | null, character: ICharacter): Promise<void> {
     try {
-      const isLocked = await this.locker.hasLock(`character-death-${character.id}`);
-      if (isLocked) return;
+      const isLocked = await this.locker.lock(`character-death-${character._id}`, 3);
 
-      await this.locker.lock(`character-death-${character.id}`, 3);
+      if (!isLocked) {
+        return;
+      }
+
       const characterBody = await this.generateCharacterBody(character);
 
-      // Run these tasks concurrently as they don't depend on each other
-      await Promise.all([
-        this.sendBattleDeathEvents(character),
-        this.handleKiller(killer, character),
-        this.handleCharacterMode(character, characterBody, killer),
-      ]);
+      await this.sendBattleDeathEvents(character);
 
+      if (character.scene.includes("arena") || character.scene.includes("training")) {
+        return;
+      }
+
+      await this.handleCharacterMode(character, characterBody, killer);
       await this.characterWeight.updateCharacterWeight(character);
       await this.sendRefreshEquipmentEvent(character);
 
@@ -115,8 +114,12 @@ export class CharacterDeath {
       await Promise.all([
         entityEffectUse.clearAllEntityEffects(character), // make sure to clear all entity effects before respawn
         this.clearCache(character),
-        this.respawnCharacter(character),
+        this.handleKiller(killer, character),
       ]);
+
+      await this.characterRespawn.respawnCharacter(character);
+
+      await this.locker.unlock(`character-death-${character._id}`);
     }
   }
 
@@ -142,11 +145,10 @@ export class CharacterDeath {
       y: character.y,
       createdAt: new Date(),
     });
+    await characterDeathLog.save();
 
     if (!characterDeathLog.isJustify) {
-      await Promise.all([characterDeathLog.save(), this.characterSkull.updateSkullAfterKill(killer._id.toString())]);
-    } else {
-      await characterDeathLog.save();
+      await this.characterSkull.updateSkullAfterKill(killer._id.toString());
     }
   }
 
@@ -185,11 +187,11 @@ export class CharacterDeath {
 
   @TrackNewRelicTransaction()
   public async generateCharacterBody(character: ICharacter): Promise<IItem> {
-    const blueprintData = await blueprintManager.getBlueprint<IItem>("items", BodiesBlueprint.CharacterBody);
+    const blueprintData = blueprintManager.getBlueprint<IItem>("items", BodiesBlueprint.CharacterBody);
 
     const charBody = new Item({
       ...blueprintData,
-      bodyFromId: character.id,
+      bodyFromId: character._id,
       name: `${character.name}'s body`,
       scene: character.scene,
       texturePath: `${character.textureKey}/death/0.png`,
@@ -201,32 +203,6 @@ export class CharacterDeath {
     await charBody.save();
 
     return charBody;
-  }
-
-  @TrackNewRelicTransaction()
-  public async respawnCharacter(character: ICharacter): Promise<void> {
-    let extraProps: Partial<ICharacter> = {};
-
-    const startingPoint = INITIAL_STARTING_POINTS[character.faction];
-
-    extraProps = {
-      x: FromGridX(startingPoint.gridX),
-      y: FromGridY(startingPoint.gridY),
-      scene: startingPoint.scene,
-    };
-
-    await Character.updateOne(
-      { _id: character._id },
-      {
-        $set: {
-          isOnline: false,
-          health: character.maxHealth,
-          mana: character.maxMana,
-          appliedEntityEffects: [],
-          ...extraProps,
-        },
-      }
-    );
   }
 
   private async sendBattleDeathEvents(character: ICharacter): Promise<void> {

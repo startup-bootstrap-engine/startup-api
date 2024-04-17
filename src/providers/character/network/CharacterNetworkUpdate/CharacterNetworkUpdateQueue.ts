@@ -10,7 +10,6 @@ import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import {
   AnimationDirection,
   CharacterSocketEvents,
-  EnvType,
   GRID_WIDTH,
   ICharacterPositionUpdateConfirm,
   ICharacterPositionUpdateFromClient,
@@ -20,30 +19,19 @@ import {
 } from "@rpg-engine/shared";
 
 import { NewRelic } from "@providers/analytics/NewRelic";
-import { appEnv } from "@providers/config/env";
 import { MAX_PING_TRACKING_THRESHOLD } from "@providers/constants/ServerConstants";
-import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MapTransition } from "@providers/map/MapTransition/MapTransition";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
-import { Queue, Worker } from "bullmq";
 import dayjs from "dayjs";
 import random from "lodash/random";
-import { v4 as uuidv4 } from "uuid";
-import { CharacterView } from "../../CharacterView";
 import { CharacterMovementValidation } from "../../characterMovement/CharacterMovementValidation";
 import { CharacterMovementWarn } from "../../characterMovement/CharacterMovementWarn";
 
 @provideSingleton(CharacterNetworkUpdateQueue)
 export class CharacterNetworkUpdateQueue {
-  private queue: Queue<any, any, string> | null = null;
-  private worker: Worker | null = null;
-  private connection: any;
-  private queueName: string = `character-network-update-${uuidv4()}-${
-    appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
-  }`;
-
   constructor(
     private socketMessaging: SocketMessaging,
     private socketAuth: SocketAuth,
@@ -53,102 +41,11 @@ export class CharacterNetworkUpdateQueue {
     private characterMovementValidation: CharacterMovementValidation,
     private characterMovementWarn: CharacterMovementWarn,
     private mathHelper: MathHelper,
-    private characterView: CharacterView,
     private newRelic: NewRelic,
     private locker: Locker,
     private mapTransition: MapTransition,
-    private redisManager: RedisManager
+    private dynamicQueue: DynamicQueue
   ) {}
-
-  public initQueue(): void {
-    if (!this.connection) {
-      this.connection = this.redisManager.client;
-    }
-
-    if (!this.queue) {
-      this.queue = new Queue(this.queueName, {
-        connection: this.connection,
-      });
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.queue.on("error", async (error) => {
-          console.error(`Error in the ${this.queueName}:`, error);
-
-          await this.queue?.close();
-          this.queue = null;
-        });
-      }
-    }
-
-    if (!this.worker) {
-      this.worker = new Worker(
-        this.queueName,
-        async (job) => {
-          const { character, data } = job.data;
-
-          try {
-            await this.handlePositionUpdateRequest(data, character);
-          } catch (err) {
-            console.error(`Error processing ${this.queueName} for Character ${character.name}:`, err);
-            throw err;
-          }
-        },
-        {
-          connection: this.connection,
-        }
-      );
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.worker.on("failed", async (job, err) => {
-          console.log(`${this.queueName} job ${job?.id} failed with error ${err.message}`);
-
-          await this.worker?.close();
-          this.worker = null;
-        });
-      }
-    }
-  }
-
-  public async clearAllJobs(): Promise<void> {
-    if (!this.connection || !this.queue || !this.worker) {
-      this.initQueue();
-    }
-
-    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
-    for (const job of jobs) {
-      try {
-        await job?.remove();
-      } catch (err) {
-        console.error(`Error removing job ${job?.id}:`, err.message);
-      }
-    }
-  }
-
-  public async shutdown(): Promise<void> {
-    await this.queue?.close();
-    await this.worker?.close();
-
-    this.queue = null;
-    this.worker = null;
-  }
-
-  public async addToQueue(data: ICharacterPositionUpdateFromClient, character: ICharacter): Promise<void> {
-    if (!this.connection || !this.queue || !this.worker) {
-      this.initQueue();
-    }
-
-    await this.queue?.add(
-      this.queueName,
-      {
-        data,
-        character,
-      },
-      {
-        removeOnComplete: true,
-        removeOnFail: true,
-      }
-    );
-  }
 
   public onCharacterUpdatePosition(channel: SocketChannel): void {
     this.socketAuth.authCharacterOn(
@@ -164,10 +61,25 @@ export class CharacterNetworkUpdateQueue {
     );
   }
 
-  private async handlePositionUpdateRequest(
-    data: ICharacterPositionUpdateFromClient,
-    character: ICharacter
-  ): Promise<void> {
+  public async addToQueue(data: ICharacterPositionUpdateFromClient, character: ICharacter): Promise<void> {
+    await this.dynamicQueue.addJob(
+      "character-network-update",
+      async (job) => {
+        const { character, data } = job.data;
+
+        await this.execPositionUpdate(data, character);
+      },
+      {
+        character,
+        data,
+      },
+      {
+        queueScaleBy: "active-characters",
+      }
+    );
+  }
+
+  private async execPositionUpdate(data: ICharacterPositionUpdateFromClient, character: ICharacter): Promise<void> {
     if (await this.isCharacterChangingScene(character)) {
       return;
     }
@@ -191,6 +103,14 @@ export class CharacterNetworkUpdateQueue {
     await this.processValidCharacterMovement(character, data, isMoving);
   }
 
+  public async clearAllJobs(): Promise<void> {
+    await this.dynamicQueue.clearAllJobs();
+  }
+
+  public async shutdown(): Promise<void> {
+    await this.dynamicQueue.shutdown();
+  }
+
   private async isCharacterChangingScene(character: ICharacter): Promise<boolean> {
     return await this.locker.hasLock(`character-changing-scene-${character._id}`);
   }
@@ -207,7 +127,7 @@ export class CharacterNetworkUpdateQueue {
     await this.syncIfPositionMismatch(character, { x: character.x, y: character.y }, data.originX, data.originY);
 
     this.characterMovementWarn.warn(character, data);
-    void this.npcManager.startNearbyNPCsBehaviorLoop(character);
+    await this.npcManager.startNearbyNPCsBehaviorLoop(character);
     await this.updateServerSideEmitterInfo(character, data.newX, data.newY, isMoving, data.direction);
     void this.mapTransition.handleNonPVPZone(character, data.newX, data.newY);
     await this.mapTransition.handleMapTransition(character, data.newX, data.newY);

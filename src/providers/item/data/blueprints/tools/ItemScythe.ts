@@ -21,7 +21,8 @@ export const itemScythe: IToolItemBlueprint = {
   textureAtlas: "items",
   texturePath: "tools/scythe.png",
   name: "Scythe",
-  description: "A tool primarily used for cutting grass or reaping crops.",
+  description:
+    "A tool primarily used for cutting grass or reaping crops. Using it on other player's crops will result in a skull penalty.",
   weight: 0.1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   hasUseWith: true,
@@ -43,7 +44,13 @@ export const itemScythe: IToolItemBlueprint = {
       targetItem,
       originItem,
       successAnimationEffectKey: AnimationEffectKeys.Rooted,
-      errorMessages: ["Sorry, removal is not possible at the moment. Please try again"],
+      errorMessages: [
+        "You tried to remove the plant, but you failed!",
+        "Oops! The plant is stronger than it looks.",
+        "The plant resisted your attempt to remove it.",
+        "You couldn't remove the plant. Maybe try again?",
+        "Your attempt to remove the plant was unsuccessful.",
+      ],
       successMessages: ["Removal has been completed successfully."],
     };
 

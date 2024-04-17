@@ -8,16 +8,17 @@ import {
   FoodsBlueprint,
   HelmetsBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
   ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcGoblin: INPCTierBlueprint<3> = {
   ...generateMoveTowardsMovement(),
@@ -65,6 +66,26 @@ export const npcGoblin: INPCTierBlueprint<3> = {
     {
       itemBlueprintKey: FoodsBlueprint.Fish,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.StrawberrySeed,
+      chance: LootProbability.Common,
+      quantityRange: [1, 5],
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.CabbageSeed,
+      chance: LootProbability.Common,
+      quantityRange: [1, 5],
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.GreenGrapeSeed,
+      chance: LootProbability.Common,
+      quantityRange: [1, 5],
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.CarrotSeed,
+      chance: LootProbability.Common,
+      quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: FoodsBlueprint.RottenMeat,

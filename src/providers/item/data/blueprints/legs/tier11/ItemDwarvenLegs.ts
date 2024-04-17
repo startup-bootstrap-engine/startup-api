@@ -26,12 +26,12 @@ export const itemDwarvenLegs: IEquippableLightArmorTier11Blueprint = {
     {
       type: CharacterBuffType.CharacterAttribute,
       trait: CharacterAttributes.Speed,
-      buffPercentage: 12,
+      buffPercentage: 8,
       durationType: CharacterBuffDurationType.Permanent,
       options: {
         messages: {
-          activation: "You feel the power of speed and quickness flowing through your body. (+12% speed)",
-          deactivation: "You feel the power of speed and quickness leaving your body. (-12% speed)",
+          activation: "You feel the power of speed and quickness flowing through your body. (+8% speed)",
+          deactivation: "You feel the power of speed and quickness leaving your body. (-8% speed)",
         },
       },
     },
@@ -48,5 +48,5 @@ export const itemDwarvenLegs: IEquippableLightArmorTier11Blueprint = {
       },
     },
   ],
-  equippedBuffDescription: "Increases speed by 12% and strength by 7% respectively",
+  equippedBuffDescription: "Increases speed by 8% and strength by 7% respectively",
 };

@@ -112,6 +112,7 @@ describe("ItemUse.ts", () => {
 
     expect(itemUsageMock).toBeCalledTimes(1);
     expect(itemUsageMock).toBeCalledWith(
+      expect.any(String),
       expect.objectContaining({
         key: testItem.key,
       }),
@@ -181,7 +182,7 @@ describe("ItemUse.ts", () => {
       PotionsBlueprint.LightLifePotion
     );
 
-    (itemUse as any).applyItemUsage(itemLightLifePotionBlueprint, testCharacter.id);
+    (itemUse as any).applyItemUsage(testCharacter.scene, itemLightLifePotionBlueprint, testCharacter.id);
 
     await wait(0.2);
 
@@ -270,7 +271,12 @@ describe("ItemUse.ts", () => {
     expect(result).toBeTruthy();
 
     // Check if applyItemUsage was called with healthRecovery
-    expect(applyItemUsageMock).toHaveBeenCalledWith(expect.any(Object), testCharacter.id, testItem.healthRecovery);
+    expect(applyItemUsageMock).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.any(Object),
+      testCharacter.id,
+      testItem.healthRecovery
+    );
 
     applyItemUsageMock.mockRestore();
   });
@@ -285,7 +291,7 @@ describe("ItemUse.ts", () => {
     };
 
     // @ts-ignore
-    await itemUse.applyItemUsage(bluePrintItem, testCharacter._id);
+    await itemUse.applyItemUsage(testCharacter.scene, bluePrintItem, testCharacter._id);
 
     expect(mockUsableEffect).toHaveBeenCalledTimes(1);
     expect(mockUsableEffect).toHaveBeenCalledWith(

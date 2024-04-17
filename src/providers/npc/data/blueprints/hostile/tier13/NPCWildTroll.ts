@@ -17,9 +17,11 @@ import {
   HelmetsBlueprint,
   MacesBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
-import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 
 export const npcWildTroll: INPCTierBlueprint<13> = {
   ...generateMoveTowardsMovement(),
@@ -65,7 +67,11 @@ export const npcWildTroll: INPCTierBlueprint<13> = {
       itemBlueprintKey: HelmetsBlueprint.GladiatorHelmet,
       chance: LootProbability.Uncommon,
     },
-
+    {
+      itemBlueprintKey: SeedsBlueprint.EggplantSeed,
+      chance: LootProbability.Common,
+      quantityRange: [1, 3],
+    },
     {
       itemBlueprintKey: HammersBlueprint.RoyalHammer,
       chance: LootProbability.Uncommon,
@@ -96,7 +102,11 @@ export const npcWildTroll: INPCTierBlueprint<13> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.WoodBreakerAxe,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.VineGrasp],

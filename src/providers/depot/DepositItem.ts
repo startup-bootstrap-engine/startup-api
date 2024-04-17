@@ -1,20 +1,15 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { Depot } from "@entities/ModuleDepot/DepotModel";
-import { IItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
+import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
-import { NPC } from "@entities/ModuleNPC/NPCModel";
+import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
-import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
-import { ItemOwnership } from "@providers/item/ItemOwnership";
 import { ItemUpdater } from "@providers/item/ItemUpdater";
 import { ItemView } from "@providers/item/ItemView";
+import { ItemContainerTransactionQueue } from "@providers/itemContainer/ItemContainerTransactionQueue";
 import { MapHelper } from "@providers/map/MapHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { IDepotDepositItem, IEquipmentAndInventoryUpdatePayload } from "@rpg-engine/shared";
+import { IDepotDepositItem, ItemContainerType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { DepotSystem } from "./DepotSystem";
 import { OpenDepot } from "./OpenDepot";
 
 @provide(DepositItem)
@@ -22,85 +17,103 @@ export class DepositItem {
   constructor(
     private openDepot: OpenDepot,
     private itemView: ItemView,
-    private characterWeight: CharacterWeight,
-    private depotSystem: DepotSystem,
     private mapHelper: MapHelper,
     private socketMessaging: SocketMessaging,
-    private itemOwnership: ItemOwnership,
     private itemUpdater: ItemUpdater,
-    private characterItemSlots: CharacterItemSlots,
-    private inMemoryHashTable: InMemoryHashTable
+    private itemContainerTransactionQueue: ItemContainerTransactionQueue
   ) {}
 
   @TrackNewRelicTransaction()
-  public async deposit(character: ICharacter, data: IDepotDepositItem): Promise<IItemContainer | undefined> {
+  public async deposit(character: ICharacter, data: IDepotDepositItem): Promise<boolean> {
     const { itemId, npcId, fromContainerId } = data;
 
-    // Simultaneously retrieve necessary data to reduce wait times.
-    const [itemContainer, item, npc] = await Promise.all([
-      this.openDepot.getContainer(character.id, npcId),
-      Item.findById(itemId) as unknown as IItem,
-      NPC.findById(npcId).lean(),
-    ]);
+    try {
+      const [originContainer, targetContainer, item, npc] = await Promise.all([
+        this.getOriginContainer(fromContainerId!),
+        this.openDepot.getContainer(character.id, npcId),
+        this.getItem(character, itemId),
+        this.getNPC(character, npcId),
+      ]);
 
-    if (!itemContainer) {
-      throw new Error(`DepotSystem > Item container not found for character id ${character.id} and npc id ${npcId}`);
+      if (!item || !npc) {
+        return false;
+      }
+
+      await this.updateItemKeyIfNeeded(item);
+
+      const result = await this.transferItemToContainer(
+        item,
+        character,
+        originContainer,
+        targetContainer as unknown as IItemContainer
+      );
+
+      if (result) {
+        await this.handleItemInDepot(item);
+      }
+
+      return result;
+    } catch (error) {
+      console.error(error);
+      return false;
     }
+  }
+
+  private async getOriginContainer(fromContainerId: string): Promise<IItemContainer> {
+    return (await ItemContainer.findById(fromContainerId).lean()) as unknown as IItemContainer;
+  }
+
+  private async getItem(character: ICharacter, itemId: string): Promise<IItem | null> {
+    const item = (await Item.findById(itemId)) as unknown as IItem;
     if (!item) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, item not found.");
       throw new Error(`DepotSystem > Item not found: ${itemId}`);
     }
+    return item;
+  }
+
+  private async getNPC(character: ICharacter, npcId: string): Promise<INPC | null> {
+    const npc = await NPC.findById(npcId).lean();
     if (!npc) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, NPC not found.");
       throw new Error(`DepotSystem > NPC not found: ${npcId}`);
     }
+    return npc as INPC;
+  }
 
-    const isDepositValid = await this.isDepositValid(character, data);
-    if (!isDepositValid) return;
-
-    // Update item key and save only if necessary.
+  private async updateItemKeyIfNeeded(item: IItem): Promise<void> {
     if (item.key !== item.baseKey) {
       item.key = item.baseKey;
       await item.save();
     }
+  }
 
-    const wasItemAddedToContainer = await this.depotSystem.addItemToContainer(
-      character,
+  private async transferItemToContainer(
+    item: IItem,
+    character: ICharacter,
+    originContainer: IItemContainer,
+    targetContainer: IItemContainer
+  ): Promise<boolean> {
+    return await this.itemContainerTransactionQueue.transferToContainer(
       item,
-      itemContainer as unknown as IItemContainer
+      character,
+      originContainer,
+      targetContainer,
+      {
+        readContainersAfterTransaction: [
+          { itemContainerId: targetContainer._id.toString(), type: ItemContainerType.Depot },
+          { itemContainerId: originContainer._id.toString(), type: ItemContainerType.Inventory },
+        ],
+      }
     );
-    if (!wasItemAddedToContainer) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Failed to deposit item. Please try again.");
-      return;
-    }
+  }
 
-    if (fromContainerId) {
-      await this.handleItemRemovalFromContainer(fromContainerId, item, character);
-    }
+  private async handleItemInDepot(item: IItem): Promise<void> {
+    await this.markItemAsInDepot(item);
 
-    // Separate handling for map items to keep the deposit logic clean and focused.
     if (this.isItemFromMap(item)) {
       await this.removeFromMapContainer(item);
     }
-
-    return itemContainer as unknown as IItemContainer;
-  }
-
-  private async handleItemRemovalFromContainer(
-    fromContainerId: string,
-    item: IItem,
-    character: ICharacter
-  ): Promise<void> {
-    const promises = [
-      this.depotSystem.removeFromContainer(fromContainerId, item),
-      this.inMemoryHashTable.delete("container-all-items", fromContainerId),
-      item.owner ? Promise.resolve() : this.itemOwnership.addItemOwnership(item, character),
-      this.markItemAsInDepot(item),
-      this.characterWeight.updateCharacterWeight(character),
-    ];
-
-    const [container] = await Promise.all(promises);
-
-    const payloadUpdate: IEquipmentAndInventoryUpdatePayload = { inventory: container as any };
-    this.depotSystem.updateInventoryCharacter(payloadUpdate, character);
   }
 
   private isItemFromMap(item: IItem): boolean {
@@ -113,35 +126,6 @@ export class DepositItem {
         isInDepot: true,
       },
     });
-  }
-
-  private async isDepositValid(character: ICharacter, data: IDepotDepositItem): Promise<boolean> {
-    // check if there're slots available on the depot
-
-    const depot = await Depot.findOne({ owner: character._id }).lean();
-
-    if (!depot) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, this depot is not available.");
-      return false;
-    }
-
-    const itemToBeAdded = await Item.findById(data.itemId).lean();
-
-    const hasAvailableSlot = await this.characterItemSlots.hasAvailableSlot(
-      depot?.itemContainer as string,
-      itemToBeAdded as IItem,
-      true
-    );
-
-    if (!hasAvailableSlot) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        "Sorry, your depot is full. Remove some items and try again."
-      );
-      return false;
-    }
-
-    return true;
   }
 
   private async removeFromMapContainer(item: IItem): Promise<void> {

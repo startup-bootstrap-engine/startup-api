@@ -22,7 +22,7 @@ export class SpecialEffect {
     namespace: SpecialEffectNamespace,
     onEffectEnd?: Function
   ): Promise<boolean> {
-    const entityType = target.type as EntityType;
+    const entityType = target?.type as EntityType;
     if (entityType === EntityType.Item) {
       return false;
     }

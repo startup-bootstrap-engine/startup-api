@@ -1,112 +1,19 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { appEnv } from "@providers/config/env";
-import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { EnvType } from "@rpg-engine/shared";
-import { Job, Queue, Worker } from "bullmq";
-import { v4 as uuidv4 } from "uuid";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
+import { Job } from "bullmq";
 import { Pathfinder } from "./Pathfinder";
 import { PathfindingResults } from "./PathfindingResults";
 @provideSingleton(PathfindingQueue)
 export class PathfindingQueue {
-  private queue: Queue | null = null;
-  private worker: Worker | null = null;
-  private connection;
-
-  private queueName: string = `npc-pathfinding-${uuidv4()}-${
-    appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
-  }`;
-
   constructor(
-    private redisManager: RedisManager,
     private pathfinder: Pathfinder,
     private pathfindingResults: PathfindingResults,
-    private locker: Locker
+    private locker: Locker,
+    private dynamicQueue: DynamicQueue
   ) {}
-
-  public init(): void {
-    if (appEnv.general.IS_UNIT_TEST) {
-      return;
-    }
-
-    if (!this.connection) {
-      this.connection = this.redisManager.client;
-    }
-
-    if (!this.queue) {
-      this.queue = new Queue(this.queueName, {
-        connection: this.connection,
-      });
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.queue.on("error", async (error) => {
-          console.error("Error in the pathfindingQueue:", error);
-
-          await this.queue?.close();
-          this.queue = null;
-        });
-      }
-    }
-
-    if (!this.worker) {
-      this.worker = new Worker(
-        this.queueName,
-        async (job) => {
-          const { npc, target, startGridX, startGridY, endGridX, endGridY } = job.data;
-
-          try {
-            const path = await this.pathfinder.findShortestPath(
-              npc as INPC,
-              target,
-              npc.scene,
-              startGridX,
-              startGridY,
-              endGridX,
-              endGridY
-            );
-
-            if (!path) {
-              return;
-            }
-
-            await this.pathfindingResults.setResult(job.id!, path);
-          } catch (err) {
-            console.error(`Error processing ${this.queueName} for NPC ${npc.key}:`, err);
-            throw err;
-          }
-        },
-        {
-          connection: this.connection,
-        }
-      );
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.worker.on("failed", async (job, err) => {
-          console.log(`Pathfinding job ${job?.id} failed with error ${err.message}`);
-
-          await this.worker?.close();
-          this.worker = null;
-        });
-      }
-    }
-  }
-
-  public async clearAllJobs(): Promise<void> {
-    if (!this.connection || !this.queue || !this.worker) {
-      this.init();
-    }
-
-    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
-    for (const job of jobs) {
-      try {
-        await job?.remove();
-      } catch (err) {
-        console.error(`Error removing job ${job?.id}:`, err.message);
-      }
-    }
-  }
 
   async addPathfindingJob(
     npc: INPC,
@@ -116,10 +23,6 @@ export class PathfindingQueue {
     endGridX: number,
     endGridY: number
   ): Promise<Job | undefined> {
-    if (!this.connection || !this.queue || !this.worker) {
-      this.init();
-    }
-
     try {
       const canProceed = await this.locker.lock(`pathfinding-${npc._id}`);
 
@@ -127,12 +30,38 @@ export class PathfindingQueue {
         return;
       }
 
-      return await this.queue?.add(
-        "pathfindingJob",
-        { npc, target, startGridX, startGridY, endGridX, endGridY },
+      return await this.dynamicQueue.addJob(
+        "npc-pathfinding-queue",
+
+        async (job) => {
+          const { npc, target, startGridX, startGridY, endGridX, endGridY } = job.data;
+
+          const path = await this.pathfinder.findShortestPath(
+            npc as INPC,
+            target,
+            npc.scene,
+            startGridX,
+            startGridY,
+            endGridX,
+            endGridY
+          );
+
+          if (!path) {
+            return;
+          }
+
+          await this.pathfindingResults.setResult(job.id!, path);
+        },
         {
-          removeOnComplete: true,
-          removeOnFail: true,
+          npc,
+          target,
+          startGridX,
+          startGridY,
+          endGridX,
+          endGridY,
+        },
+        {
+          queueScaleBy: "active-npcs",
         }
       );
     } catch (error) {
@@ -142,10 +71,11 @@ export class PathfindingQueue {
     }
   }
 
+  public async clearAllJobs(): Promise<void> {
+    await this.dynamicQueue.clearAllJobs();
+  }
+
   public async shutdown(): Promise<void> {
-    await this.queue?.close();
-    await this.worker?.close();
-    this.queue = null;
-    this.worker = null;
+    await this.dynamicQueue.shutdown();
   }
 }

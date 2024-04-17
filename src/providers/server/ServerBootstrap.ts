@@ -9,28 +9,34 @@ import { PushNotificationHelper } from "@providers/pushNotification/PushNotifica
 import { Seeder } from "@providers/seeds/Seeder";
 
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { HitTarget } from "@providers/battle/HitTarget";
+import { HitTargetQueue } from "@providers/battle/HitTargetQueue";
 import { CharacterActionsTracker } from "@providers/character/CharacterActionsTracker";
 import { CharacterConsumptionControl } from "@providers/character/CharacterConsumptionControl";
 import { CharacterMonitorCallbackTracker } from "@providers/character/CharacterMonitorInterval/CharacterMonitorCallbackTracker";
 import { CharacterNetworkUpdateQueue } from "@providers/character/network/CharacterNetworkUpdate/CharacterNetworkUpdateQueue";
-import { ChatNetworkGlobalMessaging } from "@providers/chat/network/ChatNetworkGlobalMessaging";
+import { CharacterNetworkCreateQueue } from "@providers/character/network/characterCreate/CharacterNetworkCreateQueue";
+import { ChatNetworkGlobalMessagingQueue } from "@providers/chat/network/ChatNetworkGlobalMessagingQueue";
 import { appEnv } from "@providers/config/env";
+import { cache } from "@providers/constants/CacheConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DiscordBot } from "@providers/discord/DiscordBot";
 import { EntityEffectDurationControl } from "@providers/entityEffects/EntityEffectDurationControl";
 import { ErrorHandlingTracker } from "@providers/errorHandling/ErrorHandlingTracker";
+import { ItemDropVerifier } from "@providers/item/ItemDropVerifier";
 import { ItemUseCycleQueue } from "@providers/item/ItemUseCycleQueue";
+import { ItemContainerTransactionQueue } from "@providers/itemContainer/ItemContainerTransactionQueue";
 import { Locker } from "@providers/locks/Locker";
 import { NPCBattleCycleQueue } from "@providers/npc/NPCBattleCycleQueue";
 import { NPCCycleQueue } from "@providers/npc/NPCCycleQueue";
+import { NPCDeathQueue } from "@providers/npc/NPCDeathQueue";
 import { NPCFreezer } from "@providers/npc/NPCFreezer";
 import PartyManagement from "@providers/party/PartyManagement";
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
+import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import SpellSilence from "@providers/spells/data/logic/mage/druid/SpellSilence";
 import { BullStrength } from "@providers/spells/data/logic/minotaur/BullStrength";
-import { SpellNetworkCast } from "@providers/spells/network/SpellNetworkCast";
+import { SpellNetworkCastQueue } from "@providers/spells/network/SpellNetworkCastQueue";
 import { UseWithTileQueue } from "@providers/useWith/abstractions/UseWithTileQueue";
 import { EnvType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -53,7 +59,7 @@ export class ServerBootstrap {
     private locker: Locker,
     private partyManagement: PartyManagement,
     private inMemoryHashTable: InMemoryHashTable,
-    private hitTarget: HitTarget,
+    private hitTarget: HitTargetQueue,
     private discordBot: DiscordBot,
     private socketSessionControl: SocketSessionControl,
     private npcBattleCycleQueue: NPCBattleCycleQueue,
@@ -62,13 +68,18 @@ export class ServerBootstrap {
     private entityEffectDuration: EntityEffectDurationControl,
     private characterMonitorCallbackTracker: CharacterMonitorCallbackTracker,
     private characterNetworkUpdateQueue: CharacterNetworkUpdateQueue,
+    private characterNetworkCreateQueue: CharacterNetworkCreateQueue,
     private patreonAPI: PatreonAPI,
     private useWithTileQueue: UseWithTileQueue,
-    private chatNetworkGlobalMessaging: ChatNetworkGlobalMessaging,
-    private spellNetworkCast: SpellNetworkCast,
+    private chatNetworkGlobalMessaging: ChatNetworkGlobalMessagingQueue,
+    private spellNetworkCast: SpellNetworkCastQueue,
     private characterActionsTracker: CharacterActionsTracker,
     private errorHandlingTracker: ErrorHandlingTracker,
-    private bullStrength: BullStrength
+    private bullStrength: BullStrength,
+    private npcDeathQueue: NPCDeathQueue,
+    private itemContainerTransactionQueue: ItemContainerTransactionQueue,
+    private itemDropVerifier: ItemDropVerifier,
+    private queueActivityMonitor: QueueActivityMonitor
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -87,11 +98,15 @@ export class ServerBootstrap {
 
   @TrackNewRelicTransaction()
   public async performMultipleInstancesOperations(): Promise<void> {
+    cache.clear();
+
     this.discordBot.initialize();
 
     await this.queueShutdownHandling();
 
     await this.clearSomeQueues();
+
+    this.errorHandlingTracker.overrideDebugHandling();
 
     if (appEnv.general.ENV === EnvType.Production) {
       this.errorHandlingTracker.overrideErrorHandling();
@@ -111,6 +126,9 @@ export class ServerBootstrap {
       await this.useWithTileQueue.shutdown();
       await this.chatNetworkGlobalMessaging.shutdown();
       await this.spellNetworkCast.shutdown();
+      await this.npcDeathQueue.shutdown();
+      await this.itemContainerTransactionQueue.shutdown();
+      await this.characterNetworkCreateQueue.shutdown();
     };
 
     process.on("SIGTERM", async () => {
@@ -152,6 +170,9 @@ export class ServerBootstrap {
     await this.inMemoryHashTable.deleteAll("use-item-to-tile");
     await this.inMemoryHashTable.deleteAll("character-bonus-penalties");
     await this.inMemoryHashTable.deleteAll("skills-with-buff");
+    await this.inMemoryHashTable.deleteAll("item-container-transfer-results");
+
+    await this.itemDropVerifier.clearAllItemDrops();
 
     await this.entityEffectDuration.clearAll();
     await this.characterMonitorCallbackTracker.clearAll();
@@ -183,15 +204,20 @@ export class ServerBootstrap {
   }
 
   private async clearSomeQueues(): Promise<void> {
+    await this.queueActivityMonitor.clearAllQueues();
+
     await this.pathfindingQueue.clearAllJobs();
-    await this.hitTarget.clearAllQueueJobs();
+    await this.hitTarget.clearAllJobs();
     await this.itemUseCycleQueue.clearAllJobs();
     await this.npcBattleCycleQueue.clearAllJobs();
     await this.characterNetworkUpdateQueue.clearAllJobs();
     await this.useWithTileQueue.clearAllJobs();
     await this.chatNetworkGlobalMessaging.clearAllJobs();
     await this.spellNetworkCast.clearAllJobs();
+    await this.npcDeathQueue.clearAllJobs();
+    await this.characterNetworkCreateQueue.clearAllJobs();
+    await this.npcCycleQueue.clearAllJobs();
 
-    console.log("🧹 BullMQ queues cleared...");
+    console.log("🧹 BullMQ queues cleared!");
   }
 }

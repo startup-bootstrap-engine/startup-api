@@ -52,7 +52,6 @@ import { itemThunderclapKatana } from "./tier17/itemThunderclapKatana";
 import { itemThunderstormEdge } from "./tier17/itemThunderstormEdge";
 import { itemCelestialDefender } from "./tier18/itemCelestialDefender";
 import { itemFrostbiteSaber } from "./tier18/itemFrostbiteSaber";
-import { itemFrostfangDagger } from "./tier18/itemFrostfangDagger";
 import { itemFrostfireGladius } from "./tier18/itemFrostfireGladius";
 import { itemFrostwindCutter } from "./tier18/itemFrostwindCutter";
 import { itemInfernalSlicer } from "./tier18/itemInfernalSlicer";
@@ -198,7 +197,6 @@ export const swordsBlueprintIndex = {
   [SwordsBlueprint.CelestialDefender]: itemCelestialDefender,
   [SwordsBlueprint.ShadowstrikeFalchion]: itemShadowstrikeFalchion,
   [SwordsBlueprint.BloodmoonBlade]: itemBloodmoonBlade,
-  [SwordsBlueprint.FrostfangDagger]: itemFrostfangDagger,
   [SwordsBlueprint.ThunderboltCutlass]: itemThunderboltCutlass,
   [SwordsBlueprint.InfernoCleaver]: itemInfernoCleaver,
   [SwordsBlueprint.MoonshadowBlade]: itemMoonshadowBlade,

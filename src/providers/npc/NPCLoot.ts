@@ -8,10 +8,12 @@ import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAc
 import {
   LOOT_CRAFTING_MATERIAL_DROP_CHANCE,
   LOOT_FOOD_DROP_CHANCE,
+  LOOT_FOOD_DROP_CHANCE_FOR_NOOB,
   LOOT_GOLD_DROP_CHANCE,
   NPC_LOOT_CHANCE_MULTIPLIER,
 } from "@providers/constants/LootConstants";
 import { NPC_GIANT_FORM_LOOT_MULTIPLIER } from "@providers/constants/NPCConstants";
+import { LOW_SKILL_LEVEL_SP_INCREASE_BONUS } from "@providers/constants/SkillConstants";
 import { blueprintManager } from "@providers/inversify/container";
 import { ItemRarity } from "@providers/item/ItemRarity";
 import { AvailableBlueprints, OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -154,10 +156,7 @@ export class NPCLoot {
 
   private async calculateLootChance(killer: ICharacter, loot: INPCLoot, baseMultiplier = 1): Promise<number> {
     try {
-      const blueprintData = await blueprintManager.getBlueprint<IItem>(
-        "items",
-        loot.itemBlueprintKey as AvailableBlueprints
-      );
+      const blueprintData = blueprintManager.getBlueprint<IItem>("items", loot.itemBlueprintKey as AvailableBlueprints);
 
       if (!blueprintData) {
         throw new Error(`Error while calculating loot chance for item with key ${loot.itemBlueprintKey}`);
@@ -180,17 +179,21 @@ export class NPCLoot {
     const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(killer);
 
     if (premiumAccountData) {
-      return this.getBaseLootMultiplier(blueprintData) * (1 + premiumAccountData.lootDropBuff / 100);
+      return this.getBaseLootMultiplier(killer, blueprintData) * (1 + premiumAccountData.lootDropBuff / 100);
     }
-    return this.getBaseLootMultiplier(blueprintData);
+    return this.getBaseLootMultiplier(killer, blueprintData);
   }
 
-  private getBaseLootMultiplier(blueprintData: IItem): number {
+  private getBaseLootMultiplier(killer: ICharacter, blueprintData: IItem): number {
     if (blueprintData?.type === ItemType.CraftingResource) {
       return LOOT_CRAFTING_MATERIAL_DROP_CHANCE;
     }
 
     if (blueprintData?.subType === ItemSubType.Food) {
+      if ((killer.skills as ISkill)?.level < LOW_SKILL_LEVEL_SP_INCREASE_BONUS) {
+        return LOOT_FOOD_DROP_CHANCE_FOR_NOOB;
+      }
+
       return LOOT_FOOD_DROP_CHANCE;
     }
 

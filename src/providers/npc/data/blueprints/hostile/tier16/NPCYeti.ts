@@ -15,17 +15,18 @@ import {
   HelmetsBlueprint,
   LegsBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   SpearsBlueprint,
   StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCCustomDeathPenalties, NPCSubtype, RangeTypes } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcYeti: INPCTierBlueprint<16> = {
   ...generateMoveTowardsMovement(),
@@ -36,6 +37,7 @@ export const npcYeti: INPCTierBlueprint<16> = {
   textureKey: HostileNPCsBlueprint.Yeti,
   alignment: NPCAlignment.Hostile,
   speed: MovementSpeed.Fast,
+  isGiantForm: true,
   baseHealth: 1670,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: RangedWeaponsBlueprint.Stone,
@@ -72,6 +74,11 @@ export const npcYeti: INPCTierBlueprint<16> = {
       chance: LootProbability.Rare,
     },
     {
+      itemBlueprintKey: SeedsBlueprint.WatermelonSeed,
+      chance: LootProbability.Common,
+      quantityRange: [1, 5],
+    },
+    {
       itemBlueprintKey: SpearsBlueprint.RoyalSpear,
       chance: LootProbability.SemiCommon,
     },
@@ -95,7 +102,7 @@ export const npcYeti: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: AxesBlueprint.RoyalDoubleAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: BootsBlueprint.CopperBoots,
@@ -177,24 +184,16 @@ export const npcYeti: INPCTierBlueprint<16> = {
       chance: LootProbability.VeryRare,
     },
     {
-      itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.TwinEdgeAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
       itemBlueprintKey: AxesBlueprint.DanishAxe,
-      chance: LootProbability.SemiCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.EarthstoneEmeraldNecklace,

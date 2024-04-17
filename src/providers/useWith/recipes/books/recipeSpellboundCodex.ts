@@ -27,6 +27,10 @@ export const recipeSpellboundCodex: IUseWithCraftingRecipe = {
       key: MagicsBlueprint.ThunderRune,
       qty: 50,
     },
+    {
+      key: CraftingResourcesBlueprint.WhisperrootEntwiner,
+      qty: 8,
+    },
   ],
   minCraftingRequirements: [
     CraftingSkill.Alchemy,

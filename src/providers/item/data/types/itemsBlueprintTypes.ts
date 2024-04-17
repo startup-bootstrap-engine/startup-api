@@ -92,7 +92,6 @@ export enum SwordsBlueprint {
   CelestialDefender = "celestial-defender",
   ShadowstrikeFalchion = "shadowstrike-falchion",
   BloodmoonBlade = "bloodmoon-blade",
-  FrostfangDagger = "frostfang-dagger",
   ThunderboltCutlass = "thunderbolt-cutlass",
   InfernoCleaver = "inferno-cleaver",
   MoonshadowBlade = "moonshadow-blade",
@@ -201,6 +200,7 @@ export enum DaggersBlueprint {
   AstralDagger = "astral-dagger",
   ArrowheadDagger = "arrowhead-dagger",
   StarshardDagger = "starshard-dagger",
+  FrostfangDagger = "frostfang-dagger",
 }
 
 export enum ArmorsBlueprint {
@@ -381,8 +381,11 @@ export enum FoodsBlueprint {
   Pumpkin = "pumpkin",
 }
 export enum CraftingResourcesBlueprint {
+  MedicinalLeaf = "medicinal-leaf",
   SocialCrystal = "social-crystal",
+  PrimordialRelic = "primordial-relic",
   Rope = "rope",
+  SeaShell = "sea-shell",
   BlueSapphire = "blue-sapphire",
   BlueFeather = "blue-feather",
   Leather = "leather",
@@ -437,18 +440,34 @@ export enum CraftingResourcesBlueprint {
   Bandage = "bandage",
   DragonHead = "dragon-head",
   DragonTooth = "dragon-tooth",
+  BloodrootBlossomFlower = "bloodroot-blossom-flower",
+  DuskwispHerbFlower = "duskwisp-herb-flower",
+  SunspireLotusFlower = "sunspire-lotus-flower",
+  NebulaSeahorn = "nebula-seahorn",
+  NautilusShell = "nautilus-shell",
+  WhisperrootEntwiner = "whisperroot-entwiner",
 }
 
 export enum ToolsBlueprint {
   ButchersKnife = "butchers-knife",
   CarpentersAxe = "carpenters-axe",
+  ElderHeartAxe = "elder-heart-axe",
+  WoodBreakerAxe = "wood-breaker-axe",
+  LogSplitterAxe = "log-splitter-axe",
+  WoodsManAxe = "woods-man-axe",
   FishingRod = "fishing-rod",
+  MoonlureFishingRod = "moonlure-fishing-rod",
   Pickaxe = "pickaxe",
+  AurumAlloyPickaxe = "aurum-alloy-pickaxe",
+  EmberEdgePickaxe = "ember-edge-pickaxe",
+  EmeraldEclipsesPickaxe = "emerald-eclipses-pickaxe",
+  GildedLavaPickaxe = "gilded-lava-pickaxe",
   Hammer = "hammer",
   UseWithItemTest = "use-with-item-test",
   UseWithTileTest = "use-with-tile-test",
   Scythe = "scythe",
   WateringCan = "watering-can",
+  CrimsonWateringCan = "crimson-watering-can",
 }
 
 export enum SeedsBlueprint {
@@ -463,6 +482,9 @@ export enum SeedsBlueprint {
   PumpkinSeed = "pumpkin-seed",
   WatermelonSeed = "watermelon-seed",
   PotatoSeed = "potato-seed",
+  BloodrootBlossomSeed = "bloodroot-blossom-seed",
+  DuskwispHerbSeed = "duskwisp-herb-seed",
+  SunspireLotusSeed = "sunspire-lotus-seed",
 }
 
 export enum SpearsBlueprint {

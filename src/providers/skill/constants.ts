@@ -3,8 +3,8 @@ import {
   AxesBlueprint,
   CraftingResourcesBlueprint,
   FoodsBlueprint,
-  RangedWeaponsBlueprint,
   PotionsBlueprint,
+  RangedWeaponsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { CraftingSkill } from "@rpg-engine/shared/dist/types/skills.types";
 
@@ -36,9 +36,13 @@ export const CraftingSkillsMap = new Map<string, string>([
   [CraftingResourcesBlueprint.WoodenSticks, CraftingSkill.Lumberjacking],
   [CraftingResourcesBlueprint.SmallWoodenStick, CraftingSkill.Lumberjacking],
   [CraftingResourcesBlueprint.ElvenWood, CraftingSkill.Lumberjacking],
+  [CraftingResourcesBlueprint.WhisperrootEntwiner, CraftingSkill.Lumberjacking],
   [FoodsBlueprint.WildSalmon, CraftingSkill.Fishing],
   [FoodsBlueprint.Tuna, CraftingSkill.Fishing],
   [FoodsBlueprint.BrownFish, CraftingSkill.Fishing],
+  [CraftingResourcesBlueprint.SeaShell, CraftingSkill.Fishing],
+  [CraftingResourcesBlueprint.NebulaSeahorn, CraftingSkill.Fishing],
+  [CraftingResourcesBlueprint.NautilusShell, CraftingSkill.Fishing],
   [FoodsBlueprint.Bread, CraftingSkill.Cooking],
   [PotionsBlueprint.GreaterLifePotion, CraftingSkill.Alchemy],
   [PotionsBlueprint.GreaterManaPotion, CraftingSkill.Alchemy],

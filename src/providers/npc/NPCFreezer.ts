@@ -41,6 +41,7 @@ export class NPCFreezer {
       );
 
       await this.locker.unlock(`npc-${npc._id}-npc-cycle`);
+      await this.locker.unlock(`npc-${npc._id}-npc-battle-cycle`);
     } catch (error) {
       console.error(error);
     }
@@ -59,6 +60,10 @@ export class NPCFreezer {
 
       if (charactersAround.length === 0) {
         inactiveNPCPromises.push(this.freezeNPC(npc, "NPCFreezer - No characters around"));
+      }
+
+      if (!npc.targetCharacter) {
+        inactiveNPCPromises.push(this.freezeNPC(npc, "NPCFreezer - No target character"));
       }
     }
 

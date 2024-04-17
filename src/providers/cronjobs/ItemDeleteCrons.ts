@@ -1,6 +1,7 @@
 import { Character } from "@entities/ModuleCharacter/CharacterModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
+import { ItemDropVerifier } from "@providers/item/ItemDropVerifier";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { MapHelper } from "@providers/map/MapHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -15,7 +16,8 @@ export class ItemDeleteCrons {
     private newRelic: NewRelic,
     private mapHelper: MapHelper,
     private itemMissingReferenceCleaner: ItemMissingReferenceCleaner,
-    private cronJobScheduler: CronJobScheduler
+    private cronJobScheduler: CronJobScheduler,
+    private itemDropVerifier: ItemDropVerifier
   ) {}
 
   public schedule(): void {
@@ -25,6 +27,12 @@ export class ItemDeleteCrons {
 
     this.cronJobScheduler.uniqueSchedule("item-cron-delete-items-without-owner", "0 0 0 * * *", async () => {
       await this.deleteItemsWithoutOwner();
+    });
+
+    this.cronJobScheduler.uniqueSchedule("item-handle-excessive-item-drops", "0 */30 * * *", async () => {
+      await this.itemDropVerifier.cleanupOldTrackedItemDropData();
+
+      await this.itemDropVerifier.verifyAllCharacterItemDrops();
     });
   }
 

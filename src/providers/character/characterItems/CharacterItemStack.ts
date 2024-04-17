@@ -39,7 +39,7 @@ export class CharacterItemStack {
         return false;
       }
 
-      const allItemsSameKey = await this.characterItemSlots.getAllItemsFromKey(targetContainer, itemToBeAdded.key);
+      const allItemsSameKey = await this.characterItemSlots.getAllItemsFromKey(targetContainer, itemToBeAdded);
 
       if (!allItemsSameKey?.length) {
         return false; // create new item, if there are no items with the same key
@@ -65,6 +65,11 @@ export class CharacterItemStack {
         const isSameItem = slotItem.key.replace(/-\d+$/, "") === itemToBeAdded.key.replace(/-\d+$/, "");
 
         if (!isSameItem) continue;
+
+        // if its same item, but rarity are different, skip
+        if (slotItem.rarity !== itemToBeAdded.rarity) {
+          continue; // Skip to the next item since the rarities do not match
+        }
 
         if (slotItem.stackQty === slotItem.maxStackSize) continue; // if item is already full, skip
 
@@ -130,6 +135,16 @@ export class CharacterItemStack {
 
       // create a new item with the difference
       itemToBeAdded.stackQty = difference;
+
+      if (!itemToBeAdded.save) {
+        itemToBeAdded = (await Item.findById(itemToBeAdded._id)) as IItem;
+
+        if (!itemToBeAdded) {
+          console.error("No item found");
+          return;
+        }
+      }
+
       await itemToBeAdded.save();
 
       await Item.updateOne(

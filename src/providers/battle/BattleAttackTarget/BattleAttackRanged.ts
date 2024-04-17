@@ -41,6 +41,7 @@ export interface IRangedAttackParams {
   equipment?: IEquipment;
   itemSubType?: ItemSubType;
   projectileAnimationKey?: AnimationEffectKeys;
+  isIncompatible?: boolean;
 }
 
 const rangedWeaponsWithoutAmmo: string[] = [RangedWeaponsBlueprint.Shuriken];
@@ -62,7 +63,8 @@ export class BattleAttackRanged {
   public sendNoAmmoEvent(
     character: ICharacter,
     target: { targetId: string; targetType: EntityType },
-    magicAttack?: boolean
+    magicAttack?: boolean,
+    isIncompatible?: boolean
   ): void {
     let ammoType: string = "";
     let attackType: string = "";
@@ -74,6 +76,13 @@ export class BattleAttackRanged {
       ammoType = "ammo";
       attackType = "ranged";
     }
+    let reason: string;
+
+    if (isIncompatible) {
+      reason = `Oops! Incompatible ${ammoType} for your ${attackType} attack!`;
+    } else {
+      reason = `Oops! Not enough ${ammoType} for your ${attackType} attack!`;
+    }
 
     this.socketMessaging.sendEventToUser<IBattleRangedAttackFailed>(
       character.channelId!,
@@ -81,7 +90,7 @@ export class BattleAttackRanged {
       {
         targetId: target.targetId,
         type: target.targetType as EntityType,
-        reason: `Oops! Not enough ${ammoType} for your ${attackType} attack!`,
+        reason,
       }
     );
   }
@@ -93,7 +102,7 @@ export class BattleAttackRanged {
     ammo: IRangedAttackParams
   ): Promise<void> {
     switch (attacker.type) {
-      case "Character":
+      case EntityType.Character:
         const character = attacker as ICharacter;
         await this.animationEffect.sendProjectileAnimationEventToCharacter(
           character,
@@ -103,7 +112,7 @@ export class BattleAttackRanged {
         );
         break;
 
-      case "NPC":
+      case EntityType.NPC:
         const npc = attacker as INPC;
         await this.animationEffect.sendProjectileAnimationEventToNPC(
           npc,
@@ -145,9 +154,23 @@ export class BattleAttackRanged {
       }
 
       result = (await this.getRequiredAmmo(weapon.item.requiredAmmoKeys, equipment)) as IRangedAttackParams;
-      if (!_.isEmpty(result)) {
-        result.maxRange = weapon.item.maxRange || 0;
+
+      if (!result) {
+        this.sendNoAmmoEvent(character, { targetId: character.id, targetType: character.type as EntityType }, false);
+        return;
       }
+
+      if (result?.isIncompatible) {
+        this.sendNoAmmoEvent(
+          character,
+          { targetId: character.id, targetType: character.type as EntityType },
+          false,
+          true
+        );
+        return;
+      }
+
+      result.maxRange = weapon.item.maxRange || 0;
     }
 
     if (weapon.item.subType === "Staff") {
@@ -194,6 +217,16 @@ export class BattleAttackRanged {
           equipment,
         };
       }
+    }
+
+    if (accessory) {
+      return {
+        location: ItemSlotType.Accessory,
+        id: accessory._id,
+        itemSubType: accessory.subType as ItemSubType,
+        equipment,
+        isIncompatible: true,
+      };
     }
   }
 

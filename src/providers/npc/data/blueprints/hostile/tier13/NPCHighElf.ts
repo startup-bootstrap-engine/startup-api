@@ -11,13 +11,14 @@ import {
   RangedWeaponsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, RangeTypes } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcHighElf: INPCTierBlueprint<13> = {
   ...generateMoveTowardsMovement(),
@@ -147,6 +148,14 @@ export const npcHighElf: INPCTierBlueprint<13> = {
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
       chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.WoodBreakerAxe,
+      chance: LootProbability.Common,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.EmeraldEclipsesPickaxe,
+      chance: LootProbability.VeryRare,
     },
   ],
 };

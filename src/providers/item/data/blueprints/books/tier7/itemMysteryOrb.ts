@@ -31,6 +31,12 @@ export const itemMysteryOrb: IEquippableBookTier7Blueprint = {
       durationType: CharacterBuffDurationType.Permanent,
     },
     {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 20,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Resistance,
       buffPercentage: 15,
@@ -42,12 +48,6 @@ export const itemMysteryOrb: IEquippableBookTier7Blueprint = {
       buffPercentage: 15,
       durationType: CharacterBuffDurationType.Permanent,
     },
-    {
-      type: CharacterBuffType.CharacterAttribute,
-      trait: CharacterAttributes.MaxMana,
-      buffPercentage: 20,
-      durationType: CharacterBuffDurationType.Permanent,
-    },
   ],
-  equippedBuffDescription: "Increases magic, resistance, dexterity and max mana by 20%.",
+  equippedBuffDescription: "Increases magic and max mana by 20%, resistance and dexterity 15% respectively.",
 };

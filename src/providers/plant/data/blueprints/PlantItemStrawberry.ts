@@ -49,4 +49,5 @@ export const plantItemStrawberry: IPlantItem = {
   yieldFactor: FARMING_HIGH_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
+  regrowAfterHarvestLimit: 1,
 };

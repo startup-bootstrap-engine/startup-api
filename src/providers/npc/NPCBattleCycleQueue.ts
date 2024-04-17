@@ -6,29 +6,19 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { BattleAttackTarget } from "@providers/battle/BattleAttackTarget/BattleAttackTarget";
 import { appEnv } from "@providers/config/env";
 import { NPC_BATTLE_CYCLE_INTERVAL, NPC_MIN_DISTANCE_TO_ACTIVATE } from "@providers/constants/NPCConstants";
-import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MovementHelper } from "@providers/movement/MovementHelper";
-import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
-import { EnvType, NPCAlignment } from "@rpg-engine/shared";
-import { Queue, Worker } from "bullmq";
+import { NPCAlignment } from "@rpg-engine/shared";
 import _ from "lodash";
-import { v4 as uuidv4 } from "uuid";
 import { NPCView } from "./NPCView";
 import { ICharacterHealth } from "./movement/NPCMovementMoveTowards";
 import { NPCTarget } from "./movement/NPCTarget";
 @provideSingleton(NPCBattleCycleQueue)
 export class NPCBattleCycleQueue {
-  private queue: Queue<any, any, string> | null = null;
-  private worker: Worker | null = null;
-  private connection: any;
-  private queueName: string = `npc-battle-cycle-queue-${uuidv4()}-${
-    appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id
-  }`;
-
   constructor(
     private newRelic: NewRelic,
     private locker: Locker,
@@ -37,68 +27,10 @@ export class NPCBattleCycleQueue {
     private movementHelper: MovementHelper,
     private battleAttackTarget: BattleAttackTarget,
     private npcView: NPCView,
-    private redisManager: RedisManager,
-    private socketMessaging: SocketMessaging
+    private dynamicQueue: DynamicQueue
   ) {}
 
-  public init(): void {
-    if (!this.connection) {
-      this.connection = this.redisManager.client;
-    }
-
-    if (!this.queue) {
-      this.queue = new Queue(this.queueName, {
-        connection: this.connection,
-      });
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.queue.on("error", async (error) => {
-          console.error(`Error in the ${this.queueName} :`, error);
-
-          await this.queue?.close();
-          this.queue = null;
-        });
-      }
-    }
-
-    if (!this.worker) {
-      this.worker = new Worker(
-        this.queueName,
-        async (job) => {
-          const { npc, npcSkills } = job.data;
-
-          try {
-            await this.execBattleCycle(npc, npcSkills);
-          } catch (err) {
-            console.error(`Error processing ${this.queueName} for NPC ${npc.key}:`, err);
-            await this.locker.unlock(`npc-${job?.data?.npcId}-npc-battle-cycle`);
-
-            throw err;
-          }
-        },
-        {
-          connection: this.connection,
-        }
-      );
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        this.worker.on("failed", async (job, err) => {
-          console.log(`${this.queueName} job ${job?.id} failed with error ${err.message}`);
-          await this.locker.unlock(`npc-${job?.data?.npcId}-npc-battle-cycle`);
-
-          await this.worker?.close();
-          this.worker = null;
-        });
-      }
-    }
-  }
-
-  @TrackNewRelicTransaction()
-  public async add(npc: INPC, npcSkills: ISkill): Promise<void> {
-    if (!this.connection || !this.queue || !this.worker) {
-      this.init();
-    }
-
+  public async addToQueue(npc: INPC, npcSkills: ISkill): Promise<void> {
     const canProceed = await this.locker.lock(`npc-${npc._id}-npc-add-battle-queue`);
 
     if (!canProceed) {
@@ -111,23 +43,25 @@ export class NPCBattleCycleQueue {
         return;
       }
 
-      const isJobBeingProcessed = await this.isJobBeingProcessed(npc._id);
+      await this.dynamicQueue.addJob(
+        "npc-battle-queue",
 
-      if (isJobBeingProcessed) {
-        return;
-      }
+        async (job) => {
+          const { npc, npcSkills } = job.data;
 
-      await this.queue?.add(
-        this.queueName,
+          await this.execBattleCycle(npc, npcSkills);
+        },
         {
-          npcId: npc._id,
           npc,
           npcSkills,
         },
         {
+          queueScaleBy: "active-npcs",
+        },
+
+        {
           delay: NPC_BATTLE_CYCLE_INTERVAL,
-          removeOnComplete: true,
-          removeOnFail: true,
+          priority: 1,
         }
       );
     } catch (error) {
@@ -139,28 +73,14 @@ export class NPCBattleCycleQueue {
   }
 
   public async clearAllJobs(): Promise<void> {
-    if (!this.connection || !this.queue || !this.worker) {
-      this.init();
-    }
-
-    const jobs = (await this.queue?.getJobs(["waiting", "active", "delayed", "paused"])) ?? [];
-    for (const job of jobs) {
-      try {
-        await job?.remove();
-      } catch (err) {
-        console.error(`Error removing job ${job?.id}:`, err.message);
-      }
-    }
+    await this.dynamicQueue.clearAllJobs();
   }
 
   public async shutdown(): Promise<void> {
-    await this.queue?.close();
-    await this.worker?.close();
-
-    this.queue = null;
-    this.worker = null;
+    await this.dynamicQueue.shutdown();
   }
 
+  @TrackNewRelicTransaction()
   private async execBattleCycle(npc: INPC, npcSkills: ISkill): Promise<void> {
     try {
       const hasLock = await this.locker.hasLock(`npc-${npc._id}-npc-battle-cycle`);
@@ -236,7 +156,7 @@ export class NPCBattleCycleQueue {
         await this.tryToSwitchToRandomTarget(npc);
       }
 
-      await this.add(updatedNPC, npcSkills);
+      await this.addToQueue(updatedNPC, npcSkills);
     } catch (error) {
       console.error(error);
       await this.locker.unlock(`npc-${npc._id}-npc-battle-cycle`);
@@ -246,17 +166,6 @@ export class NPCBattleCycleQueue {
   @TrackNewRelicTransaction()
   private async stop(npc: INPC): Promise<void> {
     await this.npcTarget.clearTarget(npc);
-  }
-
-  private async isJobBeingProcessed(npcId: string): Promise<boolean> {
-    const existingJobs = (await this.queue?.getJobs(["waiting", "active", "delayed"])) ?? [];
-    const isJobExisting = existingJobs.some((job) => job?.data?.npcId === npcId);
-
-    if (isJobExisting) {
-      return true; // Don't enqueue a new job if one with the same callbackId already exists
-    }
-
-    return false;
   }
 
   @TrackNewRelicTransaction()

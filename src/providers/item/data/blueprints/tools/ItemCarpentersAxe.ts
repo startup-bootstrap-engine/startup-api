@@ -1,7 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { container } from "@providers/inversify/container";
-import { ItemCraftable } from "@providers/item/ItemCraftable";
+import { ItemCraftableQueue } from "@providers/item/ItemCraftableQueue";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { UseWithItemToTile } from "@providers/useWith/abstractions/UseWithItemToTile";
 import { IUseWithTargetTile } from "@providers/useWith/useWithTypes";
@@ -24,7 +24,7 @@ export const itemCarpentersAxe: IToolItemBlueprint = {
   textureAtlas: "items",
   texturePath: "tools/carpenters-axe.png",
   name: "Carpenter's Axe",
-  description: "An axe designed primarily as a work axe.",
+  description: "A tool used for gathering wooden sticks and small wooden sticks.",
   attack: 6,
   defense: 2,
   weight: 0.5,
@@ -39,7 +39,7 @@ export const itemCarpentersAxe: IToolItemBlueprint = {
     targetTile: IUseWithTargetTile,
     targetName: string,
     character: ICharacter,
-    itemCraftable: ItemCraftable,
+    itemCraftable: ItemCraftableQueue,
     skillIncrease: SkillIncrease
   ): Promise<void> => {
     const useWithItemToTile = container.get<UseWithItemToTile>(UseWithItemToTile);
@@ -54,29 +54,24 @@ export const itemCarpentersAxe: IToolItemBlueprint = {
         successMessages: ["You found some wood!", "You're getting good at this!"],
         rewards: [
           {
-            key: CraftingResourcesBlueprint.GreaterWoodenLog,
-            qty: [3, 4],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 5, rarityOfTool),
-          },
-          {
             key: CraftingResourcesBlueprint.WoodenSticks,
             qty: [2, 3],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 10, rarityOfTool),
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 7, rarityOfTool),
           },
           {
             key: CraftingResourcesBlueprint.SmallWoodenStick,
             qty: [2, 3],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 10, rarityOfTool),
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 7, rarityOfTool),
           },
           {
-            key: CraftingResourcesBlueprint.ElvenWood,
+            key: CraftingResourcesBlueprint.GreaterWoodenLog,
             qty: [1, 2],
-            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 5, rarityOfTool),
+            chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 3, rarityOfTool),
           },
         ],
       },
       skillIncrease
     );
   },
-  usableEffectDescription: "Use it on a tree to cut it",
+  usableEffectDescription: "Use this tool to gather wooden sticks and small wooden sticks.",
 };

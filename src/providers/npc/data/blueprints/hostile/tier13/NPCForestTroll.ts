@@ -19,11 +19,13 @@ import {
   MacesBlueprint,
   PotionsBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
-import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 
 export const npcForestTroll: INPCTierBlueprint<14> = {
   ...generateMoveTowardsMovement(),
@@ -58,7 +60,11 @@ export const npcForestTroll: INPCTierBlueprint<14> = {
       itemBlueprintKey: SwordsBlueprint.DoubleEdgedSword,
       chance: LootProbability.Uncommon,
     },
-
+    {
+      itemBlueprintKey: SeedsBlueprint.EggplantSeed,
+      chance: LootProbability.Common,
+      quantityRange: [1, 3],
+    },
     {
       itemBlueprintKey: LegsBlueprint.BronzeLegs,
       chance: LootProbability.VeryRare,
@@ -128,7 +134,11 @@ export const npcForestTroll: INPCTierBlueprint<14> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.AurumAlloyPickaxe,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],

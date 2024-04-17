@@ -32,7 +32,7 @@ describe("NPCLoot.spec.ts", () => {
     const goldLoot = npcLoot.getGoldLoot(npc);
 
     expect(goldLoot).toMatchObject({
-      quantityRange: [1, 8],
+      quantityRange: [1, 9],
     });
   });
 

@@ -10,6 +10,7 @@ import { blueprintManager } from "@providers/inversify/container";
 import { AvailableBlueprints, OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { MathHelper } from "@providers/math/MathHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { NumberFormatter } from "@providers/text/NumberFormatter";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import Shared, {
   IEquipmentAndInventoryUpdatePayload,
@@ -23,11 +24,12 @@ import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterInventory } from "./CharacterInventory";
 import { CharacterTradingBalance } from "./CharacterTradingBalance";
+import { CharacterTradingPriceControl } from "./CharacterTradingPriceControl";
 import { CharacterTradingValidation } from "./CharacterTradingValidation";
 import { CharacterItemContainer } from "./characterItems/CharacterItemContainer";
 import { CharacterItemInventory } from "./characterItems/CharacterItemInventory";
 import { CharacterItemSlots } from "./characterItems/CharacterItemSlots";
-import { CharacterWeight } from "./weight/CharacterWeight";
+import { CharacterWeightQueue } from "./weight/CharacterWeightQueue";
 
 @provide(CharacterTradingSell)
 export class CharacterTradingSell {
@@ -35,14 +37,16 @@ export class CharacterTradingSell {
     private socketMessaging: SocketMessaging,
     private characterItemContainer: CharacterItemContainer,
     private characterItemInventory: CharacterItemInventory,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private characterTradingValidation: CharacterTradingValidation,
     private mathHelper: MathHelper,
     private characterItemSlots: CharacterItemSlots,
     private characterTradingBalance: CharacterTradingBalance,
     private characterInventory: CharacterInventory,
     private newRelic: NewRelic,
-    private inMemoryHashTable: InMemoryHashTable
+    private inMemoryHashTable: InMemoryHashTable,
+    private characterTradingPriceControl: CharacterTradingPriceControl,
+    private numberFormatter: NumberFormatter
   ) {}
 
   @TrackNewRelicTransaction()
@@ -50,7 +54,7 @@ export class CharacterTradingSell {
     character: ICharacter,
     items: ITradeRequestItem[],
     entityType: TradingEntity,
-    npc?: INPC
+    npc: INPC
   ): Promise<void> {
     if (!items.length) {
       return;
@@ -72,7 +76,7 @@ export class CharacterTradingSell {
       return;
     }
 
-    await this.addGoldToInventory(soldItems, character);
+    await this.addGoldToInventory(soldItems, character, npc);
 
     void this.characterWeight.updateCharacterWeight(character);
 
@@ -134,13 +138,14 @@ export class CharacterTradingSell {
     return removedItems;
   }
 
-  private async addGoldToInventory(items: ITradeRequestItem[], character: ICharacter): Promise<void> {
+  private async addGoldToInventory(items: ITradeRequestItem[], character: ICharacter, npc: INPC): Promise<void> {
     const blueprint = await blueprintManager.getBlueprint<IItem>("items", OthersBlueprint.GoldCoin);
 
     const inventory = await this.characterInventory.getInventory(character);
     const inventoryContainerId = inventory?.itemContainer as unknown as string;
 
-    let qty = await this.getGoldQuantity(items);
+    let qty = await this.getItemGoldPrice(items, npc);
+
     let success = true;
 
     while (qty > 0) {
@@ -166,11 +171,13 @@ export class CharacterTradingSell {
     }
   }
 
-  private async getGoldQuantity(items: ITradeRequestItem[]): Promise<number> {
+  private async getItemGoldPrice(items: ITradeRequestItem[], npc: INPC): Promise<number> {
     let qty = 0;
 
     for (const item of items) {
-      qty += item.qty * (await this.characterTradingBalance.getItemSellPrice(item.key));
+      qty += item.qty * (await this.characterTradingBalance.getItemSellPrice(item.key, npc));
+
+      await this.characterTradingPriceControl.recordCharacterNPCTradeOperation(npc, item.key, qty, item.qty, "sell");
     }
 
     qty = this.mathHelper.fixPrecision(qty);
@@ -202,7 +209,8 @@ export class CharacterTradingSell {
   @TrackNewRelicTransaction()
   public async getCharacterItemsToSell(
     character: ICharacter,
-    tradingEntity: TradingEntity
+    tradingEntity: TradingEntity,
+    npc: INPC
   ): Promise<ITradeResponseItem[] | undefined> {
     const responseItems: ITradeResponseItem[] = [];
     const uniqueItems: string[] = [];
@@ -232,13 +240,15 @@ export class CharacterTradingSell {
 
       if (!item || !item.basePrice || item.canSell === false) continue;
 
-      const sellPrice = await this.characterTradingBalance.getItemSellPrice(itemKey, priceMultiplier);
+      const sellPrice = await this.characterTradingBalance.getItemSellPrice(itemKey, npc, priceMultiplier);
 
       if (!sellPrice) continue;
 
       responseItems.push({
         ...(item as unknown as Shared.IItem),
-        price: await this.characterTradingBalance.getItemSellPrice(item.key, priceMultiplier),
+        price: this.numberFormatter.formatNumber(
+          await this.characterTradingBalance.getItemSellPrice(item.key, npc, priceMultiplier)
+        ),
         stackQty: itemsQty.get(itemKey),
       });
     }

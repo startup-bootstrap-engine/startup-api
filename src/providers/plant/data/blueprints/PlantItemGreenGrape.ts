@@ -44,4 +44,5 @@ export const plantItemGreenGrape: IPlantItem = {
   yieldFactor: FARMING_SUPER_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
+  regrowAfterHarvestLimit: 1,
 };

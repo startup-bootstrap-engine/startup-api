@@ -3,7 +3,7 @@ import { Equipment, IEquipment } from "@entities/ModuleCharacter/EquipmentModel"
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
-import { HitTarget } from "@providers/battle/HitTarget";
+import { HitTargetQueue } from "@providers/battle/HitTargetQueue";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { itemsBlueprintIndex } from "@providers/item/data";
 import {
@@ -16,7 +16,7 @@ import { spellSelfHealing } from "@providers/spells/data/blueprints/all/SpellSel
 import { BattleEventType, CharacterClass, FromGridX } from "@rpg-engine/shared";
 
 describe("HitTarget", () => {
-  let hitTarget: HitTarget;
+  let hitTarget: HitTargetQueue;
   let targetCharacter: ICharacter;
   let attackerCharacter: ICharacter;
   let testNPC: INPC;
@@ -29,7 +29,7 @@ describe("HitTarget", () => {
   let characterSkills: ISkill;
 
   beforeAll(() => {
-    hitTarget = container.get(HitTarget);
+    hitTarget = container.get(HitTargetQueue);
     spellCast = container.get<SpellCast>(SpellCast);
   });
 
@@ -301,7 +301,7 @@ describe("HitTarget", () => {
       expect(applyEntitySpy).toBeCalledTimes(1);
     });
 
-    it("should call applyEntityEffectsCharacter if the attacker is a Character", async () => {
+    it("should call applyEntityEffectsCharacter if the attacker is a Character and target is a Character", async () => {
       // @ts-ignore
       const applyEntityEffectsCharacter = jest.spyOn(hitTarget, "applyEntityEffectsCharacter");
       // @ts-ignore
@@ -317,11 +317,11 @@ describe("HitTarget", () => {
       // prettier-ignore
       const applyEntityEffectsIfApplicable = jest.spyOn(hitTarget, "applyEntityEffectsIfApplicable").mockResolvedValue(undefined);
 
-      await hitTarget.hit(attackerCharacter, testNPC);
+      await hitTarget.hit(attackerCharacter, targetCharacter);
 
       // return weapon on getWeapon
 
-      expect(applyEntityEffectsCharacter).toHaveBeenCalledWith(attackerCharacter, mockWeapon, testNPC);
+      expect(applyEntityEffectsCharacter).toHaveBeenCalledWith(attackerCharacter, mockWeapon, targetCharacter);
       expect(applyEntityEffectsIfApplicable).not.toHaveBeenCalled();
     });
 

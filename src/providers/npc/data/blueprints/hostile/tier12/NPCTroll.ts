@@ -17,10 +17,11 @@ import {
   MacesBlueprint,
   PotionsBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   StaffsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
-import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 
 export const npcTroll: INPCTierBlueprint<12> = {
   ...generateMoveTowardsMovement(),
@@ -58,6 +59,11 @@ export const npcTroll: INPCTierBlueprint<12> = {
     {
       itemBlueprintKey: MacesBlueprint.Club,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.PotatoSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 5],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.BlueSapphire,

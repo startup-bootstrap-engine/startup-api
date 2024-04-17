@@ -1,4 +1,5 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { CharacterPvPKillLog } from "@entities/ModuleCharacter/CharacterPvPKillLogModel";
 import { Equipment, IEquipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { Depot, IDepot } from "@entities/ModuleDepot/DepotModel";
@@ -12,7 +13,13 @@ import { ChatLog } from "@entities/ModuleSystem/ChatLogModel";
 import { IControlTime, MapControlTimeModel } from "@entities/ModuleSystem/MapControlTimeModel";
 import { IUser, User } from "@entities/ModuleSystem/UserModel";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
+import { CharacterSkull } from "@providers/character/CharacterSkull";
 import { CharacterItems } from "@providers/character/characterItems/CharacterItems";
+import {
+  CHARACTER_SKULL_RED_SKULL_DURATION,
+  CHARACTER_SKULL_WHITE_SKULL_DURATION,
+  CHARACTER_SKULL_YELLOW_SKULL_DURATION,
+} from "@providers/constants/CharacterSkullConstants";
 import { EquipmentEquip } from "@providers/equipment/EquipmentEquip";
 import { blueprintManager, container, mapLoader } from "@providers/inversify/container";
 import {
@@ -29,7 +36,15 @@ import {
   stoppedMovementMockNPC,
 } from "@providers/unitTests/mock/NPCMock";
 import { characterMock } from "@providers/unitTests/mock/characterMock";
-import { ISocketTransmissionZone, NPCMovementType, PeriodOfDay, QuestType, UserAccountTypes } from "@rpg-engine/shared";
+import {
+  CharacterSkullType,
+  ISocketTransmissionZone,
+  NPCMovementType,
+  PeriodOfDay,
+  QuestType,
+  UserAccountTypes,
+} from "@rpg-engine/shared";
+import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { Types } from "mongoose";
@@ -52,6 +67,7 @@ import {
   questMock,
   questRewardsMock,
 } from "./mock/questMock";
+
 import { userMock } from "./mock/userMock";
 
 export enum InteractionQuestSubtype {
@@ -65,6 +81,7 @@ interface IMockCharacterOptions {
   isPremiumAccount?: boolean;
   isPremiumAccountType?: UserAccountTypes;
   hasUser?: boolean;
+  hasSkull?: CharacterSkullType;
 }
 
 interface IMockNPCOptions {
@@ -79,7 +96,8 @@ interface IMockQuestOptions {
 
 @provide(UnitTestHelper)
 export class UnitTestHelper {
-  constructor(private characterInventory: CharacterInventory) {}
+  private readonly oneMinuteAgo = 60 * 1000;
+  constructor(private characterInventory: CharacterInventory, private characterSkull: CharacterSkull) {}
 
   private mongoServer: MongoMemoryServer;
   private characterItems: CharacterItems;
@@ -109,6 +127,59 @@ export class UnitTestHelper {
     await weatherControl.save();
 
     return weatherControl;
+  }
+
+  public async createMockHostileNPC(
+    creatureName: any,
+    options: IMockNPCOptions | null = null,
+    movementType: NPCMovementType = NPCMovementType.Random
+  ): Promise<INPC> {
+    const movementTypeMock = {
+      [NPCMovementType.FixedPath]: fixedPathMockNPC,
+      [NPCMovementType.MoveAway]: moveAwayMockNPC,
+      [NPCMovementType.MoveTowards]: moveTowardsMockNPC,
+      [NPCMovementType.Random]: randomMovementMockNPC,
+      [NPCMovementType.Stopped]: stoppedMovementMockNPC,
+    };
+    const creature = new NPC({
+      ...movementTypeMock[movementType],
+      health: creatureName.baseHealth,
+      maxHealth: creatureName.baseHealth,
+      name: creatureName.name,
+      tier: creatureName.tier,
+      subType: creatureName.subType,
+      key: creatureName.key,
+      textureKey: creatureName.textureKey,
+      alignment: creatureName.alignment,
+      attackType: creatureName.attackType,
+      speed: creatureName.speed,
+      baseHealth: creatureName.baseHealth,
+      healthRandomizerDice: creatureName.healthRandomizerDice,
+      canSwitchToRandomTarget: creatureName.canSwitchToRandomTarget,
+      skillRandomizerDice: creatureName.skillRandomizerDice,
+      skillsToBeRandomized: creatureName.skillsToBeRandomized,
+      fleeOnLowHealth: creatureName.fleeOnLowHealth,
+      // loots: creatureName.loots,
+      entityEffects: creatureName.entityEffects,
+    });
+
+    if (options?.hasSkills) {
+      const npcSkills = new Skill({
+        ownerType: "NPC",
+        ...creatureName.skills,
+      });
+
+      npcSkills.owner = creature._id;
+      creature.skills = npcSkills._id;
+      await npcSkills.save();
+    }
+
+    creature.x = 0;
+    creature.y = 0;
+
+    await creature.save();
+
+    return creature;
   }
 
   public async createMockNPC(
@@ -189,7 +260,7 @@ export class UnitTestHelper {
     return container;
   }
 
-  public async createMockItemContainer(character: ICharacter): Promise<IItem> {
+  public async createMockCharacterDeadBody(character: ICharacter): Promise<IItem> {
     const blueprintData = await blueprintManager.getBlueprint<IItem>("items", BodiesBlueprint.CharacterBody);
 
     const charBody = new Item({
@@ -403,6 +474,24 @@ export class UnitTestHelper {
       testCharacter.y = 0;
     }
 
+    if (options?.hasSkull) {
+      testCharacter.hasSkull = true;
+      testCharacter.skullType = options?.hasSkull;
+      switch (options?.hasSkull) {
+        case CharacterSkullType.WhiteSkull:
+          testCharacter.skullExpiredAt = dayjs().add(CHARACTER_SKULL_WHITE_SKULL_DURATION, "millisecond").toDate();
+          break;
+        case CharacterSkullType.YellowSkull:
+          testCharacter.skullExpiredAt = dayjs().add(CHARACTER_SKULL_YELLOW_SKULL_DURATION, "millisecond").toDate();
+          await this.addUnjustifiedKills(testCharacter, 2);
+          break;
+        case CharacterSkullType.RedSkull:
+          testCharacter.skullExpiredAt = dayjs().add(CHARACTER_SKULL_RED_SKULL_DURATION, "millisecond").toDate();
+          await this.addUnjustifiedKills(testCharacter, 4);
+          break;
+      }
+    }
+
     await testCharacter.save();
 
     // @ts-ignore
@@ -424,6 +513,22 @@ export class UnitTestHelper {
       chatLogMock.emitter = emitter._id;
       const chatLog = new ChatLog(chatLogMock);
       await chatLog.save();
+    }
+  }
+
+  public async addUnjustifiedKills(killer: ICharacter, amount: number): Promise<void> {
+    const targetId = Types.ObjectId();
+    for (let i = 0; i < amount; i++) {
+      const characterDeathLog = new CharacterPvPKillLog({
+        killer: killer._id.toString(),
+        target: targetId.toString(),
+        isJustify: false,
+        x: 1,
+        y: 2,
+        createdAt: new Date(Date.now() - amount * this.oneMinuteAgo),
+      });
+
+      await characterDeathLog.save();
     }
   }
 
@@ -476,6 +581,19 @@ export class UnitTestHelper {
         } as ISocketTransmissionZone)
     );
     return socketTransmissionZone;
+  }
+
+  public async createMockItemContainer(extraProps?: Partial<IItemContainer>): Promise<IItemContainer> {
+    const parentItem = await this.createMockItemFromBlueprint(ContainersBlueprint.Backpack);
+
+    const itemContainer = new ItemContainer({
+      parentItem: parentItem._id,
+      ...extraProps,
+    });
+
+    await itemContainer.save();
+
+    return itemContainer;
   }
 
   public async createMockBackpackItemContainer(parent: IItem, extraProps?: Partial<IItem>): Promise<IItemContainer> {
@@ -655,6 +773,7 @@ export class UnitTestHelper {
 
     let depotItemContainer = new ItemContainer({
       parentItem: newDepot._id,
+      owner: characterId,
       ...extraProps,
     });
     depotItemContainer = await depotItemContainer.save();

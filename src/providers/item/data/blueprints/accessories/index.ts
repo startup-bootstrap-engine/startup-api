@@ -8,6 +8,7 @@ import { itemCorruptionNecklace } from "./tier0/ItemCorruptionNecklace";
 import { itemDeathNecklace } from "./tier0/ItemDeathNecklace";
 import { itemElvenRing } from "./tier0/ItemElvenRing";
 import { itemPendantOfLife } from "./tier0/ItemPendantOfLife";
+import { itemPendantOfMana } from "./tier0/ItemPendantOfMana";
 import { itemRoyalBracelet } from "./tier0/ItemRoyalBracelet";
 import { itemSapphireNecklace } from "./tier0/ItemSapphireNecklace";
 import { itemStarNecklace } from "./tier0/ItemStarNecklace";
@@ -77,6 +78,7 @@ export const accessoriesBlueprintIndex = {
   [AccessoriesBlueprint.AmuletOfDeath]: itemAmuletOfDeath,
   [AccessoriesBlueprint.AmuletOfLuck]: itemAmuletOfLuck,
   [AccessoriesBlueprint.PendantOfLife]: itemPendantOfLife,
+  [AccessoriesBlueprint.PendantOfMana]: itemPendantOfMana,
   [AccessoriesBlueprint.FalconsRing]: itemFalconsRing,
   [AccessoriesBlueprint.GlacialRing]: itemGlacialRing,
   [AccessoriesBlueprint.BloodstoneAmulet]: itemBloodstoneAmulet,

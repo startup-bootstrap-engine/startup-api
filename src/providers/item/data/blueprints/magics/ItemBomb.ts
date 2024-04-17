@@ -5,6 +5,7 @@ import {
   ItemType,
   MagicPower,
   RangeTypes,
+  UserAccountTypes,
 } from "@rpg-engine/shared";
 
 import { MagicsBlueprint } from "../../types/itemsBlueprintTypes";
@@ -31,4 +32,10 @@ export const itemBomb: IRuneItemBlueprint = {
   animationKey: AnimationEffectKeys.Hit,
   projectileAnimationKey: AnimationEffectKeys.Red,
   usableEffectKey: UsableEffectsBlueprint.BombUsableEffect,
+  canBePurchasedOnlyByPremiumPlans: [
+    UserAccountTypes.PremiumBronze,
+    UserAccountTypes.PremiumSilver,
+    UserAccountTypes.PremiumGold,
+    UserAccountTypes.PremiumUltimate,
+  ],
 };

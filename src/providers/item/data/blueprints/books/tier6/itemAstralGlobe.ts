@@ -49,5 +49,5 @@ export const itemAstralGlobe: IEquippableBookTier6Blueprint = {
       durationType: CharacterBuffDurationType.Permanent,
     },
   ],
-  equippedBuffDescription: "Increases strength, magic resistance, resistance and max health by 20%.",
+  equippedBuffDescription: "Increases strength, magic resistance, resistance and max health by 15%.",
 };

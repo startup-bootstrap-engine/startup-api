@@ -32,6 +32,10 @@ export class EntityEffectUse {
     entityEffect?: IEntityEffect
   ): Promise<void> {
     try {
+      if (!target || !attacker) {
+        return;
+      }
+
       if (entityEffect) {
         await this.applyEntityEffect(entityEffect, target, attacker, true);
         return;
@@ -139,7 +143,6 @@ export class EntityEffectUse {
       return;
     }
     let appliedEffects = target.appliedEntityEffects ?? [];
-
     const applied = appliedEffects.find((effect) => effect.key === entityEffect.key);
 
     if (applied) {
@@ -152,7 +155,9 @@ export class EntityEffectUse {
     }
 
     appliedEffects.push({ key: entityEffect.key, lastUpdated: new Date().getTime() });
+
     target.appliedEntityEffects = appliedEffects;
+
     await this.updateTargetInDatabase(target);
     await this.startEntityEffectCycle(entityEffect, target, attacker);
   }
@@ -160,10 +165,10 @@ export class EntityEffectUse {
   private async updateTargetInDatabase(target: ICharacter | INPC): Promise<void> {
     const updateData = { $set: { appliedEntityEffects: target.appliedEntityEffects } };
 
-    if (target.type === "Character") {
-      await Character.updateOne({ _id: target.id }, updateData);
-    } else if (target.type === "NPC") {
-      await NPC.updateOne({ _id: target.id }, updateData);
+    if (target.type === EntityType.Character) {
+      await Character.updateOne({ _id: target._id }, updateData);
+    } else if (target.type === EntityType.NPC) {
+      await NPC.updateOne({ _id: target._id }, updateData);
     }
   }
 

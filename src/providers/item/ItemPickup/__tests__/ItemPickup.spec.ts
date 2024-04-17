@@ -3,7 +3,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Equipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { EquipmentSlots } from "@providers/equipment/EquipmentSlots";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -18,14 +18,14 @@ describe("ItemPickup.ts", () => {
   let testItem: IItem;
   let inventory: IItem;
   let inventoryItemContainerId: string;
-  let characterWeight: CharacterWeight;
+  let characterWeight: CharacterWeightQueue;
   let equipmentSlots: EquipmentSlots;
   let socketMessaging: SocketMessaging;
   let itemPickupUpdater: ItemPickupUpdater;
 
   beforeAll(() => {
     itemPickup = container.get<ItemPickup>(ItemPickup);
-    characterWeight = container.get<CharacterWeight>(CharacterWeight);
+    characterWeight = container.get<CharacterWeightQueue>(CharacterWeightQueue);
     equipmentSlots = container.get<EquipmentSlots>(EquipmentSlots);
     socketMessaging = container.get<SocketMessaging>(SocketMessaging);
     itemPickupUpdater = container.get<ItemPickupUpdater>(ItemPickupUpdater);

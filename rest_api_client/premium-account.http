@@ -4,9 +4,9 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "blueprintKey": "gold-coin",
-  "quantity": 999,
-  "characterId": "65e55b1a5d8dd50035b5c86b" 
+  "blueprintKey": "bag",
+  "quantity": 1,
+  "characterId": "65ffd7a39f32490044e90d7d" 
 }
 
 ###
@@ -30,8 +30,8 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "email": "shaunemdyck93@hotmail.com",
-  "accountType": "silver"
+  "email": "travis.pangman@gmail.com",
+  "accountType": "gold"
 }
 
 ###

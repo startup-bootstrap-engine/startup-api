@@ -1,8 +1,9 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
+import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
-import { ItemType } from "@rpg-engine/shared";
+import { CraftingSkill, IBaseItemBlueprint, ItemType } from "@rpg-engine/shared";
 import { IUseWithItemToSeedOptions, UseWithItemToSeed } from "../abstractions/UseWithItemToSeed";
 
 describe("UseWithItemToSeed.ts", () => {
@@ -14,9 +15,12 @@ describe("UseWithItemToSeed.ts", () => {
   let sendMessageToCharacter: jest.SpyInstance;
   let sendErrorMessageToCharacter: jest.SpyInstance;
   let sendSimpleTutorialAction: jest.SpyInstance;
+  let blueprintManager: BlueprintManager;
+  let itemBlueprint: IBaseItemBlueprint;
 
   beforeAll(() => {
     useWithItemToSeed = container.get<UseWithItemToSeed>(UseWithItemToSeed);
+    blueprintManager = container.get<BlueprintManager>(BlueprintManager);
 
     mockItemSave = jest.fn();
     Item.save = mockItemSave;
@@ -48,6 +52,8 @@ describe("UseWithItemToSeed.ts", () => {
 
     // @ts-ignore
     sendSimpleTutorialAction = jest.spyOn(useWithItemToSeed.simpleTutorial, "sendSimpleTutorialActionToCharacter");
+
+    itemBlueprint = (await blueprintManager.getBlueprint("items", options.originItemKey)) as IBaseItemBlueprint;
   });
 
   it("should create a new plant and update inventory on successful execution", async () => {
@@ -84,5 +90,26 @@ describe("UseWithItemToSeed.ts", () => {
 
     expect(plant).toBeNull();
     expect(sendErrorMessageToCharacter).toHaveBeenCalledWith(testCharacter, "Planting Failed!");
+  });
+
+  it("should send an error message when minimum requirements are not met", async () => {
+    const level = 5;
+    const skillLevel = 10;
+    const skill = CraftingSkill.Farming;
+
+    itemBlueprint.minRequirements = {
+      level: level,
+      skill: {
+        name: skill,
+        level: skillLevel,
+      },
+    };
+
+    await useWithItemToSeed.execute(testCharacter, options, skillIncrease);
+
+    expect(sendErrorMessageToCharacter).toHaveBeenCalledWith(
+      testCharacter,
+      `Sorry, this seed requires level ${level} and ${skillLevel} level in ${skill}`
+    );
   });
 });

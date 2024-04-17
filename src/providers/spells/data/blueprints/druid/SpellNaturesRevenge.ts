@@ -1,6 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { HitTarget } from "@providers/battle/HitTarget";
+import { HitTargetQueue } from "@providers/battle/HitTargetQueue";
 import { SPELL_AREA_MEDIUM_BLAST_RADIUS } from "@providers/constants/SpellConstants";
 import { entityEffectVineGrasp } from "@providers/entityEffects/data/blueprints/entityEffectVineGrasp";
 import { characterBuffActivator, container } from "@providers/inversify/container";
@@ -47,7 +47,7 @@ export const spellNaturesRevenge: Partial<ISpell> = {
       spellAreaGrid: SPELL_AREA_MEDIUM_BLAST_RADIUS,
       entityEffect: entityEffectVineGrasp,
       customFn: async (target: ICharacter | INPC, intensity: number) => {
-        const hitTarget = container.get(HitTarget);
+        const hitTarget = container.get(HitTargetQueue);
         const spellCalculator = container.get(SpellCalculator);
 
         await hitTarget.hit(character, target, true, MagicPower.High, true);

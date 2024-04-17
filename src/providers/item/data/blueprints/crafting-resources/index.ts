@@ -2,6 +2,7 @@ import { CraftingResourcesBlueprint } from "../../types/itemsBlueprintTypes";
 import { itemRope } from "../tools/ItemRope";
 import { itemBandage } from "./ItemBandage";
 import { itemBatsWing } from "./ItemBatsWing";
+import { itemBloodrootBlossomFlower } from "./ItemBloodrootBlossomFlower";
 import { itemBlueFeather } from "./ItemBlueFeather";
 import { itemBlueLeather } from "./itemBlueLeather";
 import { itemBlueSapphire } from "./ItemBlueSapphire";
@@ -16,6 +17,7 @@ import { itemCorruptionOre } from "./ItemCorruptionOre";
 import { itemDiamond } from "./ItemDiamond";
 import { itemDragonHead } from "./ItemDragonHead";
 import { itemDragonTooth } from "./ItemDragonTooth";
+import { itemDuskwispHerbFlower } from "./ItemDuskwispHerbFlower";
 import { itemElvenLeaf } from "./itemElvenLeaf";
 import { itemElvenWood } from "./itemElvenWood";
 import { itemEye } from "./ItemEye";
@@ -36,14 +38,19 @@ import { itemJade } from "./itemJade";
 
 import { itemLeather } from "./ItemLeather";
 import { itemMagicRecipe } from "./ItemMagicRecipe";
+import { itemMedicinalLeft } from "./ItemMedicinalLeaf";
+import { itemNautilusShell } from "./ItemNautilusShell";
+import { itemNebulaSeahorn } from "./ItemNebulaSeahorn";
 
 import { itemObsidiumIngot } from "./ItemObsidiumIngot";
 import { itemObsidiumOre } from "./ItemObsidiumOre";
 import { itemPhoenixFeather } from "./itemPhoenixfeather";
 
 import { itemPolishedStone } from "./itemPolishedStone";
+import { itemPrimordialRelic } from "./ItemPrimordialRelic";
 import { itemRedSapphire } from "./itemRedSapphire";
 import { itemRock } from "./itemRock";
+import { itemSeaShell } from "./ItemSeaShell";
 import { itemSewingThread } from "./itemSewingThread";
 import { itemSilk } from "./ItemSilk";
 import { itemSilverIngot } from "./ItemSilverIngot";
@@ -53,9 +60,11 @@ import { itemSmallWoodenStick } from "./itemSmallWoodenStick";
 import { itemSmallWorm } from "./itemSmallWorm";
 import { itemSocialCrystal } from "./ItemSocialCrystal";
 import { itemSteelIngot } from "./itemSteelIngot";
+import { itemSunspireLotusFlower } from "./ItemSunspireLotusFlower";
 import { itemWaterBottle } from "./itemWaterBottle";
 import { itemWeaponRecipe } from "./ItemWeaponRecipe";
 import { itemWheat } from "./ItemWheat";
+import { itemWhisperrootEntwiner } from "./ItemWhisperrootEntwiner";
 import { itemWolfTooth } from "./ItemWolfTooth";
 import { itemWoodenBoard } from "./itemWoodenBoard";
 import { itemWoodenSticks } from "./ItemWoodenSticks";
@@ -118,4 +127,13 @@ export const craftingResourcesBlueprintIndex = {
   [CraftingResourcesBlueprint.DragonHead]: itemDragonHead,
   [CraftingResourcesBlueprint.DragonTooth]: itemDragonTooth,
   [CraftingResourcesBlueprint.SocialCrystal]: itemSocialCrystal,
+  [CraftingResourcesBlueprint.BloodrootBlossomFlower]: itemBloodrootBlossomFlower,
+  [CraftingResourcesBlueprint.DuskwispHerbFlower]: itemDuskwispHerbFlower,
+  [CraftingResourcesBlueprint.SunspireLotusFlower]: itemSunspireLotusFlower,
+  [CraftingResourcesBlueprint.SeaShell]: itemSeaShell,
+  [CraftingResourcesBlueprint.PrimordialRelic]: itemPrimordialRelic,
+  [CraftingResourcesBlueprint.NebulaSeahorn]: itemNebulaSeahorn,
+  [CraftingResourcesBlueprint.NautilusShell]: itemNautilusShell,
+  [CraftingResourcesBlueprint.MedicinalLeaf]: itemMedicinalLeft,
+  [CraftingResourcesBlueprint.WhisperrootEntwiner]: itemWhisperrootEntwiner,
 };

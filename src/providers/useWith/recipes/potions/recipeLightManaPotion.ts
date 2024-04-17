@@ -7,12 +7,8 @@ export const recipeLightManaPotion: IUseWithCraftingRecipe = {
   outputQtyRange: [5, 10],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.BlueFeather,
-      qty: 1,
-    },
-    {
-      key: CraftingResourcesBlueprint.WaterBottle,
-      qty: 1,
+      key: CraftingResourcesBlueprint.DuskwispHerbFlower,
+      qty: 2,
     },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 1],

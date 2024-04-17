@@ -41,7 +41,7 @@ export const spellDispelMagic: Partial<ISpell> = {
       }),
       spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.MagicResistance, {
         min: 5,
-        max: 40,
+        max: 60,
       }),
     ]);
 

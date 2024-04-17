@@ -10,6 +10,7 @@ import { npcTraderJewelry } from "./NPCTraderJewelry";
 import { npcTraderMage } from "./NPCTraderMage";
 import { npcTraderTavern } from "./NPCTraderTavern";
 import { npcTraderTeleport } from "./NPCTraderTeleport";
+import { npcTraderTools } from "./NPCTraderTools";
 import { npcTraderTraining } from "./NPCTraderTraining";
 
 export const tradersNPCs = {
@@ -25,4 +26,5 @@ export const tradersNPCs = {
   [FriendlyNPCsBlueprint.TraderTavern]: npcTraderTavern,
   [FriendlyNPCsBlueprint.TraderTeleport]: npcTraderTeleport,
   [FriendlyNPCsBlueprint.TraderFarm]: npcTraderFarm,
+  [FriendlyNPCsBlueprint.TraderTools]: npcTraderTools,
 };

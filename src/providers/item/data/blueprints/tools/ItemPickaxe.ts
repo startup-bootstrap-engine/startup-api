@@ -1,7 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { container } from "@providers/inversify/container";
-import { ItemCraftable } from "@providers/item/ItemCraftable";
+import { ItemCraftableQueue } from "@providers/item/ItemCraftableQueue";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import {
   IUseWithItemToTileOptions,
@@ -28,7 +28,7 @@ export const itemPickaxe: IToolItemBlueprint = {
   textureAtlas: "items",
   texturePath: "tools/pickaxe.png",
   name: "Pickaxe",
-  description: "A tool used for mining, breaking rocks or even as a weapon.",
+  description: "A tool used for mining iron and copper ores.",
   attack: 4,
   defense: 2,
   weight: 0.1,
@@ -43,7 +43,7 @@ export const itemPickaxe: IToolItemBlueprint = {
     targetTile: IUseWithTargetTile,
     targetName: string | undefined,
     character: ICharacter,
-    itemCraftable: ItemCraftable,
+    itemCraftable: ItemCraftableQueue,
     skillIncrease: SkillIncrease
   ) => {
     const useWithItemToTile = container.get<UseWithItemToTile>(UseWithItemToTile);
@@ -84,7 +84,7 @@ export const itemPickaxe: IToolItemBlueprint = {
             {
               key: CraftingResourcesBlueprint.IronOre,
               qty: [5, 7],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 15, rarityOfTool),
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 10, rarityOfTool),
             },
           ] as IUseWithItemToTileReward[],
         };
@@ -97,73 +97,7 @@ export const itemPickaxe: IToolItemBlueprint = {
             {
               key: CraftingResourcesBlueprint.CopperOre,
               qty: [3, 4],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 10, rarityOfTool),
-            },
-          ] as IUseWithItemToTileReward[],
-        };
-        break;
-
-      case CraftingResourcesBlueprint.SilverOre:
-        useWithItemToTileOptions = {
-          ...baseUseWithItemToTileOptions,
-          rewards: [
-            ...baseUseWithItemToTileOptions.rewards,
-            {
-              key: CraftingResourcesBlueprint.SilverOre,
-              qty: [2, 3],
               chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 5, rarityOfTool),
-            },
-          ] as IUseWithItemToTileReward[],
-        };
-        break;
-      case CraftingResourcesBlueprint.GoldenOre:
-        useWithItemToTileOptions = {
-          ...baseUseWithItemToTileOptions,
-          rewards: [
-            ...baseUseWithItemToTileOptions.rewards,
-            {
-              key: CraftingResourcesBlueprint.GoldenOre,
-              qty: [1, 2],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 3, rarityOfTool),
-            },
-          ] as IUseWithItemToTileReward[],
-        };
-        break;
-      case CraftingResourcesBlueprint.GreenOre:
-        useWithItemToTileOptions = {
-          ...baseUseWithItemToTileOptions,
-          rewards: [
-            ...baseUseWithItemToTileOptions.rewards,
-            {
-              key: CraftingResourcesBlueprint.GreenOre,
-              qty: [1, 2],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 2, rarityOfTool),
-            },
-          ] as IUseWithItemToTileReward[],
-        };
-        break;
-      case CraftingResourcesBlueprint.ObsidiumOre:
-        useWithItemToTileOptions = {
-          ...baseUseWithItemToTileOptions,
-          rewards: [
-            ...baseUseWithItemToTileOptions.rewards,
-            {
-              key: CraftingResourcesBlueprint.ObsidiumOre,
-              qty: [1, 2],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 1, rarityOfTool),
-            },
-          ] as IUseWithItemToTileReward[],
-        };
-        break;
-      case CraftingResourcesBlueprint.CorruptionOre:
-        useWithItemToTileOptions = {
-          ...baseUseWithItemToTileOptions,
-          rewards: [
-            ...baseUseWithItemToTileOptions.rewards,
-            {
-              key: CraftingResourcesBlueprint.CorruptionOre,
-              qty: [1, 2],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 1, rarityOfTool),
             },
           ] as IUseWithItemToTileReward[],
         };
@@ -172,5 +106,5 @@ export const itemPickaxe: IToolItemBlueprint = {
 
     await useWithItemToTile.execute(character, useWithItemToTileOptions, skillIncrease);
   },
-  usableEffectDescription: "Use it on ores to mine them",
+  usableEffectDescription: "Use this tool to mine ores.",
 };

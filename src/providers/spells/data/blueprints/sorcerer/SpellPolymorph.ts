@@ -13,9 +13,9 @@ import {
   ISpell,
   RangeTypes,
   SpellCastingType,
+  SpellsBlueprint,
 } from "@rpg-engine/shared";
 import { SpellCalculator } from "../../abstractions/SpellCalculator";
-import { SpellsBlueprint } from "../../types/SpellsBlueprintTypes";
 
 export const spellPolymorph: Partial<ISpell> = {
   key: SpellsBlueprint.SpellPolymorph,
@@ -54,7 +54,7 @@ export const spellPolymorph: Partial<ISpell> = {
 
     const debuffPercentage = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
       min: 5,
-      max: 15,
+      max: 50,
     });
 
     await characterBuffActivator.enableTemporaryBuff(target as ICharacter, {

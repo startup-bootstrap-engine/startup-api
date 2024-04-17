@@ -40,8 +40,8 @@ export const spellChefsDelight: Partial<ISpell> = {
         max: 180,
       }),
       spellCalculator.calculateBasedOnSkillLevel(character, CraftingSkill.Cooking, {
-        min: 5,
-        max: 40,
+        min: 10,
+        max: 60,
       }),
     ]);
 

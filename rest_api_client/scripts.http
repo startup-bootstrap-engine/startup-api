@@ -37,3 +37,20 @@ Content-Type: application/json
 GET {{baseUrl}}/scripts/update-farming-skills HTTP/1.1
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
+
+### Scripts :: Fix depot ownership
+GET {{baseUrl}}/scripts/fix-depot-ownership HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### Scripts :: Dump users email on txt
+GET {{baseUrl}}/scripts/users-emails-dump HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+  
+
+### Scripts :: Farmland depot fix
+GET {{baseUrl}}/scripts/farmland-depot-fix HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+  

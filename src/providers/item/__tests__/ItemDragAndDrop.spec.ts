@@ -286,5 +286,64 @@ describe("ItemDragAndDrop.ts", () => {
         stackQty: stackableItem.stackQty! + stackableItem2.stackQty!,
       });
     });
+
+    it("should rollback the move if an error occurs", async () => {
+      const stackableItem = await unitTestHelper.createStackableMockItem({
+        stackQty: 2,
+      });
+      const stackableItem2 = await unitTestHelper.createStackableMockItem({
+        stackQty: 3,
+      });
+
+      await unitTestHelper.addItemsToContainer(inventoryContainer, 10, [stackableItem, stackableItem2]);
+
+      itemMoveData = {
+        from: {
+          item: stackableItem as any,
+          slotIndex: 0,
+          source: "Inventory",
+          containerId: inventoryContainer._id,
+        },
+        to: {
+          item: stackableItem2 as any,
+          slotIndex: 1,
+          source: "Inventory",
+          containerId: inventoryContainer._id,
+        },
+        quantity: stackableItem.stackQty!,
+      };
+
+      const updatedInventoryContainer = {
+        slots: {
+          0: {
+            _id: inventoryContainer.slots[0]._id,
+            stackQty: 1,
+          },
+          1: {
+            _id: inventoryContainer.slots[1]._id,
+            stackQty: 1,
+          },
+        },
+      } as any;
+
+      // @ts-ignore
+      await itemDragAndDrop.verifyAndRollbackStackQty(
+        stackableItem as any,
+        stackableItem2 as any,
+        itemMoveData,
+        testCharacter,
+        updatedInventoryContainer
+      );
+
+      expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledWith(
+        testCharacter,
+        "Sorry, item move not successful. rollback to original state."
+      );
+
+      const rollbackInventoryContainer = await ItemContainer.findById(inventory?.itemContainer);
+
+      expect(rollbackInventoryContainer?.slots[0].stackQty).toEqual(stackableItem.stackQty);
+      expect(rollbackInventoryContainer?.slots[1].stackQty).toEqual(stackableItem2.stackQty);
+    });
   });
 });

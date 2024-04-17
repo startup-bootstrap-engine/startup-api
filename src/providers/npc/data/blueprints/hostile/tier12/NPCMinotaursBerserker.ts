@@ -8,17 +8,19 @@ import {
   GlovesBlueprint,
   HammersBlueprint,
   HelmetsBlueprint,
+  SeedsBlueprint,
   SpearsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcMinotaurBerserker: INPCTierBlueprint<12> = {
   ...generateMoveTowardsMovement(),
@@ -29,6 +31,7 @@ export const npcMinotaurBerserker: INPCTierBlueprint<12> = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Fast,
+  isGiantForm: true,
   tier: 12,
   canSwitchToLowHealthTarget: true,
   baseHealth: 720,
@@ -59,6 +62,11 @@ export const npcMinotaurBerserker: INPCTierBlueprint<12> = {
     {
       itemBlueprintKey: SpearsBlueprint.GuanDao,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.PumpkinSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 3],
     },
     {
       itemBlueprintKey: FoodsBlueprint.Fish,
@@ -117,6 +125,10 @@ export const npcMinotaurBerserker: INPCTierBlueprint<12> = {
     },
     {
       itemBlueprintKey: SwordsBlueprint.StellarBlade,
+      chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.AurumAlloyPickaxe,
       chance: LootProbability.VeryRare,
     },
   ],

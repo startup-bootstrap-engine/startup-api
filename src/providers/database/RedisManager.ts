@@ -2,6 +2,7 @@ import { appEnv } from "@providers/config/env";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Redis } from "ioredis";
 import { RedisBareClient } from "./RedisManager/RedisBareClient";
+import { RedisClientConnectionManager } from "./RedisManager/RedisClientConnectionManager";
 import { RedisIOClient } from "./RedisManager/RedisIOClient";
 
 @provideSingleton(RedisManager)
@@ -10,7 +11,11 @@ export class RedisManager {
   private retryDelay: number = 1000; // Start with 1 second
   public client: Redis | null | void = null;
 
-  constructor(private redisBareClient: RedisBareClient, private redisIOClient: RedisIOClient) {}
+  constructor(
+    private redisBareClient: RedisBareClient,
+    private redisIOClient: RedisIOClient,
+    private redisClientConnectionManager: RedisClientConnectionManager
+  ) {}
 
   public async connect(retries: number = this.maxRetries): Promise<void> {
     if (this.client) return;
@@ -64,6 +69,14 @@ export class RedisManager {
   }
 
   public async getClientCount(): Promise<number> {
-    return await this.redisIOClient.getTotalConnectedClients();
+    return await this.redisClientConnectionManager.getConnectedClientCount(this.client!);
+  }
+
+  public async getPoolClient(connectionName: string): Promise<Redis> {
+    return await this.redisIOClient.getPoolClient(connectionName);
+  }
+
+  public async releasePoolClient(client: Redis): Promise<void> {
+    await this.redisIOClient.releasePoolClient(client);
   }
 }

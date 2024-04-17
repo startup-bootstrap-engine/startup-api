@@ -59,22 +59,22 @@ export class ItemCraftingRecipes {
     let skillLevel: number = 0;
     switch (minCraftingRequirements[0]) {
       case CraftingSkill.Blacksmithing:
-        skillLevel = skills.blacksmithing.level;
+        skillLevel = skills?.blacksmithing?.level;
         break;
       case CraftingSkill.Lumberjacking:
-        skillLevel = skills.lumberjacking.level;
+        skillLevel = skills?.lumberjacking?.level;
         break;
       case CraftingSkill.Alchemy:
-        skillLevel = skills.alchemy.level;
+        skillLevel = skills?.alchemy?.level;
         break;
       case CraftingSkill.Mining:
-        skillLevel = skills.mining.level;
+        skillLevel = skills?.mining?.level;
         break;
       case CraftingSkill.Cooking:
-        skillLevel = skills.cooking.level;
+        skillLevel = skills?.cooking?.level;
         break;
       case CraftingSkill.Fishing:
-        skillLevel = skills.fishing.level;
+        skillLevel = skills?.fishing?.level;
         break;
       default:
         break;

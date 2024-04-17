@@ -24,11 +24,12 @@ import { capitalize } from "lodash";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterInventory } from "./CharacterInventory";
 import { CharacterTradingBalance } from "./CharacterTradingBalance";
+import { CharacterTradingPriceControl } from "./CharacterTradingPriceControl";
 import { CharacterTradingValidation } from "./CharacterTradingValidation";
 import { CharacterUser } from "./CharacterUser";
 import { CharacterItemContainer } from "./characterItems/CharacterItemContainer";
 import { CharacterItemInventory } from "./characterItems/CharacterItemInventory";
-import { CharacterWeight } from "./weight/CharacterWeight";
+import { CharacterWeightQueue } from "./weight/CharacterWeightQueue";
 
 @provide(CharacterTradingBuy)
 export class CharacterTradingBuy {
@@ -37,13 +38,14 @@ export class CharacterTradingBuy {
     private characterTradingBalance: CharacterTradingBalance,
     private characterItemContainer: CharacterItemContainer,
     private characterItemInventory: CharacterItemInventory,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private characterTradingValidation: CharacterTradingValidation,
     private characterInventory: CharacterInventory,
     private newRelic: NewRelic,
     private characterUser: CharacterUser,
     private simpleTutorial: SimpleTutorial,
-    private inMemoryHashTable: InMemoryHashTable
+    private inMemoryHashTable: InMemoryHashTable,
+    private characterTradingPriceControl: CharacterTradingPriceControl
   ) {}
 
   @TrackNewRelicTransaction()
@@ -51,7 +53,8 @@ export class CharacterTradingBuy {
     character: ICharacter,
     tradingEntity: INPC,
     items: ITradeRequestItem[],
-    tradingEntityType: TradingEntity
+    tradingEntityType: TradingEntity,
+    npc: INPC
   ): Promise<boolean> {
     const inventory = await this.characterInventory.getInventory(character);
     const inventoryContainerId = inventory?.itemContainer as unknown as string;
@@ -61,7 +64,13 @@ export class CharacterTradingBuy {
       return false;
     }
 
-    const isBuyTransactionValid = await this.validateBuyTransaction(character, tradingEntity, items, tradingEntityType);
+    const isBuyTransactionValid = await this.validateBuyTransaction(
+      character,
+      tradingEntity,
+      items,
+      tradingEntityType,
+      npc
+    );
 
     if (!isBuyTransactionValid) {
       return false;
@@ -83,34 +92,6 @@ export class CharacterTradingBuy {
 
       if (!entityHasItem) {
         continue;
-      }
-
-      const itemPrice = await this.characterTradingBalance.getItemBuyPrice(purchasedItem.key, priceMultiplier);
-
-      if (!itemPrice) {
-        this.socketMessaging.sendErrorMessageToCharacter(
-          character,
-          "The item price is not valid for item " + purchasedItem.key
-        );
-        return false;
-      }
-
-      const decrementQty = itemPrice * purchasedItem.qty;
-
-      await this.inMemoryHashTable.delete("container-all-items", inventoryContainerId.toString()!);
-
-      const decrementedGold = await this.characterItemInventory.decrementItemFromNestedInventoryByKey(
-        OthersBlueprint.GoldCoin,
-        character,
-        decrementQty
-      );
-
-      if (!decrementedGold.success) {
-        this.socketMessaging.sendErrorMessageToCharacter(
-          character,
-          "An error occurred while processing your purchase."
-        );
-        return false;
       }
 
       // create the new item representation on the database
@@ -136,6 +117,15 @@ export class CharacterTradingBuy {
           character,
           inventoryContainerId
         );
+
+        if (!wasItemAddedToContainer) {
+          this.socketMessaging.sendErrorMessageToCharacter(
+            character,
+            "An error occurred while processing your purchase."
+          );
+          await Item.deleteOne({ _id: newItem._id });
+          return false;
+        }
       } else {
         for (let i = 0; i < purchasedItem.qty; i++) {
           const newItem = new Item({
@@ -149,16 +139,57 @@ export class CharacterTradingBuy {
             character,
             inventoryContainerId
           );
+
+          if (!wasItemAddedToContainer) {
+            this.socketMessaging.sendErrorMessageToCharacter(
+              character,
+              "An error occurred while processing your purchase."
+            );
+
+            await Item.deleteOne({ _id: newItem._id });
+            return false;
+          }
+        }
+      }
+
+      if (wasItemAddedToContainer) {
+        const itemPrice = await this.characterTradingBalance.getItemBuyPrice(purchasedItem.key, npc, priceMultiplier);
+
+        if (!itemPrice) {
+          this.socketMessaging.sendErrorMessageToCharacter(
+            character,
+            "The item price is not valid for item " + purchasedItem.key
+          );
+          return false;
         }
 
-        if (!wasItemAddedToContainer) {
+        const decrementQty = itemPrice * purchasedItem.qty;
+
+        await this.inMemoryHashTable.delete("container-all-items", inventoryContainerId.toString()!);
+
+        const decrementedGold = await this.characterItemInventory.decrementItemFromNestedInventoryByKey(
+          OthersBlueprint.GoldCoin,
+          character,
+          decrementQty
+        );
+
+        if (!decrementedGold.success) {
           this.socketMessaging.sendErrorMessageToCharacter(
             character,
             "An error occurred while processing your purchase."
           );
           return false;
         }
+
+        await this.characterTradingPriceControl.recordCharacterNPCTradeOperation(
+          npc,
+          purchasedItem.key,
+          decrementQty,
+          purchasedItem.qty,
+          "buy"
+        );
       }
+
       if (itemBlueprint.subType === ItemSubType.Seed) {
         await this.simpleTutorial.sendSimpleTutorialActionToCharacter(character, "buy-seed");
       }
@@ -202,7 +233,8 @@ export class CharacterTradingBuy {
     character: ICharacter,
     tradingEntity: INPC,
     itemsToPurchase: ITradeRequestItem[],
-    tradingEntityType: TradingEntity
+    tradingEntityType: TradingEntity,
+    npc: INPC
   ): Promise<boolean> {
     let isBaseTransactionValid = false;
     let priceModifier = 1;
@@ -268,7 +300,8 @@ export class CharacterTradingBuy {
     const totalCost = await this.characterTradingBalance.calculateItemsTotalPrice(
       tradingItems,
       itemsToPurchase,
-      priceModifier
+      priceModifier,
+      npc
     );
 
     const characterTotalGoldInventory = await this.characterTradingBalance.getTotalGoldInInventory(character);

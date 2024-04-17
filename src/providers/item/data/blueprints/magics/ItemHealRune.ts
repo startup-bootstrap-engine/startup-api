@@ -20,7 +20,7 @@ export const itemHealRune: IRuneItemBlueprint = {
 
   name: "Healing Rune",
   description: "An ancient healing rune.",
-  weight: 0.01,
+  weight: 0.1,
   maxStackSize: 100,
 
   hasUseWith: true,

@@ -2,7 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterDeath } from "@providers/character/CharacterDeath";
-import { NPCDeath } from "@providers/npc/NPCDeath";
+import { NPCDeathQueue } from "@providers/npc/NPCDeathQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { EntityType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -10,15 +10,20 @@ import { provide } from "inversify-binding-decorators";
 @provide(Execution)
 export class Execution {
   constructor(
-    private npcDeath: NPCDeath,
+    private npcDeath: NPCDeathQueue,
     private characterDeath: CharacterDeath,
     private socketMessaging: SocketMessaging
   ) {}
 
   @TrackNewRelicTransaction()
   public async handleExecution(attacker: ICharacter, target: ICharacter | INPC): Promise<boolean> {
-    const targetId = target._id;
-    const targetType = target.type as EntityType;
+    if (!attacker || !target) {
+      console.debug(`Invalid attacker or target: ${attacker} - ${target}`);
+      return false;
+    }
+
+    const targetId = target?._id;
+    const targetType = target?.type as EntityType;
 
     try {
       if (!attacker || !targetId || !targetType) {

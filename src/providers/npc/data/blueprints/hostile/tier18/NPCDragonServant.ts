@@ -4,20 +4,20 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
-  AxesBlueprint,
   BooksBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
   GemsBlueprint,
   GlovesBlueprint,
   HelmetsBlueprint,
-  LegsBlueprint,
   MacesBlueprint,
   OthersBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import {
@@ -32,7 +32,6 @@ import {
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcDragonServant: INPCTierBlueprint<18> = {
   ...generateMoveTowardsMovement(),
@@ -72,6 +71,11 @@ export const npcDragonServant: INPCTierBlueprint<18> = {
     {
       itemBlueprintKey: ShieldsBlueprint.DemonShield,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.WatermelonSeed,
+      chance: LootProbability.Common,
+      quantityRange: [1, 15],
     },
     {
       itemBlueprintKey: SwordsBlueprint.YggdrasilGladius,
@@ -134,17 +138,10 @@ export const npcDragonServant: INPCTierBlueprint<18> = {
       chance: LootProbability.Rare,
     },
     {
-      itemBlueprintKey: StaffsBlueprint.ElementalStaff,
-      chance: LootProbability.VeryRare,
-    },
-    {
       itemBlueprintKey: GlovesBlueprint.GenesisGloves,
       chance: LootProbability.VeryRare,
     },
-    {
-      itemBlueprintKey: LegsBlueprint.DragonScaleLegs,
-      chance: LootProbability.Rare,
-    },
+
     {
       itemBlueprintKey: MacesBlueprint.BoneBreakerClub,
       chance: LootProbability.SemiCommon,
@@ -166,18 +163,6 @@ export const npcDragonServant: INPCTierBlueprint<18> = {
       chance: LootProbability.SemiCommon,
     },
     {
-      itemBlueprintKey: AxesBlueprint.BoneReaperAxe,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.TwinEdgeAxe,
-      chance: LootProbability.SemiCommon,
-    },
-    {
       itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
       chance: LootProbability.SemiCommon,
     },
@@ -192,15 +177,6 @@ export const npcDragonServant: INPCTierBlueprint<18> = {
     {
       itemBlueprintKey: GemsBlueprint.CoralReefGem,
       chance: LootProbability.VeryRare,
-    },
-
-    {
-      itemBlueprintKey: SwordsBlueprint.FrostwindCutter,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.FrostfireGladius,
-      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.SapphireStrandNecklace,

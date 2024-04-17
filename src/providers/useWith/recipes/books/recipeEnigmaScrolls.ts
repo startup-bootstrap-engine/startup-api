@@ -22,6 +22,10 @@ export const recipeEnigmaScrolls: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.PhoenixFeather,
       qty: 40,
     },
+    {
+      key: CraftingResourcesBlueprint.NautilusShell,
+      qty: 2,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 20],
 };

@@ -1,13 +1,13 @@
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { provide } from "inversify-binding-decorators";
-import { ChatNetworkGlobalMessaging } from "./ChatNetworkGlobalMessaging";
+import { ChatNetworkGlobalMessagingQueue } from "./ChatNetworkGlobalMessagingQueue";
 import { ChatNetworkPrivateMessaging } from "./ChatNetworkPrivateMessaging";
 import { ChatNetworkTradeMessaging } from "./ChatNetworkTradeMessaging";
 
 @provide(ChatNetwork)
 export class ChatNetwork {
   constructor(
-    private chatNetworkGlobalMessaging: ChatNetworkGlobalMessaging,
+    private chatNetworkGlobalMessaging: ChatNetworkGlobalMessagingQueue,
     private chatNetworkPrivateMessaging: ChatNetworkPrivateMessaging,
     private chatNetworkTradeMessaging: ChatNetworkTradeMessaging
   ) {}

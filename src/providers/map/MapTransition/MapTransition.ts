@@ -44,6 +44,7 @@ export class MapTransition {
     private mapTransitionReferralBonus: MapTransitionReferralBonus
   ) {}
 
+  @TrackNewRelicTransaction()
   public async handleMapTransition(character: ICharacter, newX: number, newY: number): Promise<void> {
     character = Object.freeze(character);
 
@@ -129,6 +130,7 @@ export class MapTransition {
     );
   }
 
+  @TrackNewRelicTransaction()
   public async handleNonPVPZone(character: ICharacter, newX: number, newY: number): Promise<void> {
     if (!character.target?.id) {
       return;

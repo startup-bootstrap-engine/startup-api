@@ -7,15 +7,16 @@ import {
   DaggersBlueprint,
   MacesBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   SpearsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcIceCyclops: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
@@ -58,7 +59,11 @@ export const npcIceCyclops: INPCTierBlueprint<15> = {
       itemBlueprintKey: SpearsBlueprint.PoseidonTrident,
       chance: LootProbability.Uncommon,
     },
-
+    {
+      itemBlueprintKey: SeedsBlueprint.PotatoSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 10],
+    },
     {
       itemBlueprintKey: SwordsBlueprint.LightingSword,
       chance: LootProbability.Uncommon,
@@ -85,12 +90,8 @@ export const npcIceCyclops: INPCTierBlueprint<15> = {
       chance: LootProbability.Rare,
     },
     {
-      itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Rare,
-    },
-    {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],

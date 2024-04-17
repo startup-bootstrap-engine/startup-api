@@ -1,7 +1,6 @@
 /* eslint-disable promise/always-return */
 /* eslint-disable no-void */
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { CharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
@@ -11,11 +10,12 @@ import { PVP_MIN_REQUIRED_LV } from "@providers/constants/PVPConstants";
 import { EntityEffectUse } from "@providers/entityEffects/EntityEffectUse";
 import { MapNonPVPZone } from "@providers/map/MapNonPVPZone";
 import { IPosition } from "@providers/movement/MovementHelper";
+import PartyManagement from "@providers/party/PartyManagement";
 import { RaidManager } from "@providers/raid/RaidManager";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { EntityType, FromGridX, FromGridY, MagicPower, NPCAlignment, ToGridX, ToGridY } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { HitTarget } from "../../battle/HitTarget";
+import { HitTargetQueue } from "../../battle/HitTargetQueue";
 import {
   IAffectedTarget,
   ISpellAreaCalculateEffectOptions,
@@ -27,12 +27,13 @@ import {
 export class SpellArea {
   constructor(
     private entityEffectUse: EntityEffectUse,
-    private hitTarget: HitTarget,
+    private hitTarget: HitTargetQueue,
     private animationEffect: AnimationEffect,
     private mapNonPVPZone: MapNonPVPZone,
     private socketMessaging: SocketMessaging,
     private characterSkull: CharacterSkull,
-    private raidManager: RaidManager
+    private raidManager: RaidManager,
+    private partyManagement: PartyManagement
   ) {}
 
   @TrackNewRelicTransaction()
@@ -42,6 +43,10 @@ export class SpellArea {
     magicPower: MagicPower,
     options: ISpellAreaCastOptions
   ): Promise<void> {
+    if (!target || !caster) {
+      return;
+    }
+
     let {
       spellAreaGrid,
       effectAnimationKey,
@@ -111,6 +116,7 @@ export class SpellArea {
           }
         }
       }
+
       if (isAttackSpell) {
         // Checks if the option isAttackSpell is not equal to false
         if (caster.type === EntityType.Character && targetToHit.type === EntityType.Character) {
@@ -123,7 +129,7 @@ export class SpellArea {
           }
 
           // Check if the caster is in a party
-          const isCasterAndTargetInParty = await this.isCasterAndTargetOnTheSameParty(
+          const isCasterAndTargetInParty = await this.partyManagement.checkIfCharacterAndTargetOnTheSameParty(
             caster as ICharacter,
             targetToHit as ICharacter
           );
@@ -182,33 +188,6 @@ export class SpellArea {
     }
 
     await Promise.all([...hitPromises, ...animationPromises]);
-  }
-
-  private async isCasterAndTargetOnTheSameParty(caster: ICharacter, target: ICharacter): Promise<boolean> {
-    // First, find a party where the caster is the leader and target is a member
-    const partyWithCasterAsLeader = await CharacterParty.findOne({
-      "leader._id": caster._id,
-      "members._id": target._id,
-    }).lean();
-
-    // If found, it means they are in the same party
-    if (partyWithCasterAsLeader) {
-      return true;
-    }
-
-    // Next, find a party where the target is the leader and caster is a member
-    const partyWithTargetAsLeader = await CharacterParty.findOne({
-      "leader._id": target._id,
-      "members._id": caster._id,
-    }).lean();
-
-    // If found, it means they are in the same party
-    if (partyWithTargetAsLeader) {
-      return true;
-    }
-
-    // If neither condition is met, then they are not in the same party
-    return false;
   }
 
   private async getEntityLevel(entity: ICharacter | INPC): Promise<number | null> {

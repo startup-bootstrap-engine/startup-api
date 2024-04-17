@@ -25,11 +25,12 @@ import {
   LegsBlueprint,
   MagicsBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
-import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
+import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 
 export const npcTrollBerserker: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
@@ -40,6 +41,7 @@ export const npcTrollBerserker: INPCTierBlueprint<15> = {
   textureKey: HostileNPCsBlueprint.TrollBerserker,
   alignment: NPCAlignment.Hostile,
   speed: MovementSpeed.Standard,
+  isGiantForm: true,
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: RangedWeaponsBlueprint.Stone,
   maxRangeAttack: RangeTypes.High,
@@ -70,7 +72,11 @@ export const npcTrollBerserker: INPCTierBlueprint<15> = {
       itemBlueprintKey: GlovesBlueprint.PlateGloves,
       chance: LootProbability.SemiCommon,
     },
-
+    {
+      itemBlueprintKey: SeedsBlueprint.PotatoSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 10],
+    },
     {
       itemBlueprintKey: ShieldsBlueprint.PaviseShield,
       chance: LootProbability.Rare,
@@ -157,7 +163,7 @@ export const npcTrollBerserker: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

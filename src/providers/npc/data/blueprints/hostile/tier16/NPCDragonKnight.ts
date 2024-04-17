@@ -11,16 +11,16 @@ import {
   HelmetsBlueprint,
   MacesBlueprint,
   OthersBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { SpellsBlueprint } from "@providers/spells/data/types/SpellsBlueprintTypes";
-import { MagicPower, NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
+import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcDragonKnight: INPCTierBlueprint<16> = {
   ...generateMoveTowardsMovement(),
@@ -58,7 +58,11 @@ export const npcDragonKnight: INPCTierBlueprint<16> = {
       chance: LootProbability.VeryCommon,
       quantityRange: [1, 10],
     },
-
+    {
+      itemBlueprintKey: SeedsBlueprint.PotatoSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 15],
+    },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,
       chance: LootProbability.Uncommon,
@@ -124,24 +128,16 @@ export const npcDragonKnight: INPCTierBlueprint<16> = {
       chance: LootProbability.Rare,
     },
     {
-      itemBlueprintKey: AxesBlueprint.SpikeToppedAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
       itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.SeraphicSabre,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.SeraphicScimitar,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.EmberglowNecklace,

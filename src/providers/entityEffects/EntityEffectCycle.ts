@@ -6,7 +6,7 @@ import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { CharacterDeath } from "@providers/character/CharacterDeath";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { locker } from "@providers/inversify/container";
-import { NPCDeath } from "@providers/npc/NPCDeath";
+import { NPCDeathQueue } from "@providers/npc/NPCDeathQueue";
 import { NPCExperience } from "@providers/npc/NPCExperience/NPCExperience";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { Time } from "@providers/time/Time";
@@ -26,7 +26,7 @@ export class EntityEffectCycle {
     private socketMessaging: SocketMessaging,
     private animationEffect: AnimationEffect,
     private characterDeath: CharacterDeath,
-    private npcDeath: NPCDeath,
+    private npcDeath: NPCDeathQueue,
     private entityEffectDurationControl: EntityEffectDurationControl,
     private time: Time
   ) {}

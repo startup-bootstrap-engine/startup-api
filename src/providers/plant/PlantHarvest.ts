@@ -1,11 +1,13 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { FARMING_BASE_YIELD, FARMING_SKILL_FACTOR } from "@providers/constants/FarmingConstants";
+import { CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { TraitGetter } from "@providers/skill/TraitGetter";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -22,6 +24,8 @@ import {
   ItemType,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import { random } from "lodash";
+import { CharacterPlantActions } from "./CharacterPlantActions";
 import { IPlantItem } from "./data/blueprints/PlantItem";
 import { PlantLifeCycle } from "./data/types/PlantTypes";
 
@@ -35,23 +39,32 @@ export class PlantHarvest {
     private characterItemContainer: CharacterItemContainer,
     private animationEffect: AnimationEffect,
     private skillIncrease: SkillIncrease,
-    private traitGetter: TraitGetter
+    private traitGetter: TraitGetter,
+    private characterPlantActions: CharacterPlantActions
   ) {}
 
+  @TrackNewRelicTransaction()
   public async harvestPlant(plant: IItem, character: ICharacter): Promise<void> {
     if (plant.isDead) {
       this.sendErrorMessage(character, "Sorry, you can't harvest the plant because it is already dead.");
       return;
     }
 
-    if (!this.isPlantOwner(plant, character)) {
-      this.sendErrorMessage(character, "Sorry, only the owner can harvest this plant.");
-      return;
-    }
-
     if (!this.isPlantMature(plant)) {
       this.sendErrorMessage(character, "Sorry, your plant is not mature enough to be harvested.");
       return;
+    }
+
+    if (!this.isPlantOwner(plant, character)) {
+      const canPerformActionsOnUnownedPlant = await this.characterPlantActions.canPerformActionOnUnowedPlant(
+        character,
+        plant,
+        `💀 ${character.name} is stealing your plants!`
+      );
+
+      if (!canPerformActionsOnUnownedPlant) {
+        return;
+      }
     }
 
     const blueprint = await this.getPlantBlueprint(plant);
@@ -65,6 +78,7 @@ export class PlantHarvest {
     const harvestableItemQuantity = this.calculateCropYield(skillLevel, blueprint);
 
     const harvestedItemBlueprint = await this.getHarvestedItemBlueprint(blueprint);
+
     const inventoryContainerId = await this.getInventoryContainerId(character);
 
     if (!inventoryContainerId) {
@@ -79,6 +93,14 @@ export class PlantHarvest {
 
     const newItem = await this.createAndSaveNewItem(harvestedItemBlueprint, harvestableItemQuantity);
     const wasItemAddedToContainer = await this.addItemToContainer(newItem, character, inventoryContainerId);
+
+    const n = Math.floor(Math.random() * 100);
+
+    if (n < 25) {
+      const extraReward = await this.getExtraReward();
+      const extraRewardItem = await this.createAndSaveNewItem(extraReward, random(1, harvestableItemQuantity));
+      await this.addItemToContainer(extraRewardItem, character, inventoryContainerId);
+    }
 
     if (!wasItemAddedToContainer) {
       this.sendErrorMessage(character, "An error occurred while processing your harvest.");
@@ -113,6 +135,20 @@ export class PlantHarvest {
 
   private getHarvestedItemBlueprint(blueprint: IPlantItem): Promise<IItem | null> {
     return this.blueprintManager.getBlueprint("items", blueprint.harvestableItemKey);
+  }
+
+  private getExtraReward(): Promise<IItem> {
+    const potentialExtraRewards = [
+      CraftingResourcesBlueprint.Herb,
+      CraftingResourcesBlueprint.ElvenLeaf,
+      CraftingResourcesBlueprint.Worm,
+      CraftingResourcesBlueprint.MedicinalLeaf,
+      CraftingResourcesBlueprint.WhisperrootEntwiner,
+    ];
+
+    const randomReward = potentialExtraRewards[Math.floor(Math.random() * potentialExtraRewards.length)];
+
+    return this.blueprintManager.getBlueprint("items", randomReward);
   }
 
   private async getInventoryContainerId(character: ICharacter): Promise<string | undefined> {
@@ -169,9 +205,19 @@ export class PlantHarvest {
     if (!blueprint.regrowsAfterHarvest) {
       await plant.remove();
     } else {
+      const currentRegrowthCount = (plant.regrowthCount ?? 0) + 1;
+      const regrowAfterHarvestLimit = blueprint.regrowAfterHarvestLimit;
+
+      if (!regrowAfterHarvestLimit || currentRegrowthCount > regrowAfterHarvestLimit) {
+        await plant.remove();
+        return;
+      }
+
       plant.currentPlantCycle = PlantLifeCycle.Seed;
       plant.texturePath = blueprint.stagesRequirements[PlantLifeCycle.Seed]?.texturePath ?? "";
       plant.growthPoints = 0;
+      plant.requiredGrowthPoints = blueprint.stagesRequirements[PlantLifeCycle.Seed]?.requiredGrowthPoints ?? 0;
+      plant.regrowthCount = currentRegrowthCount;
       await plant.save();
       const itemToUpdate = this.prepareItemToUpdate(plant);
 
@@ -201,7 +247,11 @@ export class PlantHarvest {
       layer: item.layer!,
       stackQty: item.stackQty || 0,
       isDeadBodyLootable: item.isDeadBodyLootable,
+      isTileTinted: item.isTileTinted,
       lastWatering: item.lastWatering!,
+      growthPoints: item.growthPoints!,
+      requiredGrowthPoints: item.requiredGrowthPoints!,
+      isDead: item.isDead,
     };
   }
 }

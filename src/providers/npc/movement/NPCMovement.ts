@@ -102,6 +102,8 @@ export class NPCMovement {
       // warn nearby characters that the NPC moved;
       const nearbyCharacters = await this.npcView.getCharactersInView(npc);
 
+      let canUpdateNPC = true;
+
       for (const character of nearbyCharacters) {
         let clearTarget = false;
 
@@ -121,8 +123,11 @@ export class NPCMovement {
           }
         }
 
-        if (!clearTarget) {
-          clearTarget = await this.stealth.isInvisible(character);
+        const isTargetInvisible = await this.stealth.isInvisible(character);
+
+        if (isTargetInvisible) {
+          canUpdateNPC = false;
+          continue;
         }
 
         if (clearTarget) {
@@ -138,7 +143,7 @@ export class NPCMovement {
             character.channelId!,
             NPCSocketEvents.NPCPositionUpdate,
             {
-              id: npc.id,
+              id: npc._id,
               x: npc.x,
               y: npc.y,
               direction: chosenMovementDirection,
@@ -147,9 +152,9 @@ export class NPCMovement {
           );
         }
       }
-
-      // use updateOne
-      await NPC.updateOne({ _id: npc._id }, { x: newX, y: newY, direction: chosenMovementDirection });
+      if (canUpdateNPC) {
+        await NPC.updateOne({ _id: npc._id }, { x: newX, y: newY, direction: chosenMovementDirection });
+      }
 
       return true;
     } catch (error) {
@@ -183,6 +188,7 @@ export class NPCMovement {
       } else {
         const job = await this.pathfindingQueue.addPathfindingJob(
           npc,
+
           target,
           startGridX,
           startGridY,

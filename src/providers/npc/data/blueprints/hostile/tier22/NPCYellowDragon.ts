@@ -15,6 +15,7 @@ import {
   MacesBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -41,7 +42,7 @@ export const npcYellowDragon: INPCTierBlueprint<22> = {
   attackType: EntityAttackType.MeleeRanged,
   ammoKey: AnimationEffectKeys.FireBall,
   hasCustomDeathPenalty: NPCCustomDeathPenalties.Hardcore,
-
+  isGiantForm: true,
   maxRangeAttack: RangeTypes.High,
   speed: MovementSpeed.ExtraFast,
   // @ts-ignore
@@ -81,12 +82,16 @@ export const npcYellowDragon: INPCTierBlueprint<22> = {
       chance: LootProbability.VeryRare,
     },
     {
-      itemBlueprintKey: BooksBlueprint.ElementalSphere,
+      itemBlueprintKey: CraftingResourcesBlueprint.PrimordialRelic,
+      chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.GildedLavaPickaxe,
       chance: LootProbability.Rare,
     },
     {
-      itemBlueprintKey: SwordsBlueprint.InfernalSlicer,
-      chance: LootProbability.Uncommon,
+      itemBlueprintKey: BooksBlueprint.ElementalSphere,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,
@@ -184,14 +189,6 @@ export const npcYellowDragon: INPCTierBlueprint<22> = {
     },
     {
       itemBlueprintKey: AxesBlueprint.HammerCleaveAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.DualImpactAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.SpikeToppedAxe,
       chance: LootProbability.Uncommon,
     },
     {

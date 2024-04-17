@@ -27,6 +27,14 @@ export const recipeArcaneArbiterChronicles: IUseWithCraftingRecipe = {
       key: MagicsBlueprint.EnergyBoltRune,
       qty: 30,
     },
+    {
+      key: CraftingResourcesBlueprint.NautilusShell,
+      qty: 2,
+    },
+    {
+      key: CraftingResourcesBlueprint.WhisperrootEntwiner,
+      qty: 8,
+    },
   ],
   minCraftingRequirements: [
     CraftingSkill.Alchemy,

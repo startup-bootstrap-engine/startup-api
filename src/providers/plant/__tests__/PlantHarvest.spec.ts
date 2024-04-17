@@ -60,16 +60,6 @@ describe("PlantHarvest.ts", () => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
   });
-  it("should return false if the plant is not owned by the character", async () => {
-    plant.owner = undefined;
-
-    await plantHarvest.harvestPlant(plant, testCharacter);
-
-    expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
-      testCharacter,
-      "Sorry, only the owner can harvest this plant."
-    );
-  });
 
   it("should return false if the plant is not mature", async () => {
     plant.currentPlantCycle = undefined;
@@ -130,6 +120,7 @@ describe("PlantHarvest.ts", () => {
   it("should harvest the plant, change PlantLifeCycle to seed and add the item to the character's inventory if regrowsAfterHarvest is true", async () => {
     //
     blueprint.regrowsAfterHarvest = true;
+    blueprint.regrowAfterHarvestLimit = 2;
 
     // @ts-ignore
     const harvestQty = plantHarvest.calculateCropYield(farmingSkillLevel, blueprint);
@@ -147,6 +138,10 @@ describe("PlantHarvest.ts", () => {
     expect(updatedPlant).not.toBeNull();
     expect(updatedPlant?.currentPlantCycle).toEqual(PlantLifeCycle.Seed);
     expect(updatedPlant?.texturePath).toEqual(blueprint.stagesRequirements[PlantLifeCycle.Seed]?.texturePath);
+    expect(updatedPlant?.requiredGrowthPoints).toEqual(
+      blueprint.stagesRequirements[PlantLifeCycle.Seed]?.requiredGrowthPoints
+    );
+    expect(updatedPlant?.growthPoints).toEqual(0);
   });
 
   it("should send an error message to the character if the plant is dead", async () => {
@@ -157,5 +152,16 @@ describe("PlantHarvest.ts", () => {
       testCharacter,
       "Sorry, you can't harvest the plant because it is already dead."
     );
+  });
+
+  it("should remove the plant if the regrowAfterHarvestLimit is reached", async () => {
+    blueprint.regrowsAfterHarvest = true;
+    blueprint.regrowAfterHarvestLimit = 2;
+
+    plant.regrowthCount = 2;
+
+    await plantHarvest.harvestPlant(plant, testCharacter);
+    const updatedPlant = await Item.findById(plant._id);
+    expect(updatedPlant).toBeNull();
   });
 });

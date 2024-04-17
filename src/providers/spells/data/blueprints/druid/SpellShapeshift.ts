@@ -11,9 +11,9 @@ import {
   CharacterClass,
   ISpell,
   SpellCastingType,
+  SpellsBlueprint,
 } from "@rpg-engine/shared";
 import { SpellCalculator } from "../../abstractions/SpellCalculator";
-import { SpellsBlueprint } from "../../types/SpellsBlueprintTypes";
 
 export const spellShapeshift: Partial<ISpell> = {
   key: SpellsBlueprint.DruidShapeshift,
@@ -50,7 +50,7 @@ export const spellShapeshift: Partial<ISpell> = {
       BasicAttribute.Magic,
       {
         min: 5,
-        max: 50,
+        max: 60,
       }
     );
 

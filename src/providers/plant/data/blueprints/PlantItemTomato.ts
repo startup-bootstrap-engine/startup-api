@@ -1,6 +1,6 @@
 import {
   DEFAULT_PLANT_CYCLE,
-  FARMING_HIGH_YIELD_FACTOR,
+  FARMING_MEDIUM_YIELD_FACTOR,
   ULTRA_LOW_GROWTH_FACTOR,
 } from "@providers/constants/FarmingConstants";
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -45,7 +45,8 @@ export const plantItemTomato: IPlantItem = {
   harvestableItemKey: FoodsBlueprint.Tomato,
   regrowsAfterHarvest: true,
   growthFactor: ULTRA_LOW_GROWTH_FACTOR,
-  yieldFactor: FARMING_HIGH_YIELD_FACTOR,
+  yieldFactor: FARMING_MEDIUM_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
+  regrowAfterHarvestLimit: 1,
 };

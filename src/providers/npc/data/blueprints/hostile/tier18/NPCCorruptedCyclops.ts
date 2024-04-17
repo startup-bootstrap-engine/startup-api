@@ -4,7 +4,6 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   AccessoriesBlueprint,
-  AxesBlueprint,
   BooksBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
@@ -12,14 +11,15 @@ import {
   HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
+  SeedsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { AnimationEffectKeys, MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcCorruptedCyclops: INPCTierBlueprint<18> = {
   ...generateMoveTowardsMovement(),
@@ -68,6 +68,11 @@ export const npcCorruptedCyclops: INPCTierBlueprint<18> = {
       chance: LootProbability.Uncommon,
     },
     {
+      itemBlueprintKey: SeedsBlueprint.WatermelonSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 3],
+    },
+    {
       itemBlueprintKey: SwordsBlueprint.GlacialSword,
       chance: LootProbability.Uncommon,
     },
@@ -100,14 +105,6 @@ export const npcCorruptedCyclops: INPCTierBlueprint<18> = {
       chance: LootProbability.Rare,
     },
     {
-      itemBlueprintKey: AxesBlueprint.DualImpactAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.BrutalChopperAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
       itemBlueprintKey: DaggersBlueprint.StarshardDagger,
       chance: LootProbability.SemiCommon,
     },
@@ -122,14 +119,6 @@ export const npcCorruptedCyclops: INPCTierBlueprint<18> = {
     {
       itemBlueprintKey: GemsBlueprint.EarthstoneGem,
       chance: LootProbability.VeryRare,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.FrostfangDagger,
-      chance: LootProbability.VeryRare,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.FrostbiteSaber,
-      chance: LootProbability.Uncommon,
     },
 
     {

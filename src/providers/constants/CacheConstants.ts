@@ -9,16 +9,16 @@ export const MEDIUM_CACHE_DURATION = 1000 * 60 * 60 * 12; // 12 hours
 
 export const SHORT_CACHE_DURATION = 1000 * 60 * 20; // 20 min;
 
-let cache;
+let apiRouteCache;
 
 switch (appEnv.general.ENV) {
   case EnvType.Development:
-    cache = apicache.options({
+    apiRouteCache = apicache.options({
       enabled: false,
     });
     break;
   case EnvType.Production:
-    cache = apicache.options({
+    apiRouteCache = apicache.options({
       redisClient: new Redis({
         host: appEnv.database.REDIS_CONTAINER,
         port: appEnv.database.REDIS_PORT,
@@ -27,4 +27,4 @@ switch (appEnv.general.ENV) {
     break;
 }
 
-export { cache };
+export { apiRouteCache as cache };

@@ -14,6 +14,7 @@ import { BattleCycle } from "../BattleCycle";
 import { BattleTargeting } from "../BattleTargeting";
 import { BattleNetworkStopTargeting } from "../network/BattleNetworkStopTargetting";
 import { BattleCharacterAttackValidation } from "./BattleCharacterAttackValidation";
+import { EntityType } from "@rpg-engine/shared";
 
 @provide(BattleCharacterAttack)
 export class BattleCharacterAttack {
@@ -73,7 +74,7 @@ export class BattleCharacterAttack {
 
     let updatedTarget;
 
-    if (target.type === "NPC") {
+    if (target.type === EntityType.NPC) {
       updatedTarget = await NPC.findOne({ _id: target._id, scene: target.scene }).lean({
         virtuals: true,
         defaults: true,
@@ -95,7 +96,8 @@ export class BattleCharacterAttack {
 
       updatedTarget.skills = updatedNPCSkills;
     }
-    if (target.type === "Character") {
+
+    if (target.type === EntityType.Character) {
       updatedTarget = await Character.findOne({ _id: target._id, scene: target.scene }).lean({
         virtuals: true,
         defaults: true,
@@ -129,7 +131,7 @@ export class BattleCharacterAttack {
       }
 
       if (!character) {
-        throw new Error("Failed to find character");
+        return false;
       }
 
       const checkRangeAndAttack = await this.battleAttackTarget.checkRangeAndAttack(character, target);

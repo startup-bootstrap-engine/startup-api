@@ -5,9 +5,9 @@ import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { recipeSpikedClub } from "@providers/useWith/recipes/maces/recipeSpikedClub";
+import { recipeSpikedClub } from "@providers/useWith/recipes/maces/tier1/recipeSpikedClub";
 import { recipeLifePotion } from "@providers/useWith/recipes/potions/recipeLifePotion";
-import { recipeBolt } from "@providers/useWith/recipes/ranged-weapons/recipeBolt";
+import { recipeBolt } from "@providers/useWith/recipes/ranged-weapons/ammo/tier1/recipeBolt";
 import {
   AnimationEffectKeys,
   AnimationSocketEvents,
@@ -20,12 +20,12 @@ import {
   UserAccountTypes,
 } from "@rpg-engine/shared";
 import _ from "lodash";
-import { ItemCraftable } from "../ItemCraftable";
+import { ItemCraftableQueue } from "../ItemCraftableQueue";
 import { itemManaPotion } from "../data/blueprints/potions/ItemManaPotion";
 import { CraftingResourcesBlueprint, PotionsBlueprint } from "../data/types/itemsBlueprintTypes";
 
 describe("ItemCraftable.ts", () => {
-  let craftableItem: ItemCraftable;
+  let craftableItem: ItemCraftableQueue;
   let inventoryContainer: IItemContainer;
   let testCharacter: ICharacter;
   let inventory: IItem;
@@ -34,7 +34,7 @@ describe("ItemCraftable.ts", () => {
   let skill: ISkill;
 
   beforeAll(() => {
-    craftableItem = container.get<ItemCraftable>(ItemCraftable);
+    craftableItem = container.get<ItemCraftableQueue>(ItemCraftableQueue);
   });
 
   beforeEach(async () => {
@@ -50,8 +50,8 @@ describe("ItemCraftable.ts", () => {
     inventoryContainer = (await ItemContainer.findById(inventory.itemContainer)) as unknown as IItemContainer;
 
     items = [
-      await unitTestHelper.createMockItemFromBlueprint(CraftingResourcesBlueprint.BlueFeather, { stackQty: 2 }),
       await unitTestHelper.createMockItemFromBlueprint(CraftingResourcesBlueprint.WaterBottle, { stackQty: 1 }),
+      await unitTestHelper.createMockItemFromBlueprint(CraftingResourcesBlueprint.DuskwispHerbFlower, { stackQty: 3 }),
     ];
 
     await unitTestHelper.addItemsToContainer(inventoryContainer, 6, items);
@@ -75,7 +75,7 @@ describe("ItemCraftable.ts", () => {
   });
 
   it("should craft non stackable item", async () => {
-    const craftChanceMock = jest.spyOn(ItemCraftable.prototype as any, "isCraftSuccessful");
+    const craftChanceMock = jest.spyOn(ItemCraftableQueue.prototype as any, "isCraftSuccessful");
     craftChanceMock.mockImplementation(() => {
       return Promise.resolve(true);
     });
@@ -103,7 +103,7 @@ describe("ItemCraftable.ts", () => {
 
     await testCharacter.populate("skills").execPopulate();
 
-    const craftChanceMock = jest.spyOn(ItemCraftable.prototype as any, "isCraftSuccessful");
+    const craftChanceMock = jest.spyOn(ItemCraftableQueue.prototype as any, "isCraftSuccessful");
     craftChanceMock.mockImplementation(() => {
       return Promise.resolve(true);
     });
@@ -129,7 +129,7 @@ describe("ItemCraftable.ts", () => {
   });
 
   it("should craft item and have Legendary rarity", async () => {
-    const craftChanceMock = jest.spyOn(ItemCraftable.prototype as any, "isCraftSuccessful");
+    const craftChanceMock = jest.spyOn(ItemCraftableQueue.prototype as any, "isCraftSuccessful");
     craftChanceMock.mockImplementation(() => {
       return Promise.resolve(true);
     });
@@ -159,7 +159,7 @@ describe("ItemCraftable.ts", () => {
   });
 
   it("should change character weight", async () => {
-    const craftChanceMock = jest.spyOn(ItemCraftable.prototype as any, "isCraftSuccessful");
+    const craftChanceMock = jest.spyOn(ItemCraftableQueue.prototype as any, "isCraftSuccessful");
     craftChanceMock.mockImplementation(() => {
       return Promise.resolve(true);
     });
@@ -179,7 +179,7 @@ describe("ItemCraftable.ts", () => {
   });
 
   it("should send inventory update event", async () => {
-    const craftChanceMock = jest.spyOn(ItemCraftable.prototype as any, "isCraftSuccessful");
+    const craftChanceMock = jest.spyOn(ItemCraftableQueue.prototype as any, "isCraftSuccessful");
     craftChanceMock.mockImplementation(() => true);
 
     skill.alchemy.level = 10;
@@ -207,7 +207,7 @@ describe("ItemCraftable.ts", () => {
   });
 
   it("should call character validation", async () => {
-    const performCraftingMock = jest.spyOn(ItemCraftable.prototype as any, "performCrafting");
+    const performCraftingMock = jest.spyOn(ItemCraftableQueue.prototype as any, "performCrafting");
     performCraftingMock.mockImplementation();
 
     const characterValidationMock = jest.spyOn(CharacterValidation.prototype, "hasBasicValidation");
@@ -238,8 +238,10 @@ describe("ItemCraftable.ts", () => {
     testCharacter.skills = undefined;
     await testCharacter.save();
 
+    await Skill.findByIdAndDelete(skill._id);
+
     // Mock the isCraftSuccessful function to always return true
-    const craftChanceMock = jest.spyOn(ItemCraftable.prototype as any, "isCraftSuccessful");
+    const craftChanceMock = jest.spyOn(ItemCraftableQueue.prototype as any, "isCraftSuccessful");
     craftChanceMock.mockImplementation(() => {
       return Promise.resolve(true);
     });
@@ -266,7 +268,7 @@ describe("ItemCraftable.ts", () => {
 
   it("should not craft without minimum skills", async () => {
     // Mock the isCraftSuccessful function to always return true
-    const craftChanceMock = jest.spyOn(ItemCraftable.prototype as any, "isCraftSuccessful");
+    const craftChanceMock = jest.spyOn(ItemCraftableQueue.prototype as any, "isCraftSuccessful");
     craftChanceMock.mockImplementation(() => {
       return Promise.resolve(true);
     });
@@ -288,7 +290,6 @@ describe("ItemCraftable.ts", () => {
 
     const itemKeys = (await container.items).map((item) => item.key);
 
-    expect(itemKeys.includes(CraftingResourcesBlueprint.BlueFeather)).toBe(true);
     expect(itemKeys.includes(CraftingResourcesBlueprint.WaterBottle)).toBe(true);
     expect(itemKeys.includes(PotionsBlueprint.ManaPotion)).toBe(false);
 
@@ -300,7 +301,7 @@ describe("ItemCraftable.ts", () => {
   });
 
   it("should not craft item if it does not have a blueprint", async () => {
-    const performCraftingMock = jest.spyOn(ItemCraftable.prototype as any, "performCrafting");
+    const performCraftingMock = jest.spyOn(ItemCraftableQueue.prototype as any, "performCrafting");
     performCraftingMock.mockImplementation();
 
     const itemToCraft: ICraftItemPayload = { itemKey: "invalid-blueprint-key" };
@@ -316,7 +317,7 @@ describe("ItemCraftable.ts", () => {
   });
 
   it("should not craft item if it does not have a recipe", async () => {
-    const performCraftingMock = jest.spyOn(ItemCraftable.prototype as any, "performCrafting");
+    const performCraftingMock = jest.spyOn(ItemCraftableQueue.prototype as any, "performCrafting");
     performCraftingMock.mockImplementation();
 
     const itemToCraft: ICraftItemPayload = { itemKey: CraftingResourcesBlueprint.Wheat };
@@ -332,7 +333,7 @@ describe("ItemCraftable.ts", () => {
   });
 
   it("should not craft item if character inventory does not have required items", async () => {
-    const performCraftingMock = jest.spyOn(ItemCraftable.prototype as any, "performCrafting");
+    const performCraftingMock = jest.spyOn(ItemCraftableQueue.prototype as any, "performCrafting");
     performCraftingMock.mockImplementation();
 
     const performTest = async (): Promise<void> => {
@@ -359,7 +360,7 @@ describe("ItemCraftable.ts", () => {
   });
 
   it("should not craft valid item due to crafting failure", async () => {
-    const craftChanceMock = jest.spyOn(ItemCraftable.prototype as any, "isCraftSuccessful");
+    const craftChanceMock = jest.spyOn(ItemCraftableQueue.prototype as any, "isCraftSuccessful");
 
     // @ts-ignore
     const skillIncreaseSpy = jest.spyOn(craftableItem.skillIncrease, "increaseCraftingSP");

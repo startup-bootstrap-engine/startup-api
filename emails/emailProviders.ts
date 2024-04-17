@@ -10,7 +10,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 //  SENDINBLUE ========================================
 const sendInBlueClient = SibApiV3Sdk.ApiClient.instance;
 
-// Configure API key authorization: api-key
+// Set API key authorization: api-key
 const apiKey = sendInBlueClient.authentications["api-key"];
 apiKey.apiKey = appEnv.transactionalEmail.sendInBlue.SENDINBLUE_API_KEY;
 

@@ -4,7 +4,7 @@ import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterDeath } from "@providers/character/CharacterDeath";
 import { GENERATE_BLOOD_ON_DEATH } from "@providers/constants/BattleConstants";
-import { NPCDeath } from "@providers/npc/NPCDeath";
+import { NPCDeathQueue } from "@providers/npc/NPCDeathQueue";
 import { NPCExperience } from "@providers/npc/NPCExperience/NPCExperience";
 import { NPCTarget } from "@providers/npc/movement/NPCTarget";
 import { QuestSystem } from "@providers/quest/QuestSystem";
@@ -21,7 +21,7 @@ export class BattleAttackTargetDeath {
     private battleEffects: BattleEffects,
     private characterDeath: CharacterDeath,
     private npcTarget: NPCTarget,
-    private npcDeath: NPCDeath,
+    private npcDeath: NPCDeathQueue,
     private questSystem: QuestSystem,
     private battleNetworkStopTargeting: BattleNetworkStopTargeting,
     private npcExperience: NPCExperience,
@@ -30,14 +30,14 @@ export class BattleAttackTargetDeath {
 
   @TrackNewRelicTransaction()
   public async handleDeathAfterHit(attacker: ICharacter | INPC, target: ICharacter | INPC): Promise<void> {
-    if (!target.isAlive) {
+    if (!target.isAlive || target.health <= 0) {
       const n = random(0, 100);
 
       if (n <= GENERATE_BLOOD_ON_DEATH) {
         await this.battleEffects.generateBloodOnGround(target);
       }
 
-      if (target.type === "Character") {
+      if (target.type === EntityType.Character) {
         await this.handleCharacterDeath(attacker, target as ICharacter);
 
         if (attacker.type === EntityType.Character) {
@@ -46,7 +46,7 @@ export class BattleAttackTargetDeath {
         if (attacker.type === EntityType.NPC) {
           this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Characters, "Mob/Death", 1);
         }
-      } else if (target.type === "NPC") {
+      } else if (target.type === EntityType.NPC) {
         await this.handleNPCDeath(attacker, target as INPC);
       }
     }
@@ -55,7 +55,7 @@ export class BattleAttackTargetDeath {
   private async handleCharacterDeath(attacker: ICharacter | INPC, targetCharacter: ICharacter): Promise<void> {
     await this.characterDeath.handleCharacterDeath(attacker, targetCharacter);
 
-    if (attacker.type === "NPC") {
+    if (attacker.type === EntityType.NPC) {
       await this.npcTarget.clearTarget(attacker as INPC);
       await this.npcTarget.tryToSetTarget(attacker as INPC);
     } else {
@@ -66,7 +66,7 @@ export class BattleAttackTargetDeath {
   private async handleNPCDeath(attacker: ICharacter | INPC, targetNPC: INPC): Promise<void> {
     await this.npcDeath.handleNPCDeath(attacker as ICharacter, targetNPC);
 
-    if (attacker.type === "Character") {
+    if (attacker.type === EntityType.Character) {
       await this.questSystem.updateQuests(QuestType.Kill, attacker as ICharacter, targetNPC.key);
       await this.battleNetworkStopTargeting.stopTargeting(attacker as ICharacter);
     }

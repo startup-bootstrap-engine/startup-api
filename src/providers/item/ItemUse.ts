@@ -3,7 +3,7 @@ import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemCon
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterView } from "@providers/character/CharacterView";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { EquipmentEquip } from "@providers/equipment/EquipmentEquip";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { ItemValidation } from "./validation/ItemValidation";
@@ -36,7 +36,7 @@ export class ItemUse {
     private itemValidation: ItemValidation,
     private socketMessaging: SocketMessaging,
     private equipmentEquip: EquipmentEquip,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private characterView: CharacterView,
     private animationEffect: AnimationEffect,
     private characterItemInventory: CharacterItemInventory,
@@ -82,9 +82,9 @@ export class ItemUse {
       }
 
       if (useItem && useItem.subType === ItemSubType.Food && useItem.healthRecovery) {
-        await this.applyItemUsage(bluePrintItem, character.id, useItem.healthRecovery);
+        await this.applyItemUsage(character.scene, bluePrintItem, character.id, useItem.healthRecovery);
       } else {
-        await this.applyItemUsage(bluePrintItem, character.id);
+        await this.applyItemUsage(character.scene, bluePrintItem, character.id);
       }
 
       const rarity = useItem.rarity || undefined;
@@ -131,6 +131,7 @@ export class ItemUse {
   }
 
   private async applyItemUsage(
+    scene: string,
     bluePrintItem: Partial<IItem>,
     characterId: string,
     healthRecovery?: number
@@ -143,7 +144,7 @@ export class ItemUse {
       return;
     }
 
-    await this.itemUseCycleQueue.start(characterId, bluePrintItem.key!, iterations, 10 * 1000, async () => {
+    await this.itemUseCycleQueue.start(scene, characterId, bluePrintItem.key!, iterations, 10 * 1000, async () => {
       await this.newRelic.trackTransaction(NewRelicTransactionCategory.Interval, "ItemUseCycle", async () => {
         const character = await Character.findOne({ _id: characterId });
 

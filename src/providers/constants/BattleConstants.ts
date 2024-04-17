@@ -9,11 +9,15 @@ export const BONUS_DAMAGE_MULTIPLIER = 4;
 
 // Damage Reduction
 export const DAMAGE_REDUCTION_MIN_DAMAGE = 1;
-export const DAMAGE_REDUCTION_MAX_REDUCTION_PERCENTAGE = 0.4;
+export const DAMAGE_REDUCTION_MAX_REDUCTION_PERCENTAGE = 0.6;
 
 // Total potential damage
 
 export const BATTLE_TOTAL_POTENTIAL_DAMAGE_MODIFIER = 1.25;
+
+// NPC damage reduction
+
+export const NPC_DAMAGE_REDUCTION_RATIO = 0.7; // lower means less damage on NPC (more challenging game)
 
 // Rogue
 
@@ -27,7 +31,7 @@ export const BERSERKER_BLOODTHIRST_HEALING_FACTOR = 1.5;
 
 // Mages
 
-export const MAGE_MANA_SHIELD_DAMAGE_REDUCTION = 2; // 50% damage reduction
+export const MAGE_MANA_SHIELD_DAMAGE_REDUCTION = 1; // 100% damage reduction
 
 export const GENERATE_BLOOD_GROUND_ON_HIT = 5; // 5% chance to generate blood on the ground
 

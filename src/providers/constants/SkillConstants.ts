@@ -4,11 +4,11 @@ import { CharacterClass, LifeBringerRaces, Modes, ShadowWalkerRaces } from "@rpg
 export const DAMAGE_ATTRIBUTE_WEIGHT = 1.15;
 export const DAMAGE_COMBAT_SKILL_WEIGHT = 1.6;
 
-export const EXP_RATIO = 1.6;
+export const EXP_CALCULATION_RATIO = 0.8;
 
-export const SP_INCREASE_BASE = 0.8;
+export const SP_INCREASE_BASE = 0.5;
 
-export const LOW_SKILL_LEVEL_SP_INCREASE_BONUS = 5;
+export const LOW_SKILL_LEVEL_SP_INCREASE_BONUS = 10;
 
 export const SP_CRAFTING_INCREASE_RATIO = SP_INCREASE_BASE * 60;
 

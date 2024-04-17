@@ -110,15 +110,12 @@ export class ItemCraftbook {
   ): Promise<IUseWithCraftingRecipe[]> {
     const recipes = this.itemCraftingRecipes.getAllRecipes();
 
-    // First, get all item keys
     const itemKeys = await blueprintManager.getAllBlueprintKeys("items");
 
-    // Then, get all items in parallel
     const items = await Promise.all(
       itemKeys.map((itemKey) => blueprintManager.getBlueprint<IItem>("items", itemKey as AvailableBlueprints))
     );
 
-    // Filter out only the items that are also recipes and have any required items in the inventory
     const availableRecipes = items.reduce((acc, item) => {
       const recipe = recipes[item.key];
       if (recipe && recipe.requiredItems.some((ing) => (inventoryIngredients.get(ing.key) ?? 0) > 0)) {
@@ -127,15 +124,27 @@ export class ItemCraftbook {
       return acc;
     }, [] as IUseWithCraftingRecipe[]);
 
-    // Pre-calculate the quantities of ingredients and store them for sorting
     const quantities = availableRecipes.map((recipe) =>
       recipe.requiredItems.reduce((acc, ing) => acc + (inventoryIngredients.get(ing.key) ?? 0), 0)
     );
 
-    // Finally, sort the available recipes
+    const metRequirements = availableRecipes.map((recipe) =>
+      recipe.requiredItems.reduce((acc, ing) => acc + ((inventoryIngredients.get(ing.key) ?? 0) >= ing.qty ? 1 : 0), 0)
+    );
+
     return availableRecipes.sort((a, b) => {
       const aQty = quantities[availableRecipes.indexOf(a)];
       const bQty = quantities[availableRecipes.indexOf(b)];
+      const aMet = metRequirements[availableRecipes.indexOf(a)];
+      const bMet = metRequirements[availableRecipes.indexOf(b)];
+
+      if (aMet > bMet) {
+        return -1;
+      }
+
+      if (aMet < bMet) {
+        return 1;
+      }
 
       if (aQty > bQty) {
         return -1;
@@ -145,7 +154,6 @@ export class ItemCraftbook {
         return 1;
       }
 
-      // sort by minCraftingRequirements level second
       return a.minCraftingRequirements[1] - b.minCraftingRequirements[1];
     });
   }

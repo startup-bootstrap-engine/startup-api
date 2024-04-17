@@ -20,7 +20,7 @@ import { CharacterTradingBuy } from "./CharacterTradingBuy";
 import { CharacterItemContainer } from "./characterItems/CharacterItemContainer";
 import { CharacterItemInventory } from "./characterItems/CharacterItemInventory";
 import { CharacterItemSlots } from "./characterItems/CharacterItemSlots";
-import { CharacterWeight } from "./weight/CharacterWeight";
+import { CharacterWeightQueue } from "./weight/CharacterWeightQueue";
 
 @provide(CharacterTradingMarketplaceBuy)
 export class CharacterTradingMarketplaceBuy {
@@ -32,7 +32,7 @@ export class CharacterTradingMarketplaceBuy {
     private characterItemSlots: CharacterItemSlots,
     private characterItemInventory: CharacterItemInventory,
     private characterItemContainer: CharacterItemContainer,
-    private characterWeight: CharacterWeight
+    private characterWeight: CharacterWeightQueue
   ) {}
 
   @TrackNewRelicTransaction()

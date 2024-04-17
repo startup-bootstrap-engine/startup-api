@@ -16,9 +16,9 @@ import { generateMoveTowardsMovement } from "@providers/npc/data/abstractions/Ba
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { NPCAlignment, NPCCustomDeathPenalties } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcAsterion: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
@@ -28,6 +28,7 @@ export const npcAsterion: INPCTierBlueprint<15> = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Fast,
+  isGiantForm: true,
   canSwitchToLowHealthTarget: true,
   // @ts-ignore
   baseHealth: 2500,
@@ -57,7 +58,7 @@ export const npcAsterion: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: SwordsBlueprint.MinotaurSword,
-      chance: LootProbability.VeryRare,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: SpearsBlueprint.RoyalSpear,
@@ -112,11 +113,7 @@ export const npcAsterion: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.FlamestrikeBlade,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
 };

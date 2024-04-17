@@ -1,6 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { HitTarget } from "@providers/battle/HitTarget";
+import { HitTargetQueue } from "@providers/battle/HitTargetQueue";
 import { EntityEffectUse } from "@providers/entityEffects/EntityEffectUse";
 import { entityEffectBurning } from "@providers/entityEffects/data/blueprints/entityEffectBurning";
 import { container } from "@providers/inversify/container";
@@ -34,7 +34,7 @@ export const spellFireBolt: Partial<ISpell> = {
 
   usableEffect: async (character: ICharacter, target: ICharacter | INPC) => {
     const entityEffectUse = container.get(EntityEffectUse);
-    const hitTarget = container.get(HitTarget);
+    const hitTarget = container.get(HitTargetQueue);
 
     await hitTarget.hit(character, target, true, MagicPower.Low, true);
 

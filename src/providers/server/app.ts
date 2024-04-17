@@ -2,6 +2,7 @@ import { container } from "@providers/inversify/container";
 import cors from "cors";
 import express from "express";
 import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 import { InversifyExpressServer } from "inversify-express-utils";
 import morgan from "morgan";
 
@@ -26,6 +27,7 @@ expressServer.setConfig((app) => {
   app.use(morgan("dev"));
   app.use(express.static("public"));
   app.use(limiter);
+  app.use(helmet());
 });
 
 const app = expressServer.build();

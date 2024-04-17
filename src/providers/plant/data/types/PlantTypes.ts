@@ -24,4 +24,7 @@ export enum PlantItemBlueprint {
   Pumpkin = "pumpkin",
   Watermelon = "watermelon",
   Potato = "potato",
+  BloodrootBlossom = "bloodroot-blossom",
+  DuskwispHerb = "duskwisp-herb",
+  SunspireLotus = "sunspire-lotus",
 }

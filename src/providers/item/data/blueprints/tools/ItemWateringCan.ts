@@ -1,7 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { container } from "@providers/inversify/container";
-import { ItemCraftable } from "@providers/item/ItemCraftable";
+import { ItemCraftableQueue } from "@providers/item/ItemCraftableQueue";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { IUseWithRefill, UseWithRefill } from "@providers/useWith/abstractions/UseWithRefill";
 import { IUseWithTargetTile } from "@providers/useWith/useWithTypes";
@@ -29,7 +29,7 @@ export const itemWateringCan: IRefillableItem = {
   animationKey: AnimationEffectKeys.Blue,
   projectileAnimationKey: AnimationEffectKeys.Energy,
   name: "Watering Can",
-  description: "A tool used for watering plants.",
+  description: "A tool used for watering plants. It has 60 charges and can be refilled with water.",
   weight: 0.1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   hasUseWith: true,
@@ -42,7 +42,7 @@ export const itemWateringCan: IRefillableItem = {
     targetTile: IUseWithTargetTile,
     targetName: string,
     character: ICharacter,
-    itemCraftable: ItemCraftable,
+    itemCraftable: ItemCraftableQueue,
     skillIncrease: SkillIncrease
   ): Promise<void> => {
     const useWithRefill = container.get<UseWithRefill>(UseWithRefill);

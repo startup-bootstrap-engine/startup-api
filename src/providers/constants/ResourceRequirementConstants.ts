@@ -31,9 +31,25 @@ export const RESOURCE_LEVEL_REQUIREMENTS: IResourceLevelRequirement = {
     item: ToolsBlueprint.Pickaxe,
   },
   [FoodsBlueprint.Tuna]: { minLevel: 1, type: CraftingSkill.Fishing, item: ToolsBlueprint.FishingRod },
-  [FoodsBlueprint.BrownFish]: { minLevel: 1, type: CraftingSkill.Fishing, item: ToolsBlueprint.FishingRod },
-  [FoodsBlueprint.WildSalmon]: { minLevel: 10, type: CraftingSkill.Fishing, item: ToolsBlueprint.FishingRod },
-  [FoodsBlueprint.Salmon]: { minLevel: 15, type: CraftingSkill.Fishing, item: ToolsBlueprint.FishingRod },
+  [FoodsBlueprint.BrownFish]: { minLevel: 5, type: CraftingSkill.Fishing, item: ToolsBlueprint.FishingRod },
+  [FoodsBlueprint.WildSalmon]: { minLevel: 15, type: CraftingSkill.Fishing, item: ToolsBlueprint.FishingRod },
+  [FoodsBlueprint.Salmon]: { minLevel: 25, type: CraftingSkill.Fishing, item: ToolsBlueprint.FishingRod },
+  [CraftingResourcesBlueprint.SeaShell]: {
+    minLevel: 35,
+    type: CraftingSkill.Fishing,
+    item: ToolsBlueprint.MoonlureFishingRod,
+  },
+  [CraftingResourcesBlueprint.NebulaSeahorn]: {
+    minLevel: 45,
+    type: CraftingSkill.Fishing,
+    item: ToolsBlueprint.MoonlureFishingRod,
+  },
+  [CraftingResourcesBlueprint.NautilusShell]: {
+    minLevel: 60,
+    type: CraftingSkill.Fishing,
+    item: ToolsBlueprint.MoonlureFishingRod,
+  },
+
   [CraftingResourcesBlueprint.SmallWoodenStick]: {
     minLevel: 1,
     type: CraftingSkill.Lumberjacking,
@@ -47,11 +63,11 @@ export const RESOURCE_LEVEL_REQUIREMENTS: IResourceLevelRequirement = {
   [CraftingResourcesBlueprint.GreaterWoodenLog]: {
     minLevel: 5,
     type: CraftingSkill.Lumberjacking,
-    item: ToolsBlueprint.CarpentersAxe,
+    item: ToolsBlueprint.WoodBreakerAxe,
   },
   [CraftingResourcesBlueprint.ElvenWood]: {
     minLevel: 15,
     type: CraftingSkill.Lumberjacking,
-    item: ToolsBlueprint.CarpentersAxe,
+    item: ToolsBlueprint.ElderHeartAxe,
   },
 };

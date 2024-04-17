@@ -19,17 +19,18 @@ import {
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { generateMoveTowardsMovement } from "@providers/npc/data/abstractions/BaseNeutralNPC";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCCustomDeathPenalties, NPCSubtype, RangeTypes } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcGorgok: INPCTierBlueprint<17> = {
   ...generateMoveTowardsMovement(),
   name: "Gorgok, the Chief",
   key: HostileNPCsBlueprint.Gorgok,
   tier: 17,
+  isGiantForm: true,
   subType: NPCSubtype.Humanoid,
   textureKey: HostileNPCsBlueprint.Goblin,
   alignment: NPCAlignment.Hostile,
@@ -82,7 +83,7 @@ export const npcGorgok: INPCTierBlueprint<17> = {
     },
     {
       itemBlueprintKey: StaffsBlueprint.SangriaStaff,
-      chance: LootProbability.Rare,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
@@ -140,28 +141,16 @@ export const npcGorgok: INPCTierBlueprint<17> = {
       chance: LootProbability.VeryRare,
     },
     {
-      itemBlueprintKey: AxesBlueprint.ButterflierAxe,
-      chance: LootProbability.SemiCommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.IroncladCleaver,
-      chance: LootProbability.Common,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Common,
-    },
-    {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.AstralDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.EmberStrandNecklace,

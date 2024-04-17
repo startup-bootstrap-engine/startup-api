@@ -120,7 +120,6 @@ export class GridManager {
     }
   }
 
-  @TrackNewRelicTransaction()
   public async setWalkable(map: string, gridX: number, gridY: number, walkable: boolean): Promise<void> {
     try {
       const grid = await this.getGrid(map);

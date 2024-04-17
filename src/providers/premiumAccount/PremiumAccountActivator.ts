@@ -1,9 +1,11 @@
 import { IUser, User } from "@entities/ModuleSystem/UserModel";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { UserAccountTypes } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
 @provide(PremiumAccountActivator)
 export class PremiumAccountActivator {
+  @TrackNewRelicTransaction()
   public async isPremiumAccountActive(email: string): Promise<boolean> {
     const user = await User.findOne({ email: email }).lean().select("accountType");
 
@@ -18,6 +20,7 @@ export class PremiumAccountActivator {
     return true;
   }
 
+  @TrackNewRelicTransaction()
   public async activateUserPremiumAccount(
     user: IUser,
     accountType: UserAccountTypes,
@@ -37,7 +40,7 @@ export class PremiumAccountActivator {
     }
   }
 
-  public async deactivateUserPremiumAccount(user: IUser): Promise<void> {
+  public async deactivateUserPremiumAccount(user: IUser): Promise<boolean> {
     try {
       console.log("😔 Deactivating premium account for user", user.email);
 
@@ -49,8 +52,11 @@ export class PremiumAccountActivator {
           isManuallyControlledPremiumAccount: "",
         },
       });
+
+      return true;
     } catch (error) {
       console.error(error);
+      return false;
     }
   }
 }

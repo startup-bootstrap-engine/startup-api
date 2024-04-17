@@ -71,7 +71,8 @@ describe("CharacterTradingBalance.ts", () => {
     const totalPrice = await characterTradingBalance.calculateItemsTotalPrice(
       testNPC.traderItems as any,
       transactionItems,
-      TRADER_BUY_PRICE_MULTIPLIER
+      TRADER_BUY_PRICE_MULTIPLIER,
+      testNPC
     );
 
     expect(totalPrice).toBe(22.5);

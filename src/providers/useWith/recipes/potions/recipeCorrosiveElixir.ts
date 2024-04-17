@@ -18,6 +18,10 @@ export const recipeCorrosiveElixir: IUseWithCraftingRecipe = {
       key: CraftingResourcesBlueprint.CorruptionIngot,
       qty: 3,
     },
+    {
+      key: CraftingResourcesBlueprint.SunspireLotusFlower,
+      qty: 5,
+    },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 20],
 };

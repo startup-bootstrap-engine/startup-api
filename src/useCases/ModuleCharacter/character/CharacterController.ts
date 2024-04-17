@@ -2,6 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { AuthMiddleware } from "@providers/middlewares/AuthMiddleware";
 import { DTOValidatorMiddleware } from "@providers/middlewares/DTOValidatorMiddleware";
 import { IAuthenticatedRequest } from "@providers/types/ServerTypes";
+import rateLimit from "express-rate-limit";
 import {
   controller,
   httpDelete,
@@ -21,6 +22,18 @@ import { ReadCharacterUseCase } from "./read/ReadCharacterUseCase";
 import { UpdateCharacterDTO } from "./update/UpdateCharacterDTO";
 import { UpdateCharacterUseCase } from "./update/UpdateCharacterUseCase";
 
+const characterDefaultRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 25, // limit each IP to 25 requests per windowMs
+  message: "Too many requests from this IP, please try again after 15 minutes",
+});
+
+const characterReadRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again after 15 minutes",
+});
+
 @controller("/characters", AuthMiddleware)
 export class CharacterController implements interfaces.Controller {
   constructor(
@@ -30,7 +43,7 @@ export class CharacterController implements interfaces.Controller {
     private deleteCharacterUseCase: DeleteCharacterUseCase
   ) {}
 
-  @httpPost("/", DTOValidatorMiddleware(CreateCharacterDTO))
+  @httpPost("/", DTOValidatorMiddleware(CreateCharacterDTO), characterDefaultRateLimiter)
   private async createCharacter(
     @requestBody() newCharacter: CreateCharacterDTO,
     @request() request: IAuthenticatedRequest
@@ -40,14 +53,14 @@ export class CharacterController implements interfaces.Controller {
     return await this.createCharacterUseCase.create(newCharacter, ownerId);
   }
 
-  @httpGet("/")
+  @httpGet("/", characterReadRateLimiter)
   private async readAllCharacters(@request() req): Promise<ICharacter[]> {
     const ownerId = req.user.id;
 
     return await this.readCharacterUseCase.readAll(ownerId);
   }
 
-  @httpGet("/:id")
+  @httpGet("/:id", characterReadRateLimiter)
   private async readCharacter(
     @request() req,
     @requestParam("id") id: string,
@@ -58,7 +71,7 @@ export class CharacterController implements interfaces.Controller {
     return await this.readCharacterUseCase.read(id, fieldsArray);
   }
 
-  @httpPatch("/:id", DTOValidatorMiddleware(UpdateCharacterDTO))
+  @httpPatch("/:id", DTOValidatorMiddleware(UpdateCharacterDTO), characterDefaultRateLimiter)
   private async updateCharacter(
     @requestParam("id") id: string,
     @requestBody() updateCharacter: UpdateCharacterDTO,
@@ -69,7 +82,7 @@ export class CharacterController implements interfaces.Controller {
     return await this.updateCharacterUseCase.updateCharacter(id, updateCharacter, ownerId);
   }
 
-  @httpDelete("/:id")
+  @httpDelete("/:id", characterDefaultRateLimiter)
   private async deleteCharacter(
     @requestParam("id") id: string,
     @request() request: IAuthenticatedRequest

@@ -1,4 +1,8 @@
-import { CraftingResourcesBlueprint, PotionsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import {
+  CraftingResourcesBlueprint,
+  FoodsBlueprint,
+  PotionsBlueprint,
+} from "@providers/item/data/types/itemsBlueprintTypes";
 import { IUseWithCraftingRecipe } from "@providers/useWith/useWithTypes";
 import { CraftingSkill } from "@rpg-engine/shared";
 
@@ -7,13 +11,17 @@ export const recipeGreaterLifePotion: IUseWithCraftingRecipe = {
   outputQtyRange: [3, 5],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.Herb,
-      qty: 7,
+      key: CraftingResourcesBlueprint.MedicinalLeaf,
+      qty: 3,
     },
     {
-      key: CraftingResourcesBlueprint.WaterBottle,
-      qty: 2,
+      key: FoodsBlueprint.Strawberry,
+      qty: 3,
+    },
+    {
+      key: CraftingResourcesBlueprint.BloodrootBlossomFlower,
+      qty: 3,
     },
   ],
-  minCraftingRequirements: [CraftingSkill.Alchemy, 10],
+  minCraftingRequirements: [CraftingSkill.Alchemy, 15],
 };

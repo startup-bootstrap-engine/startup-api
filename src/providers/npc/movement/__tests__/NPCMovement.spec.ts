@@ -98,4 +98,17 @@ describe("NPCMovement.ts", () => {
     expect(mockIsNonPVPZoneAtXY).toHaveBeenCalled();
     expect(moved).toBe(true);
   });
+
+  it("should stop updating the NPC if the target is invisible", async () => {
+    // @ts-ignore
+    const mockIsInvisible = jest.spyOn(npcMovement.stealth, "isInvisible").mockReturnValue(true);
+
+    const npcUpdateOne = jest.spyOn(NPC, "updateOne");
+
+    const moved = await npcMovement.moveNPC(testNPC, testNPC.x, testNPC.y, FromGridX(6), FromGridY(4), "right");
+
+    expect(mockIsInvisible).toHaveBeenCalled();
+    expect(npcUpdateOne).not.toHaveBeenCalled();
+    expect(moved).toBe(true);
+  });
 });

@@ -8,10 +8,12 @@ import {
   DaggersBlueprint,
   HelmetsBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import {
@@ -25,7 +27,6 @@ import {
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcConde: INPCTierBlueprint<16> = {
   ...generateMoveTowardsMovement(),
@@ -80,6 +81,11 @@ export const npcConde: INPCTierBlueprint<16> = {
       quantityRange: [1, 10],
     },
     {
+      itemBlueprintKey: SeedsBlueprint.PumpkinSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 3],
+    },
+    {
       itemBlueprintKey: DaggersBlueprint.HellishDagger,
       chance: LootProbability.Rare,
     },
@@ -93,20 +99,17 @@ export const npcConde: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.ArrowheadDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.EmberbrandClaymore,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.BloodmoonBlade,
-      chance: LootProbability.Uncommon,
-    },
+
     {
       itemBlueprintKey: AccessoriesBlueprint.EmberglowNecklace,
       chance: LootProbability.VeryRare,

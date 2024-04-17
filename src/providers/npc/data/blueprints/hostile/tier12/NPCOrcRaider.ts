@@ -14,15 +14,17 @@ import {
   HelmetsBlueprint,
   MacesBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   StaffsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { MagicPower, NPCAlignment, NPCSubtype, RangeTypes, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcOrcRaider: INPCTierBlueprint<12> = {
   ...generateMoveTowardsMovement(),
@@ -64,6 +66,11 @@ export const npcOrcRaider: INPCTierBlueprint<12> = {
       quantityRange: [1, 3],
     },
     {
+      itemBlueprintKey: SeedsBlueprint.TurnipSeed,
+      chance: LootProbability.Common,
+      quantityRange: [1, 5],
+    },
+    {
       itemBlueprintKey: AccessoriesBlueprint.OrcRing,
       chance: LootProbability.Uncommon,
     },
@@ -103,7 +110,7 @@ export const npcOrcRaider: INPCTierBlueprint<12> = {
     },
     {
       itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: BootsBlueprint.CopperBoots,
@@ -124,6 +131,10 @@ export const npcOrcRaider: INPCTierBlueprint<12> = {
     {
       itemBlueprintKey: AxesBlueprint.RoyalChopperAxe,
       chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: ToolsBlueprint.LogSplitterAxe,
+      chance: LootProbability.Common,
     },
   ],
   entityEffects: [EntityEffectBlueprint.VineGrasp],

@@ -141,6 +141,10 @@ export class ItemView {
       stackQty: item.stackQty || 0,
       isDeadBodyLootable: item.isDeadBodyLootable,
       lastWatering: item.lastWatering!,
+      isTileTinted: item.isTileTinted,
+      growthPoints: item.growthPoints,
+      requiredGrowthPoints: item.requiredGrowthPoints,
+      isDead: item.isDead,
     };
   }
 

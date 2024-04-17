@@ -146,7 +146,7 @@ describe("UseWithRefill.ts", () => {
 
     expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
       testCharacter,
-      `Sorry, You can only ${resourceKey} that you own ${useWithRefillData.targetType}s.`
+      `Sorry, You can only ${resourceKey} ${useWithRefillData.targetType}s that you own.`
     );
   });
 
@@ -172,7 +172,12 @@ describe("UseWithRefill.ts", () => {
 
     expect(updatedRefillItem?.remainingUses).toEqual(currentRemainingUses - decrementQty);
 
-    expect(sendRandomMessageToCharacterMock).toBeCalledWith(testCharacter, useWithRefillData.successMessages, true);
+    expect(sendRandomMessageToCharacterMock).toBeCalledWith(
+      testCharacter,
+      useWithRefillData.successMessages,
+      true,
+      expect.any(Object)
+    );
 
     expect(mockSocketMessaging.sendEventToUser).toBeCalledWith(
       testCharacter.channelId!,
@@ -218,6 +223,31 @@ describe("UseWithRefill.ts", () => {
       expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
         testCharacter,
         "Sorry, the blueprint could not be found."
+      );
+    });
+
+    it("should sends an message when refilling is successful", async () => {
+      // @ts-expect-error
+      const sendRandomMessageToCharacterMock = jest.spyOn(useWithRefill, "sendRandomMessageToCharacter");
+
+      await useWithRefill.executeRefill(testCharacter, useWithRefillData, skillIncrease);
+
+      expect(sendRandomMessageToCharacterMock).toBeCalledWith(
+        testCharacter,
+        useWithRefillData.successMessages,
+        true,
+        null
+      );
+    });
+
+    it("should sends an message already refilled", async () => {
+      useWithRefillData.originItem.remainingUses = testRefillItemBlueprint.initialRemainingUses;
+
+      await useWithRefill.executeRefill(testCharacter, useWithRefillData, skillIncrease);
+
+      expect(mockSocketMessaging.sendMessageToCharacter).toBeCalledWith(
+        testCharacter,
+        "You have already refilled your watering can. 🌊"
       );
     });
   });

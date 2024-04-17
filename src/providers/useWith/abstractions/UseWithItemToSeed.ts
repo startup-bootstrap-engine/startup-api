@@ -1,18 +1,26 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
-import { CharacterWeight } from "@providers/character/weight/CharacterWeight";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { container } from "@providers/inversify/container";
 
 import { IPosition } from "@providers/movement/MovementHelper";
 import { IPlantItem } from "@providers/plant/data/blueprints/PlantItem";
+import { PlantLifeCycle } from "@providers/plant/data/types/PlantTypes";
 import { SimpleTutorial } from "@providers/simpleTutorial/SimpleTutorial";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { IEquipmentAndInventoryUpdatePayload, IItemContainer, ItemSocketEvents, ItemType } from "@rpg-engine/shared";
+import {
+  IBaseItemBlueprint,
+  IEquipmentAndInventoryUpdatePayload,
+  IItemContainer,
+  ItemSocketEvents,
+  ItemType,
+} from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
 
@@ -30,7 +38,7 @@ export class UseWithItemToSeed {
   constructor(
     private socketMessaging: SocketMessaging,
     private characterItemInventory: CharacterItemInventory,
-    private characterWeight: CharacterWeight,
+    private characterWeight: CharacterWeightQueue,
     private characterInventory: CharacterInventory,
     private simpleTutorial: SimpleTutorial
   ) {}
@@ -44,11 +52,28 @@ export class UseWithItemToSeed {
     const blueprintManager = container.get<BlueprintManager>(BlueprintManager);
 
     try {
+      const itemBlueprint = (await blueprintManager.getBlueprint("items", originItemKey)) as IBaseItemBlueprint;
+
+      if (itemBlueprint?.minRequirements) {
+        const meetsMinRequirements = await this.checkMinimumRequirements(character, itemBlueprint);
+
+        if (!meetsMinRequirements) {
+          const { level, skill } = itemBlueprint.minRequirements!;
+
+          const message = `Sorry, this seed requires level ${level} and ${skill.level} level in ${skill.name}`;
+
+          this.socketMessaging.sendErrorMessageToCharacter(character, message);
+          return;
+        }
+      }
+
       const blueprint = (await blueprintManager.getBlueprint("plants", key)) as IPlantItem;
 
       if (!blueprint) {
         throw new Error(`Cannot find blueprint for key '${key}'`);
       }
+
+      const requiredGrowthPoints = blueprint.stagesRequirements[PlantLifeCycle.Seed]?.requiredGrowthPoints ?? 0;
 
       const plantData = {
         ...blueprint,
@@ -57,6 +82,7 @@ export class UseWithItemToSeed {
         y: coordinates.y,
         scene: map,
         owner: character.id,
+        requiredGrowthPoints,
       };
 
       const newPlant = new Item(plantData);
@@ -81,6 +107,26 @@ export class UseWithItemToSeed {
 
   private async cacheClear(character: ICharacter): Promise<void> {
     await clearCacheForKey(`${character._id}-inventory`);
+  }
+
+  private async checkMinimumRequirements(character: ICharacter, itemBlueprint: IBaseItemBlueprint): Promise<boolean> {
+    const skill = (await Skill.findById(character.skills)
+      .lean()
+      .cacheQuery({
+        cacheKey: `${character?._id}-skills`,
+      })) as unknown as ISkill as ISkill;
+
+    const minRequirements = itemBlueprint?.minRequirements;
+
+    if (!minRequirements) return true;
+
+    if (skill.level < minRequirements.level) return false;
+
+    const skillsLevel: number = skill[minRequirements.skill.name]?.level ?? 0;
+
+    if (skillsLevel < minRequirements.skill.level) return false;
+
+    return true;
   }
 
   private async refreshInventory(character: ICharacter): Promise<void> {

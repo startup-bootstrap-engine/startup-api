@@ -1,6 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { HitTarget } from "@providers/battle/HitTarget";
+import { HitTargetQueue } from "@providers/battle/HitTargetQueue";
 import { CharacterBuffActivator } from "@providers/character/characterBuff/CharacterBuffActivator";
 import { container } from "@providers/inversify/container";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -39,7 +39,7 @@ export const spellShieldBash: Partial<ISpell> = {
     const socketMessaging = container.get(SocketMessaging);
     const spellCalculator = container.get(SpellCalculator);
     const characterBuffActivator = container.get(CharacterBuffActivator);
-    const hitTarget = container.get(HitTarget);
+    const hitTarget = container.get(HitTargetQueue);
 
     if (target.type === "NPC") {
       socketMessaging.sendErrorMessageToCharacter(character, "You can't use Shield Bash on a NPC.");
@@ -55,12 +55,12 @@ export const spellShieldBash: Partial<ISpell> = {
 
     const debuffPercentage = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Strength, {
       min: 10,
-      max: 25,
+      max: 60,
     });
 
     const timeout = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Strength, {
-      min: 10,
-      max: 30,
+      min: 15,
+      max: 60,
     });
 
     await characterBuffActivator.enableTemporaryBuff(target as ICharacter, {

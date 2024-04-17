@@ -1,7 +1,7 @@
 import {
   DEFAULT_PLANT_CYCLE,
-  FARMING_LOW_YIELD_FACTOR,
-  SUPER_GROWTH_FACTOR,
+  FARMING_MEDIUM_YIELD_FACTOR,
+  HIGH_GROWTH_FACTOR,
 } from "@providers/constants/FarmingConstants";
 import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemSubType, ItemType } from "@rpg-engine/shared";
@@ -45,8 +45,8 @@ export const plantItemPumpkin: IPlantItem = {
   },
   harvestableItemKey: FoodsBlueprint.Pumpkin,
   regrowsAfterHarvest: false,
-  growthFactor: SUPER_GROWTH_FACTOR,
-  yieldFactor: FARMING_LOW_YIELD_FACTOR,
+  growthFactor: HIGH_GROWTH_FACTOR,
+  yieldFactor: FARMING_MEDIUM_YIELD_FACTOR,
   availableOnlyOnSeasons: [],
   fasterGrowthOnSeasons: [],
 };

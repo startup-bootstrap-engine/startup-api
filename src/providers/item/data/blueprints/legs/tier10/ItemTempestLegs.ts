@@ -26,12 +26,12 @@ export const itemTempestLegs: IEquippableLightArmorTier10Blueprint = {
     {
       type: CharacterBuffType.CharacterAttribute,
       trait: CharacterAttributes.Speed,
-      buffPercentage: 10,
+      buffPercentage: 6,
       durationType: CharacterBuffDurationType.Permanent,
       options: {
         messages: {
-          activation: "You feel the power of speed and quickness flowing through your body. (+10% speed)",
-          deactivation: "You feel the power of speed and quickness leaving your body. (-10% speed)",
+          activation: "You feel the power of speed and quickness flowing through your body. (+6% speed)",
+          deactivation: "You feel the power of speed and quickness leaving your body. (-6% speed)",
         },
       },
     },
@@ -48,5 +48,5 @@ export const itemTempestLegs: IEquippableLightArmorTier10Blueprint = {
       },
     },
   ],
-  equippedBuffDescription: "Increases speed by 10% and strength by 5% respectively",
+  equippedBuffDescription: "Increases speed by 6% and strength by 5% respectively",
 };

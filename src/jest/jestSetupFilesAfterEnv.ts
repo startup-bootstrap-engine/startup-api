@@ -5,7 +5,7 @@ import {
   RACE_BONUS_OR_PENALTIES,
 } from "@providers/character/__tests__/mockConstants/SkillConstants.mock";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
-import { container, redisManager } from "@providers/inversify/container";
+import { container, inMemoryHashTable, inMemoryRepository, redisManager } from "@providers/inversify/container";
 import { MapLoader } from "@providers/map/MapLoader";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
@@ -73,6 +73,15 @@ jest.mock("@providers/constants/AntiMacroConstants", () => ({
   CHARACTER_MAX_ACTIONS_STORAGE_THRESHOLD: 2,
   ANTI_MACRO_SKIP_EVENTS_FROM_SIMILARITY_CHECK: [],
   ANTI_MACRO_SIMILARITY_THRESHOLD: 0.5,
+}));
+
+jest.mock("@providers/constants/CharacterSkullConstants", () => ({
+  CHARACTER_SKULL_AMOUNT_KILLS_NEEDED_TO_RED_SKULL: 3,
+  CHARACTER_SKULL_AMOUNT_KILLS_NEEDED_TO_YELLOW_SKULL: 1,
+  CHARACTER_SKULL_MAX_TIME_UNTIL_UPGRADE_TO_RED_SKULL: 10 * 24 * 60 * 60 * 1000,
+  CHARACTER_SKULL_RED_SKULL_DURATION: 14 * 24 * 60 * 60 * 1000,
+  CHARACTER_SKULL_WHITE_SKULL_DURATION: 15 * 60 * 1000,
+  CHARACTER_SKULL_YELLOW_SKULL_DURATION: 7 * 24 * 60 * 60 * 1000,
 }));
 
 jest.mock("@providers/constants/PremiumAccountConstants", () => ({
@@ -153,6 +162,7 @@ jest.mock("@providers/constants/BattleConstants", () => ({
   DAMAGE_REDUCTION_MIN_DAMAGE: 1,
   DAMAGE_REDUCTION_MAX_REDUCTION_PERCENTAGE: 0.6,
   BATTLE_TOTAL_POTENTIAL_DAMAGE_MODIFIER: 1,
+  NPC_DAMAGE_REDUCTION_RATIO: 1,
   BATTLE_PVP_MELEE_DAMAGE_RATIO: 1,
   BERSERKER_BLOODTHIRST_HEALING_FACTOR: 1,
   MAGE_MANA_SHIELD_DAMAGE_REDUCTION: 1,
@@ -170,6 +180,7 @@ jest.mock("@providers/constants/LootConstants", () => ({
   LOOT_FOOD_DROP_CHANCE: 0.5,
   LOOT_GOLD_DROP_CHANCE: 1,
   NPC_LOOT_CHANCE_MULTIPLIER: 1,
+  LOOT_FOOD_DROP_CHANCE_FOR_NOOB: 0.5,
 }));
 
 jest.mock("@providers/constants/CraftingConstants", () => ({
@@ -220,6 +231,8 @@ jest.mock("@providers/constants/FarmingConstants", () => ({
   MEDIUM_GROWTH_FACTOR: 2,
   HIGH_GROWTH_FACTOR: 2.5,
   SUPER_GROWTH_FACTOR: 3,
+  FARMING_HARVEST_PRICE_RATIO: 1,
+  FARMING_SEED_PRICE_RATIO: 1,
   DEFAULT_PLANT_CYCLE: {
     Seed: 5,
     Sprout: 10,
@@ -263,6 +276,14 @@ jest.mock("@providers/constants/CharacterConstants", () => ({
       gridY: 15,
       scene: "shadowlands-sewer",
     },
+    "Farming Mode": {
+      gridX: 36,
+      gridY: 18,
+      scene: "farm-land",
+    },
+  },
+  CharacterGameMode: {
+    Farming: "Farming Mode",
   },
 }));
 
@@ -284,6 +305,9 @@ beforeAll(async () => {
   await mongoose.connection.db.dropDatabase();
 
   await redisManager.connect();
+
+  await inMemoryHashTable.init();
+  await inMemoryRepository.init();
 });
 
 afterAll(async () => {
@@ -303,7 +327,7 @@ afterAll(async () => {
 
   MapLoader.maps.clear();
 
-  await redisManager.client.flushAll();
+  await redisManager.client?.flushall();
 });
 
 beforeEach(async () => {

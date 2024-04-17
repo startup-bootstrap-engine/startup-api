@@ -10,7 +10,7 @@ import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
-import { ItemCraftable } from "@providers/item/ItemCraftable";
+import { ItemCraftableQueue } from "@providers/item/ItemCraftableQueue";
 import { FromGridX, FromGridY, IRefillableItem, IUseWithTile, MapLayers } from "@rpg-engine/shared";
 import { UseWithTileQueue } from "../abstractions/UseWithTileQueue";
 describe("UseWithTile.ts", () => {
@@ -23,7 +23,7 @@ describe("UseWithTile.ts", () => {
     useWithTileData: IUseWithTile,
     useWithTileDataRefill: IUseWithTile,
     skillIncrease: SkillIncrease,
-    itemCraftable: ItemCraftable,
+    itemCraftable: ItemCraftableQueue,
     inMemoryHashTable: InMemoryHashTable,
     inventory: IItem,
     inventoryContainer: IItemContainer,
@@ -33,7 +33,7 @@ describe("UseWithTile.ts", () => {
   beforeAll(async () => {
     useWithTile = container.get<UseWithTileQueue>(UseWithTileQueue);
     skillIncrease = container.get<SkillIncrease>(SkillIncrease);
-    itemCraftable = container.get<ItemCraftable>(ItemCraftable);
+    itemCraftable = container.get<ItemCraftableQueue>(ItemCraftableQueue);
     inMemoryHashTable = container.get<InMemoryHashTable>(InMemoryHashTable);
     await unitTestHelper.initializeMapLoader();
   });

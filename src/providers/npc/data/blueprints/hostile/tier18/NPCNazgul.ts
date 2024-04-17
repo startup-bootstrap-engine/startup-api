@@ -4,7 +4,6 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
-  AxesBlueprint,
   BooksBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
@@ -14,6 +13,7 @@ import {
   MacesBlueprint,
   SpearsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -81,6 +81,10 @@ export const npcNazgul: INPCTierBlueprint<18> = {
       chance: LootProbability.VeryRare,
     },
     {
+      itemBlueprintKey: ToolsBlueprint.GildedLavaPickaxe,
+      chance: LootProbability.VeryRare,
+    },
+    {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
       chance: LootProbability.Rare,
     },
@@ -117,18 +121,6 @@ export const npcNazgul: INPCTierBlueprint<18> = {
       chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: AxesBlueprint.DualImpactAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.CrownSplitterAxe,
-      chance: LootProbability.SemiCommon,
-    },
-    {
       itemBlueprintKey: DaggersBlueprint.AstralDagger,
       chance: LootProbability.SemiCommon,
     },
@@ -144,18 +136,7 @@ export const npcNazgul: INPCTierBlueprint<18> = {
       itemBlueprintKey: GemsBlueprint.CoralReefGem,
       chance: LootProbability.VeryRare,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.FrostbiteSaber,
-      chance: LootProbability.VeryRare,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.FrostfangDagger,
-      chance: LootProbability.VeryRare,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.CelestialDefender,
-      chance: LootProbability.VeryRare,
-    },
+
     {
       itemBlueprintKey: AccessoriesBlueprint.WoodlandNecklace,
       chance: LootProbability.VeryRare,

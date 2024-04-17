@@ -12,7 +12,6 @@ import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { SpellLearn } from "@providers/spells/SpellLearn";
 import { NamespaceRedisControl } from "@providers/spells/data/types/SpellsBlueprintTypes";
-import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { CharacterSocketEvents, ICharacterLogout, SpellsBlueprint } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
@@ -47,13 +46,18 @@ export class CharacterNetworkLogout {
   }
 
   private async handleLogout(data: ICharacterLogout, character: ICharacter, channel: SocketChannel): Promise<void> {
-    await this.unwatchCharacter(character);
-    await this.notifyNearbyCharacters(data, character);
-    await this.updateTextureKeysAndStatus(data, character);
-    await this.performCleanup(data, character);
-    await this.updateSkillsAndStats(character);
-    await this.leavePartyIfExists(character);
-    await this.finalizeLogout(character, channel);
+    try {
+      await this.leavePartyIfExists(character);
+      await this.unwatchCharacter(character);
+      await this.updateTextureKeysAndStatus(data, character);
+      await this.performCleanup(data, character);
+      await this.updateSkillsAndStats(character);
+      await this.notifyNearbyCharacters(data, character);
+
+      await this.finalizeLogout(character, channel);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   private async unwatchCharacter(character: ICharacter): Promise<void> {
@@ -70,7 +74,6 @@ export class CharacterNetworkLogout {
       );
     }
     console.log(`🚪: Character id ${data.id} (${character.name}) has disconnected`);
-    this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Server, "SocketDisconnect", 1);
   }
 
   private async updateTextureKeysAndStatus(data: ICharacterLogout, character: ICharacter): Promise<void> {
@@ -114,7 +117,7 @@ export class CharacterNetworkLogout {
   private async leavePartyIfExists(character: ICharacter): Promise<void> {
     const party = (await this.partyManagement.getPartyByCharacterId(character._id)) as ICharacterParty;
     if (party) {
-      await this.partyManagement.leaveParty(party._id, character, character);
+      await this.partyManagement.removeMemberFromParty(party, character);
     }
   }
 

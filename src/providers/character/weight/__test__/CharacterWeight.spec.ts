@@ -9,11 +9,11 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { CharacterSocketEvents, Modes } from "@rpg-engine/shared";
 import { CharacterDeath } from "../../CharacterDeath";
 import { CharacterItemContainer } from "../../characterItems/CharacterItemContainer";
-import { CharacterWeight } from "../CharacterWeight";
+import { CharacterWeightQueue } from "../CharacterWeightQueue";
 
 describe("CharacterWeight.ts", () => {
   let testCharacter: ICharacter;
-  let characterWeight: CharacterWeight;
+  let characterWeight: CharacterWeightQueue;
   let inventoryContainer: IItemContainer;
   let characterDeath: CharacterDeath;
   let testNPC: INPC;
@@ -21,7 +21,7 @@ describe("CharacterWeight.ts", () => {
   const mockSendEventToUser = jest.fn();
 
   beforeAll(() => {
-    characterWeight = container.get<CharacterWeight>(CharacterWeight);
+    characterWeight = container.get<CharacterWeightQueue>(CharacterWeightQueue);
     characterDeath = container.get<CharacterDeath>(CharacterDeath);
     characterItemContainer = container.get<CharacterItemContainer>(CharacterItemContainer);
 

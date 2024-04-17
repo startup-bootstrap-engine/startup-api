@@ -12,9 +12,11 @@ import {
   LegsBlueprint,
   MacesBlueprint,
   PotionsBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import {
@@ -27,7 +29,6 @@ import {
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcCorruptedKobold: INPCTierBlueprint<18> = {
   ...generateMoveTowardsMovement(),
@@ -77,6 +78,11 @@ export const npcCorruptedKobold: INPCTierBlueprint<18> = {
       chance: LootProbability.Uncommon,
     },
     {
+      itemBlueprintKey: SeedsBlueprint.PotatoSeed,
+      chance: LootProbability.Common,
+      quantityRange: [1, 15],
+    },
+    {
       itemBlueprintKey: SwordsBlueprint.LongSword,
       chance: LootProbability.Uncommon,
     },
@@ -113,14 +119,6 @@ export const npcCorruptedKobold: INPCTierBlueprint<18> = {
       chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.CrownedAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
       chance: LootProbability.Uncommon,
     },
@@ -130,18 +128,6 @@ export const npcCorruptedKobold: INPCTierBlueprint<18> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.AstralDagger,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.CelestialEdge,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.CelestialSaber,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.FrostfireLongblade,
       chance: LootProbability.Uncommon,
     },
     {

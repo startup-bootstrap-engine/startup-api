@@ -1,3 +1,4 @@
+import { FARMING_HARVEST_PRICE_RATIO } from "@providers/constants/FarmingConstants";
 import { IConsumableItemBlueprint, ItemSubType, ItemType } from "@rpg-engine/shared";
 import { FoodsBlueprint } from "../../types/itemsBlueprintTypes";
 import { UsableEffectsBlueprint } from "../../usableEffects/types";
@@ -12,7 +13,7 @@ export const itemTomato: IConsumableItemBlueprint = {
   description: "Tomatoes are red shaped fruits that can be found in tropical areas.",
   weight: 0.5,
   maxStackSize: 999,
-  basePrice: 88,
+  basePrice: 40 * FARMING_HARVEST_PRICE_RATIO,
   canSell: true,
   usableEffectKey: UsableEffectsBlueprint.ModerateEatingEffect,
 };

@@ -1,4 +1,5 @@
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { DEAD_PLANT_REMOVE_HOURS, MAX_HOURS_NO_WATER_DEAD } from "@providers/constants/FarmingConstants";
 import { container } from "@providers/inversify/container";
@@ -11,6 +12,7 @@ import { IPlantItem } from "./data/blueprints/PlantItem";
 export class PlantDead {
   constructor(private plantGrowth: PlantGrowth) {}
 
+  @TrackNewRelicTransaction()
   public async checkUpdateDeadPlants(): Promise<void> {
     const blueprintManager = container.get<BlueprintManager>(BlueprintManager);
     const thresholdDate = new Date(Date.now() - MAX_HOURS_NO_WATER_DEAD * 60 * 60 * 1000);
@@ -40,6 +42,7 @@ export class PlantDead {
     return queryResult;
   }
 
+  @TrackNewRelicTransaction()
   private async updateDeadPlant(plant: IItem, blueprintManager: BlueprintManager): Promise<void> {
     const blueprint = (await blueprintManager.getBlueprint("plants", plant.baseKey)) as IPlantItem;
 
@@ -52,6 +55,7 @@ export class PlantDead {
     await this.plantGrowth.updatePlantTexture(updatedPlant as IItem);
   }
 
+  @TrackNewRelicTransaction()
   public async removeDeadPlants(): Promise<void> {
     const thresholdDate = new Date(Date.now() - DEAD_PLANT_REMOVE_HOURS * 60 * 60 * 1000);
 

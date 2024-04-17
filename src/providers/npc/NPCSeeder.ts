@@ -134,7 +134,7 @@ export class NPCSeeder {
     return blueprintManager.getBlueprint<INPC>("npcs", npcFound.baseKey);
   }
 
-  @TrackNewRelicTransaction()
+  //! Please don't use new relic decorators here. It will cause huge spikes in our APM monitoring.
   private async resetNPC(npc: INPC): Promise<void> {
     try {
       await this.locker.unlock(`npc-death-${npc._id}`);

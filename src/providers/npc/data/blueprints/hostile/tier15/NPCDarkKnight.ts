@@ -13,22 +13,25 @@ import {
   LegsBlueprint,
   OthersBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   ShieldsBlueprint,
   SpearsBlueprint,
   StaffsBlueprint,
   SwordsBlueprint,
+  ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { MagicPower, NPCAlignment, NPCCustomDeathPenalties, RangeTypes, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcDarkKnight: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
   name: "Dark Knight",
   key: HostileNPCsBlueprint.DarkKnight,
+  tier: 15,
   // @ts-ignore
   textureKey: "superior-knight",
   alignment: NPCAlignment.Hostile,
@@ -62,7 +65,15 @@ export const npcDarkKnight: INPCTierBlueprint<15> = {
       chance: LootProbability.VeryCommon,
       quantityRange: [1, 10],
     },
-
+    {
+      itemBlueprintKey: ToolsBlueprint.MoonlureFishingRod,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.PumpkinSeed,
+      chance: LootProbability.Uncommon,
+      quantityRange: [1, 10],
+    },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Diamond,
       chance: LootProbability.Uncommon,
@@ -201,15 +212,15 @@ export const npcDarkKnight: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.StormswiftDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
-      itemBlueprintKey: SwordsBlueprint.FrostbiteFang,
-      chance: LootProbability.Uncommon,
+      itemBlueprintKey: ToolsBlueprint.WoodsManAxe,
+      chance: LootProbability.Common,
     },
     {
-      itemBlueprintKey: SwordsBlueprint.ShadowstrikeFalchion,
-      chance: LootProbability.Uncommon,
+      itemBlueprintKey: ToolsBlueprint.EmeraldEclipsesPickaxe,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],

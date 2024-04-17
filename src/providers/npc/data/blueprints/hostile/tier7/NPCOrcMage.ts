@@ -12,8 +12,10 @@ import {
   MacesBlueprint,
   MagicsBlueprint,
   RangedWeaponsBlueprint,
+  SeedsBlueprint,
   StaffsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import {
@@ -26,7 +28,6 @@ import {
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcOrcMage: INPCTierBlueprint<7> = {
   ...generateMoveTowardsMovement(),
@@ -70,6 +71,16 @@ export const npcOrcMage: INPCTierBlueprint<7> = {
     {
       itemBlueprintKey: AxesBlueprint.Axe,
       chance: LootProbability.SemiCommon,
+    },
+    {
+      itemBlueprintKey: SeedsBlueprint.TurnipSeed,
+      chance: LootProbability.Rare,
+      quantityRange: [1, 5],
+    },
+    {
+      itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
+      chance: LootProbability.Common,
+      quantityRange: [1, 10],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.BlueSapphire,

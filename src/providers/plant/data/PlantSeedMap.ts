@@ -13,4 +13,7 @@ export const seedToPlantMapping: Record<string, string> = {
   [SeedsBlueprint.TomatoSeed]: PlantItemBlueprint.Tomato,
   [SeedsBlueprint.TurnipSeed]: PlantItemBlueprint.Turnip,
   [SeedsBlueprint.WatermelonSeed]: PlantItemBlueprint.Watermelon,
+  [SeedsBlueprint.BloodrootBlossomSeed]: PlantItemBlueprint.BloodrootBlossom,
+  [SeedsBlueprint.DuskwispHerbSeed]: PlantItemBlueprint.DuskwispHerb,
+  [SeedsBlueprint.SunspireLotusSeed]: PlantItemBlueprint.SunspireLotus,
 };

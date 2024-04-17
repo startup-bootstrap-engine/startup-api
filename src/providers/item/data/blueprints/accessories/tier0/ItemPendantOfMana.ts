@@ -27,7 +27,8 @@ export const itemPendantOfMana: IEquippableAccessoryTier0Blueprint = {
   equippedBuff: {
     type: CharacterBuffType.CharacterAttribute,
     trait: CharacterAttributes.MaxMana,
-    buffPercentage: 5,
+    buffPercentage: 10,
     durationType: CharacterBuffDurationType.Permanent,
   },
+  equippedBuffDescription: "Increases maximum mana by 10%.",
 };

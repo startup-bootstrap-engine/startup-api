@@ -15,6 +15,7 @@ import {
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import {
@@ -27,7 +28,6 @@ import {
 } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcForestKobold: INPCTierBlueprint<16> = {
   ...generateMoveTowardsMovement(),
@@ -94,15 +94,15 @@ export const npcForestKobold: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: BootsBlueprint.SolarflareBoots,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: MacesBlueprint.ThunderStrikeClub,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.StarfirMaulClub,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: MacesBlueprint.SpikedClub,
@@ -110,19 +110,11 @@ export const npcForestKobold: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: AxesBlueprint.CleaverAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.MaulAxe,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.CrownedAxe,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: DaggersBlueprint.DarkmoonDagger,
@@ -130,20 +122,9 @@ export const npcForestKobold: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.AstralDagger,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
-    {
-      itemBlueprintKey: SwordsBlueprint.CelestialEdge,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.CelestialSaber,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: SwordsBlueprint.FrostfireLongblade,
-      chance: LootProbability.Uncommon,
-    },
+
     {
       itemBlueprintKey: AccessoriesBlueprint.SunlitRubyNecklace,
       chance: LootProbability.VeryRare,
@@ -170,27 +151,27 @@ export const npcForestKobold: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: ShieldsBlueprint.DemonShield,
-      chance: LootProbability.Common,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.MithrilArmor,
-      chance: LootProbability.Common,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: LegsBlueprint.MithrilLegs,
-      chance: LootProbability.Common,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: LegsBlueprint.GoldenLegs,
-      chance: LootProbability.Common,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: BootsBlueprint.GoldenBoots,
-      chance: LootProbability.VeryCommon,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.RoyalHelmet,
-      chance: LootProbability.VeryCommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.SaviorsHelmet,
@@ -202,7 +183,7 @@ export const npcForestKobold: INPCTierBlueprint<16> = {
     },
     {
       itemBlueprintKey: HelmetsBlueprint.RoyalKnightHelmet,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: ShieldsBlueprint.SilverShield,

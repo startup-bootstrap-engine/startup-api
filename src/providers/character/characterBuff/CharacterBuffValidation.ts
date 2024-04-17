@@ -1,4 +1,5 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { ICharacterBuff, ICharacterItemBuff } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { CharacterItemEquipment } from "../characterItems/CharacterItemEquipment";
@@ -18,6 +19,7 @@ export class CharacterBuffValidation {
     private characterItemEquipment: CharacterItemEquipment
   ) {}
 
+  @TrackNewRelicTransaction()
   public async removeDuplicatedBuffs(character: ICharacter): Promise<void> {
     const allCharacterBuffs = (await this.characterBuffTracker.getAllCharacterBuffs(character._id)) as IBuff[];
 

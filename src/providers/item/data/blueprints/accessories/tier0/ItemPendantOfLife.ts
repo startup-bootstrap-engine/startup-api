@@ -27,8 +27,8 @@ export const itemPendantOfLife: IEquippableAccessoryTier0Blueprint = {
   equippedBuff: {
     type: CharacterBuffType.CharacterAttribute,
     trait: CharacterAttributes.MaxHealth,
-    buffPercentage: 5,
+    buffPercentage: 10,
     durationType: CharacterBuffDurationType.Permanent,
   },
-  equippedBuffDescription: "Increases maxHealth by 5%",
+  equippedBuffDescription: "Increases maxHealth by 10%",
 };

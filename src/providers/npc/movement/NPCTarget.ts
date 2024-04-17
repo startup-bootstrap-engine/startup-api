@@ -71,13 +71,17 @@ export class NPCTarget {
   @TrackNewRelicTransaction()
   public async tryToSetTarget(npc: INPC): Promise<void> {
     try {
+      if (npc.targetCharacter) {
+        return;
+      }
+
       const canProceed = await this.locker.lock(`npc-try-set-target-${npc._id}`);
 
       if (!canProceed) {
         return;
       }
 
-      if (!npc.isAlive) {
+      if (!npc.isAlive || npc.health === 0) {
         return;
       }
 
@@ -122,7 +126,7 @@ export class NPCTarget {
       const character = await Character.findById(minDistanceCharacter.id).lean();
 
       if (!character) {
-        throw new Error(`Error in ${npc.key}: Failed to find character to set as target!`);
+        return;
       }
 
       const isRaid = npc.raidKey !== undefined;
@@ -161,7 +165,8 @@ export class NPCTarget {
     const targetCharacter = await Character.findById(npc.targetCharacter).lean();
 
     if (!targetCharacter) {
-      throw new Error(`Error in ${npc.key}: Failed to find targetCharacter!`);
+      console.debug(`Error in ${npc.key}: Failed to find targetCharacter!`);
+      return;
     }
 
     const rangeThresholdDefinition = this.getRangeThreshold(npc);
@@ -188,13 +193,13 @@ export class NPCTarget {
   @TrackNewRelicTransaction()
   public async setTarget(npc: INPC, character: ICharacter): Promise<void> {
     try {
-      if (!npc.isAlive) {
+      if (!(npc.isAlive || npc.health === 0) || character?.health === 0) {
         return;
       }
 
-      const char = await Character.findById(character.id).lean();
+      const char = await Character.findById(character._id).lean();
       if (!char) {
-        throw new Error(`Error in ${npc.key}: Failed to find character to set as target!`);
+        return;
       }
 
       await NPC.updateOne({ _id: npc._id }, { $set: { targetCharacter: char._id } });

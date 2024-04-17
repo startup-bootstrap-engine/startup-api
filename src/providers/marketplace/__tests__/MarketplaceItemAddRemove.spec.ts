@@ -71,13 +71,17 @@ describe("MarketplaceItemAddRemove.ts", () => {
     });
 
     const success = await marketplaceItemAddRemove.addItemToMarketplace(testCharacter, testNPC._id, {
-      price: 100,
+      price: 100.5,
       itemId: testItem._id,
     });
 
     expect(success).toBe(true);
     const marketPlaceItem = await MarketplaceItem.findOne({ item: testItem._id });
     expect(marketPlaceItem).not.toBeNull();
+    expect(marketPlaceItem).toBeDefined();
+    if (marketPlaceItem) {
+      expect(marketPlaceItem.price).toBe(100);
+    }
   });
 
   it("should fail to add an item to marketplace if the item is not in inventory", async () => {

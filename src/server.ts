@@ -6,6 +6,8 @@ import { appEnv } from "@providers/config/env";
 import {
   cronJobs,
   database,
+  inMemoryHashTable,
+  inMemoryRepository,
   mapLoader,
   newRelic,
   redisManager,
@@ -37,6 +39,9 @@ const server = app.listen(port, async () => {
     "ServerBootstrap",
     async () => {
       await Promise.all([database.initialize(), redisManager.connect(), socketAdapter.init(appEnv.socket.type)]);
+
+      await inMemoryHashTable.init();
+      await inMemoryRepository.init();
 
       cronJobs.start();
 
@@ -71,5 +76,3 @@ const server = app.listen(port, async () => {
     appEnv.general.ENV === EnvType.Development
   );
 });
-
-serverHelper.gracefullyShutdown(server);
