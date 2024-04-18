@@ -17,6 +17,7 @@ import { NPCExperience } from "@providers/npc/NPCExperience/NPCExperience";
 import { NPCLoader } from "@providers/npc/NPCLoader";
 import { NPCManager } from "@providers/npc/NPCManager";
 import PartyManagement from "@providers/party/PartyManagement";
+import { BullBoardMonitor } from "@providers/queue/BullBoardMonitor";
 import { PM2Helper } from "@providers/server/PM2Helper";
 import { ServerBootstrap } from "@providers/server/ServerBootstrap";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
@@ -76,6 +77,8 @@ export const redisManager = container.get<RedisManager>(RedisManager);
 export const inMemoryHashTable = container.get<InMemoryHashTable>(InMemoryHashTable);
 
 export const inMemoryRepository = container.get<InMemoryRepository>(InMemoryRepository);
+
+export const bullBoardMonitor = container.get<BullBoardMonitor>(BullBoardMonitor);
 
 export const pm2Helper = container.get<PM2Helper>(PM2Helper);
 
