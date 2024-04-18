@@ -171,6 +171,8 @@ export class DynamicQueue {
             await jobFn(job);
           } catch (error) {
             console.error(`Error processing ${queueName} job ${job.id}: ${error.message}`);
+            // Removing the job immediately on error
+            await job.remove();
           }
         },
         {
@@ -179,6 +181,14 @@ export class DynamicQueue {
           limiter: {
             max: maxWorkerLimiter,
             duration: QUEUE_GLOBAL_WORKER_LIMITER_DURATION,
+          },
+          removeOnComplete: {
+            age: 86400, // 24 hours
+            count: 1000,
+          },
+          removeOnFail: {
+            age: 86400, // 24 hours
+            count: 1000,
           },
           connection,
           ...workerOptions,

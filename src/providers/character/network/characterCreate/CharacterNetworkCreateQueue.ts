@@ -79,18 +79,15 @@ export class CharacterNetworkCreateQueue {
 
     character = await this.respawnIfNecessary(character);
 
+    const dataFromServer = await this.characterCreateInteractionManager.prepareDataForServer(character, data);
+
     await Promise.all([
       this.characterDailyPlayTracker.updateCharacterDailyPlay(character._id),
       this.unlockCharacterMapTransition(character),
       this.refreshBattleState(character),
       this.characterBuffValidation.removeDuplicatedBuffs(character),
       this.gridManager.setWalkable(character.scene, ToGridX(character.x), ToGridY(character.y), false),
-    ]);
-
-    const dataFromServer = await this.characterCreateInteractionManager.prepareDataForServer(character, data);
-
-    await this.characterCreateInteractionManager.startNPCInteractions(character);
-    await Promise.all([
+      this.characterCreateInteractionManager.startNPCInteractions(character),
       this.characterCreateInteractionManager.sendCharacterCreateMessages(character, dataFromServer),
       this.characterCreateInteractionManager.warnAboutWeatherStatus(character.channelId!),
       this.characterCreateRegen.handleCharacterRegen(character),
