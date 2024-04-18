@@ -36,7 +36,7 @@ export const npcNPCBalrog: INPCTierBlueprint<27> = {
   ...generateMoveTowardsMovement(),
   name: "Balrog",
   key: HostileNPCsBlueprint.Balrog,
-  subType: NPCSubtype.Animal,
+  subType: NPCSubtype.Magical,
   textureKey: HostileNPCsBlueprint.Balrog,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,
@@ -44,9 +44,9 @@ export const npcNPCBalrog: INPCTierBlueprint<27> = {
   tier: 27,
   maxRangeAttack: RangeTypes.High,
   isGiantForm: true,
-  speed: MovementSpeed.Fast,
+  speed: MovementSpeed.ExtraFast,
   // @ts-ignore
-  baseHealth: 600000,
+  baseHealth: 800000,
   healthRandomizerDice: Dice.D20,
   skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
@@ -274,6 +274,34 @@ export const npcNPCBalrog: INPCTierBlueprint<27> = {
       itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
       chance: LootProbability.Uncommon,
     },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.GoldenRubyNecklace,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.SunlitRubyNecklace,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.ElementalCodex,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.MysticCompendium,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.SpellboundCodex,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: BooksBlueprint.PotioncraftPrimer,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.ArcaneAdepthat,
+      chance: LootProbability.Uncommon,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
   areaSpells: [
@@ -288,8 +316,13 @@ export const npcNPCBalrog: INPCTierBlueprint<27> = {
       power: MagicPower.Medium,
     },
     {
+      spellKey: SpellsBlueprint.FireBolt,
+      probability: 90,
+      power: MagicPower.High,
+    },
+    {
       spellKey: SpellsBlueprint.FireStorm,
-      probability: 70,
+      probability: 100,
       power: MagicPower.UltraHigh,
     },
   ],
