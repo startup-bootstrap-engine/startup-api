@@ -240,7 +240,9 @@ export class DynamicQueue {
       const queue = this.queues.get(queueName);
       if (queue) {
         await queue.close();
-        await queue.obliterate();
+        await queue.obliterate({
+          force: true,
+        });
         this.queues.delete(queueName);
       }
 
