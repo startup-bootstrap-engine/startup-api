@@ -18,7 +18,6 @@ import { EnvType } from "@rpg-engine/shared";
 import { DefaultJobOptions, Job, Queue, QueueBaseOptions, Worker, WorkerOptions } from "bullmq";
 import { Redis } from "ioredis";
 import { random } from "lodash";
-import { BullBoardMonitor } from "./BullBoardMonitor";
 import { EntityQueueScalingCalculator } from "./EntityQueueScalingCalculator";
 import { QueueActivityMonitor } from "./QueueActivityMonitor";
 
@@ -47,8 +46,7 @@ export class DynamicQueue {
     private inMemoryHashTable: InMemoryHashTable,
     private newRelic: NewRelic,
     private entityQueueScalingCalculator: EntityQueueScalingCalculator,
-    private locker: Locker,
-    private bullBoardMonitor: BullBoardMonitor
+    private locker: Locker
   ) {}
 
   public async addJob(
@@ -121,7 +119,6 @@ export class DynamicQueue {
       console.log(`💡💡💡 Initializing queue ${queueName} 💡💡💡`);
       queue = new Queue(queueName, queueOptions);
       this.queues.set(queueName, queue);
-      this.bullBoardMonitor.addQueue(queueName, { connection });
       // constantly pool the connection to check if it's still needed
       await this.monitorAndReleaseInactiveQueueRedisConnections(queueName, connection);
 
@@ -256,7 +253,6 @@ export class DynamicQueue {
         await queue.obliterate({
           force: true,
         });
-        this.bullBoardMonitor.removeQueue(queueName);
         this.queues.delete(queueName);
       }
 
