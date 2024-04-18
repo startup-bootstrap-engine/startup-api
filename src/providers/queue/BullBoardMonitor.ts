@@ -30,7 +30,6 @@ export class BullBoardMonitor {
     const adapter = new BullMQAdapter(queue);
     this.queues.set(queueName, adapter);
     this.bullBoard.addQueue(adapter);
-    console.log(`Queue ${queueName} added to Bull Board`);
   }
 
   public removeQueue(queueName: string): void {
@@ -38,9 +37,8 @@ export class BullBoardMonitor {
     if (adapter) {
       this.bullBoard.removeQueue(adapter);
       this.queues.delete(queueName);
-      console.log(`Queue ${queueName} removed from Bull Board`);
     } else {
-      console.log(`Queue ${queueName} not found`);
+      console.log(`BullBoard: Queue ${queueName} not found`);
     }
   }
 
