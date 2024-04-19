@@ -22,7 +22,7 @@ import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DiscordBot } from "@providers/discord/DiscordBot";
 import { EntityEffectDurationControl } from "@providers/entityEffects/EntityEffectDurationControl";
 import { ErrorHandlingTracker } from "@providers/errorHandling/ErrorHandlingTracker";
-import { ItemDropVerifier } from "@providers/item/ItemDropVerifier";
+import { ItemDropVerifier } from "@providers/item/ItemDrop/ItemDropVerifier";
 import { ItemUseCycleQueue } from "@providers/item/ItemUseCycleQueue";
 import { ItemContainerTransactionQueue } from "@providers/itemContainer/ItemContainerTransactionQueue";
 import { Locker } from "@providers/locks/Locker";
