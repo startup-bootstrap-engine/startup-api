@@ -7,8 +7,8 @@ import { CharacterView } from "@providers/character/CharacterView";
 import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { FromGridX, FromGridY, IItemDrop } from "@rpg-engine/shared";
+import { ItemView } from "../../ItemView";
 import { ItemDrop } from "../ItemDrop";
-import { ItemView } from "../ItemView";
 
 describe("ItemDrop.ts", () => {
   let itemDrop: ItemDrop;
@@ -50,7 +50,11 @@ describe("ItemDrop.ts", () => {
     await testItem.save();
 
     // @ts-ignore
-    sendErrorMessageToCharacter = jest.spyOn(itemDrop.socketMessaging, "sendErrorMessageToCharacter" as any);
+    sendErrorMessageToCharacter = jest.spyOn(
+      // @ts-ignore
+      itemDrop.itemDropValidator.socketMessaging,
+      "sendErrorMessageToCharacter" as any
+    );
     // @ts-ignore
     itemDropData = {
       itemId: testItem.id,
@@ -182,6 +186,12 @@ describe("ItemDrop.ts", () => {
 
   describe("Item drop validation", () => {
     it("should fail on trying to drop an item to a position that's far away", async () => {
+      sendErrorMessageToCharacter = jest.spyOn(
+        // @ts-ignore
+        itemDrop.socketMessaging,
+        "sendErrorMessageToCharacter" as any
+      );
+
       const dropFar = await dropItem(inventoryItemContainerId, {
         toPosition: { x: FromGridX(999), y: FromGridY(999), scene: testCharacter.scene },
       });

@@ -22,7 +22,7 @@ import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DiscordBot } from "@providers/discord/DiscordBot";
 import { EntityEffectDurationControl } from "@providers/entityEffects/EntityEffectDurationControl";
 import { ErrorHandlingTracker } from "@providers/errorHandling/ErrorHandlingTracker";
-import { ItemDropVerifier } from "@providers/item/ItemDropVerifier";
+import { ItemDropVerifier } from "@providers/item/ItemDrop/ItemDropVerifier";
 import { ItemUseCycleQueue } from "@providers/item/ItemUseCycleQueue";
 import { ItemContainerTransactionQueue } from "@providers/itemContainer/ItemContainerTransactionQueue";
 import { Locker } from "@providers/locks/Locker";
@@ -32,6 +32,7 @@ import { NPCDeathQueue } from "@providers/npc/NPCDeathQueue";
 import { NPCFreezer } from "@providers/npc/NPCFreezer";
 import PartyManagement from "@providers/party/PartyManagement";
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
+import { BullBoardMonitor } from "@providers/queue/BullBoardMonitor";
 import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import SpellSilence from "@providers/spells/data/logic/mage/druid/SpellSilence";
@@ -79,7 +80,8 @@ export class ServerBootstrap {
     private npcDeathQueue: NPCDeathQueue,
     private itemContainerTransactionQueue: ItemContainerTransactionQueue,
     private itemDropVerifier: ItemDropVerifier,
-    private queueActivityMonitor: QueueActivityMonitor
+    private queueActivityMonitor: QueueActivityMonitor,
+    private bullBoardMonitor: BullBoardMonitor
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -171,6 +173,8 @@ export class ServerBootstrap {
     await this.inMemoryHashTable.deleteAll("character-bonus-penalties");
     await this.inMemoryHashTable.deleteAll("skills-with-buff");
     await this.inMemoryHashTable.deleteAll("item-container-transfer-results");
+
+    await this.bullBoardMonitor.cleanup();
 
     await this.itemDropVerifier.clearAllItemDrops();
 

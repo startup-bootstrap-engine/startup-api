@@ -507,33 +507,30 @@ export class CharacterItemInventory {
   }
 
   private async removeItemFromContainer(item: IItem, container: IItemContainer): Promise<boolean> {
-    for (let i = 0; i < container.slotQty; i++) {
-      const slotItem = container.slots?.[i];
+    // Check if the item exists in the container
+    const slotNumber = Object.keys(container.slots).find(
+      (key) => container.slots[key] && container.slots[key]._id.toString() === item._id.toString()
+    );
 
-      if (!slotItem) continue;
-      if (slotItem._id.toString() === item._id.toString()) {
-        // Changing item slot to null, thus removing it
-        container.slots[i] = null;
-
-        await ItemContainer.updateOne(
-          {
-            _id: container._id,
-          },
-          {
-            $set: {
-              slots: {
-                ...container.slots,
-              },
-            },
-          }
-        );
-
-        await this.inMemoryHashTable.delete("container-all-items", container._id);
-
-        return true;
-      }
+    if (!slotNumber) {
+      return false;
     }
-    return false;
+
+    // Set the slot to null
+    container.slots[slotNumber] = null;
+
+    // Update the database
+    try {
+      await ItemContainer.updateOne({ _id: container._id }, { $set: { slots: { ...container.slots } } });
+    } catch (error) {
+      console.error("Failed to update database:", error);
+      return false;
+    }
+
+    // Update the in-memory hash table
+    await this.inMemoryHashTable.delete("container-all-items", container._id);
+
+    return true;
   }
 
   @TrackNewRelicTransaction()
