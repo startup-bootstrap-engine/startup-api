@@ -173,9 +173,6 @@ export class ServerBootstrap {
     await this.inMemoryHashTable.deleteAll("character-bonus-penalties");
     await this.inMemoryHashTable.deleteAll("skills-with-buff");
     await this.inMemoryHashTable.deleteAll("item-container-transfer-results");
-
-    await this.bullBoardMonitor.cleanup();
-
     await this.itemDropVerifier.clearAllItemDrops();
 
     await this.entityEffectDuration.clearAll();

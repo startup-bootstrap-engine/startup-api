@@ -46,9 +46,7 @@ const server = app.listen(port, async () => {
 
       await bullBoardMonitor.init();
 
-      if (bullBoardMonitor.getRouter()) {
-        app.use("/admin/queues", bullBoardMonitor.getRouter());
-      }
+      app.use("/admin/queues", bullBoardMonitor.getRouter());
 
       cronJobs.start();
 

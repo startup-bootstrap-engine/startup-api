@@ -27,12 +27,6 @@ export class BullBoardMonitor {
   ) {}
 
   public async init(): Promise<void> {
-    const canProceed = await this.locker.lock("bull-board-monitor");
-
-    if (!canProceed) {
-      return;
-    }
-
     try {
       this.serverAdapter = new ExpressAdapter();
       this.serverAdapter.setBasePath("/admin/queues");
@@ -119,9 +113,5 @@ export class BullBoardMonitor {
       return;
     }
     return this.serverAdapter.getRouter();
-  }
-
-  public async cleanup(): Promise<void> {
-    await this.locker.unlock("bull-board-monitor");
   }
 }
