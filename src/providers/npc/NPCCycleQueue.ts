@@ -104,15 +104,21 @@ export class NPCCycleQueue {
       npc.skills = npcSkills;
 
       if (await this.stun.isStun(npc)) {
-        await this.addToQueue(npc, npcSkills);
-
         return;
       }
 
       await this.startCoreNPCBehavior(npc);
+      await this.addToQueue(npc, npcSkills);
     } catch (error) {
+      if (!npc) {
+        console.error("NPC is null");
+        return;
+      }
+
+      // for any other errors, keep going
+
       console.error(error);
-    } finally {
+
       await this.addToQueue(npc, npcSkills);
     }
   }
