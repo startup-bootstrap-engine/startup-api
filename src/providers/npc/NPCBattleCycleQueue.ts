@@ -93,7 +93,7 @@ export class NPCBattleCycleQueue {
       this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.NPCs, "NPCBattleCycle", 1);
 
       const result = await Promise.all([
-        NPC.findById(npc.id).lean({ virtuals: true, defaults: true }),
+        NPC.findById(npc._id).lean({ virtuals: true, defaults: true }),
         Character.findById(npc.targetCharacter).lean({ virtuals: true, defaults: true }),
       ]);
 
@@ -119,6 +119,12 @@ export class NPCBattleCycleQueue {
       }
 
       updatedNPC = result[0] as INPC;
+
+      if (!updatedNPC) {
+        await this.stop(npc);
+        return;
+      }
+
       updatedNPC.skills = npcSkills;
 
       if (!updatedNPC.isBehaviorEnabled) {
