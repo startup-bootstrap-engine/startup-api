@@ -82,6 +82,7 @@ export class NPCBattleCycleQueue {
 
   @TrackNewRelicTransaction()
   private async execBattleCycle(npc: INPC, npcSkills: ISkill): Promise<void> {
+    let updatedNPC = npc;
     try {
       const hasLock = await this.locker.hasLock(`npc-${npc._id}-npc-battle-cycle`);
 
@@ -117,7 +118,7 @@ export class NPCBattleCycleQueue {
         return;
       }
 
-      const updatedNPC = result[0] as INPC;
+      updatedNPC = result[0] as INPC;
       updatedNPC.skills = npcSkills;
 
       if (!updatedNPC.isBehaviorEnabled) {
@@ -126,7 +127,7 @@ export class NPCBattleCycleQueue {
       }
 
       const hasNoTarget = !updatedNPC.targetCharacter?.toString();
-      const hasDifferentTarget = updatedNPC.targetCharacter?.toString() !== targetCharacter?.id;
+      const hasDifferentTarget = updatedNPC.targetCharacter?.toString() !== targetCharacter?._id.toString();
 
       if (hasNoTarget || hasDifferentTarget || !targetCharacter) {
         await this.stop(npc);
@@ -155,11 +156,11 @@ export class NPCBattleCycleQueue {
         await this.battleAttackTarget.checkRangeAndAttack(updatedNPC, targetCharacter);
         await this.tryToSwitchToRandomTarget(npc);
       }
-
-      await this.addToQueue(updatedNPC, npcSkills);
     } catch (error) {
       console.error(error);
       await this.locker.unlock(`npc-${npc._id}-npc-battle-cycle`);
+    } finally {
+      await this.addToQueue(updatedNPC, npcSkills);
     }
   }
 
