@@ -109,9 +109,6 @@ export class BullBoardMonitor {
   }
 
   public getRouter(): any {
-    if (!this.serverAdapter) {
-      return;
-    }
     return this.serverAdapter.getRouter();
   }
 }
