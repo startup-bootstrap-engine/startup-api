@@ -11,6 +11,7 @@ import {
   BATTLE_TOTAL_POTENTIAL_DAMAGE_MODIFIER,
   DAMAGE_REDUCTION_MAX_REDUCTION_PERCENTAGE,
   DAMAGE_REDUCTION_MIN_DAMAGE,
+  NPC_DAMAGE_REDUCTION_RATIO,
 } from "@providers/constants/BattleConstants";
 import { PVP_ROGUE_ATTACK_DAMAGE_INCREASE_MULTIPLIER } from "@providers/constants/PVPConstants";
 import { SkillStatsCalculator } from "@providers/skill/SkillsStatsCalculator";
@@ -117,19 +118,19 @@ export class BattleDamageCalculator {
     isMagicAttack: boolean
   ): Promise<number> {
     //! Disable for now NPC damage reduction
-    // if (target.type === EntityType.NPC) {
-    //   const [defenderResistanceLevel, defenderMagicResistanceLevel] = await Promise.all([
-    //     defenderSkills?.resistance.level,
-    //     defenderSkills?.magicResistance.level,
-    //   ]);
+    if (target.type === EntityType.NPC) {
+      const [defenderResistanceLevel, defenderMagicResistanceLevel] = await Promise.all([
+        defenderSkills?.resistance.level,
+        defenderSkills?.magicResistance.level,
+      ]);
 
-    //   const defenseAttribute = isMagicAttack ? defenderMagicResistanceLevel : defenderResistanceLevel;
-    //   damage =
-    //     this.calculateDamageReduction(
-    //       damage,
-    //       this.calculateCharacterRegularDefense(defenderSkills.level, defenseAttribute)
-    //     ) * NPC_DAMAGE_REDUCTION_RATIO;
-    // }
+      const defenseAttribute = isMagicAttack ? defenderMagicResistanceLevel : defenderResistanceLevel;
+      damage =
+        this.calculateDamageReduction(
+          damage,
+          this.calculateCharacterRegularDefense(defenderSkills.level, defenseAttribute)
+        ) * NPC_DAMAGE_REDUCTION_RATIO;
+    }
 
     if (target.type === EntityType.Character) {
       const character = target as ICharacter;
