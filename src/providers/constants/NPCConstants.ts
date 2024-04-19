@@ -31,4 +31,4 @@ export const NPC_CYCLE_INTERVAL_RATIO = 0.95; // higher means faster cycles
 export const NPC_FREEZE_CHECK_INTERVAL = 10000;
 
 // NPC Battle
-export const NPC_BATTLE_CYCLE_INTERVAL = 1000;
+export const NPC_BATTLE_CYCLE_INTERVAL = 1500;
