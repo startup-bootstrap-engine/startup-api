@@ -106,6 +106,7 @@ import { npcOrcBerserker } from "./tier7/NPCOrcBerserker";
 import { npcOrcMage } from "./tier7/NPCOrcMage";
 import { npcForestWalker } from "./tier8/NPCForestWalker";
 import { npcDwarfMage } from "./tier9/NPCDwarfMage";
+import { npcAlphaWolf } from "./tier11/NPCAlphaWolf";
 
 export const hostileNPCs = {
   [HostileNPCsBlueprint.Orc]: npcOrc,
@@ -215,4 +216,5 @@ export const hostileNPCs = {
   [HostileNPCsBlueprint.ForestOrc]: npcForestOrc,
   [HostileNPCsBlueprint.Balrog]: npcNPCBalrog,
   [HostileNPCsBlueprint.LavaGolem]: npcLavaGolem,
+  [HostileNPCsBlueprint.AlphaWolf]: npcAlphaWolf,
 };
