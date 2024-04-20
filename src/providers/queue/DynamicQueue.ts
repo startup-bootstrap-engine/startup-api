@@ -85,6 +85,7 @@ export class DynamicQueue {
       );
 
       return await queue.add(queueName, data, {
+        ...addQueueOptions,
         removeOnComplete: true,
         removeOnFail: true,
         attempts: 3, // Number of attempts before the job is considered failed
@@ -92,7 +93,6 @@ export class DynamicQueue {
           type: "exponential",
           delay: 500,
         },
-        ...addQueueOptions,
       });
     } catch (error) {
       console.error(error);
