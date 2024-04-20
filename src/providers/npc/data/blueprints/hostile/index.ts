@@ -73,8 +73,10 @@ import { npcIceNaga } from "./tier21/NPCIceNaga";
 import { npcVenomNaga } from "./tier22/NPCVenomNaga";
 import { npcYellowDragon } from "./tier22/NPCYellowDragon";
 import { npcBlackNaga } from "./tier23/NPCBlackNaga";
+import { npcLavaGolem } from "./tier23/NPCLavaGolem";
 import { npcPurpleDragon } from "./tier23/NPCPurpleDragon";
 import { npcAncientDragon } from "./tier26/NPCAncientDragon";
+import { npcNPCBalrog } from "./tier27/NPCBalrog";
 import { npcBlackEagle } from "./tier3/NPCBlackEagle";
 import { npcBlackSpider } from "./tier3/NPCBlackSpider";
 import { npcBrownBear } from "./tier3/NPCBrownBear";
@@ -212,5 +214,10 @@ export const hostileNPCs = {
   [HostileNPCsBlueprint.IceOrc]: npcIceOrc,
   [HostileNPCsBlueprint.FireOrc]: npcFireOrc,
   [HostileNPCsBlueprint.ForestOrc]: npcForestOrc,
+<<<<<<< HEAD
   [HostileNPCsBlueprint.DemonSkeleton]: npcDemonSkeleton,
+=======
+  [HostileNPCsBlueprint.Balrog]: npcNPCBalrog,
+  [HostileNPCsBlueprint.LavaGolem]: npcLavaGolem,
+>>>>>>> 9686ddcb1bad462c7c38c520f75cf027b61297de
 };

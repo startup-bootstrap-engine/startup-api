@@ -184,6 +184,8 @@ export enum HostileNPCsBlueprint {
   FireOrc = "fire-orc",
   ForestOrc = "forest-orc",
   DemonSkeleton = "demon-skeleton",
+  Balrog = "balrog",
+  LavaGolem = "lava-golem",
   // Trainer
   BattleCompanion = "battle-companion",
   BattleCompanionMagic = "battle-companion-magic",

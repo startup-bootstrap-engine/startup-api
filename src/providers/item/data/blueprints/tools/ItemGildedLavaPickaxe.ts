@@ -29,8 +29,7 @@ export const itemGildedLavaPickaxe: IToolItemBlueprint = {
   textureAtlas: "items",
   texturePath: "tools/gilded-lava-pickaxe.png",
   name: "Gilded Lava Pickaxe",
-  description:
-    "Its molten core resonates with the allure of gold and the strength of obsidian, perfect for mining both materials.",
+  description: "A powerful pickaxe made of gilded lava.",
   attack: 10,
   defense: 6,
   weight: 0.1,
