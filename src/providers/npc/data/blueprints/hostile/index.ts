@@ -214,10 +214,7 @@ export const hostileNPCs = {
   [HostileNPCsBlueprint.IceOrc]: npcIceOrc,
   [HostileNPCsBlueprint.FireOrc]: npcFireOrc,
   [HostileNPCsBlueprint.ForestOrc]: npcForestOrc,
-<<<<<<< HEAD
   [HostileNPCsBlueprint.DemonSkeleton]: npcDemonSkeleton,
-=======
   [HostileNPCsBlueprint.Balrog]: npcNPCBalrog,
   [HostileNPCsBlueprint.LavaGolem]: npcLavaGolem,
->>>>>>> 9686ddcb1bad462c7c38c520f75cf027b61297de
 };
