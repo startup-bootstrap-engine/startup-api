@@ -51,6 +51,7 @@ export interface IBaseNPCBlueprint {
     chance: number;
     quantityRange?: number[];
   }[];
+  tintColor?: number;
 }
 
 const tierProperties = {

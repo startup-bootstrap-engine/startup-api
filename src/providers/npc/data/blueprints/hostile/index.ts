@@ -79,6 +79,7 @@ import { npcBlackEagle } from "./tier3/NPCBlackEagle";
 import { npcBlackSpider } from "./tier3/NPCBlackSpider";
 import { npcBrownBear } from "./tier3/NPCBrownBear";
 import { npcCaveSpider } from "./tier3/NPCCaveSpider";
+import { npcDemonSkeleton } from "./tier3/NPCDemonSkeleton";
 import { npcGhost } from "./tier3/NPCGhost";
 import { npcGoblin } from "./tier3/NPCGoblin";
 import { npcRedCentipede } from "./tier3/NPCRedCentipede";
@@ -211,4 +212,5 @@ export const hostileNPCs = {
   [HostileNPCsBlueprint.IceOrc]: npcIceOrc,
   [HostileNPCsBlueprint.FireOrc]: npcFireOrc,
   [HostileNPCsBlueprint.ForestOrc]: npcForestOrc,
+  [HostileNPCsBlueprint.DemonSkeleton]: npcDemonSkeleton,
 };
