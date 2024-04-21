@@ -8,14 +8,13 @@ export class FactionRepository {
 
   public readSprites(characterClass: string, race: string): ICharacterTexture[] {
     return characterTextures.filter(
-      (texture: ICharacterTexture) => texture.race === race && texture.class === characterClass
-    );
+      (entry) => (entry.class.includes(characterClass) && entry.race.includes(race)) || entry.isGloballyAvailable
+    ) as ICharacterTexture[];
   }
 
   public exists(race: string, textureKey: string): boolean {
-    const textures = characterTextures.find(
-      (texture: ICharacterTexture) => texture.race === race && texture.textureKey === textureKey
-    );
+    const textures = characterTextures.some((entry) => entry.race.includes(race) && entry.textureKey === textureKey);
+
     return !!textures;
   }
 }
