@@ -175,9 +175,12 @@ export class DynamicQueue {
             await this.queueActivityMonitor.updateQueueActivity(queueName);
             await jobFn(job);
           } catch (error) {
-            console.error(`Error processing ${queueName} job ${job.id}: ${error.message}`);
+            console.error(`Error processing ${queueName} job ${job.id}: ${error.message}`, {
+              jobData: job.data,
+              errorStack: error.stack,
+            });
             // Removing the job immediately on error
-            await job.remove();
+            await job.moveToFailed(error, `${queueName}-${job.id}`);
           }
         },
         {
@@ -311,7 +314,10 @@ export class DynamicQueue {
           queueScaleOptions?.forceCustomScale || QUEUE_CHARACTER_MAX_SCALE_FACTOR
         );
 
-        return `${prefix}-${envSuffix}-${charQueueScaleFactor}`;
+        // Generate a random number between 0 and charQueueScaleFactor - 1
+        const charQueueNumber = random(0, charQueueScaleFactor - 1);
+
+        return `${prefix}-${envSuffix}-${charQueueNumber}`;
 
       case "active-npcs":
         const activeNPCs = Number((await this.inMemoryHashTable.get("activity-tracker", "npc-count")) || 1);
@@ -322,7 +328,10 @@ export class DynamicQueue {
           maxNPCQueues,
           queueScaleOptions?.forceCustomScale || QUEUE_NPC_MAX_SCALE_FACTOR
         );
-        return `${prefix}-${envSuffix}-${NPCQueueScaleFactor}`;
+
+        const npcQueueNumber = random(0, NPCQueueScaleFactor - 1);
+
+        return `${prefix}-${envSuffix}-${npcQueueNumber}`;
     }
   }
 

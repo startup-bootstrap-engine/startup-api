@@ -69,7 +69,6 @@ export class NPCCycleQueue {
 
       {
         delay: npcCycleDelay,
-        priority: 1,
       }
     );
   }
@@ -110,16 +109,7 @@ export class NPCCycleQueue {
       await this.startCoreNPCBehavior(npc);
       await this.addToQueue(npc, npcSkills);
     } catch (error) {
-      if (!npc) {
-        console.error("NPC is null");
-        return;
-      }
-
-      // for any other errors, keep going
-
-      console.error(error);
-
-      await this.addToQueue(npc, npcSkills);
+      console.error("Error in NPCCycleQueue", error);
     }
   }
 
