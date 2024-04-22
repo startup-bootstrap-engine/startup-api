@@ -173,14 +173,15 @@ export class DynamicQueue {
         async (job) => {
           try {
             await this.queueActivityMonitor.updateQueueActivity(queueName);
-            await jobFn(job);
+
+            return await jobFn(job);
           } catch (error) {
             console.error(`Error processing ${queueName} job ${job.id}: ${error.message}`, {
               jobData: job.data,
               errorStack: error.stack,
             });
-            // Removing the job immediately on error
-            await job.moveToFailed(error, `${queueName}-${job.id}`);
+
+            throw error;
           }
         },
         {
@@ -205,9 +206,8 @@ export class DynamicQueue {
       this.workers.set(queueName, worker);
 
       if (!appEnv.general.IS_UNIT_TEST) {
-        worker.on("failed", async (job, err) => {
+        worker.on("failed", (job, err) => {
           console.log(`${queueName} job ${job?.id} failed with error ${err.message}`);
-          await worker?.close();
         });
       }
     }

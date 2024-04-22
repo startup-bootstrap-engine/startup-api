@@ -8,7 +8,6 @@ import {
   NPC_FRIENDLY_NEUTRAL_FREEZE_CHECK_CHANCE,
   NPC_HOSTILE_FREEZE_CHECK_CHANCE,
 } from "@providers/constants/NPCConstants";
-import { QUEUE_NPC_CYCLE_CUSTOM_SCALE } from "@providers/constants/QueueConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
@@ -64,7 +63,6 @@ export class NPCCycleQueue {
       },
       {
         queueScaleBy: "active-npcs",
-        forceCustomScale: QUEUE_NPC_CYCLE_CUSTOM_SCALE,
       },
 
       {
