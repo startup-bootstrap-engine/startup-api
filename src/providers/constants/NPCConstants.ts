@@ -1,11 +1,11 @@
 import { appEnv } from "@providers/config/env";
 import { EnvType } from "@rpg-engine/shared";
 
-export const NPC_BASE_HEALTH_MULTIPLIER = 0.9;
+export const NPC_BASE_HEALTH_MULTIPLIER = 1;
 export const NPC_SPEED_MULTIPLIER = 0.75;
-export const NPC_SKILL_LEVEL_MULTIPLIER = 1.1;
-export const NPC_SKILL_STRENGTH_MULTIPLIER = 1.1;
-export const NPC_SKILL_DEXTERITY_MULTIPLIER = 1;
+export const NPC_SKILL_LEVEL_MULTIPLIER = 2.5;
+export const NPC_SKILL_STRENGTH_MULTIPLIER = 2.5;
+export const NPC_SKILL_DEXTERITY_MULTIPLIER = 1.5;
 export const NPC_SKILL_RESISTANCE_MULTIPLIER = 1;
 // Performance adjustments
 export const NPC_MAX_ACTIVE_NPC_PER_CHARACTER = appEnv.general.ENV === EnvType.Development ? 100 : 10;
@@ -31,4 +31,4 @@ export const NPC_CYCLE_INTERVAL_RATIO = 0.95; // higher means faster cycles
 export const NPC_FREEZE_CHECK_INTERVAL = 10000;
 
 // NPC Battle
-export const NPC_BATTLE_CYCLE_INTERVAL = 1000;
+export const NPC_BATTLE_CYCLE_INTERVAL = 1500;

@@ -34,6 +34,7 @@ describe("NPCExperienceLimiter", () => {
       { hasSkills: true }
     );
   });
+
   afterEach(() => {
     jest.restoreAllMocks();
   });
@@ -63,5 +64,21 @@ describe("NPCExperienceLimiter", () => {
 
     const result = npcExperienceLimiter.isXpInRange(testNPC);
     expect(result).toBe(false);
+  });
+
+  describe("compareAndProcessRightEXP", () => {
+    it("should return a target experience when target xpToRelease experience is greater than target experience", () => {
+      if (testNPC.xpToRelease) {
+        testNPC.xpToRelease[0].xp = xpToLvl4 - 1;
+      }
+
+      testNPC.experience = xpToLvl3;
+
+      const npcWithRightExp = npcExperienceLimiter.compareAndProcessRightEXP(testNPC);
+
+      if (npcWithRightExp.xpToRelease) {
+        expect(npcWithRightExp.xpToRelease[0].xp).toBe(81);
+      }
+    });
   });
 });

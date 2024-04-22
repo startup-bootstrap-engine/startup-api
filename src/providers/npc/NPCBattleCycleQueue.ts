@@ -61,7 +61,6 @@ export class NPCBattleCycleQueue {
 
         {
           delay: NPC_BATTLE_CYCLE_INTERVAL,
-          priority: 1,
         }
       );
     } catch (error) {
@@ -82,6 +81,8 @@ export class NPCBattleCycleQueue {
 
   @TrackNewRelicTransaction()
   private async execBattleCycle(npc: INPC, npcSkills: ISkill): Promise<void> {
+    let updatedNPC = npc;
+
     try {
       const hasLock = await this.locker.hasLock(`npc-${npc._id}-npc-battle-cycle`);
 
@@ -92,44 +93,47 @@ export class NPCBattleCycleQueue {
       this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.NPCs, "NPCBattleCycle", 1);
 
       const result = await Promise.all([
-        NPC.findById(npc.id).lean({ virtuals: true, defaults: true }),
+        NPC.findById(npc._id).lean({ virtuals: true, defaults: true }),
         Character.findById(npc.targetCharacter).lean({ virtuals: true, defaults: true }),
       ]);
 
       const targetCharacter = result[1] as ICharacter;
+      updatedNPC = result[0] as INPC;
 
-      const isUnderRange = this.movementHelper.isUnderRange(
-        npc.x,
-        npc.y,
-        targetCharacter.x,
-        targetCharacter.y,
-        npc.maxRangeInGridCells || NPC_MIN_DISTANCE_TO_ACTIVATE
-      );
-
-      if (
-        !targetCharacter ||
-        !targetCharacter.isOnline ||
-        targetCharacter.health <= 0 ||
-        targetCharacter.scene !== npc.scene ||
-        !isUnderRange
-      ) {
-        await this.stop(npc);
+      if (!updatedNPC) {
+        console.error("NPC is null");
         return;
       }
 
-      const updatedNPC = result[0] as INPC;
       updatedNPC.skills = npcSkills;
 
-      if (!updatedNPC.isBehaviorEnabled) {
+      const isUnderRange = this.movementHelper.isUnderRange(
+        updatedNPC.x,
+        updatedNPC.y,
+        targetCharacter.x,
+        targetCharacter.y,
+        updatedNPC.maxRangeInGridCells || NPC_MIN_DISTANCE_TO_ACTIVATE
+      );
+
+      if (
+        !updatedNPC?.isBehaviorEnabled ||
+        !targetCharacter ||
+        !targetCharacter.isOnline ||
+        targetCharacter.health <= 0 ||
+        targetCharacter.scene !== updatedNPC.scene ||
+        !isUnderRange
+      ) {
         await this.stop(npc);
+
         return;
       }
 
       const hasNoTarget = !updatedNPC.targetCharacter?.toString();
-      const hasDifferentTarget = updatedNPC.targetCharacter?.toString() !== targetCharacter?.id;
+      const hasDifferentTarget = updatedNPC.targetCharacter?.toString() !== targetCharacter?.id.toString();
 
       if (hasNoTarget || hasDifferentTarget || !targetCharacter) {
         await this.stop(npc);
+
         return;
       }
 
@@ -158,8 +162,15 @@ export class NPCBattleCycleQueue {
 
       await this.addToQueue(updatedNPC, npcSkills);
     } catch (error) {
+      if (!updatedNPC) {
+        console.error("NPC is null");
+        return;
+      }
+
       console.error(error);
       await this.locker.unlock(`npc-${npc._id}-npc-battle-cycle`);
+
+      await this.addToQueue(updatedNPC, npcSkills);
     }
   }
 

@@ -26,6 +26,7 @@ import {
   CharacterPartyBenefits,
   CharacterSocketEvents,
   DisplayTextSocketEvents,
+  EntityType,
   ICharacterAttributeChanged,
   IDisplayTextEvent,
   IIncreaseXPResult,
@@ -83,7 +84,7 @@ export class NPCExperience {
       return;
     }
 
-    await this.time.waitForMilliseconds(random(0, 50)); // add artificial delay to avoid concurrency
+    await this.time.waitForMilliseconds(random(10, 40)); // add artificial delay to avoid concurrency
 
     const hasLock = await this.locker.lock(`npc-${target._id}-release-xp`);
 
@@ -94,12 +95,12 @@ export class NPCExperience {
     // The xp gained is released once the NPC dies.
     // Store the xp in the xpToRelease array
     // before adding the character to the array, check if the character already caused some damage
-
     target.xpToRelease = uniqBy(target.xpToRelease, "xpId");
 
     while (target.xpToRelease.length > 0) {
       const record = target.xpToRelease.shift();
       const characterAndSkills = await this.validateCharacterAndSkills(record!.charId);
+
       if (!characterAndSkills) {
         continue;
       }
@@ -169,39 +170,48 @@ export class NPCExperience {
   public async recordXPinBattle(attacker: ICharacter, target: ICharacter | INPC, damage: number): Promise<void> {
     try {
       const canProceed = await this.locker.lock(`npc-${target._id}-record-xp`);
+
       if (!canProceed) {
         return;
       }
+
       // For now, only supported increasing XP when target is NPC
-      if (target.type === "NPC" && damage > 0) {
+      if (target.type === EntityType.NPC && damage > 0) {
+        target = target as INPC;
+        // ensure that xpPerDamage is not undefined since u just need calculate EXP / MAX HEALTH
+        if (typeof target.xpPerDamage === "undefined" && target.experience) {
+          target.xpPerDamage = target.experience / target.maxHealth;
+        }
+
         // matches both melee and magic battle companions
         // do not give XP for battle companions
         if ((target as INPC).key.includes("battle-companion")) {
           return;
         }
 
-        target = target as INPC;
         target.xpToRelease = uniqBy(target.xpToRelease, "xpId");
-        const party = (await this.partyManagement.getPartyByCharacterId(attacker.id)) as ICharacterParty;
+        const party = (await this.partyManagement.getPartyByCharacterId(attacker._id)) as ICharacterParty;
         // Store the xp in the xpToRelease array
         // before adding the character to the array, check if the character already caused some damage
         if (typeof target.xpToRelease !== "undefined") {
           let found = false;
           for (const i in target.xpToRelease) {
             const xpCondition = party
-              ? target.xpToRelease[i].partyId?.toString() === party.id
-              : target.xpToRelease[i].charId?.toString() === attacker.id;
+              ? target.xpToRelease[i].partyId?.toString() === party._id.toString()
+              : target.xpToRelease[i].charId?.toString() === attacker._id.toString();
+
             if (xpCondition) {
               found = true;
               target.xpToRelease[i].xp! += target.xpPerDamage * damage;
               break;
             }
           }
+
           if (!found) {
             target.xpToRelease.push({
               xpId: uuidv4(),
-              charId: attacker.id,
-              partyId: party ? party.id : null, // can be null if the attacker is not in a party
+              charId: attacker._id,
+              partyId: party ? party._id : null, // can be null if the attacker is not in a party
               xp: target.xpPerDamage * damage,
             });
           }
@@ -209,20 +219,28 @@ export class NPCExperience {
           target.xpToRelease = [
             {
               xpId: uuidv4(),
-              charId: attacker.id,
-              partyId: party ? party.id : null, // can be null if the attacker is not in a party
+              charId: attacker._id,
+              partyId: party ? party._id : null, // can be null if the attacker is not in a party
               xp: target.xpPerDamage * damage,
             },
           ];
         }
 
         const isXpInRange = this.experienceLimiter.isXpInRange(target);
+
         if (isXpInRange) {
-          await NPC.updateOne({ _id: target.id }, { xpToRelease: target.xpToRelease });
+          await NPC.updateOne({ _id: target._id }, { xpToRelease: target.xpToRelease });
+        } else {
+          // E.g. if a creature has 800 experience and last but one xpToRelease has 700 accumulated
+          // and the last xpToRelease has 850 and when you make isXpInRange compare it will be false
+          // because 850 is bigger than 800, so last but one xpToRelease will be returned with 700.
+          // The player has "lost" 100 exp, this validation fixes this behavior.
+          target = this.experienceLimiter.compareAndProcessRightEXP(target);
+
+          await NPC.updateOne({ _id: target._id }, { xpToRelease: target.xpToRelease });
         }
       }
     } catch (error) {
-      console.error(error);
       await this.locker.unlock(`npc-${target._id}-record-xp`);
     } finally {
       await this.locker.unlock(`npc-${target._id}-record-xp`);
@@ -231,22 +249,15 @@ export class NPCExperience {
 
   private async getXPMultiplier(character: ICharacter, target: INPC): Promise<number> {
     const premiumAccountData = await this.characterPremiumAccount.getPremiumAccountData(character);
-
     const premiumAccountXPMultiplier = premiumAccountData ? premiumAccountData.XPBuff / 100 + 1 : 1;
-
     const characterMode: Modes = Object.values(Modes).find((mode) => mode === character.mode) ?? Modes.SoftMode;
-
     const giantNPCMultiplier = target.isGiantForm ? NPC_GIANT_FORM_EXPERIENCE_MULTIPLIER : 1;
     const characterModeMultiplier = MODE_EXP_MULTIPLIER[characterMode];
 
     return giantNPCMultiplier * characterModeMultiplier * premiumAccountXPMultiplier;
   }
 
-  private async sendExpLevelUpEvents(
-    expData: IIncreaseXPResult,
-    character: ICharacter,
-    target: INPC | ICharacter
-  ): Promise<void> {
+  private async sendExpLevelUpEvents(expData: IIncreaseXPResult, character: ICharacter): Promise<void> {
     const previousLevel = expData.level - 1;
 
     if (previousLevel === 0) {
@@ -271,7 +282,7 @@ export class NPCExperience {
     });
 
     const payload = {
-      characterId: character.id,
+      characterId: character._id,
       eventType: SkillEventType.LevelUp,
     };
 
@@ -285,7 +296,7 @@ export class NPCExperience {
     const updatedCharacter = await Character.findById(character._id).lean().select("maxHealth maxMana");
 
     if (!updatedCharacter) {
-      throw new Error(`Character ${character._id} not found`);
+      throw new Error(`Character ${character._id} not found.`);
     }
 
     await Character.updateOne(
@@ -301,7 +312,7 @@ export class NPCExperience {
     );
 
     const HPManaBoostPayload: ICharacterAttributeChanged = {
-      targetId: character.id,
+      targetId: character._id,
       health: updatedCharacter.maxHealth,
       mana: updatedCharacter.maxMana,
     };
@@ -331,7 +342,7 @@ export class NPCExperience {
 
   private async warnCharactersAroundAboutExpGains(character: ICharacter, exp: number): Promise<void> {
     const levelUpEventPayload: IDisplayTextEvent = {
-      targetId: character.id,
+      targetId: character._id,
       value: exp,
       prefix: "+",
     };
@@ -370,6 +381,7 @@ export class NPCExperience {
       virtuals: true,
       defaults: true,
     })) as ICharacter;
+
     if (!character) {
       return null;
     }
@@ -384,6 +396,7 @@ export class NPCExperience {
     if (!skills) {
       return null;
     }
+
     return { character, skills };
   }
 
@@ -412,7 +425,7 @@ export class NPCExperience {
 
     if (levelUp) {
       await this.skillLvUpStatsIncrease.increaseMaxManaMaxHealth(character._id);
-      await this.sendExpLevelUpEvents({ level: skills.level, previousLevel, exp }, character, target);
+      await this.sendExpLevelUpEvents({ level: skills.level, previousLevel, exp }, character);
       setTimeout(async () => {
         // importing directly to avoid circular dependency issues. Good luck trying to solve.
         await spellLearn.learnLatestSkillLevelSpells(character._id, true);
