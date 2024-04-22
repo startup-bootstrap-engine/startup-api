@@ -8,6 +8,7 @@ import { npcSpiderling } from "./tier1/NPCSpiderling";
 import { npcWolf } from "./tier1/NPCWolf";
 import { npcIceFox } from "./tier10/NPCIceFox";
 import { npcMudGolem } from "./tier10/NPCMudGolem";
+import { npcAlphaWolf } from "./tier11/NPCAlphaWolf";
 import { npcFireFox } from "./tier11/NPCFireFox";
 import { npcIceOrc } from "./tier11/NPCIceOrc";
 import { npcIceTroll } from "./tier11/NPCIceTroll";
@@ -30,6 +31,7 @@ import { npcCaveCyclops } from "./tier15/NPCCaveCyclops";
 import { npcCondessa } from "./tier15/NPCCondessa";
 import { npcDarkKnight } from "./tier15/NPCDarkKnight";
 import { npcDarkWraith } from "./tier15/NPCDarkWraith";
+import { npcDemonSkeleton } from "./tier15/NPCDemonSkeleton";
 import { npcForestCyclops } from "./tier15/NPCForestCyclops";
 import { npcIceCyclops } from "./tier15/NPCIceCyclop";
 import { npcMinotaurMage } from "./tier15/NPCMinotaurMage";
@@ -47,6 +49,7 @@ import { npcYeti } from "./tier16/NPCYeti";
 import { npcForestKobold } from "./tier16/npcForestKobold";
 import { npcBlackKobold } from "./tier17/NPCBlackKobold";
 import { npcCyclopsWarrior } from "./tier17/NPCCyclopsWarrior";
+import { npcDwarfKing } from "./tier17/NPCDwarfKing";
 import { npcFellbeast } from "./tier17/NPCFellbeast";
 import { npcNightFellbeast } from "./tier17/NPCNightFellbeast";
 import { npcCorruptedCyclops } from "./tier18/NPCCorruptedCyclops";
@@ -66,6 +69,7 @@ import { npcSnake } from "./tier2/NPCSnake";
 import { npcWinterWolf } from "./tier2/NPCWinterWolf";
 import { npcCorruptedNaga } from "./tier20/NPCCorruptedNaga";
 import { npcFireNaga } from "./tier20/NPCFireNaga";
+import { npcInfernoWidow } from "./tier20/NPCInfernoWidow";
 import { npcRedDragon } from "./tier20/NPCRedDragon";
 import { npcBlueDragon } from "./tier21/NPCBlueDragon";
 import { npcCrimsonNaga } from "./tier21/NPCCrimsonNaga";
@@ -81,7 +85,6 @@ import { npcBlackEagle } from "./tier3/NPCBlackEagle";
 import { npcBlackSpider } from "./tier3/NPCBlackSpider";
 import { npcBrownBear } from "./tier3/NPCBrownBear";
 import { npcCaveSpider } from "./tier3/NPCCaveSpider";
-import { npcDemonSkeleton } from "./tier3/NPCDemonSkeleton";
 import { npcGhost } from "./tier3/NPCGhost";
 import { npcGoblin } from "./tier3/NPCGoblin";
 import { npcRedCentipede } from "./tier3/NPCRedCentipede";
@@ -107,7 +110,6 @@ import { npcOrcBerserker } from "./tier7/NPCOrcBerserker";
 import { npcOrcMage } from "./tier7/NPCOrcMage";
 import { npcForestWalker } from "./tier8/NPCForestWalker";
 import { npcDwarfMage } from "./tier9/NPCDwarfMage";
-import { npcAlphaWolf } from "./tier11/NPCAlphaWolf";
 
 export const hostileNPCs = {
   [HostileNPCsBlueprint.Orc]: npcOrc,
@@ -166,6 +168,7 @@ export const hostileNPCs = {
   [HostileNPCsBlueprint.Elf]: npcElf,
   [HostileNPCsBlueprint.HighElf]: npcHighElf,
   [HostileNPCsBlueprint.GiantSpider]: npcGiantSpider,
+  [HostileNPCsBlueprint.InfernoWidow]: npcInfernoWidow,
   [HostileNPCsBlueprint.BlackEagle]: npcBlackEagle,
   [HostileNPCsBlueprint.DwarfArcher]: npcDwarfArcher,
   [HostileNPCsBlueprint.DwarfGuardian]: npcDwarfGuardian,
@@ -219,4 +222,5 @@ export const hostileNPCs = {
   [HostileNPCsBlueprint.Balrog]: npcNPCBalrog,
   [HostileNPCsBlueprint.LavaGolem]: npcLavaGolem,
   [HostileNPCsBlueprint.AlphaWolf]: npcAlphaWolf,
+  [HostileNPCsBlueprint.DwarfKing]: npcDwarfKing,
 };
