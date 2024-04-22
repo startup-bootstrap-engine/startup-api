@@ -7,13 +7,7 @@ export class FactionRepository {
   constructor() {}
 
   public readSprites(characterClass: string, race: string): ICharacterTexture[] {
-    return characterTextures
-      .filter(
-        (entry) => (entry.class.includes(characterClass) && entry.race.includes(race)) || entry.isGloballyAvailable
-      )
-      .sort((a, b) =>
-        a.isGloballyAvailable === b.isGloballyAvailable ? 0 : a.isGloballyAvailable ? 1 : -1
-      ) as ICharacterTexture[];
+    return characterTextures.filter((entry) => entry.class.includes(characterClass) && entry.race.includes(race));
   }
 
   public exists(race: string, textureKey: string): boolean {
