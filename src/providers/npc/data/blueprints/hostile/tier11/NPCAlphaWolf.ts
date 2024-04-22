@@ -5,11 +5,8 @@ import {
   ArmorsBlueprint,
   AxesBlueprint,
   BootsBlueprint,
-  ContainersBlueprint,
-  DaggersBlueprint,
   GlovesBlueprint,
   HelmetsBlueprint,
-  MacesBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -37,15 +34,13 @@ export const npcAlphaWolf: INPCTierBlueprint<11> = {
   tier: 11,
   maxRangeAttack: RangeTypes.High,
   speed: MovementSpeed.Fast,
-  // @ts-ignore
-  baseHealth: 590,
+  baseHealth: 670,
   healthRandomizerDice: Dice.D20,
   skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity", "resistance"],
   canSwitchToLowHealthTarget: true,
   canSwitchToRandomTarget: true,
 
-  isMagic: true,
   skills: {
     level: 41,
     strength: {
@@ -65,11 +60,6 @@ export const npcAlphaWolf: INPCTierBlueprint<11> = {
     },
   },
   loots: [
-    {
-      itemBlueprintKey: ContainersBlueprint.AzureBackpack,
-      chance: LootProbability.Rare,
-    },
-
     {
       itemBlueprintKey: BootsBlueprint.CopperBoots,
       chance: LootProbability.SemiCommon,
@@ -99,32 +89,17 @@ export const npcAlphaWolf: INPCTierBlueprint<11> = {
       itemBlueprintKey: GlovesBlueprint.ChainGloves,
       chance: LootProbability.Uncommon,
     },
-    {
-      itemBlueprintKey: MacesBlueprint.HellishMace,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.ShatterSpikeClub,
-      chance: LootProbability.VeryRare,
-    },
-    {
-      itemBlueprintKey: MacesBlueprint.SunderingClub,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: AxesBlueprint.ChaosAxe,
-      chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: DaggersBlueprint.FlameheartDagger,
-      chance: LootProbability.Rare,
-    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
   areaSpells: [
     {
       spellKey: SpellsBlueprint.BleedingEdge,
       probability: 10,
+      power: MagicPower.High,
+    },
+    {
+      spellKey: SpellsBlueprint.CleavingStomp,
+      probability: 50,
       power: MagicPower.High,
     },
   ],
