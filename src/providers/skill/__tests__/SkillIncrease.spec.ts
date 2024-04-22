@@ -22,6 +22,7 @@ import {
 import { SkillFunctions } from "../SkillFunctions";
 import { SkillIncrease } from "../SkillIncrease";
 import { CraftingSkillsMap } from "../constants";
+import { v4 as uuidv4 } from "uuid";
 
 type TestCase = {
   item: string;
@@ -200,6 +201,7 @@ describe("SkillIncrease.spec.ts | increaseShieldingSP, increaseSkillsOnBattle & 
       ownerType: "Character",
     }) as ISkill;
     initialLevel = initialSkills.first.level;
+
     await initialSkills.save();
 
     spToLvl2 = calculateSPToNextLevel(initialSkills.first.skillPoints, initialLevel + 1);
@@ -331,7 +333,7 @@ describe("SkillIncrease.spec.ts | increaseShieldingSP, increaseSkillsOnBattle & 
     expect(testNPC.xpToRelease?.length).toBe(1);
   });
 
-  it("should increase character's 'first' skill level and skill points. Should increase experience and level up to level 5", async () => {
+  it("should increase character's 'first' skill level and skill points", async () => {
     const spToAdd = spToLvl2 * 5 + 5;
     const attacker = (await Character.findByIdAndUpdate(
       { _id: testCharacter._id },
@@ -348,28 +350,11 @@ describe("SkillIncrease.spec.ts | increaseShieldingSP, increaseSkillsOnBattle & 
       await skillIncrease.increaseSkillsOnBattle(attacker, testNPC, 2);
     }
 
-    // @ts-ignore
-    await skillIncrease.npcExperience.releaseXP(testNPC);
-
     const updatedSkills = (await Skill.findById(attacker.skills).lean()) as ISkill;
 
     expect(updatedSkills.first.level).toBe(initialLevel + 1);
     expect(updatedSkills.first.skillPoints).toBe(spToAdd * SP_INCREASE_BASE + 35);
     expect(updatedSkills.first.skillPointsToNextLevel).toBe(spToLvl2 - 5.75);
-
-    expect(updatedSkills.level).toBe(initialLevel + 3);
-    expect(updatedSkills.experience).toBe(spToAdd * 2);
-    expect(updatedSkills.xpToNextLevel).toBe(145);
-    expect(testNPC.xpToRelease?.length).toBe(0);
-
-    expect(sendSkillLevelUpEvents).toHaveBeenCalled();
-    expect(sendExpLevelUpEvents).toHaveBeenCalled();
-
-    expect(spellLearnMock).not.toHaveBeenCalled();
-    // faking timers is creating issue with mongo calls
-    await wait(5.2);
-    expect(spellLearnMock).toHaveBeenCalledTimes(1);
-    expect(spellLearnMock).toHaveBeenCalledWith(attacker._id, true);
 
     // Check that other skills remained unchanged
     expect(updatedSkills.axe.level).toBe(initialSkills.axe.level);
@@ -380,6 +365,50 @@ describe("SkillIncrease.spec.ts | increaseShieldingSP, increaseSkillsOnBattle & 
     expect(updatedSkills.sword.skillPoints).toBe(initialSkills.sword.skillPoints);
     expect(updatedSkills.shielding.level).toBe(initialSkills.shielding.level);
     expect(updatedSkills.shielding.skillPoints).toBe(initialSkills.shielding.skillPoints);
+
+    expect(sendSkillLevelUpEvents).toHaveBeenCalled();
+  });
+
+  it("Should increase experience and level up to level 5", async () => {
+    const experienceToLevel5 = xpToLvl2 * 20;
+    const attacker = (await Character.findByIdAndUpdate(
+      { _id: testCharacter._id },
+      {
+        x: 0,
+        y: 1,
+        class: CharacterClass.Druid,
+      },
+      { new: true }
+    )) as ICharacter;
+
+    if (typeof testNPC.xpToRelease !== "undefined") {
+      const party = uuidv4(); // just for avoid warning on partyId
+      testNPC.xpToRelease.push({
+        xpId: uuidv4(),
+        charId: attacker._id,
+        partyId: party ? null : party,
+        xp: experienceToLevel5,
+      });
+    }
+
+    // @ts-ignore
+    await skillIncrease.npcExperience.releaseXP(testNPC);
+
+    const updatedSkills = (await Skill.findById(attacker.skills).lean()) as ISkill;
+
+    expect(updatedSkills.level).toBe(5);
+    expect(updatedSkills.experience).toBe(experienceToLevel5);
+    expect(updatedSkills.xpToNextLevel).toBe(168);
+
+    expect(testNPC.xpToRelease?.length).toBe(0);
+
+    expect(sendExpLevelUpEvents).toHaveBeenCalled();
+
+    expect(spellLearnMock).not.toHaveBeenCalled();
+    // faking timers is creating issue with mongo calls
+    await wait(5.2);
+    expect(spellLearnMock).toHaveBeenCalledTimes(1);
+    expect(spellLearnMock).toHaveBeenCalledWith(attacker._id, true);
   });
 
   it("should increase character's magic skill level and not strength.", async () => {
