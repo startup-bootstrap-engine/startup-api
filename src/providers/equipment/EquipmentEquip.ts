@@ -212,54 +212,58 @@ export class EquipmentEquip {
     item: IItem,
     character: ICharacter
   ): Promise<void> {
-    const equipmentSlots = await this.equipmentSlots.getEquipmentSlots(character._id, equipment._id);
-    const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {
-      equipment: equipmentSlots,
-      inventory: inventoryContainer as any,
-    };
+    try {
+      const equipmentSlots = await this.equipmentSlots.getEquipmentSlots(character._id, equipment._id);
+      const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {
+        equipment: equipmentSlots,
+        inventory: inventoryContainer as any,
+      };
 
-    this.updateItemInventoryCharacter(payloadUpdate, character);
+      this.updateItemInventoryCharacter(payloadUpdate, character);
 
-    // if no owner, add item ownership
-    if (!item.owner) {
-      await this.itemOwnership.addItemOwnership(item, character);
+      await Item.updateOne({ _id: item._id }, { isEquipped: true });
+
+      // make sure it does not save coordinates here
+      if (item.x || item.y || item.scene) {
+        await Item.updateOne({ _id: item._id }, { $unset: { x: "", y: "", scene: "" } });
+      }
+
+      // When Equip remove data from redis
+      await this.inMemoryHashTable.delete(character._id.toString(), "totalAttack");
+      await this.inMemoryHashTable.delete(character._id.toString(), "totalDefense");
+
+      await this.characterWeight.updateCharacterWeight(character);
+
+      await this.characterItemBuff.enableItemBuff(character, item);
+
+      const INCREASE_VALUE = 2;
+      const Accessory = await Item.findById(equipmentSlots.accessory);
+
+      if (
+        item.subType === ItemSubType.Book ||
+        (item.type === ItemType.Weapon && Accessory?.subType === ItemSubType.Book)
+      ) {
+        const handItemsIds = [equipment.leftHand, equipment.rightHand];
+        await Item.updateMany(
+          { _id: { $in: handItemsIds }, type: ItemType.Weapon },
+          { $inc: { attack: INCREASE_VALUE, defense: INCREASE_VALUE } }
+        );
+      }
+
+      const newEquipmentSlots = await this.equipmentSlots.getEquipmentSlots(character._id, equipment._id);
+
+      this.socketMessaging.sendEventToUser(character.channelId!, ItemSocketEvents.EquipmentAndInventoryUpdate, {
+        equipment: newEquipmentSlots,
+        inventory: inventoryContainer,
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      // if no owner, add item ownership
+      if (!item.owner) {
+        await this.itemOwnership.addItemOwnership(item, character);
+      }
     }
-
-    await Item.updateOne({ _id: item._id }, { isEquipped: true });
-
-    // make sure it does not save coordinates here
-    if (item.x || item.y || item.scene) {
-      await Item.updateOne({ _id: item._id }, { $unset: { x: "", y: "", scene: "" } });
-    }
-
-    // When Equip remove data from redis
-    await this.inMemoryHashTable.delete(character._id.toString(), "totalAttack");
-    await this.inMemoryHashTable.delete(character._id.toString(), "totalDefense");
-
-    await this.characterWeight.updateCharacterWeight(character);
-
-    await this.characterItemBuff.enableItemBuff(character, item);
-
-    const INCREASE_VALUE = 2;
-    const Accessory = await Item.findById(equipmentSlots.accessory);
-
-    if (
-      item.subType === ItemSubType.Book ||
-      (item.type === ItemType.Weapon && Accessory?.subType === ItemSubType.Book)
-    ) {
-      const handItemsIds = [equipment.leftHand, equipment.rightHand];
-      await Item.updateMany(
-        { _id: { $in: handItemsIds }, type: ItemType.Weapon },
-        { $inc: { attack: INCREASE_VALUE, defense: INCREASE_VALUE } }
-      );
-    }
-
-    const newEquipmentSlots = await this.equipmentSlots.getEquipmentSlots(character._id, equipment._id);
-
-    this.socketMessaging.sendEventToUser(character.channelId!, ItemSocketEvents.EquipmentAndInventoryUpdate, {
-      equipment: newEquipmentSlots,
-      inventory: inventoryContainer,
-    });
   }
 
   private async checkContainerType(itemContainer: IItemContainer): Promise<SourceEquipContainerType> {

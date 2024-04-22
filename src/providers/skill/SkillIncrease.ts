@@ -85,7 +85,7 @@ export class SkillIncrease {
         return;
       }
 
-      const canIncreaseSP = await await this.skillGainValidation.canUpdateSkills(attacker, skills, skillName);
+      const canIncreaseSP = await this.skillGainValidation.canUpdateSkills(attacker, skills, skillName);
       if (!canIncreaseSP) return;
 
       const targetSkills = target.skills as ISkill;

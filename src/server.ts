@@ -4,6 +4,7 @@ import "express-async-errors";
 
 import { appEnv } from "@providers/config/env";
 import {
+  bullBoardMonitor,
   cronJobs,
   database,
   inMemoryHashTable,
@@ -43,6 +44,8 @@ const server = app.listen(port, async () => {
       await inMemoryHashTable.init();
       await inMemoryRepository.init();
 
+      await bullBoardMonitor.init();
+
       cronJobs.start();
 
       await mapLoader.init(); // must be the first thing loaded!
@@ -50,6 +53,8 @@ const server = app.listen(port, async () => {
       app.use(router);
 
       app.use(errorHandlerMiddleware);
+
+      app.use("/admin/queues", bullBoardMonitor.getRouter());
 
       //! Dev Warning: If you want to add a new operation on server bootstrap, make sure to add it to one of the methods below (check if needs to be executed in all PM2 instances or not.)
 

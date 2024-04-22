@@ -3,8 +3,6 @@ import { Equipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { CharacterInventory } from "@providers/character/CharacterInventory";
-import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { EquipmentSlots } from "@providers/equipment/EquipmentSlots";
@@ -21,11 +19,12 @@ import {
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
-import { CharacterItems } from "../character/characterItems/CharacterItems";
+import { CharacterItems } from "../../character/characterItems/CharacterItems";
 
 import { Locker } from "@providers/locks/Locker";
+import { ItemOwnership } from "../ItemOwnership";
+import { ItemDropValidator } from "./ItemDropValidator";
 import { ItemDropVerifier } from "./ItemDropVerifier";
-import { ItemOwnership } from "./ItemOwnership";
 
 @provide(ItemDrop)
 export class ItemDrop {
@@ -33,22 +32,21 @@ export class ItemDrop {
     private socketMessaging: SocketMessaging,
     private characterItems: CharacterItems,
     private equipmentSlots: EquipmentSlots,
-    private characterValidation: CharacterValidation,
     private movementHelper: MovementHelper,
     private characterWeight: CharacterWeightQueue,
     private itemOwnership: ItemOwnership,
-    private characterInventory: CharacterInventory,
 
     private inMemoryHashTable: InMemoryHashTable,
     private locker: Locker,
-    private itemDropVerifier: ItemDropVerifier
+    private itemDropVerifier: ItemDropVerifier,
+    private itemDropValidator: ItemDropValidator
   ) {}
 
   //! For now, only a drop from inventory or equipment set is allowed.
   @TrackNewRelicTransaction()
   public async performItemDrop(itemDropData: IItemDrop, character: ICharacter): Promise<boolean> {
     try {
-      const isDropValid = await this.isItemDropValid(itemDropData, character);
+      const isDropValid = await this.itemDropValidator.isItemDropValid(itemDropData, character);
       if (!isDropValid) {
         return false;
       }
@@ -155,26 +153,29 @@ export class ItemDrop {
   }
 
   private async tryDroppingToMap(itemDrop: IItemDrop, dropItem: IItem, character: ICharacter): Promise<boolean> {
-    // if itemDrop toPosition has x and y, then drop item to that position in the map, if not, then drop to the character position
-    const targetPosition = this.getTargetPosition(itemDrop);
+    try {
+      // if itemDrop toPosition has x and y, then drop item to that position in the map, if not, then drop to the character position
+      const targetPosition = this.getTargetPosition(itemDrop);
 
-    // check if targetX and Y is under range
-    if (!this.isDropPositionValid(character, targetPosition)) {
-      this.sendDropErrorMessage(character);
+      // check if targetX and Y is under range
+      if (!this.isDropPositionValid(character, targetPosition)) {
+        this.sendDropErrorMessage(character);
+        return false;
+      }
+
+      // update x, y, scene and unset owner, using updateOne
+      await this.updateItemPosition(dropItem, targetPosition, character);
+
+      // Perform cleanup, status update, and ownership removal concurrently
+      await Promise.all([this.itemDropVerifier.trackDrop(character, dropItem._id), this.updateItemStatus(dropItem)]);
+
+      return true;
+    } catch (error) {
+      console.error(error);
       return false;
+    } finally {
+      await this.removeItemOwnership(dropItem);
     }
-
-    // update x, y, scene and unset owner, using updateOne
-    await this.updateItemPosition(dropItem, targetPosition, character);
-
-    // Perform cleanup, status update, and ownership removal concurrently
-    await Promise.all([
-      this.itemDropVerifier.trackDrop(character, dropItem._id),
-      this.updateItemStatus(dropItem),
-      this.removeItemOwnership(dropItem),
-    ]);
-
-    return true;
   }
 
   private getTargetPosition(itemDrop: IItemDrop): { x: number; y: number } {
@@ -261,79 +262,6 @@ export class ItemDrop {
     const wasItemDeleted = await this.characterItems.deleteItemFromContainer(item._id, character, "inventory");
 
     if (!wasItemDeleted) {
-      return false;
-    }
-
-    return true;
-  }
-
-  private async isItemDropValid(itemDrop: IItemDrop, character: ICharacter): Promise<Boolean> {
-    const item = await Item.findById(itemDrop.itemId);
-    const isFromEquipmentSet = itemDrop.source === "equipment";
-
-    if (!item) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, this item is not accessible.");
-      return false;
-    }
-
-    if (!isFromEquipmentSet) {
-      const validation = await this.validateItemDropFromInventory(itemDrop, character);
-
-      if (!validation) {
-        return false;
-      }
-    }
-
-    return this.characterValidation.hasBasicValidation(character);
-  }
-
-  private async validateItemDropFromInventory(
-    itemDrop: IItemDrop,
-
-    character: ICharacter
-  ): Promise<boolean> {
-    const inventory = await this.characterInventory.getInventory(character);
-
-    if (!inventory) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        "Sorry, you must have a bag or backpack to drop this item."
-      );
-      return false;
-    }
-
-    const inventoryContainer = await ItemContainer.findById(inventory.itemContainer);
-
-    if (!inventoryContainer) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, inventory container not found.");
-      return false;
-    }
-
-    const hasItemInInventory = inventoryContainer?.itemIds?.find(
-      (itemId) => String(itemId) === String(itemDrop.itemId)
-    );
-
-    if (!hasItemInInventory) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        "Sorry, you do not have this item in your inventory."
-      );
-      return false;
-    }
-
-    if (itemDrop.fromContainerId.toString() !== inventoryContainer?.id.toString()) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        "Sorry, this item does not belong to your inventory."
-      );
-      return false;
-    }
-
-    if (!inventoryContainer) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        "Sorry, you must have a bag or backpack to drop this item."
-      );
       return false;
     }
 

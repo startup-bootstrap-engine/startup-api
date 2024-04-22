@@ -208,6 +208,8 @@ const npcSchema = createLeanSchema(
     ),
     raidKey: Type.string({}),
     appliedEntityEffects: Type.array().of(Type.mixed({})),
+
+    tintColor: Type.number({ required: false }),
   },
   { timestamps: { createdAt: true, updatedAt: true } }
 );
