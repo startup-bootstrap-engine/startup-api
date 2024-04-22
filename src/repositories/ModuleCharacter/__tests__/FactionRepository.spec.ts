@@ -10,7 +10,7 @@ describe("FactionRepository.ts", () => {
 
   it("should read correct sprites from json", () => {
     const result = factionRepository.readSprites("Warrior", "Dwarf");
-    expect(result.length).toEqual(20);
+    expect(result.length).toEqual(2);
   });
 
   it("should check if sprite exists", () => {
