@@ -1,129 +1,111 @@
 [
   {
     "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human"],
     "textureKey": "purple-hair-hero-1",
-    "textureDisplayName": "Purple Hair Hero 1",
-    "isGloballyAvailable": true
+    "textureDisplayName": "Purple Hair Hero 1"
   },
   {
     "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human"],
     "textureKey": "pink-hair-hero-1",
-    "textureDisplayName": "Pink Hair Hero 1",
-    "isGloballyAvailable": true
+    "textureDisplayName": "Pink Hair Hero 1"
   },
   {
     "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human"],
     "textureKey": "pink-hair-girl-1",
-    "textureDisplayName": "Pink Hair Girl 1",
-    "isGloballyAvailable": true
+    "textureDisplayName": "Pink Hair Girl 1"
   },
   {
     "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human"],
     "textureKey": "orange-hair-hero-2",
-    "textureDisplayName": "Orange Hair Hero 2",
-    "isGloballyAvailable": true
+    "textureDisplayName": "Orange Hair Hero 2"
   },
   {
     "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human"],
     "textureKey": "orange-hair-hero-1",
-    "textureDisplayName": "Orange Hair Hero 1",
-    "isGloballyAvailable": true
+    "textureDisplayName": "Orange Hair Hero 1"
   },
   {
     "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human"],
     "textureKey": "orange-hair-girl-2",
-    "textureDisplayName": "Orange Hair Girl 2",
-    "isGloballyAvailable": true
+    "textureDisplayName": "Orange Hair Girl 2"
   },
   {
     "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human"],
     "textureKey": "navy-blue-hair-hero",
-    "textureDisplayName": "Navy Blue Hair Hero",
-    "isGloballyAvailable": true
+    "textureDisplayName": "Navy Blue Hair Hero"
   },
   {
     "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human"],
     "textureKey": "green-hair-hero-2",
-    "textureDisplayName": "Green Hair Hero 2",
-    "isGloballyAvailable": true
+    "textureDisplayName": "Green Hair Hero 2"
   },
   {
     "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human"],
     "textureKey": "green-hair-hero-1",
-    "textureDisplayName": "Green Hair Hero 1",
-    "isGloballyAvailable": true
+    "textureDisplayName": "Green Hair Hero 1"
   },
   {
     "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human"],
     "textureKey": "brown-hair-hero-2",
-    "textureDisplayName": "Brown Hair Hero 2",
-    "isGloballyAvailable": true
+    "textureDisplayName": "Brown Hair Hero 2"
   },
   {
     "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human"],
     "textureKey": "human-girl-1",
-    "textureDisplayName": "Human Girl 1",
-    "isGloballyAvailable": true
+    "textureDisplayName": "Human Girl 1"
   },
   {
     "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human"],
     "textureKey": "human-girl-2",
-    "textureDisplayName": "Human Girl 2",
-    "isGloballyAvailable": true
+    "textureDisplayName": "Human Girl 2"
   },
   {
     "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human"],
     "textureKey": "human-girl-3",
-    "textureDisplayName": "Human Girl 3",
-    "isGloballyAvailable": true
+    "textureDisplayName": "Human Girl 3"
   },
   {
     "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human"],
     "textureKey": "human-girl-4",
-    "textureDisplayName": "Human Girl 4",
-    "isGloballyAvailable": true
+    "textureDisplayName": "Human Girl 4"
   },
   {
     "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human"],
     "textureKey": "human-male-1",
-    "textureDisplayName": "Human Male 1",
-    "isGloballyAvailable": true
+    "textureDisplayName": "Human Male 1"
   },
   {
     "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human"],
     "textureKey": "human-male-2",
-    "textureDisplayName": "Human Male 2",
-    "isGloballyAvailable": true
+    "textureDisplayName": "Human Male 2"
   },
   {
     "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human"],
     "textureKey": "redhead-hero-1",
-    "textureDisplayName": "Red Head Hero 1",
-    "isGloballyAvailable": true
+    "textureDisplayName": "Red Head Hero 1"
   },
   {
     "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human"],
     "textureKey": "redhair-girl-1",
-    "textureDisplayName": "Red Hair Girl-1",
-    "isGloballyAvailable": true
+    "textureDisplayName": "Red Hair Girl-1"
   },
   {
     "class": ["Warrior"],
@@ -264,13 +246,13 @@
     "textureDisplayName": "Dwarf Hunter"
   },
   {
-    "class": ["Druid"],
+    "class": ["Sorcerer", "Druid"],
     "race": ["Dwarf"],
     "textureKey": "dwarf-mage-2",
     "textureDisplayName": "Dwarf Mage"
   },
   {
-    "class": ["Sorcerer"],
+    "class": ["Sorcerer", "Druid"],
     "race": ["Dwarf"],
     "textureKey": "dwarf-mage",
     "textureDisplayName": "Dwarf Mage"
@@ -288,7 +270,7 @@
     "textureDisplayName": "Orc"
   },
   {
-    "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
+    "class": ["Warrior", "Berserker", "Rogue", "Hunter"],
     "race": ["Orc"],
     "textureKey": "orc-warrior",
     "textureDisplayName": "Orc Warrior"
@@ -300,16 +282,10 @@
     "textureDisplayName": "Orc Berserker"
   },
   {
-    "class": ["Sorcerer"],
+    "class": ["Sorcerer", "Druid"],
     "race": ["Orc"],
     "textureKey": "orc-mage",
     "textureDisplayName": "Orc Mage"
-  },
-  {
-    "class": ["Druid"],
-    "race": ["Orc"],
-    "textureKey": "orc-mage",
-    "textureDisplayName": "Orc Druid"
   },
   {
     "class": ["Rogue"],
@@ -318,7 +294,7 @@
     "textureDisplayName": "Orc Rogue"
   },
   {
-    "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
+    "class": ["Hunter"],
     "race": ["Orc"],
     "textureKey": "orc-archer",
     "textureDisplayName": "Orc Hunter"
@@ -330,32 +306,26 @@
     "textureDisplayName": "Minotaur"
   },
   {
-    "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
+    "class": ["Warrior", "Berserker"],
     "race": ["Minotaur"],
     "textureKey": "minotaur-berserker",
     "textureDisplayName": "Minotaur Berserker"
   },
   {
-    "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
+    "class": ["Hunter"],
     "race": ["Minotaur"],
     "textureKey": "minotaur-archer",
     "textureDisplayName": "Minotaur Hunter"
   },
   {
-    "class": ["Rogue"],
-    "race": ["Minotaur"],
-    "textureKey": "minotaur",
-    "textureDisplayName": "Minotaur Rogue"
-  },
-  {
-    "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
+    "class": ["Druid", "Sorcerer"],
     "race": ["Minotaur"],
     "textureKey": "minotaur-mage",
     "textureDisplayName": "Minotaur Mage"
   },
   {
     "class": ["Druid", "Sorcerer"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human", "Elf"],
     "textureKey": "green-druid",
     "textureDisplayName": "Green Druid"
   },
@@ -367,12 +337,12 @@
   },
   {
     "class": ["Druid", "Sorcerer"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human", "Elf"],
     "textureKey": "healer",
     "textureDisplayName": "Healer"
   },
   {
-    "class": ["Warrior"],
+    "class": ["Warrior", "Berserker"],
     "race": ["Orc"],
     "textureKey": "orc-char",
     "textureDisplayName": "Orc Master"
@@ -385,24 +355,24 @@
   },
   {
     "class": ["Druid", "Sorcerer"],
-    "race": ["Human", "Elf", "Dwarf", "Orc", "Minotaur"],
+    "race": ["Human", "Elf"],
     "textureKey": "witch",
     "textureDisplayName": "Witch"
   },
   {
-    "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
+    "class": ["Warrior", "Berserker", "Rogue", "Hunter"],
     "race": ["Orc"],
     "textureKey": "ice-orc",
     "textureDisplayName": "Ice Orc"
   },
   {
-    "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
+    "class": ["Warrior", "Berserker", "Rogue", "Hunter"],
     "race": ["Orc"],
     "textureKey": "black-orc",
     "textureDisplayName": "Black Orc"
   },
   {
-    "class": ["Warrior", "Berserker", "Druid", "Sorcerer", "Rogue", "Hunter"],
+    "class": ["Warrior", "Berserker", "Rogue", "Hunter"],
     "race": ["Orc"],
     "textureKey": "fire-orc",
     "textureDisplayName": "Fire Orc"
