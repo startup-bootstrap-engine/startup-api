@@ -1,3 +1,5 @@
+export const QUEUE_BULL_MONITOR_REFRESH_INTERVAL = 60 * 1000;
+
 export const QUEUE_INACTIVITY_THRESHOLD_MS = 60 * 3 * 1000; // 3 min
 
 export const QUEUE_CLOSE_CHECK_MAX_TRIES = 10; // Set your desired maximum number of tries

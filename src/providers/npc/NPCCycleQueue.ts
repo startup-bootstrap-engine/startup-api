@@ -69,7 +69,6 @@ export class NPCCycleQueue {
 
       {
         delay: npcCycleDelay,
-        priority: 1,
       }
     );
   }
@@ -86,30 +85,32 @@ export class NPCCycleQueue {
   private async execNpcCycle(npc: INPC, npcSkills: ISkill): Promise<void> {
     this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Server, "NPCCycles", 1);
 
-    npc = await NPC.findById(npc._id).lean({
+    npc = await NPC.findById(npc?._id).lean({
       virtuals: true,
       defaults: true,
     });
 
-    const shouldNPCBeCleared = this.shouldNPCBeCleared(npc);
+    try {
+      const shouldNPCBeCleared = this.shouldNPCBeCleared(npc);
 
-    if (shouldNPCBeCleared) {
-      await this.stop(npc);
-      return;
-    }
+      if (shouldNPCBeCleared) {
+        await this.stop(npc);
+        return;
+      }
 
-    await this.npcFreezeCheck(npc);
+      await this.npcFreezeCheck(npc);
 
-    npc.skills = npcSkills;
+      npc.skills = npcSkills;
 
-    if (await this.stun.isStun(npc)) {
+      if (await this.stun.isStun(npc)) {
+        return;
+      }
+
+      await this.startCoreNPCBehavior(npc);
       await this.addToQueue(npc, npcSkills);
-
-      return;
+    } catch (error) {
+      console.error("Error in NPCCycleQueue", error);
     }
-
-    await this.startCoreNPCBehavior(npc);
-    await this.addToQueue(npc, npcSkills);
   }
 
   private async stop(npc: INPC): Promise<void> {

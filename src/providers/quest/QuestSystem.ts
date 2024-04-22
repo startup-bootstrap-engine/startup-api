@@ -17,7 +17,7 @@ import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeigh
 import { EquipmentSlots } from "@providers/equipment/EquipmentSlots";
 import { blueprintManager } from "@providers/inversify/container";
 import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTypes";
-import { ItemDrop } from "@providers/item/ItemDrop";
+import { ItemDrop } from "@providers/item/ItemDrop/ItemDrop";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {

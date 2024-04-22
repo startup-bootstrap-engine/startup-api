@@ -119,15 +119,25 @@ describe("NPCExperience.spec.ts | releaseXP test cases", () => {
 
     await npcExperience.recordXPinBattle(testCharacter, testNPC, 50);
 
-    expect(NPC.updateOne).toHaveBeenCalledWith({ _id: testNPC.id }, { xpToRelease: testNPC.xpToRelease });
+    expect(NPC.updateOne).toHaveBeenCalledWith({ _id: testNPC._id }, { xpToRelease: testNPC.xpToRelease });
   });
 
-  it("should NOT update NPC when xp is not in range", async () => {
+  it("should return a base exp when xp in range is great than max base xp", async () => {
     // @ts-ignore
     jest.spyOn(npcExperience.experienceLimiter, "isXpInRange").mockReturnValue(false);
 
+    expect(testNPC.experience).toBe(100);
+
     await npcExperience.recordXPinBattle(testCharacter, testNPC, 50);
 
-    expect(NPC.updateOne).not.toHaveBeenCalled();
+    expect(testNPC.xpToRelease?.length).toBe(1);
+
+    if (testNPC.xpToRelease) {
+      for (const released of testNPC.xpToRelease) {
+        expect(released.xp).toBe(100);
+      }
+    }
+
+    expect(NPC.updateOne).toHaveBeenCalled();
   });
 });
