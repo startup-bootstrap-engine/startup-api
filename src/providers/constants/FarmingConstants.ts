@@ -10,6 +10,8 @@ export const FARMING_SUPER_YIELD_FACTOR = 4;
 export const FARMING_HARVEST_PRICE_RATIO = 2.5;
 export const FARMING_SEED_PRICE_RATIO = 1;
 
+export const FARMING_RANDOM_REWARD_QTY_CAP = 3;
+
 // Cycle timing
 export const MAXIMUM_MINUTES_FOR_GROW: number = 40; // Its a growth BETWEEN Cycles. Careful... its not the total time it takes! The total would be the sum of all cycles.
 export const MINIMUM_MINUTES_FOR_WATERING: number = 5; // You'll need to water a plant based on this interval

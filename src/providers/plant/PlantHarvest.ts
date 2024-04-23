@@ -6,7 +6,11 @@ import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
-import { FARMING_BASE_YIELD, FARMING_SKILL_FACTOR } from "@providers/constants/FarmingConstants";
+import {
+  FARMING_BASE_YIELD,
+  FARMING_RANDOM_REWARD_QTY_CAP,
+  FARMING_SKILL_FACTOR,
+} from "@providers/constants/FarmingConstants";
 import { CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { TraitGetter } from "@providers/skill/TraitGetter";
@@ -98,7 +102,7 @@ export class PlantHarvest {
 
     if (n < 25) {
       const extraReward = await this.getExtraReward();
-      const extraRewardItem = await this.createAndSaveNewItem(extraReward, random(1, 3));
+      const extraRewardItem = await this.createAndSaveNewItem(extraReward, random(1, FARMING_RANDOM_REWARD_QTY_CAP));
       await this.addItemToContainer(extraRewardItem, character, inventoryContainerId);
     }
 
