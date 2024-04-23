@@ -98,7 +98,7 @@ export class PlantHarvest {
 
     if (n < 25) {
       const extraReward = await this.getExtraReward();
-      const extraRewardItem = await this.createAndSaveNewItem(extraReward, random(1, harvestableItemQuantity));
+      const extraRewardItem = await this.createAndSaveNewItem(extraReward, random(1, 3));
       await this.addItemToContainer(extraRewardItem, character, inventoryContainerId);
     }
 
