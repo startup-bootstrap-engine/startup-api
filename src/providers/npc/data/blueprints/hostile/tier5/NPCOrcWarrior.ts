@@ -86,7 +86,7 @@ export const npcOrcWarrior: INPCTierBlueprint<5> = {
       chance: LootProbability.SemiCommon,
     },
     {
-      itemBlueprintKey: AxesBlueprint.Greataxe,
+      itemBlueprintKey: AxesBlueprint.GreatAxe,
       chance: LootProbability.Rare,
     },
     {
