@@ -70,7 +70,7 @@ export const npcAlphaWolf: INPCTierBlueprint<11> = {
     },
 
     {
-      itemBlueprintKey: AxesBlueprint.GreaterAxe,
+      itemBlueprintKey: AxesBlueprint.GreatAxe,
       chance: LootProbability.Rare,
     },
     {
