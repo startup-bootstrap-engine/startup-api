@@ -35,7 +35,7 @@ export const itemAurumAlloyPickaxe: IToolItemBlueprint = {
   weight: 0.1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   rangeType: EntityAttackType.Melee,
-  basePrice: 20000,
+  basePrice: 12500,
   hasUseWith: true,
   canSell: false,
   useWithMaxDistanceGrid: RangeTypes.UltraShort,
