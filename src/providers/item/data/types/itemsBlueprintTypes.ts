@@ -255,7 +255,6 @@ export enum AxesBlueprint {
   DwarvenWaraxe = "dwarven-waraxe",
   CorruptionAxe = "corruption-axe",
   GoldenAxe = "golden-axe",
-
   GreatAxe = "great-axe",
   HellishAxe = "hellish-axe",
   RoyalDoubleAxe = "royalDouble-axe",
