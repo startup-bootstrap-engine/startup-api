@@ -35,24 +35,21 @@ export class CharacterWeapon {
       return undefined;
     }
 
-    const rightHandItem = equipment.rightHand
-      ? ((await Item.findById(equipment.rightHand).lean({ virtuals: true, defaults: true })) as IItem)
-      : undefined;
-    const leftHandItem = equipment.leftHand
-      ? ((await Item.findById(equipment.leftHand).lean({ virtuals: true, defaults: true })) as IItem)
-      : undefined;
+    const handItems = [
+      { hand: "rightHand", slot: ItemSlotType.RightHand },
+      { hand: "leftHand", slot: ItemSlotType.LeftHand },
+    ];
 
-    // ItemSubType Shield is of type Weapon, so check that the weapon is not subType Shield (because cannot attack with Shield)
-    if (rightHandItem?.type === ItemType.Weapon && rightHandItem?.subType !== ItemSubType.Shield) {
-      const result = { item: rightHandItem, location: ItemSlotType.RightHand };
-      await this.inMemoryHashTable.set(namespace, character._id, result);
-      return result;
-    }
+    for (const { hand, slot } of handItems) {
+      const handItem = equipment[hand]
+        ? ((await Item.findById(equipment[hand]).lean({ virtuals: true, defaults: true })) as IItem)
+        : undefined;
 
-    if (leftHandItem?.type === ItemType.Weapon && leftHandItem?.subType !== ItemSubType.Shield) {
-      const result = { item: leftHandItem, location: ItemSlotType.LeftHand };
-      await this.inMemoryHashTable.set(namespace, character._id, result);
-      return result;
+      if (handItem?.type === ItemType.Weapon && handItem?.subType !== ItemSubType.Shield) {
+        const result = { item: handItem, location: slot };
+        await this.inMemoryHashTable.set(namespace, character._id, result);
+        return result;
+      }
     }
   }
 

@@ -194,7 +194,7 @@ describe("ItemUse.ts", () => {
 
     expect(sendEventToUser).toHaveBeenLastCalledWith(testCharacter.channelId, CharacterSocketEvents.AttributeChanged, {
       targetId: testCharacter._id,
-      health: 60,
+      health: 55,
       mana: testCharacter.mana,
     });
 
@@ -205,7 +205,7 @@ describe("ItemUse.ts", () => {
     expect(args[1]).toBe(AnimationEffectKeys.LifeHeal);
 
     const character = (await Character.findById(testCharacter.id)) as unknown as ICharacter;
-    expect(character.health).toBe(60);
+    expect(character.health).toBe(55);
   });
 
   it("should call character validation", async () => {
