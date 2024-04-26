@@ -17,7 +17,7 @@ export const lightLifePotionUsableEffect: IUsableEffect = {
 
     await itemUsableEffect.apply(character, EffectableAttribute.Health, characterHealthPercentage);
   },
-  usableEffectDescription: "Restores 10% of life",
+  usableEffectDescription: "Restores 5% of life",
 };
 
 export const lifePotionUsableEffect: IUsableEffect = {
@@ -55,7 +55,7 @@ export const LightManaPotionUsableEffect: IUsableEffect = {
 
     await itemUsableEffect.apply(character, EffectableAttribute.Mana, characterManaPercentage);
   },
-  usableEffectDescription: "Restores 10% of mana",
+  usableEffectDescription: "Restores 5% of mana",
 };
 
 export const manaPotionUsableEffect: IUsableEffect = {

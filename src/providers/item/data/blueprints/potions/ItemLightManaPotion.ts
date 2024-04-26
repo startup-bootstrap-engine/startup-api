@@ -12,7 +12,7 @@ export const itemLightManaPotion: IConsumableItemBlueprint = {
   name: "Light Mana Potion",
   description: "A light flask containing blue liquid of a mana potion.",
   weight: 0.5,
-  basePrice: 50,
+  basePrice: 25,
   maxStackSize: 999,
   canSell: false,
   usableEffectKey: UsableEffectsBlueprint.LightManaPotionUsableEffect,
