@@ -333,7 +333,8 @@ export class HitTargetQueue {
     damage = Math.min(damage, maxDamage);
 
     if (isNaN(damage)) {
-      throw new Error("Damage is not a number");
+      damage = 0;
+      console.error(`Damage is NaN for attacker: ${attacker._id} and target: ${target._id} - ${target.type}`);
     }
 
     return { damage, baseDamage, lastestHealth };
