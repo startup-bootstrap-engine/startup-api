@@ -1,12 +1,12 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { Item } from "@entities/ModuleInventory/ItemModel";
+import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
-import { IItem, IUseWithItem, IUseWithItemBlueprint, UseWithSocketEvents } from "@rpg-engine/shared";
+import { IUseWithItem, IUseWithItemBlueprint, UseWithSocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
 @provide(UseWithItemToItem)

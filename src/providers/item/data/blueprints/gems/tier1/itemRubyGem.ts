@@ -1,4 +1,6 @@
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
+import { container } from "@providers/inversify/container";
+import { UseWithGem } from "@providers/useWith/abstractions/UseWithGem";
 import { EntityAttackType, IItemGem, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
 import { GemsBlueprint } from "../../../types/itemsBlueprintTypes";
 
@@ -21,7 +23,11 @@ export const itemRubyGem: IItemGem = {
     defense: 3,
   },
   gemEntityEffectsAdd: [EntityEffectBlueprint.Burning],
+  gemEntityEffectChance: 80,
+
   useWithItemEffect: async (originItem, targetItem, character) => {
-    // Add your custom logic here
+    const useWithGem = container.get<UseWithGem>(UseWithGem);
+
+    await useWithGem.execute(originItem, targetItem, character);
   },
 };
