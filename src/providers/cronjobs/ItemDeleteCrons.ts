@@ -1,7 +1,7 @@
 import { Character } from "@entities/ModuleCharacter/CharacterModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
-import { ItemDropVerifier } from "@providers/item/ItemDropVerifier";
+import { ItemDropVerifier } from "@providers/item/ItemDrop/ItemDropVerifier";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { MapHelper } from "@providers/map/MapHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";

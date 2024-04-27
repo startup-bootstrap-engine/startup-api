@@ -96,6 +96,8 @@ export class CharacterItemContainer {
     toContainerId: string,
     options?: IAddItemToContainerOptions
   ): Promise<boolean> {
+    const { shouldAddOwnership = true, isInventoryItem = false, dropOnMapIfFull = false } = options || {};
+
     try {
       if (!item) {
         return false;
@@ -106,8 +108,6 @@ export class CharacterItemContainer {
       if (!hasLock) {
         return false;
       }
-
-      const { shouldAddOwnership = true, isInventoryItem = false, dropOnMapIfFull = false } = options || {};
 
       item = (await this.ensureItemHasContainer(item)) as IItem;
 
@@ -135,10 +135,6 @@ export class CharacterItemContainer {
         return false;
       }
 
-      if (shouldAddOwnership) {
-        await this.itemOwnership.addItemOwnership(item, character);
-      }
-
       await Item.updateOne(
         {
           _id: item._id,
@@ -156,6 +152,10 @@ export class CharacterItemContainer {
       console.error(error);
       return false;
     } finally {
+      if (shouldAddOwnership) {
+        await this.itemOwnership.addItemOwnership(item, character);
+      }
+
       await this.clearCache(toContainerId, character._id, item.type as ItemType);
 
       await this.locker.unlock(`item-${item?._id}-add-item-to-container`);

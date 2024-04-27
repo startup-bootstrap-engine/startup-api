@@ -47,6 +47,26 @@ services:
         # - "traefik.http.services.rpg-api-socket-service.loadbalancer.sticky.cookie.name=StickyCookie"
         # - "traefik.http.services.rpg-api-socket-service.loadbalancer.sticky.cookie.secure=true"
 
+        # Bull Monitor
+
+        - "traefik.http.middlewares.bullmq-redirect.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.bullmq-redirect.redirectregex.regex=^https://bullmq.definya.com(/.*)?$"
+        - "traefik.http.middlewares.bullmq-redirect.redirectregex.replacement=https://bullmq.definya.com/admin/queues"
+        - "traefik.http.middlewares.bullmq-redirect.redirectregex.permanent=true"
+
+        - "traefik.http.routers.bullmq-board.rule=Host(`bullmq.definya.com`)"
+        - "traefik.http.routers.bullmq-board.entrypoints=websecure"
+        - "traefik.http.routers.bullmq-board.tls.certresolver=myresolver"
+        - "traefik.http.routers.bullmq-board.middlewares=bullmq-board-auth,bullmq-redirect"
+        - "traefik.http.routers.bullmq-board.service=rpg-api-service"
+        - "traefik.http.services.rpg-api-service.loadbalancer.server.port=5002"
+
+          # Basic Auth Middleware
+        - "traefik.http.middlewares.bullmq-board-auth.basicauth.users=admin:$$2y$$05$$zXp4YId/ud4GKWGfcurBPe33lyAfwRhTPCKdmPlSYm.hRsyeATcRC"
+
+        # Configure a higher security for the cookie in Basic Auth
+        - "traefik.http.middlewares.bullmq-board-auth.basicauth.removeheader=true"
+
     logging:
       options:
         max-size: "10m"

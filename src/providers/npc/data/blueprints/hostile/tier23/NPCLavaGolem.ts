@@ -194,12 +194,12 @@ export const npcLavaGolem: INPCTierBlueprint<23> = {
     },
     {
       spellKey: SpellsBlueprint.FireBolt,
-      probability: 60,
+      probability: 90,
       power: MagicPower.High,
     },
     {
       spellKey: SpellsBlueprint.FireStorm,
-      probability: 85,
+      probability: 90,
       power: MagicPower.UltraHigh,
     },
   ],

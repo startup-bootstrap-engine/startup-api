@@ -101,6 +101,7 @@ export class NPCWarn {
         isTrader: npc.isTrader,
         traderItems: npc.traderItems,
         isGiantForm: npc.isGiantForm,
+        tintColor: npc.tintColor,
         hasCustomDeathPenalty: npc.hasCustomDeathPenalty as NPCCustomDeathPenalties,
       }
     );

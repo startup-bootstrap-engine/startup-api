@@ -13,12 +13,11 @@ describe("ReadFactionSpriteUseCase", () => {
       const results = readFactionSpriteUseCase.readAll("Warrior", "Human");
 
       expect(results).toBeDefined();
-
       expect(results).toMatchObject(
         expect.arrayContaining([
           expect.objectContaining({
-            class: "Warrior",
-            race: "Human",
+            class: expect.arrayContaining(["Warrior"]),
+            race: expect.arrayContaining(["Human"]),
           }),
         ])
       );

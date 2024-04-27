@@ -15,7 +15,7 @@ import {
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
-import { ItemDropVerifier } from "../ItemDropVerifier";
+import { ItemDropVerifier } from "../ItemDrop/ItemDropVerifier";
 
 @provide(ItemPickupUpdater)
 export class ItemPickupUpdater {

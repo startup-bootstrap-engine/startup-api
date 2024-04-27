@@ -85,9 +85,14 @@ export class DynamicQueue {
       );
 
       return await queue.add(queueName, data, {
+        ...addQueueOptions,
         removeOnComplete: true,
         removeOnFail: true,
-        ...addQueueOptions,
+        attempts: 3, // Number of attempts before the job is considered failed
+        backoff: {
+          type: "exponential",
+          delay: 500,
+        },
       });
     } catch (error) {
       console.error(error);
@@ -168,9 +173,15 @@ export class DynamicQueue {
         async (job) => {
           try {
             await this.queueActivityMonitor.updateQueueActivity(queueName);
-            await jobFn(job);
+
+            return await jobFn(job);
           } catch (error) {
-            console.error(`Error processing ${queueName} job ${job.id}: ${error.message}`);
+            console.error(`Error processing ${queueName} job ${job.id}: ${error.message}`, {
+              jobData: job.data,
+              errorStack: error.stack,
+            });
+
+            throw error;
           }
         },
         {
@@ -180,6 +191,14 @@ export class DynamicQueue {
             max: maxWorkerLimiter,
             duration: QUEUE_GLOBAL_WORKER_LIMITER_DURATION,
           },
+          removeOnComplete: {
+            age: 86400, // 24 hours
+            count: 1000,
+          },
+          removeOnFail: {
+            age: 86400, // 24 hours
+            count: 1000,
+          },
           connection,
           ...workerOptions,
         }
@@ -187,9 +206,8 @@ export class DynamicQueue {
       this.workers.set(queueName, worker);
 
       if (!appEnv.general.IS_UNIT_TEST) {
-        worker.on("failed", async (job, err) => {
+        worker.on("failed", (job, err) => {
           console.log(`${queueName} job ${job?.id} failed with error ${err.message}`);
-          await worker?.close();
         });
       }
     }
@@ -240,7 +258,9 @@ export class DynamicQueue {
       const queue = this.queues.get(queueName);
       if (queue) {
         await queue.close();
-        await queue.obliterate();
+        await queue.obliterate({
+          force: true,
+        });
         this.queues.delete(queueName);
       }
 
@@ -294,7 +314,10 @@ export class DynamicQueue {
           queueScaleOptions?.forceCustomScale || QUEUE_CHARACTER_MAX_SCALE_FACTOR
         );
 
-        return `${prefix}-${envSuffix}-${charQueueScaleFactor}`;
+        // Generate a random number between 0 and charQueueScaleFactor - 1
+        const charQueueNumber = random(0, charQueueScaleFactor - 1);
+
+        return `${prefix}-${envSuffix}-${charQueueNumber}`;
 
       case "active-npcs":
         const activeNPCs = Number((await this.inMemoryHashTable.get("activity-tracker", "npc-count")) || 1);
@@ -305,7 +328,10 @@ export class DynamicQueue {
           maxNPCQueues,
           queueScaleOptions?.forceCustomScale || QUEUE_NPC_MAX_SCALE_FACTOR
         );
-        return `${prefix}-${envSuffix}-${NPCQueueScaleFactor}`;
+
+        const npcQueueNumber = random(0, NPCQueueScaleFactor - 1);
+
+        return `${prefix}-${envSuffix}-${npcQueueNumber}`;
     }
   }
 
