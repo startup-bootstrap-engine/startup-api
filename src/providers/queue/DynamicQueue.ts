@@ -96,6 +96,8 @@ export class DynamicQueue {
       });
     } catch (error) {
       console.error(error);
+
+      throw error;
     }
   }
 
@@ -171,18 +173,9 @@ export class DynamicQueue {
       worker = new Worker(
         queueName,
         async (job) => {
-          try {
-            await this.queueActivityMonitor.updateQueueActivity(queueName);
+          await this.queueActivityMonitor.updateQueueActivity(queueName);
 
-            return await jobFn(job);
-          } catch (error) {
-            console.error(`Error processing ${queueName} job ${job.id}: ${error.message}`, {
-              jobData: job.data,
-              errorStack: error.stack,
-            });
-
-            throw error;
-          }
+          return await jobFn(job);
         },
         {
           name: `${queueName}-worker`,
@@ -206,8 +199,15 @@ export class DynamicQueue {
       this.workers.set(queueName, worker);
 
       if (!appEnv.general.IS_UNIT_TEST) {
-        worker.on("failed", (job, err) => {
-          console.log(`${queueName} job ${job?.id} failed with error ${err.message}`);
+        worker.on("error", (error) => {
+          console.error(`Worker error: ${error.message}`, error);
+        });
+
+        worker.on("failed", (job, error) => {
+          console.error(`${queueName} - Job ${job?.id} failed with error: ${error.message}`, {
+            jobData: job?.data,
+            errorStack: error.stack,
+          });
         });
       }
     }
