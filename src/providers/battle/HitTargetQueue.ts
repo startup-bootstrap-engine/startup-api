@@ -93,7 +93,7 @@ export class HitTargetQueue {
             await this.npcTarget.setTarget(target as INPC, attacker as ICharacter);
           }
 
-          await this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
+          return await this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
         },
         { attacker, target, targetType, magicAttack, bonusDamage, spellHit },
         {
@@ -116,7 +116,7 @@ export class HitTargetQueue {
             return;
           }
 
-          await this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
+          return await this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
         },
         { attacker, target, targetType, magicAttack, bonusDamage, spellHit },
         {
@@ -142,122 +142,118 @@ export class HitTargetQueue {
     bonusDamage?: number,
     spellHit?: boolean
   ): Promise<void> {
-    try {
-      let sorcererManaShield: boolean = false;
-      target.isAlive = target.health > 0;
+    let sorcererManaShield: boolean = false;
+    target.isAlive = target.health > 0;
 
-      if (!target.isAlive) {
-        return;
-      }
+    if (!target.isAlive) {
+      return;
+    }
 
-      const battleEvent: BattleEventType = magicAttack
-        ? BattleEventType.Hit
-        : await this.battleEvent.calculateEvent(attacker, target);
+    const battleEvent: BattleEventType = magicAttack
+      ? BattleEventType.Hit
+      : await this.battleEvent.calculateEvent(attacker, target);
 
-      let battleEventPayload: Partial<IBattleEventFromServer> = {
-        attackerId: attacker._id,
-        attackerType: attacker.type as EntityType.Character | EntityType.NPC,
-        targetId: target._id,
-        targetType: target.type as EntityType.Character | EntityType.NPC,
-        eventType: battleEvent,
-      };
+    let battleEventPayload: Partial<IBattleEventFromServer> = {
+      attackerId: attacker._id,
+      attackerType: attacker.type as EntityType.Character | EntityType.NPC,
+      targetId: target._id,
+      targetType: target.type as EntityType.Character | EntityType.NPC,
+      eventType: battleEvent,
+    };
 
-      if (battleEvent === BattleEventType.Hit) {
-        const { damage, baseDamage, lastestHealth } = await this.getCalculatedDamage(
-          attacker,
-          target,
-          bonusDamage!,
-          magicAttack!
-        );
+    if (battleEvent === BattleEventType.Hit) {
+      const { damage, baseDamage, lastestHealth } = await this.getCalculatedDamage(
+        attacker,
+        target,
+        bonusDamage!,
+        magicAttack!
+      );
 
-        const damageRelatedPromises: any[] = [];
+      const damageRelatedPromises: any[] = [];
 
-        if (damage > 0) {
-          if (attacker.type === EntityType.Character) {
-            const character = attacker as ICharacter;
-            await this.skillIncrease.increaseSkillsOnBattle(character, target, damage, spellHit);
+      if (damage > 0) {
+        if (attacker.type === EntityType.Character) {
+          const character = attacker as ICharacter;
+          await this.skillIncrease.increaseSkillsOnBattle(character, target, damage, spellHit);
+        }
+
+        if (attacker.class === CharacterClass.Berserker) {
+          const character = attacker as ICharacter;
+          const berserkerSpell = this.bloodthirst.getBerserkerBloodthirstSpell(character);
+
+          if (await berserkerSpell) {
+            damageRelatedPromises.push(this.bloodthirst.handleBerserkerAttack(character, damage));
           }
+        }
 
-          if (attacker.class === CharacterClass.Berserker) {
-            const character = attacker as ICharacter;
-            const berserkerSpell = this.bloodthirst.getBerserkerBloodthirstSpell(character);
+        if (target.type === EntityType.NPC) {
+          const updatedTarget = await this.doCalculateAndUpdateOnTargetHealth(target, lastestHealth, damage);
+          target.isAlive = updatedTarget.isAlive;
+          target.health = updatedTarget.health;
+        } else if (target.type === EntityType.Character) {
+          if (target.class === CharacterClass.Sorcerer || target.class === CharacterClass.Druid) {
+            const character = target as ICharacter;
+            const hasManaShieldSpell = await this.manaShield.getManaShieldSpell(character);
 
-            if (await berserkerSpell) {
-              damageRelatedPromises.push(this.bloodthirst.handleBerserkerAttack(character, damage));
+            if (hasManaShieldSpell) {
+              sorcererManaShield = await this.manaShield.handleManaShield(character, damage);
             }
           }
 
-          if (target.type === EntityType.NPC) {
+          if (!sorcererManaShield) {
             const updatedTarget = await this.doCalculateAndUpdateOnTargetHealth(target, lastestHealth, damage);
             target.isAlive = updatedTarget.isAlive;
             target.health = updatedTarget.health;
-          } else if (target.type === EntityType.Character) {
-            if (target.class === CharacterClass.Sorcerer || target.class === CharacterClass.Druid) {
-              const character = target as ICharacter;
-              const hasManaShieldSpell = await this.manaShield.getManaShieldSpell(character);
-
-              if (hasManaShieldSpell) {
-                sorcererManaShield = await this.manaShield.handleManaShield(character, damage);
-              }
-            }
-
-            if (!sorcererManaShield) {
-              const updatedTarget = await this.doCalculateAndUpdateOnTargetHealth(target, lastestHealth, damage);
-              target.isAlive = updatedTarget.isAlive;
-              target.health = updatedTarget.health;
-            }
           }
-
-          battleEventPayload = {
-            ...battleEventPayload,
-            totalDamage: damage,
-            postDamageTargetHP: target.health,
-            isCriticalHit: damage > baseDamage,
-          };
-
-          if (attacker.type === EntityType.NPC && target.type === EntityType.Character) {
-            await this.handleNPCTargetAttackSkillIncreaseAndEffects(
-              attacker as INPC,
-              target as ICharacter,
-              damageRelatedPromises
-            );
-          }
-
-          await this.handleCharacterAttackerSkillIncreaseAndEffects(attacker, target, damageRelatedPromises);
-
-          const generateBloodChance = random(1, 100);
-
-          generateBloodChance <= GENERATE_BLOOD_GROUND_ON_HIT &&
-            damageRelatedPromises.push(this.battleEffects.generateBloodOnGround(target));
         }
 
-        await Promise.all(damageRelatedPromises);
+        battleEventPayload = {
+          ...battleEventPayload,
+          totalDamage: damage,
+          postDamageTargetHP: target.health,
+          isCriticalHit: damage > baseDamage,
+        };
+
+        if (attacker.type === EntityType.NPC && target.type === EntityType.Character) {
+          await this.handleNPCTargetAttackSkillIncreaseAndEffects(
+            attacker as INPC,
+            target as ICharacter,
+            damageRelatedPromises
+          );
+        }
+
+        await this.handleCharacterAttackerSkillIncreaseAndEffects(attacker, target, damageRelatedPromises);
+
+        const generateBloodChance = random(1, 100);
+
+        generateBloodChance <= GENERATE_BLOOD_GROUND_ON_HIT &&
+          damageRelatedPromises.push(this.battleEffects.generateBloodOnGround(target));
       }
 
-      const remainingPromises: any[] = [];
-
-      if (battleEvent === BattleEventType.Block && target.type === EntityType.Character) {
-        remainingPromises.push(this.skillIncrease.increaseShieldingSP(target as ICharacter));
-      }
-
-      if (battleEvent === BattleEventType.Miss && target.type === EntityType.Character) {
-        remainingPromises.push(
-          this.skillIncrease.increaseBasicAttributeSP(target as ICharacter, BasicAttribute.Dexterity)
-        );
-      }
-
-      remainingPromises.push(this.warnCharacterIfNotInView(attacker as ICharacter, target));
-
-      const character = attacker.type === EntityType.Character ? (attacker as ICharacter) : (target as ICharacter);
-
-      remainingPromises.push(this.sendBattleEvent(character, battleEventPayload as IBattleEventFromServer));
-
-      await Promise.all(remainingPromises);
-
-      await this.battleAttackTargetDeath.handleDeathAfterHit(attacker, target);
-    } catch (error) {
-      console.error(error);
+      await Promise.all(damageRelatedPromises);
     }
+
+    const remainingPromises: any[] = [];
+
+    if (battleEvent === BattleEventType.Block && target.type === EntityType.Character) {
+      remainingPromises.push(this.skillIncrease.increaseShieldingSP(target as ICharacter));
+    }
+
+    if (battleEvent === BattleEventType.Miss && target.type === EntityType.Character) {
+      remainingPromises.push(
+        this.skillIncrease.increaseBasicAttributeSP(target as ICharacter, BasicAttribute.Dexterity)
+      );
+    }
+
+    remainingPromises.push(this.warnCharacterIfNotInView(attacker as ICharacter, target));
+
+    const character = attacker.type === EntityType.Character ? (attacker as ICharacter) : (target as ICharacter);
+
+    remainingPromises.push(this.sendBattleEvent(character, battleEventPayload as IBattleEventFromServer));
+
+    await Promise.all(remainingPromises);
+
+    await this.battleAttackTargetDeath.handleDeathAfterHit(attacker, target);
   }
 
   private async handleNPCTargetAttackSkillIncreaseAndEffects(
