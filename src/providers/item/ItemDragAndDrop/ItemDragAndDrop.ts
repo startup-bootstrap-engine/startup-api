@@ -257,6 +257,7 @@ export class ItemDragAndDrop {
   private async updateStackQty(targetContainer: IItemContainer, slotIndex: number, newStackQty: number): Promise<void> {
     await this.characterItemSlots.updateItemOnSlot(slotIndex, targetContainer, {
       stackQty: newStackQty,
+      owner: targetContainer.owner,
     } as IItem);
   }
 

@@ -108,6 +108,7 @@ export class CharacterTradingBuy {
         const newItem = new Item({
           ...itemBlueprint,
           stackQty: purchasedItem.qty,
+          owner: character._id,
         });
         await newItem.save();
 
@@ -130,6 +131,7 @@ export class CharacterTradingBuy {
         for (let i = 0; i < purchasedItem.qty; i++) {
           const newItem = new Item({
             ...itemBlueprint,
+            owner: character._id,
           });
           await newItem.save();
 

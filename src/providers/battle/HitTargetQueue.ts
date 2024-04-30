@@ -24,6 +24,7 @@ import {
   ItemSubType,
 } from "@rpg-engine/shared";
 
+import { Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { appEnv } from "@providers/config/env";
 import { BONUS_DAMAGE_MULTIPLIER, GENERATE_BLOOD_GROUND_ON_HIT } from "@providers/constants/BattleConstants";
 import { blueprintManager } from "@providers/inversify/container";
@@ -264,6 +265,14 @@ export class HitTargetQueue {
     const npc = await blueprintManager.getBlueprint<any>("npcs", attacker.baseKey);
 
     if (npc?.isMagic && (npc?.attackType === EntityAttackType.MeleeRanged || EntityAttackType.Ranged)) {
+      if (!npc.skills?.magic?.level) {
+        const skills = await Skill.findOne({ owner: attacker._id }).lean();
+
+        if (skills) {
+          npc.skills = skills;
+        }
+      }
+
       const npcMagicLevel = npc.skills?.magic?.level ?? 15;
       const power = Math.max(15, npcMagicLevel);
 

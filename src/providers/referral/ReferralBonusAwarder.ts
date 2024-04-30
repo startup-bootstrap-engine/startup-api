@@ -27,7 +27,7 @@ export class ReferralBonusAwarder {
       if (!inventory.itemContainer) throw new Error("Character inventory does not have an item container");
 
       const inventoryContainer = await this.getContainer(inventory.itemContainer.toString());
-      const newItem = await this.createRewardItem(amount);
+      const newItem = await this.createRewardItem(characterId, amount);
 
       try {
         await this.addItemToContainer(newItem, character, inventoryContainer._id);
@@ -68,7 +68,7 @@ export class ReferralBonusAwarder {
     return container;
   }
 
-  private async createRewardItem(amount: number): Promise<IItem> {
+  private async createRewardItem(characterId: string, amount: number): Promise<IItem> {
     const socialCrystalItemBlueprint = (await this.blueprintManager.getBlueprint(
       "items",
       CraftingResourcesBlueprint.SocialCrystal
@@ -77,6 +77,7 @@ export class ReferralBonusAwarder {
     const newItem = new Item({
       ...socialCrystalItemBlueprint,
       stackQty: amount,
+      owner: characterId,
     });
 
     await newItem.save();

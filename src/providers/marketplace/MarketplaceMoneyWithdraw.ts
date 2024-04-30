@@ -88,7 +88,7 @@ export class MarketplaceMoneyWithdraw {
     let moneyLeft = marketplaceMoney.money;
 
     while (qty > 0) {
-      const newItem = new Item({ ...blueprint });
+      const newItem = new Item({ ...blueprint, owner: character._id });
 
       const qtyToAdd = newItem.maxStackSize < qty ? newItem.maxStackSize : qty;
       const availableQtyOnFirstItemSlot = await this.characterItemSlots.getAvailableQuantityOnSlotToStack(
@@ -167,7 +167,7 @@ export class MarketplaceMoneyWithdraw {
       } else {
         let qty = initialCharacterAvailableGold - characterAvailableGold;
         while (qty > 0) {
-          const newItem = new Item({ ...blueprint });
+          const newItem = new Item({ ...blueprint, owner: character._id });
 
           if (newItem.maxStackSize >= qty) {
             newItem.stackQty = qty;

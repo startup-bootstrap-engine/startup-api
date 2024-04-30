@@ -173,9 +173,14 @@ export class DynamicQueue {
       worker = new Worker(
         queueName,
         async (job) => {
-          await this.queueActivityMonitor.updateQueueActivity(queueName);
+          try {
+            await this.queueActivityMonitor.updateQueueActivity(queueName);
 
-          return await jobFn(job);
+            return await jobFn(job);
+          } catch (error) {
+            console.error(error);
+            throw error;
+          }
         },
         {
           name: `${queueName}-worker`,
@@ -308,7 +313,7 @@ export class DynamicQueue {
       case "active-characters":
         const activeCharacters = Number((await this.inMemoryHashTable.get("activity-tracker", "character-count")) || 1);
 
-        const maxCharQueues = Math.ceil(activeCharacters / 20) || 1;
+        const maxCharQueues = Math.ceil(activeCharacters / 35) || 1;
         const charQueueScaleFactor = Math.min(
           maxCharQueues,
           queueScaleOptions?.forceCustomScale || QUEUE_CHARACTER_MAX_SCALE_FACTOR
@@ -322,7 +327,7 @@ export class DynamicQueue {
       case "active-npcs":
         const activeNPCs = Number((await this.inMemoryHashTable.get("activity-tracker", "npc-count")) || 1);
 
-        const maxNPCQueues = Math.ceil(activeNPCs / 15) || 1;
+        const maxNPCQueues = Math.ceil(activeNPCs / 35) || 1;
 
         const NPCQueueScaleFactor = Math.min(
           maxNPCQueues,

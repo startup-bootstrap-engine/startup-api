@@ -106,6 +106,7 @@ export class PremiumAccountUseCase {
       const item = new Item({
         ...itemBlueprint,
         stackQty: quantity,
+        owner: characterId,
       });
 
       await item.save();

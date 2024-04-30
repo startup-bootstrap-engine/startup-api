@@ -1,6 +1,7 @@
 import { Character } from "@entities/ModuleCharacter/CharacterModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
+import { CharacterItems } from "@providers/character/characterItems/CharacterItems";
 import { ItemDropVerifier } from "@providers/item/ItemDrop/ItemDropVerifier";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { MapHelper } from "@providers/map/MapHelper";
@@ -17,7 +18,8 @@ export class ItemDeleteCrons {
     private mapHelper: MapHelper,
     private itemMissingReferenceCleaner: ItemMissingReferenceCleaner,
     private cronJobScheduler: CronJobScheduler,
-    private itemDropVerifier: ItemDropVerifier
+    private itemDropVerifier: ItemDropVerifier,
+    private characterItems: CharacterItems
   ) {}
 
   public schedule(): void {

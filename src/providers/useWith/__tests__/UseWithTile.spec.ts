@@ -157,6 +157,7 @@ describe("UseWithTile.ts", () => {
       testCharacterEquipment.leftHand = undefined;
       await testCharacterEquipment.save();
 
+      // @ts-ignore
       testItem.owner = undefined;
       await testItem.save();
 

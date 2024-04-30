@@ -118,7 +118,7 @@ export class CharacterItemInventory {
       return false;
     }
 
-    const item = this.createItemFromBlueprint(blueprint, extraProps);
+    const item = this.createItemFromBlueprint(character, blueprint, extraProps);
 
     const rarityData = await this.itemRarity.setItemRarityOnCraft(character, item, character.skills as Types.ObjectId);
 
@@ -139,10 +139,12 @@ export class CharacterItemInventory {
     return this.characterItemsContainer.addItemToContainer(item, character, inventory.itemContainer.toString());
   }
 
-  private createItemFromBlueprint(blueprint: IItem, extraProps?: Partial<IItem>): IItem {
+  private createItemFromBlueprint(character: ICharacter, blueprint: IItem, extraProps?: Partial<IItem>): IItem {
     return new Item({
       ...blueprint,
       ...extraProps,
+      owner: character._id,
+      carrier: character._id,
     });
   }
 
