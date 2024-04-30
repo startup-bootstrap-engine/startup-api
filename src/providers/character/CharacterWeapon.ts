@@ -54,42 +54,51 @@ export class CharacterWeapon {
   }
 
   @TrackNewRelicTransaction()
-  public async hasShield(character: ICharacter): Promise<
-    | {
-        leftHandItem?: IItem;
-        rightHandItem?: IItem;
-      }
-    | undefined
-  > {
-    const hasCached = await this.inMemoryHashTable.get("character-shield", character._id);
+  public async hasShield(character: ICharacter): Promise<{ leftHandItem?: IItem; rightHandItem?: IItem } | undefined> {
+    const cachedResult = (await this.inMemoryHashTable.get("character-shield", character._id)) as {
+      leftHandItem?: IItem;
+      rightHandItem?: IItem;
+    };
 
-    if (hasCached) {
-      return hasCached;
+    if (cachedResult) {
+      return cachedResult;
     }
 
-    const equipment = (await Equipment.findById(character.equipment)
+    const equipment = await this.getCharacterEquipment(character);
+    if (!equipment) return undefined;
+
+    const shieldItems = await this.getShieldItems(equipment);
+    if (shieldItems) {
+      await this.inMemoryHashTable.set("character-shield", character._id, shieldItems);
+      return shieldItems;
+    }
+
+    return undefined;
+  }
+
+  private async getCharacterEquipment(character: ICharacter): Promise<IEquipment | undefined> {
+    return (await Equipment.findById(character.equipment)
       .lean()
-      .cacheQuery({
-        cacheKey: `${character._id}-equipment`,
-      })) as IEquipment;
+      .cacheQuery({ cacheKey: `${character._id}-equipment` })) as IEquipment;
+  }
 
-    if (!equipment) {
-      return;
+  private async getShieldItems(
+    equipment: IEquipment
+  ): Promise<{ leftHandItem?: IItem; rightHandItem?: IItem } | undefined> {
+    const itemSlots = { leftHand: "leftHand", rightHand: "rightHand" };
+    const shieldItems: { leftHandItem?: IItem; rightHandItem?: IItem } = {};
+
+    for (const [key, value] of Object.entries(itemSlots)) {
+      const itemId = equipment[value];
+      if (itemId) {
+        const item = (await Item.findById(itemId).lean({ virtuals: true, defaults: true })) as IItem;
+        if (item && item.subType === ItemSubType.Shield) {
+          shieldItems[key + "Item"] = item; // Concatenate "Item" to match the key structure in result
+        }
+      }
     }
 
-    const leftHandItem = equipment.leftHand
-      ? ((await Item.findById(equipment.leftHand).lean({ virtuals: true, defaults: true })) as IItem)
-      : undefined;
-
-    const rightHandItem = equipment.rightHand
-      ? ((await Item.findById(equipment.rightHand).lean({ virtuals: true, defaults: true })) as IItem)
-      : undefined;
-
-    if (leftHandItem?.subType === ItemSubType.Shield || rightHandItem?.subType === ItemSubType.Shield) {
-      await this.inMemoryHashTable.set("character-shield", character._id, { leftHandItem, rightHandItem });
-
-      return { leftHandItem, rightHandItem };
-    }
+    return Object.keys(shieldItems).length > 0 ? shieldItems : undefined;
   }
 
   @TrackNewRelicTransaction()
