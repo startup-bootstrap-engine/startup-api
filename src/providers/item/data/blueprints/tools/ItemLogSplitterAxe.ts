@@ -60,23 +60,23 @@ export const itemLogSplitterAxe: IToolItemBlueprint = {
         rewards: [
           {
             key: CraftingResourcesBlueprint.WoodenSticks,
-            qty: [2, 3],
+            qty: [2, 5],
             chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 25, rarityOfTool),
           },
           {
             key: CraftingResourcesBlueprint.SmallWoodenStick,
-            qty: [2, 3],
+            qty: [2, 5],
             chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 25, rarityOfTool),
           },
 
           {
             key: CraftingResourcesBlueprint.ElvenWood,
-            qty: [2, 3],
+            qty: [2, 8],
             chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 15, rarityOfTool),
           },
           {
             key: CraftingResourcesBlueprint.GreaterWoodenLog,
-            qty: [1, 2],
+            qty: [1, 6],
             chance: await itemCraftable.getCraftChance(character, CraftingSkill.Lumberjacking, 10, rarityOfTool),
           },
         ],

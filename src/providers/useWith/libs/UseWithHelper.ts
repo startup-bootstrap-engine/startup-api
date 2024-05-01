@@ -26,9 +26,10 @@ export class UseWithHelper {
   }
 
   public async getItem(character: ICharacter, itemId: string): Promise<IItem> {
-    const hasItem = await this.characterItems.hasItem(itemId, character, "both");
+    const hasItem = await Item.exists({ _id: itemId, owner: character._id });
+
     if (!hasItem) {
-      throw new Error("UseWith > Character does not own the item that wants to use");
+      throw new Error(`UseWith > Item with id ${itemId} does not belong to the character!`);
     }
 
     // Check if the item corresponds to the useWithKey

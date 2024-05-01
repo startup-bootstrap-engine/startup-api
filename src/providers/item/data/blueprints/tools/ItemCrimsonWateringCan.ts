@@ -34,7 +34,7 @@ export const itemCrimsonWateringCan: IRefillableItem = {
   weight: 0.1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   hasUseWith: true,
-  basePrice: 20000,
+  basePrice: 10000,
   rangeType: EntityAttackType.None,
   useWithMaxDistanceGrid: RangeTypes.Short,
   canSell: false,

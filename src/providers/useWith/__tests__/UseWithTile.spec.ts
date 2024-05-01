@@ -43,9 +43,13 @@ describe("UseWithTile.ts", () => {
     testCharacterEquipment = (await Equipment.findById(testCharacter.equipment)
       .populate("inventory")
       .exec()) as unknown as IEquipment;
-    testItem = await unitTestHelper.createMockItemFromBlueprint(ToolsBlueprint.UseWithTileTest);
+    testItem = await unitTestHelper.createMockItemFromBlueprint(ToolsBlueprint.UseWithTileTest, {
+      owner: testCharacter._id,
+    });
 
-    testRefillItem = await unitTestHelper.createMockItemFromBlueprint(ToolsBlueprint.WateringCan);
+    testRefillItem = await unitTestHelper.createMockItemFromBlueprint(ToolsBlueprint.WateringCan, {
+      owner: testCharacter._id,
+    });
 
     // Locate character close to the tile
     testCharacter.x = FromGridX(0);
@@ -154,10 +158,14 @@ describe("UseWithTile.ts", () => {
       await testCharacterEquipment.save();
 
       // @ts-ignore
+      testItem.owner = undefined;
+      await testItem.save();
+
+      // @ts-ignore
       await useWithTile.validateData(testCharacter, useWithTileData);
       throw new Error("This test should failed!");
     } catch (error: any) {
-      expect(error.message).toEqual("UseWith > Character does not own the item that wants to use");
+      expect(error.message).toEqual(`UseWith > Item with id ${testItem._id} does not belong to the character!`);
     }
   });
 

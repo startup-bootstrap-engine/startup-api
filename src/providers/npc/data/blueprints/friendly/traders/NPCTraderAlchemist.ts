@@ -12,6 +12,12 @@ export const npcTraderAlchemist = {
   isTrader: true,
   traderItems: [
     {
+      key: PotionsBlueprint.LightLifePotion,
+    },
+    {
+      key: PotionsBlueprint.LightManaPotion,
+    },
+    {
       key: CraftingResourcesBlueprint.Bandage,
     },
     {

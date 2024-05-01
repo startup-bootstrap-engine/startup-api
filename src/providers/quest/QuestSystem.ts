@@ -348,7 +348,7 @@ export class QuestSystem {
       const blueprintData = await blueprintManager.getBlueprint<IItem>("items", itemKey as AvailableBlueprints);
 
       for (let i = 0; i < reward.qty; i++) {
-        let rewardItem = new Item({ ...blueprintData });
+        let rewardItem = new Item({ ...blueprintData, owner: itemContainer.owner });
 
         if (rewardItem.maxStackSize > 1) {
           if (reward.qty > rewardItem.maxStackSize) {

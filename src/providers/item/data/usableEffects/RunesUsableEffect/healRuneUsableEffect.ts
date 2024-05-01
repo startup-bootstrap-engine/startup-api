@@ -33,8 +33,8 @@ export const healRuneUsableEffect: IUsableEffectRune = {
 
       case CharacterClass.Warrior:
       case CharacterClass.Berserker:
-        min = 15;
-        max = 25;
+        min = 20;
+        max = 30;
 
         break;
     }
@@ -49,5 +49,5 @@ export const healRuneUsableEffect: IUsableEffectRune = {
     await itemUsableEffect.apply(target, EffectableAttribute.Health, totalAmount);
   },
 
-  usableEffectDescription: "Restores 50-100% of health, based on Magic skill level",
+  usableEffectDescription: "Restores health, based on Magic skill level",
 };

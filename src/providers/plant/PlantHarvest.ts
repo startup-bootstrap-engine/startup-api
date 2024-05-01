@@ -6,7 +6,11 @@ import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
-import { FARMING_BASE_YIELD, FARMING_SKILL_FACTOR } from "@providers/constants/FarmingConstants";
+import {
+  FARMING_BASE_YIELD,
+  FARMING_RANDOM_REWARD_QTY_CAP,
+  FARMING_SKILL_FACTOR,
+} from "@providers/constants/FarmingConstants";
 import { CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { TraitGetter } from "@providers/skill/TraitGetter";
@@ -91,14 +95,18 @@ export class PlantHarvest {
       return;
     }
 
-    const newItem = await this.createAndSaveNewItem(harvestedItemBlueprint, harvestableItemQuantity);
+    const newItem = await this.createAndSaveNewItem(character, harvestedItemBlueprint, harvestableItemQuantity);
     const wasItemAddedToContainer = await this.addItemToContainer(newItem, character, inventoryContainerId);
 
     const n = Math.floor(Math.random() * 100);
 
     if (n < 25) {
       const extraReward = await this.getExtraReward();
-      const extraRewardItem = await this.createAndSaveNewItem(extraReward, random(1, harvestableItemQuantity));
+      const extraRewardItem = await this.createAndSaveNewItem(
+        character,
+        extraReward,
+        random(1, FARMING_RANDOM_REWARD_QTY_CAP)
+      );
       await this.addItemToContainer(extraRewardItem, character, inventoryContainerId);
     }
 
@@ -156,10 +164,15 @@ export class PlantHarvest {
     return inventory?.itemContainer?.toString();
   }
 
-  private async createAndSaveNewItem(harvestedItemBlueprint: IItem, harvestableItemQuantity: number): Promise<IItem> {
+  private async createAndSaveNewItem(
+    character: ICharacter,
+    harvestedItemBlueprint: IItem,
+    harvestableItemQuantity: number
+  ): Promise<IItem> {
     const newItem = new Item({
       ...harvestedItemBlueprint,
       stackQty: harvestableItemQuantity,
+      owner: character._id,
     });
     await newItem.save();
     return newItem;

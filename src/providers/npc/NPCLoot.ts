@@ -68,12 +68,12 @@ export class NPCLoot {
 
       if (rand <= lootChance) {
         const lootQuantity = this.getLootQuantity(loot);
-        const isStackable = await this.isLootItemStackable(loot);
+        const isStackable = await this.isLootItemStackable(killer, loot);
 
         let remainingLootQuantity = lootQuantity;
 
         while (remainingLootQuantity > 0) {
-          const lootItem = await this.createLootItemWithoutSaving(loot);
+          const lootItem = await this.createLootItemWithoutSaving(killer, loot);
           const freeSlotId = itemContainer.firstAvailableSlotId;
 
           if (freeSlotId === null) {
@@ -113,13 +113,13 @@ export class NPCLoot {
     );
   }
 
-  private async createLootItemWithoutSaving(loot: INPCLoot): Promise<IItem> {
+  private async createLootItemWithoutSaving(character: ICharacter, loot: INPCLoot): Promise<IItem> {
     const blueprintData = await blueprintManager.getBlueprint<IItem>(
       "items",
       loot.itemBlueprintKey as AvailableBlueprints
     );
 
-    let lootItem = new Item({ ...blueprintData });
+    let lootItem = new Item({ ...blueprintData, owner: character._id });
 
     const itemTypesWithoutRarity = [ItemType.CraftingResource, ItemType.Quest, ItemType.Information];
 
@@ -130,6 +130,7 @@ export class NPCLoot {
         attack: rarityAttributes.attack,
         defense: rarityAttributes.defense,
         rarity: rarityAttributes.rarity,
+        owner: character._id,
       });
     }
 
@@ -140,6 +141,7 @@ export class NPCLoot {
         healthRecovery: rarityAttributesFood?.healthRecovery,
         usableEffectDescription: rarityAttributesFood?.usableEffectDescription,
         rarity: rarityAttributesFood?.rarity,
+        owner: character._id,
       });
     }
 
@@ -212,12 +214,12 @@ export class NPCLoot {
     return 1;
   }
 
-  private async isLootItemStackable(loot: INPCLoot): Promise<boolean> {
+  private async isLootItemStackable(character: ICharacter, loot: INPCLoot): Promise<boolean> {
     const blueprintData = await blueprintManager.getBlueprint<IItem>(
       "items",
       loot.itemBlueprintKey as AvailableBlueprints
     );
-    const lootItem = new Item({ ...blueprintData });
+    const lootItem = new Item({ ...blueprintData, owner: character._id });
 
     return lootItem.maxStackSize > 1;
   }

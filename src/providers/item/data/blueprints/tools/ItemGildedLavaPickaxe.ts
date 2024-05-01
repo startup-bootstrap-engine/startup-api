@@ -140,7 +140,7 @@ export const itemGildedLavaPickaxe: IToolItemBlueprint = {
             {
               key: CraftingResourcesBlueprint.CorruptionOre,
               qty: [1, 2],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 10, rarityOfTool),
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 12, rarityOfTool),
             },
           ] as IUseWithItemToTileReward[],
         };
@@ -154,7 +154,7 @@ export const itemGildedLavaPickaxe: IToolItemBlueprint = {
             {
               key: CraftingResourcesBlueprint.GreenOre,
               qty: [2, 3],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 8, rarityOfTool),
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 10, rarityOfTool),
             },
           ] as IUseWithItemToTileReward[],
         };
@@ -168,7 +168,7 @@ export const itemGildedLavaPickaxe: IToolItemBlueprint = {
             {
               key: CraftingResourcesBlueprint.ObsidiumOre,
               qty: [2, 3],
-              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 5, rarityOfTool),
+              chance: await itemCraftable.getCraftChance(character, CraftingSkill.Mining, 8, rarityOfTool),
             },
           ] as IUseWithItemToTileReward[],
         };

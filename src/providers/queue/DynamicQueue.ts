@@ -96,6 +96,8 @@ export class DynamicQueue {
       });
     } catch (error) {
       console.error(error);
+
+      throw error;
     }
   }
 
@@ -176,11 +178,7 @@ export class DynamicQueue {
 
             return await jobFn(job);
           } catch (error) {
-            console.error(`Error processing ${queueName} job ${job.id}: ${error.message}`, {
-              jobData: job.data,
-              errorStack: error.stack,
-            });
-
+            console.error(error);
             throw error;
           }
         },
@@ -206,8 +204,15 @@ export class DynamicQueue {
       this.workers.set(queueName, worker);
 
       if (!appEnv.general.IS_UNIT_TEST) {
-        worker.on("failed", (job, err) => {
-          console.log(`${queueName} job ${job?.id} failed with error ${err.message}`);
+        worker.on("error", (error) => {
+          console.error(`Worker error: ${error.message}`, error);
+        });
+
+        worker.on("failed", (job, error) => {
+          console.error(`${queueName} - Job ${job?.id} failed with error: ${error.message}`, {
+            jobData: job?.data,
+            errorStack: error.stack,
+          });
         });
       }
     }
@@ -308,7 +313,7 @@ export class DynamicQueue {
       case "active-characters":
         const activeCharacters = Number((await this.inMemoryHashTable.get("activity-tracker", "character-count")) || 1);
 
-        const maxCharQueues = Math.ceil(activeCharacters / 20) || 1;
+        const maxCharQueues = Math.ceil(activeCharacters / 35) || 1;
         const charQueueScaleFactor = Math.min(
           maxCharQueues,
           queueScaleOptions?.forceCustomScale || QUEUE_CHARACTER_MAX_SCALE_FACTOR
@@ -322,7 +327,7 @@ export class DynamicQueue {
       case "active-npcs":
         const activeNPCs = Number((await this.inMemoryHashTable.get("activity-tracker", "npc-count")) || 1);
 
-        const maxNPCQueues = Math.ceil(activeNPCs / 15) || 1;
+        const maxNPCQueues = Math.ceil(activeNPCs / 35) || 1;
 
         const NPCQueueScaleFactor = Math.min(
           maxNPCQueues,

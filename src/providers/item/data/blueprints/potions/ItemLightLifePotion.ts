@@ -12,7 +12,7 @@ export const itemLightLifePotion: IConsumableItemBlueprint = {
   name: "Light Life Potion",
   description: "A small flask containing an elixir of life.",
   weight: 0.5,
-  basePrice: 50,
+  basePrice: 25,
   maxStackSize: 999,
   canSell: false,
   usableEffectKey: UsableEffectsBlueprint.LightLifePotionUsableEffect,

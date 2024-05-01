@@ -1,5 +1,5 @@
 import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { CraftingResourcesBlueprint, PotionsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { generateRandomMovement } from "@providers/npc/data/abstractions/BaseNeutralNPC";
 import { CharacterGender } from "@rpg-engine/shared";
 
@@ -11,6 +11,12 @@ export const npcTraderHerbalist = {
   gender: CharacterGender.Female,
   isTrader: true,
   traderItems: [
+    {
+      key: PotionsBlueprint.LightLifePotion,
+    },
+    {
+      key: PotionsBlueprint.LightManaPotion,
+    },
     {
       key: CraftingResourcesBlueprint.Silk,
     },

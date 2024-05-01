@@ -13,11 +13,11 @@ export const lightLifePotionUsableEffect: IUsableEffect = {
   usableEffect: async (character: ICharacter) => {
     const itemUsableEffect = container.get(ItemUsableEffect);
 
-    const characterHealthPercentage = round(character.maxHealth * 0.1); // 10% of char max health
+    const characterHealthPercentage = round(character.maxHealth * 0.05); // 5% of char max health
 
     await itemUsableEffect.apply(character, EffectableAttribute.Health, characterHealthPercentage);
   },
-  usableEffectDescription: "Restores 10% of life",
+  usableEffectDescription: "Restores 5% of life",
 };
 
 export const lifePotionUsableEffect: IUsableEffect = {
@@ -51,11 +51,11 @@ export const LightManaPotionUsableEffect: IUsableEffect = {
   usableEffect: async (character: ICharacter) => {
     const itemUsableEffect = container.get(ItemUsableEffect);
 
-    const characterManaPercentage = round(character.maxMana * 0.1); // 10% of char max mana
+    const characterManaPercentage = round(character.maxMana * 0.05); // 5% of char max mana
 
     await itemUsableEffect.apply(character, EffectableAttribute.Mana, characterManaPercentage);
   },
-  usableEffectDescription: "Restores 10% of mana",
+  usableEffectDescription: "Restores 5% of mana",
 };
 
 export const manaPotionUsableEffect: IUsableEffect = {

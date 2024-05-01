@@ -307,7 +307,7 @@ export class UseWithItemToTile {
     qty: number,
     inventoryContainerId: string
   ): Promise<boolean> {
-    const item = new Item({ ...itemBlueprint, stackQty: qty });
+    const item = new Item({ ...itemBlueprint, stackQty: qty, owner: character._id });
     await item.save(); // Consider batching these operations if possible, or using an upsert operation to reduce the number of database calls
 
     return this.characterItemContainer.addItemToContainer(item, character, inventoryContainerId);

@@ -140,6 +140,7 @@ describe("UseWithRefill.ts", () => {
   });
 
   it("should sends an error message for non-owner trying to use the item", async () => {
+    // @ts-ignore
     testPlant.owner = undefined;
 
     await useWithRefill.executeUse(testCharacter, useWithRefillData, skillIncrease);

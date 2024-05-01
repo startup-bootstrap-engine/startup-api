@@ -3,8 +3,8 @@ import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { IEquippableTwoHandedTier4WeaponBlueprint } from "../../../types/TierBlueprintTypes";
 import { AxesBlueprint } from "../../../types/itemsBlueprintTypes";
 
-export const itemGreataxe: IEquippableTwoHandedTier4WeaponBlueprint = {
-  key: AxesBlueprint.Greataxe,
+export const itemGreatAxe: IEquippableTwoHandedTier4WeaponBlueprint = {
+  key: AxesBlueprint.GreatAxe,
   type: ItemType.Weapon,
   subType: ItemSubType.Axe,
   textureAtlas: "items",

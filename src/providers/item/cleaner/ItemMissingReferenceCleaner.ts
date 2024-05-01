@@ -7,6 +7,7 @@ import { EquipmentSlots } from "@providers/equipment/EquipmentSlots";
 
 import { MarketplaceItem } from "@entities/ModuleMarketplace/MarketplaceItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provide } from "inversify-binding-decorators";
 import { ItemOwnership } from "../ItemOwnership";
 
@@ -15,7 +16,8 @@ export class ItemMissingReferenceCleaner {
   constructor(
     private characterInventory: CharacterInventory,
     private equipmentSlots: EquipmentSlots,
-    private itemOwnership: ItemOwnership
+    private itemOwnership: ItemOwnership,
+    private inMemoryHashTable: InMemoryHashTable
   ) {}
 
   @TrackNewRelicTransaction()
@@ -66,6 +68,8 @@ export class ItemMissingReferenceCleaner {
 
   @TrackNewRelicTransaction()
   private async cleanupMissingEquipmentReferences(character: ICharacter): Promise<void> {
+    await this.inMemoryHashTable.delete("equipment-slots", character._id);
+
     if (!character.equipment) {
       return;
     }
@@ -84,6 +88,15 @@ export class ItemMissingReferenceCleaner {
       }
 
       if (!item) {
+        console.error(`Cleaning equipment reference for ${character._id} in slot ${slotName}. 
+          Related info:
+          - Equipment: ${character.equipment}
+          - Item: ${itemData._id}
+          - Item data: ${JSON.stringify(itemData)}
+          - Slots data: ${JSON.stringify(slotsData)}
+          - Character: ${JSON.stringify(character)}
+          `);
+
         await Equipment.updateOne(
           { _id: character.equipment.toString() },
           {
