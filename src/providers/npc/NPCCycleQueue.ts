@@ -112,6 +112,8 @@ export class NPCCycleQueue {
   }
 
   private async stop(npc: INPC): Promise<void> {
+    if (!npc) return;
+
     await this.locker.unlock(`npc-${npc._id}-npc-cycle`);
     await this.npcFreezer.freezeNPC(npc, "NPCCycle stop");
   }
