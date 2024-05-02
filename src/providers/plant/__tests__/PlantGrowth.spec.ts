@@ -15,10 +15,8 @@ describe("PlantGrowth.ts", () => {
   let plant: IItem;
   let blueprint: IPlantItem;
   let mockItemUpdateOne: jest.Mock;
-  let mockItemFindByIdAndUpdate: jest.Mock;
   let testCharacter: ICharacter;
   let blueprintManager: BlueprintManager;
-  let errorMessages: string[] | undefined;
   let errorMessage: string;
 
   const mockSocketMessaging = {
@@ -50,7 +48,6 @@ describe("PlantGrowth.ts", () => {
     // @ts-ignore
     plantGrowth.socketMessaging = mockSocketMessaging;
     errorMessage = "Sorry, you can't water now. Please try again";
-    errorMessages = [errorMessage];
 
     jest.spyOn(_, "random").mockImplementation(() => 74);
   });
@@ -114,7 +111,6 @@ describe("PlantGrowth.ts", () => {
 
       expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
         testCharacter,
-        // "Sorry, the plant is not ready to be watered. Try again in a few minutes."
         expect.stringContaining("Sorry, the plant is not ready to be watered. Try again")
       );
     });
@@ -358,6 +354,17 @@ describe("PlantGrowth.ts", () => {
 
       const updatedPlant = await Item.findOne({ _id: plant._id }).lean();
       expect(updatedPlant?.isTileTinted).toBe(false);
+    });
+  });
+
+  describe("Rain Watering", () => {
+    it("should not send an error message if the plant has no owner during rain watering", async () => {
+      plant.owner = undefined;
+      await plant.save();
+
+      await plantGrowth.updatePlantGrowth(plant);
+
+      expect(mockSocketMessaging.sendErrorMessageToCharacter).not.toBeCalled();
     });
   });
 });

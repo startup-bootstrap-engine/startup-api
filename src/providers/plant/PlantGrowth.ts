@@ -27,14 +27,14 @@ export class PlantGrowth {
   constructor(private socketMessaging: SocketMessaging, private socketAuth: SocketAuth) {}
 
   @TrackNewRelicTransaction()
-  public async updatePlantGrowth(plant: IItem, character: ICharacter): Promise<boolean> {
+  public async updatePlantGrowth(plant: IItem, character?: ICharacter): Promise<boolean> {
     try {
-      if (plant.isDead) {
+      if (plant.isDead && character) {
         this.notifyCharacter(character, "Sorry, the plant is already dead.");
         return false;
       }
 
-      if (!plant.owner) {
+      if (!plant.owner && character) {
         this.notifyCharacter(character, "Sorry, plant is not owned by anyone.");
         return false;
       }
@@ -45,7 +45,7 @@ export class PlantGrowth {
 
       const { canGrow, canWater } = this.canPlantGrow(plant);
 
-      if (!this.handleWateringStatus(canWater, character, plant.lastWatering ?? new Date())) {
+      if (!this.handleWateringStatus(canWater, plant.lastWatering ?? new Date(), character)) {
         return false;
       }
 
@@ -188,14 +188,15 @@ export class PlantGrowth {
     return true;
   }
 
-  private handleWateringStatus(canWater: boolean, character: ICharacter, lastWatering: Date): boolean {
+  private handleWateringStatus(canWater: boolean, lastWatering: Date, character?: ICharacter): boolean {
     if (!canWater) {
       const remainingMinutesToWater = MINIMUM_MINUTES_FOR_WATERING - dayjs().diff(dayjs(lastWatering), "minute");
-
-      this.notifyCharacter(
-        character,
-        `Sorry, the plant is not ready to be watered. Try again in ${remainingMinutesToWater} minutes.`
-      );
+      if (character) {
+        this.notifyCharacter(
+          character,
+          `Sorry, the plant is not ready to be watered. Try again in ${remainingMinutesToWater} minutes.`
+        );
+      }
       return false;
     }
     return true;
