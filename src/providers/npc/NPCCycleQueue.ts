@@ -101,6 +101,7 @@ export class NPCCycleQueue {
 
     npc.skills = npcSkills;
 
+    // if NPC is stunned, do not proceed with the cycle.
     if (await this.stun.isStun(npc)) {
       return;
     }
