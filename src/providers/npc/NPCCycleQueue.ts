@@ -88,30 +88,28 @@ export class NPCCycleQueue {
       defaults: true,
     });
 
-    try {
-      const shouldNPCBeCleared = this.shouldNPCBeCleared(npc);
+    const shouldNPCBeCleared = this.shouldNPCBeCleared(npc);
 
-      if (shouldNPCBeCleared) {
-        await this.stop(npc);
-        return;
-      }
-
-      await this.npcFreezeCheck(npc);
-
-      npc.skills = npcSkills;
-
-      if (await this.stun.isStun(npc)) {
-        return;
-      }
-
-      await this.startCoreNPCBehavior(npc);
-      await this.addToQueue(npc, npcSkills);
-    } catch (error) {
-      console.error("Error in NPCCycleQueue", error);
+    if (shouldNPCBeCleared) {
+      await this.stop(npc);
+      return;
     }
+
+    await this.npcFreezeCheck(npc);
+
+    npc.skills = npcSkills;
+
+    if (await this.stun.isStun(npc)) {
+      return;
+    }
+
+    await this.startCoreNPCBehavior(npc);
+    await this.addToQueue(npc, npcSkills);
   }
 
   private async stop(npc: INPC): Promise<void> {
+    if (!npc) return;
+
     await this.locker.unlock(`npc-${npc._id}-npc-cycle`);
     await this.npcFreezer.freezeNPC(npc, "NPCCycle stop");
   }

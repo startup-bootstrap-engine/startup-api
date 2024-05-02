@@ -173,14 +173,9 @@ export class DynamicQueue {
       worker = new Worker(
         queueName,
         async (job) => {
-          try {
-            await this.queueActivityMonitor.updateQueueActivity(queueName);
+          await this.queueActivityMonitor.updateQueueActivity(queueName);
 
-            return await jobFn(job);
-          } catch (error) {
-            console.error(error);
-            throw error;
-          }
+          return await jobFn(job);
         },
         {
           name: `${queueName}-worker`,
