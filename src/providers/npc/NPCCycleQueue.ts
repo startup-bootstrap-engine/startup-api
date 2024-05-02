@@ -81,6 +81,8 @@ export class NPCCycleQueue {
 
   @TrackNewRelicTransaction()
   private async execNpcCycle(npc: INPC, npcSkills: ISkill): Promise<void> {
+    if (!npc) return;
+
     this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Server, "NPCCycles", 1);
 
     npc = await NPC.findById(npc?._id).lean({
