@@ -2,7 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { IEquippableAccessoryTier1Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { AccessoriesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { AccessoriesBlueprint, GemsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { CharacterBuffTracker } from "../CharacterBuffTracker";
 import { CharacterItemBuff } from "../CharacterItemBuff";
 
@@ -41,5 +41,18 @@ describe("CharacterItemBuff", () => {
     const characterBuffs = await characterBuffTracker.getAllCharacterBuffs(testCharacter._id);
 
     expect(characterBuffs).toHaveLength(1);
+  });
+
+  it("should add gem buffs", async () => {
+    // AmethystGem has strength buff
+    testItem.attachedGems = {
+      key: GemsBlueprint.AmethystGem,
+    } as any;
+
+    await characterItemBuff.enableItemBuff(testCharacter, testItem);
+
+    const characterBuffs = await characterBuffTracker.getAllCharacterBuffs(testCharacter._id);
+
+    expect(characterBuffs).toHaveLength(4);
   });
 });

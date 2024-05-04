@@ -8,6 +8,7 @@ import {
   BootsBlueprint,
   ContainersBlueprint,
   CraftingResourcesBlueprint,
+  GemsBlueprint,
   GlovesBlueprint,
   HelmetsBlueprint,
   MacesBlueprint,
@@ -141,6 +142,11 @@ export const npcDwarfMage: INPCTierBlueprint<9> = {
     },
     {
       itemBlueprintKey: ShieldsBlueprint.IronHeartShield,
+      chance: LootProbability.VeryRare,
+    },
+
+    {
+      itemBlueprintKey: GemsBlueprint.CoralReefGem,
       chance: LootProbability.VeryRare,
     },
   ],

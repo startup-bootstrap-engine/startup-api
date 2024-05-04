@@ -209,11 +209,19 @@ export const npcYellowDragon: INPCTierBlueprint<22> = {
     },
     {
       itemBlueprintKey: GemsBlueprint.RubyGem,
-      chance: LootProbability.VeryRare,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: GemsBlueprint.CoralReefGem,
-      chance: LootProbability.VeryRare,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.TopazRadiance,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.ObsidianGem,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.EmberStrandNecklace,

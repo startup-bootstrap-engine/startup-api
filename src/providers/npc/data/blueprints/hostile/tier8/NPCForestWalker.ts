@@ -5,6 +5,7 @@ import {
   BootsBlueprint,
   CraftingResourcesBlueprint,
   FoodsBlueprint,
+  GemsBlueprint,
   PotionsBlueprint,
   RangedWeaponsBlueprint,
   SeedsBlueprint,
@@ -134,6 +135,10 @@ export const npcForestWalker: INPCTierBlueprint<8> = {
     },
     {
       itemBlueprintKey: BootsBlueprint.LeafstepBoots,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.MistyQuartzGem,
       chance: LootProbability.Rare,
     },
   ],

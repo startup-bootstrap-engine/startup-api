@@ -134,7 +134,7 @@ export const npcNazgul: INPCTierBlueprint<18> = {
     },
     {
       itemBlueprintKey: GemsBlueprint.CoralReefGem,
-      chance: LootProbability.VeryRare,
+      chance: LootProbability.Uncommon,
     },
 
     {

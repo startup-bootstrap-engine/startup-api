@@ -6,6 +6,7 @@ import {
   IEquippableRangedWeaponTwoHandedBlueprint,
   IEquippableStaffBlueprint,
   IEquippableWeaponBlueprint,
+  IItemGem,
 } from "@rpg-engine/shared";
 import { RangedWeaponsBlueprint } from "./itemsBlueprintTypes";
 
@@ -1251,4 +1252,162 @@ export interface IEquippableBookTier6Blueprint extends IEquippableItemBlueprint 
 
 export interface IEquippableBookTier7Blueprint extends IEquippableItemBlueprint {
   tier: 7;
+}
+
+export type GemTier0Attack = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type GemTier1Attack = GemTier0Attack | 9 | 10 | 11 | 12 | 13 | 14 | 15;
+export type GemTier2Attack = GemTier1Attack | 16 | 17 | 18 | 19 | 20 | 21 | 22;
+export type GemTier3Attack = GemTier2Attack | 23 | 24 | 25 | 26 | 27 | 28 | 29;
+export type GemTier4Attack = GemTier3Attack | 30 | 31 | 32 | 33 | 34 | 35 | 36;
+export type GemTier5Attack = GemTier4Attack | 37 | 38 | 39 | 40 | 41 | 42 | 43;
+export type GemTier6Attack = GemTier5Attack | 44 | 45 | 46 | 47 | 48 | 49 | 50;
+export type GemTier7Attack = GemTier6Attack | 51 | 52 | 53 | 54 | 55 | 56 | 57;
+export type GemTier8Attack = GemTier7Attack | 58 | 59 | 60 | 61 | 62 | 63 | 64;
+export type GemTier9Attack = GemTier8Attack | 65 | 66 | 67 | 68 | 69 | 70 | 71;
+export type GemTier10Attack = GemTier9Attack | 72 | 73 | 74 | 75 | 76 | 77 | 78;
+
+export type GemTier0Defense = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type GemTier1Defense = GemTier0Defense | 9 | 10 | 11 | 12 | 13 | 14 | 15;
+export type GemTier2Defense = GemTier1Defense | 16 | 17 | 18 | 19 | 20 | 21 | 22;
+export type GemTier3Defense = GemTier2Defense | 23 | 24 | 25 | 26 | 27 | 28 | 29;
+export type GemTier4Defense = GemTier3Defense | 30 | 31 | 32 | 33 | 34 | 35 | 36;
+export type GemTier5Defense = GemTier4Defense | 37 | 38 | 39 | 40 | 41 | 42 | 43;
+export type GemTier6Defense = GemTier5Defense | 44 | 45 | 46 | 47 | 48 | 49 | 50;
+export type GemTier7Defense = GemTier6Defense | 51 | 52 | 53 | 54 | 55 | 56 | 57;
+export type GemTier8Defense = GemTier7Defense | 58 | 59 | 60 | 61 | 62 | 63 | 64;
+export type GemTier9Defense = GemTier8Defense | 65 | 66 | 67 | 68 | 69 | 70 | 71;
+export type GemTier10Defense = GemTier9Defense | 72 | 73 | 74 | 75 | 76 | 77 | 78;
+
+export type GemTier0EffectChance = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type GemTier1EffectChance = 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
+export type GemTier2EffectChance = 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24;
+export type GemTier3EffectChance = 25 | 26 | 27 | 28 | 29 | 30 | 31 | 32;
+export type GemTier4EffectChance = 33 | 34 | 35 | 36 | 37 | 38 | 39 | 40;
+export type GemTier5EffectChance = 41 | 42 | 43 | 44 | 45 | 46 | 47 | 48;
+export type GemTier6EffectChance = 49 | 50 | 51 | 52 | 53 | 54 | 55 | 56;
+export type GemTier7EffectChance = 57 | 58 | 59 | 60 | 61 | 62 | 63 | 64;
+export type GemTier8EffectChance = 65 | 66 | 67 | 68 | 69 | 70 | 71 | 72;
+export type GemTier9EffectChance = 73 | 74 | 75 | 76 | 77 | 78 | 79 | 80;
+export type GemTier10EffectChance = 81 | 82 | 83 | 84 | 85 | 86 | 87 | 88;
+
+export type GemTier0BasePrice = 2000 | 4000 | 6000 | 8000 | 10000;
+export type GemTier1BasePrice = 12000 | 14000 | 16000 | 18000 | 20000;
+export type GemTier2BasePrice = 22000 | 24000 | 26000 | 28000 | 30000;
+export type GemTier3BasePrice = 32000 | 34000 | 36000 | 38000 | 40000;
+export type GemTier4BasePrice = 42000 | 44000 | 46000 | 48000 | 50000;
+export type GemTier5BasePrice = 52000 | 54000 | 56000 | 58000 | 60000;
+export type GemTier6BasePrice = 62000 | 64000 | 66000 | 68000 | 70000;
+export type GemTier7BasePrice = 72000 | 74000 | 76000 | 78000 | 80000;
+export type GemTier8BasePrice = 82000 | 84000 | 86000 | 88000 | 90000;
+export type GemTier9BasePrice = 92000 | 94000 | 96000 | 98000 | 100000;
+export type GemTier10BasePrice = 102000 | 104000 | 106000 | 108000 | 110000;
+
+export interface IItemGemTier0Blueprint extends IItemGem {
+  tier: 0;
+  gemStatBuff: {
+    attack: GemTier0Attack;
+    defense: GemTier0Defense;
+  };
+  gemEntityEffectChance: GemTier0EffectChance;
+  basePrice: GemTier0BasePrice;
+}
+
+export interface IItemGemTier1Blueprint extends IItemGem {
+  tier: 1;
+  gemStatBuff: {
+    attack: GemTier1Attack;
+    defense: GemTier1Defense;
+  };
+  gemEntityEffectChance: GemTier1EffectChance;
+  basePrice: GemTier1BasePrice;
+}
+
+export interface IItemGemTier2Blueprint extends IItemGem {
+  tier: 2;
+  gemStatBuff: {
+    attack: GemTier2Attack;
+    defense: GemTier2Defense;
+  };
+  gemEntityEffectChance: GemTier2EffectChance;
+  basePrice: GemTier2BasePrice;
+}
+
+export interface IItemGemTier3Blueprint extends IItemGem {
+  tier: 3;
+  gemStatBuff: {
+    attack: GemTier3Attack;
+    defense: GemTier3Defense;
+  };
+  gemEntityEffectChance: GemTier3EffectChance;
+  basePrice: GemTier3BasePrice;
+}
+
+export interface IItemGemTier4Blueprint extends IItemGem {
+  tier: 4;
+  gemStatBuff: {
+    attack: GemTier4Attack;
+    defense: GemTier4Defense;
+  };
+  gemEntityEffectChance: GemTier4EffectChance;
+  basePrice: GemTier4BasePrice;
+}
+
+export interface IItemGemTier5Blueprint extends IItemGem {
+  tier: 5;
+  gemStatBuff: {
+    attack: GemTier5Attack;
+    defense: GemTier5Defense;
+  };
+  gemEntityEffectChance: GemTier5EffectChance;
+  basePrice: GemTier5BasePrice;
+}
+
+export interface IItemGemTier6Blueprint extends IItemGem {
+  tier: 6;
+  gemStatBuff: {
+    attack: GemTier6Attack;
+    defense: GemTier6Defense;
+  };
+  gemEntityEffectChance: GemTier6EffectChance;
+  basePrice: GemTier6BasePrice;
+}
+
+export interface IItemGemTier7Blueprint extends IItemGem {
+  tier: 7;
+  gemStatBuff: {
+    attack: GemTier7Attack;
+    defense: GemTier7Defense;
+  };
+  gemEntityEffectChance: GemTier7EffectChance;
+  basePrice: GemTier7BasePrice;
+}
+
+export interface IItemGemTier8Blueprint extends IItemGem {
+  tier: 8;
+  gemStatBuff: {
+    attack: GemTier8Attack;
+    defense: GemTier8Defense;
+  };
+  gemEntityEffectChance: GemTier8EffectChance;
+  basePrice: GemTier8BasePrice;
+}
+
+export interface IItemGemTier9Blueprint extends IItemGem {
+  tier: 9;
+  gemStatBuff: {
+    attack: GemTier9Attack;
+    defense: GemTier9Defense;
+  };
+  gemEntityEffectChance: GemTier9EffectChance;
+  basePrice: GemTier9BasePrice;
+}
+
+export interface IItemGemTier10Blueprint extends IItemGem {
+  tier: 10;
+  gemStatBuff: {
+    attack: GemTier10Attack;
+    defense: GemTier10Defense;
+  };
+  gemEntityEffectChance: GemTier10EffectChance;
+  basePrice: GemTier10BasePrice;
 }

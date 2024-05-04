@@ -200,8 +200,8 @@ export const npcIceNaga: INPCTierBlueprint<21> = {
       chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: GemsBlueprint.RubyGem,
-      chance: LootProbability.Uncommon,
+      itemBlueprintKey: GemsBlueprint.MistyQuartzGem,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.EarthstoneEmeraldNecklace,

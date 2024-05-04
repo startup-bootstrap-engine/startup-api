@@ -4,7 +4,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { blueprintManager } from "@providers/inversify/container";
 import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { ICharacterItemBuff, IEquippableItemBlueprint } from "@rpg-engine/shared";
+import { ICharacterItemBuff, ICharacterPermanentBuff, IEquippableItemBlueprint, IItemGem } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { CharacterBuffActivator } from "./CharacterBuffActivator";
 import { CharacterBuffTracker } from "./CharacterBuffTracker";
@@ -24,13 +24,32 @@ export class CharacterItemBuff {
       item.baseKey as AvailableBlueprints
     );
 
-    if (!itemBlueprint || !itemBlueprint.equippedBuff) {
+    const equippedBuffs: ICharacterPermanentBuff[] = [];
+
+    if (item.attachedGems) {
+      for (const gem of item.attachedGems) {
+        if (gem.key) {
+          const gemBlueprints = (await blueprintManager.getBlueprint("items", gem.key)) as IItemGem;
+          if (gemBlueprints.gemEquippedBuffAdd) {
+            const gemBuffsToAdd = Array.isArray(gemBlueprints.gemEquippedBuffAdd)
+              ? gemBlueprints.gemEquippedBuffAdd
+              : [gemBlueprints.gemEquippedBuffAdd];
+            equippedBuffs.push(...gemBuffsToAdd);
+          }
+        }
+      }
+    }
+
+    if (!itemBlueprint || (!itemBlueprint.equippedBuff && equippedBuffs.length === 0)) {
       return;
     }
 
-    const equippedBuffs = Array.isArray(itemBlueprint.equippedBuff)
-      ? itemBlueprint.equippedBuff
-      : [itemBlueprint.equippedBuff];
+    if (itemBlueprint.equippedBuff) {
+      const itemBuffsToAdd = Array.isArray(itemBlueprint.equippedBuff)
+        ? itemBlueprint.equippedBuff
+        : [itemBlueprint.equippedBuff];
+      equippedBuffs.push(...itemBuffsToAdd);
+    }
 
     try {
       const messages = (

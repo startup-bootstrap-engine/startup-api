@@ -228,7 +228,11 @@ export const npcNPCBalrog: INPCTierBlueprint<27> = {
     },
     {
       itemBlueprintKey: GemsBlueprint.AmethystGem,
-      chance: LootProbability.VeryRare,
+      chance: LootProbability.Common,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.TopazRadiance,
+      chance: LootProbability.Common,
     },
     {
       itemBlueprintKey: GemsBlueprint.JasperGem,

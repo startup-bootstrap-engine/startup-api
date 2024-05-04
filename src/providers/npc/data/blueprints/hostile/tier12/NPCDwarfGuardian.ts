@@ -9,6 +9,7 @@ import {
   CraftingResourcesBlueprint,
   DaggersBlueprint,
   FoodsBlueprint,
+  GemsBlueprint,
   GlovesBlueprint,
   HammersBlueprint,
   HelmetsBlueprint,
@@ -198,6 +199,10 @@ export const npcDwarfGuardian: INPCTierBlueprint<12> = {
     {
       itemBlueprintKey: ToolsBlueprint.EmberEdgePickaxe,
       chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.EarthstoneGem,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
