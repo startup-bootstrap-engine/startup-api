@@ -1,12 +1,18 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { blueprintManager, container, unitTestHelper } from "@providers/inversify/container";
-import { GemsBlueprint, SwordsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import {
+  ArmorsBlueprint,
+  CraftingResourcesBlueprint,
+  GemsBlueprint,
+  ShieldsBlueprint,
+  SwordsBlueprint,
+} from "@providers/item/data/types/itemsBlueprintTypes";
 
 import { IItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
-import { IItemGem } from "@rpg-engine/shared";
+import { AnimationEffectKeys, IItemGem, ItemSubType, ItemType } from "@rpg-engine/shared";
 import { GemAttachToEquip, IAttachedItemGem } from "../GemAttachToEquip";
 
 describe("GemAttachToEquip", () => {
@@ -18,6 +24,7 @@ describe("GemAttachToEquip", () => {
   let inventoryItemContainer: IItemContainer;
   let characterInventory: CharacterInventory;
   let testGemBlueprint: IItemGem;
+  let sendErrorMessageToCharacterSpy: jest.SpyInstance;
 
   beforeAll(() => {
     gemAttachToEquip = container.resolve(GemAttachToEquip);
@@ -52,6 +59,9 @@ describe("GemAttachToEquip", () => {
     // update data
     testGemItem = await Item.findById(testGemItem._id).lean();
     testEquipItem = await Item.findById(testEquipItem._id).lean();
+
+    // @ts-ignore
+    sendErrorMessageToCharacterSpy = jest.spyOn(gemAttachToEquip.socketMessaging, "sendErrorMessageToCharacter");
   });
 
   afterEach(() => {
@@ -67,8 +77,8 @@ describe("GemAttachToEquip", () => {
 
     const updatedEquipItem = (await Item.findById(testEquipItem._id).lean()) as IItem;
 
-    expect(updatedEquipItem.attack).toBe(18);
-    expect(updatedEquipItem.defense).toBe(15);
+    expect(updatedEquipItem.attack).toBe(68);
+    expect(updatedEquipItem.defense).toBe(66);
 
     // verify the gem was consumed
     const gemItem = await Item.findById(testGemItem._id).lean();
@@ -103,11 +113,98 @@ describe("GemAttachToEquip", () => {
 
     expect(sendMessageSpy).toHaveBeenCalledWith(
       testCharacter,
-      "Attached 'Ruby Gem' to Sword. Increased stats by: +10 attack, +8 defense. Added effects: burning."
+      "Attached 'Ruby Gem' to Sword. Increased stats by: +60 attack, +59 defense. Added effects: burning."
     );
   });
 
-  describe("Edge cases", () => {
+  it("should update the equippedBuffDescription of the target item correctly", async () => {
+    testEquipItem = await Item.findByIdAndUpdate(
+      testEquipItem._id,
+      {
+        equippedBuffDescription: "Initial description.",
+        owner: testCharacter._id,
+      },
+      { new: true }
+    ).lean();
+
+    // Perform the gem attachment operation
+    const result = await gemAttachToEquip.attachGemToEquip(testGemItem, testEquipItem, testCharacter);
+
+    expect(result).toBe(true);
+
+    // Fetch the updated item
+    const updatedEquipItem = await Item.findById(testEquipItem._id).lean();
+
+    // Check updated description
+    expect(updatedEquipItem?.equippedBuffDescription).toStrictEqual(
+      "Initial description. Ruby Gem: +60 atk, +59 def, 68% chance to apply burning effects. Additional buffs: sword: +20%, resistance: +15%, magicResistance: +15%."
+    );
+  });
+
+  describe("isArmorOrShield logic", () => {
+    it("should increase only defense if target item is armor or shield", async () => {
+      // Assuming 'Armor' is a type and 'Shield' is a subtype in the ItemType and ItemSubType enums respectively
+      let testArmorItem = await unitTestHelper.createMockItemFromBlueprint(ArmorsBlueprint.DarkArmor);
+
+      // Add the armor item to the character's inventory
+      await characterItemContainer.addItemToContainer(testArmorItem, testCharacter, inventoryItemContainer._id, {
+        shouldAddOwnership: true,
+      });
+
+      // Update the armor item for test
+      testArmorItem = await Item.findByIdAndUpdate(
+        testArmorItem._id,
+        {
+          attack: 5,
+          defense: 5,
+        },
+        { new: true }
+      ).lean();
+
+      // Perform the gem attachment
+      await gemAttachToEquip.attachGemToEquip(testGemItem, testArmorItem, testCharacter);
+
+      // Fetch the updated armor item
+      const updatedArmorItem = await Item.findById(testArmorItem._id).lean();
+
+      // Check that only defense was increased
+      expect(updatedArmorItem?.attack).toBe(5); // Unchanged
+      expect(updatedArmorItem?.defense).toBe(64); // Increased by gem's defense stat
+    });
+
+    it("should increase both attack and defense if target item is not armor or shield", async () => {
+      // Setup a weapon item that is neither armor nor shield
+      let testWeaponItem = await unitTestHelper.createMockItemFromBlueprint(SwordsBlueprint.Sword);
+
+      // Add the weapon item to the character's inventory
+      await characterItemContainer.addItemToContainer(testWeaponItem, testCharacter, inventoryItemContainer._id, {
+        shouldAddOwnership: true,
+      });
+
+      // Update the weapon item for test
+      testWeaponItem = await Item.findByIdAndUpdate(
+        testWeaponItem._id,
+        {
+          attack: 10,
+          defense: 10,
+          type: ItemType.Weapon,
+        },
+        { new: true }
+      ).lean();
+
+      // Perform the gem attachment
+      await gemAttachToEquip.attachGemToEquip(testGemItem, testWeaponItem, testCharacter);
+
+      // Fetch the updated weapon item
+      const updatedWeaponItem = await Item.findById(testWeaponItem._id).lean();
+
+      // Check that both attack and defense were increased
+      expect(updatedWeaponItem?.attack).toBe(70); // Increased by gem's attack stat
+      expect(updatedWeaponItem?.defense).toBe(69); // Increased by gem's defense stat
+    });
+  });
+
+  describe("Edge cases & validation", () => {
     // Test for attaching an invalid gem type to equipment
     it("should not attach non-gem item to equip", async () => {
       // Setup a non-gem item
@@ -164,6 +261,104 @@ describe("GemAttachToEquip", () => {
       const unchangedEquipItem = (await Item.findById(testEquipItem._id).lean()) as IItem;
       expect(unchangedEquipItem.attack).toBe(8);
       expect(unchangedEquipItem.defense).toBe(7);
+    });
+
+    it("should send error message and return if the target is not a weapon", async () => {
+      const testNonWeaponItem = await unitTestHelper.createMockItemFromBlueprint(
+        CraftingResourcesBlueprint.PolishedStone
+      ); // Non-weapon item
+      const result = await gemAttachToEquip.attachGemToEquip(testGemItem, testNonWeaponItem, testCharacter);
+      expect(result).toBe(false);
+      expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledWith(
+        testCharacter,
+        "Sorry,  you can only attach gems to weapons, armors, and shields."
+      );
+    });
+
+    it("should send error message and return if the gem is already equipped", async () => {
+      // @ts-ignore
+      testEquipItem.attachedGems = [{ key: GemsBlueprint.RubyGem }]; // Gem already attached
+      const result = await gemAttachToEquip.attachGemToEquip(testGemItem, testEquipItem, testCharacter);
+      expect(result).toBe(false);
+      expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledWith(
+        testCharacter,
+        "Sorry, you already have this gem equipped."
+      );
+    });
+
+    it("should send error message if number of gems equipped is greater than the tier can hold", async () => {
+      // @ts-ignore
+      testEquipItem.attachedGems = new Array(3).fill({ key: GemsBlueprint.AmethystGem }); // Maximum tier capacity reached
+      const result = await gemAttachToEquip.attachGemToEquip(testGemItem, testEquipItem, testCharacter);
+      expect(result).toBe(false);
+      expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledWith(
+        testCharacter,
+        "Sorry, you can only attach up to 1 gems to tier 0 items."
+      );
+    });
+
+    it("should trigger the correct animation event upon successful gem attachment", async () => {
+      const sendAnimationEventToCharacterSpy = jest.spyOn(
+        // @ts-ignore
+        gemAttachToEquip.animationEffect,
+        "sendAnimationEventToCharacter"
+      );
+
+      // Perform the gem attachment operation
+      await gemAttachToEquip.attachGemToEquip(testGemItem, testEquipItem, testCharacter);
+
+      // Check that the animation event was triggered
+      expect(sendAnimationEventToCharacterSpy).toHaveBeenCalledWith(testCharacter, AnimationEffectKeys.LevelUp);
+    });
+
+    it("should update the equippedBuffDescription for armors with specific stat boosts", async () => {
+      // Set up an armor item
+      const testArmorItem = await unitTestHelper.createMockItemFromBlueprint(ArmorsBlueprint.DarkArmor, {
+        equippedBuffDescription: "Base defense: 50.",
+        owner: testCharacter._id,
+      });
+
+      await characterItemContainer.addItemToContainer(testArmorItem, testCharacter, inventoryItemContainer._id, {
+        shouldAddOwnership: true,
+      });
+
+      // Perform the gem attachment
+      const result = await gemAttachToEquip.attachGemToEquip(testGemItem, testArmorItem, testCharacter);
+
+      expect(result).toBe(true);
+
+      // Fetch the updated armor item
+      const updatedArmorItem = await Item.findById(testArmorItem._id).lean();
+
+      // Verify updated description includes specific stat boosts
+      expect(updatedArmorItem?.equippedBuffDescription).toContain("Base defense: 50. Ruby Gem: +59 def.");
+    });
+
+    it("should ensure only defense is increased when a defense-only gem is attached to a shield", async () => {
+      // Setup a shield item
+      let testShieldItem = await unitTestHelper.createMockItemFromBlueprint(ShieldsBlueprint.WoodenShield);
+      testShieldItem = await Item.findByIdAndUpdate(
+        testShieldItem._id,
+        {
+          attack: 0,
+          defense: 10,
+          subType: ItemSubType.Shield,
+          owner: testCharacter._id,
+        },
+        { new: true }
+      ).lean();
+
+      // Perform the gem attachment
+      const result = await gemAttachToEquip.attachGemToEquip(testGemItem, testShieldItem, testCharacter);
+
+      expect(result).toBe(true);
+
+      // Fetch the updated shield item
+      const updatedShieldItem = await Item.findById(testShieldItem._id).lean();
+
+      // Verify that only defense was increased
+      expect(updatedShieldItem?.attack).toBe(0); // Unchanged
+      expect(updatedShieldItem?.defense).toBe(69); // Increased by gem's defense stat
     });
   });
 });

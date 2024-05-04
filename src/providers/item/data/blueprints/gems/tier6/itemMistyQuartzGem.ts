@@ -2,7 +2,15 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import { container } from "@providers/inversify/container";
 import { IItemGemTier6Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import { UseWithGem } from "@providers/useWith/abstractions/UseWithGem";
-import { EntityAttackType, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  EntityAttackType,
+  ItemSubType,
+  ItemType,
+  RangeTypes,
+} from "@rpg-engine/shared";
 import { GemsBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemMistyQuartzGem: IItemGemTier6Blueprint = {
@@ -26,7 +34,23 @@ export const itemMistyQuartzGem: IItemGemTier6Blueprint = {
   },
   gemEntityEffectsAdd: [EntityEffectBlueprint.Freezing],
   gemEntityEffectChance: 50,
-  usableEffectDescription: "+46 Attack, +42 Defense, 50% chance to apply Freezing effect each hit.",
+  usableEffectDescription:
+    "+46 Attack, +42 Defense, 50% chance to apply Freezing effect each hit. Buff: +12% Magic Resistance, +12% Magic.",
+
+  gemEquippedBuffAdd: [
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.MagicResistance,
+      buffPercentage: 12,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 12,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
 
   useWithItemEffect: async (originItem, targetItem, character) => {
     const useWithGem = container.get<UseWithGem>(UseWithGem);

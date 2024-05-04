@@ -2,7 +2,16 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import { container } from "@providers/inversify/container";
 import { IItemGemTier8Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import { UseWithGem } from "@providers/useWith/abstractions/UseWithGem";
-import { EntityAttackType, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  CombatSkill,
+  EntityAttackType,
+  ItemSubType,
+  ItemType,
+  RangeTypes,
+} from "@rpg-engine/shared";
 import { GemsBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemRubyGem: IItemGemTier8Blueprint = {
@@ -26,7 +35,29 @@ export const itemRubyGem: IItemGemTier8Blueprint = {
   },
   gemEntityEffectsAdd: [EntityEffectBlueprint.Burning],
   gemEntityEffectChance: 68,
-  usableEffectDescription: "+60 Attack, +59 Defense, 68% chance to apply Burning effect each hit.",
+  usableEffectDescription:
+    "+60 Attack, +59 Defense, 68% chance to apply Burning effect each hit. Buff: +20% Sword, +15% Resistance, +15% Magic Resistance.",
+
+  gemEquippedBuffAdd: [
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Sword,
+      buffPercentage: 20,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.MagicResistance,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
 
   useWithItemEffect: async (originItem, targetItem, character) => {
     const useWithGem = container.get<UseWithGem>(UseWithGem);

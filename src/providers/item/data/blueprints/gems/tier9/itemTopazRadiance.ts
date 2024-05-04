@@ -2,7 +2,16 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import { container } from "@providers/inversify/container";
 import { IItemGemTier9Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import { UseWithGem } from "@providers/useWith/abstractions/UseWithGem";
-import { EntityAttackType, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  CombatSkill,
+  EntityAttackType,
+  ItemSubType,
+  ItemType,
+  RangeTypes,
+} from "@rpg-engine/shared";
 import { GemsBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemTopazRadiance: IItemGemTier9Blueprint = {
@@ -26,7 +35,53 @@ export const itemTopazRadiance: IItemGemTier9Blueprint = {
   },
   gemEntityEffectsAdd: [EntityEffectBlueprint.Corruption],
   gemEntityEffectChance: 75,
-  usableEffectDescription: "+70 Attack, +70 Defense, 75% chance to apply Corruption effect each hit.",
+  usableEffectDescription:
+    "+70 Attack, +70 Defense, 75% chance to apply Corruption effect each hit. Buff: +15% Magic Resistance, +15% Magic. 15% in all combat skills.",
+
+  gemEquippedBuffAdd: [
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.MagicResistance,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Axe,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Club,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Sword,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Distance,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Dagger,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
 
   useWithItemEffect: async (originItem, targetItem, character) => {
     const useWithGem = container.get<UseWithGem>(UseWithGem);

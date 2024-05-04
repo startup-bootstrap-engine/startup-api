@@ -2,7 +2,15 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import { container } from "@providers/inversify/container";
 import { IItemGemTier2Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import { UseWithGem } from "@providers/useWith/abstractions/UseWithGem";
-import { EntityAttackType, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  EntityAttackType,
+  ItemSubType,
+  ItemType,
+  RangeTypes,
+} from "@rpg-engine/shared";
 import { GemsBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemAmethystGem: IItemGemTier2Blueprint = {
@@ -27,7 +35,29 @@ export const itemAmethystGem: IItemGemTier2Blueprint = {
   },
   gemEntityEffectsAdd: [EntityEffectBlueprint.Poison],
   gemEntityEffectChance: 20,
-  usableEffectDescription: "+22 Attack, +20 Defense, 20% chance to apply Poison effect each hit.",
+  usableEffectDescription:
+    "+22 Attack, +20 Defense, 20% chance to apply Poison effect each hit. Buff: +4% Resistance, +3% Magic Resistance, +6% Magic.",
+
+  gemEquippedBuffAdd: [
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 4,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.MagicResistance,
+      buffPercentage: 3,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 6,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
 
   useWithItemEffect: async (originItem, targetItem, character) => {
     const useWithGem = container.get<UseWithGem>(UseWithGem);

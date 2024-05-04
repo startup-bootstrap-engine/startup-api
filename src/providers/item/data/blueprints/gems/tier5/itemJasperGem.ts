@@ -34,24 +34,26 @@ export const itemJasperGem: IItemGemTier5Blueprint = {
   },
   gemEntityEffectsAdd: [EntityEffectBlueprint.Bleeding],
   gemEntityEffectChance: 44,
-  usableEffectDescription: "+41 Attack, +42 Defense, 44% chance to apply Bleeding effect each hit.",
+  usableEffectDescription:
+    "+41 Attack, +42 Defense, 44% chance to apply Bleeding effect each hit. Buff: +10% Strength, +10% Magic.",
 
+  gemEquippedBuffAdd: [
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
   useWithItemEffect: async (originItem, targetItem, character) => {
     const useWithGem = container.get<UseWithGem>(UseWithGem);
 
     await useWithGem.execute(originItem, targetItem, character);
   },
-  gemEquippedBuffAdd: {
-    type: CharacterBuffType.Skill,
-    trait: BasicAttribute.Strength,
-    buffPercentage: 10,
-    durationType: CharacterBuffDurationType.Permanent,
-    options: {
-      messages: {
-        activation: "You feel the strength and fortitude coursing through your body. (+10% strength)",
-        deactivation: "You feel the strength and fortitude coursing leaving through your body. (-10% strength)",
-      },
-    },
-  },
-  equippedBuffDescription: "Increases strength by 10%",
 };

@@ -53,6 +53,6 @@ describe("CharacterItemBuff", () => {
 
     const characterBuffs = await characterBuffTracker.getAllCharacterBuffs(testCharacter._id);
 
-    expect(characterBuffs).toHaveLength(2);
+    expect(characterBuffs).toHaveLength(4);
   });
 });

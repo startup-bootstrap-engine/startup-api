@@ -3,9 +3,9 @@ import { container } from "@providers/inversify/container";
 import { IItemGemTier7Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import { UseWithGem } from "@providers/useWith/abstractions/UseWithGem";
 import {
-  BasicAttribute,
   CharacterBuffDurationType,
   CharacterBuffType,
+  CombatSkill,
   EntityAttackType,
   ItemSubType,
   ItemType,
@@ -34,24 +34,44 @@ export const itemObsidianGem: IItemGemTier7Blueprint = {
   },
   gemEntityEffectsAdd: [EntityEffectBlueprint.Corruption],
   gemEntityEffectChance: 58,
-  usableEffectDescription: "+52 Attack, +50 Defense, 58% chance to apply Corruption effect each hit.",
+  usableEffectDescription:
+    "+52 Attack, +50 Defense, 58% chance to apply Corruption effect each hit.  Buff: +10% to all combat skills.",
 
   useWithItemEffect: async (originItem, targetItem, character) => {
     const useWithGem = container.get<UseWithGem>(UseWithGem);
 
     await useWithGem.execute(originItem, targetItem, character);
   },
-  gemEquippedBuffAdd: {
-    type: CharacterBuffType.Skill,
-    trait: BasicAttribute.Resistance,
-    buffPercentage: 12,
-    durationType: CharacterBuffDurationType.Permanent,
-    options: {
-      messages: {
-        activation: "You feel the strength and fortitude coursing through your body. (+10% strength)",
-        deactivation: "You feel the strength and fortitude coursing leaving through your body. (-10% strength)",
-      },
+  gemEquippedBuffAdd: [
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Axe,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
     },
-  },
-  equippedBuffDescription: "Increases strength by 10%",
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Club,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Sword,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Distance,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Dagger,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
 };

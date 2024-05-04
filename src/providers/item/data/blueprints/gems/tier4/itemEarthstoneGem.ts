@@ -2,7 +2,16 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import { container } from "@providers/inversify/container";
 import { IItemGemTier4Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import { UseWithGem } from "@providers/useWith/abstractions/UseWithGem";
-import { EntityAttackType, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  CombatSkill,
+  EntityAttackType,
+  ItemSubType,
+  ItemType,
+  RangeTypes,
+} from "@rpg-engine/shared";
 import { GemsBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemEarthstoneGem: IItemGemTier4Blueprint = {
@@ -26,7 +35,29 @@ export const itemEarthstoneGem: IItemGemTier4Blueprint = {
   },
   gemEntityEffectsAdd: [EntityEffectBlueprint.VineGrasp],
   gemEntityEffectChance: 40,
-  usableEffectDescription: "+32 Attack, +30 Defense, 40% chance to apply Vine Grasp effect each hit.",
+  usableEffectDescription:
+    "+32 Attack, +30 Defense, 40% chance to apply Vine Grasp effect each hit. Buff: +8% Magic Resistance, +9% Magic, +6% Shielding.",
+
+  gemEquippedBuffAdd: [
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.MagicResistance,
+      buffPercentage: 8,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 9,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Shielding,
+      buffPercentage: 6,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
 
   useWithItemEffect: async (originItem, targetItem, character) => {
     const useWithGem = container.get<UseWithGem>(UseWithGem);

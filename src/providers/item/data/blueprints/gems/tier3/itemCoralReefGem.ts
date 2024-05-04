@@ -2,7 +2,16 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import { container } from "@providers/inversify/container";
 import { IItemGemTier3Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import { UseWithGem } from "@providers/useWith/abstractions/UseWithGem";
-import { EntityAttackType, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
+import {
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  CombatSkill,
+  EntityAttackType,
+  ItemSubType,
+  ItemType,
+  RangeTypes,
+  UserAccountTypes,
+} from "@rpg-engine/shared";
 import { GemsBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemCoralReefGem: IItemGemTier3Blueprint = {
@@ -24,9 +33,49 @@ export const itemCoralReefGem: IItemGemTier3Blueprint = {
     attack: 24,
     defense: 26,
   },
-  gemEntityEffectsAdd: [EntityEffectBlueprint.Poison],
+  canBePurchasedOnlyByPremiumPlans: [
+    UserAccountTypes.PremiumBronze,
+    UserAccountTypes.PremiumSilver,
+    UserAccountTypes.PremiumGold,
+    UserAccountTypes.PremiumUltimate,
+  ],
+  gemEntityEffectsAdd: [EntityEffectBlueprint.Bleeding],
   gemEntityEffectChance: 25,
-  usableEffectDescription: "+24 Attack, +26 Defense, 25% chance to apply Poison effect each hit.",
+  usableEffectDescription:
+    "+24 Attack, +26 Defense, 25% chance to apply Bleeding effect each hit. Buff: +5% to all combat skills.",
+
+  gemEquippedBuffAdd: [
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Axe,
+      buffPercentage: 5,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Club,
+      buffPercentage: 5,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Sword,
+      buffPercentage: 5,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Distance,
+      buffPercentage: 5,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: CombatSkill.Dagger,
+      buffPercentage: 5,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
 
   useWithItemEffect: async (originItem, targetItem, character) => {
     const useWithGem = container.get<UseWithGem>(UseWithGem);
