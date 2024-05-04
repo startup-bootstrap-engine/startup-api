@@ -1,28 +1,45 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
+import { container } from "@providers/inversify/container";
+import { UseWithGem } from "@providers/useWith/abstractions/UseWithGem";
 import {
   BasicAttribute,
   CharacterBuffDurationType,
   CharacterBuffType,
-  ItemSlotType,
+  EntityAttackType,
+  IItemGem,
   ItemSubType,
   ItemType,
+  RangeTypes,
 } from "@rpg-engine/shared";
-import { IEquippableArmorTier2Blueprint } from "../../../types/TierBlueprintTypes";
 import { GemsBlueprint } from "../../../types/itemsBlueprintTypes";
 
-export const itemJasperGem: IEquippableArmorTier2Blueprint = {
+export const itemJasperGem: IItemGem = {
   key: GemsBlueprint.JasperGem,
-  type: ItemType.Jewelry,
+  type: ItemType.Tool,
   subType: ItemSubType.Gem,
   textureAtlas: "items",
   texturePath: "gems/jasper-gem.png",
   name: "Jasper Gem",
   description: "Rustic allure, nature's palette, a mystical touch; embody the essence of adventure.",
-  defense: 15,
-  tier: 2,
-  weight: 2,
-  allowedEquipSlotType: [ItemSlotType.Accessory],
-  basePrice: 65,
-  equippedBuff: {
+  hasUseWith: true,
+  useWithMaxDistanceGrid: RangeTypes.Medium,
+  weight: 1,
+  basePrice: 550,
+  canSell: false,
+  rangeType: EntityAttackType.None,
+  gemStatBuff: {
+    attack: 15,
+    defense: 12,
+  },
+  gemEntityEffectsAdd: [EntityEffectBlueprint.Bleeding],
+  gemEntityEffectChance: 80,
+
+  useWithItemEffect: async (originItem, targetItem, character) => {
+    const useWithGem = container.get<UseWithGem>(UseWithGem);
+
+    await useWithGem.execute(originItem, targetItem, character);
+  },
+  gemEquippedBuffAdd: {
     type: CharacterBuffType.Skill,
     trait: BasicAttribute.Strength,
     buffPercentage: 10,

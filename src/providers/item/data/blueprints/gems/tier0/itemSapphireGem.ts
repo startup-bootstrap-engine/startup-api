@@ -1,18 +1,33 @@
-import { ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
-import { IEquippableArmorTier0Blueprint } from "../../../types/TierBlueprintTypes";
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
+import { container } from "@providers/inversify/container";
+import { UseWithGem } from "@providers/useWith/abstractions/UseWithGem";
+import { EntityAttackType, IItemGem, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
 import { GemsBlueprint } from "../../../types/itemsBlueprintTypes";
 
-export const itemSapphireGem: IEquippableArmorTier0Blueprint = {
+export const itemSapphireGem: IItemGem = {
   key: GemsBlueprint.SapphireGem,
-  type: ItemType.Jewelry,
+  type: ItemType.Tool,
   subType: ItemSubType.Gem,
   textureAtlas: "items",
   texturePath: "gems/sapphire-gem.png",
   name: "Sapphire Gem",
   description: "Deep blue allure, clear brilliance, timeless elegance captured in the essence of this precious stone.",
-  defense: 7,
-  tier: 0,
-  weight: 1,
-  allowedEquipSlotType: [ItemSlotType.Accessory],
-  basePrice: 45,
+  hasUseWith: true,
+  useWithMaxDistanceGrid: RangeTypes.Medium,
+  weight: 2,
+  basePrice: 330,
+  canSell: false,
+  rangeType: EntityAttackType.None,
+  gemStatBuff: {
+    attack: 7,
+    defense: 4,
+  },
+  gemEntityEffectsAdd: [EntityEffectBlueprint.VineGrasp],
+  gemEntityEffectChance: 60,
+
+  useWithItemEffect: async (originItem, targetItem, character) => {
+    const useWithGem = container.get<UseWithGem>(UseWithGem);
+
+    await useWithGem.execute(originItem, targetItem, character);
+  },
 };

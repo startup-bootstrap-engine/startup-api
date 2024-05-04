@@ -4,6 +4,7 @@ import {
   ArmorsBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
+  GemsBlueprint,
   HelmetsBlueprint,
   RangedWeaponsBlueprint,
   SeedsBlueprint,
@@ -100,6 +101,10 @@ export const npcSkeletonKnight: INPCTierBlueprint<5> = {
     {
       itemBlueprintKey: SwordsBlueprint.CopperveinBlade,
       chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.EmeraldGem,
+      chance: LootProbability.Common,
     },
   ],
 };

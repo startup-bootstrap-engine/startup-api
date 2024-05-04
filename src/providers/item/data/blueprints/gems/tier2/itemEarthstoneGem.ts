@@ -1,28 +1,45 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
+import { container } from "@providers/inversify/container";
+import { UseWithGem } from "@providers/useWith/abstractions/UseWithGem";
 import {
   BasicAttribute,
   CharacterBuffDurationType,
   CharacterBuffType,
-  ItemSlotType,
+  EntityAttackType,
+  IItemGem,
   ItemSubType,
   ItemType,
+  RangeTypes,
 } from "@rpg-engine/shared";
-import { IEquippableArmorTier2Blueprint } from "../../../types/TierBlueprintTypes";
 import { GemsBlueprint } from "../../../types/itemsBlueprintTypes";
 
-export const itemEarthstoneGem: IEquippableArmorTier2Blueprint = {
+export const itemEarthstoneGem: IItemGem = {
   key: GemsBlueprint.EarthstoneGem,
-  type: ItemType.Jewelry,
+  type: ItemType.Tool,
   subType: ItemSubType.Gem,
   textureAtlas: "items",
   texturePath: "gems/earthstone-gem.png",
   name: "Earthstone Gem",
   description: "Nature's embrace, earthly hues, timeless energy; a grounding and enchanting essence in gem form.",
-  defense: 18,
-  tier: 2,
-  weight: 2,
-  allowedEquipSlotType: [ItemSlotType.Accessory],
-  basePrice: 70,
-  equippedBuff: {
+  hasUseWith: true,
+  useWithMaxDistanceGrid: RangeTypes.Medium,
+  weight: 1.2,
+  basePrice: 650,
+  canSell: false,
+  rangeType: EntityAttackType.None,
+  gemStatBuff: {
+    attack: 17,
+    defense: 15,
+  },
+  gemEntityEffectsAdd: [EntityEffectBlueprint.VineGrasp],
+  gemEntityEffectChance: 80,
+
+  useWithItemEffect: async (originItem, targetItem, character) => {
+    const useWithGem = container.get<UseWithGem>(UseWithGem);
+
+    await useWithGem.execute(originItem, targetItem, character);
+  },
+  gemEquippedBuffAdd: {
     type: CharacterBuffType.Skill,
     trait: BasicAttribute.Strength,
     buffPercentage: 5,

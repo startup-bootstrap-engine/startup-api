@@ -15,15 +15,15 @@ export const itemRubyGem: IItemGem = {
   hasUseWith: true,
   useWithMaxDistanceGrid: RangeTypes.Medium,
   weight: 1.5,
-  basePrice: 50,
+  basePrice: 400,
   canSell: false,
   rangeType: EntityAttackType.None,
   gemStatBuff: {
-    attack: 5,
-    defense: 3,
+    attack: 10,
+    defense: 8,
   },
   gemEntityEffectsAdd: [EntityEffectBlueprint.Burning],
-  gemEntityEffectChance: 80,
+  gemEntityEffectChance: 70,
 
   useWithItemEffect: async (originItem, targetItem, character) => {
     const useWithGem = container.get<UseWithGem>(UseWithGem);

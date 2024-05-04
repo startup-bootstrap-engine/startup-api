@@ -1,28 +1,45 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
+import { container } from "@providers/inversify/container";
+import { UseWithGem } from "@providers/useWith/abstractions/UseWithGem";
 import {
   BasicAttribute,
   CharacterBuffDurationType,
   CharacterBuffType,
-  ItemSlotType,
+  EntityAttackType,
+  IItemGem,
   ItemSubType,
   ItemType,
+  RangeTypes,
 } from "@rpg-engine/shared";
-import { IEquippableArmorTier2Blueprint } from "../../../types/TierBlueprintTypes";
 import { GemsBlueprint } from "../../../types/itemsBlueprintTypes";
 
-export const itemAmethystGem: IEquippableArmorTier2Blueprint = {
+export const itemAmethystGem: IItemGem = {
   key: GemsBlueprint.AmethystGem,
-  type: ItemType.Jewelry,
+  type: ItemType.Tool,
   subType: ItemSubType.Gem,
   textureAtlas: "items",
   texturePath: "gems/amethyst-gem.png",
   name: "Amethyst Gem",
   description: "Royal purple charm, soothing clarity; a regal and enchanting beauty within this precious stone.",
-  defense: 22,
-  tier: 2,
-  weight: 2,
-  allowedEquipSlotType: [ItemSlotType.Accessory],
-  basePrice: 80,
-  equippedBuff: {
+  hasUseWith: true,
+  useWithMaxDistanceGrid: RangeTypes.Medium,
+  weight: 1.5,
+  basePrice: 800,
+  canSell: false,
+  rangeType: EntityAttackType.None,
+  gemStatBuff: {
+    attack: 20,
+    defense: 18,
+  },
+  gemEntityEffectsAdd: [EntityEffectBlueprint.Poison],
+  gemEntityEffectChance: 90,
+
+  useWithItemEffect: async (originItem, targetItem, character) => {
+    const useWithGem = container.get<UseWithGem>(UseWithGem);
+
+    await useWithGem.execute(originItem, targetItem, character);
+  },
+  gemEquippedBuffAdd: {
     type: CharacterBuffType.Skill,
     trait: BasicAttribute.Strength,
     buffPercentage: 15,

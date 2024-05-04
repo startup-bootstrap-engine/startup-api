@@ -1,6 +1,6 @@
-import { GemsBlueprint, CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { CraftingResourcesBlueprint, GemsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { CraftingSkill } from "@rpg-engine/shared";
-import { IUseWithCraftingRecipe } from "../../useWithTypes";
+import { IUseWithCraftingRecipe } from "../../../useWithTypes";
 
 export const recipeCoralReefGem: IUseWithCraftingRecipe = {
   outputKey: GemsBlueprint.CoralReefGem,
@@ -19,5 +19,5 @@ export const recipeCoralReefGem: IUseWithCraftingRecipe = {
       qty: 25,
     },
   ],
-  minCraftingRequirements: [CraftingSkill.Alchemy, 18],
+  minCraftingRequirements: [CraftingSkill.Alchemy, 25],
 };

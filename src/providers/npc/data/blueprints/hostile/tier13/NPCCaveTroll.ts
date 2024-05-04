@@ -6,6 +6,7 @@ import {
   CraftingResourcesBlueprint,
   DaggersBlueprint,
   FoodsBlueprint,
+  GemsBlueprint,
   GlovesBlueprint,
   HelmetsBlueprint,
   MacesBlueprint,
@@ -138,6 +139,10 @@ export const npcCaveTroll: INPCTierBlueprint<13> = {
     {
       itemBlueprintKey: ToolsBlueprint.EmberEdgePickaxe,
       chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.AmethystGem,
+      chance: LootProbability.Uncommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

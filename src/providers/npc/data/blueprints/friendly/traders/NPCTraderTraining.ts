@@ -2,6 +2,7 @@ import { INPC } from "@entities/ModuleNPC/NPCModel";
 import {
   AxesBlueprint,
   DaggersBlueprint,
+  GemsBlueprint,
   MacesBlueprint,
   RangedWeaponsBlueprint,
   ShieldsBlueprint,
@@ -42,6 +43,15 @@ export const npcTraderTraining = {
     },
     {
       key: RangedWeaponsBlueprint.WoodenArrow,
+    },
+    {
+      key: GemsBlueprint.EmeraldGem,
+    },
+    {
+      key: GemsBlueprint.SapphireGem,
+    },
+    {
+      key: GemsBlueprint.TopazRadiance,
     },
   ],
 } as Partial<INPC>;

@@ -78,6 +78,10 @@ export class UseWithGem {
     const attachedGem = this.createAttachedGem(originItem, gemStatBuff, gemEntityEffectsAdd);
     targetItem.attachedGems = [...attachedGems, attachedGem] as any;
 
+    if (originItemBlueprint.equippedBuffDescription) {
+      targetItem.equippedBuffDescription = originItemBlueprint.equippedBuffDescription;
+    }
+
     const updateTarget = await Item.findByIdAndUpdate(targetItem._id, targetItem);
 
     if (updateTarget) {

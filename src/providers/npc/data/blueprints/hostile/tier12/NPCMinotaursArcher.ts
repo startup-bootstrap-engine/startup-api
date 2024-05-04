@@ -6,6 +6,7 @@ import {
   CraftingResourcesBlueprint,
   DaggersBlueprint,
   FoodsBlueprint,
+  GemsBlueprint,
   RangedWeaponsBlueprint,
   SeedsBlueprint,
   ToolsBlueprint,
@@ -104,6 +105,10 @@ export const npcMinotaurArcher: INPCTierBlueprint<12> = {
     {
       itemBlueprintKey: ToolsBlueprint.LogSplitterAxe,
       chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.EarthstoneGem,
+      chance: LootProbability.Common,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning],

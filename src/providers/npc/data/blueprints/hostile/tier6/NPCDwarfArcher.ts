@@ -5,6 +5,7 @@ import {
   ArmorsBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
+  GemsBlueprint,
   RangedWeaponsBlueprint,
   SeedsBlueprint,
   ToolsBlueprint,
@@ -114,6 +115,10 @@ export const npcDwarfArcher: INPCTierBlueprint<6> = {
       itemBlueprintKey: RangedWeaponsBlueprint.HeartseekerArrow,
       chance: LootProbability.VeryRare,
       quantityRange: [10, 20],
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.SapphireGem,
+      chance: LootProbability.Uncommon,
     },
   ],
 };

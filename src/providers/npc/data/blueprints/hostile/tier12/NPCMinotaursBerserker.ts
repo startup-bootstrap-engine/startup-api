@@ -5,6 +5,7 @@ import {
   CraftingResourcesBlueprint,
   DaggersBlueprint,
   FoodsBlueprint,
+  GemsBlueprint,
   GlovesBlueprint,
   HammersBlueprint,
   HelmetsBlueprint,
@@ -130,6 +131,10 @@ export const npcMinotaurBerserker: INPCTierBlueprint<12> = {
     {
       itemBlueprintKey: ToolsBlueprint.AurumAlloyPickaxe,
       chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.ObsidianGem,
+      chance: LootProbability.Uncommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

@@ -7,6 +7,7 @@ import {
   BootsBlueprint,
   CraftingResourcesBlueprint,
   FoodsBlueprint,
+  GemsBlueprint,
   HammersBlueprint,
   HelmetsBlueprint,
   RangedWeaponsBlueprint,
@@ -133,6 +134,10 @@ export const npcIceTroll: INPCTierBlueprint<10> = {
     {
       itemBlueprintKey: StaffsBlueprint.FrostbiteWand,
       chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.JasperGem,
+      chance: LootProbability.Uncommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],

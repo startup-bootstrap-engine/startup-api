@@ -1,6 +1,6 @@
-import { GemsBlueprint, CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { CraftingResourcesBlueprint, GemsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { CraftingSkill } from "@rpg-engine/shared";
-import { IUseWithCraftingRecipe } from "../../useWithTypes";
+import { IUseWithCraftingRecipe } from "../../../useWithTypes";
 
 export const recipeRubyGem: IUseWithCraftingRecipe = {
   outputKey: GemsBlueprint.RubyGem,
@@ -19,5 +19,5 @@ export const recipeRubyGem: IUseWithCraftingRecipe = {
       qty: 20,
     },
   ],
-  minCraftingRequirements: [CraftingSkill.Alchemy, 10],
+  minCraftingRequirements: [CraftingSkill.Alchemy, 22],
 };
