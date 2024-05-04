@@ -156,12 +156,11 @@ export class ItemUse {
         if (character) {
           try {
             if (healthRecovery) {
-              bluePrintItem.usableEffect?.(character, healthRecovery);
+              await bluePrintItem.usableEffect?.(character, healthRecovery);
             } else {
-              bluePrintItem.usableEffect?.(character);
+              await bluePrintItem.usableEffect?.(character);
             }
 
-            await character.save();
             await this.sendItemConsumptionEvent(character);
           } catch (error) {
             console.error("An error occurred in applyItemUsage: ", error);

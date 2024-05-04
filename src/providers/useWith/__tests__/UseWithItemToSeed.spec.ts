@@ -1,9 +1,10 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
+import { MapControlTimeModel } from "@entities/ModuleSystem/MapControlTimeModel";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
-import { CraftingSkill, IBaseItemBlueprint, ItemType } from "@rpg-engine/shared";
+import { AvailableWeather, CraftingSkill, IBaseItemBlueprint, ItemType } from "@rpg-engine/shared";
 import { IUseWithItemToSeedOptions, UseWithItemToSeed } from "../abstractions/UseWithItemToSeed";
 
 describe("UseWithItemToSeed.ts", () => {
@@ -17,6 +18,8 @@ describe("UseWithItemToSeed.ts", () => {
   let sendSimpleTutorialAction: jest.SpyInstance;
   let blueprintManager: BlueprintManager;
   let itemBlueprint: IBaseItemBlueprint;
+  let updatePlantMock: jest.SpyInstance;
+  let findOneMock: jest.SpyInstance;
 
   beforeAll(() => {
     useWithItemToSeed = container.get<UseWithItemToSeed>(UseWithItemToSeed);
@@ -54,6 +57,14 @@ describe("UseWithItemToSeed.ts", () => {
     sendSimpleTutorialAction = jest.spyOn(useWithItemToSeed.simpleTutorial, "sendSimpleTutorialActionToCharacter");
 
     itemBlueprint = (await blueprintManager.getBlueprint("items", options.originItemKey)) as IBaseItemBlueprint;
+
+    // @ts-ignore
+    updatePlantMock = jest.spyOn(useWithItemToSeed.wateringByRain, "updatePlant");
+    findOneMock = jest.spyOn(MapControlTimeModel, "findOne");
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it("should create a new plant and update inventory on successful execution", async () => {
@@ -90,6 +101,38 @@ describe("UseWithItemToSeed.ts", () => {
 
     expect(plant).toBeNull();
     expect(sendErrorMessageToCharacter).toHaveBeenCalledWith(testCharacter, "Planting Failed!");
+  });
+
+  it("should water the seed when it is in soft rain", async () => {
+    findOneMock.mockResolvedValueOnce({ weather: AvailableWeather.SoftRain });
+
+    await useWithItemToSeed.execute(testCharacter, options, skillIncrease);
+
+    expect(updatePlantMock).toHaveBeenCalled();
+  });
+
+  it("should water the seed when it is in heavy rain", async () => {
+    findOneMock.mockResolvedValueOnce({ weather: AvailableWeather.HeavyRain });
+
+    await useWithItemToSeed.execute(testCharacter, options, skillIncrease);
+
+    expect(updatePlantMock).toHaveBeenCalled();
+  });
+
+  it("should not water the seed when it is not raining", async () => {
+    findOneMock.mockResolvedValueOnce({ weather: AvailableWeather.Standard });
+
+    await useWithItemToSeed.execute(testCharacter, options, skillIncrease);
+
+    expect(updatePlantMock).not.toHaveBeenCalled();
+  });
+
+  it("should not water the seed when weather data is not available", async () => {
+    findOneMock.mockResolvedValueOnce(null);
+
+    await useWithItemToSeed.execute(testCharacter, options, skillIncrease);
+
+    expect(updatePlantMock).not.toHaveBeenCalled();
   });
 
   it("should send an error message when minimum requirements are not met", async () => {

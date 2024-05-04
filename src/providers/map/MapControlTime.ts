@@ -1,6 +1,7 @@
 import { Character } from "@entities/ModuleCharacter/CharacterModel";
 import { MapControlTimeModel } from "@entities/ModuleSystem/MapControlTimeModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { WateringByRain } from "@providers/plant/WateringByRain";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { AvailableWeather, IControlTime, PeriodOfDay, WeatherSocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -8,12 +9,12 @@ import random from "lodash/random";
 
 @provide(MapControlTime)
 export class MapControlTime {
-  constructor(private socketMessaging: SocketMessaging) {}
+  constructor(private socketMessaging: SocketMessaging, private wateringByRain: WateringByRain) {}
 
   public getRandomWeather(): AvailableWeather {
     const n = random(0, 100);
 
-    if (n < 80) {
+    if (n < 60) {
       return AvailableWeather.Standard;
     } else {
       return AvailableWeather.SoftRain;
@@ -35,6 +36,10 @@ export class MapControlTime {
 
     // Create new one
     await MapControlTimeModel.create(dataOfWeather);
+
+    if (dataOfWeather.weather === AvailableWeather.SoftRain || dataOfWeather.weather === AvailableWeather.HeavyRain) {
+      await this.wateringByRain.wateringPlants();
+    }
 
     for (const character of onlineCharacters) {
       this.socketMessaging.sendEventToUser<IControlTime>(
