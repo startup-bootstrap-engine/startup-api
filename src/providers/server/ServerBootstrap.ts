@@ -32,8 +32,8 @@ import { NPCDeathQueue } from "@providers/npc/NPCDeathQueue";
 import { NPCFreezer } from "@providers/npc/NPCFreezer";
 import PartyManagement from "@providers/party/PartyManagement";
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
-import { BullBoardMonitor } from "@providers/queue/BullBoardMonitor";
 import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
+import { RaidManager } from "@providers/raid/RaidManager";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import SpellSilence from "@providers/spells/data/logic/mage/druid/SpellSilence";
 import { BullStrength } from "@providers/spells/data/logic/minotaur/BullStrength";
@@ -81,7 +81,7 @@ export class ServerBootstrap {
     private itemContainerTransactionQueue: ItemContainerTransactionQueue,
     private itemDropVerifier: ItemDropVerifier,
     private queueActivityMonitor: QueueActivityMonitor,
-    private bullBoardMonitor: BullBoardMonitor
+    private raidManager: RaidManager
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -173,6 +173,7 @@ export class ServerBootstrap {
     await this.inMemoryHashTable.deleteAll("character-bonus-penalties");
     await this.inMemoryHashTable.deleteAll("skills-with-buff");
     await this.inMemoryHashTable.deleteAll("item-container-transfer-results");
+    await this.raidManager.deleteAllRaids();
     await this.itemDropVerifier.clearAllItemDrops();
 
     await this.entityEffectDuration.clearAll();
