@@ -66,7 +66,7 @@ export const npcLavaGolem: INPCTierBlueprint<23> = {
   loots: [
     {
       itemBlueprintKey: GemsBlueprint.AmethystGem,
-      chance: LootProbability.VeryRare,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: SwordsBlueprint.ZenBroadsword,
@@ -138,7 +138,7 @@ export const npcLavaGolem: INPCTierBlueprint<23> = {
     },
     {
       itemBlueprintKey: GemsBlueprint.RubyGem,
-      chance: LootProbability.VeryRare,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.EarthstoneEmeraldNecklace,

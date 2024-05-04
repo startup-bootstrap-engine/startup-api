@@ -135,7 +135,7 @@ export const npcMalakarLichKing: INPCTierBlueprint<19> = {
     },
     {
       itemBlueprintKey: GemsBlueprint.CoralReefGem,
-      chance: LootProbability.VeryRare,
+      chance: LootProbability.Common,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.RubyNeckles,

@@ -7,6 +7,7 @@ import {
   BootsBlueprint,
   CraftingResourcesBlueprint,
   FoodsBlueprint,
+  GemsBlueprint,
   GlovesBlueprint,
   HammersBlueprint,
   HelmetsBlueprint,
@@ -169,6 +170,10 @@ export const npcOrcWarrior: INPCTierBlueprint<5> = {
     {
       itemBlueprintKey: CraftingResourcesBlueprint.Rope,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.EmeraldGem,
+      chance: LootProbability.Rare,
     },
   ],
 };

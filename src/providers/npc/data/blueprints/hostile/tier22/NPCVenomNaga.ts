@@ -203,7 +203,7 @@ export const npcVenomNaga: INPCTierBlueprint<21> = {
       chance: LootProbability.Uncommon,
     },
     {
-      itemBlueprintKey: GemsBlueprint.RubyGem,
+      itemBlueprintKey: GemsBlueprint.JasperGem,
       chance: LootProbability.Uncommon,
     },
     {

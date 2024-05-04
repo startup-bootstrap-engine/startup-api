@@ -1,5 +1,5 @@
 import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { ToolsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { GemsBlueprint, ToolsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { generateRandomMovement } from "@providers/npc/data/abstractions/BaseNeutralNPC";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { CharacterGender } from "@rpg-engine/shared";
@@ -23,6 +23,9 @@ export const npcTraderTools = {
     },
     {
       key: ToolsBlueprint.LogSplitterAxe,
+    },
+    {
+      key: GemsBlueprint.CoralReefGem,
     },
   ],
 } as Partial<INPC>;

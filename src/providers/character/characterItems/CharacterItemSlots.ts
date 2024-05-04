@@ -116,7 +116,7 @@ export class CharacterItemSlots {
   @TrackNewRelicTransaction()
   public async findItemSlotIndex(targetContainer: IItemContainer, itemId: string): Promise<number | undefined> {
     try {
-      const container = (await ItemContainer.findById(targetContainer.id).lean()) as unknown as IItemContainer;
+      const container = (await ItemContainer.findById(targetContainer._id).lean()) as unknown as IItemContainer;
 
       if (!container) {
         throw new Error("Container not found");

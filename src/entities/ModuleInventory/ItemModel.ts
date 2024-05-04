@@ -16,6 +16,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 
 import { PlantLifeCycle } from "@providers/plant/data/types/PlantTypes";
 import { updateIfCurrentPlugin } from "mongoose-update-if-current";
+import { GemSchema } from "./GemSchema";
 
 const itemSchema = createLeanSchema(
   {
@@ -157,6 +158,8 @@ const itemSchema = createLeanSchema(
     isTileTinted: Type.boolean({ required: false }),
 
     regrowthCount: Type.number({ required: false }),
+
+    attachedGems: Type.array({ required: false }).of(GemSchema),
   },
   { timestamps: { createdAt: true, updatedAt: true } }
 ).plugin(updateIfCurrentPlugin);

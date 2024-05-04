@@ -7,6 +7,7 @@ import {
   BooksBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
+  GemsBlueprint,
   GlovesBlueprint,
   HelmetsBlueprint,
   MacesBlueprint,
@@ -163,6 +164,10 @@ export const npcOrcMage: INPCTierBlueprint<7> = {
       itemBlueprintKey: CraftingResourcesBlueprint.Herb,
       chance: LootProbability.Common,
       quantityRange: [5, 10],
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.MistyQuartzGem,
+      chance: LootProbability.VeryRare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning],

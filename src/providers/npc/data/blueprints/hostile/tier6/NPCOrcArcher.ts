@@ -5,6 +5,7 @@ import {
   BootsBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
+  GemsBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
   RangedWeaponsBlueprint,
@@ -126,6 +127,10 @@ export const npcOrcArcher: INPCTierBlueprint<6> = {
       itemBlueprintKey: RangedWeaponsBlueprint.SunflareArrow,
       chance: LootProbability.VeryRare,
       quantityRange: [10, 20],
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.SapphireGem,
+      chance: LootProbability.VeryRare,
     },
   ],
 };
