@@ -2,7 +2,6 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
-import { MapControlTimeModel } from "@entities/ModuleSystem/MapControlTimeModel";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
@@ -10,14 +9,12 @@ import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeigh
 import { container } from "@providers/inversify/container";
 
 import { IPosition } from "@providers/movement/MovementHelper";
-import { WateringByRain } from "@providers/plant/WateringByRain";
 import { IPlantItem } from "@providers/plant/data/blueprints/PlantItem";
 import { PlantLifeCycle } from "@providers/plant/data/types/PlantTypes";
 import { SimpleTutorial } from "@providers/simpleTutorial/SimpleTutorial";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
-  AvailableWeather,
   IBaseItemBlueprint,
   IEquipmentAndInventoryUpdatePayload,
   IItemContainer,
@@ -43,8 +40,7 @@ export class UseWithItemToSeed {
     private characterItemInventory: CharacterItemInventory,
     private characterWeight: CharacterWeightQueue,
     private characterInventory: CharacterInventory,
-    private simpleTutorial: SimpleTutorial,
-    private wateringByRain: WateringByRain
+    private simpleTutorial: SimpleTutorial
   ) {}
 
   public async execute(
@@ -91,15 +87,6 @@ export class UseWithItemToSeed {
 
       const newPlant = new Item(plantData);
       await newPlant.save();
-
-      const mapControlTime = await MapControlTimeModel.findOne();
-
-      if (
-        mapControlTime &&
-        (mapControlTime.weather === AvailableWeather.SoftRain || mapControlTime.weather === AvailableWeather.HeavyRain)
-      ) {
-        await this.wateringByRain.updatePlant(newPlant);
-      }
 
       await this.characterItemInventory.decrementItemFromInventoryByKey(originItemKey, character, 1);
       await this.characterWeight.updateCharacterWeight(character);
