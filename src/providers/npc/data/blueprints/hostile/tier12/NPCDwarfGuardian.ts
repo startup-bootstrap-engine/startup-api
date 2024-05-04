@@ -202,7 +202,7 @@ export const npcDwarfGuardian: INPCTierBlueprint<12> = {
     },
     {
       itemBlueprintKey: GemsBlueprint.EarthstoneGem,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

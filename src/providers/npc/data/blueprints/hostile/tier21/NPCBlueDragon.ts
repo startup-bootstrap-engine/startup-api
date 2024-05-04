@@ -204,11 +204,15 @@ export const npcBlueDragon: INPCTierBlueprint<21> = {
     },
     {
       itemBlueprintKey: GemsBlueprint.SapphireGem,
-      chance: LootProbability.VeryRare,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: GemsBlueprint.AmethystGem,
-      chance: LootProbability.VeryRare,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.MistyQuartzGem,
+      chance: LootProbability.Uncommon,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.GoldenRubyNecklace,

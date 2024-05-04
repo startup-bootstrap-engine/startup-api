@@ -1,29 +1,32 @@
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { container } from "@providers/inversify/container";
+import { IItemGemTier4Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import { UseWithGem } from "@providers/useWith/abstractions/UseWithGem";
-import { EntityAttackType, IItemGem, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
+import { EntityAttackType, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
 import { GemsBlueprint } from "../../../types/itemsBlueprintTypes";
 
-export const itemRubyGem: IItemGem = {
-  key: GemsBlueprint.RubyGem,
+export const itemEarthstoneGem: IItemGemTier4Blueprint = {
+  key: GemsBlueprint.EarthstoneGem,
   type: ItemType.Tool,
   subType: ItemSubType.Gem,
   textureAtlas: "items",
-  texturePath: "gems/ruby-gem.png",
-  name: "Ruby Gem",
-  description: "Vibrant red charm, clear brilliance; a timeless and captivating beauty in this precious jewel.",
+  texturePath: "gems/earthstone-gem.png",
+  name: "Earthstone Gem",
+  description: "Nature's embrace, earthly hues, timeless energy; a grounding and enchanting essence in gem form.",
   hasUseWith: true,
   useWithMaxDistanceGrid: RangeTypes.Medium,
-  weight: 1.5,
-  basePrice: 400,
+  weight: 1.2,
+  basePrice: 42000,
   canSell: false,
   rangeType: EntityAttackType.None,
+  tier: 4,
   gemStatBuff: {
-    attack: 10,
-    defense: 8,
+    attack: 32,
+    defense: 30,
   },
-  gemEntityEffectsAdd: [EntityEffectBlueprint.Burning],
-  gemEntityEffectChance: 70,
+  gemEntityEffectsAdd: [EntityEffectBlueprint.VineGrasp],
+  gemEntityEffectChance: 40,
+  usableEffectDescription: "+32 Attack, +30 Defense, 40% chance to apply Vine Grasp effect each hit.",
 
   useWithItemEffect: async (originItem, targetItem, character) => {
     const useWithGem = container.get<UseWithGem>(UseWithGem);

@@ -7,7 +7,6 @@ import {
   BootsBlueprint,
   ContainersBlueprint,
   DaggersBlueprint,
-  GemsBlueprint,
   GlovesBlueprint,
   HelmetsBlueprint,
   MacesBlueprint,
@@ -119,10 +118,6 @@ export const npcIceOrc: INPCTierBlueprint<11> = {
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
       chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: GemsBlueprint.JasperGem,
-      chance: LootProbability.Common,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Freezing, EntityEffectBlueprint.Bleeding],

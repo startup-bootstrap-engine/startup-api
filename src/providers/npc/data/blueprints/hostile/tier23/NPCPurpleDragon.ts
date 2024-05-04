@@ -99,6 +99,10 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
       chance: LootProbability.Rare,
     },
     {
+      itemBlueprintKey: GemsBlueprint.ObsidianGem,
+      chance: LootProbability.SemiCommon,
+    },
+    {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,
       chance: LootProbability.VeryCommon,
     },
@@ -240,7 +244,11 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
     },
     {
       itemBlueprintKey: GemsBlueprint.RubyGem,
-      chance: LootProbability.VeryRare,
+      chance: LootProbability.SemiCommon,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.TopazRadiance,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.EarthstoneEmeraldNecklace,

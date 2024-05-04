@@ -173,7 +173,7 @@ export const npcOrcWarrior: INPCTierBlueprint<5> = {
     },
     {
       itemBlueprintKey: GemsBlueprint.EmeraldGem,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
 };

@@ -130,7 +130,7 @@ export const npcOrcArcher: INPCTierBlueprint<6> = {
     },
     {
       itemBlueprintKey: GemsBlueprint.SapphireGem,
-      chance: LootProbability.Common,
+      chance: LootProbability.VeryRare,
     },
   ],
 };

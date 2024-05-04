@@ -1,38 +1,40 @@
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { container } from "@providers/inversify/container";
+import { IItemGemTier7Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import { UseWithGem } from "@providers/useWith/abstractions/UseWithGem";
 import {
   BasicAttribute,
   CharacterBuffDurationType,
   CharacterBuffType,
   EntityAttackType,
-  IItemGem,
   ItemSubType,
   ItemType,
   RangeTypes,
 } from "@rpg-engine/shared";
 import { GemsBlueprint } from "../../../types/itemsBlueprintTypes";
 
-export const itemEarthstoneGem: IItemGem = {
-  key: GemsBlueprint.EarthstoneGem,
+export const itemObsidianGem: IItemGemTier7Blueprint = {
+  key: GemsBlueprint.ObsidianGem,
   type: ItemType.Tool,
   subType: ItemSubType.Gem,
   textureAtlas: "items",
-  texturePath: "gems/earthstone-gem.png",
-  name: "Earthstone Gem",
-  description: "Nature's embrace, earthly hues, timeless energy; a grounding and enchanting essence in gem form.",
+  texturePath: "gems/obsidian-gem.png",
+  name: "Obsidian Gem",
+  description: "Dark mystery, sleek elegance, a formidable beauty; harness the strength and allure of obsidian.",
   hasUseWith: true,
   useWithMaxDistanceGrid: RangeTypes.Medium,
-  weight: 1.2,
-  basePrice: 650,
+  weight: 1.5,
+  tier: 7,
+  basePrice: 72000,
   canSell: false,
   rangeType: EntityAttackType.None,
   gemStatBuff: {
-    attack: 17,
-    defense: 15,
+    attack: 52,
+    defense: 50,
   },
-  gemEntityEffectsAdd: [EntityEffectBlueprint.VineGrasp],
-  gemEntityEffectChance: 80,
+  gemEntityEffectsAdd: [EntityEffectBlueprint.Corruption],
+  gemEntityEffectChance: 58,
+  usableEffectDescription: "+52 Attack, +50 Defense, 58% chance to apply Corruption effect each hit.",
 
   useWithItemEffect: async (originItem, targetItem, character) => {
     const useWithGem = container.get<UseWithGem>(UseWithGem);
@@ -41,15 +43,15 @@ export const itemEarthstoneGem: IItemGem = {
   },
   gemEquippedBuffAdd: {
     type: CharacterBuffType.Skill,
-    trait: BasicAttribute.Strength,
-    buffPercentage: 5,
+    trait: BasicAttribute.Resistance,
+    buffPercentage: 12,
     durationType: CharacterBuffDurationType.Permanent,
     options: {
       messages: {
-        activation: "You feel the strength and fortitude coursing through your body. (+5% strength)",
-        deactivation: "You feel the strength and fortitude coursing leaving through your body. (-5% strength)",
+        activation: "You feel the strength and fortitude coursing through your body. (+10% strength)",
+        deactivation: "You feel the strength and fortitude coursing leaving through your body. (-10% strength)",
       },
     },
   },
-  equippedBuffDescription: "Increases strength by 5%",
+  equippedBuffDescription: "Increases strength by 10%",
 };

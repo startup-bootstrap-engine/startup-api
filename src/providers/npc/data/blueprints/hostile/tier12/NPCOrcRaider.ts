@@ -9,7 +9,6 @@ import {
   ContainersBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
-  GemsBlueprint,
   GlovesBlueprint,
   HammersBlueprint,
   HelmetsBlueprint,
@@ -135,10 +134,6 @@ export const npcOrcRaider: INPCTierBlueprint<12> = {
     },
     {
       itemBlueprintKey: ToolsBlueprint.LogSplitterAxe,
-      chance: LootProbability.Common,
-    },
-    {
-      itemBlueprintKey: GemsBlueprint.ObsidianGem,
       chance: LootProbability.Common,
     },
   ],

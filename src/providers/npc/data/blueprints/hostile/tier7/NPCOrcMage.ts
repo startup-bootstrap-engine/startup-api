@@ -167,7 +167,7 @@ export const npcOrcMage: INPCTierBlueprint<7> = {
     },
     {
       itemBlueprintKey: GemsBlueprint.MistyQuartzGem,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.VeryRare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning],

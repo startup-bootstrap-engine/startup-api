@@ -137,7 +137,7 @@ export const npcIceTroll: INPCTierBlueprint<10> = {
     },
     {
       itemBlueprintKey: GemsBlueprint.JasperGem,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.VeryRare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],

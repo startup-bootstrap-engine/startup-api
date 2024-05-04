@@ -144,13 +144,10 @@ export const npcDwarfMage: INPCTierBlueprint<9> = {
       itemBlueprintKey: ShieldsBlueprint.IronHeartShield,
       chance: LootProbability.VeryRare,
     },
-    {
-      itemBlueprintKey: GemsBlueprint.RubyGem,
-      chance: LootProbability.Common,
-    },
+
     {
       itemBlueprintKey: GemsBlueprint.CoralReefGem,
-      chance: LootProbability.Rare,
+      chance: LootProbability.VeryRare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning],

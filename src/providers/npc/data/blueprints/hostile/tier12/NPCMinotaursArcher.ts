@@ -108,7 +108,7 @@ export const npcMinotaurArcher: INPCTierBlueprint<12> = {
     },
     {
       itemBlueprintKey: GemsBlueprint.EarthstoneGem,
-      chance: LootProbability.Common,
+      chance: LootProbability.VeryRare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning],

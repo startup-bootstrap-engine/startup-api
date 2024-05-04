@@ -7,7 +7,6 @@ import {
   BootsBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
-  GemsBlueprint,
   GlovesBlueprint,
   HammersBlueprint,
   HelmetsBlueprint,
@@ -114,10 +113,6 @@ export const npcOrcBerserker: INPCTierBlueprint<7> = {
     {
       itemBlueprintKey: DaggersBlueprint.RomanDagger,
       chance: LootProbability.Rare,
-    },
-    {
-      itemBlueprintKey: GemsBlueprint.TopazRadiance,
-      chance: LootProbability.Common,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

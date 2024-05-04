@@ -104,7 +104,7 @@ export const npcSkeletonKnight: INPCTierBlueprint<5> = {
     },
     {
       itemBlueprintKey: GemsBlueprint.EmeraldGem,
-      chance: LootProbability.Common,
+      chance: LootProbability.Uncommon,
     },
   ],
 };

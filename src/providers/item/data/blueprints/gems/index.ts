@@ -1,14 +1,14 @@
 import { GemsBlueprint } from "../../types/itemsBlueprintTypes";
 import { itemEmeraldGem } from "./tier0/itemEmeraldGem";
-import { itemSapphireGem } from "./tier0/itemSapphireGem";
-import { itemTopazRadiance } from "./tier0/itemTopazRadiance";
-import { itemCoralReefGem } from "./tier1/itemCoralReefGem";
-import { itemMistyQuartzGem } from "./tier1/itemMistyQuartzGem";
-import { itemRubyGem } from "./tier1/itemRubyGem";
-import { itemEarthstoneGem } from "./tier2/itemEarthstoneGem";
-import { itemJasperGem } from "./tier2/itemJasperGem";
-import { itemObsidianGem } from "./tier2/itemObsidianGem";
-import { itemAmethystGem } from "./tier3/itemAmethystGem";
+import { itemSapphireGem } from "./tier1/itemSapphireGem";
+import { itemAmethystGem } from "./tier2/itemAmethystGem";
+import { itemCoralReefGem } from "./tier3/itemCoralReefGem";
+import { itemEarthstoneGem } from "./tier4/itemEarthstoneGem";
+import { itemJasperGem } from "./tier5/itemJasperGem";
+import { itemMistyQuartzGem } from "./tier6/itemMistyQuartzGem";
+import { itemObsidianGem } from "./tier7/itemObsidianGem";
+import { itemRubyGem } from "./tier8/itemRubyGem";
+import { itemTopazRadiance } from "./tier9/itemTopazRadiance";
 
 export const gemsBlueprintIndex = {
   [GemsBlueprint.TopazRadiance]: itemTopazRadiance,

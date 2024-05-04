@@ -6,7 +6,6 @@ import {
   CraftingResourcesBlueprint,
   DaggersBlueprint,
   FoodsBlueprint,
-  GemsBlueprint,
   HelmetsBlueprint,
   OthersBlueprint,
   RangedWeaponsBlueprint,
@@ -157,10 +156,6 @@ export const npcHighElf: INPCTierBlueprint<13> = {
     {
       itemBlueprintKey: ToolsBlueprint.EmeraldEclipsesPickaxe,
       chance: LootProbability.VeryRare,
-    },
-    {
-      itemBlueprintKey: GemsBlueprint.AmethystGem,
-      chance: LootProbability.Common,
     },
   ],
 };

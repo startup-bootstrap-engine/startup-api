@@ -118,7 +118,7 @@ export const npcDwarfArcher: INPCTierBlueprint<6> = {
     },
     {
       itemBlueprintKey: GemsBlueprint.SapphireGem,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.Rare,
     },
   ],
 };

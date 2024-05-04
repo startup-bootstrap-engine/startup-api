@@ -200,7 +200,7 @@ export const npcCorruptedNaga: INPCTierBlueprint<20> = {
     },
     {
       itemBlueprintKey: GemsBlueprint.AmethystGem,
-      chance: LootProbability.Rare,
+      chance: LootProbability.Common,
     },
     {
       itemBlueprintKey: GemsBlueprint.RubyGem,

@@ -5,7 +5,6 @@ import {
   ArmorsBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
-  GemsBlueprint,
   GlovesBlueprint,
   HammersBlueprint,
   HelmetsBlueprint,
@@ -125,10 +124,6 @@ export const npcDwarfGuard: INPCTierBlueprint<7> = {
     },
     {
       itemBlueprintKey: HelmetsBlueprint.InfantryHelmet,
-      chance: LootProbability.Uncommon,
-    },
-    {
-      itemBlueprintKey: GemsBlueprint.TopazRadiance,
       chance: LootProbability.Uncommon,
     },
   ],

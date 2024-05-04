@@ -134,7 +134,7 @@ export const npcMinotaurBerserker: INPCTierBlueprint<12> = {
     },
     {
       itemBlueprintKey: GemsBlueprint.ObsidianGem,
-      chance: LootProbability.Uncommon,
+      chance: LootProbability.VeryRare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

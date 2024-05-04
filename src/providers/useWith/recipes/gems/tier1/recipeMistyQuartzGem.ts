@@ -7,16 +7,16 @@ export const recipeMistyQuartzGem: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 1],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.PolishedStone,
+      key: CraftingResourcesBlueprint.BlueSapphire,
       qty: 20,
     },
     {
-      key: CraftingResourcesBlueprint.CopperIngot,
-      qty: 15,
+      key: CraftingResourcesBlueprint.CorruptionIngot,
+      qty: 40,
     },
     {
       key: CraftingResourcesBlueprint.DuskwispHerbFlower,
-      qty: 10,
+      qty: 30,
     },
   ],
   minCraftingRequirements: [CraftingSkill.Alchemy, 20],

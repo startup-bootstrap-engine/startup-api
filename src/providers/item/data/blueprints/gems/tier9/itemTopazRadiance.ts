@@ -1,29 +1,32 @@
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { container } from "@providers/inversify/container";
+import { IItemGemTier9Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import { UseWithGem } from "@providers/useWith/abstractions/UseWithGem";
-import { EntityAttackType, IItemGem, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
+import { EntityAttackType, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
 import { GemsBlueprint } from "../../../types/itemsBlueprintTypes";
 
-export const itemMistyQuartzGem: IItemGem = {
-  key: GemsBlueprint.MistyQuartzGem,
+export const itemTopazRadiance: IItemGemTier9Blueprint = {
+  key: GemsBlueprint.TopazRadiance,
   type: ItemType.Tool,
   subType: ItemSubType.Gem,
   textureAtlas: "items",
-  texturePath: "gems/misty-quartz-gem.png",
-  name: "Misty Quartz Gem",
-  description: "Soft misty charm, subtle clarity; a serene and enchanting beauty in this unique gem.",
+  texturePath: "gems/topaz-radiance.png",
+  name: "Topaz Radiance Gem",
+  description: "Shiny gold gem, clear and bright, like a sunny spark in a picture.",
   hasUseWith: true,
   useWithMaxDistanceGrid: RangeTypes.Medium,
   weight: 1,
-  basePrice: 380,
+  basePrice: 100000,
   canSell: false,
   rangeType: EntityAttackType.None,
+  tier: 9,
   gemStatBuff: {
-    attack: 8,
-    defense: 8,
+    attack: 70,
+    defense: 70,
   },
-  gemEntityEffectsAdd: [EntityEffectBlueprint.Freezing],
-  gemEntityEffectChance: 70,
+  gemEntityEffectsAdd: [EntityEffectBlueprint.Corruption],
+  gemEntityEffectChance: 75,
+  usableEffectDescription: "+70 Attack, +70 Defense, 75% chance to apply Corruption effect each hit.",
 
   useWithItemEffect: async (originItem, targetItem, character) => {
     const useWithGem = container.get<UseWithGem>(UseWithGem);

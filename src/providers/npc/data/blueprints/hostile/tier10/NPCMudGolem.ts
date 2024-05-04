@@ -5,7 +5,6 @@ import {
   BootsBlueprint,
   CraftingResourcesBlueprint,
   FoodsBlueprint,
-  GemsBlueprint,
   GlovesBlueprint,
   HammersBlueprint,
   SeedsBlueprint,
@@ -100,10 +99,6 @@ export const npcMudGolem: INPCTierBlueprint<10> = {
     {
       itemBlueprintKey: GlovesBlueprint.OsirisGloves,
       chance: LootProbability.VeryRare,
-    },
-    {
-      itemBlueprintKey: GemsBlueprint.CoralReefGem,
-      chance: LootProbability.Common,
     },
   ],
 };

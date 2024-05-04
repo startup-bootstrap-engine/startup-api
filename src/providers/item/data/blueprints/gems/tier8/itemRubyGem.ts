@@ -1,33 +1,32 @@
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { container } from "@providers/inversify/container";
-import { IItemGemTier0Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
+import { IItemGemTier8Blueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import { UseWithGem } from "@providers/useWith/abstractions/UseWithGem";
 import { EntityAttackType, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
 import { GemsBlueprint } from "../../../types/itemsBlueprintTypes";
 
-export const itemEmeraldGem: IItemGemTier0Blueprint = {
-  key: GemsBlueprint.EmeraldGem,
+export const itemRubyGem: IItemGemTier8Blueprint = {
+  key: GemsBlueprint.RubyGem,
   type: ItemType.Tool,
   subType: ItemSubType.Gem,
   textureAtlas: "items",
-  texturePath: "gems/emerald-gem.png",
-  name: "Emerald Gem",
-  description:
-    "When attached to a weapon, it increases the attack and defense of the wielder. It also has a chance to apply the Poison effect on each hit",
+  texturePath: "gems/ruby-gem.png",
+  name: "Ruby Gem",
+  description: "Vibrant red charm, clear brilliance; a timeless and captivating beauty in this precious jewel.",
   hasUseWith: true,
   useWithMaxDistanceGrid: RangeTypes.Medium,
   weight: 1.5,
-  basePrice: 6000,
+  basePrice: 90000,
   canSell: false,
   rangeType: EntityAttackType.None,
-  tier: 0,
+  tier: 8,
   gemStatBuff: {
-    attack: 5,
-    defense: 4,
+    attack: 60,
+    defense: 59,
   },
-  gemEntityEffectsAdd: [EntityEffectBlueprint.Poison],
-  gemEntityEffectChance: 8,
-  usableEffectDescription: "+5 Attack, +4 Defense, 8% chance to apply Poison effect each hit.",
+  gemEntityEffectsAdd: [EntityEffectBlueprint.Burning],
+  gemEntityEffectChance: 68,
+  usableEffectDescription: "+60 Attack, +59 Defense, 68% chance to apply Burning effect each hit.",
 
   useWithItemEffect: async (originItem, targetItem, character) => {
     const useWithGem = container.get<UseWithGem>(UseWithGem);

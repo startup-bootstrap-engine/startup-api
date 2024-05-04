@@ -50,8 +50,5 @@ export const npcTraderTraining = {
     {
       key: GemsBlueprint.SapphireGem,
     },
-    {
-      key: GemsBlueprint.TopazRadiance,
-    },
   ],
 } as Partial<INPC>;

@@ -142,7 +142,7 @@ export const npcEloraTheQueen: INPCTierBlueprint<19> = {
     },
     {
       itemBlueprintKey: GemsBlueprint.RubyGem,
-      chance: LootProbability.VeryRare,
+      chance: LootProbability.SemiCommon,
     },
     {
       itemBlueprintKey: AccessoriesBlueprint.RubyNeckles,
