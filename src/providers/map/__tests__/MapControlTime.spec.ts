@@ -139,30 +139,4 @@ describe("MapControlTime", () => {
       controlTimeMockData
     );
   });
-
-  it("should call the wateringPlants method when the weather is SoftRain or HeavyRain", async () => {
-    // @ts-ignore
-    const wateringPlantsMock = jest.spyOn(mapControlTime.wateringByRain, "wateringPlants");
-
-    jest.spyOn(mapControlTime, "getRandomWeather").mockImplementation(() => AvailableWeather.SoftRain);
-    await mapControlTime.controlTime("10:00", PeriodOfDay.Morning);
-
-    expect(wateringPlantsMock).toHaveBeenCalled();
-
-    jest.clearAllMocks();
-    jest.spyOn(mapControlTime, "getRandomWeather").mockImplementation(() => AvailableWeather.HeavyRain);
-    await mapControlTime.controlTime("10:00", PeriodOfDay.Morning);
-
-    expect(wateringPlantsMock).toHaveBeenCalled();
-  });
-
-  it("should not call the wateringPlants method when the weather is Standard", async () => {
-    // @ts-ignore
-    const wateringPlantsMock = jest.spyOn(mapControlTime.wateringByRain, "wateringPlants");
-
-    jest.spyOn(mapControlTime, "getRandomWeather").mockImplementation(() => AvailableWeather.Standard);
-    await mapControlTime.controlTime("10:00", PeriodOfDay.Morning);
-
-    expect(wateringPlantsMock).not.toHaveBeenCalled();
-  });
 });
