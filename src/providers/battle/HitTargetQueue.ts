@@ -420,7 +420,6 @@ export class HitTargetQueue {
     weapon: ICharacterWeaponResult,
     target: ICharacter | INPC
   ): Promise<void> {
-    console.log("Applying entity effects from character");
     // if we have a ranged weapon without entity effects, just use the accessory one
     if (weapon?.item.subType === ItemSubType.Ranged && !weapon.item.entityEffects?.length!) {
       const equipment = await Equipment.findById(character.equipment).cacheQuery({
@@ -441,12 +440,9 @@ export class HitTargetQueue {
     if (hasEntityEffect && entityEffectChance) {
       const n = random(0, 100);
 
-      console.log("Entity effect chance", entityEffectChance, n);
       if (entityEffectChance <= n) {
         return;
       }
-
-      console.log("Applying entity effect!!!!");
 
       await this.entityEffectUse.applyEntityEffects(target, character);
     }
