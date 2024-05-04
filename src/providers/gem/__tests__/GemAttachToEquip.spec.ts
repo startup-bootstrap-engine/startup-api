@@ -67,8 +67,8 @@ describe("GemAttachToEquip", () => {
 
     const updatedEquipItem = (await Item.findById(testEquipItem._id).lean()) as IItem;
 
-    expect(updatedEquipItem.attack).toBe(13);
-    expect(updatedEquipItem.defense).toBe(10);
+    expect(updatedEquipItem.attack).toBe(18);
+    expect(updatedEquipItem.defense).toBe(15);
 
     // verify the gem was consumed
     const gemItem = await Item.findById(testGemItem._id).lean();
@@ -103,7 +103,7 @@ describe("GemAttachToEquip", () => {
 
     expect(sendMessageSpy).toHaveBeenCalledWith(
       testCharacter,
-      "Attached 'Ruby Gem' to Sword. Increased stats by: +5 attack, +3 defense. Added effects: burning."
+      "Attached 'Ruby Gem' to Sword. Increased stats by: +10 attack, +8 defense. Added effects: burning."
     );
   });
 
