@@ -7,17 +7,17 @@ export const recipeEmeraldGem: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 1],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.Leather,
-      qty: 5,
+      key: CraftingResourcesBlueprint.Jade,
+      qty: 15,
     },
     {
       key: CraftingResourcesBlueprint.SteelIngot,
-      qty: 10,
+      qty: 20,
     },
     {
-      key: CraftingResourcesBlueprint.Skull,
-      qty: 15,
+      key: CraftingResourcesBlueprint.BlueSapphire,
+      qty: 25,
     },
   ],
-  minCraftingRequirements: [CraftingSkill.Alchemy, 10],
+  minCraftingRequirements: [CraftingSkill.Alchemy, 15],
 };

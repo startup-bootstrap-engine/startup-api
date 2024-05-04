@@ -7,17 +7,25 @@ export const recipeEarthstoneGem: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 1],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.Herb,
-      qty: 40,
+      key: CraftingResourcesBlueprint.WhisperrootEntwiner,
+      qty: 100,
     },
     {
-      key: CraftingResourcesBlueprint.BlueSapphire,
-      qty: 20,
+      key: CraftingResourcesBlueprint.Diamond,
+      qty: 75,
     },
     {
-      key: CraftingResourcesBlueprint.GreenOre,
-      qty: 20,
+      key: CraftingResourcesBlueprint.Jade,
+      qty: 50,
+    },
+    {
+      key: CraftingResourcesBlueprint.GreenIngot,
+      qty: 50,
+    },
+    {
+      key: CraftingResourcesBlueprint.DragonTooth,
+      qty: 5,
     },
   ],
-  minCraftingRequirements: [CraftingSkill.Alchemy, 34],
+  minCraftingRequirements: [CraftingSkill.Alchemy, 35],
 };

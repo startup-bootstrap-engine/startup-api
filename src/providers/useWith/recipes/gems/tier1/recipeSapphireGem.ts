@@ -7,17 +7,17 @@ export const recipeSapphireGem: IUseWithCraftingRecipe = {
   outputQtyRange: [1, 1],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.BlueFeather,
-      qty: 15,
+      key: CraftingResourcesBlueprint.BlueSapphire,
+      qty: 30,
     },
     {
       key: CraftingResourcesBlueprint.BlueLeather,
       qty: 20,
     },
     {
-      key: CraftingResourcesBlueprint.CopperIngot,
+      key: CraftingResourcesBlueprint.SilverIngot,
       qty: 25,
     },
   ],
-  minCraftingRequirements: [CraftingSkill.Alchemy, 12],
+  minCraftingRequirements: [CraftingSkill.Alchemy, 20],
 };

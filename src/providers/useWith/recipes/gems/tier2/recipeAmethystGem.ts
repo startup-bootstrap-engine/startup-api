@@ -2,26 +2,26 @@ import { CraftingResourcesBlueprint, GemsBlueprint } from "@providers/item/data/
 import { CraftingSkill } from "@rpg-engine/shared";
 import { IUseWithCraftingRecipe } from "../../../useWithTypes";
 
-export const recipeObsidianGem: IUseWithCraftingRecipe = {
-  outputKey: GemsBlueprint.ObsidianGem,
+export const recipeAmethystGem: IUseWithCraftingRecipe = {
+  outputKey: GemsBlueprint.AmethystGem,
   outputQtyRange: [1, 1],
   requiredItems: [
     {
-      key: CraftingResourcesBlueprint.ObsidiumOre,
-      qty: 40,
+      key: CraftingResourcesBlueprint.Diamond,
+      qty: 30,
     },
     {
       key: CraftingResourcesBlueprint.RedSapphire,
       qty: 30,
     },
     {
-      key: CraftingResourcesBlueprint.CorruptionOre,
-      qty: 10,
+      key: CraftingResourcesBlueprint.GreenIngot,
+      qty: 25,
     },
     {
-      key: CraftingResourcesBlueprint.BloodrootBlossomFlower,
-      qty: 10,
+      key: CraftingResourcesBlueprint.SunspireLotusFlower,
+      qty: 25,
     },
   ],
-  minCraftingRequirements: [CraftingSkill.Alchemy, 37],
+  minCraftingRequirements: [CraftingSkill.Alchemy, 25],
 };
