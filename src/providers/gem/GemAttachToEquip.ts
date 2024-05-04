@@ -203,6 +203,9 @@ export class GemAttachToEquip {
           $each: gemItemBlueprint.gemEntityEffectsAdd,
         },
       },
+      $set: {
+        entityEffectChance: gemItemBlueprint.gemEntityEffectChance,
+      },
     });
   }
 

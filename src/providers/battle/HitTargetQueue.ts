@@ -222,8 +222,17 @@ export class HitTargetQueue {
             damageRelatedPromises
           );
         }
+        const weapon = (await this.characterWeapon.getWeapon(
+          attacker as ICharacter
+        )) as unknown as ICharacterWeaponResult;
 
-        await this.handleCharacterAttackerSkillIncreaseAndEffects(attacker, target, damageRelatedPromises);
+        this.handleCharacterAttackerSkillIncreaseAndEffects(weapon, target, damageRelatedPromises);
+
+        if (attacker.type === EntityType.Character) {
+          if (target.health > 0) {
+            await this.applyEntityEffectsCharacter(attacker as ICharacter, weapon, target);
+          }
+        }
 
         const generateBloodChance = random(1, 100);
 
@@ -284,16 +293,15 @@ export class HitTargetQueue {
     }
   }
 
-  private async handleCharacterAttackerSkillIncreaseAndEffects(
-    attacker: ICharacter | INPC,
+  private handleCharacterAttackerSkillIncreaseAndEffects(
+    weapon: ICharacterWeaponResult,
+
     target: ICharacter | INPC,
     damageRelatedPromises: Promise<any>[]
-  ): Promise<void> {
+  ): void {
     if (target.type === EntityType.NPC) {
       return;
     }
-
-    const weapon = (await this.characterWeapon.getWeapon(attacker as ICharacter)) as unknown as ICharacterWeaponResult;
 
     if (
       (weapon?.item && weapon?.item.subType === ItemSubType.Magic) ||
@@ -306,12 +314,6 @@ export class HitTargetQueue {
       damageRelatedPromises.push(
         this.skillIncrease.increaseBasicAttributeSP(target as ICharacter, BasicAttribute.Resistance)
       );
-    }
-
-    if (attacker.type === EntityType.Character) {
-      if (target.health > 0) {
-        damageRelatedPromises.push(this.applyEntityEffectsCharacter(attacker as ICharacter, weapon, target));
-      }
     }
   }
 
@@ -418,6 +420,7 @@ export class HitTargetQueue {
     weapon: ICharacterWeaponResult,
     target: ICharacter | INPC
   ): Promise<void> {
+    console.log("Applying entity effects from character");
     // if we have a ranged weapon without entity effects, just use the accessory one
     if (weapon?.item.subType === ItemSubType.Ranged && !weapon.item.entityEffects?.length!) {
       const equipment = await Equipment.findById(character.equipment).cacheQuery({
@@ -437,9 +440,14 @@ export class HitTargetQueue {
     const entityEffectChance = item?.entityEffectChance;
     if (hasEntityEffect && entityEffectChance) {
       const n = random(0, 100);
+
+      console.log("Entity effect chance", entityEffectChance, n);
       if (entityEffectChance <= n) {
         return;
       }
+
+      console.log("Applying entity effect!!!!");
+
       await this.entityEffectUse.applyEntityEffects(target, character);
     }
   }
