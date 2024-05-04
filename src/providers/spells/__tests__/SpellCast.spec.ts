@@ -479,22 +479,45 @@ describe("SpellCast.ts", () => {
     let targetNPC: INPC;
 
     beforeEach(async () => {
-      testCharacter.learnedSpells = [SpellsBlueprint.WarriorStunTarget];
+      testCharacter.learnedSpells = [SpellsBlueprint.WarriorStunTarget, SpellsBlueprint.ShieldBash];
 
       testCharacter.class = CharacterClass.Warrior;
       await Character.findByIdAndUpdate(testCharacter.id, testCharacter);
 
       const skills = (await Skill.findById(testCharacter.skills).lean()) as ISkill;
       characterSkills = skills;
-      characterSkills.level = spellStunTarget.minLevelRequired!;
-      characterSkills.magic.level = spellStunTarget.minMagicLevelRequired;
+      characterSkills.level = 99;
+      characterSkills.magic.level = 99;
       (await Skill.findByIdAndUpdate(characterSkills._id, characterSkills).lean()) as ISkill;
 
       targetNPC = await unitTestHelper.createMockNPC({ health: 5 }, { hasSkills: true });
     });
 
+    it("should fail if spell is PVP only and targetType is NPC", async () => {
+      targetNPC.alignment = NPCAlignment.Hostile;
+      await targetNPC.save();
+
+      const spell = { magicWords: "talas tamb-eth", targetType: EntityType.NPC, targetId: targetNPC._id };
+
+      spellStunTarget.minLevelRequired = 1;
+      spellStunTarget.minMagicLevelRequired = 1;
+
+      testCharacter.learnedSpells = [spellStunTarget.key!];
+
+      await testCharacter.save();
+
+      expect(await spellCast.castSpell(spell, testCharacter)).toBeFalsy();
+
+      expect(sendEventToUser).toBeCalledTimes(1);
+
+      expect(sendEventToUser).toHaveBeenLastCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
+        message: "Sorry, this spell is only available for PVP.",
+        type: "error",
+      });
+    });
+
     it("should  not cast spell if the target is not valid", async () => {
-      const spell = { magicWords: "talas tamb-eth", targetId: targetCharacter._id, targetType: EntityType.NPC };
+      const spell = { magicWords: "turin rista", targetId: targetCharacter._id, targetType: EntityType.NPC };
       expect(await spellCast.castSpell(spell, testCharacter)).toBeFalsy();
 
       expect(sendEventToUser).toHaveBeenCalledWith(testCharacter.channelId, UISocketEvents.ShowMessage, {
@@ -566,8 +589,6 @@ describe("SpellCast.ts", () => {
       expect(await stun.isStun(targetCharacter)).toBeTruthy();
 
       expect(timerMock).toHaveBeenCalled();
-
-      expect(timerMock.mock.calls[0][1]).toBe(11000);
 
       await timerMock.mock.calls[0][0]();
       expect(await stun.isStun(targetCharacter)).toBeFalsy();

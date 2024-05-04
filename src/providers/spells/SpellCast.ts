@@ -278,6 +278,10 @@ export class SpellCast {
       return false;
     }
 
+    if (caster.type === EntityType.Character && target.type === EntityType.NPC && spell.isPVPOnly) {
+      this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, this spell is only available for PVP.");
+      return false;
+    }
     return true;
   }
 
