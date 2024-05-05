@@ -57,9 +57,9 @@ describe("CharacterBuffTracker", () => {
   });
 
   it("should delete a buff by ID", async () => {
-    const testBuff = createTestBuff() as ICharacterTemporaryBuff;
+    let testBuff = createTestBuff() as ICharacterTemporaryBuff;
 
-    await characterBuffTracker.addBuff(testCharacter._id, testBuff);
+    testBuff = (await characterBuffTracker.addBuff(testCharacter._id, testBuff)) as ICharacterTemporaryBuff;
 
     const result = await characterBuffTracker.deleteBuff(testCharacter, testBuff._id!);
 
@@ -71,11 +71,11 @@ describe("CharacterBuffTracker", () => {
   });
 
   it("should delete all buffs for a character", async () => {
-    const testBuff1 = createTestBuff() as ICharacterTemporaryBuff;
-    const testBuff2 = { ...createTestBuff(), trait: CharacterAttributes.MaxMana } as ICharacterTemporaryBuff;
+    let testBuff1 = createTestBuff() as ICharacterTemporaryBuff;
+    let testBuff2 = { ...createTestBuff(), trait: CharacterAttributes.MaxMana } as ICharacterTemporaryBuff;
 
-    await characterBuffTracker.addBuff(testCharacter._id, testBuff1);
-    await characterBuffTracker.addBuff(testCharacter._id, testBuff2);
+    testBuff1 = (await characterBuffTracker.addBuff(testCharacter._id, testBuff1)) as ICharacterTemporaryBuff;
+    testBuff2 = (await characterBuffTracker.addBuff(testCharacter._id, testBuff2)) as ICharacterTemporaryBuff;
 
     const result = await characterBuffTracker.deleteAllCharacterBuffs(testCharacter);
 

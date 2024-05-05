@@ -101,13 +101,17 @@ export class CharacterBuffTracker {
 
   @TrackNewRelicTransaction()
   public async getBuff(characterId: string, buffId: string): Promise<ICharacterBuff | undefined> {
-    const buff = (await CharacterBuff.findOne({ _id: buffId, owner: characterId })
-      .lean()
-      .cacheQuery({
-        cacheKey: `characterBuff_${characterId}_${buffId}`,
-      })) as ICharacterBuff;
+    try {
+      const buff = (await CharacterBuff.findOne({ _id: buffId, owner: characterId })
+        .lean()
+        .cacheQuery({
+          cacheKey: `characterBuff_${characterId}_${buffId}`,
+        })) as ICharacterBuff;
 
-    return buff;
+      return buff;
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   @TrackNewRelicTransaction()
@@ -115,15 +119,18 @@ export class CharacterBuffTracker {
     try {
       const buff = (await this.getBuff(character._id, buffId)) as ICharacterBuff;
 
+      if (!buff) {
+        throw new Error("Buff not found");
+      }
+
+      await CharacterBuff.deleteOne({ _id: buffId, owner: character._id });
+
       await this.clearCache(character, buff?.trait);
 
       return true;
     } catch (error) {
       console.error(error);
-
       return false;
-    } finally {
-      await CharacterBuff.deleteOne({ _id: buffId, owner: character._id });
     }
   }
 

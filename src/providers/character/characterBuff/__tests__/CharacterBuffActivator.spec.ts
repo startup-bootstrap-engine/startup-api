@@ -4,6 +4,8 @@ import { container, unitTestHelper } from "@providers/inversify/container";
 import {
   BasicAttribute,
   CharacterAttributes,
+  CharacterBuffDurationType,
+  CharacterBuffType,
   ICharacterPermanentBuff,
   ICharacterTemporaryBuff,
 } from "@rpg-engine/shared";
@@ -218,5 +220,21 @@ describe("CharacterBuffActivator", () => {
       originateFrom: mockBuff.originateFrom,
     });
     expect(enableBuffSpy).toHaveBeenCalledWith(testCharacter, mockBuff, undefined);
+  });
+
+  describe("Edge cases", () => {
+    it("should correctly apply a permanent buff that modifies an attribute inversely", async () => {
+      const inverseBuff: ICharacterPermanentBuff = {
+        type: CharacterBuffType.CharacterAttribute,
+        trait: CharacterAttributes.MaxHealth,
+        buffPercentage: -10, // Reducing health
+        durationType: CharacterBuffDurationType.Permanent,
+      };
+
+      const buffId = await characterBuffActivator.enablePermanentBuff(testCharacter, inverseBuff);
+
+      expect(buffId).toBeDefined();
+      expect(characterBuffCharacterAttributeSpy).toHaveBeenCalledWith(testCharacter, inverseBuff, undefined);
+    });
   });
 });

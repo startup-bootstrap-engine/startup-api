@@ -55,9 +55,9 @@ export class CharacterBuffActivator {
     type: CharacterBuffType,
     noMessage?: boolean
   ): Promise<boolean | undefined> {
-    return await (type === CharacterBuffType.CharacterAttribute
-      ? this.characterBuffCharacterAttribute.disableBuff(character, buffId, noMessage)
-      : this.characterBuffSkill.disableBuff(character, buffId, noMessage));
+    return type === CharacterBuffType.CharacterAttribute
+      ? await this.characterBuffCharacterAttribute.disableBuff(character, buffId, noMessage)
+      : await this.characterBuffSkill.disableBuff(character, buffId, noMessage);
   }
 
   @TrackNewRelicTransaction()
@@ -92,6 +92,7 @@ export class CharacterBuffActivator {
     if (!enabledBuff) {
       throw new Error(`Failed to enable buff with details ${JSON.stringify(buff)}`);
     }
+
     this.handleTemporaryBuffExpiration(character, enabledBuff as ICharacterTemporaryBuff, noMessage || false);
     return enabledBuff;
   }
