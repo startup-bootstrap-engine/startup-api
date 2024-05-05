@@ -31,11 +31,15 @@ const characterBuffModel = createLeanSchema({
   itemId: Type.string(),
   itemKey: Type.string(),
   originateFrom: Type.string(),
+  isStackable: Type.boolean(),
 });
 
 characterBuffModel.index(
   {
     owner: 1,
+    type: 1,
+    itemId: 1,
+    durationType: 1,
   },
   { background: true }
 );

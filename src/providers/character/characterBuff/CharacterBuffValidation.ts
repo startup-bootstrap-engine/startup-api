@@ -27,7 +27,9 @@ export class CharacterBuffValidation {
       return;
     }
 
-    const itemBuffs = allCharacterBuffs.filter((buff) => !!buff.itemId) as ICharacterItemBuff[];
+    const itemBuffs = allCharacterBuffs.filter(
+      (buff) => !!buff.itemId && !buff.isStackable && !buff.originateFrom
+    ) as ICharacterItemBuff[];
 
     const duplicatedBuffsToRemove = this.getDuplicatedItemBuffsToDelete(this.groupItemBuffsByItemId(itemBuffs));
 
@@ -52,17 +54,14 @@ export class CharacterBuffValidation {
   }
 
   private groupItemBuffsByItemId(itemBuffs: ICharacterItemBuff[]): { [key: string]: ICharacterItemBuff[] } {
-    const itemBuffsGrouped = itemBuffs.reduce((acc, buff) => {
-      if (!acc[buff.itemId + buff.trait]) {
-        acc[buff.itemId + buff.trait] = [];
+    return itemBuffs.reduce((acc, buff) => {
+      const key = `${buff.itemId}${buff.trait}`;
+      if (!acc[key]) {
+        acc[key] = [];
       }
-
-      acc[buff.itemId + buff.trait].push(buff);
-
+      acc[key].push(buff);
       return acc;
     }, {} as { [key: string]: ICharacterItemBuff[] });
-
-    return itemBuffsGrouped;
   }
 
   private getDuplicatedItemBuffsToDelete(itemBuffsGrouped: {
