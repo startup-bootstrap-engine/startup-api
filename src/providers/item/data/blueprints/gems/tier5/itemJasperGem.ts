@@ -43,12 +43,16 @@ export const itemJasperGem: IItemGemTier5Blueprint = {
       trait: BasicAttribute.Strength,
       buffPercentage: 10,
       durationType: CharacterBuffDurationType.Permanent,
+      isStackable: true,
+      originateFrom: GemsBlueprint.JasperGem,
     },
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Magic,
       buffPercentage: 10,
       durationType: CharacterBuffDurationType.Permanent,
+      isStackable: true,
+      originateFrom: GemsBlueprint.JasperGem,
     },
   ],
   useWithItemEffect: async (originItem, targetItem, character) => {

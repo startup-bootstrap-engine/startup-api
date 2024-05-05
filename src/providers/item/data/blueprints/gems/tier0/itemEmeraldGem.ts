@@ -44,12 +44,16 @@ export const itemEmeraldGem: IItemGemTier0Blueprint = {
       trait: BasicAttribute.Resistance,
       buffPercentage: 1,
       durationType: CharacterBuffDurationType.Permanent,
+      isStackable: true,
+      originateFrom: GemsBlueprint.EmeraldGem,
     },
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Strength,
       buffPercentage: 2,
       durationType: CharacterBuffDurationType.Permanent,
+      isStackable: true,
+      originateFrom: GemsBlueprint.EmeraldGem,
     },
   ],
 

@@ -43,12 +43,16 @@ export const itemMistyQuartzGem: IItemGemTier6Blueprint = {
       trait: BasicAttribute.MagicResistance,
       buffPercentage: 12,
       durationType: CharacterBuffDurationType.Permanent,
+      isStackable: true,
+      originateFrom: GemsBlueprint.MistyQuartzGem,
     },
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Magic,
       buffPercentage: 12,
       durationType: CharacterBuffDurationType.Permanent,
+      isStackable: true,
+      originateFrom: GemsBlueprint.MistyQuartzGem,
     },
   ],
 

@@ -44,10 +44,12 @@ describe("CharacterBuffValidation", () => {
     const buff1 = {
       // different buff details...
       itemId: "123",
+      trait: BasicAttribute.Strength,
     } as ICharacterItemBuff;
     const buff2 = {
       // different buff details...
       itemId: "456",
+      trait: BasicAttribute.Strength,
     } as ICharacterItemBuff;
 
     await characterBuffActivator.enablePermanentBuff(testCharacter, buff1);
