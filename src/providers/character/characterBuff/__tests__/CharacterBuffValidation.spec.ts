@@ -1,6 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
-import { BasicAttribute, CharacterBuffDurationType, ICharacterItemBuff } from "@rpg-engine/shared";
+import { BasicAttribute, CharacterBuffDurationType, CharacterBuffType, ICharacterItemBuff } from "@rpg-engine/shared";
 import { CharacterBuffActivator } from "../CharacterBuffActivator";
 import { CharacterBuffTracker } from "../CharacterBuffTracker";
 import { CharacterBuffValidation } from "../CharacterBuffValidation";
@@ -45,11 +45,13 @@ describe("CharacterBuffValidation", () => {
       // different buff details...
       itemId: "123",
       trait: BasicAttribute.Strength,
+      type: CharacterBuffType.Skill,
     } as ICharacterItemBuff;
     const buff2 = {
       // different buff details...
       itemId: "456",
       trait: BasicAttribute.Strength,
+      type: CharacterBuffType.Skill,
     } as ICharacterItemBuff;
 
     await characterBuffActivator.enablePermanentBuff(testCharacter, buff1);

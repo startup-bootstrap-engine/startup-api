@@ -26,30 +26,17 @@ export class CharacterBuffActivator {
     character: ICharacter,
     buff: ICharacterTemporaryBuff
   ): Promise<ICharacterBuff | undefined> {
-    try {
-      let noMessage;
+    let noMessage;
 
-      // Enable the buff directly if it's stackable or doesn't originate from anywhere
-      if (!(buff.isStackable || !buff.originateFrom)) {
-        // Find the character buffs that have the same owner and originate from the same place
-        const characterBuff = (await CharacterBuff.findOne({
-          owner: character.id,
-          originateFrom: buff.originateFrom,
-        }).lean()) as ICharacterBuff;
-
-        // If any such buffs exist, disable the buff
-        if (characterBuff) {
-          await this.disableBuff(character, characterBuff._id!, characterBuff.type, true);
-          noMessage = true;
-        }
+    if (!buff.isStackable && buff.originateFrom) {
+      const existingBuff = await this.findExistingBuff(character, buff);
+      if (existingBuff) {
+        await this.disableBuff(character, existingBuff._id!, existingBuff.type, true);
+        noMessage = true;
       }
-
-      // Enable the buff
-      return await this.enableBuff(character, buff, noMessage);
-    } catch (error) {
-      console.error(error);
-      throw new Error(`Unable to enable temporary buff for character id: ${character.id}, buff id: ${buff._id!}.`);
     }
+
+    return await this.enableBuff(character, buff, noMessage);
   }
 
   @TrackNewRelicTransaction()
@@ -68,28 +55,16 @@ export class CharacterBuffActivator {
     type: CharacterBuffType,
     noMessage?: boolean
   ): Promise<boolean | undefined> {
-    switch (type) {
-      case CharacterBuffType.CharacterAttribute:
-        return await this.characterBuffCharacterAttribute.disableBuff(character, buffId, noMessage);
-
-      case CharacterBuffType.Skill:
-        return await this.characterBuffSkill.disableBuff(character, buffId, noMessage);
-    }
+    return await (type === CharacterBuffType.CharacterAttribute
+      ? this.characterBuffCharacterAttribute.disableBuff(character, buffId, noMessage)
+      : this.characterBuffSkill.disableBuff(character, buffId, noMessage));
   }
 
   @TrackNewRelicTransaction()
-  public async disableAllBuffs(
-    character: ICharacter,
-    durationType: CharacterBuffDurationType | "all" = CharacterBuffDurationType.Temporary
-  ): Promise<void> {
+  public async disableAllBuffs(character: ICharacter, durationType: CharacterBuffDurationType | "all"): Promise<void> {
     const buffs = await this.characterBuffTracker.getAllCharacterBuffs(character._id);
-
     for (const buff of buffs) {
-      if (durationType === "all") {
-        await this.disableBuff(character, buff._id!, buff.type);
-      }
-
-      if (buff.durationType === durationType) {
+      if (durationType === "all" || buff.durationType === durationType) {
         await this.disableBuff(character, buff._id!, buff.type);
       }
     }
@@ -98,15 +73,11 @@ export class CharacterBuffActivator {
   @TrackNewRelicTransaction()
   public async disableAllTemporaryBuffsAllCharacters(): Promise<void> {
     const temporaryBuffs = await CharacterBuff.find({ durationType: CharacterBuffDurationType.Temporary }).lean();
-
     for (const buff of temporaryBuffs) {
       const character = (await Character.findById(buff.owner).lean()) as ICharacter;
-
-      if (!character) {
-        continue;
+      if (character) {
+        await this.disableBuff(character, buff._id, buff.type as CharacterBuffType);
       }
-
-      await this.disableBuff(character, buff._id!, buff.type as CharacterBuffType);
     }
   }
 
@@ -115,35 +86,32 @@ export class CharacterBuffActivator {
     buff: ICharacterPermanentBuff | ICharacterTemporaryBuff,
     noMessage?: boolean
   ): Promise<ICharacterBuff | undefined> {
-    switch (buff.type) {
-      case CharacterBuffType.CharacterAttribute:
-        const newCharBuff = await this.characterBuffCharacterAttribute.enableBuff(character, buff, noMessage);
+    const enabledBuff = await (buff.type === CharacterBuffType.CharacterAttribute
+      ? this.characterBuffCharacterAttribute.enableBuff(character, buff, noMessage)
+      : this.characterBuffSkill.enableBuff(character, buff, noMessage));
+    if (!enabledBuff) {
+      throw new Error(`Failed to enable buff with details ${JSON.stringify(buff)}`);
+    }
+    this.handleTemporaryBuffExpiration(character, enabledBuff as ICharacterTemporaryBuff, noMessage || false);
+    return enabledBuff;
+  }
 
-        if (!newCharBuff) {
-          throw new Error(`Failed to enable buff with details ${JSON.stringify(buff)}`);
-        }
+  private async findExistingBuff(character: ICharacter, buff: ICharacterTemporaryBuff): Promise<ICharacterBuff | null> {
+    return await CharacterBuff.findOne({
+      owner: character.id,
+      originateFrom: buff.originateFrom,
+    }).lean();
+  }
 
-        if (buff.durationType === "temporary") {
-          setTimeout(async () => {
-            await this.characterBuffCharacterAttribute.disableBuff(character, newCharBuff._id!);
-          }, buff.durationSeconds * 1000);
-        }
-
-        return newCharBuff;
-
-      case CharacterBuffType.Skill:
-        const newSkillBuff = await this.characterBuffSkill.enableBuff(character, buff, noMessage);
-
-        if (!newSkillBuff) {
-          throw new Error(`Failed to enable buff with details ${JSON.stringify(buff)}`);
-        }
-
-        if (buff.durationType === "temporary") {
-          setTimeout(async () => {
-            await this.characterBuffSkill.disableBuff(character, newSkillBuff._id!);
-          }, buff.durationSeconds * 1000);
-        }
-        return newSkillBuff;
+  private handleTemporaryBuffExpiration(
+    character: ICharacter,
+    buff: ICharacterTemporaryBuff,
+    noMessage: boolean
+  ): void {
+    if (buff.durationType === CharacterBuffDurationType.Temporary && buff.durationSeconds) {
+      setTimeout(async () => {
+        await this.disableBuff(character, buff._id!, buff.type, noMessage);
+      }, buff.durationSeconds * 1000);
     }
   }
 }
