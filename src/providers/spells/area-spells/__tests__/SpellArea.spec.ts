@@ -398,7 +398,7 @@ describe("SpellArea - PVP", () => {
 
   it("should prevent a character from attacking another one that's on the same party", async () => {
     // @ts-ignore
-    isSamePartySpy = jest.spyOn(spellArea.partyManagement, "checkIfCharacterAndTargetOnTheSameParty");
+    isSamePartySpy = jest.spyOn(spellArea.partyValidator, "checkIfCharacterAndTargetOnTheSameParty");
 
     const party = new CharacterParty({
       leader: {
@@ -436,7 +436,7 @@ describe("SpellArea - PVP", () => {
   });
   it("should NOT prevent a character from attacking another one if they're not on the same party", async () => {
     // @ts-ignore
-    isSamePartySpy = jest.spyOn(spellArea.partyManagement, "checkIfCharacterAndTargetOnTheSameParty");
+    isSamePartySpy = jest.spyOn(spellArea.partyValidator, "checkIfCharacterAndTargetOnTheSameParty");
 
     const party1 = new CharacterParty({
       leader: {
