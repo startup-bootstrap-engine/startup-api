@@ -7,7 +7,7 @@ import { provide } from "inversify-binding-decorators";
 import { PartyBenefitsCalculator } from "./PartyBenefitsCalculator";
 import { PartyBuff } from "./PartyBuff";
 import { PartyCRUD } from "./PartyCRUD";
-import { PartyMembers } from "./PartyMembers";
+import { PartyClasses } from "./PartyClasses";
 import { PartySocketMessaging } from "./PartySocketMessaging";
 import { PartyValidator } from "./PartyValidator";
 
@@ -21,7 +21,7 @@ export default class PartyInvitation {
     private partyBenefitsCalculator: PartyBenefitsCalculator,
     private partyBuff: PartyBuff,
     private partySocketMessaging: PartySocketMessaging,
-    private partyMembers: PartyMembers
+    private partyClasses: PartyClasses
   ) {}
 
   // PARTY MANAGEMENT
@@ -101,7 +101,7 @@ export default class PartyInvitation {
 
     const benefits = this.partyBenefitsCalculator.calculatePartyBenefits(
       party.size + 1,
-      this.partyMembers.getDifferentClasses(party)
+      this.partyClasses.getDifferentClasses(party)
     );
 
     const updatedParty = (await CharacterParty.findByIdAndUpdate(

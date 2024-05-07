@@ -17,7 +17,7 @@ import {
 import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
 import { PartyBenefitsCalculator } from "./PartyBenefitsCalculator";
-import { PartyMembers } from "./PartyMembers";
+import { PartyClasses } from "./PartyClasses";
 
 type BuffSkillTypes = BasicAttribute | CombatSkill | CraftingSkill | CharacterAttributes;
 
@@ -26,7 +26,7 @@ export class PartyBuff {
   constructor(
     private characterBuffActivator: CharacterBuffActivator,
     private partyBenefitsCalculator: PartyBenefitsCalculator,
-    private partyMembers: PartyMembers
+    private partyClasses: PartyClasses
   ) {}
 
   // CHARACTERS BUFFS
@@ -35,7 +35,7 @@ export class PartyBuff {
       .lean()
       .select("_id leader members size")) as ICharacterParty;
 
-    const differentClasses = this.partyMembers.getDifferentClasses(party);
+    const differentClasses = this.partyClasses.getDifferentClasses(party);
     const { leader, members, size } = party;
 
     const numberOfMembers = size || members.length + 1;

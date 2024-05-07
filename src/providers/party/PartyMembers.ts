@@ -10,6 +10,7 @@ import { provide } from "inversify-binding-decorators";
 import { PartyBenefitsCalculator } from "./PartyBenefitsCalculator";
 import { PartyBuff } from "./PartyBuff";
 import { PartyCRUD } from "./PartyCRUD";
+import { PartyClasses } from "./PartyClasses";
 import { PartySocketMessaging } from "./PartySocketMessaging";
 import { PartyValidator } from "./PartyValidator";
 
@@ -23,18 +24,9 @@ export class PartyMembers {
     private partyBuff: PartyBuff,
     private partyBenefitsCalculator: PartyBenefitsCalculator,
     private partyValidator: PartyValidator,
-    private partySocketMessaging: PartySocketMessaging
+    private partySocketMessaging: PartySocketMessaging,
+    private partyClasses: PartyClasses
   ) {}
-
-  public getDifferentClasses(party: ICharacterParty): number {
-    const leaderClass = party.leader.class;
-    const memberClasses = party.members.map((member) => member.class);
-
-    memberClasses.push(leaderClass);
-    const uniqueClasses = new Set(memberClasses);
-
-    return uniqueClasses.size;
-  }
 
   public async removeMemberFromParty(party: ICharacterParty, character: ICharacter): Promise<boolean> {
     if (!party) {
@@ -47,7 +39,10 @@ export class PartyMembers {
     party.members = party.members.filter((member) => member._id.toString() !== character._id.toString());
 
     const partySize = party.size || party.members.length + 1;
-    party.benefits = this.partyBenefitsCalculator.calculatePartyBenefits(partySize, this.getDifferentClasses(party));
+    party.benefits = this.partyBenefitsCalculator.calculatePartyBenefits(
+      partySize,
+      this.partyClasses.getDifferentClasses(party)
+    );
 
     if (party.members.length === 0) {
       await this.partyCRUD.deleteParty(character._id);
