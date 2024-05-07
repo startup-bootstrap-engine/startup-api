@@ -33,45 +33,54 @@ export class PartyMembers {
       return false;
     }
 
-    let isAdding = false;
-    await this.partyBuff.handleAllBuffInParty(party, isAdding);
+    try {
+      await this.handleBuffBeforeRemovingMember(party);
+      party.members = party.members.filter((member) => member._id.toString() !== character._id.toString());
+      const updatedMembers = party.members;
 
-    party.members = party.members.filter((member) => member._id.toString() !== character._id.toString());
+      if (updatedMembers.length === 0) {
+        await this.deletePartyAndSendMessages(party, character);
+        return true;
+      }
 
-    const partySize = party.size || party.members.length + 1;
-    party.benefits = this.partyBenefitsCalculator.calculatePartyBenefits(
-      partySize,
-      this.partyClasses.getDifferentClasses(party)
-    );
+      party.benefits = this.partyBenefitsCalculator.calculatePartyBenefits(
+        party.size || party.members.length + 1,
+        this.partyClasses.getDifferentClasses(party)
+      );
 
-    if (party.members.length === 0) {
-      await this.partyCRUD.deleteParty(character._id);
-      const message = "Party Deleted!";
-      await this.partySocketMessaging.sendMessageToAllMembers(message, party);
+      const updatedParty = (await CharacterParty.findByIdAndUpdate(party._id, party, { new: true })) as ICharacterParty;
+      await this.handleBuffAfterRemovingMember(updatedParty);
 
-      await this.partySocketMessaging.partyPayloadSend(null, [character._id, party.leader._id]);
+      const message = `${character.name} has left the party!`;
+      await this.partySocketMessaging.sendMessageToAllMembers(message, updatedParty);
+      await this.partySocketMessaging.partyPayloadSend(updatedParty);
+      await this.partySocketMessaging.partyPayloadSend(null, [character._id]);
+
+      await this.inMemoryHashTable.set(
+        "party-members",
+        updatedParty._id.toString(),
+        updatedParty.members.map((member) => member._id)
+      );
 
       return true;
+    } catch (error) {
+      console.error(error);
+      return false;
     }
+  }
 
-    const updatedParty = (await CharacterParty.findByIdAndUpdate(party._id, party, { new: true })) as ICharacterParty;
+  private async handleBuffBeforeRemovingMember(party: ICharacterParty): Promise<void> {
+    await this.partyBuff.handleAllBuffInParty(party, false);
+  }
 
-    isAdding = true;
-    await this.partyBuff.handleAllBuffInParty(updatedParty, isAdding);
+  private async handleBuffAfterRemovingMember(party: ICharacterParty): Promise<void> {
+    await this.partyBuff.handleAllBuffInParty(party, true);
+  }
 
-    const message = `${character.name} has left the party!`;
-    await this.partySocketMessaging.sendMessageToAllMembers(message, updatedParty);
-
-    await this.partySocketMessaging.partyPayloadSend(updatedParty);
-    await this.partySocketMessaging.partyPayloadSend(null, [character._id]);
-
-    await this.inMemoryHashTable.set(
-      "party-members",
-      updatedParty._id.toString(),
-      updatedParty.members.map((member) => member._id)
-    );
-
-    return true;
+  private async deletePartyAndSendMessages(party: ICharacterParty, character: ICharacter): Promise<void> {
+    await this.partyCRUD.deleteParty(character._id);
+    const message = "Party Deleted!";
+    await this.partySocketMessaging.sendMessageToAllMembers(message, party);
   }
 
   @TrackNewRelicTransaction()
