@@ -59,7 +59,7 @@ export class PartyMembers {
     isAdding = true;
     await this.partyBuff.handleAllBuffInParty(updatedParty, isAdding);
 
-    const message = `${character.name} left the party!`;
+    const message = `${character.name} has left the party!`;
     await this.partySocketMessaging.sendMessageToAllMembers(message, updatedParty);
 
     await this.partySocketMessaging.partyPayloadSend(updatedParty);
