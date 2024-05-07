@@ -1,7 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { CharacterParty, ICharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
-import { CharacterClass } from "@rpg-engine/shared";
+import { CharacterClass, UISocketEvents } from "@rpg-engine/shared";
 import { PartyCRUD } from "../PartyCRUD";
 import PartyInvitation from "../PartyInvitation";
 import { PartyMembers } from "../PartyMembers";
@@ -173,5 +173,65 @@ describe("PartyMembers", () => {
       `Leadership has been transferred to ${firstMember.name}!`,
       expect.anything()
     );
+  });
+
+  it("should not allow a leader to remove a character that's not in the party", async () => {
+    const party = await partyInvitation.acceptInvite(characterLeader, firstMember);
+
+    expect(party).toBeDefined;
+
+    await partyMembers.leaveParty(party?._id, characterLeader, thirdMember);
+
+    expect(sendEventToUser).toHaveBeenCalledWith(characterLeader.channelId!, UISocketEvents.ShowMessage, {
+      message: "You can't remove other members from the party!",
+      type: "info",
+    });
+  });
+
+  it("should allow a non-leader member to leave the party", async () => {
+    await partyCRUD.createParty(characterLeader, firstMember);
+    const party = await partyInvitation.acceptInvite(characterLeader, secondMember);
+
+    expect(party).toBeDefined;
+
+    const success = await partyMembers.leaveParty(party?._id, firstMember, firstMember);
+
+    expect(success).toBeTruthy;
+
+    const updatedParty = (await CharacterParty.findById(party?._id).lean().select("leader members")) as ICharacterParty;
+
+    expect(partyValidator.checkIfInParty(updatedParty, firstMember)).toBeFalsy();
+
+    expect(sendMessageToAllMembers).toHaveBeenCalledWith(`${firstMember.name} has left the party!`, expect.anything());
+  });
+
+  it("should not allow a non-leader member to remove other member", async () => {
+    await partyCRUD.createParty(characterLeader, firstMember);
+    const party = await partyInvitation.acceptInvite(characterLeader, secondMember);
+
+    expect(party).toBeDefined;
+
+    await partyMembers.leaveParty(party?._id, characterLeader, firstMember);
+
+    expect(sendEventToUser).toHaveBeenCalledWith(characterLeader.channelId!, UISocketEvents.ShowMessage, {
+      message: "You can't remove other members from the party!",
+      type: "info",
+    });
+  });
+  // END LEAVE PARTY TESTS
+
+  it("should not allow leader to transfer leadership to a character not in the same party", async () => {
+    const party = await partyInvitation.acceptInvite(characterLeader, firstMember);
+
+    expect(party).toBeDefined;
+
+    const success = await partyMembers.transferLeadership(party?._id, secondMember, characterLeader);
+
+    expect(success).toBeTruthy;
+
+    expect(sendEventToUser).toHaveBeenCalledWith(characterLeader.channelId!, UISocketEvents.ShowMessage, {
+      message: `${secondMember.name} is not in your party!`,
+      type: "info",
+    });
   });
 });
