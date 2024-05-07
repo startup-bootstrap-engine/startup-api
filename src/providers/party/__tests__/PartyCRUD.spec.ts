@@ -3,10 +3,12 @@ import { container, unitTestHelper } from "@providers/inversify/container";
 import { CharacterClass } from "@rpg-engine/shared";
 import { PartyCRUD } from "../PartyCRUD";
 import PartyInvitation from "../PartyInvitation";
+import { PartyValidator } from "../PartyValidator";
 
 describe("PartyCRUD", () => {
   let partyCRUD: PartyCRUD;
   let partyInvitation: PartyInvitation;
+  let partyValidator: PartyValidator;
   let characterLeader: ICharacter;
   let firstMember: ICharacter;
   let secondMember: ICharacter;
@@ -16,6 +18,7 @@ describe("PartyCRUD", () => {
   beforeAll(() => {
     partyCRUD = container.get<PartyCRUD>(PartyCRUD);
     partyInvitation = container.get<PartyInvitation>(PartyInvitation);
+    partyValidator = container.get<PartyValidator>(PartyValidator);
 
     // @ts-ignore
     messageSpy = jest.spyOn(partyCRUD.socketMessaging, "sendEventToUser");
@@ -84,10 +87,9 @@ describe("PartyCRUD", () => {
 
     expect(party).toBeDefined;
 
-    // @ts-ignore
-    expect(partyCRUD.checkIfInParty(party, characterLeader)).toBeTruthy();
-    // @ts-ignore
-    expect(partyCRUD.checkIfInParty(party, firstMember)).toBeTruthy();
+    expect(partyValidator.checkIfInParty(party!, characterLeader)).toBeTruthy();
+
+    expect(partyValidator.checkIfInParty(party!, firstMember)).toBeTruthy();
   });
 
   it("should return a party if the character is the leader", async () => {
@@ -101,8 +103,7 @@ describe("PartyCRUD", () => {
   });
 
   it("should return a party if the character is a member", async () => {
-    // @ts-ignore
-    await partyCRUD.acceptInvite(characterLeader, firstMember);
+    await partyInvitation.acceptInvite(characterLeader, firstMember);
 
     const party = await partyCRUD.getPartyByCharacterId(firstMember._id);
 
