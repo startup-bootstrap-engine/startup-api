@@ -1,7 +1,7 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { CharacterParty, ICharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
+import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
-import { INPC } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { Types } from "mongoose";
 import { PartyCRUD } from "./PartyCRUD";

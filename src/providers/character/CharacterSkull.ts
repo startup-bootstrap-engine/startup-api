@@ -10,7 +10,7 @@ import {
   CHARACTER_SKULL_YELLOW_SKULL_DURATION,
 } from "@providers/constants/CharacterSkullConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
-import PartyManagement from "@providers/party/PartyManagement";
+import { PartyValidator } from "@providers/party/PartyValidator";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { CharacterSkullType, CharacterSocketEvents, ICharacterAttributeChanged, Modes } from "@rpg-engine/shared";
 import dayjs from "dayjs";
@@ -21,7 +21,7 @@ export class CharacterSkull {
   constructor(
     private readonly inMemoryHashTable: InMemoryHashTable,
     private readonly socketMessaging: SocketMessaging,
-    private partyManagement: PartyManagement
+    private partyValidator: PartyValidator
   ) {}
 
   @TrackNewRelicTransaction()
@@ -32,7 +32,7 @@ export class CharacterSkull {
     }
 
     // Check if the caster is in a party
-    const isCharacterAndTargetInParty = await this.partyManagement.checkIfCharacterAndTargetOnTheSameParty(
+    const isCharacterAndTargetInParty = await this.partyValidator.checkIfCharacterAndTargetOnTheSameParty(
       character as ICharacter,
       target as ICharacter
     );

@@ -12,7 +12,6 @@ import { MODE_EXP_MULTIPLIER } from "@providers/constants/SkillConstants";
 import { DiscordBot } from "@providers/discord/DiscordBot";
 import { spellLearn } from "@providers/inversify/container";
 import { Locker } from "@providers/locks/Locker";
-import PartyManagement from "@providers/party/PartyManagement";
 import { SkillBuff } from "@providers/skill/SkillBuff";
 import { SkillCalculator } from "@providers/skill/SkillCalculator";
 import { SkillFunctions } from "@providers/skill/SkillFunctions";
@@ -42,6 +41,8 @@ import { Colors } from "discord.js";
 import { provide } from "inversify-binding-decorators";
 
 import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
+import { PartyCRUD } from "@providers/party/PartyCRUD";
+import { PartyValidator } from "@providers/party/PartyValidator";
 import dayjs from "dayjs";
 import random from "lodash/random";
 import uniqBy from "lodash/uniqBy";
@@ -64,11 +65,12 @@ export class NPCExperience {
     private time: Time,
     private skillLvUpStatsIncrease: SkillStatsIncrease,
     private locker: Locker,
-    private partyManagement: PartyManagement,
     private newRelic: NewRelic,
     private discordBot: DiscordBot,
     private experienceLimiter: NPCExperienceLimiter,
-    private characterPremiumAccount: CharacterPremiumAccount
+    private characterPremiumAccount: CharacterPremiumAccount,
+    private partyValidator: PartyValidator,
+    private partyCRUD: PartyCRUD
   ) {}
 
   /**
@@ -120,7 +122,7 @@ export class NPCExperience {
       let expRecipients: Types.ObjectId[] = [];
 
       if (record!.partyId) {
-        const party = await this.partyManagement.getPartyByCharacterId(characterAndSkills.character._id);
+        const party = await this.partyCRUD.getPartyByCharacterId(characterAndSkills.character._id);
 
         if (!party) {
           continue;
@@ -134,7 +136,7 @@ export class NPCExperience {
         expRecipients.push(record!.charId);
       }
 
-      const charactersInRange = await this.partyManagement.isWithinRange(target, expRecipients, 150);
+      const charactersInRange = await this.partyValidator.isWithinRange(target, expRecipients, 150);
 
       if (charactersInRange.size === 0) {
         continue;
@@ -190,7 +192,7 @@ export class NPCExperience {
         }
 
         target.xpToRelease = uniqBy(target.xpToRelease, "xpId");
-        const party = (await this.partyManagement.getPartyByCharacterId(attacker._id)) as ICharacterParty;
+        const party = (await this.partyCRUD.getPartyByCharacterId(attacker._id)) as ICharacterParty;
         // Store the xp in the xpToRelease array
         // before adding the character to the array, check if the character already caused some damage
         if (typeof target.xpToRelease !== "undefined") {

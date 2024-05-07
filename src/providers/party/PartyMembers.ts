@@ -4,7 +4,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { CharacterLastAction } from "@providers/character/CharacterLastAction";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
+import { CharacterClass, IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
 import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 import { PartyBenefitsCalculator } from "./PartyBenefitsCalculator";
@@ -117,6 +117,61 @@ export class PartyMembers {
         throw new Error(error.message);
       }
     }
+  }
+
+  public async transferLeadership(partyId: string, target: ICharacter, eventCaller: ICharacter): Promise<boolean> {
+    const party = (await CharacterParty.findById(partyId).lean().select("_id leader members")) as ICharacterParty;
+
+    if (!party) {
+      return false;
+    }
+
+    const isLeader = this.partyValidator.checkIfIsLeader(party, eventCaller);
+
+    if (!isLeader) {
+      this.socketMessaging.sendEventToUser<IUIShowMessage>(eventCaller.channelId!, UISocketEvents.ShowMessage, {
+        message: "You are not the party leader!",
+        type: "info",
+      });
+
+      return false;
+    }
+
+    const inSameParty = this.partyValidator.areBothInSameParty(party, eventCaller, target);
+    const isTargetSameParty = this.partyValidator.checkIfInParty(party, target);
+
+    if (!isTargetSameParty || !inSameParty) {
+      this.socketMessaging.sendEventToUser<IUIShowMessage>(eventCaller.channelId!, UISocketEvents.ShowMessage, {
+        message: `${target.name} is not in your party!`,
+        type: "info",
+      });
+
+      return false;
+    }
+
+    const members = party.members.filter((member) => member._id.toString() !== target._id.toString());
+
+    party.members = members;
+    party.members.push({
+      _id: party.leader._id,
+      class: party.leader.class as CharacterClass,
+      name: party.leader.name,
+    });
+
+    party.leader = {
+      _id: target._id,
+      class: target.class as CharacterClass,
+      name: target.name,
+    };
+
+    const updatedParty = (await CharacterParty.findByIdAndUpdate(party._id, party, { new: true })) as ICharacterParty;
+
+    const message = `Leadership has been transferred to ${target.name}!`;
+    await this.partySocketMessaging.sendMessageToAllMembers(message, updatedParty);
+
+    await this.partySocketMessaging.partyPayloadSend(updatedParty);
+
+    return true;
   }
 
   public async leaveParty(partyId: string, targetOfEvent: ICharacter, eventCaller: ICharacter): Promise<boolean> {

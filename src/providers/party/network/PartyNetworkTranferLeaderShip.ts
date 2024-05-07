@@ -1,13 +1,13 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
-import { provide } from "inversify-binding-decorators";
-import PartyManagement from "../PartyManagement";
 import { IPartyManagementFromClient, PartySocketEvents } from "@rpg-engine/shared";
+import { provide } from "inversify-binding-decorators";
+import { PartyMembers } from "../PartyMembers";
 
 @provide(PartyNetworkTranferLeaderShip)
 export class PartyNetworkTranferLeaderShip {
-  constructor(private socketAuth: SocketAuth, private partyManagement: PartyManagement) {}
+  constructor(private socketAuth: SocketAuth, private partyMembers: PartyMembers) {}
 
   public onTranferLeaderShip(channel: SocketChannel): void {
     this.socketAuth.authCharacterOn(
@@ -27,7 +27,7 @@ export class PartyNetworkTranferLeaderShip {
             return;
           }
 
-          const success = await this.partyManagement.transferLeadership(data.partyId, target, eventCaller);
+          const success = await this.partyMembers.transferLeadership(data.partyId, target, eventCaller);
 
           if (!success) {
             return;

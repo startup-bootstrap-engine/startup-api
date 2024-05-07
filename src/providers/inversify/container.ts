@@ -16,7 +16,6 @@ import { MapLoader } from "@providers/map/MapLoader";
 import { NPCExperience } from "@providers/npc/NPCExperience/NPCExperience";
 import { NPCLoader } from "@providers/npc/NPCLoader";
 import { NPCManager } from "@providers/npc/NPCManager";
-import PartyManagement from "@providers/party/PartyManagement";
 import { BullBoardMonitor } from "@providers/queue/BullBoardMonitor";
 import { PM2Helper } from "@providers/server/PM2Helper";
 import { ServerBootstrap } from "@providers/server/ServerBootstrap";
@@ -95,8 +94,6 @@ export const newRelic = container.get<NewRelic>(NewRelic);
 export const spellLearn = container.get<SpellLearn>(SpellLearn);
 
 export const npcExperience = container.get<NPCExperience>(NPCExperience);
-
-export const partyManagement = container.get<PartyManagement>(PartyManagement);
 
 export const entityEffectUse = container.get<EntityEffectUse>(EntityEffectUse);
 

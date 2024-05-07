@@ -9,7 +9,7 @@ import {
   CharacterPartyEXPBonus,
   CharacterPartySkillBonus,
 } from "@rpg-engine/shared";
-import PartyManagement from "../PartyManagement";
+import PartyManagement from "../PartyInvitation";
 
 describe("Party Benefits", () => {
   let partyManagement: PartyManagement;

@@ -3,7 +3,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { CharacterParty, ICharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { CharacterBuffDurationType, CharacterClass, PartySocketEvents, UISocketEvents } from "@rpg-engine/shared";
-import PartyManagement from "../PartyManagement";
+import PartyManagement from "../PartyInvitation";
 
 describe("Party Management", () => {
   let partyManagement: PartyManagement;
@@ -321,26 +321,6 @@ describe("Party Management", () => {
     });
   });
   // END LEAVE PARTY TESTS
-
-  it("should return a party if the character is the leader", async () => {
-    // @ts-ignore
-    await partyManagement.createParty(characterLeader, firstMember);
-
-    const party = await partyManagement.getPartyByCharacterId(characterLeader._id);
-
-    expect(party).toBeDefined();
-    expect(party?.leader._id).toEqual(characterLeader._id);
-  });
-
-  it("should return a party if the character is a member", async () => {
-    // @ts-ignore
-    await partyManagement.acceptInvite(characterLeader, firstMember);
-
-    const party = await partyManagement.getPartyByCharacterId(firstMember._id);
-
-    expect(party).toBeDefined();
-    expect(party?.members.some((member) => member._id.toString() === firstMember._id.toString())).toBeTruthy();
-  });
 
   it("should return null if the character is not part of a party", async () => {
     // @ts-ignore

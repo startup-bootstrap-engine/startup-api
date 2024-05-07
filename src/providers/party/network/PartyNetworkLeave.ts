@@ -1,13 +1,13 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
-import { provide } from "inversify-binding-decorators";
-import PartyManagement from "../PartyManagement";
 import { IPartyManagementFromClient, PartySocketEvents } from "@rpg-engine/shared";
+import { provide } from "inversify-binding-decorators";
+import { PartyMembers } from "../PartyMembers";
 
 @provide(PartyNetworkLeave)
 export class PartyNetworkLeave {
-  constructor(private socketAuth: SocketAuth, private partyManagement: PartyManagement) {}
+  constructor(private socketAuth: SocketAuth, private partyMembers: PartyMembers) {}
 
   public onLeaveParty(channel: SocketChannel): void {
     this.socketAuth.authCharacterOn(
@@ -30,7 +30,7 @@ export class PartyNetworkLeave {
             throw new Error("Error on leave party, partyId not found");
           }
 
-          const success = await this.partyManagement.leaveParty(data.partyId, targetOnEvent, eventCaller);
+          const success = await this.partyMembers.leaveParty(data.partyId, targetOnEvent, eventCaller);
 
           if (!success) {
             return;

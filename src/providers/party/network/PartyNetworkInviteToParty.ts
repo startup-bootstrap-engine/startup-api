@@ -3,11 +3,16 @@ import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { IPartyManagementFromClient, PartySocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import PartyManagement from "../PartyManagement";
+import PartyInvitation from "../PartyInvitation";
+import { PartySocketMessaging } from "../PartySocketMessaging";
 
 @provide(PartyNetworkInviteToParty)
 export class PartyNetworkInviteToParty {
-  constructor(private socketAuth: SocketAuth, private partyManagement: PartyManagement) {}
+  constructor(
+    private socketAuth: SocketAuth,
+    private partyInvitation: PartyInvitation,
+    private partySocketMessaging: PartySocketMessaging
+  ) {}
 
   public onInviteToParty(channel: SocketChannel): void {
     this.socketAuth.authCharacterOn(
@@ -25,7 +30,7 @@ export class PartyNetworkInviteToParty {
             throw new Error("Error on invite to party, target not found");
           }
 
-          await this.partyManagement.inviteToParty(leader, target);
+          await this.partyInvitation.inviteToParty(leader, target);
         } catch (error) {
           console.error(error);
         }
@@ -48,10 +53,10 @@ export class PartyNetworkInviteToParty {
             throw new Error("Error on joing party, character target not found");
           }
 
-          const party = await this.partyManagement.acceptInvite(leader, target);
+          const party = await this.partyInvitation.acceptInvite(leader, target);
 
           if (party) {
-            await this.partyManagement.partyPayloadSend(party);
+            await this.partySocketMessaging.partyPayloadSend(party);
           }
         } catch (error) {
           console.error(error);
