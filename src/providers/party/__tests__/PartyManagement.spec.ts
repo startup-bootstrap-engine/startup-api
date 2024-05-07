@@ -322,13 +322,6 @@ describe("Party Management", () => {
   });
   // END LEAVE PARTY TESTS
 
-  it("should return null if the character is not part of a party", async () => {
-    // @ts-ignore
-    const anotherParty = await partyManagement.getPartyByCharacterId(thirdMember._id);
-
-    expect(anotherParty).toBeNull();
-  });
-
   it("should not allow leader to transfer leadership to a character not in the same party", async () => {
     const party = await partyManagement.acceptInvite(characterLeader, firstMember);
 

@@ -110,4 +110,10 @@ describe("PartyCRUD", () => {
     expect(party).toBeDefined();
     expect(party?.members.some((member) => member._id.toString() === firstMember._id.toString())).toBeTruthy();
   });
+
+  it("should return null if the character is not part of a party", async () => {
+    const anotherParty = await partyCRUD.getPartyByCharacterId(thirdMember._id);
+
+    expect(anotherParty).toBeNull();
+  });
 });
