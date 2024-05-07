@@ -92,6 +92,18 @@ describe("PartyCRUD", () => {
     expect(partyValidator.checkIfInParty(party!, firstMember)).toBeTruthy();
   });
 
+  it("should create a party when leader is not in a party", async () => {
+    const party = await partyInvitation.acceptInvite(firstMember, secondMember);
+
+    expect(party).toBeDefined;
+
+    expect(partyValidator.checkIfInParty(party!, firstMember)).toBeTruthy();
+
+    expect(partyValidator.checkIfInParty(party!, secondMember)).toBeTruthy();
+
+    expect(partyValidator.checkIfInParty(party!, characterLeader)).toBeFalsy();
+  });
+
   it("should return a party if the character is the leader", async () => {
     // @ts-ignore
     await partyCRUD.createParty(characterLeader, firstMember);

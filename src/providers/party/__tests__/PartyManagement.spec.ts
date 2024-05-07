@@ -77,19 +77,6 @@ describe("Party Management", () => {
     jest.clearAllMocks();
   });
 
-  it("should create a party when leader is not in a party", async () => {
-    // @ts-ignore
-    const createPartySpy = jest.spyOn(partyManagement, "createParty");
-    // @ts-ignore
-    const checkIfInPartySpy = jest.spyOn(partyManagement, "checkIfInParty").mockResolvedValue(false);
-
-    await partyManagement.acceptInvite(characterLeader, firstMember);
-    expect(createPartySpy).toHaveBeenCalledWith(characterLeader, firstMember);
-
-    (createPartySpy as jest.SpyInstance).mockRestore();
-    (checkIfInPartySpy as jest.SpyInstance).mockRestore();
-  });
-
   it("should invite to party when leader is already in a party", async () => {
     // @ts-ignore
     const addMemberToPartySpy = jest.spyOn(partyManagement, "addMemberToParty");
