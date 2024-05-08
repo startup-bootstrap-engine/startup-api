@@ -7,7 +7,6 @@ import {
   CharacterPartySkillBonus,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import _ from "lodash";
 
 @provide(PartyBenefitsCalculator)
 export class PartyBenefitsCalculator {
@@ -15,55 +14,13 @@ export class PartyBenefitsCalculator {
     numberOfMembers: number,
     differentClasses: number
   ): { benefit: CharacterPartyBenefits; value: number }[] {
-    const bonusMapping = {
-      2: {
-        distribution: CharacterPartyDistributionBonus.Two,
-        dropRatio: CharacterPartyDropBonus.Two,
-        skill: CharacterPartySkillBonus.Two,
-      },
-      3: {
-        distribution: CharacterPartyDistributionBonus.Three,
-        dropRatio: CharacterPartyDropBonus.Three,
-        skill: CharacterPartySkillBonus.Three,
-      },
-      4: {
-        distribution: CharacterPartyDistributionBonus.Four,
-        dropRatio: CharacterPartyDropBonus.Four,
-        skill: CharacterPartySkillBonus.Four,
-      },
-      5: {
-        distribution: CharacterPartyDistributionBonus.Five,
-        dropRatio: CharacterPartyDropBonus.Five,
-        skill: CharacterPartySkillBonus.Five,
-      },
-    };
-
-    const defaultBonus = {
-      distribution: CharacterPartyDistributionBonus.None,
-      dropRatio: CharacterPartyDropBonus.None,
-      skill: CharacterPartySkillBonus.None,
-    };
-
-    const bonuses = _.get(bonusMapping, numberOfMembers, defaultBonus);
-
-    const distributionBonus = bonuses.distribution;
-    const dropRatioBonus = bonuses.dropRatio;
-    const skillBonus = bonuses.skill;
-
-    const expBonusMapping = {
-      1: CharacterPartyEXPBonus.One,
-      2: CharacterPartyEXPBonus.Two,
-      3: CharacterPartyEXPBonus.Three,
-      4: CharacterPartyEXPBonus.Four,
-      5: CharacterPartyEXPBonus.Five,
-    };
-
-    const experienceBonus = _.get(expBonusMapping, differentClasses, CharacterPartyEXPBonus.One);
+    const bonusMapping = this.getBonusMapping(numberOfMembers);
+    const experienceBonus = this.getExperienceBonus(differentClasses);
 
     return [
       {
         benefit: CharacterPartyBenefits.Distribution,
-        value: distributionBonus * PARTY_BONUS_RATIO,
+        value: bonusMapping.distribution * PARTY_BONUS_RATIO,
       },
       {
         benefit: CharacterPartyBenefits.Experience,
@@ -71,12 +28,68 @@ export class PartyBenefitsCalculator {
       },
       {
         benefit: CharacterPartyBenefits.DropRatio,
-        value: dropRatioBonus * PARTY_BONUS_RATIO,
+        value: bonusMapping.dropRatio * PARTY_BONUS_RATIO,
       },
       {
         benefit: CharacterPartyBenefits.Skill,
-        value: skillBonus * PARTY_BONUS_RATIO,
+        value: bonusMapping.skill * PARTY_BONUS_RATIO,
       },
     ];
+  }
+
+  private getBonusMapping(numberOfMembers: number): {
+    distribution: CharacterPartyDistributionBonus;
+    dropRatio: CharacterPartyDropBonus;
+    skill: CharacterPartySkillBonus;
+  } {
+    switch (numberOfMembers) {
+      case 2:
+        return {
+          distribution: CharacterPartyDistributionBonus.Two,
+          dropRatio: CharacterPartyDropBonus.Two,
+          skill: CharacterPartySkillBonus.Two,
+        };
+      case 3:
+        return {
+          distribution: CharacterPartyDistributionBonus.Three,
+          dropRatio: CharacterPartyDropBonus.Three,
+          skill: CharacterPartySkillBonus.Three,
+        };
+      case 4:
+        return {
+          distribution: CharacterPartyDistributionBonus.Four,
+          dropRatio: CharacterPartyDropBonus.Four,
+          skill: CharacterPartySkillBonus.Four,
+        };
+      case 5:
+        return {
+          distribution: CharacterPartyDistributionBonus.Five,
+          dropRatio: CharacterPartyDropBonus.Five,
+          skill: CharacterPartySkillBonus.Five,
+        };
+      default:
+        return {
+          distribution: CharacterPartyDistributionBonus.None,
+          dropRatio: CharacterPartyDropBonus.None,
+          skill: CharacterPartySkillBonus.None,
+        };
+    }
+  }
+
+  private getExperienceBonus(differentClasses: number): CharacterPartyEXPBonus {
+    switch (differentClasses) {
+      case 1:
+        return CharacterPartyEXPBonus.One;
+      case 2:
+        return CharacterPartyEXPBonus.Two;
+      case 3:
+        return CharacterPartyEXPBonus.Three;
+      case 4:
+        return CharacterPartyEXPBonus.Four;
+      case 5:
+        return CharacterPartyEXPBonus.Five;
+      default:
+        return CharacterPartyEXPBonus.One;
+    }
   }
 }
