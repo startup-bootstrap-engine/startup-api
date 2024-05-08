@@ -82,50 +82,103 @@ describe("PartyCRUD", () => {
     jest.clearAllMocks();
   });
 
-  it("should create a party", async () => {
-    const party = await partyInvitation.acceptInvite(characterLeader, firstMember);
+  describe("Party Creation", () => {
+    it("should create a party", async () => {
+      const party = await partyInvitation.acceptInvite(characterLeader, firstMember);
 
-    expect(party).toBeDefined;
+      expect(party).toBeDefined;
 
-    expect(partyValidator.checkIfInParty(party!, characterLeader)).toBeTruthy();
+      expect(partyValidator.checkIfInParty(party!, characterLeader)).toBeTruthy();
 
-    expect(partyValidator.checkIfInParty(party!, firstMember)).toBeTruthy();
+      expect(partyValidator.checkIfInParty(party!, firstMember)).toBeTruthy();
+    });
+
+    it("should create a party with a maximum size limit", async () => {
+      const maxSize = 3;
+      await partyCRUD.createParty(characterLeader, firstMember, maxSize);
+      const party = await partyCRUD.findById(characterLeader._id);
+
+      expect(party).toBeDefined();
+      expect(party?.maxSize).toEqual(maxSize);
+    });
+
+    it("should create a party when leader is not in a party", async () => {
+      const party = await partyInvitation.acceptInvite(firstMember, secondMember);
+
+      expect(party).toBeDefined;
+
+      expect(partyValidator.checkIfInParty(party!, firstMember)).toBeTruthy();
+
+      expect(partyValidator.checkIfInParty(party!, secondMember)).toBeTruthy();
+
+      expect(partyValidator.checkIfInParty(party!, characterLeader)).toBeFalsy();
+    });
   });
 
-  it("should create a party when leader is not in a party", async () => {
-    const party = await partyInvitation.acceptInvite(firstMember, secondMember);
+  describe("Party Read", () => {
+    it("should return a party if the character is the leader", async () => {
+      await partyCRUD.createParty(characterLeader, firstMember);
 
-    expect(party).toBeDefined;
+      const party = await partyCRUD.findPartyByCharacterId(characterLeader._id);
 
-    expect(partyValidator.checkIfInParty(party!, firstMember)).toBeTruthy();
+      expect(party).toBeDefined();
+      expect(party?.leader._id.toString()).toStrictEqual(characterLeader._id.toString());
+    });
 
-    expect(partyValidator.checkIfInParty(party!, secondMember)).toBeTruthy();
+    it("should return a party if the character is a member", async () => {
+      await partyInvitation.acceptInvite(characterLeader, firstMember);
 
-    expect(partyValidator.checkIfInParty(party!, characterLeader)).toBeFalsy();
+      const party = await partyCRUD.findPartyByCharacterId(firstMember._id);
+
+      expect(party).toBeDefined();
+      expect(party?.members.some((member) => member._id.toString() === firstMember._id.toString())).toBeTruthy();
+    });
+
+    it("should return null if the character is not part of a party", async () => {
+      const anotherParty = await partyCRUD.findPartyByCharacterId(thirdMember._id);
+
+      expect(anotherParty).toBeNull();
+    });
   });
 
-  it("should return a party if the character is the leader", async () => {
-    // @ts-ignore
-    await partyCRUD.createParty(characterLeader, firstMember);
+  describe("Party Updates", () => {
+    it("should update party details", async () => {
+      await partyCRUD.createParty(characterLeader, firstMember);
 
-    const party = await partyCRUD.getPartyByCharacterId(characterLeader._id);
+      await partyCRUD.findByIdAndUpdate(characterLeader._id, {
+        leader: secondMember,
+      });
 
-    expect(party).toBeDefined();
-    expect(party?.leader._id).toEqual(characterLeader._id);
+      const party = await partyCRUD.findById(characterLeader._id);
+      expect(party?.leader._id.toString()).toEqual(secondMember._id.toString());
+    });
   });
 
-  it("should return a party if the character is a member", async () => {
-    await partyInvitation.acceptInvite(characterLeader, firstMember);
+  describe("Party Deletion", () => {
+    it("should delete a party", async () => {
+      await partyCRUD.createParty(characterLeader, firstMember);
+      await partyCRUD.deleteParty(characterLeader);
 
-    const party = await partyCRUD.getPartyByCharacterId(firstMember._id);
-
-    expect(party).toBeDefined();
-    expect(party?.members.some((member) => member._id.toString() === firstMember._id.toString())).toBeTruthy();
+      const party = await partyCRUD.findById(characterLeader._id);
+      expect(party).toBeFalsy();
+    });
   });
 
-  it("should return null if the character is not part of a party", async () => {
-    const anotherParty = await partyCRUD.getPartyByCharacterId(thirdMember._id);
+  describe("Edge Cases", () => {
+    it("should not add members beyond the maximum party size", async () => {
+      const maxSize = 2;
+      await partyCRUD.createParty(characterLeader, firstMember, maxSize);
+      await partyCRUD.createParty(characterLeader, secondMember, maxSize);
+      const result = await partyCRUD.createParty(characterLeader, thirdMember, maxSize);
 
-    expect(anotherParty).toBeNull();
+      expect(result).toBeUndefined();
+    });
+
+    it("should check if a character is already in a party before adding", async () => {
+      await partyCRUD.createParty(characterLeader, firstMember);
+      const result = await partyCRUD.createParty(characterLeader, firstMember);
+
+      expect(result).toBeUndefined(); // Or check for a specific error message
+    });
   });
 });
