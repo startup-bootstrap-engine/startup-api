@@ -3,6 +3,7 @@ import { container, unitTestHelper } from "@providers/inversify/container";
 import { CharacterClass } from "@rpg-engine/shared";
 import { PartyCRUD } from "../PartyCRUD";
 import PartyInvitation from "../PartyInvitation";
+import { ICharacterParty } from "../PartyTypes";
 import { PartyValidator } from "../PartyValidator";
 
 describe("PartyValidator", () => {
@@ -117,7 +118,7 @@ describe("PartyValidator", () => {
   });
 
   it("should check leader in party", async () => {
-    const party = await partyInvitation.acceptInvite(characterLeader, firstMember);
+    const party = (await partyInvitation.acceptInvite(characterLeader, firstMember)) as ICharacterParty;
 
     expect(party).toBeDefined;
 

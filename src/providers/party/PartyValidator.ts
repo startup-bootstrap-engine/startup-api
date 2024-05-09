@@ -1,18 +1,17 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { CharacterParty, ICharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provide } from "inversify-binding-decorators";
 import { Types } from "mongoose";
 import { PartyCRUD } from "./PartyCRUD";
+import { ICharacterParty } from "./PartyTypes";
 
 @provide(PartyValidator)
 export class PartyValidator {
   constructor(private partyCRUD: PartyCRUD, private inMemoryHashTable: InMemoryHashTable) {}
 
-  // PARTY VALIDATIONS
   public async checkIfCharacterAndTargetOnTheSameParty(character: ICharacter, target: ICharacter): Promise<boolean> {
-    const party = await this.partyCRUD.getPartyByCharacterId(character._id);
+    const party = await this.partyCRUD.findPartyByCharacterId(character._id);
 
     if (!party) return false;
 
@@ -67,9 +66,7 @@ export class PartyValidator {
   }
 
   public async checkIfPartyHaveFreeSlots(character: ICharacter): Promise<boolean> {
-    const party = (await CharacterParty.findOne({ "leader._id": character._id })
-      .lean({ virtuals: true, defaults: true })
-      .select("maxSize size members")) as ICharacterParty;
+    const party = await this.partyCRUD.findPartyByCharacterId(character._id);
 
     if (!party) {
       return true;

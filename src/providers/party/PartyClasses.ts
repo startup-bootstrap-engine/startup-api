@@ -1,5 +1,5 @@
-import { ICharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { provide } from "inversify-binding-decorators";
+import { ICharacterParty } from "./PartyTypes";
 
 @provide(PartyClasses)
 export class PartyClasses {

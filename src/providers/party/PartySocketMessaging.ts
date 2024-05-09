@@ -1,5 +1,4 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { ICharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
   CharacterClass,
@@ -11,6 +10,7 @@ import {
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { Types } from "mongoose";
+import { ICharacterParty } from "./PartyTypes";
 
 @provide(PartySocketMessaging)
 export class PartySocketMessaging {

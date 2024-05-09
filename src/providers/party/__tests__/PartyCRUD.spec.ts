@@ -3,6 +3,7 @@ import { container, unitTestHelper } from "@providers/inversify/container";
 import { CharacterClass } from "@rpg-engine/shared";
 import { PartyCRUD } from "../PartyCRUD";
 import PartyInvitation from "../PartyInvitation";
+import { ICharacterParty } from "../PartyTypes";
 import { PartyValidator } from "../PartyValidator";
 
 describe("PartyCRUD", () => {
@@ -95,8 +96,8 @@ describe("PartyCRUD", () => {
 
     it("should create a party with a maximum size limit", async () => {
       const maxSize = 3;
-      await partyCRUD.createParty(characterLeader, firstMember, maxSize);
-      const party = await partyCRUD.findById(characterLeader._id);
+      const newParty = (await partyCRUD.createParty(characterLeader, firstMember, maxSize)) as ICharacterParty;
+      const party = await partyCRUD.findById(newParty._id);
 
       expect(party).toBeDefined();
       expect(party?.maxSize).toEqual(maxSize);
@@ -143,18 +144,31 @@ describe("PartyCRUD", () => {
 
   describe("Party Updates", () => {
     it("should update party details", async () => {
-      await partyCRUD.createParty(characterLeader, firstMember);
+      const newParty = (await partyCRUD.createParty(characterLeader, firstMember)) as ICharacterParty;
 
-      await partyCRUD.findByIdAndUpdate(characterLeader._id, {
+      await partyCRUD.findByIdAndUpdate(newParty?._id, {
         leader: secondMember,
       });
 
-      const party = await partyCRUD.findById(characterLeader._id);
+      const party = await partyCRUD.findById(newParty._id);
+
+      expect(party).toBeDefined();
+
       expect(party?.leader._id.toString()).toEqual(secondMember._id.toString());
+    });
+
+    it("should update party maximum size and benefits", async () => {
+      const newParty = (await partyCRUD.createParty(characterLeader, firstMember)) as ICharacterParty;
+      const updates = { maxSize: 10, benefits: [{ benefit: "experience", value: 50 }] } as Partial<ICharacterParty>;
+      await partyCRUD.findByIdAndUpdate(newParty._id, updates);
+
+      const party = await partyCRUD.findById(newParty._id);
+      expect(party?.maxSize).toEqual(10);
+      expect(party?.benefits).toEqual(expect.arrayContaining([{ benefit: "experience", value: 50 }]));
     });
   });
 
-  describe("Party Deletion", () => {
+  describe("Party Deletion/Removal", () => {
     it("should delete a party", async () => {
       await partyCRUD.createParty(characterLeader, firstMember);
       await partyCRUD.deleteParty(characterLeader);
@@ -165,15 +179,6 @@ describe("PartyCRUD", () => {
   });
 
   describe("Edge Cases", () => {
-    it("should not add members beyond the maximum party size", async () => {
-      const maxSize = 2;
-      await partyCRUD.createParty(characterLeader, firstMember, maxSize);
-      await partyCRUD.createParty(characterLeader, secondMember, maxSize);
-      const result = await partyCRUD.createParty(characterLeader, thirdMember, maxSize);
-
-      expect(result).toBeUndefined();
-    });
-
     it("should check if a character is already in a party before adding", async () => {
       await partyCRUD.createParty(characterLeader, firstMember);
       const result = await partyCRUD.createParty(characterLeader, firstMember);

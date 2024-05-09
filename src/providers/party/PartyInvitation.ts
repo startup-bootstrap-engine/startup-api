@@ -1,5 +1,4 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { CharacterParty, ICharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { CharacterClass, IUIShowMessage, PartySocketEvents, UISocketEvents } from "@rpg-engine/shared";
@@ -9,6 +8,7 @@ import { PartyBuff } from "./PartyBuff";
 import { PartyCRUD } from "./PartyCRUD";
 import { PartyClasses } from "./PartyClasses";
 import { PartySocketMessaging } from "./PartySocketMessaging";
+import { ICharacterParty } from "./PartyTypes";
 import { PartyValidator } from "./PartyValidator";
 
 @provide(PartyInvitation)
@@ -27,7 +27,7 @@ export default class PartyInvitation {
   // PARTY MANAGEMENT
 
   public async inviteToParty(leader: ICharacter, target: ICharacter): Promise<void> {
-    const isTargetInParty = await this.partyCRUD.getPartyByCharacterId(target._id);
+    const isTargetInParty = await this.partyCRUD.findPartyByCharacterId(target._id);
     if (isTargetInParty) {
       this.socketMessaging.sendEventToUser<IUIShowMessage>(leader.channelId!, UISocketEvents.ShowMessage, {
         message: `${target.name} already is in a party!`,
@@ -56,7 +56,7 @@ export default class PartyInvitation {
   }
 
   public async acceptInvite(leader: ICharacter, target: ICharacter): Promise<ICharacterParty | undefined> {
-    const isPartyExist = await this.partyCRUD.getPartyByCharacterId(leader._id);
+    const isPartyExist = await this.partyCRUD.findPartyByCharacterId(leader._id);
 
     const party: ICharacterParty | undefined = isPartyExist
       ? await this.addMemberToParty(leader, target)
@@ -70,7 +70,7 @@ export default class PartyInvitation {
   }
 
   private async addMemberToParty(leader: ICharacter, target: ICharacter): Promise<ICharacterParty | undefined> {
-    const targetIsInParty = await this.partyCRUD.getPartyByCharacterId(target._id);
+    const targetIsInParty = await this.partyCRUD.findPartyByCharacterId(target._id);
     if (targetIsInParty) {
       this.socketMessaging.sendEventToUser<IUIShowMessage>(leader.channelId!, UISocketEvents.ShowMessage, {
         message: `${target.name} already is in a party!`,
@@ -89,7 +89,7 @@ export default class PartyInvitation {
       return;
     }
 
-    const party = (await this.partyCRUD.getPartyByCharacterId(leader._id)) as ICharacterParty;
+    const party = (await this.partyCRUD.findPartyByCharacterId(leader._id)) as ICharacterParty;
     let isAdding = false;
     await this.partyBuff.handleAllBuffInParty(party, isAdding);
 
@@ -104,14 +104,14 @@ export default class PartyInvitation {
       this.partyClasses.getDifferentClasses(party)
     );
 
-    const updatedParty = (await CharacterParty.findByIdAndUpdate(
-      party._id,
-      {
-        members: party.members,
-        benefits,
-      },
-      { new: true }
-    )) as ICharacterParty;
+    const updatedParty = await this.partyCRUD.findByIdAndUpdate(party._id, {
+      members: party.members,
+      benefits,
+    });
+
+    if (!updatedParty) {
+      throw new Error("Error adding member to party!");
+    }
 
     isAdding = true;
     await this.partyBuff.handleAllBuffInParty(updatedParty, isAdding);

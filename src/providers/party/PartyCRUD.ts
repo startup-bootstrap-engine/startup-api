@@ -9,6 +9,8 @@ import { PartyBuff } from "./PartyBuff";
 import { PartySocketMessaging } from "./PartySocketMessaging";
 import { ICharacterParty } from "./PartyTypes";
 
+import { v4 as uuidv4 } from "uuid";
+
 @provide(PartyCRUD)
 export class PartyCRUD {
   constructor(
@@ -74,8 +76,10 @@ export class PartyCRUD {
     const finalMaxSize = typeof maxSize !== "undefined" ? Math.min(Math.max(maxSize, 2), 5) : 5;
     const benefits = this.partyBenefitsCalculator.calculatePartyBenefits(2, leader.class !== target.class ? 2 : 1);
 
+    const newPartyId = uuidv4();
+
     const newParty: ICharacterParty = {
-      _id: leader._id,
+      _id: newPartyId,
       leader: {
         _id: leader._id,
         class: leader.class as CharacterClass,
@@ -94,7 +98,7 @@ export class PartyCRUD {
     };
 
     try {
-      await this.inMemoryHashTable.set("character-party", leader._id, newParty);
+      await this.inMemoryHashTable.set("character-party", newPartyId, newParty);
       await this.inMemoryHashTable.set(
         "party-members",
         newParty._id.toString(),
@@ -125,6 +129,10 @@ export class PartyCRUD {
         return undefined;
       }
 
+      if (partyUpdate._id) {
+        delete partyUpdate._id;
+      }
+
       const updatedParty = {
         ...oldParty,
         ...partyUpdate,
@@ -149,8 +157,8 @@ export class PartyCRUD {
 
     const party = parties.find(
       (party) =>
-        party.leader._id === characterId.toString() ||
-        party.members.some((member) => member._id === characterId.toString())
+        party.leader._id.toString() === characterId.toString() ||
+        party.members.some((member) => member._id.toString() === characterId.toString())
     );
 
     return party || null;

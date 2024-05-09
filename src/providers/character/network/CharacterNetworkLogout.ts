@@ -1,10 +1,10 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { ICharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { PartyCRUD } from "@providers/party/PartyCRUD";
 import { PartyMembers } from "@providers/party/PartyMembers";
+import { ICharacterParty } from "@providers/party/PartyTypes";
 import { SkillStatsIncrease } from "@providers/skill/SkillStatsIncrease";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketConnection } from "@providers/sockets/SocketConnection";
@@ -117,7 +117,7 @@ export class CharacterNetworkLogout {
   }
 
   private async leavePartyIfExists(character: ICharacter): Promise<void> {
-    const party = (await this.partyCRUD.getPartyByCharacterId(character._id)) as ICharacterParty;
+    const party = (await this.partyCRUD.findPartyByCharacterId(character._id)) as ICharacterParty;
     if (party) {
       await this.partyMembers.removeMemberFromParty(party, character);
     }

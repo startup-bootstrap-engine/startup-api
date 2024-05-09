@@ -1,6 +1,5 @@
 import { CharacterBuff } from "@entities/ModuleCharacter/CharacterBuffModel";
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { CharacterParty, ICharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { CharacterBuffActivator } from "@providers/character/characterBuff/CharacterBuffActivator";
 import {
   BasicAttribute,
@@ -18,6 +17,7 @@ import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
 import { PartyBenefitsCalculator } from "./PartyBenefitsCalculator";
 import { PartyClasses } from "./PartyClasses";
+import { ICharacterParty } from "./PartyTypes";
 
 type BuffSkillTypes = BasicAttribute | CombatSkill | CraftingSkill | CharacterAttributes;
 
@@ -30,11 +30,7 @@ export class PartyBuff {
   ) {}
 
   // CHARACTERS BUFFS
-  public async handleAllBuffInParty(teste: ICharacterParty, isAdding: boolean): Promise<void> {
-    const party = (await CharacterParty.findById(teste._id)
-      .lean()
-      .select("_id leader members size")) as ICharacterParty;
-
+  public async handleAllBuffInParty(party: ICharacterParty, isAdding: boolean): Promise<void> {
     const differentClasses = this.partyClasses.getDifferentClasses(party);
     const { leader, members, size } = party;
 

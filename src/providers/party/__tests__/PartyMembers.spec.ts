@@ -1,10 +1,10 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { CharacterParty, ICharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { CharacterClass, UISocketEvents } from "@rpg-engine/shared";
 import { PartyCRUD } from "../PartyCRUD";
 import PartyInvitation from "../PartyInvitation";
 import { PartyMembers } from "../PartyMembers";
+import { ICharacterParty } from "../PartyTypes";
 import { PartyValidator } from "../PartyValidator";
 
 describe("PartyMembers", () => {
@@ -91,15 +91,15 @@ describe("PartyMembers", () => {
   });
 
   it("should transfer leadership without removing the old leader", async () => {
-    const party = await partyInvitation.acceptInvite(characterLeader, firstMember);
+    const party = (await partyInvitation.acceptInvite(characterLeader, firstMember)) as ICharacterParty;
 
-    expect(party).toBeDefined;
+    expect(party).toBeDefined();
 
     const success = await partyMembers.transferLeadership(party?._id, firstMember, characterLeader);
 
-    expect(success).toBeTruthy;
+    expect(success).toBeTruthy();
 
-    const updatedParty = (await CharacterParty.findById(party?._id).lean()) as ICharacterParty;
+    const updatedParty = (await partyCRUD.findById(party?._id)) as ICharacterParty;
 
     expect(partyValidator.checkIfIsLeader(updatedParty, characterLeader)).toBeFalsy();
 
@@ -110,7 +110,7 @@ describe("PartyMembers", () => {
 
   it("should transfer leadership and remove the old leader", async () => {
     await partyInvitation.acceptInvite(characterLeader, firstMember);
-    const party = await partyInvitation.acceptInvite(characterLeader, secondMember);
+    const party = (await partyInvitation.acceptInvite(characterLeader, secondMember)) as ICharacterParty;
 
     expect(party).toBeDefined;
 
@@ -121,7 +121,7 @@ describe("PartyMembers", () => {
     success = await partyMembers.leaveParty(party?._id, characterLeader, firstMember);
     expect(success).toBeTruthy;
 
-    const updatedParty = (await CharacterParty.findById(party?._id).lean()) as ICharacterParty;
+    const updatedParty = (await partyCRUD.findById(party?._id)) as ICharacterParty;
 
     expect(partyValidator.checkIfIsLeader(updatedParty, characterLeader)).toBeFalsy();
 
@@ -134,7 +134,7 @@ describe("PartyMembers", () => {
 
   it("should allow a leader to remove a member", async () => {
     await partyInvitation.acceptInvite(characterLeader, firstMember);
-    const party = await partyInvitation.acceptInvite(characterLeader, secondMember);
+    const party = (await partyInvitation.acceptInvite(characterLeader, secondMember)) as ICharacterParty;
 
     expect(party).toBeDefined;
 
@@ -142,7 +142,7 @@ describe("PartyMembers", () => {
 
     expect(success).toBeTruthy;
 
-    const updatedParty = (await CharacterParty.findById(party?._id).lean().select("leader members")) as ICharacterParty;
+    const updatedParty = (await partyCRUD.findById(party?._id)) as ICharacterParty;
 
     expect(partyValidator.checkIfInParty(updatedParty, firstMember)).toBeFalsy();
 
@@ -150,7 +150,7 @@ describe("PartyMembers", () => {
   });
 
   it("should not allow a leader to remove themselves", async () => {
-    const party = await partyInvitation.acceptInvite(characterLeader, firstMember);
+    const party = (await partyInvitation.acceptInvite(characterLeader, firstMember)) as ICharacterParty;
 
     expect(party).toBeDefined;
 
@@ -163,7 +163,7 @@ describe("PartyMembers", () => {
   });
 
   it("should allow a leader to remove themselves and close party", async () => {
-    const party = await partyInvitation.acceptInvite(characterLeader, firstMember);
+    const party = (await partyInvitation.acceptInvite(characterLeader, firstMember)) as ICharacterParty;
 
     expect(party).toBeDefined;
 
@@ -176,7 +176,7 @@ describe("PartyMembers", () => {
   });
 
   it("should not allow a leader to remove a character that's not in the party", async () => {
-    const party = await partyInvitation.acceptInvite(characterLeader, firstMember);
+    const party = (await partyInvitation.acceptInvite(characterLeader, firstMember)) as ICharacterParty;
 
     expect(party).toBeDefined;
 
@@ -190,7 +190,7 @@ describe("PartyMembers", () => {
 
   it("should allow a non-leader member to leave the party", async () => {
     await partyCRUD.createParty(characterLeader, firstMember);
-    const party = await partyInvitation.acceptInvite(characterLeader, secondMember);
+    const party = (await partyInvitation.acceptInvite(characterLeader, secondMember)) as ICharacterParty;
 
     expect(party).toBeDefined;
 
@@ -198,7 +198,7 @@ describe("PartyMembers", () => {
 
     expect(success).toBeTruthy;
 
-    const updatedParty = (await CharacterParty.findById(party?._id).lean().select("leader members")) as ICharacterParty;
+    const updatedParty = (await partyCRUD.findById(party?._id)) as ICharacterParty;
 
     expect(partyValidator.checkIfInParty(updatedParty, firstMember)).toBeFalsy();
 
@@ -207,7 +207,7 @@ describe("PartyMembers", () => {
 
   it("should not allow a non-leader member to remove other member", async () => {
     await partyCRUD.createParty(characterLeader, firstMember);
-    const party = await partyInvitation.acceptInvite(characterLeader, secondMember);
+    const party = (await partyInvitation.acceptInvite(characterLeader, secondMember)) as ICharacterParty;
 
     expect(party).toBeDefined;
 
@@ -221,7 +221,7 @@ describe("PartyMembers", () => {
   // END LEAVE PARTY TESTS
 
   it("should not allow leader to transfer leadership to a character not in the same party", async () => {
-    const party = await partyInvitation.acceptInvite(characterLeader, firstMember);
+    const party = (await partyInvitation.acceptInvite(characterLeader, firstMember)) as ICharacterParty;
 
     expect(party).toBeDefined;
 

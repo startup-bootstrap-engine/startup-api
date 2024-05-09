@@ -1,5 +1,4 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { CharacterParty, ICharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterLastAction } from "@providers/character/CharacterLastAction";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
@@ -12,6 +11,7 @@ import { PartyBuff } from "./PartyBuff";
 import { PartyCRUD } from "./PartyCRUD";
 import { PartyClasses } from "./PartyClasses";
 import { PartySocketMessaging } from "./PartySocketMessaging";
+import { ICharacterParty } from "./PartyTypes";
 import { PartyValidator } from "./PartyValidator";
 
 @provide(PartyMembers)
@@ -48,7 +48,12 @@ export class PartyMembers {
         this.partyClasses.getDifferentClasses(party)
       );
 
-      const updatedParty = (await CharacterParty.findByIdAndUpdate(party._id, party, { new: true })) as ICharacterParty;
+      const updatedParty = await this.partyCRUD.findByIdAndUpdate(party._id, party);
+
+      if (!updatedParty) {
+        return false;
+      }
+
       await this.handleBuffAfterRemovingMember(updatedParty);
 
       const message = `${character.name} has left the party!`;
@@ -86,7 +91,7 @@ export class PartyMembers {
   @TrackNewRelicTransaction()
   public async removeInactivePartyMembers(partyId: string): Promise<void> {
     try {
-      const party = await CharacterParty.findById(partyId).lean();
+      const party = await this.partyCRUD.findById(partyId);
 
       if (party) {
         const currentTime = dayjs();
@@ -124,7 +129,7 @@ export class PartyMembers {
   }
 
   public async transferLeadership(partyId: string, target: ICharacter, eventCaller: ICharacter): Promise<boolean> {
-    const party = (await CharacterParty.findById(partyId).lean().select("_id leader members")) as ICharacterParty;
+    const party = await this.partyCRUD.findById(partyId);
 
     if (!party) {
       return false;
@@ -168,7 +173,11 @@ export class PartyMembers {
       name: target.name,
     };
 
-    const updatedParty = (await CharacterParty.findByIdAndUpdate(party._id, party, { new: true })) as ICharacterParty;
+    const updatedParty = await this.partyCRUD.findByIdAndUpdate(party._id, party);
+
+    if (!updatedParty) {
+      return false;
+    }
 
     const message = `Leadership has been transferred to ${target.name}!`;
     await this.partySocketMessaging.sendMessageToAllMembers(message, updatedParty);
@@ -179,7 +188,11 @@ export class PartyMembers {
   }
 
   public async leaveParty(partyId: string, targetOfEvent: ICharacter, eventCaller: ICharacter): Promise<boolean> {
-    const party = (await CharacterParty.findById(partyId).lean().select("_id leader members")) as ICharacterParty;
+    const party = await this.partyCRUD.findById(partyId);
+
+    if (!party) {
+      throw new Error("Party not found!");
+    }
 
     const isLeader = this.partyValidator.checkIfIsLeader(party, eventCaller);
     const isSameAsTarget = this.partyValidator.checkIfIsSameTarget(targetOfEvent._id, eventCaller._id);

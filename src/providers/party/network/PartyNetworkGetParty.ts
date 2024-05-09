@@ -1,11 +1,11 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { CharacterParty, ICharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { IPartyManagementFromClient, PartySocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { PartyCRUD } from "../PartyCRUD";
 import { PartySocketMessaging } from "../PartySocketMessaging";
+import { ICharacterParty } from "../PartyTypes";
 
 @provide(PartyNetworkGetParty)
 export class PartyNetworkGetParty {
@@ -25,7 +25,7 @@ export class PartyNetworkGetParty {
           let party: ICharacterParty | null = null;
 
           if (partyId) {
-            party = (await CharacterParty.findById(partyId).lean()) as ICharacterParty;
+            party = (await this.partyCRUD.findById(partyId)) as ICharacterParty;
 
             if (party) {
               await this.partySocketMessaging.partyPayloadSend(party);
@@ -35,7 +35,7 @@ export class PartyNetworkGetParty {
 
           const characterId = leaderId || targetId || character._id;
 
-          party = (await this.partyCRUD.getPartyByCharacterId(characterId)) as ICharacterParty;
+          party = (await this.partyCRUD.findPartyByCharacterId(characterId)) as ICharacterParty;
 
           await this.partySocketMessaging.partyPayloadSend(party || null, party ? undefined : [character._id]);
         } catch (error) {

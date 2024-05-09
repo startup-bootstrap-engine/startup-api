@@ -13,6 +13,7 @@ import { PartyBenefitsCalculator } from "../PartyBenefitsCalculator";
 import { PartyCRUD } from "../PartyCRUD";
 import PartyInvitation from "../PartyInvitation";
 import { PartyMembers } from "../PartyMembers";
+import { ICharacterParty } from "../PartyTypes";
 
 describe("PartyBenefitsCalculator", () => {
   let partyBenefitsCalculator: PartyBenefitsCalculator;
@@ -117,7 +118,7 @@ describe("PartyBenefitsCalculator", () => {
   it("should calculate correct benefits for a party with 2 members", async () => {
     await partyCRUD.createParty(characterLeader, firstMember);
 
-    const party = await partyCRUD.getPartyByCharacterId(characterLeader._id);
+    const party = await partyCRUD.findPartyByCharacterId(characterLeader._id);
 
     const expectedBenefits = partyBenefitsCalculator.calculatePartyBenefits(
       2,
@@ -133,7 +134,7 @@ describe("PartyBenefitsCalculator", () => {
     // @ts-ignore
     await partyInvitation.addMemberToParty(characterLeader, secondMember);
 
-    const party = await partyCRUD.getPartyByCharacterId(characterLeader._id);
+    const party = await partyCRUD.findPartyByCharacterId(characterLeader._id);
 
     const expectedBenefits = partyBenefitsCalculator.calculatePartyBenefits(3, 3);
 
@@ -143,13 +144,13 @@ describe("PartyBenefitsCalculator", () => {
   it("should update benefits when a party member is removed", async () => {
     await partyInvitation.acceptInvite(characterLeader, firstMember);
 
-    const party = await partyInvitation.acceptInvite(characterLeader, secondMember);
+    const party = (await partyInvitation.acceptInvite(characterLeader, secondMember)) as ICharacterParty;
 
     const success = await partyMembers.leaveParty(party?._id, secondMember, secondMember);
 
     expect(success).toBeTruthy;
 
-    const updatedParty = await partyCRUD.getPartyByCharacterId(characterLeader._id);
+    const updatedParty = await partyCRUD.findPartyByCharacterId(characterLeader._id);
 
     const expectedBenefits = partyBenefitsCalculator.calculatePartyBenefits(2, 2);
 

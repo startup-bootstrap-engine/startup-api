@@ -1,5 +1,4 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { ICharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
@@ -20,6 +19,8 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { NumberFormatter } from "@providers/text/NumberFormatter";
 import { Time } from "@providers/time/Time";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
+import { ObjectId } from "mongodb";
+
 import {
   AnimationEffectKeys,
   CharacterPartyBenefits,
@@ -42,6 +43,7 @@ import { provide } from "inversify-binding-decorators";
 
 import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
 import { PartyCRUD } from "@providers/party/PartyCRUD";
+import { ICharacterParty } from "@providers/party/PartyTypes";
 import { PartyValidator } from "@providers/party/PartyValidator";
 import dayjs from "dayjs";
 import random from "lodash/random";
@@ -122,7 +124,7 @@ export class NPCExperience {
       let expRecipients: Types.ObjectId[] = [];
 
       if (record!.partyId) {
-        const party = await this.partyCRUD.getPartyByCharacterId(characterAndSkills.character._id);
+        const party = await this.partyCRUD.findPartyByCharacterId(characterAndSkills.character._id);
 
         if (!party) {
           continue;
@@ -192,7 +194,7 @@ export class NPCExperience {
         }
 
         target.xpToRelease = uniqBy(target.xpToRelease, "xpId");
-        const party = (await this.partyCRUD.getPartyByCharacterId(attacker._id)) as ICharacterParty;
+        const party = (await this.partyCRUD.findPartyByCharacterId(attacker._id)) as ICharacterParty;
         // Store the xp in the xpToRelease array
         // before adding the character to the array, check if the character already caused some damage
         if (typeof target.xpToRelease !== "undefined") {
@@ -213,7 +215,8 @@ export class NPCExperience {
             target.xpToRelease.push({
               xpId: uuidv4(),
               charId: attacker._id,
-              partyId: party ? party._id : null, // can be null if the attacker is not in a party
+              // @ts-ignore
+              partyId: party ? new ObjectId(party._id) : null,
               xp: target.xpPerDamage * damage,
             });
           }
@@ -222,7 +225,8 @@ export class NPCExperience {
             {
               xpId: uuidv4(),
               charId: attacker._id,
-              partyId: party ? party._id : null, // can be null if the attacker is not in a party
+              // @ts-ignore
+              partyId: party ? new ObjectId(party._id) : null,
               xp: target.xpPerDamage * damage,
             },
           ];
