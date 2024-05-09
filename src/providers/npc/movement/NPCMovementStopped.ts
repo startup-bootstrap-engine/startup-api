@@ -62,6 +62,7 @@ export class NPCMovementStopped {
       }
     } catch (error) {
       console.error(error);
+      throw error;
     }
   }
 }

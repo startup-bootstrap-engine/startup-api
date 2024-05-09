@@ -234,6 +234,7 @@ export class NPCMovement {
     } catch (error) {
       console.error(`❌ Error while trying to move NPC key: ${npc.key} at ${npc.x}, ${npc.y} - map ${npc.scene}`);
       console.error(error);
+      throw error;
     }
   }
 

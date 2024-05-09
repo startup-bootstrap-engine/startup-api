@@ -55,6 +55,7 @@ export class NPCNetworkDialogStop {
           }
         } catch (error) {
           console.error(error);
+          throw error;
         }
       }
     );
