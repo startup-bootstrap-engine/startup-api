@@ -274,7 +274,7 @@ export class HitTargetQueue {
     const npc = await blueprintManager.getBlueprint<any>("npcs", attacker.baseKey);
 
     if (npc?.isMagic && (npc?.attackType === EntityAttackType.MeleeRanged || EntityAttackType.Ranged)) {
-      if (!npc.skills?.magic?.level) {
+      if (!npc?.skills?.magic?.level) {
         const skills = await Skill.findOne({ owner: attacker._id }).lean();
 
         if (skills) {
@@ -282,7 +282,7 @@ export class HitTargetQueue {
         }
       }
 
-      const npcMagicLevel = npc.skills?.magic?.level ?? 15;
+      const npcMagicLevel = npc?.skills?.magic?.level ?? 15;
       const power = Math.max(15, npcMagicLevel);
 
       damageRelatedPromises.push(this.skillIncrease.increaseMagicResistanceSP(target, power));
