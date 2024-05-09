@@ -56,7 +56,7 @@ export class DynamicQueue {
     queueScaleOptions: IQueueScaleOptions = { queueScaleBy: "single" },
     addQueueOptions?: DefaultJobOptions,
     queueOptions?: QueueBaseOptions,
-    workerOptions?: QueueBaseOptions
+    workerOptions?: WorkerOptions
   ): Promise<Job | undefined> {
     try {
       const { queueScaleFactor, queueScaleBy } = queueScaleOptions;

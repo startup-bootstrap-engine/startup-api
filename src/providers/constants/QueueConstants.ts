@@ -29,3 +29,5 @@ export const QUEUE_WORKER_CONCURRENCY_SCALING_FACTOR = 0.5;
 export const QUEUE_WORKER_JOB_RATE_SCALING_FACTOR = 0.5;
 export const QUEUE_WORKER_MIN_JOB_RATE = 30; // Min jobs per second per NPC
 export const QUEUE_WORKER_MAX_JOB_RATE = 300; // Max jobs per second per NPC
+
+export const QUEUE_ACTIVE_JOB_MAX_TIMEOUT = 60 * 60 * 1000; // 1 hr
