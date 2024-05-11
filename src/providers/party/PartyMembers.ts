@@ -94,7 +94,7 @@ export class PartyMembers {
 
   private async deletePartyAndSendMessages(party: ICharacterParty, character: ICharacter): Promise<void> {
     await this.partyCRUD.deleteParty(character._id);
-    const message = "Party Deleted!";
+    const message = "Party has been disbanded!";
     await this.partySocketMessaging.sendMessageToAllMembers(message, party);
 
     await this.partySocketMessaging.partyPayloadSend(party);
