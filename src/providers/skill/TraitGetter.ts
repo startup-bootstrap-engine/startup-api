@@ -26,7 +26,12 @@ export class TraitGetter {
   @TrackNewRelicTransaction()
   public async getSkillLevelWithBuffs(skills: ISkill, skillName: SkillsAvailable): Promise<number> {
     try {
-      if (!skills.owner) {
+      if (!skills?.level) {
+        // refetch
+        skills = await Skill.findById(skills._id).lean();
+      }
+
+      if (!skills?.owner) {
         throw new Error("Skills owner is undefined");
       }
 
@@ -38,7 +43,7 @@ export class TraitGetter {
       }
 
       let totalBuffPercentages = 0;
-      const ownerStr = skills.owner.toString();
+      const ownerStr = skills.owner?.toString();
 
       const buffPromises: Promise<any>[] = [];
 

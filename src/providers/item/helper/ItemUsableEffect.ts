@@ -34,6 +34,15 @@ export class ItemUsableEffect {
         return;
       }
 
+      // sometimes target is coming here without a type for NPCs (probably due to a lean without virtuals: true). This is a workaround to fix it.
+      if (!target.type) {
+        if (target.textureKey) {
+          target.type = EntityType.NPC;
+        } else {
+          target.type = EntityType.Character;
+        }
+      }
+
       const latestTargetHealth = await this.fetchLatestHealth(target);
 
       if (target.health !== latestTargetHealth) {

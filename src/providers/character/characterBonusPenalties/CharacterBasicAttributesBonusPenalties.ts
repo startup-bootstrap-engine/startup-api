@@ -19,7 +19,7 @@ export class CharacterBasicAttributesBonusPenalties {
     let skillLevelUp: boolean = false;
     let skillSpData: IIncreaseSPResult = {
       skillLevelUp: false,
-      skillLevelBefore: skills[skillName].level,
+      skillLevelBefore: skills[skillName]?.level,
       skillLevelAfter: 0,
       skillName: "",
       skillPoints: 0,
@@ -36,7 +36,7 @@ export class CharacterBasicAttributesBonusPenalties {
         skillSpData = {
           skillLevelUp: skillLevelUp,
           skillLevelBefore: skillSpData.skillLevelBefore,
-          skillLevelAfter: skills[skillName].level,
+          skillLevelAfter: skills[skillName]?.level,
           skillName: skillName,
           skillPoints: skills[skillName].skillPoints,
         };
@@ -48,7 +48,7 @@ export class CharacterBasicAttributesBonusPenalties {
         skillLevelUp = this.skillFunctions.updateSkillByType(
           skills,
           skillName,
-          await this.skillFunctions.calculateBonusOrPenaltiesSP(bonusOrPenalties.resistance, skills[skillName].level)
+          await this.skillFunctions.calculateBonusOrPenaltiesSP(bonusOrPenalties.resistance, skills[skillName]?.level)
         );
 
         skillSpData = {
@@ -66,13 +66,13 @@ export class CharacterBasicAttributesBonusPenalties {
         skillLevelUp = this.skillFunctions.updateSkillByType(
           skills,
           skillName,
-          await this.skillFunctions.calculateBonusOrPenaltiesSP(bonusOrPenalties.dexterity, skills[skillName].level)
+          await this.skillFunctions.calculateBonusOrPenaltiesSP(bonusOrPenalties.dexterity, skills[skillName]?.level)
         );
 
         skillSpData = {
           skillLevelUp: skillLevelUp,
           skillLevelBefore: skillSpData.skillLevelBefore,
-          skillLevelAfter: skills[skillName].level,
+          skillLevelAfter: skills[skillName]?.level,
           skillName: skillName,
           skillPoints: skills[skillName].skillPoints,
         };
@@ -102,7 +102,7 @@ export class CharacterBasicAttributesBonusPenalties {
       case "magicResistance": {
         const bonusOrPenaltiesMagic = this.skillFunctions.calculateBonusOrPenaltiesMagicSP(
           bonusOrPenalties.magicResistance,
-          skills.magicResistance.level
+          skills.magicResistance?.level
         );
 
         skillLevelUp = this.skillFunctions.updateSkillByType(skills, skillName, bonusOrPenaltiesMagic);

@@ -44,6 +44,14 @@ export class BattleDamageCalculator {
       defenderSkills = (await this.getSkills(target._id)) as unknown as ISkill;
     }
 
+    if (!attackerSkills) {
+      throw new Error(`Skills not found for attacker ${attacker._id}`);
+    }
+
+    if (!defenderSkills) {
+      throw new Error(`Skills not found for defender ${target._id}`);
+    }
+
     const weapon = await this.characterWeapon.getWeapon(attacker as ICharacter);
 
     let totalPotentialAttackerDamage = await this.calculateTotalPotentialDamage(
@@ -119,15 +127,15 @@ export class BattleDamageCalculator {
     //! Disable for now NPC damage reduction
     // if (target.type === EntityType.NPC) {
     //   const [defenderResistanceLevel, defenderMagicResistanceLevel] = await Promise.all([
-    //     defenderSkills?.resistance.level,
-    //     defenderSkills?.magicResistance.level,
+    //     defenderSkills?.resistance?.level,
+    //     defenderSkills?.magicResistance?.level,
     //   ]);
 
     //   const defenseAttribute = isMagicAttack ? defenderMagicResistanceLevel : defenderResistanceLevel;
     //   damage =
     //     this.calculateDamageReduction(
     //       damage,
-    //       this.calculateCharacterRegularDefense(defenderSkills.level, defenseAttribute)
+    //       this.calculateCharacterRegularDefense(defenderSkills?.level, defenseAttribute)
     //     ) * NPC_DAMAGE_REDUCTION_RATIO;
     // }
 
@@ -162,7 +170,7 @@ export class BattleDamageCalculator {
           break;
       }
 
-      const level = defenderSkills.level * DEFENDER_LEVEL_MODIFIER;
+      const level = defenderSkills?.level * DEFENDER_LEVEL_MODIFIER;
 
       if (hasShield && defenderShieldingLevel > 1) {
         damage = this.calculateDamageReduction(
@@ -224,7 +232,7 @@ export class BattleDamageCalculator {
     if (!skillName) {
       return 0;
     }
-    return Math.floor(characterSkills[skillName].level / 2);
+    return Math.floor(characterSkills[skillName]?.level / 2);
   }
 
   private calculateExtraDamageBasedOnClass(clas: CharacterClass, calculatedDamage: number): number {
