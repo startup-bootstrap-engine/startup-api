@@ -103,20 +103,6 @@ describe("PartyValidator", () => {
     expect(areInSameParty).toBeFalsy();
   });
 
-  it("should return true when check if both characters are on same party", async () => {
-    // @ts-ignore
-    const party = await partyCRUD.createParty(characterLeader, firstMember, 2);
-
-    expect(party).toBeDefined;
-
-    const areBothOnSameParty = await partyValidator.checkIfCharacterAndTargetOnTheSameParty(
-      characterLeader,
-      firstMember
-    );
-
-    expect(areBothOnSameParty).toBe(true);
-  });
-
   it("should check leader in party", async () => {
     const party = (await partyInvitation.acceptInvite(characterLeader, firstMember)) as ICharacterParty;
 
@@ -125,5 +111,52 @@ describe("PartyValidator", () => {
     expect(partyValidator.checkIfIsLeader(party, characterLeader)).toBeTruthy();
 
     expect(partyValidator.checkIfIsLeader(party, firstMember)).toBeFalsy();
+  });
+
+  describe("PartyValidator - Edge Cases", () => {
+    it("should return true when check if both characters are on same party", async () => {
+      // @ts-ignore
+      const party = await partyCRUD.createParty(characterLeader, firstMember, 2);
+
+      expect(party).toBeDefined;
+
+      const areBothOnSameParty = await partyValidator.checkIfCharacterAndTargetOnTheSameParty(
+        characterLeader,
+        firstMember
+      );
+
+      expect(areBothOnSameParty).toBe(true);
+    });
+
+    it("should return true if one member is the leader and the other is a member in the same party", async () => {
+      await partyInvitation.acceptInvite(characterLeader, firstMember);
+      const isInSameParty = await partyValidator.checkIfCharacterAndTargetOnTheSameParty(characterLeader, firstMember);
+      expect(isInSameParty).toBe(true);
+    });
+
+    it("should return true if two members are in the same party", async () => {
+      await partyInvitation.acceptInvite(characterLeader, firstMember);
+      await partyInvitation.acceptInvite(characterLeader, secondMember);
+      const isInSameParty = await partyValidator.checkIfCharacterAndTargetOnTheSameParty(firstMember, secondMember);
+      expect(isInSameParty).toBe(true);
+    });
+
+    it("should return false if two characters are in different parties", async () => {
+      await partyInvitation.acceptInvite(characterLeader, firstMember);
+      await partyInvitation.acceptInvite(secondMember, thirdMember);
+      const isInSameParty = await partyValidator.checkIfCharacterAndTargetOnTheSameParty(firstMember, thirdMember);
+      expect(isInSameParty).toBe(false);
+    });
+
+    it("should return false if neither character is in a party", async () => {
+      const isInSameParty = await partyValidator.checkIfCharacterAndTargetOnTheSameParty(firstMember, thirdMember);
+      expect(isInSameParty).toBe(false);
+    });
+
+    it("should return false if one character is in a party and the other is not", async () => {
+      await partyInvitation.acceptInvite(characterLeader, firstMember);
+      const isInSameParty = await partyValidator.checkIfCharacterAndTargetOnTheSameParty(firstMember, thirdMember);
+      expect(isInSameParty).toBe(false);
+    });
   });
 });

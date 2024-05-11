@@ -413,43 +413,21 @@ describe("SpellArea - PVP", () => {
     // @ts-ignore
     isSamePartySpy = jest.spyOn(spellArea.partyValidator, "checkIfCharacterAndTargetOnTheSameParty");
 
-    // const party1 = new CharacterParty({
-    //   leader: {
-    //     _id: testCharacter._id,
-    //     class: CharacterClass.Druid,
-    //     name: "Test Character",
-    //   },
-    //   members: [],
-    //   maxSize: 2,
-    //   benefits: [],
-    // });
-    // await party1.save();
-
-    // const party2 = new CharacterParty({
-    //   leader: {
-    //     _id: testAnotherCharacter._id,
-    //     class: CharacterClass.Berserker,
-    //     name: "Test Another Character",
-    //   },
-    //   members: [
-    //     {
-    //       _id: testAnotherCharacter2._id,
-    //       class: CharacterClass.Berserker,
-    //       name: "Test Another Character 2",
-    //     },
-    //   ],
-    //   maxSize: 2,
-    //   benefits: [],
-    // });
-    // await party2.save();
-
     await partyCRUD.createParty(testCharacter, testAnotherCharacter, 2);
     await partyCRUD.createParty(testAnotherCharacter, testAnotherCharacter2, 2);
 
     await spellArea.cast(testCharacter, testAnotherCharacter, MagicPower.High, testSpellAreaOptions);
 
     expect(isSamePartySpy).toHaveBeenCalled();
-    const returnValue = await isSamePartySpy.mock.results[0].value;
-    expect(returnValue).toBe(false);
+
+    // second isSamePartySpy should be false
+
+    const firstValue = await isSamePartySpy.mock.results[0].value;
+    expect(firstValue).toBe(true);
+
+    const secondValue = await isSamePartySpy.mock.results[1].value;
+    expect(secondValue).toBe(false);
+
+    expect(isSamePartySpy).toHaveBeenCalledTimes(2);
   });
 });

@@ -1,6 +1,5 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provide } from "inversify-binding-decorators";
 import { Types } from "mongoose";
 import { PartyCRUD } from "./PartyCRUD";
@@ -8,16 +7,18 @@ import { ICharacterParty } from "./PartyTypes";
 
 @provide(PartyValidator)
 export class PartyValidator {
-  constructor(private partyCRUD: PartyCRUD, private inMemoryHashTable: InMemoryHashTable) {}
+  constructor(private partyCRUD: PartyCRUD) {}
 
   public async checkIfCharacterAndTargetOnTheSameParty(character: ICharacter, target: ICharacter): Promise<boolean> {
     const party = await this.partyCRUD.findPartyByCharacterId(character._id);
 
     if (!party) return false;
 
-    const theyAreInSameParty = party.members.some((member) => member._id.toString() === target._id.toString());
+    const theyAreInSameParty =
+      party.members.some((member) => member._id.toString() === target._id.toString()) ||
+      party.leader.toString() === target._id.toString();
 
-    return theyAreInSameParty || false;
+    return theyAreInSameParty;
   }
 
   public checkIfIsLeader(party: ICharacterParty, eventCaller: ICharacter): boolean {
