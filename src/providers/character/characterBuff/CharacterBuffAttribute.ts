@@ -80,7 +80,7 @@ export class CharacterBuffAttribute {
     const hasDeletedBuff = await this.characterBuffTracker.deleteBuff(character, buff._id!);
 
     if (!hasDeletedBuff) {
-      throw new Error("Could not delete buff from character");
+      throw new Error(`Could not delete buff from character ${character._id} - ${buff._id}`);
     }
 
     await Character.updateOne(

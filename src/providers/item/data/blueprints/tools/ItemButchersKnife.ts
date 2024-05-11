@@ -49,7 +49,7 @@ export const itemButchersKnife: IToolItemBlueprint = {
   ) => {
     const useWithItemToEntity = container.get<UseWithItemToEntity>(UseWithItemToEntity);
     const socketMessaging = container.get<SocketMessaging>(SocketMessaging);
-    const rarityOfTool = originItem.rarity ?? ItemRarities.Common;
+    const rarityOfTool = originItem?.rarity ?? ItemRarities.Common;
 
     const targetEntity =
       (await NPC.findOne({ _id: targetItem.bodyFromId })) || (await Character.findOne({ _id: targetItem.bodyFromId }));

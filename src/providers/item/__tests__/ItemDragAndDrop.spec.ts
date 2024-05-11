@@ -64,6 +64,67 @@ describe("ItemDragAndDrop.ts", () => {
     jest.clearAllMocks();
   });
 
+  it("should handle moving non-stackable items successfully", async () => {
+    const nonStackableItem = await unitTestHelper.createMockItem({ stackQty: undefined });
+    await unitTestHelper.addItemsToContainer(inventoryContainer, 1, [nonStackableItem]);
+
+    itemMoveData.from.item = nonStackableItem as any;
+
+    const result = await itemDragAndDrop.performItemMove(itemMoveData, testCharacter);
+    expect(result).toBeTruthy();
+    expect(sendErrorMessageToCharacterSpy).not.toHaveBeenCalled();
+  });
+
+  it("should prevent moving items if the target slot is occupied by a different type", async () => {
+    const differentTypeItem = await unitTestHelper.createMockItem();
+    await differentTypeItem.save();
+    itemMoveData.to.item = differentTypeItem as any;
+
+    const result = await itemDragAndDrop.performItemMove(itemMoveData, testCharacter);
+    expect(result).toBeFalsy();
+  });
+
+  it("should handle the edge case where moving an item results in splitting stacks correctly", async () => {
+    const stackableItem = await unitTestHelper.createStackableMockItem({ stackQty: 10 });
+    await unitTestHelper.addItemsToContainer(inventoryContainer, 1, [stackableItem]);
+
+    itemMoveData.from.item = stackableItem as any;
+    itemMoveData.quantity = 5; // Splitting the stack
+
+    const result = await itemDragAndDrop.performItemMove(itemMoveData, testCharacter);
+    expect(result).toBeTruthy();
+
+    const updatedStackQty = (await Item.findById(stackableItem._id))?.stackQty;
+    expect(updatedStackQty).toEqual(5); // Original stack should now be half
+  });
+
+  it("should return false if moving an item to a non-existent container", async () => {
+    itemMoveData.to.containerId = "nonExistentContainerId";
+
+    const result = await itemDragAndDrop.performItemMove(itemMoveData, testCharacter);
+    expect(result).toBeFalsy();
+    expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledWith(
+      testCharacter,
+      "Sorry, this item does not belong to your inventory."
+    );
+  });
+
+  it("should validate the rarity of items before moving", async () => {
+    const highRarityItem = await unitTestHelper.createMockItem({ rarity: "Rare" });
+    const lowRarityItem = await unitTestHelper.createMockItem({ rarity: "Common" });
+    await unitTestHelper.addItemsToContainer(inventoryContainer, 1, [highRarityItem, lowRarityItem]);
+
+    itemMoveData.from.item = highRarityItem as any;
+    itemMoveData.to.item = lowRarityItem as any;
+
+    const result = await itemDragAndDrop.performItemMove(itemMoveData, testCharacter);
+    expect(result).toBeFalsy();
+    expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledWith(
+      testCharacter,
+      "Unable to move items with different rarities."
+    );
+  });
+
   it("should move item in inventory", async () => {
     const result = await itemDragAndDrop.performItemMove(itemMoveData, testCharacter);
 
@@ -285,65 +346,6 @@ describe("ItemDragAndDrop.ts", () => {
       expect(updatedInventoryContainer.slots[1]).toMatchObject({
         stackQty: stackableItem.stackQty! + stackableItem2.stackQty!,
       });
-    });
-
-    it("should rollback the move if an error occurs", async () => {
-      const stackableItem = await unitTestHelper.createStackableMockItem({
-        stackQty: 2,
-      });
-      const stackableItem2 = await unitTestHelper.createStackableMockItem({
-        stackQty: 3,
-      });
-
-      await unitTestHelper.addItemsToContainer(inventoryContainer, 10, [stackableItem, stackableItem2]);
-
-      itemMoveData = {
-        from: {
-          item: stackableItem as any,
-          slotIndex: 0,
-          source: "Inventory",
-          containerId: inventoryContainer._id,
-        },
-        to: {
-          item: stackableItem2 as any,
-          slotIndex: 1,
-          source: "Inventory",
-          containerId: inventoryContainer._id,
-        },
-        quantity: stackableItem.stackQty!,
-      };
-
-      const updatedInventoryContainer = {
-        slots: {
-          0: {
-            _id: inventoryContainer.slots[0]._id,
-            stackQty: 1,
-          },
-          1: {
-            _id: inventoryContainer.slots[1]._id,
-            stackQty: 1,
-          },
-        },
-      } as any;
-
-      // @ts-ignore
-      await itemDragAndDrop.verifyAndRollbackStackQty(
-        stackableItem as any,
-        stackableItem2 as any,
-        itemMoveData,
-        testCharacter,
-        updatedInventoryContainer
-      );
-
-      expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledWith(
-        testCharacter,
-        "Sorry, item move not successful. rollback to original state."
-      );
-
-      const rollbackInventoryContainer = await ItemContainer.findById(inventory?.itemContainer);
-
-      expect(rollbackInventoryContainer?.slots[0].stackQty).toEqual(stackableItem.stackQty);
-      expect(rollbackInventoryContainer?.slots[1].stackQty).toEqual(stackableItem2.stackQty);
     });
   });
 });

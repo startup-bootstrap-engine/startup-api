@@ -89,6 +89,7 @@ export class NPCNetworkDialogStart {
           }
         } catch (error) {
           console.error(error);
+          throw error;
         }
       }
     );

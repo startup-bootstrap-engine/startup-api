@@ -78,6 +78,7 @@ export class NPCMovementMoveTowards {
       await this.execStartMoveTowardsMovement(npc, targetCharacter);
     } catch (error) {
       console.error(error);
+      throw error;
     } finally {
       await this.locker.unlock(`movement-move-towards-${npc._id}`);
     }
@@ -335,6 +336,7 @@ export class NPCMovementMoveTowards {
       }
     } catch (error) {
       console.error(error);
+      throw error;
     }
   }
 }

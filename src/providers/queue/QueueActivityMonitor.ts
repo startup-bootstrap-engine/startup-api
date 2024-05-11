@@ -56,41 +56,45 @@ export class QueueActivityMonitor {
     );
 
     for (const [queueName, lastActivity] of Object.entries(queues)) {
-      const now = dayjs();
-      const lastActivityDate = dayjs(Number(lastActivity));
-
-      if (now.diff(lastActivityDate, "millisecond") > QUEUE_INACTIVITY_THRESHOLD_MS) {
-        if (!this.connection) {
-          this.connection = await this.redisManager.getPoolClient("queue-activity-monitor");
-        }
-
-        const queue = new Queue(queueName, {
-          connection: this.connection,
-        });
-
-        try {
-          // Check for active jobs
-          const activeJobs = await queue.getActive();
-          if (activeJobs.length > 0) {
-            for (const job of activeJobs) {
-              let tries = 0;
-              while (tries < QUEUE_CLOSE_CHECK_MAX_TRIES && (await job.getState()) === "active") {
-                // Wait for 1 second before checking the job state again
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-                tries++;
-              }
-            }
-          }
-
-          await this.deleteQueueActivity(queueName); // Remove the queue from the centralized store
-        } catch (error) {
-          console.error(`Failed to remove inactive queue: ${queueName}`, error);
-        }
-      }
+      await this.shutdownInactiveQueue(queueName, lastActivity);
     }
 
     await this.redisManager.releasePoolClient(this.connection!);
 
     this.connection = null;
+  }
+
+  private async shutdownInactiveQueue(queueName: string, lastActivity: string): Promise<void> {
+    const now = dayjs();
+    const lastActivityDate = dayjs(Number(lastActivity));
+
+    if (now.diff(lastActivityDate, "millisecond") > QUEUE_INACTIVITY_THRESHOLD_MS) {
+      if (!this.connection) {
+        this.connection = await this.redisManager.getPoolClient("queue-activity-monitor");
+      }
+
+      const queue = new Queue(queueName, {
+        connection: this.connection,
+      });
+
+      try {
+        // Check for active jobs
+        const activeJobs = await queue.getActive();
+        if (activeJobs.length > 0) {
+          for (const job of activeJobs) {
+            let tries = 0;
+            while (tries < QUEUE_CLOSE_CHECK_MAX_TRIES && (await job.getState()) === "active") {
+              // Wait for 1 second before checking the job state again
+              await new Promise((resolve) => setTimeout(resolve, 1000));
+              tries++;
+            }
+          }
+        }
+
+        await this.deleteQueueActivity(queueName); // Remove the queue from the centralized store
+      } catch (error) {
+        console.error(`Failed to remove inactive queue: ${queueName}`, error);
+      }
+    }
   }
 }
