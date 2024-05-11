@@ -1,5 +1,5 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
+import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { DiscordBot } from "@providers/discord/DiscordBot";
 import { SkillFunctions } from "@providers/skill/SkillFunctions";
@@ -16,6 +16,10 @@ export class CharacterBasicAttributesBonusPenalties {
     skillName: string,
     bonusOrPenalties: IBasicAttributesBonusAndPenalties
   ): Promise<IIncreaseSPResult> {
+    if (!skills[skillName]?.level) {
+      skills = (await Skill.findById(skills._id).lean()) as ISkill;
+    }
+
     let skillLevelUp: boolean = false;
     let skillSpData: IIncreaseSPResult = {
       skillLevelUp: false,

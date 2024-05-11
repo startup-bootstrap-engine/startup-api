@@ -236,20 +236,6 @@ export class EquipmentEquip {
 
       await this.characterItemBuff.enableItemBuff(character, item);
 
-      const INCREASE_VALUE = 2;
-      const Accessory = await Item.findById(equipmentSlots.accessory);
-
-      if (
-        item.subType === ItemSubType.Book ||
-        (item.type === ItemType.Weapon && Accessory?.subType === ItemSubType.Book)
-      ) {
-        const handItemsIds = [equipment.leftHand, equipment.rightHand];
-        await Item.updateMany(
-          { _id: { $in: handItemsIds }, type: ItemType.Weapon },
-          { $inc: { attack: INCREASE_VALUE, defense: INCREASE_VALUE } }
-        );
-      }
-
       const newEquipmentSlots = await this.equipmentSlots.getEquipmentSlots(character._id, equipment._id);
 
       this.socketMessaging.sendEventToUser(character.channelId!, ItemSocketEvents.EquipmentAndInventoryUpdate, {
