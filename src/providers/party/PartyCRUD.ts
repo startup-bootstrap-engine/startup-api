@@ -57,11 +57,6 @@ export class PartyCRUD {
         existingParty.size = existingParty.members.length;
 
         await this.inMemoryHashTable.set("character-party", leader._id, existingParty);
-        await this.inMemoryHashTable.set(
-          "party-members",
-          existingParty._id.toString(),
-          existingParty.members.map((member) => member._id)
-        );
 
         const message = `${target.name} joined the party!`;
         await this.partySocketMessaging.sendMessageToAllMembers(message, existingParty);
@@ -99,11 +94,6 @@ export class PartyCRUD {
 
     try {
       await this.inMemoryHashTable.set("character-party", newPartyId, newParty);
-      await this.inMemoryHashTable.set(
-        "party-members",
-        newParty._id.toString(),
-        newParty.members.map((member) => member._id)
-      );
 
       const message = `${target.name} joined the party!`;
       await this.partySocketMessaging.sendMessageToAllMembers(message, newParty);
@@ -181,8 +171,6 @@ export class PartyCRUD {
     const updatedParty = (await this.inMemoryHashTable.get("character-party", character._id)) as ICharacterParty;
 
     await this.partySocketMessaging.partyPayloadSend(updatedParty);
-
-    await this.inMemoryHashTable.delete("party-members", updatedParty?._id.toString());
   }
 
   public async clearAllParties(): Promise<void> {
@@ -201,7 +189,5 @@ export class PartyCRUD {
     });
 
     await Promise.all(removeTasks);
-
-    await this.inMemoryHashTable.deleteAll("party-members");
   }
 }

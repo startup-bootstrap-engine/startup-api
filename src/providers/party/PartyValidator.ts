@@ -15,8 +15,7 @@ export class PartyValidator {
 
     if (!party) return false;
 
-    const partyMembers = (await this.inMemoryHashTable.get("party-members", party._id.toString())) as string[];
-    const theyAreInSameParty = partyMembers?.includes(target._id.toString());
+    const theyAreInSameParty = party.members.some((member) => member._id.toString() === target._id.toString());
 
     return theyAreInSameParty || false;
   }

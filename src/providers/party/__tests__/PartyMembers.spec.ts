@@ -173,6 +173,14 @@ describe("PartyMembers", () => {
       `Leadership has been transferred to ${firstMember.name}!`,
       expect.anything()
     );
+
+    const success = await partyMembers.leaveParty(party?._id, characterLeader, firstMember);
+
+    expect(success).toBeTruthy();
+
+    const updatedParty = (await partyCRUD.findById(party?._id)) as ICharacterParty;
+
+    expect(updatedParty).toBeFalsy();
   });
 
   it("should not allow a leader to remove a character that's not in the party", async () => {
@@ -232,6 +240,32 @@ describe("PartyMembers", () => {
     expect(sendEventToUser).toHaveBeenCalledWith(characterLeader.channelId!, UISocketEvents.ShowMessage, {
       message: `${secondMember.name} is not in your party!`,
       type: "info",
+    });
+  });
+
+  describe("Edge cases", () => {
+    it("If a member that's a leader leaves the party, he should transfer the leadership before leaving", async () => {
+      // @ts-ignore
+      const transferLeadershipSpy = jest.spyOn(partyMembers, "transferLeadership");
+
+      (await partyInvitation.acceptInvite(characterLeader, firstMember)) as ICharacterParty;
+      const party = (await partyInvitation.acceptInvite(characterLeader, secondMember)) as ICharacterParty;
+
+      expect(party).toBeTruthy();
+
+      const result = await partyMembers.removeMemberFromParty(party, characterLeader);
+
+      expect(result).toBeTruthy();
+
+      expect(transferLeadershipSpy).toHaveBeenCalled();
+
+      const updatedParty = await partyCRUD.findById(party._id);
+
+      expect(updatedParty).toBeTruthy();
+
+      expect(updatedParty?.leader._id.toString()).toStrictEqual(firstMember._id.toString());
+
+      expect(updatedParty?.members).toHaveLength(1);
     });
   });
 });

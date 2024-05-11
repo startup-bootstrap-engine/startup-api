@@ -1,10 +1,8 @@
-import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { CharacterLastAction } from "@providers/character/CharacterLastAction";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { CharacterClass, IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
-import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 import { PartyBenefitsCalculator } from "./PartyBenefitsCalculator";
 import { PartyBuff } from "./PartyBuff";
@@ -30,15 +28,31 @@ export class PartyMembers {
 
   public async removeMemberFromParty(party: ICharacterParty, character: ICharacter): Promise<boolean> {
     if (!party) {
-      return false;
+      throw new Error("Party not found!");
     }
 
     try {
-      await this.handleBuffBeforeRemovingMember(party);
-      party.members = party.members.filter((member) => member._id.toString() !== character._id.toString());
-      const updatedMembers = party.members;
+      let message = `${character.name} has left the party!`;
 
-      if (updatedMembers.length === 0) {
+      // check if member is a party leader. If so, transfer leadership before removing him
+      const isLeader = this.partyValidator.checkIfIsLeader(party, character);
+
+      if (isLeader) {
+        const memberToTransferTo = await Character.findById(party.members[0]._id);
+
+        if (memberToTransferTo) {
+          message = `${character.name} has left the party! Leadership has been transferred to ${memberToTransferTo.name}!`;
+          await this.transferLeadership(party._id, memberToTransferTo, character);
+        }
+      }
+
+      party = (await this.partyCRUD.findById(party._id)) as ICharacterParty;
+
+      await this.handleBuffBeforeRemovingMember(party);
+
+      party.members = party.members.filter((member) => member._id.toString() !== character._id.toString());
+
+      if (party.members.length === 0) {
         await this.deletePartyAndSendMessages(party, character);
         return true;
       }
@@ -56,20 +70,15 @@ export class PartyMembers {
 
       await this.handleBuffAfterRemovingMember(updatedParty);
 
-      const message = `${character.name} has left the party!`;
       await this.partySocketMessaging.sendMessageToAllMembers(message, updatedParty);
-      await this.partySocketMessaging.partyPayloadSend(updatedParty);
-      await this.partySocketMessaging.partyPayloadSend(null, [character._id]);
 
-      await this.inMemoryHashTable.set(
-        "party-members",
-        updatedParty._id.toString(),
-        updatedParty.members.map((member) => member._id)
-      );
+      await this.partySocketMessaging.partyPayloadSend(updatedParty);
+
+      await this.partySocketMessaging.partyPayloadSend(null, [character._id]);
 
       return true;
     } catch (error) {
-      console.error(error);
+      console.error("Error while removing member from party:", error);
       return false;
     }
   }
@@ -86,46 +95,6 @@ export class PartyMembers {
     await this.partyCRUD.deleteParty(character._id);
     const message = "Party Deleted!";
     await this.partySocketMessaging.sendMessageToAllMembers(message, party);
-  }
-
-  @TrackNewRelicTransaction()
-  public async removeInactivePartyMembers(partyId: string): Promise<void> {
-    try {
-      const party = await this.partyCRUD.findById(partyId);
-
-      if (party) {
-        const currentTime = dayjs();
-        const INACTIVITY_LIMIT_MS = 180000;
-
-        const inactiveMembers: ICharacter[] = [];
-
-        for (const member of party.members) {
-          const lastAction = await this.characterLastAction.getLastAction(member._id as string);
-          if (!lastAction || currentTime.diff(dayjs(lastAction), "milliseconds") > INACTIVITY_LIMIT_MS) {
-            inactiveMembers.push(member as ICharacter);
-          }
-        }
-
-        for (const inactiveMember of inactiveMembers) {
-          const removed = await this.removeMemberFromParty(party as ICharacterParty, inactiveMember as ICharacter);
-
-          if (removed) {
-            this.socketMessaging.sendEventToUser<IUIShowMessage>(
-              (inactiveMember as ICharacter).channelId!,
-              UISocketEvents.ShowMessage,
-              {
-                message: "You were removed from the party due to inactivity",
-                type: "info",
-              }
-            );
-          }
-        }
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(error.message);
-      }
-    }
   }
 
   public async transferLeadership(partyId: string, target: ICharacter, eventCaller: ICharacter): Promise<boolean> {

@@ -119,10 +119,6 @@ export default class PartyInvitation {
     const message = `${target.name} joined the party!`;
     await this.partySocketMessaging.sendMessageToAllMembers(message, updatedParty);
 
-    const partyMembers = updatedParty.members.map((member) => member._id.toString());
-
-    await this.inMemoryHashTable.set("party-members", updatedParty._id.toString(), partyMembers);
-
     return updatedParty;
   }
 

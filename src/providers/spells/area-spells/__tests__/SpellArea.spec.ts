@@ -4,7 +4,7 @@ import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { SPELL_AREA_MEDIUM_BLAST_RADIUS } from "@providers/constants/SpellConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { entityEffectBurning } from "@providers/entityEffects/data/blueprints/entityEffectBurning";
-import { container, inMemoryHashTable, unitTestHelper } from "@providers/inversify/container";
+import { container, unitTestHelper } from "@providers/inversify/container";
 import { FriendlyNPCsBlueprint, HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { PartyCRUD } from "@providers/party/PartyCRUD";
 import { ICharacterParty } from "@providers/party/PartyTypes";
@@ -397,33 +397,9 @@ describe("SpellArea - PVP", () => {
     // @ts-ignore
     isSamePartySpy = jest.spyOn(spellArea.partyValidator, "checkIfCharacterAndTargetOnTheSameParty");
 
-    // const party = new CharacterParty({
-    //   leader: {
-    //     _id: testCharacter._id,
-    //     class: CharacterClass.Druid,
-    //     name: "Test Character",
-    //   },
-    //   members: [
-    //     {
-    //       _id: testAnotherCharacter._id,
-    //       class: CharacterClass.Berserker,
-    //       name: "Test Another Character",
-    //     },
-    //     {
-    //       _id: testAnotherCharacter2._id,
-    //       class: CharacterClass.Berserker,
-    //       name: "Test Another Character 2",
-    //     },
-    //   ],
-    //   maxSize: 2,
-    //   benefits: [],
-    // });
-    // await party.save();
-
     const party = (await partyCRUD.createParty(testCharacter, testAnotherCharacter, 2)) as ICharacterParty;
 
-    //! Ideally, party members should be fully stored on redis. Meanwhile, this ugly hack is necessary.
-    await inMemoryHashTable.set("party-members", party._id.toString(), [testCharacter._id, testAnotherCharacter._id]);
+    expect(party).toBeTruthy();
 
     const result = await spellArea.cast(testCharacter, testAnotherCharacter, MagicPower.High, testSpellAreaOptions);
 
