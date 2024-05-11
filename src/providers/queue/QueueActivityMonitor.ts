@@ -1,9 +1,5 @@
 import { NewRelic } from "@providers/analytics/NewRelic";
-import {
-  QUEUE_ACTIVE_JOB_MAX_TIMEOUT,
-  QUEUE_CLOSE_CHECK_MAX_TRIES,
-  QUEUE_INACTIVITY_THRESHOLD_MS,
-} from "@providers/constants/QueueConstants";
+import { QUEUE_CLOSE_CHECK_MAX_TRIES, QUEUE_INACTIVITY_THRESHOLD_MS } from "@providers/constants/QueueConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
@@ -61,8 +57,6 @@ export class QueueActivityMonitor {
 
     for (const [queueName, lastActivity] of Object.entries(queues)) {
       await this.shutdownInactiveQueue(queueName, lastActivity);
-
-      await this.cleanJobsStuckOnActiveState(queueName, QUEUE_ACTIVE_JOB_MAX_TIMEOUT);
     }
 
     await this.redisManager.releasePoolClient(this.connection!);
@@ -102,32 +96,5 @@ export class QueueActivityMonitor {
         console.error(`Failed to remove inactive queue: ${queueName}`, error);
       }
     }
-  }
-
-  private async cleanJobsStuckOnActiveState(queueName: string, maxActiveDuration: number): Promise<void> {
-    if (!this.connection) {
-      this.connection = await this.redisManager.getPoolClient("queue-activity-monitor");
-    }
-
-    const queue = new Queue(queueName, {
-      connection: this.connection,
-    });
-
-    // Get active jobs
-    const activeJobs = await queue.getActive();
-
-    for (const job of activeJobs) {
-      const now = Date.now();
-      const jobActiveDuration = now - job.processedOn!;
-
-      if (jobActiveDuration > maxActiveDuration) {
-        // If job is active for too long, fail it
-        await job.moveToFailed(new Error("Job active for too long"), `job-${job.id}-stuck`);
-      }
-    }
-
-    await this.redisManager.releasePoolClient(this.connection!);
-
-    this.connection = null;
   }
 }

@@ -11,7 +11,7 @@ import { CharacterItems } from "@providers/character/characterItems/CharacterIte
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { ItemOwnership } from "@providers/item/ItemOwnership";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { IEquipmentSet, ItemSocketEvents, ItemSubType, ItemType } from "@rpg-engine/shared";
+import { ItemSocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
 import { EquipmentSlots } from "./EquipmentSlots";
@@ -66,10 +66,6 @@ export class EquipmentUnequip {
       );
 
       const bookValue = 2;
-      const Accessory = await Item.findById(equipmentSlots.accessory);
-      if (item.type === ItemType.Weapon && Accessory?.subType === ItemSubType.Book) {
-        await Item.updateOne({ _id: item._id }, { $inc: { attack: -bookValue, defense: -bookValue } });
-      }
 
       const updatedItem = (await Item.findById(item._id)) || item;
 
@@ -96,8 +92,6 @@ export class EquipmentUnequip {
       });
 
       await Item.updateOne({ _id: item._id }, { isEquipped: false });
-
-      await this.handleBookEffect(item, equipmentSlots, bookValue);
 
       const newEquipmentSlots = await this.equipmentSlots.getEquipmentSlots(
         character._id,
@@ -176,20 +170,6 @@ export class EquipmentUnequip {
     await clearCacheForKey(`characterBuffs_${character._id}`);
     await clearCacheForKey(`${character._id}-skills`);
     await this.inMemoryHashTable.delete("skills-with-buff", character._id);
-  }
-
-  private async handleBookEffect(item: IItem, equipmentSlots: IEquipmentSet, bookValue: number): Promise<void> {
-    // decrease attack and defense
-    if (item.subType === ItemSubType.Book) {
-      const leftHandItem = await Item.findById(equipmentSlots.leftHand);
-      const rightHandItem = await Item.findById(equipmentSlots.rightHand);
-      if (leftHandItem?.type === ItemType.Weapon) {
-        await Item.updateOne({ _id: leftHandItem._id }, { $inc: { attack: -bookValue, defense: -bookValue } });
-      }
-      if (rightHandItem?.type === ItemType.Weapon) {
-        await Item.updateOne({ _id: rightHandItem._id }, { $inc: { attack: -bookValue, defense: -bookValue } });
-      }
-    }
   }
 
   private async isUnequipValid(character: ICharacter, item: IItem, inventoryContainerId: string): Promise<boolean> {

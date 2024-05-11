@@ -214,51 +214,6 @@ describe("EquipmentEquip.spec.ts", () => {
     expect(updatedInventory?.slots[1]._id).toEqual(spearItem2._id);
   });
 
-  describe("Weapon Attack and Defense increase", () => {
-    const INCREASE_VALUE = 2;
-
-    beforeEach(async () => {
-      inventoryContainer.slots[0] = daggerItem;
-      inventoryContainer.slots[1] = bookitem;
-      inventoryContainer.markModified("slots");
-      await inventoryContainer.save();
-
-      testCharacter = (await Character.findByIdAndUpdate(
-        testCharacter._id,
-        { class: CharacterClass.Sorcerer },
-        { new: true }
-      )) as ICharacter;
-    });
-
-    it("should increase the attack and defense values of weapon if Book is equipped", async () => {
-      const equipOneHand = await equipmentEquip.equip(testCharacter, daggerItem._id, inventoryContainer.id);
-      expect(equipOneHand).toBeTruthy();
-
-      const accessory = await equipmentEquip.equip(testCharacter, bookitem._id, inventoryContainer.id);
-      expect(accessory).toBeTruthy();
-
-      const updatedDagger = await Item.findById(daggerItem._id);
-      // @ts-ignore
-      expect(updatedDagger?.attack).toBe(daggerItem.attack + INCREASE_VALUE);
-      // @ts-ignore
-      expect(updatedDagger?.defense).toBe(daggerItem.defense + INCREASE_VALUE);
-    });
-
-    it("should increase the attack and defense values if Book is equipped already", async () => {
-      const accessory = await equipmentEquip.equip(testCharacter, bookitem._id, inventoryContainer.id);
-      expect(accessory).toBeTruthy();
-
-      const equipOneHand = await equipmentEquip.equip(testCharacter, daggerItem._id, inventoryContainer.id);
-      expect(equipOneHand).toBeTruthy();
-
-      const updatedDagger = await Item.findById(daggerItem._id);
-      // @ts-ignore
-      expect(updatedDagger?.attack).toBe(daggerItem.attack + INCREASE_VALUE);
-      // @ts-ignore
-      expect(updatedDagger?.defense).toBe(daggerItem.defense + INCREASE_VALUE);
-    });
-  });
-
   describe("Min level and skill requirements", () => {
     let minRequiredLevelSkillDagger: IItem; // a dagger with minimum level and skill requirements
 

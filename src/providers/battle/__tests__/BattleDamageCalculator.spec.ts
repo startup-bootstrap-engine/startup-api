@@ -157,7 +157,7 @@ describe("BattleDamageCalculator.spec.ts", () => {
       // @ts-ignore
       spyDamageReduction = jest.spyOn(battleDamageCalculator, "calculateDamageReduction");
 
-      attacker = await unitTestHelper.createMockNPC();
+      attacker = await unitTestHelper.createMockNPC(null, { hasSkills: true });
 
       defender = await unitTestHelper.createMockCharacter(null, { hasSkills: true });
 
@@ -254,7 +254,7 @@ describe("BattleDamageCalculator.spec.ts", () => {
     let attacker: ICharacter;
     let defender: ICharacter;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       // @ts-ignore
       jest.spyOn(battleDamageCalculator.characterWeapon, "getWeapon" as any).mockImplementation(() => {
         return null;
@@ -278,15 +278,21 @@ describe("BattleDamageCalculator.spec.ts", () => {
         // @ts-ignore
         .mockImplementation((meanDamage, stdDeviation) => meanDamage + stdDeviation);
 
-      attacker = {
-        class: CharacterClass.Rogue,
-        type: EntityType.Character,
-      } as unknown as ICharacter;
+      attacker = await unitTestHelper.createMockCharacter(
+        {
+          class: CharacterClass.Rogue,
+          type: EntityType.Character,
+        },
+        { hasSkills: true }
+      );
 
-      defender = {
-        type: EntityType.Character,
-        health: 200,
-      } as unknown as ICharacter;
+      defender = await unitTestHelper.createMockCharacter(
+        {
+          type: EntityType.Character,
+          health: 200,
+        },
+        { hasSkills: true }
+      );
     });
 
     afterEach(() => {
@@ -298,15 +304,16 @@ describe("BattleDamageCalculator.spec.ts", () => {
       expect(damage).toBe(94);
     });
 
-    it("attack damage should not be increased if attacker is not rouge", async () => {
+    it("attack damage should not be increased if attacker is not a Rogue", async () => {
       attacker.class = CharacterClass.Berserker;
       const damage = await battleDamageCalculator.calculateHitDamage(attacker, defender, false);
       expect(damage).toBe(85);
     });
 
     it("attack damage should not be increased if battle is not pvp", async () => {
-      defender.type = EntityType.NPC;
-      const damage = await battleDamageCalculator.calculateHitDamage(attacker, defender, false);
+      const defenderNPC = await unitTestHelper.createMockNPC(null, { hasSkills: true });
+
+      const damage = await battleDamageCalculator.calculateHitDamage(attacker, defenderNPC, false);
       expect(damage).toBeCloseTo(85);
     });
   });

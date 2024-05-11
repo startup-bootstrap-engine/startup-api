@@ -173,13 +173,20 @@ export class DynamicQueue {
       worker = new Worker(
         queueName,
         async (job) => {
-          await this.queueActivityMonitor.updateQueueActivity(queueName);
+          try {
+            await this.queueActivityMonitor.updateQueueActivity(queueName);
 
-          return await jobFn(job);
+            return await jobFn(job);
+          } catch (error) {
+            console.error(error);
+            throw error; // rethrow the error to be caught by the worker
+          }
         },
         {
           name: `${queueName}-worker`,
           concurrency: maxWorkerConcurrency,
+          lockDuration: 60000,
+          lockRenewTime: 30000,
           limiter: {
             max: maxWorkerLimiter,
             duration: QUEUE_GLOBAL_WORKER_LIMITER_DURATION,
