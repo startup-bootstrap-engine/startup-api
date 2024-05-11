@@ -54,6 +54,7 @@ export class PartyMembers {
 
       if (party.members.length === 0) {
         await this.deletePartyAndSendMessages(party, character);
+
         return true;
       }
 
@@ -74,7 +75,7 @@ export class PartyMembers {
 
       await this.partySocketMessaging.partyPayloadSend(updatedParty);
 
-      await this.partySocketMessaging.partyPayloadSend(null, [character._id]);
+      // await this.partySocketMessaging.partyPayloadSend(null, [character._id]);
 
       return true;
     } catch (error) {
@@ -95,6 +96,8 @@ export class PartyMembers {
     await this.partyCRUD.deleteParty(character._id);
     const message = "Party Deleted!";
     await this.partySocketMessaging.sendMessageToAllMembers(message, party);
+
+    await this.partySocketMessaging.partyPayloadSend(party);
   }
 
   public async transferLeadership(partyId: string, target: ICharacter, eventCaller: ICharacter): Promise<boolean> {
