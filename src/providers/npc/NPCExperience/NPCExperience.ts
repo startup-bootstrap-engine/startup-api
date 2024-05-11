@@ -19,7 +19,6 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { NumberFormatter } from "@providers/text/NumberFormatter";
 import { Time } from "@providers/time/Time";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
-import { ObjectId } from "mongodb";
 
 import {
   AnimationEffectKeys,
@@ -144,7 +143,7 @@ export class NPCExperience {
         continue;
       }
 
-      const expPerRecipient = Number((baseExp / charactersInRange.size ?? 1).toFixed(2));
+      const expPerRecipient = Math.max(1, Number((baseExp / expRecipients.length ?? 1).toFixed(2)));
 
       for (const characterInRange of charactersInRange) {
         const recipientCharacterAndSkills = await this.validateCharacterAndSkills(characterInRange);
@@ -216,7 +215,7 @@ export class NPCExperience {
               xpId: uuidv4(),
               charId: attacker._id,
               // @ts-ignore
-              partyId: party ? new ObjectId(party._id) : null,
+              partyId: party ? party._id : null,
               xp: target.xpPerDamage * damage,
             });
           }
@@ -226,7 +225,7 @@ export class NPCExperience {
               xpId: uuidv4(),
               charId: attacker._id,
               // @ts-ignore
-              partyId: party ? new ObjectId(party._id) : null,
+              partyId: party ? party._id : null,
               xp: target.xpPerDamage * damage,
             },
           ];
