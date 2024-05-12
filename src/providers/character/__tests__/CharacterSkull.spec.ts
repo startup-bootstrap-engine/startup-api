@@ -77,7 +77,7 @@ describe("CharacterSkull.ts", () => {
 
   it("should know if target is not unjustify attack when target has skull", async () => {
     // @ts-ignore
-    isSamePartySpy = jest.spyOn(characterSkull.partyManagement, "checkIfCharacterAndTargetOnTheSameParty");
+    isSamePartySpy = jest.spyOn(characterSkull.partyValidator, "checkIfCharacterAndTargetOnTheSameParty");
 
     testCharacter.faction = CharacterFactions.LifeBringer;
     testCharacter.hasSkull = false;

@@ -1,5 +1,4 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { ICharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
@@ -12,7 +11,6 @@ import { MODE_EXP_MULTIPLIER } from "@providers/constants/SkillConstants";
 import { DiscordBot } from "@providers/discord/DiscordBot";
 import { spellLearn } from "@providers/inversify/container";
 import { Locker } from "@providers/locks/Locker";
-import PartyManagement from "@providers/party/PartyManagement";
 import { SkillBuff } from "@providers/skill/SkillBuff";
 import { SkillCalculator } from "@providers/skill/SkillCalculator";
 import { SkillFunctions } from "@providers/skill/SkillFunctions";
@@ -21,6 +19,7 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { NumberFormatter } from "@providers/text/NumberFormatter";
 import { Time } from "@providers/time/Time";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
+
 import {
   AnimationEffectKeys,
   CharacterPartyBenefits,
@@ -42,6 +41,9 @@ import { Colors } from "discord.js";
 import { provide } from "inversify-binding-decorators";
 
 import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
+import { PartyCRUD } from "@providers/party/PartyCRUD";
+import { ICharacterParty } from "@providers/party/PartyTypes";
+import { PartyValidator } from "@providers/party/PartyValidator";
 import dayjs from "dayjs";
 import random from "lodash/random";
 import uniqBy from "lodash/uniqBy";
@@ -64,11 +66,12 @@ export class NPCExperience {
     private time: Time,
     private skillLvUpStatsIncrease: SkillStatsIncrease,
     private locker: Locker,
-    private partyManagement: PartyManagement,
     private newRelic: NewRelic,
     private discordBot: DiscordBot,
     private experienceLimiter: NPCExperienceLimiter,
-    private characterPremiumAccount: CharacterPremiumAccount
+    private characterPremiumAccount: CharacterPremiumAccount,
+    private partyValidator: PartyValidator,
+    private partyCRUD: PartyCRUD
   ) {}
 
   /**
@@ -120,7 +123,7 @@ export class NPCExperience {
       let expRecipients: Types.ObjectId[] = [];
 
       if (record!.partyId) {
-        const party = await this.partyManagement.getPartyByCharacterId(characterAndSkills.character._id);
+        const party = await this.partyCRUD.findPartyByCharacterId(characterAndSkills.character._id);
 
         if (!party) {
           continue;
@@ -134,13 +137,13 @@ export class NPCExperience {
         expRecipients.push(record!.charId);
       }
 
-      const charactersInRange = await this.partyManagement.isWithinRange(target, expRecipients, 150);
+      const charactersInRange = await this.partyValidator.isWithinRange(target, expRecipients, 150);
 
       if (charactersInRange.size === 0) {
         continue;
       }
 
-      const expPerRecipient = Number((baseExp / charactersInRange.size ?? 1).toFixed(2));
+      const expPerRecipient = Math.max(1, Number((baseExp / expRecipients.length ?? 1).toFixed(2)));
 
       for (const characterInRange of charactersInRange) {
         const recipientCharacterAndSkills = await this.validateCharacterAndSkills(characterInRange);
@@ -190,7 +193,7 @@ export class NPCExperience {
         }
 
         target.xpToRelease = uniqBy(target.xpToRelease, "xpId");
-        const party = (await this.partyManagement.getPartyByCharacterId(attacker._id)) as ICharacterParty;
+        const party = (await this.partyCRUD.findPartyByCharacterId(attacker._id)) as ICharacterParty;
         // Store the xp in the xpToRelease array
         // before adding the character to the array, check if the character already caused some damage
         if (typeof target.xpToRelease !== "undefined") {
@@ -211,7 +214,8 @@ export class NPCExperience {
             target.xpToRelease.push({
               xpId: uuidv4(),
               charId: attacker._id,
-              partyId: party ? party._id : null, // can be null if the attacker is not in a party
+              // @ts-ignore
+              partyId: party ? party._id : null,
               xp: target.xpPerDamage * damage,
             });
           }
@@ -220,7 +224,8 @@ export class NPCExperience {
             {
               xpId: uuidv4(),
               charId: attacker._id,
-              partyId: party ? party._id : null, // can be null if the attacker is not in a party
+              // @ts-ignore
+              partyId: party ? party._id : null,
               xp: target.xpPerDamage * damage,
             },
           ];

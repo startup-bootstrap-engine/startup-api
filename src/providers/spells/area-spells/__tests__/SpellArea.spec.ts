@@ -1,21 +1,14 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { CharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { SPELL_AREA_MEDIUM_BLAST_RADIUS } from "@providers/constants/SpellConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { entityEffectBurning } from "@providers/entityEffects/data/blueprints/entityEffectBurning";
-import { container, inMemoryHashTable, unitTestHelper } from "@providers/inversify/container";
+import { container, unitTestHelper } from "@providers/inversify/container";
 import { FriendlyNPCsBlueprint, HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import {
-  AnimationEffectKeys,
-  CharacterClass,
-  EntityType,
-  FromGridX,
-  FromGridY,
-  MagicPower,
-  NPCAlignment,
-} from "@rpg-engine/shared";
+import { PartyCRUD } from "@providers/party/PartyCRUD";
+import { ICharacterParty } from "@providers/party/PartyTypes";
+import { AnimationEffectKeys, EntityType, FromGridX, FromGridY, MagicPower, NPCAlignment } from "@rpg-engine/shared";
 import { SpellArea } from "../SpellArea";
 
 describe("SpellArea", () => {
@@ -24,10 +17,12 @@ describe("SpellArea", () => {
   let testNPC: INPC;
   let spellArea: SpellArea;
   let inMemoryHashTable: InMemoryHashTable;
+  let partyCRUD: PartyCRUD;
 
   beforeAll(() => {
     spellArea = container.get(SpellArea);
     inMemoryHashTable = container.get(InMemoryHashTable);
+    partyCRUD = container.get(PartyCRUD);
   });
 
   beforeEach(async () => {
@@ -338,6 +333,7 @@ describe("SpellArea - PVP", () => {
   let testAnotherCharacter2: ICharacter;
   let isSamePartySpy: jest.SpyInstance;
   let spellArea: SpellArea;
+  let partyCRUD: PartyCRUD;
 
   const testSpellAreaOptions = {
     effectAnimationKey: AnimationEffectKeys.HitFire,
@@ -347,6 +343,7 @@ describe("SpellArea - PVP", () => {
 
   beforeAll(() => {
     spellArea = container.get(SpellArea);
+    partyCRUD = container.get(PartyCRUD);
   });
 
   beforeEach(async () => {
@@ -398,33 +395,11 @@ describe("SpellArea - PVP", () => {
 
   it("should prevent a character from attacking another one that's on the same party", async () => {
     // @ts-ignore
-    isSamePartySpy = jest.spyOn(spellArea.partyManagement, "checkIfCharacterAndTargetOnTheSameParty");
+    isSamePartySpy = jest.spyOn(spellArea.partyValidator, "checkIfCharacterAndTargetOnTheSameParty");
 
-    const party = new CharacterParty({
-      leader: {
-        _id: testCharacter._id,
-        class: CharacterClass.Druid,
-        name: "Test Character",
-      },
-      members: [
-        {
-          _id: testAnotherCharacter._id,
-          class: CharacterClass.Berserker,
-          name: "Test Another Character",
-        },
-        {
-          _id: testAnotherCharacter2._id,
-          class: CharacterClass.Berserker,
-          name: "Test Another Character 2",
-        },
-      ],
-      maxSize: 2,
-      benefits: [],
-    });
-    await party.save();
+    const party = (await partyCRUD.createParty(testCharacter, testAnotherCharacter, 2)) as ICharacterParty;
 
-    //! Ideally, party members should be fully stored on redis. Meanwhile, this ugly hack is necessary.
-    await inMemoryHashTable.set("party-members", party._id.toString(), [testCharacter._id, testAnotherCharacter._id]);
+    expect(party).toBeTruthy();
 
     const result = await spellArea.cast(testCharacter, testAnotherCharacter, MagicPower.High, testSpellAreaOptions);
 
@@ -436,42 +411,23 @@ describe("SpellArea - PVP", () => {
   });
   it("should NOT prevent a character from attacking another one if they're not on the same party", async () => {
     // @ts-ignore
-    isSamePartySpy = jest.spyOn(spellArea.partyManagement, "checkIfCharacterAndTargetOnTheSameParty");
+    isSamePartySpy = jest.spyOn(spellArea.partyValidator, "checkIfCharacterAndTargetOnTheSameParty");
 
-    const party1 = new CharacterParty({
-      leader: {
-        _id: testCharacter._id,
-        class: CharacterClass.Druid,
-        name: "Test Character",
-      },
-      members: [],
-      maxSize: 2,
-      benefits: [],
-    });
-    await party1.save();
-
-    const party2 = new CharacterParty({
-      leader: {
-        _id: testAnotherCharacter._id,
-        class: CharacterClass.Berserker,
-        name: "Test Another Character",
-      },
-      members: [
-        {
-          _id: testAnotherCharacter2._id,
-          class: CharacterClass.Berserker,
-          name: "Test Another Character 2",
-        },
-      ],
-      maxSize: 2,
-      benefits: [],
-    });
-    await party2.save();
+    await partyCRUD.createParty(testCharacter, testAnotherCharacter, 2);
+    await partyCRUD.createParty(testAnotherCharacter, testAnotherCharacter2, 2);
 
     await spellArea.cast(testCharacter, testAnotherCharacter, MagicPower.High, testSpellAreaOptions);
 
     expect(isSamePartySpy).toHaveBeenCalled();
-    const returnValue = await isSamePartySpy.mock.results[0].value;
-    expect(returnValue).toBe(false);
+
+    // second isSamePartySpy should be false
+
+    const firstValue = await isSamePartySpy.mock.results[0].value;
+    expect(firstValue).toBe(true);
+
+    const secondValue = await isSamePartySpy.mock.results[1].value;
+    expect(secondValue).toBe(false);
+
+    expect(isSamePartySpy).toHaveBeenCalledTimes(2);
   });
 });

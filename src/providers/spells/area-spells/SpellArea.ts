@@ -10,7 +10,7 @@ import { PVP_MIN_REQUIRED_LV } from "@providers/constants/PVPConstants";
 import { EntityEffectUse } from "@providers/entityEffects/EntityEffectUse";
 import { MapNonPVPZone } from "@providers/map/MapNonPVPZone";
 import { IPosition } from "@providers/movement/MovementHelper";
-import PartyManagement from "@providers/party/PartyManagement";
+import { PartyValidator } from "@providers/party/PartyValidator";
 import { RaidManager } from "@providers/raid/RaidManager";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { EntityType, FromGridX, FromGridY, MagicPower, NPCAlignment, ToGridX, ToGridY } from "@rpg-engine/shared";
@@ -33,7 +33,7 @@ export class SpellArea {
     private socketMessaging: SocketMessaging,
     private characterSkull: CharacterSkull,
     private raidManager: RaidManager,
-    private partyManagement: PartyManagement
+    private partyValidator: PartyValidator
   ) {}
 
   @TrackNewRelicTransaction()
@@ -129,7 +129,7 @@ export class SpellArea {
           }
 
           // Check if the caster is in a party
-          const isCasterAndTargetInParty = await this.partyManagement.checkIfCharacterAndTargetOnTheSameParty(
+          const isCasterAndTargetInParty = await this.partyValidator.checkIfCharacterAndTargetOnTheSameParty(
             caster as ICharacter,
             targetToHit as ICharacter
           );

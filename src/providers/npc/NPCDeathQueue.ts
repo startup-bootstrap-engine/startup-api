@@ -3,7 +3,6 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { CharacterParty, ICharacterParty } from "@entities/ModuleCharacter/CharacterPartyModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { blueprintManager } from "@providers/inversify/container";
@@ -23,6 +22,7 @@ import { NPCTarget } from "./movement/NPCTarget";
 import { CharacterView } from "@providers/character/CharacterView";
 import { appEnv } from "@providers/config/env";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { PartyCRUD } from "@providers/party/PartyCRUD";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 @provideSingleton(NPCDeathQueue)
 export class NPCDeathQueue {
@@ -38,7 +38,8 @@ export class NPCDeathQueue {
     private locker: Locker,
     private newRelic: NewRelic,
     private npcLoot: NPCLoot,
-    private dynamicQueue: DynamicQueue
+    private dynamicQueue: DynamicQueue,
+    private partyCRUD: PartyCRUD
   ) {}
 
   public async handleNPCDeath(killer: ICharacter, npc: INPC): Promise<void> {
@@ -213,7 +214,7 @@ export class NPCDeathQueue {
   }
 
   private async getPartyAndCalculateDropRatio(partyId: Types.ObjectId): Promise<number> {
-    const party = (await CharacterParty.findById(partyId).lean().select("benefits")) as ICharacterParty;
+    const party = await this.partyCRUD.findById(partyId.toString());
     if (party?.benefits) {
       const dropRatioBenefit = party.benefits.find((benefits) => benefits.benefit === CharacterPartyBenefits.DropRatio);
       return dropRatioBenefit?.value || 0;

@@ -9,16 +9,27 @@ import {
   CharacterPartyEXPBonus,
   CharacterPartySkillBonus,
 } from "@rpg-engine/shared";
-import PartyManagement from "../PartyManagement";
+import { PartyBenefitsCalculator } from "../PartyBenefitsCalculator";
+import { PartyCRUD } from "../PartyCRUD";
+import PartyInvitation from "../PartyInvitation";
+import { PartyMembers } from "../PartyMembers";
+import { ICharacterParty } from "../PartyTypes";
 
-describe("Party Benefits", () => {
-  let partyManagement: PartyManagement;
+describe("PartyBenefitsCalculator", () => {
+  let partyBenefitsCalculator: PartyBenefitsCalculator;
+  let partyInvitation: PartyInvitation;
+  let partyCRUD: PartyCRUD;
+  let partyMembers: PartyMembers;
+
   let characterLeader: ICharacter;
   let firstMember: ICharacter;
   let secondMember: ICharacter;
 
   beforeAll(() => {
-    partyManagement = container.get<PartyManagement>(PartyManagement);
+    partyInvitation = container.get<PartyInvitation>(PartyInvitation);
+    partyBenefitsCalculator = container.get<PartyBenefitsCalculator>(PartyBenefitsCalculator);
+    partyCRUD = container.get<PartyCRUD>(PartyCRUD);
+    partyMembers = container.get<PartyMembers>(PartyMembers);
   });
 
   beforeEach(async () => {
@@ -61,7 +72,7 @@ describe("Party Benefits", () => {
   });
 
   it("should calculate benefits for a party of size 2 with 2 unique classes", () => {
-    const result = partyManagement.calculatePartyBenefits(2, 2);
+    const result = partyBenefitsCalculator.calculatePartyBenefits(2, 2);
     expect(result).toEqual([
       {
         benefit: CharacterPartyBenefits.Distribution,
@@ -83,7 +94,7 @@ describe("Party Benefits", () => {
   });
 
   it("should calculate benefits for a party of size 3 with 1 unique class", () => {
-    const result = partyManagement.calculatePartyBenefits(3, 1);
+    const result = partyBenefitsCalculator.calculatePartyBenefits(3, 1);
     expect(result).toEqual([
       {
         benefit: CharacterPartyBenefits.Distribution,
@@ -105,13 +116,11 @@ describe("Party Benefits", () => {
   });
 
   it("should calculate correct benefits for a party with 2 members", async () => {
-    // @ts-ignore
-    await partyManagement.createParty(characterLeader, firstMember);
+    await partyCRUD.createParty(characterLeader, firstMember);
 
-    // @ts-ignore
-    const party = await partyManagement.getPartyByCharacterId(characterLeader._id);
+    const party = await partyCRUD.findPartyByCharacterId(characterLeader._id);
 
-    const expectedBenefits = partyManagement.calculatePartyBenefits(
+    const expectedBenefits = partyBenefitsCalculator.calculatePartyBenefits(
       2,
       characterLeader.class === firstMember.class ? 1 : 2
     );
@@ -120,31 +129,30 @@ describe("Party Benefits", () => {
   });
 
   it("should calculate correct benefits for a party with 3 members", async () => {
-    // @ts-ignore
-    await partyManagement.createParty(characterLeader, firstMember);
-    // @ts-ignore
-    await partyManagement.addMemberToParty(characterLeader, secondMember, secondMember);
+    await partyCRUD.createParty(characterLeader, firstMember);
 
     // @ts-ignore
-    const party = await partyManagement.getPartyByCharacterId(characterLeader._id);
+    await partyInvitation.addMemberToParty(characterLeader, secondMember);
 
-    const expectedBenefits = partyManagement.calculatePartyBenefits(3, 3);
+    const party = await partyCRUD.findPartyByCharacterId(characterLeader._id);
+
+    const expectedBenefits = partyBenefitsCalculator.calculatePartyBenefits(3, 3);
 
     expect(party!.benefits!.map(({ benefit, value }) => ({ benefit, value }))).toEqual(expectedBenefits);
   });
 
   it("should update benefits when a party member is removed", async () => {
-    await partyManagement.acceptInvite(characterLeader, firstMember);
+    await partyInvitation.acceptInvite(characterLeader, firstMember);
 
-    const party = await partyManagement.acceptInvite(characterLeader, secondMember);
+    const party = (await partyInvitation.acceptInvite(characterLeader, secondMember)) as ICharacterParty;
 
-    const success = await partyManagement.leaveParty(party?._id, secondMember, secondMember);
+    const success = await partyMembers.leaveParty(party?._id, secondMember, secondMember);
 
     expect(success).toBeTruthy;
 
-    const updatedParty = await partyManagement.getPartyByCharacterId(characterLeader._id);
+    const updatedParty = await partyCRUD.findPartyByCharacterId(characterLeader._id);
 
-    const expectedBenefits = partyManagement.calculatePartyBenefits(2, 2);
+    const expectedBenefits = partyBenefitsCalculator.calculatePartyBenefits(2, 2);
 
     expect(updatedParty!.benefits!.map(({ benefit, value }) => ({ benefit, value }))).toEqual(expectedBenefits);
   });

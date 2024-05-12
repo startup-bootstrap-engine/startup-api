@@ -30,7 +30,7 @@ import { NPCBattleCycleQueue } from "@providers/npc/NPCBattleCycleQueue";
 import { NPCCycleQueue } from "@providers/npc/NPCCycleQueue";
 import { NPCDeathQueue } from "@providers/npc/NPCDeathQueue";
 import { NPCFreezer } from "@providers/npc/NPCFreezer";
-import PartyManagement from "@providers/party/PartyManagement";
+import { PartyCRUD } from "@providers/party/PartyCRUD";
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
 import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { RaidManager } from "@providers/raid/RaidManager";
@@ -58,7 +58,7 @@ export class ServerBootstrap {
     private pathfindingResults: PathfindingResults,
     private npcFreezer: NPCFreezer,
     private locker: Locker,
-    private partyManagement: PartyManagement,
+    private partyCRUD: PartyCRUD,
     private inMemoryHashTable: InMemoryHashTable,
     private hitTarget: HitTargetQueue,
     private discordBot: DiscordBot,
@@ -155,7 +155,7 @@ export class ServerBootstrap {
     await this.characterConnection.resetCharacterAttributes();
     await this.characterConsumptionControl.clearAllItemConsumption();
     await this.characterBuffActivator.disableAllTemporaryBuffsAllCharacters();
-    await this.partyManagement.clearAllParties();
+    await this.partyCRUD.clearAllParties();
 
     await this.spellSilence.removeAllSilence();
 

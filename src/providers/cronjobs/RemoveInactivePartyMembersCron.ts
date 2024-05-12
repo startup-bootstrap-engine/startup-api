@@ -1,10 +1,10 @@
-import PartyManagement from "@providers/party/PartyManagement";
+import { PartyMembers } from "@providers/party/PartyMembers";
 import { provide } from "inversify-binding-decorators";
 import { CronJobScheduler } from "./CronJobScheduler";
 
 @provide(RemoveInactivePartyMembersCron)
 export class RemoveInactivePartyMembersCron {
-  constructor(private partyManagement: PartyManagement, private cronJobSchedules: CronJobScheduler) {}
+  constructor(private partyMembers: PartyMembers, private cronJobSchedules: CronJobScheduler) {}
 
   public schedule(): void {
     //!  Disabled because it causes more issues than solve it
