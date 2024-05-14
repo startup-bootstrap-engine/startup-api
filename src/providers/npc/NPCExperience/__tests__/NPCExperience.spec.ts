@@ -3,6 +3,9 @@ import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { MODE_EXP_MULTIPLIER } from "@providers/constants/SkillConstants";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import { PartyCRUD } from "@providers/party/PartyCRUD";
+import PartyInvitation from "@providers/party/PartyInvitation";
+import { ICharacterParty } from "@providers/party/PartyTypes";
 import { Modes, calculateXPToNextLevel } from "@rpg-engine/shared";
 import { v4 as uuidv4 } from "uuid";
 import { NPCExperience } from "../NPCExperience";
@@ -139,5 +142,66 @@ describe("NPCExperience.spec.ts | releaseXP test cases", () => {
     }
 
     expect(NPC.updateOne).toHaveBeenCalled();
+  });
+
+  describe("XP Distribution in Party", () => {
+    let partyLeader: ICharacter;
+    let partyMembers: ICharacter[];
+    let partyCRUD: PartyCRUD;
+    let partyInvitation: PartyInvitation;
+
+    beforeAll(() => {
+      partyCRUD = container.get<PartyCRUD>(PartyCRUD);
+      partyInvitation = container.get<PartyInvitation>(PartyInvitation);
+    });
+
+    beforeEach(async () => {
+      partyLeader = await unitTestHelper.createMockCharacter({}, { hasSkills: true });
+      partyMembers = await Promise.all(
+        Array.from({ length: 2 }).map(() => unitTestHelper.createMockCharacter({}, { hasSkills: true }))
+      );
+
+      await partyCRUD.createParty(partyLeader, partyMembers[0]);
+      await partyInvitation.acceptInvite(partyLeader, partyMembers[1]);
+
+      const party = (await partyCRUD.findPartyByCharacterId(partyLeader._id)) as ICharacterParty;
+
+      testNPC.xpToRelease = [
+        {
+          xpId: uuidv4(),
+          charId: partyLeader.id,
+          xp: expToRelease,
+          partyId: party._id as any,
+        },
+        {
+          xpId: uuidv4(),
+          charId: partyMembers[0].id,
+          xp: expToRelease,
+          partyId: party._id as any,
+        },
+        {
+          xpId: uuidv4(),
+          charId: partyMembers[1].id,
+          xp: expToRelease,
+          partyId: party._id as any,
+        },
+      ];
+
+      await testNPC.save();
+    });
+
+    it("should distribute XP among party members within range", async () => {
+      jest
+        // @ts-ignore
+        .spyOn(npcExperience.partyValidator, "isWithinRange")
+        .mockResolvedValue(new Set(partyMembers.map((member) => member._id)));
+
+      // @ts-ignore
+      const updateSkillsSpy = jest.spyOn(npcExperience, "updateSkillsAndSendEvents");
+
+      await npcExperience.releaseXP(testNPC);
+
+      expect(updateSkillsSpy).toHaveBeenCalledTimes(6);
+    });
   });
 });

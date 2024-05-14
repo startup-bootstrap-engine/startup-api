@@ -152,11 +152,7 @@ const npcSchema = createLeanSchema(
         ref: "Character",
         required: true,
       }),
-      partyId: Type.objectId({
-        ref: "CharacterParty",
-        required: false,
-        nullable: true,
-      }),
+      partyId: Type.string(),
       xp: Type.number({ required: true }),
     }),
 
