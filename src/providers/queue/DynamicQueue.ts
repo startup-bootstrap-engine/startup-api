@@ -32,12 +32,11 @@ interface IQueueScaleOptions {
   };
   forceCustomScale?: number;
 }
-
 @provideSingleton(DynamicQueue)
 export class DynamicQueue {
   private queues: Map<string, Queue> = new Map();
   private workers: Map<string, Worker> = new Map();
-  private queueConnections: Map<string, any> = new Map();
+  private queueConnections: Map<string, Redis> = new Map();
 
   constructor(
     private redisManager: RedisManager,
@@ -59,19 +58,13 @@ export class DynamicQueue {
   ): Promise<Job | undefined> {
     try {
       const { queueScaleFactor, queueScaleBy } = queueScaleOptions;
-
       const queueName = await this.generateQueueName(prefix, queueScaleBy, queueScaleFactor, queueScaleOptions);
-
       const connection = await this.getQueueConnection(queueName);
-
       const queue = await this.initOrFetchQueue(
         queueName,
         jobFn,
         connection,
-        {
-          connection,
-          ...queueOptions,
-        },
+        { connection, ...queueOptions },
         workerOptions,
         queueScaleOptions
       );
@@ -87,28 +80,21 @@ export class DynamicQueue {
         ...addQueueOptions,
         removeOnComplete: true,
         removeOnFail: true,
-        attempts: 3, // Number of attempts before the job is considered failed
-        backoff: {
-          type: "exponential",
-          delay: 500,
-        },
+        attempts: 3,
+        backoff: { type: "exponential", delay: 500 },
       });
     } catch (error) {
       console.error(error);
-
       throw error;
     }
   }
 
-  public async getQueueConnection(queueName: string): Promise<Redis> {
-    let connection = this.queueConnections.get(queueName);
-    if (connection) {
-      return connection;
-    } else {
-      connection = await this.redisManager.getPoolClient(queueName);
+  private async getQueueConnection(queueName: string): Promise<Redis> {
+    if (!this.queueConnections.has(queueName)) {
+      const connection = await this.redisManager.getPoolClient(queueName);
       this.queueConnections.set(queueName, connection);
     }
-    return connection;
+    return this.queueConnections.get(queueName)!;
   }
 
   private async initOrFetchQueue(
@@ -119,13 +105,12 @@ export class DynamicQueue {
     workerOptions?: QueueBaseOptions,
     queueScaleOptions?: IQueueScaleOptions
   ): Promise<Queue> {
-    let queue = this.queues.get(queueName);
-
-    if (!queue) {
+    if (!this.queues.has(queueName)) {
       console.log(`💡💡💡 Initializing queue ${queueName} 💡💡💡`);
-      queue = new Queue(queueName, queueOptions);
+      const queue = new Queue(queueName, queueOptions);
       this.queues.set(queueName, queue);
-      // constantly pool the connection to check if it's still needed
+      queue.on("error", (error) => console.error(`Queue error: ${error.message}`));
+
       await this.dynamicQueueCleaner.monitorAndReleaseInactiveQueueRedisConnections(
         this.queues,
         this.workers,
@@ -134,14 +119,10 @@ export class DynamicQueue {
         connection
       );
 
-      queue.on("error", (error) => {
-        console.error(`Queue error: ${error.message}`);
-      });
+      await this.initOrFetchWorker(queueName, jobFn, connection, workerOptions, queueScaleOptions);
     }
 
-    await this.initOrFetchWorker(queueName, jobFn, connection, workerOptions, queueScaleOptions);
-
-    return queue;
+    return this.queues.get(queueName)!;
   }
 
   private async initOrFetchWorker(
@@ -151,78 +132,78 @@ export class DynamicQueue {
     workerOptions?: WorkerOptions,
     queueScaleOptions?: IQueueScaleOptions
   ): Promise<void> {
-    let worker = this.workers.get(queueName);
+    if (this.workers.has(queueName)) return;
 
+    const { maxWorkerLimiter, maxWorkerConcurrency } = await this.getWorkerScalingParameters(queueScaleOptions);
+
+    const worker = new Worker(
+      queueName,
+      async (job) => {
+        try {
+          await this.queueActivityMonitor.updateQueueActivity(queueName);
+          return await jobFn(job);
+        } catch (error) {
+          console.error(error);
+          throw error;
+        }
+      },
+      {
+        name: `${queueName}-worker`,
+        concurrency: maxWorkerConcurrency,
+        lockDuration: 60000,
+        lockRenewTime: 30000,
+        limiter: { max: maxWorkerLimiter, duration: QUEUE_GLOBAL_WORKER_LIMITER_DURATION },
+        removeOnComplete: { age: 86400, count: 1000 },
+        removeOnFail: { age: 86400, count: 1000 },
+        connection,
+        ...workerOptions,
+      }
+    );
+
+    this.workers.set(queueName, worker);
+
+    if (!appEnv.general.IS_UNIT_TEST) {
+      this.setupWorkerErrorHandlers(worker, queueName);
+    }
+  }
+
+  private async getWorkerScalingParameters(
+    queueScaleOptions?: IQueueScaleOptions
+  ): Promise<{ maxWorkerLimiter: number; maxWorkerConcurrency: number }> {
     let maxWorkerLimiter = QUEUE_WORKER_MIN_JOB_RATE;
     let maxWorkerConcurrency = QUEUE_WORKER_MIN_CONCURRENCY;
 
-    switch (queueScaleOptions?.queueScaleBy) {
-      case "active-characters":
-        const activeCharacterCount = Number(
-          (await this.inMemoryHashTable.get("activity-tracker", "character-count")) || 1
-        );
+    if (!queueScaleOptions) return { maxWorkerLimiter, maxWorkerConcurrency };
 
-        maxWorkerLimiter = this.entityQueueScalingCalculator.calculateMaxLimiter(activeCharacterCount);
+    const { queueScaleBy } = queueScaleOptions;
+    const activeCount = await this.getActiveEntityCount(queueScaleBy);
 
-        maxWorkerConcurrency = this.entityQueueScalingCalculator.calculateConcurrency(activeCharacterCount);
-
-        break;
-      case "active-npcs":
-        const activeNPCsCount = Number((await this.inMemoryHashTable.get("activity-tracker", "npc-count")) || 1);
-        maxWorkerLimiter = this.entityQueueScalingCalculator.calculateMaxLimiter(activeNPCsCount);
-        maxWorkerConcurrency = this.entityQueueScalingCalculator.calculateConcurrency(activeNPCsCount);
-        break;
+    if (queueScaleBy === "active-characters" || queueScaleBy === "active-npcs") {
+      maxWorkerLimiter = this.entityQueueScalingCalculator.calculateMaxLimiter(activeCount);
+      maxWorkerConcurrency = this.entityQueueScalingCalculator.calculateConcurrency(activeCount);
     }
 
-    if (!worker) {
-      worker = new Worker(
-        queueName,
-        async (job) => {
-          try {
-            await this.queueActivityMonitor.updateQueueActivity(queueName);
+    return { maxWorkerLimiter, maxWorkerConcurrency };
+  }
 
-            return await jobFn(job);
-          } catch (error) {
-            console.error(error);
-            throw error; // rethrow the error to be caught by the worker
-          }
-        },
-        {
-          name: `${queueName}-worker`,
-          concurrency: maxWorkerConcurrency,
-          lockDuration: 60000,
-          lockRenewTime: 30000,
-          limiter: {
-            max: maxWorkerLimiter,
-            duration: QUEUE_GLOBAL_WORKER_LIMITER_DURATION,
-          },
-          removeOnComplete: {
-            age: 86400, // 24 hours
-            count: 1000,
-          },
-          removeOnFail: {
-            age: 86400, // 24 hours
-            count: 1000,
-          },
-          connection,
-          ...workerOptions,
-        }
-      );
-      this.workers.set(queueName, worker);
-
-      if (!appEnv.general.IS_UNIT_TEST) {
-        worker.on("error", (error) => {
-          console.error(`Worker error: ${error.message}`, error);
-        });
-
-        worker.on("failed", (job, error) => {
-          console.error(`${queueName} - Job ${job?.id} failed with error: ${error.message}`, {
-            jobData: job?.data,
-            errorStack: error.stack,
-          });
-        });
-      }
+  private async getActiveEntityCount(queueScaleBy: AvailableScaleFactors): Promise<number> {
+    if (queueScaleBy === "active-characters") {
+      return Number((await this.inMemoryHashTable.get("activity-tracker", "character-count")) || 1);
     }
+    if (queueScaleBy === "active-npcs") {
+      return Number((await this.inMemoryHashTable.get("activity-tracker", "npc-count")) || 1);
+    }
+    return 1;
+  }
+
+  private setupWorkerErrorHandlers(worker: Worker, queueName: string): void {
+    worker.on("error", (error) => console.error(`Worker error: ${error.message}`, error));
+    worker.on("failed", (job, error) =>
+      console.error(`${queueName} - Job ${job?.id} failed with error: ${error.message}`, {
+        jobData: job?.data,
+        errorStack: error.stack,
+      })
+    );
   }
 
   private async generateQueueName(
@@ -231,60 +212,50 @@ export class DynamicQueue {
     queueScaleFactor?: number,
     queueScaleOptions?: IQueueScaleOptions
   ): Promise<string> {
-    let envSuffix;
-
-    switch (appEnv.general.ENV) {
-      case EnvType.Development:
-        envSuffix = "dev";
-        break;
-      default:
-        envSuffix = process.env.pm_id || "prod";
-        break;
-    }
+    const envSuffix = appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id || "prod";
 
     switch (queueScaleBy) {
       case "single":
-        return `${prefix}-${envSuffix}`;
-
+        return this.buildQueueName(prefix, envSuffix);
       case "custom":
-        if (!queueScaleFactor) {
-          throw new Error("Queue scale factor is required when scaling by custom");
-        }
-
-        if (queueScaleFactor > 1) {
-          queueScaleFactor = random(1, queueScaleFactor);
-        }
-
-        return `${prefix}-${envSuffix}-${queueScaleFactor}`;
-
+        if (!queueScaleFactor) throw new Error("Queue scale factor is required when scaling by custom");
+        return this.buildQueueName(prefix, envSuffix, random(1, queueScaleFactor));
       case "active-characters":
-        const activeCharacters = Number((await this.inMemoryHashTable.get("activity-tracker", "character-count")) || 1);
-
-        const maxCharQueues = Math.ceil(activeCharacters / 35) || 1;
-        const charQueueScaleFactor = Math.min(
-          maxCharQueues,
-          queueScaleOptions?.forceCustomScale || QUEUE_CHARACTER_MAX_SCALE_FACTOR
+        return await this.generateDynamicQueueName(
+          prefix,
+          envSuffix,
+          "character-count",
+          queueScaleOptions,
+          QUEUE_CHARACTER_MAX_SCALE_FACTOR
         );
-
-        // Generate a random number between 0 and charQueueScaleFactor - 1
-        const charQueueNumber = random(0, charQueueScaleFactor - 1);
-
-        return `${prefix}-${envSuffix}-${charQueueNumber}`;
-
       case "active-npcs":
-        const activeNPCs = Number((await this.inMemoryHashTable.get("activity-tracker", "npc-count")) || 1);
-
-        const maxNPCQueues = Math.ceil(activeNPCs / 35) || 1;
-
-        const NPCQueueScaleFactor = Math.min(
-          maxNPCQueues,
-          queueScaleOptions?.forceCustomScale || QUEUE_NPC_MAX_SCALE_FACTOR
+        return await this.generateDynamicQueueName(
+          prefix,
+          envSuffix,
+          "npc-count",
+          queueScaleOptions,
+          QUEUE_NPC_MAX_SCALE_FACTOR
         );
-
-        const npcQueueNumber = random(0, NPCQueueScaleFactor - 1);
-
-        return `${prefix}-${envSuffix}-${npcQueueNumber}`;
+      default:
+        throw new Error("Invalid queueScaleBy value");
     }
+  }
+
+  private async generateDynamicQueueName(
+    prefix: string,
+    envSuffix: string,
+    entityKey: string,
+    queueScaleOptions?: IQueueScaleOptions,
+    defaultScaleFactor?: number
+  ): Promise<string> {
+    const entityCount = Number((await this.inMemoryHashTable.get("activity-tracker", entityKey)) || 1);
+    const maxQueues = Math.ceil(entityCount / 35) || 1;
+    const scaleFactor = Math.min(maxQueues, queueScaleOptions?.forceCustomScale! || defaultScaleFactor!);
+    return this.buildQueueName(prefix, envSuffix, random(0, scaleFactor - 1));
+  }
+
+  private buildQueueName(prefix: string, envSuffix: string, factor?: number): string {
+    return `${prefix}-${envSuffix}${factor !== undefined ? `-${factor}` : ""}`;
   }
 
   public async clearAllJobs(): Promise<void> {
