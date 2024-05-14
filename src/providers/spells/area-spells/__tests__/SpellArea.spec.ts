@@ -33,6 +33,7 @@ describe("SpellArea", () => {
       },
       {
         hasSkills: true,
+        hasEquipment: true,
       }
     );
     testCharacterTarget = await unitTestHelper.createMockCharacter(

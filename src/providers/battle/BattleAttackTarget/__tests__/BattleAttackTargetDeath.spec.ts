@@ -23,7 +23,7 @@ describe("BattleAttackTargetDeath.spec.ts", () => {
     // @ts-ignore
     handleNPCDeathSpy = jest.spyOn(battleAttackTargetDeath, "handleNPCDeath");
 
-    testCharacter = await unitTestHelper.createMockCharacter(null, { hasSkills: true });
+    testCharacter = await unitTestHelper.createMockCharacter(null, { hasSkills: true, hasEquipment: true });
     testNPC = await unitTestHelper.createMockNPC(null, { hasSkills: true });
   });
 

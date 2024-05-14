@@ -29,6 +29,7 @@ export class CharacterBuffTracker {
       return newCharacterBuff as ICharacterBuff;
     } catch (error) {
       console.error(error);
+      throw error;
     }
   }
 
@@ -111,6 +112,7 @@ export class CharacterBuffTracker {
       return buff;
     } catch (error) {
       console.error(error);
+      throw error;
     }
   }
 

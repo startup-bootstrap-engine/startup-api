@@ -19,16 +19,12 @@ export class BattleNetworkStopTargeting {
 
   @TrackNewRelicTransaction()
   public async stopTargeting(character: ICharacter): Promise<void> {
-    try {
-      if (character) {
-        await Character.updateOne({ _id: character._id }, { $unset: { target: 1 } });
+    if (character) {
+      await Character.updateOne({ _id: character._id }, { $unset: { target: 1 } });
 
-        await this.battleCycle.stop(character._id);
+      await this.battleCycle.stop(character._id);
 
-        await this.locker.unlock(`character-${character._id}-battle-targeting`);
-      }
-    } catch (error) {
-      console.error(error);
+      await this.locker.unlock(`character-${character._id}-battle-targeting`);
     }
   }
 }

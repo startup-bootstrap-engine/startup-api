@@ -18,44 +18,40 @@ export class BattleCycle {
     attackIntervalSpeed: number,
     attackFn: () => Promise<void>
   ): Promise<void> {
-    try {
-      await this.stop(character._id.toString());
+    await this.stop(character._id.toString());
 
-      if (this.intervals.has(character._id.toString())) {
+    if (this.intervals.has(character._id.toString())) {
+      return;
+    }
+
+    const interval = setInterval(async () => {
+      const hasBasicValidation = this.characterValidation.hasBasicValidation(character);
+
+      if (!hasBasicValidation) {
+        clearInterval(interval);
         return;
       }
 
-      const interval = setInterval(async () => {
-        const hasBasicValidation = this.characterValidation.hasBasicValidation(character);
+      // if original target (init) is not the same as the current target, stop the interval
 
-        if (!hasBasicValidation) {
-          clearInterval(interval);
-          return;
-        }
+      const currentTargetId = await this.getCurrentTargetId(character._id.toString());
 
-        // if original target (init) is not the same as the current target, stop the interval
+      if (!currentTargetId) {
+        clearInterval(interval);
+        return;
+      }
 
-        const currentTargetId = await this.getCurrentTargetId(character._id.toString());
+      if (currentTargetId?.toString() !== targetId.toString()) {
+        clearInterval(interval);
+        return;
+      }
 
-        if (!currentTargetId) {
-          clearInterval(interval);
-          return;
-        }
+      await attackFn();
+    }, attackIntervalSpeed);
 
-        if (currentTargetId?.toString() !== targetId.toString()) {
-          clearInterval(interval);
-          return;
-        }
+    this.intervals.set(character._id.toString(), interval);
 
-        await attackFn();
-      }, attackIntervalSpeed);
-
-      this.intervals.set(character._id.toString(), interval);
-
-      this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Server, "CharacterBattleCycle", 1);
-    } catch (error) {
-      console.error(error);
-    }
+    this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Server, "CharacterBattleCycle", 1);
   }
 
   public stop(characterId: string): void {

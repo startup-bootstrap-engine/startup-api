@@ -8,13 +8,13 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { CharacterSkull } from "@providers/character/CharacterSkull";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterWeapon } from "@providers/character/CharacterWeapon";
+import { EntityType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { BattleAttackTarget } from "../BattleAttackTarget/BattleAttackTarget";
 import { BattleCycle } from "../BattleCycle";
 import { BattleTargeting } from "../BattleTargeting";
 import { BattleNetworkStopTargeting } from "../network/BattleNetworkStopTargetting";
 import { BattleCharacterAttackValidation } from "./BattleCharacterAttackValidation";
-import { EntityType } from "@rpg-engine/shared";
 
 @provide(BattleCharacterAttack)
 export class BattleCharacterAttack {
@@ -124,35 +124,30 @@ export class BattleCharacterAttack {
 
   @TrackNewRelicTransaction()
   public async attackTarget(character: ICharacter, target: ICharacter | INPC): Promise<boolean> {
-    try {
-      const canAttack = await this.battleCharacterAttackValidation.canAttack(character, target);
-      if (!canAttack) {
-        return false;
-      }
+    const canAttack = await this.battleCharacterAttackValidation.canAttack(character, target);
+    if (!canAttack) {
+      return false;
+    }
 
-      if (!character) {
-        return false;
-      }
+    if (!character) {
+      return false;
+    }
 
-      const checkRangeAndAttack = await this.battleAttackTarget.checkRangeAndAttack(character, target);
-      if (checkRangeAndAttack) {
-        // check for skull
-        if (target.type === "Character") {
-          const isAttackUnjustified = await this.characterSkull.checkForUnjustifiedAttack(
-            character as ICharacter,
-            target as ICharacter
-          );
-          if (isAttackUnjustified) {
-            // If the attack is not justified, the caster gains a 'skull'
-            await this.characterSkull.updateWhiteSkull(character.id, target.id);
-          }
+    const checkRangeAndAttack = await this.battleAttackTarget.checkRangeAndAttack(character, target);
+    if (checkRangeAndAttack) {
+      // check for skull
+      if (target.type === "Character") {
+        const isAttackUnjustified = await this.characterSkull.checkForUnjustifiedAttack(
+          character as ICharacter,
+          target as ICharacter
+        );
+        if (isAttackUnjustified) {
+          // If the attack is not justified, the caster gains a 'skull'
+          await this.characterSkull.updateWhiteSkull(character.id, target.id);
         }
-        return true;
-      } else {
-        return false;
       }
-    } catch (err) {
-      console.error(err);
+      return true;
+    } else {
       return false;
     }
   }

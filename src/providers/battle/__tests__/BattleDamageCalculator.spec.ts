@@ -1,8 +1,7 @@
-import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
-import { container, unitTestHelper } from "@providers/inversify/container";
-
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
+import { container, unitTestHelper } from "@providers/inversify/container";
 import { CharacterClass, EntityType } from "@rpg-engine/shared";
 import _ from "lodash";
 import { BattleDamageCalculator } from "../BattleDamageCalculator";
@@ -37,10 +36,9 @@ describe("BattleDamageCalculator.spec.ts", () => {
       await testCharacter.populate("skills").execPopulate();
 
       // @ts-ignore
-      const potentialDamage = await battleDamageCalculator.calculateTotalPotentialDamage(
+      const potentialDamage = await battleDamageCalculator.calculatePhysicalTotalPotentialDamage(
         testCharacter.skills as ISkill,
         testNPC.skills as ISkill,
-        false,
         undefined
       );
 
@@ -58,10 +56,9 @@ describe("BattleDamageCalculator.spec.ts", () => {
       await testCharacter.populate("skills").execPopulate();
 
       // @ts-ignore
-      const potentialDamage = await battleDamageCalculator.calculateTotalPotentialDamage(
+      const potentialDamage = await battleDamageCalculator.calculatePhysicalTotalPotentialDamage(
         testCharacter.skills as ISkill,
         testNPC.skills as ISkill,
-        false,
         undefined
       );
 
@@ -74,8 +71,7 @@ describe("BattleDamageCalculator.spec.ts", () => {
       await testNPC.populate("skills").execPopulate();
       await testCharacter.populate("skills").execPopulate();
 
-      // @ts-ignore
-      jest.spyOn(battleDamageCalculator, "gaussianRandom").mockImplementation(() => 10);
+      jest.spyOn(battleDamageCalculator as any, "gaussianRandom").mockImplementation(() => 10);
 
       const hit = await battleDamageCalculator.calculateHitDamage(testCharacter, testNPC);
 
@@ -94,8 +90,7 @@ describe("BattleDamageCalculator.spec.ts", () => {
 
       await testCharacter.populate("skills").execPopulate();
 
-      // @ts-ignore
-      jest.spyOn(battleDamageCalculator, "gaussianRandom").mockImplementation(() => 30);
+      jest.spyOn(battleDamageCalculator as any, "gaussianRandom").mockImplementation(() => 30);
 
       const hit = await battleDamageCalculator.calculateHitDamage(testNPC, testCharacter);
 
@@ -115,8 +110,7 @@ describe("BattleDamageCalculator.spec.ts", () => {
       await testCharacter.populate("skills").execPopulate();
 
       jest.spyOn(_, "random").mockImplementation(() => 10);
-      // @ts-ignore
-      jest.spyOn(battleDamageCalculator, "gaussianRandom").mockImplementation(() => 10);
+      jest.spyOn(battleDamageCalculator as any, "gaussianRandom").mockImplementation(() => 10);
 
       const hit = await battleDamageCalculator.calculateHitDamage(testNPC, testCharacter);
 
@@ -127,8 +121,7 @@ describe("BattleDamageCalculator.spec.ts", () => {
       await testNPC.populate("skills").execPopulate();
       await testCharacter.populate("skills").execPopulate();
 
-      // @ts-ignore
-      jest.spyOn(battleDamageCalculator, "gaussianRandom").mockImplementation(() => 1000);
+      jest.spyOn(battleDamageCalculator as any, "gaussianRandom").mockImplementation(() => 1000);
 
       const hit = await battleDamageCalculator.calculateHitDamage(testCharacter, testNPC);
 
@@ -145,17 +138,13 @@ describe("BattleDamageCalculator.spec.ts", () => {
     let defenderSkills: ISkill;
 
     beforeEach(async () => {
-      // @ts-ignore
-      jest.spyOn(battleDamageCalculator, "calculateTotalPotentialDamage").mockImplementation(() => 100);
+      jest.spyOn(battleDamageCalculator as any, "calculatePhysicalTotalPotentialDamage").mockImplementation(() => 100);
 
-      // @ts-ignore
-      spyCalculateShieldingDefense = jest.spyOn(battleDamageCalculator, "calculateCharacterShieldingDefense");
+      spyCalculateShieldingDefense = jest.spyOn(battleDamageCalculator as any, "calculateCharacterShieldingDefense");
 
-      // @ts-ignore
-      spyCalculateRegularDefense = jest.spyOn(battleDamageCalculator, "calculateCharacterRegularDefense");
+      spyCalculateRegularDefense = jest.spyOn(battleDamageCalculator as any, "calculateCharacterRegularDefense");
 
-      // @ts-ignore
-      spyDamageReduction = jest.spyOn(battleDamageCalculator, "calculateDamageReduction");
+      spyDamageReduction = jest.spyOn(battleDamageCalculator as any, "calculateDamageReduction");
 
       attacker = await unitTestHelper.createMockNPC(null, { hasSkills: true });
 
@@ -184,7 +173,6 @@ describe("BattleDamageCalculator.spec.ts", () => {
 
       expect(spyDamageReduction).toHaveBeenCalled();
       expect(spyCalculateShieldingDefense).toHaveBeenCalled();
-      // expect(spyCalculateRegularDefense).not.toHaveBeenCalled();
 
       expect(spyCalculateShieldingDefense).toHaveBeenCalledWith(
         defenderSkills.level,
@@ -227,8 +215,7 @@ describe("BattleDamageCalculator.spec.ts", () => {
 
   describe("Edge cases - Invalid input", () => {
     it("hit damage should always be >= 0", async () => {
-      // @ts-ignore
-      jest.spyOn(battleDamageCalculator, "gaussianRandom").mockImplementation(() => 0);
+      jest.spyOn(battleDamageCalculator as any, "gaussianRandom").mockImplementation(() => 0);
 
       // @ts-ignore
       jest.spyOn(battleDamageCalculator.skillStatsCalculator, "getAttack").mockImplementation(() => 0);
@@ -256,25 +243,19 @@ describe("BattleDamageCalculator.spec.ts", () => {
 
     beforeEach(async () => {
       // @ts-ignore
-      jest.spyOn(battleDamageCalculator.characterWeapon, "getWeapon" as any).mockImplementation(() => {
-        return null;
-      });
+      jest.spyOn(battleDamageCalculator.characterWeapon, "getWeapon" as any).mockImplementation(() => null);
 
-      // @ts-ignore
-      jest.spyOn(battleDamageCalculator, "calculateTotalPotentialDamage").mockImplementation(() => 100);
+      jest.spyOn(battleDamageCalculator as any, "calculatePhysicalTotalPotentialDamage").mockImplementation(() => 100);
 
       jest
-        // @ts-ignore
-        .spyOn(battleDamageCalculator, "implementDamageReduction")
-        // @ts-ignore
+        .spyOn(battleDamageCalculator as any, "implementDamageReduction")
         .mockImplementation((defenderSkills, target, damage, isMagicAttack) => damage);
 
       // @ts-ignore
       jest.spyOn(_, "random").mockImplementation((a, b) => b);
 
       jest
-        // @ts-ignore
-        .spyOn(battleDamageCalculator, "gaussianRandom")
+        .spyOn(battleDamageCalculator as any, "gaussianRandom")
         // @ts-ignore
         .mockImplementation((meanDamage, stdDeviation) => meanDamage + stdDeviation);
 
@@ -315,6 +296,175 @@ describe("BattleDamageCalculator.spec.ts", () => {
 
       const damage = await battleDamageCalculator.calculateHitDamage(attacker, defenderNPC, false);
       expect(damage).toBeCloseTo(85);
+    });
+
+    describe("BattleDamageCalculator - New Test Cases", () => {
+      let battleDamageCalculator: BattleDamageCalculator;
+      let testCharacter: ICharacter;
+      let testNPC: INPC;
+
+      beforeAll(() => {
+        battleDamageCalculator = container.get<BattleDamageCalculator>(BattleDamageCalculator);
+
+        // Set random as 50 to get the most likely Battle Event
+        jest.spyOn(_, "random").mockImplementation(() => 51);
+      });
+
+      beforeEach(async () => {
+        testNPC = await unitTestHelper.createMockNPC(null, { hasSkills: true });
+        await testNPC.populate("skills").execPopulate();
+        testCharacter = await unitTestHelper.createMockCharacter(null, { hasSkills: true, hasEquipment: true });
+        await testCharacter.populate("skills").execPopulate();
+      });
+
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
+
+      describe("Magic attack scenarios", () => {
+        it("should properly calculate magic attack damage", async () => {
+          await testCharacter.populate("skills").execPopulate();
+          await testNPC.populate("skills").execPopulate();
+
+          jest.spyOn(battleDamageCalculator as any, "gaussianRandom").mockImplementation(() => 10);
+
+          const hit = await battleDamageCalculator.calculateHitDamage(testCharacter, testNPC, true);
+
+          expect(hit).toBeCloseTo(10, 0);
+        });
+
+        it("should properly calculate magic attack damage with damage reduction", async () => {
+          await testCharacter.populate("skills").execPopulate();
+          await testNPC.populate("skills").execPopulate();
+          const skills = await Skill.findById(testCharacter.skills);
+
+          skills!.level = 25;
+          skills!.magicResistance.level = 25;
+          await skills!.save();
+
+          await testCharacter.populate("skills").execPopulate();
+
+          jest.spyOn(battleDamageCalculator as any, "gaussianRandom").mockImplementation(() => 30);
+
+          const hit = await battleDamageCalculator.calculateHitDamage(testNPC, testCharacter, true);
+
+          expect(hit).toBeCloseTo(15, 1);
+        });
+
+        it("should handle critical hits in magic attacks", () => {
+          jest.spyOn(_, "random").mockImplementation(() => 0); // Force critical hit
+          const hit = battleDamageCalculator.getCriticalHitDamageIfSucceed(10);
+          expect(hit).toBe(18);
+        });
+
+        it("should calculate magic attack potential damage", async () => {
+          // @ts-ignore
+          const potentialDamage = await battleDamageCalculator.calculateMagicTotalPotentialDamage(
+            testCharacter.skills as ISkill,
+            testNPC.skills as ISkill
+          );
+
+          expect(potentialDamage).toBeGreaterThan(0);
+        });
+      });
+
+      describe("Edge cases for damage calculation", () => {
+        it("should handle zero attack and defense gracefully", async () => {
+          // @ts-ignore
+          jest.spyOn(battleDamageCalculator.skillStatsCalculator, "getAttack").mockImplementation(() => 0);
+          // @ts-ignore
+          jest.spyOn(battleDamageCalculator.skillStatsCalculator, "getDefense").mockImplementation(() => 0);
+
+          const hit = await battleDamageCalculator.calculateHitDamage(testCharacter, testNPC);
+
+          expect(hit).toBe(0);
+        });
+
+        it("should handle maximum possible damage", async () => {
+          jest.spyOn(battleDamageCalculator as any, "gaussianRandom").mockImplementation(() => 10000);
+
+          const hit = await battleDamageCalculator.calculateHitDamage(testCharacter, testNPC);
+
+          expect(hit).toBe(testNPC.health); // Damage should not exceed target's health
+        });
+
+        it("should handle negative damage (should be clamped to minimum)", async () => {
+          jest.spyOn(battleDamageCalculator as any, "gaussianRandom").mockImplementation(() => -10);
+
+          const hit = await battleDamageCalculator.calculateHitDamage(testCharacter, testNPC);
+
+          expect(hit).toBe(0);
+        });
+
+        it("should not apply damage reduction for NPCs", async () => {
+          const defender = await unitTestHelper.createMockNPC(null, { hasSkills: true });
+          const attacker = await unitTestHelper.createMockCharacter(null, { hasSkills: true });
+
+          const hit = await battleDamageCalculator.calculateHitDamage(attacker, defender);
+
+          expect(hit).toBeGreaterThan(0);
+        });
+      });
+
+      describe("PVP scenarios", () => {
+        let attacker: ICharacter;
+        let defender: ICharacter;
+
+        beforeEach(async () => {
+          // @ts-ignore
+          jest.spyOn(battleDamageCalculator.characterWeapon, "getWeapon" as any).mockImplementation(() => null);
+
+          jest
+            .spyOn(battleDamageCalculator as any, "calculatePhysicalTotalPotentialDamage")
+            .mockImplementation(() => 100);
+
+          jest
+            .spyOn(battleDamageCalculator as any, "implementDamageReduction")
+            .mockImplementation((defenderSkills, target, damage, isMagicAttack) => damage);
+
+          // @ts-ignore
+          jest.spyOn(_, "random").mockImplementation((a, b) => b);
+
+          jest
+            .spyOn(battleDamageCalculator as any, "gaussianRandom")
+            // @ts-ignore
+            .mockImplementation((meanDamage, stdDeviation) => meanDamage + stdDeviation);
+
+          attacker = await unitTestHelper.createMockCharacter(
+            {
+              class: CharacterClass.Rogue,
+              type: EntityType.Character,
+            },
+            { hasSkills: true }
+          );
+
+          defender = await unitTestHelper.createMockCharacter(
+            {
+              type: EntityType.Character,
+              health: 200,
+            },
+            { hasSkills: true }
+          );
+        });
+
+        it("should increase damage for Rogue in PVP", async () => {
+          const damage = await battleDamageCalculator.calculateHitDamage(attacker, defender, false);
+          expect(damage).toBe(94);
+        });
+
+        it("should not increase damage for non-Rogue in PVP", async () => {
+          attacker.class = CharacterClass.Berserker;
+          const damage = await battleDamageCalculator.calculateHitDamage(attacker, defender, false);
+          expect(damage).toBe(85);
+        });
+
+        it("should not increase damage for Rogue against NPC", async () => {
+          const defenderNPC = await unitTestHelper.createMockNPC(null, { hasSkills: true });
+
+          const damage = await battleDamageCalculator.calculateHitDamage(attacker, defenderNPC, false);
+          expect(damage).toBeCloseTo(85);
+        });
+      });
     });
   });
 });
