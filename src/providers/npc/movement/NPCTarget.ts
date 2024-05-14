@@ -193,21 +193,16 @@ export class NPCTarget {
 
   @TrackNewRelicTransaction()
   public async setTarget(npc: INPC, character: ICharacter): Promise<void> {
-    try {
-      if (!(npc.isAlive || npc.health === 0) || character?.health === 0) {
-        return;
-      }
-
-      const char = await Character.findById(character._id).lean();
-      if (!char) {
-        return;
-      }
-
-      await NPC.updateOne({ _id: npc._id }, { $set: { targetCharacter: char._id } });
-    } catch (error) {
-      console.error(error);
-      throw error;
+    if (!(npc.isAlive || npc.health === 0) || character?.health === 0) {
+      return;
     }
+
+    const char = await Character.findById(character._id).lean();
+    if (!char) {
+      return;
+    }
+
+    await NPC.updateOne({ _id: npc._id }, { $set: { targetCharacter: char._id } });
   }
 
   private getRangeThreshold(npc: INPC): number | undefined {

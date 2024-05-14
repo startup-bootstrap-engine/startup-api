@@ -106,6 +106,7 @@ export class CharacterBuffAttribute {
       }
     } catch (err) {
       console.error(err);
+      throw err;
     }
 
     if (!noMessage) {

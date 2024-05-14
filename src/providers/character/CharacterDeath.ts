@@ -109,6 +109,7 @@ export class CharacterDeath {
       this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Characters, "Death", 1);
     } catch (err) {
       console.error(err);
+      throw err;
     } finally {
       // Run these tasks concurrently as they don't depend on each other
       await Promise.all([

@@ -125,6 +125,7 @@ export class CharacterAutoLootQueue {
       await Promise.all([this.characterInventory.sendInventoryUpdateEvent(character), ...disableLootingPromises]);
     } catch (error) {
       console.error(error);
+      throw error;
     }
   }
 

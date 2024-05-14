@@ -106,6 +106,7 @@ export class BattleNetworkInitTargeting {
         } catch (error) {
           console.error(error);
           await this.locker.unlock(`character-${character._id}-battle-targeting`);
+          throw error;
         }
       }
     );

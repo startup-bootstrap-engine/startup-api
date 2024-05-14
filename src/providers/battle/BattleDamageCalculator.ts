@@ -34,67 +34,36 @@ export class BattleDamageCalculator {
     target: BattleParticipant,
     isMagicAttack: boolean = false
   ): Promise<number> {
-    let attackerSkills = attacker.skills as unknown as ISkill;
-    let defenderSkills = target.skills as unknown as ISkill;
-
-    if (!attackerSkills?.level) {
-      attackerSkills = (await this.getSkills(attacker._id)) as unknown as ISkill;
-    }
-    if (!defenderSkills?.level) {
-      defenderSkills = (await this.getSkills(target._id)) as unknown as ISkill;
-    }
-
-    if (!attackerSkills) {
-      throw new Error(`Skills not found for attacker ${attacker._id}`);
-    }
-
-    if (!defenderSkills) {
-      throw new Error(`Skills not found for defender ${target._id}`);
-    }
+    const attackerSkills = await this.getOrFetchSkills(attacker);
+    const defenderSkills = await this.getOrFetchSkills(target);
 
     const weapon = await this.characterWeapon.getWeapon(attacker as ICharacter);
+    const totalPotentialAttackerDamage = isMagicAttack
+      ? await this.calculateMagicTotalPotentialDamage(attackerSkills, defenderSkills)
+      : await this.calculatePhysicalTotalPotentialDamage(attackerSkills, defenderSkills, weapon?.item);
 
-    let totalPotentialAttackerDamage = await this.calculateTotalPotentialDamage(
-      attackerSkills,
-      defenderSkills,
-      isMagicAttack,
-      weapon?.item
-    );
+    let adjustedDamage = this.adjustForClassAndPvP(attacker, target, totalPotentialAttackerDamage);
+    adjustedDamage = this.calculateDamageWithDeviation(adjustedDamage);
 
-    if (attacker.type === EntityType.Character && target.type === EntityType.Character) {
-      totalPotentialAttackerDamage += this.calculateExtraDamageBasedOnClass(
-        attacker.class as CharacterClass,
-        totalPotentialAttackerDamage
-      );
+    const reducedDamage = await this.implementDamageReduction(defenderSkills, target, adjustedDamage, isMagicAttack);
 
-      totalPotentialAttackerDamage *= BATTLE_PVP_MELEE_DAMAGE_RATIO;
-    }
-
-    let damage;
-
-    if (weapon?.item && weapon?.item.isTraining) {
-      damage = Math.round(_.random(0, 1));
-    } else {
-      // regular damage
-
-      const meanDamage = totalPotentialAttackerDamage * 0.75; // 75% of max as the mean
-      const stdDeviation = totalPotentialAttackerDamage * 0.1; // 10% of max as the std deviation
-
-      damage = Math.round(this.gaussianRandom(meanDamage, stdDeviation));
-    }
-
-    damage = await this.implementDamageReduction(defenderSkills, target, damage, isMagicAttack);
-
-    // damage cannot be higher than target's remaining health
-    return damage > target.health ? target.health : damage;
+    return Math.max(0, Math.min(reducedDamage, target.health));
   }
 
   public getCriticalHitDamageIfSucceed(damage: number): number {
     const hasCriticalHitSucceeded = _.random(0, 100) <= BATTLE_CRITICAL_HIT_CHANCE;
+    return hasCriticalHitSucceeded ? damage * BATTLE_CRITICAL_HIT_DAMAGE_MULTIPLIER : damage;
+  }
 
-    if (hasCriticalHitSucceeded) return damage * BATTLE_CRITICAL_HIT_DAMAGE_MULTIPLIER;
-
-    return damage;
+  private async getOrFetchSkills(participant: BattleParticipant): Promise<ISkill> {
+    let skills = participant.skills as unknown as ISkill;
+    if (!skills?.level) {
+      skills = (await this.getSkills(participant._id)) as unknown as ISkill;
+    }
+    if (!skills) {
+      throw new Error(`Skills not found for participant ${participant._id}`);
+    }
+    return skills;
   }
 
   private async getSkills(entityId: string): Promise<ISkill> {
@@ -105,8 +74,13 @@ export class BattleDamageCalculator {
       .cacheQuery({
         cacheKey: `${entityId}-skills`,
       })) as unknown as ISkill;
-
     return skills;
+  }
+
+  private calculateDamageWithDeviation(totalPotentialDamage: number): number {
+    const meanDamage = totalPotentialDamage * 0.75; // 75% of max as the mean
+    const stdDeviation = totalPotentialDamage * 0.1; // 10% of max as the std deviation
+    return Math.round(this.gaussianRandom(meanDamage, stdDeviation));
   }
 
   private gaussianRandom(mean: number, stdDeviation: number): number {
@@ -124,25 +98,8 @@ export class BattleDamageCalculator {
     damage: number,
     isMagicAttack: boolean
   ): Promise<number> {
-    //! Disable for now NPC damage reduction
-    // if (target.type === EntityType.NPC) {
-    //   const [defenderResistanceLevel, defenderMagicResistanceLevel] = await Promise.all([
-    //     defenderSkills?.resistance?.level,
-    //     defenderSkills?.magicResistance?.level,
-    //   ]);
-
-    //   const defenseAttribute = isMagicAttack ? defenderMagicResistanceLevel : defenderResistanceLevel;
-    //   damage =
-    //     this.calculateDamageReduction(
-    //       damage,
-    //       this.calculateCharacterRegularDefense(defenderSkills?.level, defenseAttribute)
-    //     ) * NPC_DAMAGE_REDUCTION_RATIO;
-    // }
-
     if (target.type === EntityType.Character) {
       const character = target as ICharacter;
-      // added this check because was getting
-      // 'Skills owner is undefined' in the getSkillLevelWithBuffs function
       if (!defenderSkills.owner) {
         defenderSkills.owner = target.id;
       }
@@ -155,60 +112,73 @@ export class BattleDamageCalculator {
           this.traitGetter.getSkillLevelWithBuffs(defenderSkills, BasicAttribute.MagicResistance),
         ]);
 
-      let DEFENDER_LEVEL_MODIFIER;
-
-      switch (target.class) {
-        case CharacterClass.Druid:
-        case CharacterClass.Sorcerer:
-          DEFENDER_LEVEL_MODIFIER = 0.25;
-          break;
-        case CharacterClass.Hunter:
-          DEFENDER_LEVEL_MODIFIER = 0.5;
-          break;
-        default:
-          DEFENDER_LEVEL_MODIFIER = 1;
-          break;
-      }
-
-      const level = defenderSkills?.level * DEFENDER_LEVEL_MODIFIER;
+      const level = defenderSkills.level * this.getDefenderLevelModifier(target.class as CharacterClass);
 
       if (hasShield && defenderShieldingLevel > 1) {
-        damage = this.calculateDamageReduction(
+        return this.calculateDamageReduction(
           damage,
           this.calculateCharacterShieldingDefense(level, defenderResistanceLevel, defenderShieldingLevel)
         );
-      } else if (!hasShield) {
+      } else {
         const defenseAttribute = isMagicAttack ? defenderMagicResistanceLevel : defenderResistanceLevel;
-        damage = this.calculateDamageReduction(damage, this.calculateCharacterRegularDefense(level, defenseAttribute));
+        return this.calculateDamageReduction(damage, this.calculateCharacterRegularDefense(level, defenseAttribute));
       }
     }
 
     return damage;
   }
 
-  private async calculateTotalPotentialDamage(
-    attackerSkills: ISkill,
-    defenderSkills: ISkill,
-    isMagicAttack: boolean,
-    weapon: IItem | undefined
-  ): Promise<number> {
-    let attackerTotalAttack, defenderTotalDefense;
-
-    if (isMagicAttack) {
-      [attackerTotalAttack, defenderTotalDefense] = await Promise.all([
-        this.skillStatsCalculator.getMagicAttack(attackerSkills),
-        this.skillStatsCalculator.getMagicDefense(defenderSkills),
-      ]);
-    } else {
-      const extraDamage = this.calculateExtraDamageBasedOnSkills(weapon, attackerSkills);
-      [attackerTotalAttack, defenderTotalDefense] = await Promise.all([
-        this.skillStatsCalculator.getAttack(attackerSkills),
-        this.skillStatsCalculator.getDefense(defenderSkills),
-      ]);
-      attackerTotalAttack += extraDamage;
+  private getDefenderLevelModifier(characterClass: CharacterClass): number {
+    switch (characterClass) {
+      case CharacterClass.Druid:
+      case CharacterClass.Sorcerer:
+        return 0.25;
+      case CharacterClass.Hunter:
+        return 0.5;
+      default:
+        return 1;
     }
+  }
+
+  private async calculateMagicTotalPotentialDamage(attackerSkills: ISkill, defenderSkills: ISkill): Promise<number> {
+    const [attackerTotalAttack, defenderTotalDefense] = await Promise.all([
+      this.skillStatsCalculator.getMagicAttack(attackerSkills),
+      this.skillStatsCalculator.getMagicDefense(defenderSkills),
+    ]);
 
     return _.round(attackerTotalAttack * (100 / (100 + defenderTotalDefense))) * BATTLE_TOTAL_POTENTIAL_DAMAGE_MODIFIER;
+  }
+
+  private async calculatePhysicalTotalPotentialDamage(
+    attackerSkills: ISkill,
+    defenderSkills: ISkill,
+    weapon: IItem | undefined
+  ): Promise<number> {
+    const extraDamage = this.calculateExtraDamageBasedOnSkills(weapon, attackerSkills);
+    const [attackerTotalAttack, defenderTotalDefense] = await Promise.all([
+      this.skillStatsCalculator.getAttack(attackerSkills),
+      this.skillStatsCalculator.getDefense(defenderSkills),
+    ]);
+
+    return (
+      _.round((attackerTotalAttack + extraDamage) * (100 / (100 + defenderTotalDefense))) *
+      BATTLE_TOTAL_POTENTIAL_DAMAGE_MODIFIER
+    );
+  }
+
+  private adjustForClassAndPvP(
+    attacker: BattleParticipant,
+    target: BattleParticipant,
+    totalPotentialDamage: number
+  ): number {
+    if (attacker.type === EntityType.Character && target.type === EntityType.Character) {
+      totalPotentialDamage += this.calculateExtraDamageBasedOnClass(
+        attacker.class as CharacterClass,
+        totalPotentialDamage
+      );
+      return totalPotentialDamage * BATTLE_PVP_MELEE_DAMAGE_RATIO;
+    }
+    return totalPotentialDamage;
   }
 
   private calculateCharacterShieldingDefense(level: number, resistanceLevel: number, shieldingLevel: number): number {
@@ -221,24 +191,18 @@ export class BattleDamageCalculator {
 
   private calculateDamageReduction(damage: number, characterDefense: number): number {
     const reduction = Math.min(characterDefense / 100, DAMAGE_REDUCTION_MAX_REDUCTION_PERCENTAGE);
-    const realDamage = damage * (1 - reduction);
-
-    return Math.max(DAMAGE_REDUCTION_MIN_DAMAGE, realDamage);
+    return Math.max(DAMAGE_REDUCTION_MIN_DAMAGE, damage * (1 - reduction));
   }
 
   private calculateExtraDamageBasedOnSkills(weapon: IItem | undefined, characterSkills: ISkill): number {
     const weaponSubType = weapon ? weapon.subType || "None" : "None";
     const skillName = SKILLS_MAP.get(weaponSubType);
-    if (!skillName) {
-      return 0;
-    }
-    return Math.floor(characterSkills[skillName]?.level / 2);
+    return skillName ? Math.floor(characterSkills[skillName]?.level / 2) : 0;
   }
 
   private calculateExtraDamageBasedOnClass(clas: CharacterClass, calculatedDamage: number): number {
-    if (clas === CharacterClass.Rogue) {
-      return Math.floor(calculatedDamage * PVP_ROGUE_ATTACK_DAMAGE_INCREASE_MULTIPLIER);
-    }
-    return 0;
+    return clas === CharacterClass.Rogue
+      ? Math.floor(calculatedDamage * PVP_ROGUE_ATTACK_DAMAGE_INCREASE_MULTIPLIER)
+      : 0;
   }
 }
