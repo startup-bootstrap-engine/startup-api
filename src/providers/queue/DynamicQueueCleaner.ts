@@ -85,4 +85,35 @@ export class DynamicQueueCleaner {
       queueConnections.delete(queueName);
     }
   }
+
+  public async clearAllJobs(queues: Map<string, Queue>): Promise<void> {
+    for (const [queueName, queue] of queues.entries()) {
+      const jobs = await queue.getJobs(["waiting", "active", "delayed", "paused"]);
+      for (const job of jobs) {
+        await job
+          .remove()
+          .catch((err) => console.error(`Error removing job ${job.id} from queue ${queueName}:`, err.message));
+      }
+    }
+  }
+
+  public async shutdown(queues: Map<string, Queue>, workers: Map<string, Worker>): Promise<void> {
+    for (const [queueName, queue] of queues.entries()) {
+      const worker = workers.get(queueName);
+      if (worker) {
+        await worker
+          .close()
+          .catch((err) => console.error(`Error shutting down worker for queue ${queueName}:`, err.message));
+        // Optionally, remove the worker from the workers map if it's no longer needed
+        workers.delete(queueName);
+      }
+
+      await queue.close().catch((err) => console.error(`Error shutting down queue ${queueName}:`, err.message));
+      // Optionally, remove the queue from the queues map if it's no longer needed
+      queues.delete(queueName);
+
+      // Update the queue activity monitor if necessary
+      await this.queueActivityMonitor.deleteQueueActivity(queueName);
+    }
+  }
 }

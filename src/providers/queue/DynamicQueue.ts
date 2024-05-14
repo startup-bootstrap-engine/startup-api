@@ -287,36 +287,11 @@ export class DynamicQueue {
     }
   }
 
-  // Moved down here for readability
-
   public async clearAllJobs(): Promise<void> {
-    for (const [queueName, queue] of this.queues.entries()) {
-      const jobs = await queue.getJobs(["waiting", "active", "delayed", "paused"]);
-      for (const job of jobs) {
-        await job
-          .remove()
-          .catch((err) => console.error(`Error removing job ${job.id} from queue ${queueName}:`, err.message));
-      }
-    }
+    await this.dynamicQueueCleaner.clearAllJobs(this.queues);
   }
 
   public async shutdown(): Promise<void> {
-    for (const [queueName, queue] of this.queues.entries()) {
-      const worker = this.workers.get(queueName);
-      if (worker) {
-        await worker
-          .close()
-          .catch((err) => console.error(`Error shutting down worker for queue ${queueName}:`, err.message));
-        // Optionally, remove the worker from the workers map if it's no longer needed
-        this.workers.delete(queueName);
-      }
-
-      await queue.close().catch((err) => console.error(`Error shutting down queue ${queueName}:`, err.message));
-      // Optionally, remove the queue from the queues map if it's no longer needed
-      this.queues.delete(queueName);
-
-      // Update the queue activity monitor if necessary
-      await this.queueActivityMonitor.deleteQueueActivity(queueName);
-    }
+    await this.dynamicQueueCleaner.shutdown(this.queues, this.workers);
   }
 }
