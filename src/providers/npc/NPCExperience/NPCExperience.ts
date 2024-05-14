@@ -74,8 +74,15 @@ export class NPCExperience {
     private partyCRUD: PartyCRUD
   ) {}
 
+  /**
+   * This function distributes
+   * the xp stored in the xpToRelease array to the corresponding
+   * characters and notifies them if leveled up
+   */
   @TrackNewRelicTransaction()
   public async releaseXP(target: INPC): Promise<void> {
+    // matches both melee and magic battle companions
+    // do not give XP for battle companions from the training room
     if ((target as INPC).key.includes("battle-companion")) {
       return;
     }
