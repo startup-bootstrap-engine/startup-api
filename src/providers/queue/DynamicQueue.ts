@@ -2,7 +2,6 @@ import { NewRelic } from "@providers/analytics/NewRelic";
 import { appEnv } from "@providers/config/env";
 import {
   QUEUE_CHARACTER_MAX_SCALE_FACTOR,
-  QUEUE_CONNECTION_CHECK_INTERVAL,
   QUEUE_GLOBAL_WORKER_LIMITER_DURATION,
   QUEUE_NPC_MAX_SCALE_FACTOR,
   QUEUE_WORKER_MIN_CONCURRENCY,
@@ -12,12 +11,12 @@ import {
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { Locker } from "@providers/locks/Locker";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { EnvType } from "@rpg-engine/shared";
 import { DefaultJobOptions, Job, Queue, QueueBaseOptions, Worker, WorkerOptions } from "bullmq";
 import { Redis } from "ioredis";
 import { random } from "lodash";
+import { DynamicQueueCleaner } from "./DynamicQueueCleaner";
 import { EntityQueueScalingCalculator } from "./EntityQueueScalingCalculator";
 import { QueueActivityMonitor } from "./QueueActivityMonitor";
 
@@ -46,7 +45,7 @@ export class DynamicQueue {
     private inMemoryHashTable: InMemoryHashTable,
     private newRelic: NewRelic,
     private entityQueueScalingCalculator: EntityQueueScalingCalculator,
-    private locker: Locker
+    private dynamicQueueCleaner: DynamicQueueCleaner
   ) {}
 
   public async addJob(
@@ -127,7 +126,13 @@ export class DynamicQueue {
       queue = new Queue(queueName, queueOptions);
       this.queues.set(queueName, queue);
       // constantly pool the connection to check if it's still needed
-      await this.monitorAndReleaseInactiveQueueRedisConnections(queueName, connection);
+      await this.dynamicQueueCleaner.monitorAndReleaseInactiveQueueRedisConnections(
+        this.queues,
+        this.workers,
+        this.queueConnections,
+        queueName,
+        connection
+      );
 
       queue.on("error", (error) => {
         console.error(`Queue error: ${error.message}`);
@@ -217,66 +222,6 @@ export class DynamicQueue {
           });
         });
       }
-    }
-  }
-
-  // Remember each redis client connection consume resources, so it's important to release them when they're no longer needed
-  private async monitorAndReleaseInactiveQueueRedisConnections(queueName: string, connection: Redis): Promise<void> {
-    const lockKey = `queue-connection-monitor-${queueName}`;
-    const canProceed = await this.locker.lock(lockKey);
-    if (!canProceed) {
-      return;
-    }
-
-    this.queueConnections.set(queueName, connection);
-
-    try {
-      // Only set the interval once when the lock is acquired.
-      const queueConnectionInterval = setInterval(async () => {
-        try {
-          const hasQueueActivity = await this.queueActivityMonitor.hasQueueActivity(queueName);
-          if (!hasQueueActivity) {
-            // Perform resource cleanup
-            await this.performResourceCleanup(queueName, connection);
-
-            // After cleanup, clear the interval and release the lock
-            clearInterval(queueConnectionInterval);
-            await this.locker.unlock(lockKey);
-          }
-        } catch (error) {
-          console.error(`Error during resource monitoring for queue ${queueName}: ${error}`);
-        }
-      }, QUEUE_CONNECTION_CHECK_INTERVAL);
-    } catch (error) {
-      console.error(`Failed to initiate resource monitoring for queue ${queueName}: ${error}`);
-    } finally {
-      await this.locker.unlock(lockKey);
-    }
-  }
-
-  private async performResourceCleanup(queueName: string, connection: Redis): Promise<void> {
-    try {
-      const worker = this.workers.get(queueName);
-      if (worker) {
-        await worker.close();
-        this.workers.delete(queueName);
-      }
-
-      const queue = this.queues.get(queueName);
-      if (queue) {
-        await queue.close();
-        await queue.obliterate({
-          force: true,
-        });
-        this.queues.delete(queueName);
-      }
-
-      console.log(`🔒 Releasing connection for queue ${queueName}`);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      await this.redisManager.releasePoolClient(connection);
-      this.queueConnections.delete(queueName);
     }
   }
 
