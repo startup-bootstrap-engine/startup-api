@@ -298,7 +298,7 @@ describe("BattleDamageCalculator.spec.ts", () => {
       expect(damage).toBeCloseTo(85);
     });
 
-    describe("BattleDamageCalculator - New Test Cases", () => {
+    describe("BattleDamageCalculator - Edge cases", () => {
       let battleDamageCalculator: BattleDamageCalculator;
       let testCharacter: ICharacter;
       let testNPC: INPC;
@@ -319,6 +319,19 @@ describe("BattleDamageCalculator.spec.ts", () => {
 
       afterEach(() => {
         jest.clearAllMocks();
+      });
+
+      it("should return a random damage between 0 and 1 if the weapon is a training weapon", async () => {
+        await testCharacter.populate("skills").execPopulate();
+        await testNPC.populate("skills").execPopulate();
+
+        const mockWeapon = { item: { isTraining: true } };
+        // @ts-ignore
+        jest.spyOn(battleDamageCalculator.characterWeapon, "getWeapon").mockResolvedValue(mockWeapon);
+
+        const hit = await battleDamageCalculator.calculateHitDamage(testCharacter, testNPC);
+
+        expect([0, 1]).toContain(hit);
       });
 
       describe("Magic attack scenarios", () => {
