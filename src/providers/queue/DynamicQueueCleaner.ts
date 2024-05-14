@@ -29,26 +29,32 @@ export class DynamicQueueCleaner {
     }
 
     queueConnections.set(queueName, connection);
+    let queueConnectionInterval: NodeJS.Timeout | null = null;
 
     try {
-      // Only set the interval once when the lock is acquired.
-      const queueConnectionInterval = setInterval(async () => {
+      queueConnectionInterval = setInterval(async () => {
         try {
           const hasQueueActivity = await this.queueActivityMonitor.hasQueueActivity(queueName);
           if (!hasQueueActivity) {
-            // Perform resource cleanup
             await this.performResourceCleanup(queues, workers, queueConnections, queueName, connection);
-
-            // After cleanup, clear the interval and release the lock
-            clearInterval(queueConnectionInterval);
+            if (queueConnectionInterval) {
+              clearInterval(queueConnectionInterval);
+            }
             await this.locker.unlock(lockKey);
           }
         } catch (error) {
           console.error(`Error during resource monitoring for queue ${queueName}: ${error}`);
+          if (queueConnectionInterval) {
+            clearInterval(queueConnectionInterval);
+          }
+          await this.locker.unlock(lockKey);
         }
       }, QUEUE_CONNECTION_CHECK_INTERVAL);
     } catch (error) {
       console.error(`Failed to initiate resource monitoring for queue ${queueName}: ${error}`);
+      if (queueConnectionInterval) {
+        clearInterval(queueConnectionInterval);
+      }
     } finally {
       await this.locker.unlock(lockKey);
     }
@@ -79,10 +85,15 @@ export class DynamicQueueCleaner {
 
       console.log(`🔒 Releasing connection for queue ${queueName}`);
     } catch (error) {
-      console.error(error);
+      console.error(`Error during resource cleanup for queue ${queueName}:`, error);
     } finally {
-      await this.redisManager.releasePoolClient(connection);
-      queueConnections.delete(queueName);
+      try {
+        await this.redisManager.releasePoolClient(connection);
+      } catch (releaseError) {
+        console.error(`Error releasing Redis connection for queue ${queueName}:`, releaseError);
+      } finally {
+        queueConnections.delete(queueName);
+      }
     }
   }
 
