@@ -38,6 +38,11 @@ export class BattleDamageCalculator {
     const defenderSkills = await this.getOrFetchSkills(target);
 
     const weapon = await this.characterWeapon.getWeapon(attacker as ICharacter);
+
+    if (weapon?.item && weapon?.item.isTraining) {
+      return Math.round(_.random(0, 1));
+    }
+
     const totalPotentialAttackerDamage = isMagicAttack
       ? await this.calculateMagicTotalPotentialDamage(attackerSkills, defenderSkills)
       : await this.calculatePhysicalTotalPotentialDamage(attackerSkills, defenderSkills, weapon?.item);
