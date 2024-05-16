@@ -55,7 +55,7 @@ export class NPCCycleQueue {
       async (job) => {
         const { npc, npcSkills } = job.data;
 
-        await this.execNpcCycle(npc, npcSkills);
+        return await this.execNpcCycle(npc, npcSkills);
       },
       {
         npc,
@@ -101,8 +101,9 @@ export class NPCCycleQueue {
 
     npc.skills = npcSkills;
 
-    // if NPC is stunned, do not proceed with the cycle.
+    // if NPC is stunned, do not proceed with core npc behavior
     if (await this.stun.isStun(npc)) {
+      await this.addToQueue(npc, npcSkills);
       return;
     }
 

@@ -31,7 +31,7 @@ export class CharacterAutoLootQueue {
       async (job) => {
         const { character, itemIdsToLoot } = job.data;
 
-        await this.execAutoLoot(character, itemIdsToLoot);
+        return await this.execAutoLoot(character, itemIdsToLoot);
       },
       { character, itemIdsToLoot }
     );

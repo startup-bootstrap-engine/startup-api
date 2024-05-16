@@ -49,7 +49,7 @@ export class NPCBattleCycleQueue {
         async (job) => {
           const { npc, npcSkills } = job.data;
 
-          await this.execBattleCycle(npc, npcSkills);
+          return await this.execBattleCycle(npc, npcSkills);
         },
         {
           npc,

@@ -33,7 +33,7 @@ export class CharacterWeightQueue {
       "character-weight",
       async (job) => {
         const data = job.data as { character: ICharacter };
-        await this.execUpdateCharacterWeight(data.character);
+        return await this.execUpdateCharacterWeight(data.character);
       },
       {
         character,

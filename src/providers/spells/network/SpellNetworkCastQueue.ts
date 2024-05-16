@@ -39,7 +39,7 @@ export class SpellNetworkCastQueue {
       async (job) => {
         const { data, character } = job.data;
 
-        await this.spellCast.castSpell(data, character);
+        return await this.spellCast.castSpell(data, character);
       },
       {
         character,

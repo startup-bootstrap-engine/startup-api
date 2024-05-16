@@ -20,7 +20,7 @@ import { DynamicQueueCleaner } from "./DynamicQueueCleaner";
 import { EntityQueueScalingCalculator } from "./EntityQueueScalingCalculator";
 import { QueueActivityMonitor } from "./QueueActivityMonitor";
 
-type QueueJobFn = (job: any) => Promise<void>;
+type QueueJobFn = ((job: Job) => Promise<void>) | ((job: Job) => Promise<boolean>);
 
 type AvailableScaleFactors = "single" | "custom" | "active-characters" | "active-npcs";
 
@@ -150,8 +150,6 @@ export class DynamicQueue {
       {
         name: `${queueName}-worker`,
         concurrency: maxWorkerConcurrency,
-        lockDuration: 60000,
-        lockRenewTime: 30000,
         limiter: { max: maxWorkerLimiter, duration: QUEUE_GLOBAL_WORKER_LIMITER_DURATION },
         removeOnComplete: { age: 86400, count: 1000 },
         removeOnFail: { age: 86400, count: 1000 },
