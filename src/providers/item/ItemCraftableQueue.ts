@@ -81,7 +81,7 @@ export class ItemCraftableQueue {
       async (job) => {
         const { itemToCraft, character } = job.data;
 
-        await this.execCraftItem(itemToCraft, character);
+        return await this.execCraftItem(itemToCraft, character);
       },
       {
         itemToCraft,

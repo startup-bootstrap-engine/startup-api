@@ -132,7 +132,7 @@ export class CalculateEffectDamage {
     switch (entity.type) {
       case EntityType.NPC:
         const entityBlueprint = blueprintManager.getBlueprint("npcs", (entity as INPC).baseKey) as any;
-        isMagicEntity = entityBlueprint.isMagic;
+        isMagicEntity = entityBlueprint?.isMagic;
         break;
 
       case EntityType.Character:

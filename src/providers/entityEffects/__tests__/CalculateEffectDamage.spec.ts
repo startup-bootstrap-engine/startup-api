@@ -13,7 +13,12 @@ describe("CalculateEffectDamage", () => {
 
   beforeEach(async () => {
     calculateEffectDamage = container.get<CalculateEffectDamage>(CalculateEffectDamage);
-    testAttacker = await unitTestHelper.createMockNPC(null, { hasSkills: true });
+    testAttacker = await unitTestHelper.createMockNPC(
+      {
+        key: "rat",
+      },
+      { hasSkills: true }
+    );
     testCharacterAttacker = await unitTestHelper.createMockCharacter(null, { hasSkills: true });
     testTarget = await unitTestHelper.createMockCharacter(null, { hasSkills: true });
 

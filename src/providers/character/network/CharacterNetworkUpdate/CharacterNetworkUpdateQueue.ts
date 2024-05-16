@@ -67,7 +67,7 @@ export class CharacterNetworkUpdateQueue {
       async (job) => {
         const { character, data } = job.data;
 
-        await this.execPositionUpdate(data, character);
+        return await this.execPositionUpdate(data, character);
       },
       {
         character,

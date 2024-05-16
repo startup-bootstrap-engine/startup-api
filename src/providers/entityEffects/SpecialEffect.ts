@@ -22,7 +22,11 @@ export class SpecialEffect {
     namespace: SpecialEffectNamespace,
     onEffectEnd?: Function
   ): Promise<boolean> {
-    const entityType = target?.type as EntityType;
+    if (!target) {
+      throw new Error("applyEffect: target is null or undefined");
+    }
+
+    const entityType = target.type as EntityType;
     if (entityType === EntityType.Item) {
       return false;
     }
@@ -35,8 +39,14 @@ export class SpecialEffect {
     await this.inMemoryHashTable.set(namespace, this.getEntityKey(target), true);
 
     this.timer.setTimeout(async () => {
+      if (!target) {
+        return;
+      }
+
       await this.inMemoryHashTable.delete(namespace, this.getEntityKey(target));
-      onEffectEnd && onEffectEnd();
+      if (onEffectEnd) {
+        onEffectEnd();
+      }
     }, intervalSec * 1000);
 
     return true;
@@ -44,6 +54,10 @@ export class SpecialEffect {
 
   @TrackNewRelicTransaction()
   public async removeEffect(target: ICharacter | INPC, namespace: SpecialEffectNamespace): Promise<boolean> {
+    if (!target) {
+      throw new Error("removeEffect: target is null or undefined");
+    }
+
     const isApplied = await this.isEffectApplied(target, namespace);
     if (!isApplied) {
       return false;
@@ -55,11 +69,19 @@ export class SpecialEffect {
   }
 
   public async isEffectApplied(target: ICharacter | INPC, namespace: SpecialEffectNamespace): Promise<boolean> {
+    if (!target) {
+      throw new Error("isEffectApplied: target is null or undefined");
+    }
+
     const value = await this.inMemoryHashTable.get(namespace, this.getEntityKey(target));
     return !!value;
   }
 
   public getEntityKey(target: ICharacter | INPC): string {
+    if (!target) {
+      throw new Error("getEntityKey: target is null or undefined");
+    }
+
     const entityType = target.type as EntityType;
     const entityId = target._id;
 
@@ -76,7 +98,7 @@ export class SpecialEffect {
   @TrackNewRelicTransaction()
   async clearEffects(target: ICharacter | INPC): Promise<void> {
     if (!target) {
-      return;
+      throw new Error("clearEffects: target is null or undefined");
     }
 
     await this.inMemoryHashTable.delete(SpecialEffectNamespace.Stealth, this.getEntityKey(target));

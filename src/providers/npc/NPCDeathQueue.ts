@@ -53,7 +53,7 @@ export class NPCDeathQueue {
       async (job) => {
         const { killer, npc } = job.data;
 
-        await this.execHandleNPCDeath(killer, npc);
+        return await this.execHandleNPCDeath(killer, npc);
       },
       { killer, npc }
     );

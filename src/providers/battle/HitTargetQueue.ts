@@ -378,25 +378,6 @@ export class HitTargetQueue {
     return data?.health ?? target.health;
   }
 
-  private async doCalculateAndUpdateOnTargetHealth(
-    target: ICharacter | INPC,
-    lastestHealth: number,
-    damage: number
-  ): Promise<ICharacter | INPC> {
-    try {
-      const newTargetHealth = lastestHealth - damage;
-      target.health = newTargetHealth <= 0 ? 0 : newTargetHealth;
-      target.isAlive = newTargetHealth > 0;
-      await this.updateHealthInDatabase(target, target.health);
-
-      return target;
-    } catch (error) {
-      console.error(`Error processing target health: ${error.message}`);
-
-      return target;
-    }
-  }
-
   private async updateHealthInDatabase(target: ICharacter | INPC, health: number): Promise<void> {
     const updatePayload = { health };
 

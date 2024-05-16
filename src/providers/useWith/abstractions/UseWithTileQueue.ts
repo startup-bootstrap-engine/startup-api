@@ -58,7 +58,7 @@ export class UseWithTileQueue {
       async (job) => {
         const { useWithTileData, character } = job.data;
 
-        await this.onExecuteUseWithTile(character, useWithTileData);
+        return await this.onExecuteUseWithTile(character, useWithTileData);
       },
       {
         character,

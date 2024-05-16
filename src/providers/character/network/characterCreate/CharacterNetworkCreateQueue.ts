@@ -64,7 +64,7 @@ export class CharacterNetworkCreateQueue {
       async (job) => {
         const { character, data } = job.data;
 
-        await this.execCharacterCreate(character, data);
+        return await this.execCharacterCreate(character, data);
       },
       { character, data }
     );

@@ -55,7 +55,7 @@ export class NPCCycleQueue {
       async (job) => {
         const { npc, npcSkills } = job.data;
 
-        await this.execNpcCycle(npc, npcSkills);
+        return await this.execNpcCycle(npc, npcSkills);
       },
       {
         npc,

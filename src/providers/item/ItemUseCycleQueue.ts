@@ -64,7 +64,7 @@ export class ItemUseCycleQueue {
         iterations--;
 
         if (iterations > 0) {
-          await this.add(scene, characterId, itemKey, iterations, intervalDurationMs);
+          return await this.add(scene, characterId, itemKey, iterations, intervalDurationMs);
         }
       },
       {

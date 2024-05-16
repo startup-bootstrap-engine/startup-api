@@ -76,6 +76,8 @@ export class ItemContainerTransactionQueue {
           `${originContainer._id}-to-${targetContainer._id}`,
           result
         );
+
+        return result;
       },
       {
         item,
