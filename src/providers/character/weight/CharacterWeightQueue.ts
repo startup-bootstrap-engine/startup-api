@@ -56,6 +56,10 @@ export class CharacterWeightQueue {
     const weight = await this.getWeight(character);
     const maxWeight = await this.getMaxWeight(character);
 
+    if (isNaN(weight) || isNaN(maxWeight)) {
+      throw new Error(`Invalid weight or maxWeight calculation for character ${character._id}`);
+    }
+
     await Character.updateOne(
       {
         _id: character._id,
@@ -68,7 +72,6 @@ export class CharacterWeightQueue {
       }
     );
 
-    //! Requires virtuals
     character = (await Character.findById(character._id).lean({ virtuals: true, defaults: true })) || character;
 
     this.socketMessaging.sendEventToUser<ICharacterAttributeChanged>(
@@ -87,11 +90,15 @@ export class CharacterWeightQueue {
   public async getMaxWeight(character: ICharacter): Promise<number> {
     const maxWeight = (await this.inMemoryHashTable.get("character-max-weights", character._id)) as unknown as number;
 
-    if (maxWeight) {
+    if (maxWeight && !isNaN(maxWeight) && maxWeight > 0) {
       return maxWeight;
     }
 
     const calculatedMaxWeight = await this.calculateMaxWeight(character);
+
+    if (isNaN(calculatedMaxWeight) || calculatedMaxWeight < 0) {
+      throw new Error(`Invalid max weight calculation for character ${character._id}`);
+    }
 
     await this.inMemoryHashTable.set("character-max-weights", character._id, calculatedMaxWeight);
 
@@ -99,22 +106,24 @@ export class CharacterWeightQueue {
   }
 
   private async calculateMaxWeight(character: ICharacter): Promise<number> {
-    const skills = (await Skill.findById(character.skills)
+    const skills = (await Skill.findOne({
+      owner: character._id,
+    })
       .lean()
       .cacheQuery({
-        cacheKey: `${character?._id}-skills`,
+        cacheKey: `${character._id}-skills`,
       })) as unknown as ISkill;
 
     if (skills) {
+      let calculatedMaxWeight: number;
       if (character.class === CharacterClass.Sorcerer || character.class === CharacterClass.Druid) {
         const magicLvl = await this.traitGetter.getSkillLevelWithBuffs(skills as ISkill, BasicAttribute.Magic);
-
-        return magicLvl * 15;
+        calculatedMaxWeight = magicLvl * 15;
+      } else {
+        const strengthLvl = await this.traitGetter.getSkillLevelWithBuffs(skills as ISkill, BasicAttribute.Strength);
+        calculatedMaxWeight = strengthLvl * 15;
       }
-
-      const strengthLvl = await this.traitGetter.getSkillLevelWithBuffs(skills as ISkill, BasicAttribute.Strength);
-
-      return strengthLvl * 15;
+      return calculatedMaxWeight;
     } else {
       return 15;
     }
@@ -124,6 +133,10 @@ export class CharacterWeightQueue {
   public async getWeight(character: ICharacter): Promise<number> {
     const result = await this.characterWeightCalculator.getTotalCharacterCalculatedWeight(character);
 
+    if (isNaN(result)) {
+      throw new Error(`Invalid weight calculation for character ${character._id}`);
+    }
+
     return result;
   }
 
@@ -131,6 +144,10 @@ export class CharacterWeightQueue {
   public async getWeightRatio(character: ICharacter, item: IItem): Promise<number> {
     const weight = await this.getWeight(character);
     const maxWeight = await this.getMaxWeight(character);
+
+    if (isNaN(weight) || isNaN(maxWeight)) {
+      throw new Error(`Invalid weight or maxWeight calculation for character ${character._id}`);
+    }
 
     return (weight + item.weight) / maxWeight;
   }

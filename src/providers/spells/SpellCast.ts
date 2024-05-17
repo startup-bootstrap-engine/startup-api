@@ -192,7 +192,19 @@ export class SpellCast {
     target.skills = updatedCharacterSkills;
   }
 
-  private async isSpellCastFailed(character: ICharacter, target: any, spell: ISpell): Promise<boolean> {
+  private async isSpellCastFailed(
+    character: ICharacter,
+    target: ITarget | null | undefined,
+    spell: ISpell
+  ): Promise<boolean> {
+    if (!character) {
+      return true;
+    }
+
+    if (spell.castingType === SpellCastingType.RangedCasting && !target) {
+      return true;
+    }
+
     const hasCastSucceeded = await spell.usableEffect(character, target);
 
     // if it fails, it will return explicitly false above. We prevent moving forward, so mana is not spent unnecessarily

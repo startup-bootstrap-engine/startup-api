@@ -28,7 +28,7 @@ export class TraitGetter {
     try {
       if (!skills?.level) {
         // refetch
-        skills = await Skill.findById(skills._id).lean();
+        skills = await Skill.findById(skills?._id).lean();
       }
 
       if (!skills?.owner) {

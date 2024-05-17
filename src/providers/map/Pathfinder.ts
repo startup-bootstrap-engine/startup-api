@@ -171,40 +171,6 @@ export class Pathfinder {
     return [];
   }
 
-  private async hasCircularReferenceOnPathfinding(
-    npc: INPC,
-    map: string,
-    startGridX: number,
-    startGridY: number,
-    endGridX: number,
-    endGridY: number,
-    cachedNextStep: number[],
-    previousNPCPosition: number[]
-  ): Promise<boolean> {
-    // if the next step is the same as the previous NPC position, then we can assume that the NPC is stuck and we should recalculate the path
-    const hasCircularRef =
-      cachedNextStep &&
-      previousNPCPosition &&
-      cachedNextStep[0] === previousNPCPosition[0] &&
-      cachedNextStep[1] === previousNPCPosition[1];
-    if (hasCircularRef) {
-      await this.pathfindingCaching.delete(map, {
-        start: {
-          x: startGridX,
-          y: startGridY,
-        },
-        end: {
-          x: endGridX,
-          y: endGridY,
-        },
-      });
-
-      return true;
-    }
-
-    return false;
-  }
-
   private async findShortestPathBetweenPoints(
     map: string,
 

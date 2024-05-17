@@ -1,19 +1,18 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Equipment, IEquipment } from "@entities/ModuleCharacter/EquipmentModel";
+import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
+import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { blueprintManager, container, unitTestHelper } from "@providers/inversify/container";
+import { ItemCraftableQueue } from "@providers/item/ItemCraftableQueue";
 import { itemsBlueprintIndex } from "@providers/item/data/index";
 import { ToolsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
-
-import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
-import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
-import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
-import { ItemCraftableQueue } from "@providers/item/ItemCraftableQueue";
 import { FromGridX, FromGridY, IRefillableItem, IUseWithTile, MapLayers } from "@rpg-engine/shared";
 import { UseWithTileQueue } from "../abstractions/UseWithTileQueue";
-describe("UseWithTile.ts", () => {
+
+describe("UseWithTileQueue", () => {
   let testItem: IItem,
     testRefillItem: IItem,
     testRefillItemBlueprint: IRefillableItem,
@@ -54,7 +53,7 @@ describe("UseWithTile.ts", () => {
     // Locate character close to the tile
     testCharacter.x = FromGridX(0);
     testCharacter.y = FromGridY(1);
-    (await Character.findByIdAndUpdate(testCharacter._id, testCharacter).lean()) as ICharacter;
+    await Character.findByIdAndUpdate(testCharacter._id, testCharacter).lean();
 
     useWithTileData = {
       originItemId: testItem.id,
@@ -81,7 +80,6 @@ describe("UseWithTile.ts", () => {
     await testCharacterEquipment.save();
 
     inventory = await testCharacter.inventory;
-
     inventoryContainer = (await ItemContainer.findById(inventory.itemContainer)) as unknown as IItemContainer;
 
     await unitTestHelper.addItemsToContainer(inventoryContainer, 1, [testRefillItem]);
@@ -123,9 +121,7 @@ describe("UseWithTile.ts", () => {
     delete testItemBlueprint.useWithTileEffect;
 
     try {
-      // Replace the original blueprint with the modified one just for this test
       itemsBlueprintIndex[testItem.baseKey] = testItemBlueprint;
-
       // @ts-ignore
       await useWithTile.validateData(testCharacter, useWithTileData);
       throw new Error("This test should fail!");
@@ -134,42 +130,41 @@ describe("UseWithTile.ts", () => {
         `UseWithTile > originItem '${testItem.baseKey}' does not have a useWithTileEffect function defined`
       );
     } finally {
-      // Restore the original item blueprint after the test
       itemsBlueprintIndex[testItem.baseKey] = originalItemBlueprint;
     }
   });
+
   it("should fail validations | character too far away from tile", async () => {
     testCharacter.x = FromGridX(5);
     testCharacter.y = FromGridY(5);
-    (await Character.findByIdAndUpdate(testCharacter._id, testCharacter).lean()) as ICharacter;
+    await Character.findByIdAndUpdate(testCharacter._id, testCharacter).lean();
 
     // @ts-ignore
     const sendErrorMsg = jest.spyOn(useWithTile.socketMessaging, "sendErrorMessageToCharacter" as any);
-
     // @ts-ignore
     const response = await useWithTile.validateData(testCharacter, useWithTileData);
     expect(response).toBeUndefined();
     expect(sendErrorMsg).toHaveBeenCalled();
   });
 
-  it("validations should fail | character does not own item", async () => {
+  it("should fail validations | character does not own item", async () => {
     try {
       testCharacterEquipment.leftHand = undefined;
       await testCharacterEquipment.save();
-
-      // @ts-ignore
       testItem.owner = undefined;
       await testItem.save();
 
       // @ts-ignore
       await useWithTile.validateData(testCharacter, useWithTileData);
-      throw new Error("This test should failed!");
+      throw new Error("This test should fail!");
     } catch (error: any) {
-      expect(error.message).toEqual(`UseWith > Item with id ${testItem._id} does not belong to the character!`);
+      expect(error.message).toEqual(
+        `UseWith > Item with id ${testItem._id} does not belong to the character or does not exist!`
+      );
     }
   });
 
-  it("should handles refillable items correctly", async () => {
+  it("should handle refillable items correctly", async () => {
     jest
       // @ts-ignore
       .spyOn(useWithTile.mapTiles, "getPropertyFromLayer" as any)
@@ -181,11 +176,9 @@ describe("UseWithTile.ts", () => {
     expect(response!.originItem.id).toEqual(testRefillItem.id);
   });
 
-  it("should handles refillable items with missing refill resource property", async () => {
-    jest
-      // @ts-ignore
-      .spyOn(useWithTile.mapTiles, "getPropertyFromLayer" as any)
-      .mockImplementation(() => undefined);
+  it("should handle refillable items with missing refill resource property", async () => {
+    // @ts-ignore
+    jest.spyOn(useWithTile.mapTiles, "getPropertyFromLayer" as any).mockImplementation(() => undefined);
 
     // @ts-ignore
     const response = await useWithTile.validateData(testCharacter, useWithTileDataRefill);
@@ -196,12 +189,10 @@ describe("UseWithTile.ts", () => {
     );
   });
 
-  it("should handles refillable items with incorrect refill resource", async () => {
+  it("should handle refillable items with incorrect refill resource", async () => {
     const resource = "incorrect-refill-resource";
-    jest
-      // @ts-ignore
-      .spyOn(useWithTile.mapTiles, "getPropertyFromLayer" as any)
-      .mockImplementation(() => resource);
+    // @ts-ignore
+    jest.spyOn(useWithTile.mapTiles, "getPropertyFromLayer" as any).mockImplementation(() => resource);
 
     // @ts-ignore
     const response = await useWithTile.validateData(testCharacter, useWithTileDataRefill);
@@ -210,5 +201,25 @@ describe("UseWithTile.ts", () => {
       testCharacter,
       `Invalid refill resource. Expected ${testRefillItemBlueprint.refillResourceKey}, got ${resource}`
     );
+  });
+
+  it("should fail validations | invalid targetTile coordinates", async () => {
+    const invalidUseWithTileData = {
+      ...useWithTileData,
+      targetTile: {
+        x: -1, // Invalid coordinate
+        y: -1, // Invalid coordinate
+        map: "example",
+        layer: "ground" as unknown as MapLayers,
+      },
+    };
+
+    // @ts-ignore
+    jest.spyOn(useWithTile.mapTiles, "getTileId" as any).mockImplementation(() => undefined);
+
+    // @ts-ignore
+    const response = await useWithTile.validateData(testCharacter, invalidUseWithTileData);
+    expect(response).toBeUndefined();
+    expect(sendErrorMessageToCharacter).toHaveBeenCalledWith(testCharacter, "Sorry, the selected tile doesn't exist.");
   });
 });

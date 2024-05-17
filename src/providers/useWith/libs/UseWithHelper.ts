@@ -14,32 +14,27 @@ import { provide } from "inversify-binding-decorators";
 export class UseWithHelper {
   constructor(private characterValidation: CharacterValidation, private characterItems: CharacterItems) {}
 
-  public basicValidations(character: ICharacter, data: IUseWithItem | IUseWithTile): void {
-    const isValid = this.characterValidation.hasBasicValidation(character);
-    if (!isValid) {
-      throw new Error(`UseWith > Character does not fulfill basic validations! Character id: ${character.id}`);
+  public basicValidations(character: ICharacter, data: IUseWithItem | IUseWithTile): boolean {
+    if (!this.characterValidation.hasBasicValidation(character)) {
+      return false;
     }
-
     if (!data.originItemId) {
-      throw new Error(`UseWith > Field 'originItemId' is missing! data: ${JSON.stringify(data)}`);
+      console.error(`UseWith > Field 'originItemId' is missing! data: ${JSON.stringify(data)}`);
+      return false;
     }
+    return true;
   }
 
   public async getItem(character: ICharacter, itemId: string): Promise<IItem> {
-    const hasItem = await Item.exists({ _id: itemId, owner: character._id });
-
-    if (!hasItem) {
-      throw new Error(`UseWith > Item with id ${itemId} does not belong to the character!`);
-    }
-
-    // Check if the item corresponds to the useWithKey
-    const item = (await Item.findById(itemId).lean({
+    const item = (await Item.findOne({ _id: itemId, owner: character._id }).lean({
       virtuals: true,
       defaults: true,
-    })) as unknown as IItem;
+    })) as IItem;
+
     if (!item) {
-      throw new Error(`UseWith > Item with id ${itemId} does not exist!`);
+      throw new Error(`UseWith > Item with id ${itemId} does not belong to the character or does not exist!`);
     }
+
     return item;
   }
 }
@@ -61,41 +56,30 @@ export async function calculateItemUseEffectPoints(itemKey: string, caster: ICha
 
   updatedCharacter.skills = skills;
 
-  const magicLevel = (updatedCharacter.skills as unknown as ISkill)?.magic?.level ?? 0;
+  const magicLevel = skills.magic?.level ?? 0;
 
   const itemData = await blueprintManager.getBlueprint<IMagicItemUseWithEntity>(
     "items",
     itemKey as AvailableBlueprints
   );
 
-  if (!itemData.power) {
-    throw new Error(`Item ${itemKey} does not have a power property`);
+  if (!itemData || !itemData.power) {
+    throw new Error(`Item ${itemKey} does not have a valid power property`);
   }
 
-  const minPoints = itemData.power ?? 1;
+  const minPoints = itemData.power;
   const scalingFactor = ITEM_USE_WITH_BASE_EFFECT + magicLevel * ITEM_USE_WITH_BASE_SCALING_FACTOR;
   const meanPoints = Math.round(minPoints + magicLevel * scalingFactor);
 
-  // Sigmoid function
-  const sigmoid = (x: number): number => {
-    return 1 / (1 + Math.exp(-x));
-  };
+  const sigmoid = (x: number): number => 1 / (1 + Math.exp(-x));
 
-  // Function to generate a sigmoid-based value
   const sigmoidRandom = (min: number, max: number): number => {
-    // Reduced range for x to decrease the spread
-    const range = 0.25; // You can adjust this value to control the spread
+    const range = 0.25;
     const x = Math.random() * range - range / 2;
-    // Adjust the sigmoid output to the range [min, max]
     return min + sigmoid(x) * (max - min);
   };
 
-  const maxPoints = meanPoints; // Optionally adjust this to further limit the spread
-  let effectPoints = sigmoidRandom(minPoints, maxPoints);
+  const effectPoints = Math.round(sigmoidRandom(minPoints, meanPoints));
 
-  // Ensure effect points are within the specified range
-  effectPoints = Math.max(minPoints, effectPoints);
-  effectPoints = Math.min(effectPoints, maxPoints);
-
-  return Math.round(effectPoints);
+  return Math.min(Math.max(minPoints, effectPoints), meanPoints);
 }

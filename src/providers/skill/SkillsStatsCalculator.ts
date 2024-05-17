@@ -47,7 +47,7 @@ export class SkillStatsCalculator {
   }
 
   private async getTotalAttackOrDefense(skills: ISkill, isAttack: boolean, isMagic: boolean = false): Promise<number> {
-    if (!skills.owner) return 0;
+    if (!skills?.owner) return 0;
 
     const ownerType = skills.owner.toString();
 

@@ -197,10 +197,9 @@ export class DynamicQueue {
   private setupWorkerErrorHandlers(worker: Worker, queueName: string): void {
     worker.on("error", (error) => console.error(`Worker error: ${error.message}`, error));
     worker.on("failed", (job, error) =>
-      console.error(`${queueName} - Job ${job?.id} failed with error: ${error.message}`, {
-        jobData: job?.data,
-        errorStack: error.stack,
-      })
+      console.error(
+        `${queueName} - Job ${job?.id} failed with error: ${error.message} - data: ${JSON.stringify(job?.data)}`
+      )
     );
   }
 
@@ -214,7 +213,7 @@ export class DynamicQueue {
 
     switch (queueScaleBy) {
       case "single":
-        return this.buildQueueName(prefix, envSuffix);
+        return prefix;
       case "custom":
         if (!queueScaleFactor) throw new Error("Queue scale factor is required when scaling by custom");
         return this.buildQueueName(prefix, envSuffix, random(1, queueScaleFactor));

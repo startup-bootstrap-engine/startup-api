@@ -94,7 +94,8 @@ export class QuestNetworkGet {
 
     const isUnderRange = distanceCharNPC <= NPC_MAX_TALKING_DISTANCE_IN_GRID * GRID_WIDTH;
     if (!isUnderRange) {
-      throw new Error(`NPC ${npc.name} out of range to ask about quests..`);
+      this.socketMessaging.sendErrorMessageToCharacter(character, "You are too far away to talk to this NPC.");
+      return;
     }
 
     npc.currentMovementType = NPCMovementType.Stopped;

@@ -30,6 +30,7 @@ export const spellEntanglingRoots: Partial<ISpell> = {
   projectileAnimationKey: AnimationEffectKeys.Energy,
   maxDistanceGrid: RangeTypes.High,
   characterClass: [CharacterClass.Druid],
+  isPVPOnly: true,
 
   usableEffect: async (character: ICharacter, target: ICharacter | INPC) => {
     const spellCalculator = container.get(SpellCalculator);
