@@ -85,9 +85,6 @@ export class ItemContainerTransactionQueue {
         originContainer,
         targetContainer,
         options,
-      },
-      {
-        queueScaleBy: "active-characters",
       }
     );
 
