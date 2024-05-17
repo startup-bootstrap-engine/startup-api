@@ -144,7 +144,7 @@ export class HitTargetQueue {
     spellHit?: boolean
   ): Promise<void> {
     target.isAlive = target.health > 0;
-    if (!target.isAlive) return;
+    if (!target?.isAlive) return;
 
     const battleEvent: BattleEventType = magicAttack
       ? BattleEventType.Hit

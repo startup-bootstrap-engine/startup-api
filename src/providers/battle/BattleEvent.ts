@@ -30,11 +30,11 @@ export class BattleEvent {
     let defenderSkills = target.skills as unknown as ISkill;
 
     // if the skills somehow are not populated, fetch them
-    if (!attackerSkills.owner) {
+    if (!attackerSkills?.owner) {
       attackerSkills = (await Skill.findOne({ owner: attacker._id }).lean()) as unknown as ISkill;
     }
 
-    if (!defenderSkills.owner) {
+    if (!defenderSkills?.owner) {
       defenderSkills = (await Skill.findOne({ owner: target._id }).lean()) as unknown as ISkill;
     }
 

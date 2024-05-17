@@ -4,6 +4,7 @@ import { container, unitTestHelper } from "@providers/inversify/container";
 import { FromGridX, FromGridY, NPCAlignment, NPCMovementType, NPCPathOrientation } from "@rpg-engine/shared";
 import { NPCMovementMoveTowards } from "../NPCMovementMoveTowards";
 import { NPCTarget } from "../NPCTarget";
+
 describe("NPCMovementMoveTowards.ts", () => {
   let npcMovementMoveTowards: NPCMovementMoveTowards;
   let npcTarget: NPCTarget;
@@ -17,12 +18,15 @@ describe("NPCMovementMoveTowards.ts", () => {
   });
 
   beforeEach(async () => {
-    testCharacter = await unitTestHelper.createMockCharacter({
-      x: FromGridX(14),
-      y: FromGridY(12),
-      initialX: FromGridX(14),
-      initialY: FromGridY(12),
-    });
+    testCharacter = await unitTestHelper.createMockCharacter(
+      {
+        x: FromGridX(14),
+        y: FromGridY(12),
+        initialX: FromGridX(14),
+        initialY: FromGridY(12),
+      },
+      { hasSkills: true }
+    );
     testNPC = await unitTestHelper.createMockNPC(
       {
         x: FromGridX(14),
@@ -74,6 +78,7 @@ describe("NPCMovementMoveTowards.ts", () => {
   it("should correctly stop the movement if the target is reached", async () => {
     testNPC.x = FromGridX(14);
     testNPC.y = FromGridY(13);
+    await testNPC.save();
 
     await npcMovementMoveTowards.startMoveTowardsMovement(testNPC);
 
@@ -134,9 +139,10 @@ describe("NPCMovementMoveTowards.ts", () => {
     expect(testNPC.x).toBe(FromGridX(20));
     expect(testNPC.y).toBe(FromGridX(14));
   });
+
   it("should correctly lose target if target is far away", async () => {
     testNPC.x = FromGridX(14);
-    testNPC.y = FromGridX(24);
+    testNPC.y = FromGridY(24);
     await testNPC.save();
     testCharacter.x = FromGridX(50);
     testCharacter.y = FromGridY(9);
@@ -173,7 +179,7 @@ describe("NPCMovementMoveTowards.ts", () => {
       testCharacter.y = FromGridY(15);
       await testCharacter.save();
 
-      //  @ts-ignore
+      // @ts-ignore
       const spy = jest.spyOn(npcMovementMoveTowards, "initBattleCycle");
 
       await npcMovementMoveTowards.startMoveTowardsMovement(testNPC);
@@ -181,46 +187,37 @@ describe("NPCMovementMoveTowards.ts", () => {
       expect(spy).toHaveBeenCalledWith(testNPC, expect.objectContaining({ _id: testCharacter._id }));
     });
 
-    describe("NPCMovementMoveTowards", () => {
-      it("should call faceTarget if reachedTarget is true", async () => {
-        testNPC.alignment = NPCAlignment.Hostile;
-        testNPC.targetCharacter = testCharacter._id;
-        await testNPC.save();
+    it("should call faceTarget if reachedTarget is true", async () => {
+      testNPC.alignment = NPCAlignment.Hostile;
+      testNPC.targetCharacter = testCharacter._id;
+      await testNPC.save();
 
-        testCharacter.x = FromGridX(14);
-        testCharacter.y = FromGridY(15);
-        await testCharacter.save();
+      testCharacter.x = FromGridX(14);
+      testCharacter.y = FromGridY(15);
+      await testCharacter.save();
 
-        // mock faceTarget function
-        // @ts-ignore
-        npcMovementMoveTowards.faceTarget = jest.fn();
+      // @ts-ignore
+      npcMovementMoveTowards.faceTarget = jest.fn();
 
-        // act
-        await npcMovementMoveTowards.startMoveTowardsMovement(testNPC);
+      await npcMovementMoveTowards.startMoveTowardsMovement(testNPC);
 
-        // assert
-        // @ts-ignore
-        expect(npcMovementMoveTowards.faceTarget).toHaveBeenCalledWith(
-          testNPC,
-          expect.objectContaining({
-            _id: testCharacter._id,
-          })
-        );
-      });
+      // @ts-ignore
+      expect(npcMovementMoveTowards.faceTarget).toHaveBeenCalledWith(
+        testNPC,
+        expect.objectContaining({ _id: testCharacter._id })
+      );
     });
 
-    describe("when reachedTarget...", () => {
-      it("sets the npc.pathOrientation to NPCPathOrientation.Forward when reaching the target, if previous pathOrientation was NPCPathOrientation.Forward", async () => {
-        testNPC.pathOrientation = NPCPathOrientation.Forward;
-        testNPC.x = testCharacter.x;
-        testNPC.y = testCharacter.y;
-        await testNPC.save();
+    it("sets the npc.pathOrientation to NPCPathOrientation.Forward when reaching the target, if previous pathOrientation was NPCPathOrientation.Forward", async () => {
+      testNPC.pathOrientation = NPCPathOrientation.Forward;
+      testNPC.x = testCharacter.x;
+      testNPC.y = testCharacter.y;
+      await testNPC.save();
 
-        // @ts-ignore
-        npcMovementMoveTowards.reachedTarget(testNPC, testCharacter);
+      // @ts-ignore
+      npcMovementMoveTowards.reachedTarget(testNPC, testCharacter);
 
-        expect(testNPC.pathOrientation).toBe(NPCPathOrientation.Forward);
-      });
+      expect(testNPC.pathOrientation).toBe(NPCPathOrientation.Forward);
     });
   });
 });
