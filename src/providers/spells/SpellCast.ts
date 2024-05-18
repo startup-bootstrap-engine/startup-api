@@ -4,6 +4,7 @@ import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
+import { BattleAttackRanged } from "@providers/battle/BattleAttackTarget/BattleAttackRanged";
 import { BattleCharacterAttackValidation } from "@providers/battle/BattleCharacterAttack/BattleCharacterAttackValidation";
 import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
@@ -56,7 +57,8 @@ export class SpellCast {
     private spellSilencer: SpellSilence,
     private mapNonPVPZone: MapNonPVPZone,
     private characterPremiumAccount: CharacterPremiumAccount,
-    private battleCharacterAttackValidation: BattleCharacterAttackValidation
+    private battleCharacterAttackValidation: BattleCharacterAttackValidation,
+    private battleAttackRanged: BattleAttackRanged
   ) {}
 
   public isSpellCasting(msg: string): boolean {
@@ -259,7 +261,6 @@ export class SpellCast {
 
     if (isTargetAtPZ && target.type === EntityType.Character) {
       this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, your target is at a protected zone.");
-
       return false;
     }
 
@@ -285,6 +286,12 @@ export class SpellCast {
       return false;
     }
 
+    // Check if there is an obstacle in the way
+    if (await this.battleAttackRanged.isSolidInRangedTrajectory(caster, target)) {
+      this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, there is an obstacle in the way.");
+      return false;
+    }
+
     const canAttack = await this.battleCharacterAttackValidation.canAttack(caster, target);
     if (!canAttack) {
       return false;
@@ -294,6 +301,7 @@ export class SpellCast {
       this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, this spell is only available for PVP.");
       return false;
     }
+
     return true;
   }
 
