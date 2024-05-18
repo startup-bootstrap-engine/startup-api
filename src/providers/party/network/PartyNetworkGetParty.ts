@@ -37,7 +37,11 @@ export class PartyNetworkGetParty {
 
           party = (await this.partyCRUD.findPartyByCharacterId(characterId)) as ICharacterParty;
 
-          await this.partySocketMessaging.partyPayloadSend(party || null, party ? undefined : [character._id]);
+          if (!party) {
+            await this.partySocketMessaging.notifyPartyDisbanded([character._id]);
+          } else {
+            await this.partySocketMessaging.partyPayloadSend(party);
+          }
         } catch (error) {
           console.error(error);
         }
