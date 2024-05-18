@@ -160,5 +160,9 @@
     "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^3.10.1",
     "typescript": "^5.2.2"
+  },
+  "resolutions": {
+    "wrap-ansi": "7.0.0",
+    "string-width": "4.2.3"
   }
 }

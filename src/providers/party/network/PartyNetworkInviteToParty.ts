@@ -22,14 +22,6 @@ export class PartyNetworkInviteToParty {
       PartySocketEvents.PartyInvite,
       async (data: IPartyManagementFromClient, _character: ICharacter) => {
         try {
-          if (!data.partyId || !data.leaderId || !data.targetId) {
-            this.socketMessaging.sendErrorMessageToCharacter(
-              _character,
-              "Something wen't wrong while trying to join the party. Try to create a new one."
-            );
-            return;
-          }
-
           const leader = (await Character.findById(data.leaderId).lean()) as ICharacter;
           if (!leader) {
             throw new Error("Error on invite to party, leader not found");
@@ -52,14 +44,6 @@ export class PartyNetworkInviteToParty {
       PartySocketEvents.AcceptInvite,
       async (data: IPartyManagementFromClient, _character: ICharacter) => {
         try {
-          if (!data.partyId || !data.leaderId || !data.targetId) {
-            this.socketMessaging.sendErrorMessageToCharacter(
-              _character,
-              "Something wen't wrong while trying to join the party. Try to create a new one."
-            );
-            return;
-          }
-
           const leader = (await Character.findById(data.leaderId).lean()) as ICharacter;
 
           if (!leader) {

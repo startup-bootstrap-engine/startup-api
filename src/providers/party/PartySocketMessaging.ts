@@ -9,42 +9,54 @@ import {
   UISocketEvents,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { Types } from "mongoose";
 import { ICharacterParty } from "./PartyTypes";
 
 @provide(PartySocketMessaging)
 export class PartySocketMessaging {
   constructor(private socketMessaging: SocketMessaging) {}
 
-  public async partyPayloadSend(party: ICharacterParty | null, charactersId?: Types.ObjectId[]): Promise<void> {
-    const allCharactersId = new Set<Types.ObjectId>(charactersId ? [...charactersId] : []);
+  public async partyPayloadSend(party: ICharacterParty, charactersId?: string[]): Promise<void> {
+    const allCharactersId = new Set<string>(charactersId ? [...charactersId] : []);
 
-    let partyPayload: ICharacterPartyShared | undefined;
+    allCharactersId.add(party.leader._id);
+    party.members.forEach((member) => allCharactersId.add(member._id));
+    const partyPayload = this.generateDataPayloadFromServer(party);
 
-    if (party) {
-      allCharactersId.add(party.leader._id);
-      party.members.forEach((member) => allCharactersId.add(member._id));
-      partyPayload = this.generateDataPayloadFromServer(party);
-    }
-
-    const fetchCharacter = async (id: Types.ObjectId): Promise<ICharacter> => {
+    const fetchCharacter = async (id: string): Promise<ICharacter> => {
       return (await Character.findById(id.toString()).lean().select("channelId")) as ICharacter;
     };
 
-    const sendPayloadToCharacter = async (characterId: Types.ObjectId): Promise<void> => {
+    const sendPayloadToCharacter = async (characterId: string): Promise<void> => {
       const character = await fetchCharacter(characterId);
-      this.socketMessaging.sendEventToUser<ICharacterPartyShared>(
-        character.channelId!,
-        PartySocketEvents.PartyInfoOpen,
-        partyPayload
-      );
+      if (character && character.channelId) {
+        this.socketMessaging.sendEventToUser<ICharacterPartyShared>(
+          character.channelId,
+          PartySocketEvents.PartyInfoOpen,
+          partyPayload
+        );
+      }
     };
 
-    if (allCharactersId.size === 1 && !partyPayload) {
-      return sendPayloadToCharacter(allCharactersId.values().next().value);
-    }
-
     await Promise.all(Array.from(allCharactersId).map(sendPayloadToCharacter));
+  }
+
+  public async notifyPartyDisbanded(charactersId: string[]): Promise<void> {
+    const fetchCharacter = async (id: string): Promise<ICharacter> => {
+      return (await Character.findById(id.toString()).lean().select("channelId")) as ICharacter;
+    };
+
+    const sendDisbandNotification = async (characterId: string): Promise<void> => {
+      const character = await fetchCharacter(characterId);
+      if (character && character.channelId) {
+        this.socketMessaging.sendEventToUser<ICharacterPartyShared>(
+          character.channelId,
+          PartySocketEvents.PartyInfoOpen,
+          null as any
+        );
+      }
+    };
+
+    await Promise.all(charactersId.map(sendDisbandNotification));
   }
 
   public async sendMessageToAllMembers(message: string, party: ICharacterParty): Promise<void> {
@@ -52,7 +64,7 @@ export class PartySocketMessaging {
       throw new Error("Empty party to send Message or Data!");
     }
 
-    const charactersIds = new Set<Types.ObjectId>();
+    const charactersIds = new Set<string>();
     charactersIds.add(party.leader._id);
 
     for (const member of party.members) {
