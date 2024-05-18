@@ -1,6 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { BattleAttackRanged } from "@providers/battle/BattleAttackTarget/BattleAttackRanged";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { spellsBlueprints } from "@providers/spells/data/blueprints";
@@ -16,11 +17,21 @@ export interface ISpellAreaNPC {
 
 @provide(NPCSpellArea)
 export class NPCSpellArea {
-  constructor(private blueprintManager: BlueprintManager, private movementHelper: MovementHelper) {}
+  constructor(
+    private blueprintManager: BlueprintManager,
+    private movementHelper: MovementHelper,
+    private battleAttackRanged: BattleAttackRanged
+  ) {}
 
   @TrackNewRelicTransaction()
   public async castNPCSpell(attacker: INPC, target: ICharacter | INPC): Promise<boolean | undefined> {
     try {
+      const hasSolidInTrajectory = await this.battleAttackRanged.isSolidInRangedTrajectory(attacker, target);
+
+      if (hasSolidInTrajectory) {
+        return false;
+      }
+
       const npcBlueprint = (await this.blueprintManager.getBlueprint("npcs", attacker.baseKey as any)) as Record<
         string,
         unknown
