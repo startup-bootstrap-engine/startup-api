@@ -73,7 +73,8 @@ export class PartyMembers {
 
       await this.partySocketMessaging.sendMessageToAllMembers(message, updatedParty);
 
-      await this.partySocketMessaging.partyPayloadSend(updatedParty);
+      // updated character that left the party
+      await this.partySocketMessaging.partyPayloadSend(updatedParty, [character._id]);
 
       // await this.partySocketMessaging.partyPayloadSend(null, [character._id]);
 
@@ -127,6 +128,11 @@ export class PartyMembers {
         type: "info",
       });
 
+      return false;
+    }
+
+    // if target is already leader, do nothing
+    if (party.leader._id.toString() === target._id.toString()) {
       return false;
     }
 
