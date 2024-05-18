@@ -109,12 +109,10 @@ export class NPCMovementMoveTowards {
   }
 
   private async handleValidTarget(npc: INPC, targetCharacter: ICharacter): Promise<void> {
-    await this.npcTarget.tryToClearOutOfRangeTargets(npc);
+    await Promise.all([this.npcTarget.tryToClearOutOfRangeTargets(npc), this.fleeIfHealthIsLow(npc)]);
 
     const attackRange = npc.attackType === EntityAttackType.Melee ? 2 : npc.maxRangeAttack;
     await this.initOrClearBattleCycle(npc, targetCharacter, attackRange!);
-
-    await this.fleeIfHealthIsLow(npc);
 
     if (this.reachedTarget(npc, targetCharacter)) {
       await this.handleReachedTarget(npc, targetCharacter);
@@ -175,17 +173,6 @@ export class NPCMovementMoveTowards {
       if (npc.health <= npc.maxHealth / 4) {
         await NPC.updateOne({ _id: npc._id }, { currentMovementType: NPCMovementType.MoveAway });
       }
-    }
-  }
-
-  @TrackNewRelicTransaction()
-  private async moveBackToOriginalPosIfNoTarget(npc: INPC, target: ICharacter): Promise<void> {
-    if (
-      !npc.targetCharacter &&
-      !this.reachedInitialPosition(npc) &&
-      npc.pathOrientation === NPCPathOrientation.Backward
-    ) {
-      await this.moveTowardsPosition(npc, target, npc.initialX, npc.initialY);
     }
   }
 

@@ -34,55 +34,61 @@ export class PartyMembers {
     try {
       let message = `${character.name} has left the party!`;
 
-      // check if member is a party leader. If so, transfer leadership before removing him
+      // Check if member is a party leader. If so, transfer leadership before removing them
       const isLeader = this.partyValidator.checkIfIsLeader(party, character);
 
       if (isLeader) {
-        const memberToTransferTo = await Character.findById(party.members[0]._id);
-
-        if (memberToTransferTo) {
-          message = `${character.name} has left the party! Leadership has been transferred to ${memberToTransferTo.name}!`;
-          await this.transferLeadership(party._id, memberToTransferTo, character);
-        }
+        message = await this.handleLeadershipTransfer(party, character);
       }
 
+      // Re-fetch the party after potential leadership transfer
       party = (await this.partyCRUD.findById(party._id)) as ICharacterParty;
 
       await this.handleBuffBeforeRemovingMember(party);
 
       party.members = party.members.filter((member) => member._id.toString() !== character._id.toString());
+      party.size = party.members.length + 1;
 
       if (party.members.length === 0) {
         await this.deletePartyAndSendMessages(party, character);
-
         return true;
       }
 
-      party.benefits = this.partyBenefitsCalculator.calculatePartyBenefits(
-        party.size || party.members.length + 1,
-        this.partyClasses.getDifferentClasses(party)
-      );
+      // Calculate new benefits for the updated party
+      this.updatePartyBenefits(party);
 
       const updatedParty = await this.partyCRUD.findByIdAndUpdate(party._id, party);
-
       if (!updatedParty) {
         return false;
       }
 
       await this.handleBuffAfterRemovingMember(updatedParty);
-
       await this.partySocketMessaging.sendMessageToAllMembers(message, updatedParty);
 
       // updated character that left the party
       await this.partySocketMessaging.partyPayloadSend(updatedParty, [character._id]);
-
-      // await this.partySocketMessaging.partyPayloadSend(null, [character._id]);
 
       return true;
     } catch (error) {
       console.error("Error while removing member from party:", error);
       return false;
     }
+  }
+
+  private async handleLeadershipTransfer(party: ICharacterParty, character: ICharacter): Promise<string> {
+    const memberToTransferTo = await Character.findById(party.members[0]._id);
+    if (memberToTransferTo) {
+      await this.transferLeadership(party._id, memberToTransferTo, character);
+      return `${character.name} has left the party! Leadership has been transferred to ${memberToTransferTo.name}!`;
+    }
+    return `${character.name} has left the party!`;
+  }
+
+  private updatePartyBenefits(party: ICharacterParty): void {
+    party.benefits = this.partyBenefitsCalculator.calculatePartyBenefits(
+      party.size,
+      this.partyClasses.getDifferentClasses(party)
+    );
   }
 
   private async handleBuffBeforeRemovingMember(party: ICharacterParty): Promise<void> {
@@ -94,11 +100,18 @@ export class PartyMembers {
   }
 
   private async deletePartyAndSendMessages(party: ICharacterParty, character: ICharacter): Promise<void> {
-    await this.partyCRUD.deleteParty(character._id);
+    await this.partyCRUD.deleteParty(character);
     const message = "Party has been disbanded!";
     await this.partySocketMessaging.sendMessageToAllMembers(message, party);
 
-    await this.partySocketMessaging.partyPayloadSend(party);
+    const charactersIds: string[] = [];
+    charactersIds.push(party.leader._id);
+
+    for (const member of party.members) {
+      charactersIds.push(member._id);
+    }
+
+    await this.partySocketMessaging.notifyPartyDisbanded(charactersIds);
   }
 
   public async transferLeadership(partyId: string, target: ICharacter, eventCaller: ICharacter): Promise<boolean> {

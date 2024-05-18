@@ -29,7 +29,7 @@ export class NPCNetworkDialogStop {
 
           if (npc) {
             if (!npc.targetCharacter) {
-              throw new Error("NPC has no target character!");
+              return;
             }
 
             if (character.id.toString() !== npc.targetCharacter?.toString()) {

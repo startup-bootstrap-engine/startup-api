@@ -10,7 +10,6 @@ import {
   CharacterPartyBenefits,
   CombatSkill,
   CraftingSkill,
-  ICharacterBuff,
   ICharacterPermanentBuff,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -33,21 +32,20 @@ export class PartyBuff {
   public async handleAllBuffInParty(party: ICharacterParty, isAdding: boolean): Promise<void> {
     const differentClasses = this.partyClasses.getDifferentClasses(party);
     const { leader, members, size } = party;
-
     const numberOfMembers = size || members.length + 1;
     const benefits = this.partyBenefitsCalculator.calculatePartyBenefits(numberOfMembers, differentClasses);
 
     const skillBenefit = benefits.find((benefit) => benefit.benefit === CharacterPartyBenefits.Skill);
 
-    if (!skillBenefit) {
-      return;
-    }
+    if (!skillBenefit) return;
+
+    const buffSkillPromises = [
+      this.handleCharacterBuffSkill(leader._id.toString(), skillBenefit.value, isAdding),
+      ...members.map((member) => this.handleCharacterBuffSkill(member._id.toString(), skillBenefit.value, isAdding)),
+    ];
 
     try {
-      await this.handleCharacterBuffSkill(leader._id.toString(), skillBenefit.value, isAdding);
-      for (const member of members) {
-        await this.handleCharacterBuffSkill(member._id.toString(), skillBenefit.value, isAdding);
-      }
+      await Promise.all(buffSkillPromises);
     } catch (error) {
       console.error(`Error ${isAdding ? "applying" : "removing"} buff from party:`, error);
     }
@@ -62,43 +60,39 @@ export class PartyBuff {
       const character = (await Character.findById(characterId)
         .lean()
         .select("_id class channelId skills")) as ICharacter;
-
       const traits = this.getClassTraits(character.class as CharacterClass);
-      const tasks = isAdding
-        ? [this.applyCharacterBuff(character, traits, buffPercentage)]
-        : [this.removeCharacterBuff(character, traits, buffPercentage)];
+      const buffTask = isAdding
+        ? this.applyCharacterBuff(character, traits, buffPercentage)
+        : this.removeCharacterBuff(character, traits, buffPercentage);
 
-      await Promise.all(tasks);
+      await buffTask;
     } catch (error) {
       console.error(`Error ${isAdding ? "applying" : "removing"} buff to character:`, error);
     }
   }
 
   private async removeCharacterBuff(character: ICharacter, traits: string[], buffPercentage: number): Promise<void> {
-    for await (const trait of traits) {
-      const buff = (await CharacterBuff.findOne({
+    const removeBuffPromises = traits.map(async (trait) => {
+      const buff = await CharacterBuff.findOne({
         owner: character._id,
         trait,
         buffPercentage,
         durationType: CharacterBuffDurationType.Permanent,
       })
         .lean()
-        .select("_id")) as ICharacterBuff;
+        .select("_id");
 
-      if (!buff) {
-        return;
+      if (buff) {
+        await this.characterBuffActivator.disableBuff(character, buff._id!, CharacterBuffType.Skill, true);
       }
-      await this.characterBuffActivator.disableBuff(character, buff._id!, CharacterBuffType.Skill, true);
-    }
+    });
+
+    await Promise.all(removeBuffPromises);
   }
 
   private async applyCharacterBuff(character: ICharacter, traits: string[], buffPercentage: number): Promise<void> {
     const capitalizedTraits = traits.map((trait) => {
-      if (trait === BasicAttribute.MagicResistance) {
-        return "Magic Resistance";
-      }
-
-      return _.capitalize(trait);
+      return trait === BasicAttribute.MagicResistance ? "Magic Resistance" : _.capitalize(trait);
     });
 
     const activationMessage = `Aura of ${capitalizedTraits.join(
@@ -108,7 +102,7 @@ export class PartyBuff {
       ", "
     )} fades, reducing your skills by ${buffPercentage}% respectively.`;
 
-    for await (const trait of traits) {
+    const applyBuffPromises = traits.map(async (trait) => {
       const existingBuff = await CharacterBuff.findOne({
         owner: character._id,
         trait,
@@ -117,26 +111,28 @@ export class PartyBuff {
         originateFrom: "party",
       });
 
-      if (existingBuff) continue;
-
-      const buff = {
-        type: CharacterBuffType.Skill,
-        trait,
-        buffPercentage,
-        durationType: CharacterBuffDurationType.Permanent,
-        skipAllMessages: false,
-        skipDeactivationMessage: false,
-        options: {
-          messages: {
-            activation: activationMessage,
-            deactivation: deactivationMessage,
+      if (!existingBuff) {
+        const buff: ICharacterPermanentBuff = {
+          type: CharacterBuffType.Skill,
+          trait: trait as BuffSkillTypes,
+          buffPercentage,
+          durationType: CharacterBuffDurationType.Permanent,
+          skipAllMessages: false,
+          skipDeactivationMessage: false,
+          options: {
+            messages: {
+              activation: activationMessage,
+              deactivation: deactivationMessage,
+            },
           },
-        },
-        originateFrom: "party",
-      } as ICharacterPermanentBuff;
+          originateFrom: "party",
+        } as ICharacterPermanentBuff;
 
-      await this.characterBuffActivator.enablePermanentBuff(character, buff, true);
-    }
+        await this.characterBuffActivator.enablePermanentBuff(character, buff, true);
+      }
+    });
+
+    await Promise.all(applyBuffPromises);
   }
 
   private getClassTraits(charClass: CharacterClass): BuffSkillTypes[] {

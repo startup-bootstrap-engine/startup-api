@@ -50,7 +50,7 @@ export class PathfindingQueue {
             return;
           }
 
-          await this.pathfindingResults.setResult(job.id!, path);
+          return await this.pathfindingResults.setResult(job.id!, path);
         },
         {
           npc,
@@ -59,9 +59,6 @@ export class PathfindingQueue {
           startGridY,
           endGridX,
           endGridY,
-        },
-        {
-          queueScaleBy: "active-npcs",
         }
       );
     } catch (error) {

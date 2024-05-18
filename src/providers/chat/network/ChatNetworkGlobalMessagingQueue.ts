@@ -41,7 +41,7 @@ export class ChatNetworkGlobalMessagingQueue {
       async (job) => {
         const { data, character } = job.data;
 
-        await this.execGlobalMessaging(data, character);
+        return await this.execGlobalMessaging(data, character);
       },
       {
         character,
@@ -127,6 +127,7 @@ export class ChatNetworkGlobalMessagingQueue {
       }
     } catch (error) {
       console.error(error);
+      throw error;
     }
   }
 

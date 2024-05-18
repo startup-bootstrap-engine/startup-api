@@ -295,7 +295,7 @@ describe("SpellArea - Validations", () => {
         x: FromGridX(1),
         y: FromGridY(1),
       },
-      { hasSkills: true }
+      { hasSkills: true, hasEquipment: true }
     );
 
     await Skill.updateOne({ owner: testCharacter._id }, { $set: { level: 20 } });

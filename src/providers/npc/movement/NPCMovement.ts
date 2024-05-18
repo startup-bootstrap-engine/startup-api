@@ -1,6 +1,5 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
-import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterView } from "@providers/character/CharacterView";
 import { appEnv } from "@providers/config/env";
@@ -48,8 +47,7 @@ export class NPCMovement {
     private inMemoryHashTable: InMemoryHashTable,
     private pathfindingQueue: PathfindingQueue,
     private pathfindingResults: PathfindingResults,
-    private pathfinder: Pathfinder,
-    private newRelic: NewRelic
+    private pathfinder: Pathfinder
   ) {}
 
   public isNPCAtPathPosition(npc: INPC, gridX: number, gridY: number): boolean {
@@ -71,14 +69,13 @@ export class NPCMovement {
   ): Promise<boolean> {
     try {
       const map = npc.scene;
+      const [newGridX, newGridY] = [ToGridX(newX), ToGridY(newY)];
+      const [oldGridX, oldGridY] = [ToGridX(oldX), ToGridY(oldY)];
 
-      const newGridX = ToGridX(newX);
-      const newGridY = ToGridY(newY);
+      // Store previous npc position.
+      await this.inMemoryHashTable.set("npc-previous-position", npc.id, [oldGridX, oldGridY]);
 
-      // store previous npc position. We'll use this to avoid circular dependencies while using the pathfinding cache.
-      await this.inMemoryHashTable.set("npc-previous-position", npc.id, [ToGridX(oldX), ToGridY(oldY)]);
-
-      // check if max range is reached
+      // Check if max range is reached
       const hasSolid = await this.movementHelper.isSolid(
         map,
         newGridX,
@@ -89,34 +86,27 @@ export class NPCMovement {
       );
 
       if (hasSolid) {
-        // console.log(`${npc.key} tried to move to ${newGridX}, ${newGridY}, but it's solid`);
-        await this.gridManager.setWalkable(map, ToGridX(newX), ToGridY(newY), false);
+        await this.gridManager.setWalkable(map, newGridX, newGridY, false);
         return false;
       }
 
       await Promise.all([
-        this.gridManager.setWalkable(map, ToGridX(oldX), ToGridY(oldY), true),
-        this.gridManager.setWalkable(map, ToGridX(newX), ToGridY(newY), false),
+        this.gridManager.setWalkable(map, oldGridX, oldGridY, true),
+        this.gridManager.setWalkable(map, newGridX, newGridY, false),
       ]);
 
-      // warn nearby characters that the NPC moved;
+      // Warn nearby characters that the NPC moved
       const nearbyCharacters = await this.npcView.getCharactersInView(npc);
 
       let canUpdateNPC = true;
 
-      for (const character of nearbyCharacters) {
+      const characterUpdates = nearbyCharacters.map(async (character) => {
         let clearTarget = false;
-
         const isRaid = npc.raidKey !== undefined;
         const freeze = !isRaid;
 
         if (!NPC_CAN_ATTACK_IN_NON_PVP_ZONE && freeze) {
           const isCharInNonPVPZone = this.mapNonPVPZone.isNonPVPZoneAtXY(character.scene, character.x, character.y);
-
-          /*
-          This is to prevent the NPC from attacking the player if they are in a non-PVP zone.
-          And when the player leaves the zone, the NPC will attack them again.
-          */
 
           if (isCharInNonPVPZone && npc.alignment === NPCAlignment.Hostile) {
             clearTarget = true;
@@ -127,7 +117,7 @@ export class NPCMovement {
 
         if (isTargetInvisible) {
           canUpdateNPC = false;
-          continue;
+          return;
         }
 
         if (clearTarget) {
@@ -151,7 +141,10 @@ export class NPCMovement {
             }
           );
         }
-      }
+      });
+
+      await Promise.all(characterUpdates);
+
       if (canUpdateNPC) {
         await NPC.updateOne({ _id: npc._id }, { x: newX, y: newY, direction: chosenMovementDirection });
       }
@@ -159,9 +152,8 @@ export class NPCMovement {
       return true;
     } catch (error) {
       console.error(error);
+      throw error;
     }
-
-    return false;
   }
 
   @TrackNewRelicTransaction()

@@ -58,7 +58,7 @@ export class UseWithTileQueue {
       async (job) => {
         const { useWithTileData, character } = job.data;
 
-        await this.onExecuteUseWithTile(character, useWithTileData);
+        return await this.onExecuteUseWithTile(character, useWithTileData);
       },
       {
         character,
@@ -113,7 +113,11 @@ export class UseWithTileQueue {
   ): Promise<IUseWithTileValidationResponse | undefined> {
     // Check if character is alive and not banned
 
-    this.useWithHelper.basicValidations(character, data);
+    const isValid = this.useWithHelper.basicValidations(character, data);
+
+    if (!isValid) {
+      return;
+    }
 
     // Check if the character has the originItem
     const originItem = await this.useWithHelper.getItem(character, data.originItemId);

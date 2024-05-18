@@ -120,7 +120,7 @@ export class EquipmentUnequip {
       console.error(error);
       return false;
     } finally {
-      if (!item.owner) {
+      if (!item.owner || item.owner.toString() !== character._id.toString()) {
         await this.itemOwnership.addItemOwnership(item, character);
       }
     }

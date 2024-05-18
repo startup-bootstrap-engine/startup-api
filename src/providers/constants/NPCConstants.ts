@@ -1,6 +1,3 @@
-import { appEnv } from "@providers/config/env";
-import { EnvType } from "@rpg-engine/shared";
-
 export const NPC_BASE_HEALTH_MULTIPLIER = 1;
 export const NPC_SPEED_MULTIPLIER = 0.75;
 export const NPC_SKILL_LEVEL_MULTIPLIER = 2.5;
@@ -8,7 +5,6 @@ export const NPC_SKILL_STRENGTH_MULTIPLIER = 2.5;
 export const NPC_SKILL_DEXTERITY_MULTIPLIER = 1.5;
 export const NPC_SKILL_RESISTANCE_MULTIPLIER = 1;
 // Performance adjustments
-export const NPC_MAX_ACTIVE_NPC_PER_CHARACTER = appEnv.general.ENV === EnvType.Development ? 100 : 10;
 export const NPC_MIN_DISTANCE_TO_ACTIVATE = 10; // grid cells
 
 export const NPC_FRIENDLY_NEUTRAL_FREEZE_CHECK_CHANCE = 25;

@@ -53,7 +53,6 @@ export class NPCSeeder {
     });
 
     await Promise.all(npcPromises);
-
     await this.npcDuplicateCleaner.cleanupDuplicateNPCs();
   }
 
@@ -74,11 +73,8 @@ export class NPCSeeder {
     }
 
     await this.resetNPC(npcFound);
-
     await this.npcGiantForm.resetNPCToNormalForm(npcFound);
-
     await this.tryToUpdateSkills(npcFound);
-
     await this.npcGiantForm.randomlyTransformNPCIntoGiantForm(npcFound);
   }
 
@@ -86,30 +82,50 @@ export class NPCSeeder {
     const cachedNPCSkills = await this.fetchCachedSkills(npcFound);
     const npcBlueprintSkills = this.fetchNPCBlueprint(npcFound)?.skills as ISkill;
 
+    // note that not all NPC has blueprint skills. Friendly ones do not need this info specified on the blueprint, although they do have skills on the database
     if (npcBlueprintSkills) {
-      // note that not all NPC has blueprint skills. Friendly ones do not need this info specified on the blueprint, although they do have skills on the database
-
-      if (!cachedNPCSkills || !npcBlueprintSkills || !_.isMatch(cachedNPCSkills, npcBlueprintSkills)) {
-        const blueprintSkills = this.createBlueprintSkills(npcBlueprintSkills);
-
+      if (!cachedNPCSkills || !_.isMatch(cachedNPCSkills, npcBlueprintSkills)) {
         await clearCacheForKey(`${npcFound._id}-skills`);
 
-        await Skill.findOneAndUpdate({ _id: npcFound.skills }, { $set: blueprintSkills }, { new: true })
-          .lean()
-          .cacheQuery({
-            cacheKey: `${npcFound._id}-skills`,
-          });
+        // If no skills are found, create new skills from the blueprint
+        if (!npcFound.skills) {
+          await this.createSkillsFromBlueprint(npcFound, npcBlueprintSkills);
+        } else {
+          // Update existing skills in the database
+          const blueprintSkills = this.createBlueprintSkills(npcBlueprintSkills);
+          await Skill.findOneAndUpdate({ _id: npcFound.skills }, { $set: blueprintSkills }, { new: true })
+            .lean()
+            .cacheQuery({ cacheKey: `${npcFound._id}-skills` });
+          console.log(`⚠️ Updated skills for NPC ${npcFound.key}`);
 
-        console.log(`⚠️ Updated skills for NPC ${npcFound.key}`);
-
-        if (npcFound.isGiantForm) {
-          await this.npcGiantForm.setNormalFormStats(npcFound, blueprintSkills as ISkill);
+          if (npcFound.isGiantForm) {
+            await this.npcGiantForm.setNormalFormStats(npcFound, blueprintSkills as ISkill);
+          }
         }
       }
     }
   }
 
-  private createBlueprintSkills(npcBlueprintSkills): Partial<ISkill> {
+  private async createSkillsFromBlueprint(npcFound: INPC, npcBlueprintSkills: ISkill): Promise<void> {
+    const blueprintSkills = this.createBlueprintSkills(npcBlueprintSkills);
+
+    const newSkills = new Skill({
+      ...blueprintSkills,
+      owner: npcFound._id,
+      ownerType: "NPC",
+    });
+
+    await newSkills.save();
+    npcFound.skills = newSkills._id;
+    await npcFound.save();
+
+    if (npcFound.isGiantForm) {
+      await this.npcGiantForm.setNormalFormStats(npcFound, blueprintSkills as ISkill);
+    }
+    console.log(`⚠️ Created new skills for NPC ${npcFound.key}`);
+  }
+
+  private createBlueprintSkills(npcBlueprintSkills: ISkill): Partial<ISkill> {
     return Object.entries(npcBlueprintSkills).reduce((acc, [key, value]) => {
       if (typeof value === "object" && value !== null) {
         Object.entries(value).forEach(([subKey, subValue]) => {
@@ -134,7 +150,6 @@ export class NPCSeeder {
     return blueprintManager.getBlueprint<INPC>("npcs", npcFound.baseKey);
   }
 
-  //! Please don't use new relic decorators here. It will cause huge spikes in our APM monitoring.
   private async resetNPC(npc: INPC): Promise<void> {
     try {
       await this.locker.unlock(`npc-death-${npc._id}`);
@@ -159,13 +174,6 @@ export class NPCSeeder {
         isBehaviorEnabled: false,
       } as any;
 
-      if (randomMaxHealth) {
-        updateParams.health = randomMaxHealth;
-        updateParams.maxHealth = randomMaxHealth;
-      } else {
-        updateParams.health = npc.maxHealth;
-      }
-
       await NPC.updateOne(
         { _id: npc._id },
         {
@@ -184,20 +192,19 @@ export class NPCSeeder {
 
   private async createNewNPCWithSkills(NPCData: INPCSeedData): Promise<void> {
     try {
-      const skills = new Skill({ ...(this.setNPCRandomSkillLevel(NPCData) as unknown as ISkill), ownerType: "NPC" }); // randomize skills present in the metadata only
+      const skills = new Skill({
+        ...(this.setNPCRandomSkillLevel(NPCData) as unknown as ISkill),
+        ownerType: "NPC",
+      });
 
-      if (skills.level) {
-        skills.level = skills.level * NPC_SKILL_LEVEL_MULTIPLIER;
-      }
-      if (skills.strength?.level) {
-        skills.strength.level = skills.strength.level * NPC_SKILL_STRENGTH_MULTIPLIER;
-      }
-      if (skills.dexterity?.level) {
-        skills.dexterity.level = skills.dexterity.level * NPC_SKILL_DEXTERITY_MULTIPLIER;
-      }
-      if (skills.resistance?.level) {
-        skills.resistance.level = skills.resistance.level * NPC_SKILL_DEXTERITY_MULTIPLIER;
-      }
+      // Apply multipliers
+      if (skills.level) skills.level *= NPC_SKILL_LEVEL_MULTIPLIER;
+      if (skills.strength?.level) skills.strength.level *= NPC_SKILL_STRENGTH_MULTIPLIER;
+      if (skills.dexterity?.level) skills.dexterity.level *= NPC_SKILL_DEXTERITY_MULTIPLIER;
+      if (skills.resistance?.level) skills.resistance.level *= NPC_SKILL_DEXTERITY_MULTIPLIER;
+
+      // Save the skills
+      await skills.save();
 
       const npcHealth = this.npcHealthManaCalculator.getNPCMaxHealthRandomized(NPCData as unknown as INPC);
 
@@ -208,10 +215,11 @@ export class NPCSeeder {
         skills: skills._id,
         isBehaviorEnabled: false,
       });
+
       await newNPC.save();
 
+      // Update skills owner reference
       skills.owner = newNPC._id;
-
       await skills.save();
 
       await this.npcGiantForm.resetNPCToNormalForm(newNPC);
@@ -219,7 +227,6 @@ export class NPCSeeder {
     } catch (error) {
       console.log(`❌ Failed to spawn NPC ${NPCData.key}. Is the blueprint for this NPC missing?`);
       console.log(NPCData);
-
       console.error(error);
     }
   }
@@ -243,10 +250,6 @@ export class NPCSeeder {
     const clonedNPC = _.cloneDeep(NPCData);
     if (!clonedNPC.skillRandomizerDice) return clonedNPC.skills;
 
-    /**
-     * If we have skills to be randomized we apply the randomDice value to that
-     * if not we get all skills added in the blueprint to change it's level
-     */
     const skillKeys: string[] = clonedNPC.skillsToBeRandomized
       ? clonedNPC.skillsToBeRandomized
       : Object.keys(clonedNPC.skills);
@@ -272,7 +275,6 @@ export class NPCSeeder {
       console.log(
         `❌ Failed to set NPC ${NPCData.key} initial position (${NPCData.x}, ${NPCData.y}) as solid on the map (${NPCData.scene})`
       );
-
       console.error(error);
     }
   }
