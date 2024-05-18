@@ -12,7 +12,6 @@ import { Locker } from "@providers/locks/Locker";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { BattleSocketEvents, CharacterPartyBenefits, EntityType, IBattleDeath, INPCLoot } from "@rpg-engine/shared";
-import { Types } from "mongoose";
 import { NPCExperience } from "./NPCExperience/NPCExperience";
 import { NPCFreezer } from "./NPCFreezer";
 import { NPCLoot } from "./NPCLoot";
@@ -200,9 +199,11 @@ export class NPCDeathQueue {
 
   private async calculateTotalDropRatioFromParty(npc: INPC): Promise<number> {
     let totalDropRatio = 0;
-    let partyIds = new Set<Types.ObjectId>();
+    let partyIds = new Set<string>();
     if (npc.xpToRelease) {
-      partyIds = new Set(npc.xpToRelease.filter((xp) => xp.partyId !== null).map((xp) => xp.partyId));
+      partyIds = new Set(
+        npc.xpToRelease.filter((xp) => xp.partyId !== null).map((xp) => xp.partyId as unknown as string)
+      );
     }
     if (partyIds.size === 0) {
       return 0;
@@ -213,8 +214,9 @@ export class NPCDeathQueue {
     return totalDropRatio || 0;
   }
 
-  private async getPartyAndCalculateDropRatio(partyId: Types.ObjectId): Promise<number> {
+  private async getPartyAndCalculateDropRatio(partyId: string): Promise<number> {
     const party = await this.partyCRUD.findById(partyId.toString());
+
     if (party?.benefits) {
       const dropRatioBenefit = party.benefits.find((benefits) => benefits.benefit === CharacterPartyBenefits.DropRatio);
       return dropRatioBenefit?.value || 0;

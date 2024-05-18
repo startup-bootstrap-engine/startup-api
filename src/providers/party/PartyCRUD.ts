@@ -28,23 +28,25 @@ export class PartyCRUD {
   ): Promise<ICharacterParty | undefined> {
     const targetIsInParty = await this.findPartyByCharacterId(target._id);
     if (targetIsInParty) {
-      this.socketMessaging.sendEventToUser<IUIShowMessage>(leader.channelId!, UISocketEvents.ShowMessage, {
-        message: `${target.name} already is in a party!`,
-        type: "info",
-      });
-
-      return;
+      if (leader.channelId) {
+        this.socketMessaging.sendEventToUser<IUIShowMessage>(leader.channelId, UISocketEvents.ShowMessage, {
+          message: `${target.name} already is in a party!`,
+          type: "info",
+        });
+      }
+      return undefined;
     }
 
     const existingParty = await this.findPartyByCharacterId(leader._id);
     if (existingParty) {
       if (existingParty.members.length >= existingParty.maxSize) {
-        this.socketMessaging.sendEventToUser<IUIShowMessage>(leader.channelId!, UISocketEvents.ShowMessage, {
-          message: "Your party is already full.",
-          type: "error",
-        });
-
-        return;
+        if (leader.channelId) {
+          this.socketMessaging.sendEventToUser<IUIShowMessage>(leader.channelId, UISocketEvents.ShowMessage, {
+            message: "Your party is already full.",
+            type: "error",
+          });
+        }
+        return undefined;
       }
 
       // Attempt to add new member to the existing party
@@ -63,8 +65,7 @@ export class PartyCRUD {
 
         return existingParty;
       }
-
-      return; // If the target is already a member, do nothing
+      return undefined; // If the target is already a member, do nothing
     }
 
     // If no existing party, create a new one
@@ -101,6 +102,7 @@ export class PartyCRUD {
       return newParty;
     } catch (error) {
       console.error(error);
+      throw new Error("Failed to create party");
     }
   }
 
@@ -133,7 +135,7 @@ export class PartyCRUD {
       return updatedParty;
     } catch (error) {
       console.error(error);
-      return undefined;
+      throw new Error("Failed to update party");
     }
   }
 
@@ -155,22 +157,40 @@ export class PartyCRUD {
   }
 
   public async deleteParty(character: ICharacter): Promise<void> {
-    const party = (await this.findPartyByCharacterId(character._id)) as ICharacterParty;
+    const party = await this.findPartyByCharacterId(character._id);
     if (!party) {
-      this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId!, UISocketEvents.ShowMessage, {
-        message: "You are not in a party",
-        type: "info",
-      });
+      if (character.channelId) {
+        this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId, UISocketEvents.ShowMessage, {
+          message: "You are not in a party",
+          type: "info",
+        });
+      }
       return;
     }
 
-    await this.partyBuff.handleAllBuffInParty(party, false);
+    try {
+      await this.partyBuff.handleAllBuffInParty(party, false);
+      await this.inMemoryHashTable.delete("character-party", party._id);
 
-    await this.inMemoryHashTable.delete("character-party", party._id);
+      // Sending message to remaining members
+      const message = "Party has been disbanded!";
+      await this.partySocketMessaging.sendMessageToAllMembers(message, party);
 
-    const updatedParty = (await this.inMemoryHashTable.get("character-party", character._id)) as ICharacterParty;
+      // Notify the character
+      if (character.channelId) {
+        const charactersIds: string[] = [];
+        charactersIds.push(party.leader._id);
 
-    await this.partySocketMessaging.partyPayloadSend(updatedParty);
+        for (const member of party.members) {
+          charactersIds.push(member._id);
+        }
+
+        await this.partySocketMessaging.notifyPartyDisbanded(charactersIds);
+      }
+    } catch (error) {
+      console.error("Failed to delete party:", error);
+      throw new Error("Failed to delete party");
+    }
   }
 
   public async clearAllParties(): Promise<void> {

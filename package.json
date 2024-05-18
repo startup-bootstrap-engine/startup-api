@@ -48,6 +48,7 @@
     "@side/jest-runtime": "^1.1.0",
     "@socket.io/pm2": "^5.3.0",
     "@socket.io/redis-adapter": "^8.2.1",
+    "archiver": "^7.0.1",
     "axios": "^0.21.0",
     "axios-cache-adapter": "^2.7.3",
     "cachegoose": "^8.0.0",
@@ -58,7 +59,9 @@
     "email-validator": "^2.0.4",
     "express": "^4.17.1",
     "express-rate-limit": "^5.2.6",
+    "fs-extra": "^11.2.0",
     "generic-pool": "^3.9.0",
+    "glob": "^10.3.15",
     "helmet": "^7.1.0",
     "ioredis": "5.3.2",
     "jsonwebtoken": "^9.0.0",
@@ -157,5 +160,9 @@
     "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^3.10.1",
     "typescript": "^5.2.2"
+  },
+  "resolutions": {
+    "wrap-ansi": "7.0.0",
+    "string-width": "4.2.3"
   }
 }
