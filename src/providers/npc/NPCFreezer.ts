@@ -1,16 +1,11 @@
 import { Character } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { NPC_FREEZE_CHECK_INTERVAL, NPC_MAX_ACTIVE_NPC_PER_CHARACTER } from "@providers/constants/NPCConstants";
+import { NPC_FREEZE_CHECK_INTERVAL } from "@providers/constants/NPCConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MathHelper } from "@providers/math/MathHelper";
-import { NPCAlignment } from "@rpg-engine/shared";
-import CPUusage from "cpu-percentage";
-import round from "lodash/round";
 import { NPCView } from "./NPCView";
-
-const MAX_CPU_USAGE_PER_INSTANCE = 60;
 
 @provideSingleton(NPCFreezer)
 export class NPCFreezer {
@@ -70,13 +65,6 @@ export class NPCFreezer {
     await Promise.all(inactiveNPCPromises);
   }
 
-  @TrackNewRelicTransaction()
-  public async maxActiveNPCs(): Promise<number> {
-    const onlineCharacters = await Character.countDocuments({ isOnline: true });
-
-    return onlineCharacters * NPC_MAX_ACTIVE_NPC_PER_CHARACTER;
-  }
-
   private monitorNPCsAndFreezeIfNeeded(): void {
     setInterval(async () => {
       const canCheck = await this.locker.lock("npc-freeze-check", 1000);
@@ -85,40 +73,39 @@ export class NPCFreezer {
         return;
       }
 
-      const totalCPUUsage = round(CPUusage().percent);
       const totalActiveNPCs = await NPC.countDocuments({ isBehaviorEnabled: true });
 
       const freezeTasks: any[] = [];
 
-      const maxActiveNPCs = await this.maxActiveNPCs();
-
-      // Try to freeze some friendly NPCs first
-      if (totalActiveNPCs >= maxActiveNPCs * 0.7) {
-        const friendlyNPCs = await NPC.find({
-          alignment: NPCAlignment.Friendly,
-          isBehaviorEnabled: true,
-          hasDepot: { $ne: true },
-          hasQuest: {
-            $ne: true,
-          },
-        }).lean();
-        for (const npc of friendlyNPCs) {
-          freezeTasks.push(this.freezeNPC(npc as INPC, "NPCFreezer - Friendly NPC freeze"));
-        }
+      // Freeze NPCs that are farthest from any active characters
+      const farthestNPCs = await this.findFarthestNPCs();
+      for (const npc of farthestNPCs) {
+        freezeTasks.push(this.freezeNPC(npc, "NPCFreezer - Farthest NPC freeze"));
       }
 
-      // Check based on NPC count or CPU usage
-      if (totalCPUUsage >= MAX_CPU_USAGE_PER_INSTANCE || (totalActiveNPCs >= 20 && totalActiveNPCs >= maxActiveNPCs)) {
-        const freezeFactor = 0.3;
-        const freezeCount = Math.ceil(totalActiveNPCs * freezeFactor);
-        for (let i = 0; i < freezeCount; i++) {
-          freezeTasks.push(this.freezeFarthestTargetingNPC());
-        }
-      }
-
-      console.log(`TOTAL_ACTIVE_NPCS: ${totalActiveNPCs} / MAX_ACTIVE_NPCS: ${maxActiveNPCs} - CPU: ${totalCPUUsage}%`);
+      console.log(`TOTAL_ACTIVE_NPCS: ${totalActiveNPCs}`);
       await Promise.all(freezeTasks);
     }, NPC_FREEZE_CHECK_INTERVAL);
+  }
+
+  private async findFarthestNPCs(): Promise<INPC[]> {
+    const activeNPCs = (await NPC.find({
+      isBehaviorEnabled: true,
+    }).lean()) as INPC[];
+
+    const activeCharacters = await Character.find().lean();
+
+    return activeNPCs
+      .map((npc) => {
+        const distances = activeCharacters.map((character) =>
+          this.mathHelper.getDistanceBetweenPoints(npc.x, npc.y, character.x, character.y)
+        );
+        const minDistance = Math.min(...distances);
+        return { npc, minDistance };
+      })
+      .sort((a, b) => b.minDistance - a.minDistance)
+      .slice(0, Math.ceil(activeNPCs.length * 0.1)) // Freeze the farthest 10% of NPCs
+      .map(({ npc }) => npc);
   }
 
   @TrackNewRelicTransaction()
@@ -134,7 +121,7 @@ export class NPCFreezer {
     const characters = await Character.find({ _id: { $in: targetCharacterIds } }).lean();
 
     let maxDistance = -Infinity;
-    let npcToFreeze;
+    let npcToFreeze: INPC | null = null;
 
     for (const npc of npcs) {
       const targetCharacter = characters.find((character) => String(character._id) === String(npc.targetCharacter));
@@ -144,16 +131,16 @@ export class NPCFreezer {
       const distance = this.mathHelper.getDistanceBetweenPoints(npc.x, npc.y, targetCharacter.x, targetCharacter.y);
       if (distance > maxDistance) {
         maxDistance = distance;
-        npcToFreeze = npc;
+        npcToFreeze = npc as INPC;
       }
     }
 
     if (npcToFreeze) {
       console.log(`❄️ Freezing farthest targeted NPC ${npcToFreeze.key} (${npcToFreeze._id})`);
       try {
-        await this.freezeNPC(npcToFreeze as INPC, "NPCFreezer - Farthest targeting NPC freeze");
+        await this.freezeNPC(npcToFreeze, "NPCFreezer - Farthest targeting NPC freeze");
       } catch (error) {
-        console.error(`Failed to freeze NPC ${npcToFreeze.id}: ${error.message}`);
+        console.error(`Failed to freeze NPC ${npcToFreeze._id}: ${error.message}`);
       }
     }
   }
