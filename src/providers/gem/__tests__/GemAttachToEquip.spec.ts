@@ -66,6 +66,7 @@ describe("GemAttachToEquip", () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it("should attach a gem to equip and consume it", async () => {
