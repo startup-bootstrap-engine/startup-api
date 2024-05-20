@@ -203,7 +203,10 @@ export class SpellCast {
       return true;
     }
 
-    if (spell.castingType === SpellCastingType.RangedCasting && !target) {
+    if (
+      spell.castingType === SpellCastingType.RangedCasting &&
+      (!target || (target.type !== EntityType.Character && target.type !== EntityType.NPC))
+    ) {
       return true;
     }
 

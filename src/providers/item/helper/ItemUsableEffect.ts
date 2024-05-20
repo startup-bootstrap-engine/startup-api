@@ -34,14 +34,7 @@ export class ItemUsableEffect {
         return;
       }
 
-      // sometimes target is coming here without a type for NPCs (probably due to a lean without virtuals: true). This is a workaround to fix it.
-      if (!target.type) {
-        if (target.textureKey) {
-          target.type = EntityType.NPC;
-        } else {
-          target.type = EntityType.Character;
-        }
-      }
+      this.ensureTargetType(target);
 
       const latestTargetHealth = await this.fetchLatestHealth(target);
 
@@ -63,19 +56,38 @@ export class ItemUsableEffect {
   }
 
   private async fetchLatestHealth(target: ICharacter | INPC): Promise<number> {
-    let data;
-    switch (target.type) {
-      case EntityType.Character:
-        data = await Character.findOne({ _id: target._id, scene: target.scene }).lean().select("health");
-        break;
-      case EntityType.NPC:
-        data = await NPC.findOne({ _id: target._id, scene: target.scene }).lean().select("health");
-        break;
-      default:
-        throw new Error(`Invalid target type: ${target.type}`);
-    }
+    try {
+      let data;
+      switch (target.type) {
+        case EntityType.Character:
+          data = await Character.findOne({ _id: target._id, scene: target.scene }).lean().select("health");
+          break;
+        case EntityType.NPC:
+          data = await NPC.findOne({ _id: target._id, scene: target.scene }).lean().select("health");
+          break;
+        default:
+          throw new Error(`Invalid target type: ${target.type}`);
+      }
 
-    return data?.health ?? target.health;
+      if (!data) {
+        throw new Error(`No data found for target with ID: ${target._id}`);
+      }
+
+      return data.health;
+    } catch (error) {
+      console.error(`Error fetching latest health for target with ID: ${target._id}`, error);
+      throw error;
+    }
+  }
+
+  private ensureTargetType(target: ICharacter | INPC): void {
+    if (!target.type) {
+      if ("isBehaviorEnabled" in target) {
+        target.type = EntityType.NPC;
+      } else {
+        target.type = EntityType.Character;
+      }
+    }
   }
 
   private validateTargetAndValue(target: ICharacter | INPC, value: number): void {
