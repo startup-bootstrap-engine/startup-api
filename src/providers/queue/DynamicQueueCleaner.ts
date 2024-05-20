@@ -76,7 +76,10 @@ export class DynamicQueueCleaner {
 
       const queue = queues.get(queueName);
       if (queue) {
+        // Pause the queue before obliterating
+        await queue.pause();
         await queue.close();
+
         await queue.obliterate({
           force: true,
         });
