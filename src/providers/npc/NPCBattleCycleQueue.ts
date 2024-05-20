@@ -162,15 +162,15 @@ export class NPCBattleCycleQueue {
 
       await this.addToQueue(updatedNPC, npcSkills);
     } catch (error) {
+      await this.locker.unlock(`npc-${npc._id}-npc-battle-cycle`);
       if (!updatedNPC) {
         console.error("NPC is null");
         return;
       }
 
       console.error(error);
-      await this.locker.unlock(`npc-${npc._id}-npc-battle-cycle`);
 
-      await this.addToQueue(updatedNPC, npcSkills);
+      throw error;
     }
   }
 

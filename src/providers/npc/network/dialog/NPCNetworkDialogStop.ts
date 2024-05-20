@@ -33,7 +33,7 @@ export class NPCNetworkDialogStop {
             }
 
             if (character.id.toString() !== npc.targetCharacter?.toString()) {
-              throw new Error("Character trying to stop NPC dialog is not the same that originated it.");
+              return;
             }
 
             // validate if character is under NPC talking distance
