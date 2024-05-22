@@ -164,4 +164,13 @@ describe("PlantHarvest.ts", () => {
     const updatedPlant = await Item.findById(plant._id);
     expect(updatedPlant).toBeNull();
   });
+
+  it("should add rarity to the crops", async () => {
+    await plantHarvest.harvestPlant(plant, testCharacter);
+    const updatedInventoryContainer = await ItemContainer.findById(inventoryContainer._id);
+
+    expect(updatedInventoryContainer?.slots[0]).not.toBeNull();
+    expect(updatedInventoryContainer?.slots[0].key).toEqual(blueprint.harvestableItemKey);
+    expect(updatedInventoryContainer?.slots[0].rarity).not.toBeNull();
+  });
 });
