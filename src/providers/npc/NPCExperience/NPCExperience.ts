@@ -212,8 +212,8 @@ export class NPCExperience {
     try {
       return dynamicGlobalsManager.getXpRatio();
     } catch (error) {
-      console.error("Error in getValue:", error);
-      return 0;
+      console.error("Error in getValue: ", error);
+      return 1;
     }
   }
 
