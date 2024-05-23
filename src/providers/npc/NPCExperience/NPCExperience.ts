@@ -209,7 +209,6 @@ export class NPCExperience {
 
   private getGlobalXp(): number {
     const dynamicGlobalsManager = DynamicGlobalsManager;
-    // const dynamicGlobalsManager = DynamicGlobalsManager.getInstance();
     try {
       return dynamicGlobalsManager.getXpRatio();
     } catch (error) {
