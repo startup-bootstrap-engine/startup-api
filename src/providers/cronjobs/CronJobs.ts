@@ -15,6 +15,7 @@ import { ItemDeleteCrons } from "./ItemDeleteCrons";
 import { MacroCaptchaCrons } from "./MacroCaptchaCrons";
 import { MarketplaceCrons } from "./MarketplaceCrons";
 import { NPCCrons } from "./NPCCrons";
+import { BonusXpEventCrons } from "./BonusXpEventCrons";
 
 import { CharacterTradingCrons } from "./CharacterTradingCrons";
 import { PlantCrons } from "./PlantCrons";
@@ -53,7 +54,8 @@ export class Cronjob {
     private referralBonusCrons: ReferralBonusCrons,
     private plantCrons: PlantCrons,
     private queueCrons: QueueCrons,
-    private characterTradingCrons: CharacterTradingCrons
+    private characterTradingCrons: CharacterTradingCrons,
+    private bonusXpEventCrons: BonusXpEventCrons
   ) {}
 
   public start(): void {
@@ -87,6 +89,7 @@ export class Cronjob {
         this.plantCrons.schedule();
         this.queueCrons.schedule();
         this.characterTradingCrons.schedule();
+        this.bonusXpEventCrons.schedule();
         break;
       case EnvType.Staging:
       case EnvType.Production:
@@ -115,6 +118,7 @@ export class Cronjob {
           this.plantCrons.schedule();
           this.queueCrons.schedule();
           this.characterTradingCrons.schedule();
+          this.bonusXpEventCrons.schedule();
         }
         break;
     }
