@@ -3,7 +3,6 @@ import { NewRelic } from "@providers/analytics/NewRelic";
 import { appEnv } from "@providers/config/env";
 import {
   QUEUE_CHARACTER_MAX_SCALE_FACTOR,
-  QUEUE_GLOBAL_WORKER_LIMITER_DURATION,
   QUEUE_NPC_MAX_SCALE_FACTOR,
   QUEUE_WORKER_MIN_CONCURRENCY,
   QUEUE_WORKER_MIN_JOB_RATE,
@@ -164,8 +163,6 @@ export class DynamicQueue {
       },
       {
         name: `${queueName}-worker`,
-        concurrency: maxWorkerConcurrency,
-        limiter: { max: maxWorkerLimiter, duration: QUEUE_GLOBAL_WORKER_LIMITER_DURATION },
         removeOnComplete: { age: 86400, count: 1000 },
         removeOnFail: { age: 86400, count: 1000 },
         connection,
