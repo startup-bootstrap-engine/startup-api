@@ -138,7 +138,7 @@ export class NPCBattleCycleQueue {
     return [fetchedNPC as INPC, targetCharacter as ICharacter];
   }
 
-  private async isValidBattleState(npc: INPC, targetCharacter: ICharacter): Promise<boolean> {
+  private isValidBattleState(npc: INPC, targetCharacter: ICharacter): boolean {
     const isUnderRange = this.movementHelper.isUnderRange(
       npc.x,
       npc.y,
@@ -155,7 +155,6 @@ export class NPCBattleCycleQueue {
       isUnderRange;
 
     if (!isValidState) {
-      await this.npcFreezer.freezeNPC(npc, "NPCBattleCycleQueue - NPC is out of range or target is dead");
       return false;
     }
 
