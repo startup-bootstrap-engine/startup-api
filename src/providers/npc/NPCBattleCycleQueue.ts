@@ -14,6 +14,7 @@ import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { NPCAlignment } from "@rpg-engine/shared";
 import _ from "lodash";
+import { NPCFreezer } from "./NPCFreezer";
 import { NPCView } from "./NPCView";
 import { ICharacterHealth } from "./movement/NPCMovementMoveTowards";
 import { NPCTarget } from "./movement/NPCTarget";
@@ -27,7 +28,8 @@ export class NPCBattleCycleQueue {
     private movementHelper: MovementHelper,
     private battleAttackTarget: BattleAttackTarget,
     private npcView: NPCView,
-    private dynamicQueue: DynamicQueue
+    private dynamicQueue: DynamicQueue,
+    private npcFreezer: NPCFreezer
   ) {}
 
   public async addToQueue(npc: INPC, npcSkills: ISkill): Promise<void> {
@@ -84,21 +86,13 @@ export class NPCBattleCycleQueue {
     let updatedNPC = npc;
 
     try {
-      const hasLock = await this.locker.hasLock(`npc-${npc._id}-npc-battle-cycle`);
-
-      if (!hasLock) {
-        return;
-      }
+      if (!(await this.isLocked(npc))) return;
 
       this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.NPCs, "NPCBattleCycle", 1);
 
-      const result = await Promise.all([
-        NPC.findById(npc._id).lean({ virtuals: true, defaults: true }),
-        Character.findById(npc.targetCharacter).lean({ virtuals: true, defaults: true }),
-      ]);
+      const [fetchedNPC, targetCharacter] = await this.fetchNPCAndTarget(npc);
 
-      const targetCharacter = result[1] as ICharacter;
-      updatedNPC = result[0] as INPC;
+      updatedNPC = fetchedNPC;
 
       if (!updatedNPC) {
         console.error("NPC is null");
@@ -107,76 +101,103 @@ export class NPCBattleCycleQueue {
 
       updatedNPC.skills = npcSkills;
 
-      const isUnderRange = this.movementHelper.isUnderRange(
-        updatedNPC.x,
-        updatedNPC.y,
-        targetCharacter.x,
-        targetCharacter.y,
-        updatedNPC.maxRangeInGridCells || NPC_MIN_DISTANCE_TO_ACTIVATE
-      );
-
-      if (
-        !updatedNPC?.isBehaviorEnabled ||
-        !targetCharacter ||
-        !targetCharacter.isOnline ||
-        targetCharacter.health <= 0 ||
-        targetCharacter.scene !== updatedNPC.scene ||
-        !isUnderRange
-      ) {
-        await this.stop(npc);
-
+      if (!(await this.isValidBattleState(updatedNPC, targetCharacter))) {
+        await this.npcFreezer.freezeNPC(updatedNPC, "NPCBattleCycleQueue - NPC is not in a valid battle state");
         return;
       }
 
-      const hasNoTarget = !updatedNPC.targetCharacter?.toString();
-      const hasDifferentTarget = updatedNPC.targetCharacter?.toString() !== targetCharacter?.id.toString();
+      await this.updateTargetCharacterSkills(targetCharacter);
 
-      if (hasNoTarget || hasDifferentTarget || !targetCharacter) {
-        await this.stop(npc);
+      const isEligibleForAttack = await this.isEligibleForAttack(updatedNPC, targetCharacter);
 
+      if (!isEligibleForAttack) {
+        await this.npcFreezer.freezeNPC(updatedNPC, "NPCBattleCycleQueue - NPC is not eligible for attack");
         return;
       }
 
-      const characterSkills = (await Skill.findOne({
-        owner: targetCharacter._id,
-      })
-        .lean()
-        .cacheQuery({
-          cacheKey: `${targetCharacter._id}-skills`,
-        })) as ISkill;
-
-      targetCharacter.skills = characterSkills;
-
-      const isTargetInvisible = await this.stealth.isInvisible(targetCharacter);
-
-      if (
-        updatedNPC?.alignment === NPCAlignment.Hostile &&
-        targetCharacter?.health > 0 &&
-        updatedNPC.health > 0 &&
-        !isTargetInvisible
-      ) {
-        // if reached target and alignment is enemy, lets hit it
-        await this.battleAttackTarget.checkRangeAndAttack(updatedNPC, targetCharacter);
-        await this.tryToSwitchToRandomTarget(npc);
-      }
+      await this.battleAttackTarget.checkRangeAndAttack(updatedNPC, targetCharacter);
+      await this.tryToSwitchToRandomTarget(npc);
 
       await this.addToQueue(updatedNPC, npcSkills);
     } catch (error) {
-      await this.locker.unlock(`npc-${npc._id}-npc-battle-cycle`);
-      if (!updatedNPC) {
-        console.error("NPC is null");
-        return;
-      }
-
-      console.error(error);
-
-      throw error;
+      await this.handleError(npc, updatedNPC, error);
     }
   }
 
-  @TrackNewRelicTransaction()
-  private async stop(npc: INPC): Promise<void> {
-    await this.npcTarget.clearTarget(npc);
+  private async isLocked(npc: INPC): Promise<boolean> {
+    const hasLock = await this.locker.hasLock(`npc-${npc._id}-npc-battle-cycle`);
+    return hasLock;
+  }
+
+  private async fetchNPCAndTarget(npc: INPC): Promise<[INPC, ICharacter]> {
+    const [fetchedNPC, targetCharacter] = await Promise.all([
+      NPC.findById(npc._id).lean({ virtuals: true, defaults: true }),
+      Character.findById(npc.targetCharacter).lean({ virtuals: true, defaults: true }),
+    ]);
+
+    return [fetchedNPC as INPC, targetCharacter as ICharacter];
+  }
+
+  private async isValidBattleState(npc: INPC, targetCharacter: ICharacter): Promise<boolean> {
+    const isUnderRange = this.movementHelper.isUnderRange(
+      npc.x,
+      npc.y,
+      targetCharacter.x,
+      targetCharacter.y,
+      npc.maxRangeInGridCells || NPC_MIN_DISTANCE_TO_ACTIVATE
+    );
+
+    const isValidState =
+      npc?.isBehaviorEnabled &&
+      targetCharacter?.isOnline &&
+      targetCharacter.health > 0 &&
+      targetCharacter.scene === npc.scene &&
+      isUnderRange;
+
+    if (!isValidState) {
+      await this.npcFreezer.freezeNPC(npc, "NPCBattleCycleQueue - NPC is out of range or target is dead");
+      return false;
+    }
+
+    return isValidState;
+  }
+
+  private async updateTargetCharacterSkills(targetCharacter: ICharacter): Promise<void> {
+    const characterSkills = await Skill.findOne({
+      owner: targetCharacter._id,
+    })
+      .lean()
+      .cacheQuery({
+        cacheKey: `${targetCharacter._id}-skills`,
+      });
+
+    targetCharacter.skills = characterSkills as ISkill;
+  }
+
+  private async isEligibleForAttack(npc: INPC, targetCharacter: ICharacter): Promise<boolean> {
+    const isTargetInvisible = await this.stealth.isInvisible(targetCharacter);
+
+    const hasNoTarget = !npc.targetCharacter?.toString();
+    const hasDifferentTarget = npc.targetCharacter?.toString() !== targetCharacter?.id.toString();
+
+    if (hasNoTarget || hasDifferentTarget || !targetCharacter) {
+      return false;
+    }
+
+    return (
+      npc?.alignment === NPCAlignment.Hostile && targetCharacter?.health > 0 && npc.health > 0 && !isTargetInvisible
+    );
+  }
+
+  private async handleError(npc: INPC, updatedNPC: INPC, error: any): Promise<void> {
+    await this.locker.unlock(`npc-${npc._id}-npc-battle-cycle`);
+    if (!updatedNPC) {
+      console.error("NPC is null");
+      return;
+    }
+
+    console.error(error);
+    throw error;
   }
 
   @TrackNewRelicTransaction()
