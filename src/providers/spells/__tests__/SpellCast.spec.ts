@@ -501,6 +501,7 @@ describe("SpellCast.ts", () => {
 
       spellStunTarget.minLevelRequired = 1;
       spellStunTarget.minMagicLevelRequired = 1;
+      spellStunTarget.isPVPOnly = true;
 
       testCharacter.learnedSpells = [spellStunTarget.key!];
 

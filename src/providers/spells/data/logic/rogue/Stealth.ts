@@ -3,6 +3,7 @@ import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SpecialEffect, SpecialEffectNamespace } from "@providers/entityEffects/SpecialEffect";
+import { npcManager } from "@providers/inversify/container";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { CharacterSocketEvents, ICharacterAttributeChanged } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -19,7 +20,7 @@ export class Stealth {
 
   @TrackNewRelicTransaction()
   public async turnInvisible(target: ICharacter, intervalSec: number): Promise<boolean> {
-    const applied = await this.specialEffect.applyEffect(target, intervalSec, this.namespace, async () => {
+    const applied = await this.specialEffect.applyEffect(target, target, intervalSec, this.namespace, async () => {
       await this.sendOpacityChange(target);
     });
 
@@ -41,6 +42,8 @@ export class Stealth {
     }
 
     await this.sendOpacityChange(target);
+
+    void npcManager.startNearbyNPCsBehaviorLoop(target);
 
     return applied;
   }

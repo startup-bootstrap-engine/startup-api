@@ -9,8 +9,8 @@ export class Stun {
   constructor(private specialEffect: SpecialEffect) {}
 
   @TrackNewRelicTransaction()
-  async execStun(target: ICharacter | INPC, intervalSec: number): Promise<boolean> {
-    return await this.specialEffect.applyEffect(target, intervalSec, SpecialEffectNamespace.Stun);
+  async execStun(caster: ICharacter, target: ICharacter | INPC, intervalSec: number): Promise<boolean> {
+    return await this.specialEffect.applyEffect(caster, target, intervalSec, SpecialEffectNamespace.Stun);
   }
 
   @TrackNewRelicTransaction()

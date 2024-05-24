@@ -1,11 +1,10 @@
 import { Character } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { NPC_FREEZE_CHECK_INTERVAL, NPC_INACTIVITY_THRESHOLD } from "@providers/constants/NPCConstants";
+import { NPC_FREEZE_CHECK_INTERVAL } from "@providers/constants/NPCConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MathHelper } from "@providers/math/MathHelper";
-import dayjs from "dayjs";
 import { NPCView } from "./NPCView";
 
 @provideSingleton(NPCFreezer)
@@ -60,11 +59,6 @@ export class NPCFreezer {
 
       if (!npc.targetCharacter) {
         inactiveNPCPromises.push(this.freezeNPC(npc, "NPCFreezer - No target character"));
-      }
-
-      // Inactivity check
-      if (dayjs().diff(dayjs(npc.updatedAt), "millisecond") > NPC_INACTIVITY_THRESHOLD) {
-        inactiveNPCPromises.push(this.freezeNPC(npc, "NPCFreezer - Inactive NPC"));
       }
     }
 
