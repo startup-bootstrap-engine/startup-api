@@ -30,7 +30,6 @@ export const spellEntanglingRoots: Partial<ISpell> = {
   projectileAnimationKey: AnimationEffectKeys.Energy,
   maxDistanceGrid: RangeTypes.High,
   characterClass: [CharacterClass.Druid],
-  isPVPOnly: true,
 
   usableEffect: async (character: ICharacter, target: ICharacter | INPC) => {
     const spellCalculator = container.get(SpellCalculator);
@@ -42,7 +41,7 @@ export const spellEntanglingRoots: Partial<ISpell> = {
       max: 10,
     });
 
-    await stun.execStun(target, timeout);
+    await stun.execStun(character, target, timeout);
 
     return true;
   },

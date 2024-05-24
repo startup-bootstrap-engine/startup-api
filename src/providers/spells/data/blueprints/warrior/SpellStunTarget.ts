@@ -24,7 +24,7 @@ export const spellStunTarget: Partial<ISpell> = {
   manaCost: 50,
   minLevelRequired: 4,
   minMagicLevelRequired: 8,
-  isPVPOnly: true,
+
   cooldown: 40,
   castingAnimationKey: AnimationEffectKeys.SkillLevelUp,
   targetHitAnimationKey: AnimationEffectKeys.Rooted,
@@ -42,7 +42,7 @@ export const spellStunTarget: Partial<ISpell> = {
       max: 20,
     });
 
-    await stun.execStun(target, timeout);
+    await stun.execStun(character, target, timeout);
 
     return true;
   },
