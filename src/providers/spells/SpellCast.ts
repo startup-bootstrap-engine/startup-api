@@ -230,7 +230,7 @@ export class SpellCast {
     spell: ISpell,
     target: ITarget
   ): Promise<void> {
-    const updatedCharacter = (await Character.findById(character._id)) as ICharacter;
+    const updatedCharacter = (await Character.findById(character._id).populate("skills")) as ICharacter;
 
     await this.itemUsableEffect.apply(updatedCharacter, EffectableAttribute.Mana, -1 * spell.manaCost);
     await updatedCharacter.save();
