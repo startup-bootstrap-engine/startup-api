@@ -120,12 +120,19 @@ describe("PartyValidator", () => {
 
       expect(party).toBeDefined;
 
-      const areBothOnSameParty = await partyValidator.checkIfCharacterAndTargetOnTheSameParty(
+      // leader and member in same party
+      const areBothOnSameParty1 = await partyValidator.checkIfCharacterAndTargetOnTheSameParty(
         characterLeader,
         firstMember
       );
+      expect(areBothOnSameParty1).toBe(true);
 
-      expect(areBothOnSameParty).toBe(true);
+      // member and leader in same party
+      const areBothOnSameParty2 = await partyValidator.checkIfCharacterAndTargetOnTheSameParty(
+        firstMember,
+        characterLeader
+      );
+      expect(areBothOnSameParty2).toBe(true);
     });
 
     it("should return true if one member is the leader and the other is a member in the same party", async () => {
