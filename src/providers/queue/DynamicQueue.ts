@@ -1,8 +1,8 @@
+/* eslint-disable promise/param-names */
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { appEnv } from "@providers/config/env";
 import {
   QUEUE_CHARACTER_MAX_SCALE_FACTOR,
-  QUEUE_GLOBAL_WORKER_LIMITER_DURATION,
   QUEUE_NPC_MAX_SCALE_FACTOR,
   QUEUE_WORKER_MIN_CONCURRENCY,
   QUEUE_WORKER_MIN_JOB_RATE,
@@ -134,23 +134,36 @@ export class DynamicQueue {
   ): Promise<void> {
     if (this.workers.has(queueName)) return;
 
-    const { maxWorkerLimiter, maxWorkerConcurrency } = await this.getWorkerScalingParameters(queueScaleOptions);
+    const { maxWorkerConcurrency } = await this.getWorkerScalingParameters(queueScaleOptions);
 
     const worker = new Worker(
       queueName,
       async (job) => {
+        const jobTimeout = 30000; // 30 seconds timeout
+
+        let timeoutHandle: NodeJS.Timeout | undefined;
+
+        const timeoutPromise = new Promise((_, reject) => {
+          timeoutHandle = setTimeout(() => reject(new Error("Job timeout")), jobTimeout);
+        });
+
         try {
           await this.queueActivityMonitor.updateQueueActivity(queueName);
-          return await jobFn(job);
+          await Promise.race([jobFn(job), timeoutPromise]);
+          if (timeoutHandle) {
+            clearTimeout(timeoutHandle); // Clear the timeout if the job completes in time
+          }
         } catch (error) {
-          console.error(error);
-          throw error;
+          console.error(`${queueName}: Error processing job ${job.id}:`, error);
+          if (timeoutHandle) {
+            clearTimeout(timeoutHandle); // Clear the timeout if the job fails
+          }
+          throw error; // Let BullMQ handle the job failure
         }
       },
       {
         name: `${queueName}-worker`,
         concurrency: maxWorkerConcurrency,
-        limiter: { max: maxWorkerLimiter, duration: QUEUE_GLOBAL_WORKER_LIMITER_DURATION },
         removeOnComplete: { age: 86400, count: 1000 },
         removeOnFail: { age: 86400, count: 1000 },
         connection,

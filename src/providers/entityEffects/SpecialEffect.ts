@@ -3,6 +3,7 @@ import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { TimerWrapper } from "@providers/helpers/TimerWrapper";
+import { npcManager } from "@providers/inversify/container";
 import { EntityType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
@@ -17,6 +18,7 @@ export class SpecialEffect {
 
   @TrackNewRelicTransaction()
   public async applyEffect(
+    caster: ICharacter,
     target: ICharacter | INPC,
     intervalSec: number,
     namespace: SpecialEffectNamespace,
@@ -46,6 +48,10 @@ export class SpecialEffect {
       await this.inMemoryHashTable.delete(namespace, this.getEntityKey(target));
       if (onEffectEnd) {
         onEffectEnd();
+      }
+
+      if (namespace === SpecialEffectNamespace.Stun || namespace === SpecialEffectNamespace.Stealth) {
+        void npcManager.startNearbyNPCsBehaviorLoop(caster);
       }
     }, intervalSec * 1000);
 
