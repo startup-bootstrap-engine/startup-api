@@ -7,31 +7,16 @@ import { itemFireWand } from "./tier1/ItemFireWand";
 import { itemPoisonWand } from "./tier1/ItemPoisonWand";
 import { itemFireburstWand } from "./tier10/ItemFireburstWand";
 import { itemWinterspireStaff } from "./tier10/ItemWinterspireStaff";
-import { itemOracleStaff } from "./tier10/itemOracleStaff";
-import { itemRainbowWand } from "./tier10/itemRainbowWand";
 import { itemSolarStaff } from "./tier11/ItemSolarStaff";
-import { itemProphecyStaff } from "./tier11/itemProphecyStaff";
-import { itemThunderBoltStaff } from "./tier11/itemThunderBoltStaff";
 import { itemVortexStaff } from "./tier12/ItemVortexStaff";
-import { itemLightningWand } from "./tier12/itemLightningWand";
-import { itemStormStaff } from "./tier12/itemStormStaff";
 import { itemLunarWand } from "./tier13/ItemLunarWand";
-import { itemDarkMoonStaff } from "./tier13/itemDarkMoonStaff";
-import { itemSparklingStaff } from "./tier13/itemSparklingStaff";
-import { itemStormyWand } from "./tier13/itemStormyWand";
 import { itemElementalStaff } from "./tier14/ItemElementalStaff";
 import { itemHellishBronzeStaff } from "./tier14/ItemHellishBronzeStaff";
-import { itemFlameSecretWand } from "./tier14/itemFlameSecretWand";
-import { itemGhostFireStaff } from "./tier14/itemGhostFireStaff";
 import { itemGaleforceStaff } from "./tier15/ItemGaleforceStaff";
 import { itemGravityStaff } from "./tier15/ItemGravityStaff";
-import { itemDoomsdayStaff } from "./tier15/itemDoomsdayStaff";
-import { itemFireHeartStaff } from "./tier15/itemFireHeartStaff";
 import { itemDoomStaff } from "./tier16/ItemDoomStaff";
 import { itemElysianEyeStaff } from "./tier16/ItemElysianEyeStaff";
 import { itemAshwoodstaff } from "./tier16/itemAshwoodstaff";
-import { itemMysticLightningStaff } from "./tier16/itemMysticLightningStaff";
-import { itemShadowLordWand } from "./tier16/itemShadowLordWand";
 import { itemAquaStaff } from "./tier2/ItemAquaStaff";
 import { itemCorruptionStaff } from "./tier2/ItemCorruptionStaff";
 import { itemSoulStaff } from "./tier2/ItemSoulStaff";
@@ -90,20 +75,4 @@ export const staffsBlueprintIndex = {
   [StaffsBlueprint.FrostbiteWand]: itemFrostbiteWand,
   [StaffsBlueprint.ElysianEyeStaff]: itemElysianEyeStaff,
   [StaffsBlueprint.AshwoodStaff]: itemAshwoodstaff,
-
-  [StaffsBlueprint.SparklingStaff]: itemSparklingStaff,
-  [StaffsBlueprint.OracleStaff]: itemOracleStaff,
-  [StaffsBlueprint.RainbowWand]: itemRainbowWand,
-  [StaffsBlueprint.ThunderBoltStaff]: itemThunderBoltStaff,
-  [StaffsBlueprint.ProphecyStaff]: itemProphecyStaff,
-  [StaffsBlueprint.LightningWand]: itemLightningWand,
-  [StaffsBlueprint.StormStaff]: itemStormStaff,
-  [StaffsBlueprint.StormyWand]: itemStormyWand,
-  [StaffsBlueprint.DarkMoonStaff]: itemDarkMoonStaff,
-  [StaffsBlueprint.FlameSecretWand]: itemFlameSecretWand,
-  [StaffsBlueprint.GhostFireStaff]: itemGhostFireStaff,
-  [StaffsBlueprint.DoomsdayStaff]: itemDoomsdayStaff,
-  [StaffsBlueprint.FireHeartStaff]: itemFireHeartStaff,
-  [StaffsBlueprint.ShadowLordWand]: itemShadowLordWand,
-  [StaffsBlueprint.MysticLightningStaff]: itemMysticLightningStaff,
 };

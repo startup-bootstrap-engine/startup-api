@@ -102,21 +102,6 @@ export enum SwordsBlueprint {
   FrostbiteFang = "frostbite-fang",
   VenomousBlade = "venomous-blade",
   CelestialSaber = "celestial-saber",
-  ZephyrBlade = "zephyr-blade",
-  CelestialReaver = "celestial-reaver",
-  PhoenixFury = "phoenix-fury",
-  Voidslayer = "void-slayer",
-  LunarEclipseBlade = "lunar-eclipse-blade",
-  StormcallerScimitar = "stormcaller-scimitar",
-  ObsidianEdge = "obsidian-edge",
-  AstralSaber = "astral-saber",
-  SolarFlareSword = "solar-flare-sword",
-  ShadowShredder = "shadow-shredder",
-  AuroraBorealisBlade = "aurora-borealis-blade",
-  BloodthornBroadsword = "bloodthorn-broad-sword",
-  ThunderclapScimitar = "thunderclap-scimitar",
-  Duskblade = "dusk-blade",
-  SoulrenderSword = "soulrender-sword",
 }
 
 export enum HelmetsBlueprint {
@@ -326,21 +311,6 @@ export enum AxesBlueprint {
   SavageSmasher = "savage-smasher",
   BoneReaperAxe = "bone-reaper-axe",
   CrownSplitterAxe = "crown-splitter-axe",
-  FrostbiteCleaver = "frostbite-cleaver",
-  ShadowedReaver = "shadowed-reaver",
-  ThunderstrikeAxe = "thunderstrike-axe",
-  ArcaneSunderer = "arcane-sunderer",
-  InfernalCleaver = "infernal-cleaver",
-  WyvernSlayer = "wyvern-slayer",
-  ObsidianWaraxe = "obsidian-waraxe",
-  StormbreakerAxe = "stormbreaker-axe",
-  BloodmoonCleaver = "bloodmoon-cleaver",
-  BlazingExecutioner = "blazing-executioner",
-  NightfallSplitter = "nightfall-splitter",
-  ThunderousMaul = "thunderous-maul",
-  VoidCleaver = "void-cleaver",
-  StormforgeReaver = "stormforge-reaver",
-  SeraphicAxe = "seraphic-axe",
 }
 
 export enum BootsBlueprint {
@@ -436,7 +406,6 @@ export enum CraftingResourcesBlueprint {
   GoldenOre = "golden-ore",
   ObsidiumOre = "obsidium-ore",
   GreenOre = "green-ore",
-
   SilverOre = "silver-ore",
   GoldenIngot = "golden-ingot",
   SilverIngot = "silver-ingot",
@@ -788,21 +757,6 @@ export enum StaffsBlueprint {
   FrostbiteWand = "frostbite-wand",
   ElysianEyeStaff = "elysian-eye-staff",
   AshwoodStaff = "ashwood-staff",
-  SparklingStaff = "sparkling-staff",
-  OracleStaff = "oracle-staff",
-  RainbowWand = "rainbow-wand",
-  ThunderBoltStaff = "thunder-bolt-staff",
-  ProphecyStaff = "prophecy-staff",
-  LightningWand = "lightning-wand",
-  StormStaff = "storm-staff",
-  StormyWand = "stormy-wand",
-  DarkMoonStaff = "dark-moon-staff",
-  FlameSecretWand = "flame-secret-wand",
-  GhostFireStaff = "ghost-fire-staff",
-  DoomsdayStaff = "doomsday-staff",
-  FireHeartStaff = "fire-heart-staff",
-  ShadowLordWand = "shadow-lord-wand",
-  MysticLightningStaff = "mystic-lightning-staff",
 }
 
 export enum ShieldsBlueprint {
@@ -932,14 +886,6 @@ export enum HammersBlueprint {
   ThorHammer = "thor-hammer",
   GoldHammer = "gold-hammer",
   DragonFistHammer = "dragon-fist-hammer",
-  ThunderForgedHammer = "thunderforged-hammer",
-  FrostSteelHammer = "froststeel-hammer",
-  ShadowHammer = "shadow-hammer",
-  PhoenixFireHammer = "phoenixfire-hammer",
-  AvalancheHammer = "avalanche-hammer",
-  Voidhammer = "void-hammer",
-  StarlightHammer = "starlight-hammer",
-  InfernoHammer = "inferno-hammer",
 }
 
 export type AvailableBlueprints =
