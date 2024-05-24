@@ -134,7 +134,7 @@ export class DynamicQueue {
   ): Promise<void> {
     if (this.workers.has(queueName)) return;
 
-    const { maxWorkerLimiter, maxWorkerConcurrency } = await this.getWorkerScalingParameters(queueScaleOptions);
+    const { maxWorkerConcurrency } = await this.getWorkerScalingParameters(queueScaleOptions);
 
     const worker = new Worker(
       queueName,
