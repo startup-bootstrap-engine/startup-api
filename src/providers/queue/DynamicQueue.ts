@@ -163,6 +163,7 @@ export class DynamicQueue {
       },
       {
         name: `${queueName}-worker`,
+        concurrency: maxWorkerConcurrency,
         removeOnComplete: { age: 86400, count: 1000 },
         removeOnFail: { age: 86400, count: 1000 },
         connection,
