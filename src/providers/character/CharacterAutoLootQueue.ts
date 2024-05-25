@@ -48,7 +48,11 @@ export class CharacterAutoLootQueue {
         character
       )) as IItemContainer;
       if (!inventoryItemContainer) {
-        throw new Error("Inventory item container not found");
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          "Sorry, you cannot loot items without an inventory."
+        );
+        return;
       }
 
       const bodies = await Item.find({ _id: { $in: itemIdsToLoot } }).lean<IItem[]>({

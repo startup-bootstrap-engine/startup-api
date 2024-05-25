@@ -85,7 +85,7 @@ export class NPCNetworkDialogStart {
               throw new Error(`NPCTalkToNPC > NPC dialogText is empty: ${npc._id}`);
             }
           } else {
-            throw new Error(`NPC ${npc.name} out of range to start dialog..`);
+            this.socketMessaging.sendErrorMessageToCharacter(character, "You are too far away to talk to this NPC.");
           }
         } catch (error) {
           console.error(error);

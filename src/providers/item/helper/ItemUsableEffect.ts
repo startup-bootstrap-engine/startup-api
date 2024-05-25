@@ -3,6 +3,7 @@ import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { Locker } from "@providers/locks/Locker";
+import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { Time } from "@providers/time/Time";
 import { EntityType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -21,11 +22,16 @@ export enum EffectableAttribute {
 
 @provide(ItemUsableEffect)
 export class ItemUsableEffect {
-  constructor(private locker: Locker, private time: Time) {}
+  constructor(private locker: Locker, private time: Time, private socketMessaging: SocketMessaging) {}
 
   @TrackNewRelicTransaction()
   public async apply(target: ICharacter | INPC, attr: EffectableAttribute, value: number): Promise<void> {
     try {
+      if (!target || (target.type !== EntityType.Character && target.type !== EntityType.NPC)) {
+        this.socketMessaging.sendErrorMessageToCharacter(target as ICharacter, "Sorry, not possible.");
+        return;
+      }
+
       await this.time.waitForMilliseconds(random(10, 20)); // add artificial delay to avoid concurrency
 
       const canProceed = await this.locker.lock(`${target._id}-applying-usable-effect`);

@@ -3,18 +3,21 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 
-import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
+import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { ItemPickup } from "@providers/item/ItemPickup/ItemPickup";
+import { CharacterItemStack } from "../characterItems/CharacterItemStack";
 
 describe("CharacterItemStack.ts", () => {
   let testItem: IItem;
   let testCharacter: ICharacter;
   let itemPickup: ItemPickup;
+  let characterItemStack: CharacterItemStack;
   let inventory: IItem;
   let inventoryItemContainerId: string;
 
   beforeAll(() => {
     itemPickup = container.get<ItemPickup>(ItemPickup);
+    characterItemStack = container.get<CharacterItemStack>(CharacterItemStack);
   });
 
   beforeEach(async () => {
@@ -74,7 +77,7 @@ describe("CharacterItemStack.ts", () => {
     expect(stackedItem.stackQty).toBe(50);
   });
 
-  it("Increase stack size to max, and create a new item with the difference. if character has stackable item on its container, and we reached the max stack size.", async () => {
+  it("should increase stack size to max, and create a new item with the difference if character has stackable item on its container, and we reached the max stack size.", async () => {
     const newStackableItem = await unitTestHelper.createStackableMockItem({
       x: testCharacter.x,
       y: testCharacter.y,
@@ -129,5 +132,38 @@ describe("CharacterItemStack.ts", () => {
     const itemFirstSlot = updatedInventoryContainer?.slots[0];
 
     expect(itemFirstSlot.stackQty).toBe(25);
+  });
+
+  it("should return false and not add item if container has no slots.", async () => {
+    const newStackableItem = await unitTestHelper.createStackableMockItem({
+      x: testCharacter.x,
+      y: testCharacter.y,
+      scene: testCharacter.scene,
+      weight: 0,
+      stackQty: 25,
+      maxStackSize: 100,
+    });
+
+    // create a container with no slots
+    const emptyContainer = await unitTestHelper.createMockItemContainer({
+      slots: [],
+      slotQty: 0,
+    });
+
+    const result = await characterItemStack.tryAddingItemToStack(testCharacter, emptyContainer, newStackableItem);
+
+    expect(result).toBe(false);
+  });
+
+  it("should return false if item is a duplicate of an existing item.", async () => {
+    testItem.maxStackSize = 30;
+
+    const duplicateItem = testItem;
+
+    const inventoryItemContainer = await ItemContainer.findById(inventoryItemContainerId).lean<IItemContainer>();
+
+    const result = await characterItemStack.tryAddingItemToStack(testCharacter, inventoryItemContainer, duplicateItem);
+
+    expect(result).toBe(false);
   });
 });
