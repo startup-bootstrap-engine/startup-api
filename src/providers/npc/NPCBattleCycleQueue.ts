@@ -115,10 +115,11 @@ export class NPCBattleCycleQueue {
         return;
       }
 
-      await this.battleAttackTarget.checkRangeAndAttack(updatedNPC, targetCharacter);
-      await this.tryToSwitchToRandomTarget(npc);
-
-      await this.addToQueue(updatedNPC, npcSkills);
+      await Promise.all([
+        this.battleAttackTarget.checkRangeAndAttack(updatedNPC, targetCharacter),
+        this.tryToSwitchToRandomTarget(npc),
+        this.addToQueue(updatedNPC, npcSkills),
+      ]);
     } catch (error) {
       await this.handleError(npc, updatedNPC, error);
     }

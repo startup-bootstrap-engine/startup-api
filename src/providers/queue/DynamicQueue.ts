@@ -80,8 +80,6 @@ export class DynamicQueue {
         ...addQueueOptions,
         removeOnComplete: true,
         removeOnFail: true,
-        attempts: 3,
-        backoff: { type: "exponential", delay: 500 },
       });
     } catch (error) {
       console.error(error);
@@ -139,7 +137,7 @@ export class DynamicQueue {
     const worker = new Worker(
       queueName,
       async (job) => {
-        const jobTimeout = 30000; // 30 seconds timeout
+        const jobTimeout = 5000;
 
         let timeoutHandle: NodeJS.Timeout | undefined;
 
@@ -163,7 +161,7 @@ export class DynamicQueue {
       },
       {
         name: `${queueName}-worker`,
-        concurrency: maxWorkerConcurrency,
+        // concurrency: maxWorkerConcurrency,
         removeOnComplete: { age: 86400, count: 1000 },
         removeOnFail: { age: 86400, count: 1000 },
         connection,
