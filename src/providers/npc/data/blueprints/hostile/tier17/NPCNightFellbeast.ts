@@ -4,6 +4,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import {
   AccessoriesBlueprint,
   ArmorsBlueprint,
+  AxesBlueprint,
   BooksBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
@@ -65,6 +66,10 @@ export const npcNightFellbeast: INPCTierBlueprint<17> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.CorruptionDagger,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.WyvernSlayer,
       chance: LootProbability.Rare,
     },
     {

@@ -12,6 +12,7 @@ import {
   HelmetsBlueprint,
   MacesBlueprint,
   SpearsBlueprint,
+  StaffsBlueprint,
   SwordsBlueprint,
   ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -70,6 +71,10 @@ export const npcNazgul: INPCTierBlueprint<18> = {
     },
     {
       itemBlueprintKey: ArmorsBlueprint.DarkArmor,
+      chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: StaffsBlueprint.GhostFireStaff,
       chance: LootProbability.VeryRare,
     },
     {

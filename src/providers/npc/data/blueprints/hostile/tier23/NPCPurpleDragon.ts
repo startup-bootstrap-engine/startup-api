@@ -10,6 +10,7 @@ import {
   CraftingResourcesBlueprint,
   DaggersBlueprint,
   GemsBlueprint,
+  HammersBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
@@ -81,6 +82,10 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
     {
       itemBlueprintKey: ToolsBlueprint.GildedLavaPickaxe,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: HammersBlueprint.Voidhammer,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.DragonsSword,

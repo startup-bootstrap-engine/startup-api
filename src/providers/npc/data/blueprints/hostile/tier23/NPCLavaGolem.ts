@@ -12,6 +12,7 @@ import {
   HelmetsBlueprint,
   MacesBlueprint,
   ShieldsBlueprint,
+  StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
@@ -75,6 +76,14 @@ export const npcLavaGolem: INPCTierBlueprint<23> = {
     {
       itemBlueprintKey: CraftingResourcesBlueprint.RedSapphire,
       chance: LootProbability.Common,
+    },
+    {
+      itemBlueprintKey: StaffsBlueprint.StormStaff,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: StaffsBlueprint.FlameSecretWand,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.MysticVeilHat,

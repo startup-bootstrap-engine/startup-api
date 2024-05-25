@@ -14,6 +14,7 @@ import {
   LegsBlueprint,
   MacesBlueprint,
   ShieldsBlueprint,
+  StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
@@ -77,6 +78,10 @@ export const npcBlackNaga: INPCTierBlueprint<23> = {
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,
       chance: LootProbability.VeryCommon,
+    },
+    {
+      itemBlueprintKey: StaffsBlueprint.DarkMoonStaff,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonTooth,

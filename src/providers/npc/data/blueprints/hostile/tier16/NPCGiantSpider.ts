@@ -92,6 +92,10 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
       chance: LootProbability.Uncommon,
     },
     {
+      itemBlueprintKey: StaffsBlueprint.OracleStaff,
+      chance: LootProbability.Rare,
+    },
+    {
       itemBlueprintKey: ToolsBlueprint.GildedLavaPickaxe,
       chance: LootProbability.VeryRare,
     },

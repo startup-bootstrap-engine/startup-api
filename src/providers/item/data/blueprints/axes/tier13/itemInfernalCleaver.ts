@@ -1,5 +1,14 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableMeleeTier13WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { EntityAttackType, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  EntityAttackType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { AxesBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemInfernalCleaver: IEquippableMeleeTier13WeaponBlueprint = {
@@ -17,4 +26,19 @@ export const itemInfernalCleaver: IEquippableMeleeTier13WeaponBlueprint = {
   tier: 13,
   rangeType: EntityAttackType.Melee,
   basePrice: 128,
+  entityEffects: [EntityEffectBlueprint.Burning],
+  entityEffectChance: 70,
+  equippedBuff: {
+    type: CharacterBuffType.Skill,
+    trait: BasicAttribute.Strength,
+    buffPercentage: 10,
+    durationType: CharacterBuffDurationType.Permanent,
+    options: {
+      messages: {
+        activation: "You feel the power of strength flowing through your body. (+10% strength)",
+        deactivation: "You feel the power of strength leaving your body. (-10% strength)",
+      },
+    },
+  },
+  equippedBuffDescription: "Increases strength by 10%",
 };

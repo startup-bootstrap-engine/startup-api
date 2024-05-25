@@ -1,3 +1,4 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableMeleeTier12WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import { EntityAttackType, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
 import { AxesBlueprint } from "../../../types/itemsBlueprintTypes";
@@ -17,4 +18,6 @@ export const itemThunderstrikeAxe: IEquippableMeleeTier12WeaponBlueprint = {
   tier: 12,
   rangeType: EntityAttackType.Melee,
   basePrice: 125,
+  entityEffects: [EntityEffectBlueprint.Bleeding],
+  entityEffectChance: 70,
 };

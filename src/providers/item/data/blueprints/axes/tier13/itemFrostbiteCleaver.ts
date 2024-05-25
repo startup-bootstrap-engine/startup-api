@@ -1,5 +1,14 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableMeleeTier13WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { EntityAttackType, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  CharacterAttributes,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  EntityAttackType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { AxesBlueprint } from "../../../types/itemsBlueprintTypes";
 
 export const itemFrostbiteCleaver: IEquippableMeleeTier13WeaponBlueprint = {
@@ -17,4 +26,19 @@ export const itemFrostbiteCleaver: IEquippableMeleeTier13WeaponBlueprint = {
   tier: 13,
   rangeType: EntityAttackType.Melee,
   basePrice: 130,
+  entityEffects: [EntityEffectBlueprint.Freezing],
+  entityEffectChance: 80,
+  equippedBuff: {
+    type: CharacterBuffType.CharacterAttribute,
+    trait: CharacterAttributes.MaxHealth,
+    buffPercentage: 6,
+    durationType: CharacterBuffDurationType.Permanent,
+    options: {
+      messages: {
+        activation: "You feel the power of max health flowing through your body. (+6% MaxHealth)",
+        deactivation: "You feel the power of max health leaving your body. (-6% MaxHealth)",
+      },
+    },
+  },
+  equippedBuffDescription: "Increases max health by 6% respectively",
 };

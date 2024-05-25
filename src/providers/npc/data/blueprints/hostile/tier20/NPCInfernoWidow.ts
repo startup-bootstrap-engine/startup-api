@@ -6,9 +6,11 @@ import {
   AxesBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
+  HammersBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
   ShieldsBlueprint,
+  StaffsBlueprint,
   SwordsBlueprint,
   ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -76,6 +78,10 @@ export const npcInfernoWidow: INPCTierBlueprint<20> = {
       chance: LootProbability.SemiCommon,
     },
     {
+      itemBlueprintKey: StaffsBlueprint.ProphecyStaff,
+      chance: LootProbability.Rare,
+    },
+    {
       itemBlueprintKey: CraftingResourcesBlueprint.PrimordialRelic,
       chance: LootProbability.VeryRare,
     },
@@ -102,6 +108,14 @@ export const npcInfernoWidow: INPCTierBlueprint<20> = {
     },
     {
       itemBlueprintKey: ShieldsBlueprint.DemonShield,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.BloodmoonCleaver,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: HammersBlueprint.InfernoHammer,
       chance: LootProbability.Rare,
     },
     {

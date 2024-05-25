@@ -8,18 +8,14 @@ export const recipeObsidianWaraxe: IUseWithCraftingRecipe = {
   requiredItems: [
     {
       key: CraftingResourcesBlueprint.ObsidiumIngot,
-      qty: 75,
-    },
-    {
-      key: CraftingResourcesBlueprint.ObsidiumOre,
-      qty: 45,
+      qty: 100,
     },
     {
       key: CraftingResourcesBlueprint.SteelIngot,
       qty: 70,
     },
     {
-      key: CraftingResourcesBlueprint.IronOre,
+      key: CraftingResourcesBlueprint.IronIngot,
       qty: 50,
     },
     {

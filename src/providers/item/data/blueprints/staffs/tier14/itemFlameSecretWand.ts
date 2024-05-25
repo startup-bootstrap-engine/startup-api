@@ -32,7 +32,7 @@ export const itemFlameSecretWand: IEquippableTwoHandedStaffTier14WeaponBlueprint
   maxRange: RangeTypes.High,
   basePrice: 190,
   isTwoHanded: true,
-  entityEffects: [EntityEffectBlueprint.VineGrasp],
+  entityEffects: [EntityEffectBlueprint.VineGrasp, EntityEffectBlueprint.Burning],
   entityEffectChance: 85,
   equippedBuff: {
     type: CharacterBuffType.Skill,

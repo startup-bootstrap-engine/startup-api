@@ -9,10 +9,12 @@ import {
   BootsBlueprint,
   DaggersBlueprint,
   GemsBlueprint,
+  HammersBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
   ShieldsBlueprint,
+  StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
@@ -79,6 +81,14 @@ export const npcFireNaga: INPCTierBlueprint<20> = {
     },
     {
       itemBlueprintKey: ArmorsBlueprint.DarkArmor,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: HammersBlueprint.PhoenixFireHammer,
+      chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: StaffsBlueprint.FireHeartStaff,
       chance: LootProbability.Rare,
     },
     {
@@ -150,6 +160,11 @@ export const npcFireNaga: INPCTierBlueprint<20> = {
       itemBlueprintKey: MacesBlueprint.SkullCrusherClub,
       chance: LootProbability.Rare,
     },
+    {
+      itemBlueprintKey: AxesBlueprint.InfernalCleaver,
+      chance: LootProbability.Rare,
+    },
+
     {
       itemBlueprintKey: MacesBlueprint.GrimHarbingerClub,
       chance: LootProbability.Rare,
