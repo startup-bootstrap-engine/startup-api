@@ -38,7 +38,7 @@ export class NPCCrons {
       await this.npcRaidActivator.activateRaids();
     });
 
-    this.cronJobScheduler.uniqueSchedule("npc-freezer", "*/3 * * * *", async () => {
+    this.cronJobScheduler.uniqueSchedule("npc-freezer", "* * * * *", async () => {
       await this.npcFreezer.freezeNPCsWithoutCharactersAround();
     });
 

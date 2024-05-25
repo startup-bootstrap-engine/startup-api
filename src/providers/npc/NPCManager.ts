@@ -8,11 +8,12 @@ import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provide } from "inversify-binding-decorators";
 import { NPCView } from "./NPCView";
 
-import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { Locker } from "@providers/locks/Locker";
 import { MathHelper } from "@providers/math/MathHelper";
 import { RaidManager } from "@providers/raid/RaidManager";
+import { Time } from "@providers/time/Time";
+import { random } from "lodash";
 import { NPCCycleQueue } from "./NPCCycleQueue";
 
 @provide(NPCManager)
@@ -20,26 +21,30 @@ export class NPCManager {
   constructor(
     private npcView: NPCView,
     private inMemoryHashTable: InMemoryHashTable,
-    private newRelic: NewRelic,
+
     private mathHelper: MathHelper,
     private raidManager: RaidManager,
     private npcCycleQueue: NPCCycleQueue,
-    private locker: Locker
+    private locker: Locker,
+    private time: Time
   ) {}
 
   @TrackNewRelicTransaction()
   public async startNearbyNPCsBehaviorLoop(character: ICharacter): Promise<void> {
     const nearbyNPCs = await this.npcView.getNPCsInView(character, { isBehaviorEnabled: false });
 
-    for (const npc of nearbyNPCs) {
-      const distanceToCharacterInGrid = this.mathHelper.getDistanceInGridCells(npc.x, npc.y, character.x, character.y);
+    const npcsToActivate = nearbyNPCs.filter(
+      (npc) =>
+        this.mathHelper.getDistanceInGridCells(npc.x, npc.y, character.x, character.y) <= NPC_MIN_DISTANCE_TO_ACTIVATE
+    );
 
-      if (distanceToCharacterInGrid > NPC_MIN_DISTANCE_TO_ACTIVATE) {
-        continue;
-      }
+    await Promise.all(
+      npcsToActivate.map(async (npc) => {
+        await this.time.waitForMilliseconds(random(1, 10));
 
-      await this.startBehaviorLoop(npc);
-    }
+        return this.startBehaviorLoop(npc);
+      })
+    );
   }
 
   @TrackNewRelicTransaction()

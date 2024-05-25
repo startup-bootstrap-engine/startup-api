@@ -96,6 +96,10 @@ export const npcRedDragon: INPCTierBlueprint<20> = {
       chance: LootProbability.Rare,
     },
     {
+      itemBlueprintKey: AxesBlueprint.InfernalCleaver,
+      chance: LootProbability.Rare,
+    },
+    {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
       chance: LootProbability.SemiCommon,
     },

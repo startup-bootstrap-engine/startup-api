@@ -62,6 +62,21 @@ import { itemRustBreakerAxe } from "./tier8/ItemRustBreakerAxe";
 import { itemGloriousAxe } from "./tier9/ItemGloriousAxe";
 import { itemGuardianAxe } from "./tier9/ItemGuardianAxe";
 import { itemHydraSlayerAxe } from "./tier9/ItemHydraSlayerAxe";
+import { itemInfernalCleaver } from "./tier13/itemInfernalCleaver";
+import { itemShadowedReaver } from "./tier12/itemShadowedReaver";
+import { itemThunderstrikeAxe } from "./tier12/itemThunderstrikeAxe";
+import { itemFrostbiteCleaver } from "./tier13/itemFrostbiteCleaver";
+import { itemWyvernSlayer } from "./tier13/itemWyvernSlayer";
+import { itemObsidianWaraxe } from "./tier14/itemObsidianWaraxe";
+import { itemStormbreakerAxe } from "./tier14/itemStormbreakerAxe";
+import { itemBlazingExecutioner } from "./tier15/itemBlazingExecutioner";
+import { itemBloodmoonCleaver } from "./tier15/itemBloodmoonCleaver";
+import { itemNightfallSplitter } from "./tier16/itemNightfallSplitter";
+import { itemThunderousMaul } from "./tier16/itemThunderousMaul";
+import { itemSeraphicAxe } from "./tier17/itemSeraphicAxe";
+import { itemVoidCleaver } from "./tier17/itemVoidCleaver";
+import { itemArcaneSunderer } from "./tier18/itemArcaneSunderer";
+import { itemStormforgeReaver } from "./tier18/itemStormforgeReaver";
 
 export const axesBlueprintIndex = {
   [AxesBlueprint.Axe]: itemAxe,
@@ -127,4 +142,19 @@ export const axesBlueprintIndex = {
   [AxesBlueprint.ButterflierAxe]: itemButterflierAxe,
   [AxesBlueprint.SavageSmasher]: itemSavageSmasher,
   [AxesBlueprint.CrownSplitterAxe]: itemCrownSplitterAxe,
+  [AxesBlueprint.FrostbiteCleaver]: itemFrostbiteCleaver,
+  [AxesBlueprint.ShadowedReaver]: itemShadowedReaver,
+  [AxesBlueprint.ThunderstrikeAxe]: itemThunderstrikeAxe,
+  [AxesBlueprint.ArcaneSunderer]: itemArcaneSunderer,
+  [AxesBlueprint.InfernalCleaver]: itemInfernalCleaver,
+  [AxesBlueprint.WyvernSlayer]: itemWyvernSlayer,
+  [AxesBlueprint.ObsidianWaraxe]: itemObsidianWaraxe,
+  [AxesBlueprint.StormbreakerAxe]: itemStormbreakerAxe,
+  [AxesBlueprint.BloodmoonCleaver]: itemBloodmoonCleaver,
+  [AxesBlueprint.BlazingExecutioner]: itemBlazingExecutioner,
+  [AxesBlueprint.NightfallSplitter]: itemNightfallSplitter,
+  [AxesBlueprint.ThunderousMaul]: itemThunderousMaul,
+  [AxesBlueprint.VoidCleaver]: itemVoidCleaver,
+  [AxesBlueprint.SeraphicAxe]: itemSeraphicAxe,
+  [AxesBlueprint.StormforgeReaver]: itemStormforgeReaver,
 };

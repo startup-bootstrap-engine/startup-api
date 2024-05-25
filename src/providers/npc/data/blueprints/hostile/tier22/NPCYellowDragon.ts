@@ -10,10 +10,12 @@ import {
   CraftingResourcesBlueprint,
   DaggersBlueprint,
   GemsBlueprint,
+  HammersBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
   ShieldsBlueprint,
+  StaffsBlueprint,
   SwordsBlueprint,
   ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -82,11 +84,19 @@ export const npcYellowDragon: INPCTierBlueprint<22> = {
       chance: LootProbability.VeryRare,
     },
     {
+      itemBlueprintKey: HammersBlueprint.StarlightHammer,
+      chance: LootProbability.Rare,
+    },
+    {
       itemBlueprintKey: CraftingResourcesBlueprint.PrimordialRelic,
       chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: ToolsBlueprint.GildedLavaPickaxe,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: StaffsBlueprint.MysticLightningStaff,
       chance: LootProbability.Rare,
     },
     {

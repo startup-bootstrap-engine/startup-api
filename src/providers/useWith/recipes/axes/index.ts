@@ -6,20 +6,35 @@ import { recipeCopperAxe } from "./tier1/recipeCopperAxe";
 import { recipeSilentScreamAxe } from "./tier10/recipeSilentScreamAxe";
 import { recipeGoldenReaverAxe } from "./tier11/recipeGoldenReaverAxe";
 import { recipeMinecraftAxe } from "./tier11/recipeMinecraftAxe";
+import { recipeShadowedReaver } from "./tier12/recipeShadowedReaver";
+import { recipeThunderstrikeAxe } from "./tier12/recipeThunderstrikeAxe";
 import { recipeWarAxe } from "./tier12/recipeWarAxe";
+import { recipeInfernalCleaver } from "./tier13/  recipeInfernalCleaver";
+import { recipeWyvernSlayer } from "./tier13/  recipeWyvernSlayer";
 import { recipeDanishAxe } from "./tier13/recipeDanishAxe";
+import { recipeFrostbiteCleaver } from "./tier13/recipeFrostbiteClever";
+import { recipeObsidianWaraxe } from "./tier14/  recipeObsidianWaraxe";
+import { recipeStormbreakerAxe } from "./tier14/  recipeStormbreakerAxe";
 import { recipeDualImpactAxe } from "./tier14/recipeDualImpactAxe";
 import { recipeMaulAxe } from "./tier14/recipeMaulAxe";
 import { recipeSpikeToppedAxe } from "./tier14/recipeSpikeToppedAxe";
+import { recipeBlazingExecutioner } from "./tier15/  recipeBlazingExecutioner";
+import { recipeBloodmoonCleaver } from "./tier15/  recipeBloodmoonCleaver";
 import { recipeBrutalChopperAxe } from "./tier15/recipeBrutalChopperAxe";
 import { recipeCrownedAxe } from "./tier15/recipeCrownedAxe";
 import { recipeTwinEdgeAxe } from "./tier15/recipeTwinEdgeAxe";
+import { recipeNightfallSplitter } from "./tier16/  recipeNightfallSplitter";
+import { recipeThunderousMaul } from "./tier16/  recipeThunderousMaul";
 import { recipeIroncladCleaver } from "./tier16/recipeIroncladCleaver";
 import { recipeRoyalChopperAxe } from "./tier16/recipeRoyalChopperAxe";
 import { recipeTimberSplitterAxe } from "./tier16/recipeTimberSplitterAxe";
+import { recipeSeraphicAxe } from "./tier17/  recipeSeraphicAxe";
+import { recipeVoidCleaver } from "./tier17/  recipeVoidCleaver";
 import { recipeBoneReaperAxe } from "./tier17/recipeBoneReaperAxe";
 import { recipeButterflierAxe } from "./tier17/recipeButterflierAxe";
 import { recipeSavageSmasher } from "./tier17/recipeSavageSmasher";
+import { recipeArcaneSunderer } from "./tier18/  recipeArcaneSunderer";
+import { recipeStormforgeReaver } from "./tier18/  recipeStormforgeReaver";
 import { recipeCrownSplitterAxe } from "./tier18/recipeCrownSplitterAxe";
 import { recipeRuneAxe } from "./tier2/recipeRuneAxe";
 import { recipeSilverAxe } from "./tier2/recipeSilverAxe";
@@ -74,4 +89,19 @@ export const recipeAxesIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [AxesBlueprint.BoneReaperAxe]: [recipeBoneReaperAxe],
   [AxesBlueprint.ButterflierAxe]: [recipeButterflierAxe],
   [AxesBlueprint.SavageSmasher]: [recipeSavageSmasher],
+  [AxesBlueprint.ShadowedReaver]: [recipeShadowedReaver],
+  [AxesBlueprint.ThunderstrikeAxe]: [recipeThunderstrikeAxe],
+  [AxesBlueprint.InfernalCleaver]: [recipeInfernalCleaver],
+  [AxesBlueprint.WyvernSlayer]: [recipeWyvernSlayer],
+  [AxesBlueprint.FrostbiteCleaver]: [recipeFrostbiteCleaver],
+  [AxesBlueprint.ObsidianWaraxe]: [recipeObsidianWaraxe],
+  [AxesBlueprint.StormbreakerAxe]: [recipeStormbreakerAxe],
+  [AxesBlueprint.BloodmoonCleaver]: [recipeBloodmoonCleaver],
+  [AxesBlueprint.ThunderousMaul]: [recipeThunderousMaul],
+  [AxesBlueprint.SeraphicAxe]: [recipeSeraphicAxe],
+  [AxesBlueprint.VoidCleaver]: [recipeVoidCleaver],
+  [AxesBlueprint.ArcaneSunderer]: [recipeArcaneSunderer],
+  [AxesBlueprint.StormforgeReaver]: [recipeStormforgeReaver],
+  [AxesBlueprint.BlazingExecutioner]: [recipeBlazingExecutioner],
+  [AxesBlueprint.NightfallSplitter]: [recipeNightfallSplitter],
 };

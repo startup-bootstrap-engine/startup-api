@@ -3,6 +3,7 @@ import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { Locker } from "@providers/locks/Locker";
+import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { Time } from "@providers/time/Time";
 import { EntityType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -21,11 +22,16 @@ export enum EffectableAttribute {
 
 @provide(ItemUsableEffect)
 export class ItemUsableEffect {
-  constructor(private locker: Locker, private time: Time) {}
+  constructor(private locker: Locker, private time: Time, private socketMessaging: SocketMessaging) {}
 
   @TrackNewRelicTransaction()
   public async apply(target: ICharacter | INPC, attr: EffectableAttribute, value: number): Promise<void> {
     try {
+      if (!target || (target.type !== EntityType.Character && target.type !== EntityType.NPC)) {
+        this.socketMessaging.sendErrorMessageToCharacter(target as ICharacter, "Sorry, not possible.");
+        return;
+      }
+
       await this.time.waitForMilliseconds(random(10, 20)); // add artificial delay to avoid concurrency
 
       const canProceed = await this.locker.lock(`${target._id}-applying-usable-effect`);
@@ -34,16 +40,13 @@ export class ItemUsableEffect {
         return;
       }
 
-      // sometimes target is coming here without a type for NPCs (probably due to a lean without virtuals: true). This is a workaround to fix it.
-      if (!target.type) {
-        if (target.textureKey) {
-          target.type = EntityType.NPC;
-        } else {
-          target.type = EntityType.Character;
-        }
-      }
+      this.ensureTargetType(target);
 
       const latestTargetHealth = await this.fetchLatestHealth(target);
+
+      if (!latestTargetHealth) {
+        return;
+      }
 
       if (target.health !== latestTargetHealth) {
         target.health = latestTargetHealth;
@@ -62,20 +65,39 @@ export class ItemUsableEffect {
     }
   }
 
-  private async fetchLatestHealth(target: ICharacter | INPC): Promise<number> {
-    let data;
-    switch (target.type) {
-      case EntityType.Character:
-        data = await Character.findOne({ _id: target._id, scene: target.scene }).lean().select("health");
-        break;
-      case EntityType.NPC:
-        data = await NPC.findOne({ _id: target._id, scene: target.scene }).lean().select("health");
-        break;
-      default:
-        throw new Error(`Invalid target type: ${target.type}`);
-    }
+  private async fetchLatestHealth(target: ICharacter | INPC): Promise<number | undefined> {
+    try {
+      let data;
+      switch (target.type) {
+        case EntityType.Character:
+          data = await Character.findOne({ _id: target._id, scene: target.scene }).lean().select("health");
+          break;
+        case EntityType.NPC:
+          data = await NPC.findOne({ _id: target._id, scene: target.scene }).lean().select("health");
+          break;
+        default:
+          throw new Error(`Invalid target type: ${target.type}`);
+      }
 
-    return data?.health ?? target.health;
+      if (!data) {
+        return;
+      }
+
+      return data.health;
+    } catch (error) {
+      console.error(`Error fetching latest health for target with ID: ${target._id}`, error);
+      throw error;
+    }
+  }
+
+  private ensureTargetType(target: ICharacter | INPC): void {
+    if (!target.type) {
+      if ("isBehaviorEnabled" in target) {
+        target.type = EntityType.NPC;
+      } else {
+        target.type = EntityType.Character;
+      }
+    }
   }
 
   private validateTargetAndValue(target: ICharacter | INPC, value: number): void {

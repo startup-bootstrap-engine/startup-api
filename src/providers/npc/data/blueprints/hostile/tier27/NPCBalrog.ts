@@ -10,10 +10,12 @@ import {
   CraftingResourcesBlueprint,
   DaggersBlueprint,
   GemsBlueprint,
+  HammersBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
   ShieldsBlueprint,
+  StaffsBlueprint,
   SwordsBlueprint,
   ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -85,6 +87,18 @@ export const npcNPCBalrog: INPCTierBlueprint<27> = {
     {
       itemBlueprintKey: SwordsBlueprint.InfernalSlicer,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: HammersBlueprint.ThunderForgedHammer,
+      chance: LootProbability.Common,
+    },
+    {
+      itemBlueprintKey: StaffsBlueprint.ShadowLordWand,
+      chance: LootProbability.Common,
+    },
+    {
+      itemBlueprintKey: HammersBlueprint.FrostSteelHammer,
+      chance: LootProbability.Common,
     },
     {
       itemBlueprintKey: BooksBlueprint.AstralGlobe,

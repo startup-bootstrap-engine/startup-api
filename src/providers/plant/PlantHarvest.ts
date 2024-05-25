@@ -23,6 +23,7 @@ import {
   IItemContainer,
   IItemUpdate,
   IItemUpdateAll,
+  ItemRarities,
   ItemSocketEvents,
   ItemSubType,
   ItemType,
@@ -96,6 +97,11 @@ export class PlantHarvest {
     }
 
     const newItem = await this.createAndSaveNewItem(character, harvestedItemBlueprint, harvestableItemQuantity);
+
+    const rarity = this.getRandomRarity(skillLevel);
+    newItem.rarity = rarity;
+    await newItem.save();
+
     const wasItemAddedToContainer = await this.addItemToContainer(newItem, character, inventoryContainerId);
 
     const n = Math.floor(Math.random() * 100);
@@ -121,6 +127,68 @@ export class PlantHarvest {
     await this.skillIncrease.increaseCraftingSP(character, ItemType.Plant, true);
 
     await this.handlePlantAfterHarvest(plant, blueprint, character);
+  }
+
+  private calculateProbabilities(skillLevel: number): { [key in ItemRarities]: number } {
+    const probabilityConfig: { [key: string]: { [key in ItemRarities]: number } } = {
+      low: {
+        Common: 0.7,
+        Uncommon: 0.2,
+        Rare: 0.08,
+        Epic: 0.02,
+        Legendary: 0,
+      },
+      medium: {
+        Common: 0.3,
+        Uncommon: 0.5,
+        Rare: 0.15,
+        Epic: 0.05,
+        Legendary: 0,
+      },
+      high: {
+        Common: 0.1,
+        Uncommon: 0.3,
+        Rare: 0.4,
+        Epic: 0.15,
+        Legendary: 0.05,
+      },
+      veryHigh: {
+        Common: 0.05,
+        Uncommon: 0.15,
+        Rare: 0.3,
+        Epic: 0.4,
+        Legendary: 0.1,
+      },
+      max: {
+        Common: 0,
+        Uncommon: 0.05,
+        Rare: 0.15,
+        Epic: 0.3,
+        Legendary: 0.5,
+      },
+    };
+
+    if (skillLevel <= 10) return probabilityConfig.low;
+    if (skillLevel <= 30) return probabilityConfig.medium;
+    if (skillLevel <= 60) return probabilityConfig.high;
+    if (skillLevel <= 100) return probabilityConfig.veryHigh;
+    return probabilityConfig.max;
+  }
+
+  private getRandomRarity(skillLevel: number): ItemRarities {
+    const probabilities = this.calculateProbabilities(skillLevel);
+    const random = Math.random();
+
+    let cumulativeProbability = 0;
+    for (const rarity in probabilities) {
+      cumulativeProbability += probabilities[rarity as ItemRarities];
+      if (random < cumulativeProbability) {
+        return rarity as ItemRarities;
+      }
+    }
+
+    // Fallback in case of rounding errors
+    return ItemRarities.Common;
   }
 
   private isPlantOwner(plant: IItem, character: ICharacter): boolean {

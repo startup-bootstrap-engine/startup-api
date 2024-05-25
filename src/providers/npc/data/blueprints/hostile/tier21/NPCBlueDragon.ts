@@ -10,6 +10,7 @@ import {
   CraftingResourcesBlueprint,
   DaggersBlueprint,
   GemsBlueprint,
+  HammersBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
@@ -79,6 +80,10 @@ export const npcBlueDragon: INPCTierBlueprint<21> = {
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,
       chance: LootProbability.VeryCommon,
+    },
+    {
+      itemBlueprintKey: HammersBlueprint.AvalancheHammer,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonTooth,

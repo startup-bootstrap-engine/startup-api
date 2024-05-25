@@ -80,27 +80,39 @@ export class CharacterNetworkUpdateQueue {
   }
 
   private async execPositionUpdate(data: ICharacterPositionUpdateFromClient, character: ICharacter): Promise<void> {
-    if (await this.isCharacterChangingScene(character)) {
+    const hasLock = await this.locker.lock(`character-network-update-${character._id}`);
+
+    if (!hasLock) {
       return;
     }
 
-    if (!data) {
-      return;
+    try {
+      if (await this.isCharacterChangingScene(character)) {
+        return;
+      }
+
+      if (!data) {
+        return;
+      }
+
+      const isMoving = this.determineCharacterMovement(character, data);
+      this.trackPing(data);
+
+      const isPositionUpdateValid = isMoving
+        ? await this.characterMovementValidation.isValid(character, data.newX, data.newY, isMoving)
+        : true;
+
+      if (!isPositionUpdateValid) {
+        this.sendConfirmation(character, data.direction, false);
+        return;
+      }
+
+      await this.processValidCharacterMovement(character, data, isMoving);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      await this.locker.unlock(`character-network-update-${character._id}`);
     }
-
-    const isMoving = this.determineCharacterMovement(character, data);
-    this.trackPing(data);
-
-    const isPositionUpdateValid = isMoving
-      ? await this.characterMovementValidation.isValid(character, data.newX, data.newY, isMoving)
-      : true;
-
-    if (!isPositionUpdateValid) {
-      this.sendConfirmation(character, data.direction, false);
-      return;
-    }
-
-    await this.processValidCharacterMovement(character, data, isMoving);
   }
 
   public async clearAllJobs(): Promise<void> {
@@ -127,7 +139,7 @@ export class CharacterNetworkUpdateQueue {
     await this.syncIfPositionMismatch(character, { x: character.x, y: character.y }, data.originX, data.originY);
 
     this.characterMovementWarn.warn(character, data);
-    await this.npcManager.startNearbyNPCsBehaviorLoop(character);
+    void this.npcManager.startNearbyNPCsBehaviorLoop(character);
     await this.updateServerSideEmitterInfo(character, data.newX, data.newY, isMoving, data.direction);
     void this.mapTransition.handleNonPVPZone(character, data.newX, data.newY);
     await this.mapTransition.handleMapTransition(character, data.newX, data.newY);

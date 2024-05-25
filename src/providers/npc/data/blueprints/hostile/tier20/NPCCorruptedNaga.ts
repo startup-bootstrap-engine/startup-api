@@ -9,6 +9,7 @@ import {
   BootsBlueprint,
   DaggersBlueprint,
   GemsBlueprint,
+  HammersBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
@@ -79,6 +80,10 @@ export const npcCorruptedNaga: INPCTierBlueprint<20> = {
     {
       itemBlueprintKey: ArmorsBlueprint.DarkArmor,
       chance: LootProbability.SemiCommon,
+    },
+    {
+      itemBlueprintKey: HammersBlueprint.ShadowHammer,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: SwordsBlueprint.LeviathanSword,

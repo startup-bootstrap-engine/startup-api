@@ -37,12 +37,17 @@ export class EntityEffectUse {
       }
 
       if (entityEffect) {
-        await this.applyEntityEffect(entityEffect, target, attacker, true);
+        await this.applyEntityEffect(entityEffect, target, attacker);
         return;
       }
 
       const entityEffects = await this.getApplicableEntityEffects(attacker);
-      await Promise.all(entityEffects.map((effect) => this.applyEntityEffect(effect, target, attacker)));
+
+      const randomNumber = _.random(0, 100);
+      const promises = entityEffects
+        .filter((effect) => effect.probability >= randomNumber)
+        .map((effect) => this.applyEntityEffect(effect, target, attacker));
+      await Promise.all(promises);
     } catch (error) {
       console.error(`Error in applyEntityEffects: ${error}`);
     }
@@ -135,13 +140,8 @@ export class EntityEffectUse {
   private async applyEntityEffect(
     entityEffect: IEntityEffect,
     target: ICharacter | INPC,
-    attacker: ICharacter | INPC,
-    skipProbability: boolean = false
+    attacker: ICharacter | INPC
   ): Promise<void> {
-    const randomNumber = _.random(0, 100);
-    if (entityEffect.probability <= randomNumber && !skipProbability) {
-      return;
-    }
     let appliedEffects = target.appliedEntityEffects ?? [];
     const applied = appliedEffects.find((effect) => effect.key === entityEffect.key);
 

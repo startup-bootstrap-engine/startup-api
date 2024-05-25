@@ -13,8 +13,8 @@ export class DiscordCronJobs {
     });
 
     // Every tuesday
-    this.cronJobScheduler.uniqueSchedule("discord-bug-abuser-hunt-cron", "0 0 * * 2", async () => {
-      await this.bugAbuserHunt();
+    this.cronJobScheduler.uniqueSchedule("discord-social-crystal-cron", "0 5 * * 1,3,5,0", async () => {
+      await this.sendSocialCrystalReferralRequest();
     });
 
     // Every tue, thu
@@ -135,6 +135,34 @@ export class DiscordCronJobs {
     }
   }
 
+  private async sendSocialCrystalReferralRequest(): Promise<void> {
+    try {
+      const message = `
+      **💎 Earn Gold to Gear Up (Get Social Crystals)! 💎**
+      
+      Definya heroes, your journey has been epic! Now, it's time to level up even more. Share your referral link and earn Social Crystals worth **8-10k gold** on the marketplace! 💎
+  
+      **Use this gold to gear up your character with the best weapons and armor!** ⚔️🛡️
+  
+      Click the **colored diamond button** and share your link with friends or on targeted groups. Let's bring more adventurers to the land of Definya and become even stronger together!
+      
+      **Together, we rise!** 💪
+  
+      @everyone
+      `;
+
+      await this.discordBot.sendMessageWithColor(
+        message,
+        "general",
+        "Earn Gold to Gear Up",
+        "Blue",
+        "https://imgur.com/OgXeOzE"
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   private async sendBeginnersGuideCronJob(): Promise<void> {
     try {
       const message = `Feeling a little bit lost? 
@@ -226,28 +254,6 @@ export class DiscordCronJobs {
       );
     } catch (error) {
       console.error(`Failed to send Discord message: ${error}`);
-    }
-  }
-
-  private async bugAbuserHunt(): Promise<void> {
-    try {
-      const message = `🔍 **Bug Abuser Hunt!** 🔍
-
-      Have you spotted someone exploiting a game bug to gain an unfair advantage?
-
-      Record the bug abuser in action using a screen recording app and post the video in the #bans channel. Don't forget to tag me.
-
-      If your report is validated by our moderators and myself, you'll be rewarded according to the severity of the bug (1-10 social crystals).
-
-      💀 The punishment can range from a few days of ban to a permaban and account deletion. 💀
-
-      On the other hand, if you discover a bug yourself and report it through a video without exploiting it, you'll also be rewarded with Social Crystals. The quantity of the reward will depend on the severity of the bug.
-
-      @everyone`;
-
-      await this.discordBot.sendMessageWithColor(message, "general", "Bug Abuser Hunt", "Red");
-    } catch (error) {
-      console.error(error);
     }
   }
 

@@ -4,7 +4,11 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { itemsBlueprintIndex } from "@providers/item/data/index";
-import { RangedWeaponsBlueprint, SwordsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import {
+  RangedWeaponsBlueprint,
+  StaffsBlueprint,
+  SwordsBlueprint,
+} from "@providers/item/data/types/itemsBlueprintTypes";
 import { EntityAttackType } from "@rpg-engine/shared";
 import _ from "lodash";
 import { EntityEffectCycle } from "../EntityEffectCycle";
@@ -23,6 +27,8 @@ describe("EntityEffectUse.ts", () => {
   let testTargetNPC: INPC;
   let testTarget: ICharacter;
   let poisonEntityEffect: IEntityEffect;
+  let bleedingEntityEffect: IEntityEffect;
+  let corruptionEntityEffect: IEntityEffect;
   let entityEffectSpy;
   let testCharacter: ICharacter;
   let poisonSwordItem: IItem;
@@ -31,6 +37,7 @@ describe("EntityEffectUse.ts", () => {
   let getWeaponSpy: jest.SpyInstance;
   let findByIdEquipmentSpy: jest.SpyInstance;
   let findByIdAccessorySpy: jest.SpyInstance;
+  let elysianEyeStaff: IItem;
 
   beforeAll(() => {
     entityEffectUse = container.get<EntityEffectUse>(EntityEffectUse);
@@ -39,6 +46,8 @@ describe("EntityEffectUse.ts", () => {
     testAttacker = await unitTestHelper.createMockNPC(null, {});
 
     poisonEntityEffect = entityEffectsBlueprintsIndex[EntityEffectBlueprint.Poison];
+    bleedingEntityEffect = entityEffectsBlueprintsIndex[EntityEffectBlueprint.Bleeding];
+    corruptionEntityEffect = entityEffectsBlueprintsIndex[EntityEffectBlueprint.Corruption];
 
     testAttacker.entityEffects = [poisonEntityEffect.key];
 
@@ -60,6 +69,10 @@ describe("EntityEffectUse.ts", () => {
     const poisonArrow = itemsBlueprintIndex[RangedWeaponsBlueprint.PoisonArrow];
     poisonArrowItem = new Item({ ...poisonArrow });
     await poisonArrowItem.save();
+
+    const elysianEye = itemsBlueprintIndex[StaffsBlueprint.ElysianEyeStaff];
+    elysianEyeStaff = new Item({ ...elysianEye });
+    await elysianEyeStaff.save();
 
     // @ts-ignore
     entityEffectSpy = jest.spyOn(entityEffectUse, "startEntityEffectCycle");
@@ -192,6 +205,18 @@ describe("EntityEffectUse.ts", () => {
       { _id: testTargetNPC._id },
       { $set: { appliedEntityEffects: testTargetNPC.appliedEntityEffects } }
     );
+  });
+
+  it("should call multiple EntityEffects if attacker has multiple entity effects item", async () => {
+    bleedingEntityEffect.probability = 100;
+    corruptionEntityEffect.probability = 100;
+    // @ts-ignore
+    getWeaponSpy = jest.spyOn(entityEffectUse.characterWeapon, "getWeapon");
+    getWeaponSpy.mockResolvedValueOnce({ item: elysianEyeStaff });
+
+    await entityEffectUse.applyEntityEffects(testAttacker, testCharacter);
+    expect(entityEffectSpy).toBeCalled();
+    expect(entityEffectSpy).toHaveBeenCalledTimes(2);
   });
 
   describe("Attack types", () => {

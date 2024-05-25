@@ -10,10 +10,12 @@ import {
   CraftingResourcesBlueprint,
   DaggersBlueprint,
   GemsBlueprint,
+  HammersBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
   ShieldsBlueprint,
+  StaffsBlueprint,
   SwordsBlueprint,
   ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -88,8 +90,24 @@ export const npcAncientDragon: INPCTierBlueprint<26> = {
       chance: LootProbability.Uncommon,
     },
     {
+      itemBlueprintKey: SwordsBlueprint.InfernoCleaver,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: HammersBlueprint.ThunderForgedHammer,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: HammersBlueprint.FrostSteelHammer,
+      chance: LootProbability.Rare,
+    },
+    {
       itemBlueprintKey: BooksBlueprint.AstralGlobe,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: StaffsBlueprint.DoomsdayStaff,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,

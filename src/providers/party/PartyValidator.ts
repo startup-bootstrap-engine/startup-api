@@ -16,7 +16,7 @@ export class PartyValidator {
 
     const theyAreInSameParty =
       party.members.some((member) => member._id.toString() === target._id.toString()) ||
-      party.leader.toString() === target._id.toString();
+      party.leader._id.toString() === target._id.toString();
 
     return theyAreInSameParty;
   }

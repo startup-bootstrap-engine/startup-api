@@ -203,7 +203,10 @@ export class SpellCast {
       return true;
     }
 
-    if (spell.castingType === SpellCastingType.RangedCasting && !target) {
+    if (
+      spell.castingType === SpellCastingType.RangedCasting &&
+      (!target || (target.type !== EntityType.Character && target.type !== EntityType.NPC))
+    ) {
       return true;
     }
 
@@ -227,7 +230,7 @@ export class SpellCast {
     spell: ISpell,
     target: ITarget
   ): Promise<void> {
-    const updatedCharacter = (await Character.findById(character._id)) as ICharacter;
+    const updatedCharacter = (await Character.findById(character._id).populate("skills")) as ICharacter;
 
     await this.itemUsableEffect.apply(updatedCharacter, EffectableAttribute.Mana, -1 * spell.manaCost);
     await updatedCharacter.save();

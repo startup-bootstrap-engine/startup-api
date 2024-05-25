@@ -341,27 +341,27 @@ export class SkillIncrease {
     bonus?: number
   ): IIncreaseSPResult | undefined {
     try {
-      // Validate skillKey is not undefined, null, or an unexpected type
       if (typeof skillKey !== "string" || !skillKey.trim()) {
         throw new Error(`Invalid or empty skillKey provided: ${skillKey}`);
       }
 
       let skillLevelUp = false;
-      // Ensure the skillKey exists in the skillsMap or can be mapped by the skillMapper
       const skillToUpdate = skillsMap.get(skillKey) ?? this.skillMapper.getCraftingSkillToUpdate(skillKey);
 
       if (!skillToUpdate) {
-        throw new Error(`skill not found for item subtype ${skillKey}`);
+        throw new Error(`Skill not found for item subtype ${skillKey}`);
+      }
+
+      if (!skills[skillToUpdate]) {
+        throw new Error(`Skill details not found for key ${skillToUpdate}`);
       }
 
       if (!skillPointsCalculator) {
         skillPointsCalculator = (skillDetails: ISkillDetails, bonus?: number): number => {
           const newSP = this.calculateNewSP(skillDetails, bonus);
-
           if (!newSP) {
             throw new Error(`newSP not found for skill ${skillKey}`);
           }
-
           return newSP;
         };
       }
@@ -376,14 +376,11 @@ export class SkillIncrease {
 
       if (updatedSkillDetails.skillPointsToNextLevel <= 0) {
         skillLevelUp = true;
-
         updatedSkillDetails.level++;
-
         updatedSkillDetails.skillPointsToNextLevel = this.skillCalculator.calculateSPToNextLevel(
           updatedSkillDetails.skillPoints,
           updatedSkillDetails.level + 1
         );
-
         this.newRelic.trackMetric(
           NewRelicMetricCategory.Count,
           NewRelicSubCategory.Characters,
@@ -403,15 +400,18 @@ export class SkillIncrease {
         skillPointsToNextLevel: Math.round(updatedSkillDetails.skillPointsToNextLevel),
       };
     } catch (error) {
-      console.error(error);
+      console.error(`Error in increaseSP for skillKey ${skillKey}:`, error);
     }
   }
 
   private calculateNewSP(skillDetails: ISkillDetails, bonus?: number): number | undefined {
     try {
+      if (!skillDetails) {
+        throw new Error("skillDetails is undefined");
+      }
+
       let spIncreaseRatio = SP_INCREASE_BASE;
 
-      // increase combat related skills faster
       if (skillDetails.level < 10) {
         spIncreaseRatio += LOW_SKILL_LEVEL_SP_INCREASE_BONUS;
       }
@@ -421,7 +421,7 @@ export class SkillIncrease {
       }
       return Math.round((skillDetails.skillPoints + spIncreaseRatio) * 100) / 100;
     } catch (error) {
-      console.error(error);
+      console.error("Error in calculateNewSP:", error);
     }
   }
 

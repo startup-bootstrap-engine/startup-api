@@ -21,34 +21,44 @@ import { recipeWarlordBroadsword } from "./tier12/recipeWarlordBroadsword";
 import { recipeZenBroadsword } from "./tier12/recipeZenBroadsword";
 import { recipeYggdrasilJianSword } from "./tier13/recipeYggdrasilJianSword";
 import { recipeFrostbitFang } from "./tier14/recipeFrostbiteFang";
+import { recipeObsidianEdge } from "./tier14/recipeObsidianEdge";
 import { recipeShadowstrikeFalchion } from "./tier14/recipeShadowstrikeFalchion";
+import { recipeStormcallerScimitar } from "./tier14/recipeStormcallerScimitar";
 import { recipeVenomousBlade } from "./tier14/recipeVenomousBlade";
 import { recipeVenomousSinger } from "./tier14/recipeVenomousStinger";
+import { recipeAstralSaber } from "./tier15/recipeAstralSaber";
 import { recipeFlamestrikeBlade } from "./tier15/recipeFlamestrikeBlade";
 import { recipeMoonshadowBlade } from "./tier15/recipeMoonshadowBlade";
 import { recipeShadowblade } from "./tier15/recipeShadowblade";
+import { recipeSolarFlareSword } from "./tier15/recipeSolarFlareSword";
 import { recipeThunderCutlass } from "./tier15/recipeThunderCutlass";
 import { recipeVenomousFang } from "./tier15/recipeVenomousFang";
 import { recipeYggdrasilTemplarSword } from "./tier15/recipeYggdrasilTemplarSword";
+import { recipeAuroraBorealisBlade } from "./tier16/recipeAuroraBorealisBlade";
 import { recipeBloodmoonBlade } from "./tier16/recipeBloodmoonBlade";
 import { recipeEmberbrandClaymore } from "./tier16/recipeEmberbrandClaymore";
 import { recipeEmberglowRapier } from "./tier16/recipeEmberglowRapier";
 import { recipeFrostheartBroadsword } from "./tier16/recipeFrostheartBroadsword";
 import { recipeSeraphicSaber } from "./tier16/recipeSeraphicSabre";
 import { recipeSeraphicScimitar } from "./tier16/recipeSeraphicScimitar";
+import { recipeShadowShredder } from "./tier16/recipeShadowShredder";
 import { recipeThunderousClaymore } from "./tier16/recipeThunderousClaymore";
+import { recipeBloodthornBroadsword } from "./tier17/recipeBloodthornBroadsword";
 import { recipeCelestialEdge } from "./tier17/recipeCelestialEdge";
 import { recipeCelestialSaber } from "./tier17/recipeCelestialSaber";
 import { recipeFrostfireLongblade } from "./tier17/recipeFrostfireLongblade";
 import { recipeMoonlightCrescent } from "./tier17/recipeMoonlightCrescent";
 import { recipeStormbreaker } from "./tier17/recipeStormbreaker";
 import { recipeThunderclapKatana } from "./tier17/recipeThunderclapKatana";
+import { recipeThunderclapScimitar } from "./tier17/recipeThunderclapScimitar";
 import { recipeThunderstormEdge } from "./tier17/recipeThunderstormEdge";
 import { recipeCelestialDefender } from "./tier18/recipeCelestialDefender";
+import { recipeDuskblade } from "./tier18/recipeDuskblade";
 import { recipeFrostbiteSaber } from "./tier18/recipeFrostbiteSaber";
 import { recipeFrostfireGladius } from "./tier18/recipeFrostfireGladius";
 import { recipeFrostwindCutter } from "./tier18/recipeFrostwindCutter";
 import { recipeInfernalSlicer } from "./tier18/recipeInfernalSlicer";
+import { recipeSoulrenderSword } from "./tier18/recipeSoulrenderSword";
 import { recipeCopperBroadsword } from "./tier2/recipeCopperBroadsword";
 import { recipeIceSword } from "./tier2/recipeIceSword";
 import { recipeBasiliskSword } from "./tier3/recipeBasiliskSword";
@@ -142,4 +152,14 @@ export const recipeSwordsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [SwordsBlueprint.FrostfireGladius]: [recipeFrostfireGladius],
   [SwordsBlueprint.FrostwindCutter]: [recipeFrostwindCutter],
   [SwordsBlueprint.InfernalSlicer]: [recipeInfernalSlicer],
+  [SwordsBlueprint.SolarFlareSword]: [recipeSolarFlareSword],
+  [SwordsBlueprint.AuroraBorealisBlade]: [recipeAuroraBorealisBlade],
+  [SwordsBlueprint.ShadowShredder]: [recipeShadowShredder],
+  [SwordsBlueprint.BloodthornBroadsword]: [recipeBloodthornBroadsword],
+  [SwordsBlueprint.Duskblade]: [recipeDuskblade],
+  [SwordsBlueprint.ObsidianEdge]: [recipeObsidianEdge],
+  [SwordsBlueprint.StormcallerScimitar]: [recipeStormcallerScimitar],
+  [SwordsBlueprint.AstralSaber]: [recipeAstralSaber],
+  [SwordsBlueprint.ThunderclapScimitar]: [recipeThunderclapScimitar],
+  [SwordsBlueprint.SoulrenderSword]: [recipeSoulrenderSword],
 };

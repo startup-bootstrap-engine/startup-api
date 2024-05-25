@@ -1,10 +1,14 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
+import { NPC_MAX_STUN_LEVEL } from "@providers/constants/NPCConstants";
 import { container } from "@providers/inversify/container";
+import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
   AnimationEffectKeys,
   BasicAttribute,
   CharacterClass,
+  ISkill,
   ISpell,
   RangeTypes,
   SpellCastingType,
@@ -30,19 +34,33 @@ export const spellEntanglingRoots: Partial<ISpell> = {
   projectileAnimationKey: AnimationEffectKeys.Energy,
   maxDistanceGrid: RangeTypes.High,
   characterClass: [CharacterClass.Druid],
-  isPVPOnly: true,
 
   usableEffect: async (character: ICharacter, target: ICharacter | INPC) => {
     const spellCalculator = container.get(SpellCalculator);
 
     const stun = container.get(Stun);
 
+    const socketMessaging = container.get(SocketMessaging);
+
+    const targetSkills = (await Skill.findOne({
+      owner: target?._id,
+    })
+      .lean()
+      .cacheQuery({
+        cacheKey: `${target?._id}-skills`,
+      })) as unknown as ISkill;
+
+    if (targetSkills?.level! > NPC_MAX_STUN_LEVEL) {
+      socketMessaging.sendErrorMessageToCharacter(character, "This target is immune to stun effects.");
+      return false;
+    }
+
     const timeout = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
       min: 5,
       max: 10,
     });
 
-    await stun.execStun(target, timeout);
+    await stun.execStun(character, target, timeout);
 
     return true;
   },

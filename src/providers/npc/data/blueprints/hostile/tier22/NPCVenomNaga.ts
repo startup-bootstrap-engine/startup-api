@@ -13,6 +13,7 @@ import {
   LegsBlueprint,
   MacesBlueprint,
   ShieldsBlueprint,
+  StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
@@ -87,6 +88,10 @@ export const npcVenomNaga: INPCTierBlueprint<21> = {
     },
     {
       itemBlueprintKey: ArmorsBlueprint.TemplarsPlate,
+      chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: StaffsBlueprint.SparklingStaff,
       chance: LootProbability.Rare,
     },
     {

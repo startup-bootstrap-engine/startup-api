@@ -1,6 +1,7 @@
 import { QUEUE_CONNECTION_CHECK_INTERVAL } from "@providers/constants/QueueConstants";
 import { RedisManager } from "@providers/database/RedisManager";
 import { Locker } from "@providers/locks/Locker";
+import { Time } from "@providers/time/Time";
 import { Queue, Worker } from "bullmq";
 import { provide } from "inversify-binding-decorators";
 import Redis from "ioredis";
@@ -11,7 +12,8 @@ export class DynamicQueueCleaner {
   constructor(
     private redisManager: RedisManager,
     private queueActivityMonitor: QueueActivityMonitor,
-    private locker: Locker
+    private locker: Locker,
+    private time: Time
   ) {}
 
   // Remember each redis client connection consume resources, so it's important to release them when they're no longer needed
@@ -76,7 +78,13 @@ export class DynamicQueueCleaner {
 
       const queue = queues.get(queueName);
       if (queue) {
+        // Pause the queue before obliterating
+        await queue.pause();
+
+        await this.time.waitForSeconds(2);
+
         await queue.close();
+
         await queue.obliterate({
           force: true,
         });
