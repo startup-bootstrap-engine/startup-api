@@ -162,6 +162,7 @@ export class UseWithItemToEntity {
         const item = new Item({
           ...itemBlueprint,
           stackQty: isArray(reward.qty) ? random(reward.qty[0], reward.qty[1]) : reward.qty,
+          owner: character._id,
         });
         await item.save();
 

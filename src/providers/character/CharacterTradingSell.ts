@@ -149,7 +149,7 @@ export class CharacterTradingSell {
     let success = true;
 
     while (qty > 0) {
-      const newItem = new Item({ ...blueprint });
+      const newItem = new Item({ ...blueprint, owner: character._id });
 
       if (newItem.maxStackSize >= qty) {
         newItem.stackQty = qty;
