@@ -1,0 +1,2 @@
+export const DYNAMIC_XP_RATIO_BASE_RATIO = 1;
+export const DYNAMIC_XP_RATIO_BOOSTED_XP_RATIO = 2;

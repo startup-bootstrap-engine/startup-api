@@ -98,7 +98,10 @@ export class QuestNetworkChoose {
             await npc.save();
           }, 60 * 1000);
         } else {
-          throw new Error(`NPC ${npc.name} out of range to choose a quest..`);
+          this.socketMessaging.sendErrorMessageToCharacter(
+            character,
+            "Sorry, you are too far away to choose a quest from this NPC."
+          );
         }
       } catch (error) {
         console.error(error);

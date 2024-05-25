@@ -8,7 +8,6 @@ import { CharacterView } from "@providers/character/CharacterView";
 import { CharacterBuffSkill } from "@providers/character/characterBuff/CharacterBuffSkill";
 import { NPC_GIANT_FORM_EXPERIENCE_MULTIPLIER } from "@providers/constants/NPCConstants";
 import { MODE_EXP_MULTIPLIER } from "@providers/constants/SkillConstants";
-import { DynamicGlobalsManager } from "@providers/global/DynamicGlobalsManager";
 import { DiscordBot } from "@providers/discord/DiscordBot";
 import { spellLearn } from "@providers/inversify/container";
 import { Locker } from "@providers/locks/Locker";
@@ -42,6 +41,7 @@ import { Colors } from "discord.js";
 import { provide } from "inversify-binding-decorators";
 
 import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
+import { DynamicXPRatio } from "@providers/dynamic-xp-ratio/DynamicXPRatio";
 import { PartyCRUD } from "@providers/party/PartyCRUD";
 import { ICharacterParty } from "@providers/party/PartyTypes";
 import { PartyValidator } from "@providers/party/PartyValidator";
@@ -72,7 +72,8 @@ export class NPCExperience {
     private experienceLimiter: NPCExperienceLimiter,
     private characterPremiumAccount: CharacterPremiumAccount,
     private partyValidator: PartyValidator,
-    private partyCRUD: PartyCRUD
+    private partyCRUD: PartyCRUD,
+    private dynamicXPRatio: DynamicXPRatio
   ) {}
 
   /**
@@ -207,10 +208,9 @@ export class NPCExperience {
     }
   }
 
-  private getGlobalXp(): number {
-    const dynamicGlobalsManager = DynamicGlobalsManager;
+  private async getDynamicXPRatio(): Promise<number> {
     try {
-      return dynamicGlobalsManager.getXpRatio();
+      return await this.dynamicXPRatio.getXpRatio();
     } catch (error) {
       console.error("Error in getValue: ", error);
       return 1;
@@ -223,9 +223,9 @@ export class NPCExperience {
     const characterMode: Modes = Object.values(Modes).find((mode) => mode === character.mode) ?? Modes.SoftMode;
     const giantNPCMultiplier = target.isGiantForm ? NPC_GIANT_FORM_EXPERIENCE_MULTIPLIER : 1;
     const characterModeMultiplier = MODE_EXP_MULTIPLIER[characterMode];
-    const globalXpRatio = this.getGlobalXp();
+    const dynamicXPRatio = await this.getDynamicXPRatio();
 
-    return giantNPCMultiplier * characterModeMultiplier * premiumAccountXPMultiplier * globalXpRatio;
+    return giantNPCMultiplier * characterModeMultiplier * premiumAccountXPMultiplier * dynamicXPRatio;
   }
 
   private async sendExpLevelUpEvents(expData: IIncreaseXPResult, character: ICharacter): Promise<void> {
