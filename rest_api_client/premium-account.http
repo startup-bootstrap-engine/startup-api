@@ -4,9 +4,9 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "blueprintKey": "bag",
-  "quantity": 1,
-  "characterId": "65ffd7a39f32490044e90d7d" 
+  "blueprintKey": "social-crystal",
+  "quantity": 15,
+  "characterId": "663fd16c009b45005eff9b20" 
 }
 
 ###

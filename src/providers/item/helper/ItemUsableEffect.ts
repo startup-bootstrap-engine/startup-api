@@ -44,6 +44,10 @@ export class ItemUsableEffect {
 
       const latestTargetHealth = await this.fetchLatestHealth(target);
 
+      if (!latestTargetHealth) {
+        return;
+      }
+
       if (target.health !== latestTargetHealth) {
         target.health = latestTargetHealth;
       }
@@ -61,7 +65,7 @@ export class ItemUsableEffect {
     }
   }
 
-  private async fetchLatestHealth(target: ICharacter | INPC): Promise<number> {
+  private async fetchLatestHealth(target: ICharacter | INPC): Promise<number | undefined> {
     try {
       let data;
       switch (target.type) {
@@ -76,7 +80,7 @@ export class ItemUsableEffect {
       }
 
       if (!data) {
-        throw new Error(`No data found for target with ID: ${target._id}`);
+        return;
       }
 
       return data.health;
