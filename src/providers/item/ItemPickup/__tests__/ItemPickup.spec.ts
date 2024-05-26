@@ -6,6 +6,7 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { EquipmentSlots } from "@providers/equipment/EquipmentSlots";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import { ItemOwnership } from "@providers/item/ItemOwnership";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { FromGridX, FromGridY, IItemContainer } from "@rpg-engine/shared";
 import { ContainersBlueprint } from "../../data/types/itemsBlueprintTypes";
@@ -22,6 +23,7 @@ describe("ItemPickup.ts", () => {
   let equipmentSlots: EquipmentSlots;
   let socketMessaging: SocketMessaging;
   let itemPickupUpdater: ItemPickupUpdater;
+  let itemOwnership: ItemOwnership;
 
   beforeAll(() => {
     itemPickup = container.get<ItemPickup>(ItemPickup);
@@ -29,6 +31,7 @@ describe("ItemPickup.ts", () => {
     equipmentSlots = container.get<EquipmentSlots>(EquipmentSlots);
     socketMessaging = container.get<SocketMessaging>(SocketMessaging);
     itemPickupUpdater = container.get<ItemPickupUpdater>(ItemPickupUpdater);
+    itemOwnership = container.get<ItemOwnership>(ItemOwnership);
   });
 
   beforeEach(async () => {
@@ -298,6 +301,30 @@ describe("ItemPickup.ts", () => {
       await itemPickupUpdater.sendContainerRead(null, testCharacter);
 
       expect(sendEventToUserSpy).not.toHaveBeenCalled();
+    });
+
+    describe("Inventory pickup", () => {
+      it("should validate ownership when picking up an item from a container", async () => {
+        // Create a mock container and add the test item to it
+        const container = await unitTestHelper.createMockItemContainer();
+        const itemPickupData = {
+          itemId: testItem.id,
+          fromContainerId: container.id,
+          toContainerId: inventoryItemContainerId,
+        };
+
+        // Simulate item pickup
+        const itemAdded = await pickupItem(container._id, itemPickupData);
+
+        expect(itemAdded).toBeTruthy();
+
+        testItem = await Item.findById(testItem.id).lean();
+
+        expect(testItem).toBeTruthy();
+
+        // Check if the item ownership is updated
+        expect(testItem.owner).toEqual(testCharacter._id);
+      });
     });
   });
 });
