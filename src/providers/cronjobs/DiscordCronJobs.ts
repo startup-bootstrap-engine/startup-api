@@ -156,7 +156,7 @@ export class DiscordCronJobs {
         "general",
         "Earn Gold to Gear Up",
         "Blue",
-        "https://imgur.com/OgXeOzE"
+        "https://i.imgur.com/OgXeOzE.png"
       );
     } catch (error) {
       console.error(error);
