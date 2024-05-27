@@ -51,7 +51,7 @@ describe("DynamicXPActivator", () => {
       "announcements",
       "Double XP Weekend!",
       "Green",
-      "https://imgur.com/I48LmP3"
+      "https://i.imgur.com/I48LmP3.png"
     );
     expect(socketMessagingSpy).toHaveBeenCalledWith("channel1", UISocketEvents.ShowMessage, {
       message: "✨ Bonus XP Event Started!✨\n\n🔹 XP Multiplier: 2x",
@@ -72,7 +72,7 @@ describe("DynamicXPActivator", () => {
       "announcements",
       "Double XP Weekend!",
       "Green",
-      "https://imgur.com/I48LmP3"
+      "https://i.imgur.com/I48LmP3.png"
     );
     expect(socketMessagingSpy).toHaveBeenCalledWith("channel1", UISocketEvents.ShowMessage, {
       message: "✨ Bonus XP Event Ended!✨\n\n🔹 XP Multiplier: 1x",
