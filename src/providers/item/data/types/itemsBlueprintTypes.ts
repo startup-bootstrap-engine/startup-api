@@ -216,6 +216,21 @@ export enum DaggersBlueprint {
   ArrowheadDagger = "arrowhead-dagger",
   StarshardDagger = "starshard-dagger",
   FrostfangDagger = "frostfang-dagger",
+  EmberbladeDagger = "emberblade-dagger",
+  ShadowstrikeDagger = "shadowstrike-dagger",
+  CelestialShardDagger = "celestial-shard-dagger",
+  MoonlightDagger = "moonlight-dagger",
+  VenomousFangDagger = "venomous-fang-dagger",
+  CrimsonLotusDagger = "crimson-lotus-dagger",
+  SeraphicDagger = "seraphic-dagger",
+  ObsidianEdgeDagger = "obsidian-edge-dagger",
+  SolarflareDagger = "solarflare-dagger",
+  BloodmoonDagger = "bloodmoon-dagger",
+  ThunderstrikeDagger = "thunderstrike-dagger",
+  EtherealVeilDagger = "ethereal-veil-dagger",
+  TwilightThornDagger = "twilight-thorn-dagger",
+  AzurefireDagger = "azurefire-dagger",
+  WildfireDagger = "wildfire-dagger",
 }
 
 export enum ArmorsBlueprint {
