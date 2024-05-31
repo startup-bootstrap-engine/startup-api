@@ -210,11 +210,18 @@ describe("EntityEffectUse.ts", () => {
   it("should call multiple EntityEffects if attacker has multiple entity effects item", async () => {
     bleedingEntityEffect.probability = 100;
     corruptionEntityEffect.probability = 100;
+
+    // Mocking getWeapon to return elysianEyeStaff
     // @ts-ignore
     getWeaponSpy = jest.spyOn(entityEffectUse.characterWeapon, "getWeapon");
     getWeaponSpy.mockResolvedValueOnce({ item: elysianEyeStaff });
 
-    await entityEffectUse.applyEntityEffects(testAttacker, testCharacter);
+    // Set up attacker entity effects
+    testAttacker.entityEffects = [bleedingEntityEffect.key, corruptionEntityEffect.key];
+    await testAttacker.save();
+
+    await entityEffectUse.applyEntityEffects(testTarget, testAttacker);
+
     expect(entityEffectSpy).toBeCalled();
     expect(entityEffectSpy).toHaveBeenCalledTimes(2);
   });

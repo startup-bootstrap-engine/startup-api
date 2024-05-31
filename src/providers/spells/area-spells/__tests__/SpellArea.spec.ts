@@ -26,6 +26,7 @@ describe("SpellArea", () => {
   });
 
   beforeEach(async () => {
+    jest.clearAllMocks(); // Clear mocks before each test
     testCharacter = await unitTestHelper.createMockCharacter(
       {
         x: FromGridX(1),
@@ -55,9 +56,12 @@ describe("SpellArea", () => {
       }
     );
     await testNPC.populate("skills").execPopulate();
-
     await testCharacter.populate("skills").execPopulate();
     await testCharacterTarget.populate("skills").execPopulate();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe("Casting", () => {
