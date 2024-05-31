@@ -33,14 +33,14 @@ export const itemFrostfangDagger: IEquippableMeleeTier18WeaponBlueprint = {
   equippedBuff: [
     {
       type: CharacterBuffType.Skill,
-      trait: CombatSkill.Sword,
-      buffPercentage: 30,
+      trait: CombatSkill.Dagger,
+      buffPercentage: 20,
       durationType: CharacterBuffDurationType.Permanent,
     },
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Dexterity,
-      buffPercentage: 30,
+      buffPercentage: 20,
       durationType: CharacterBuffDurationType.Permanent,
     },
   ],
