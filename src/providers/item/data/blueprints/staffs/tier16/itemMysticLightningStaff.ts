@@ -3,6 +3,7 @@ import { IEquippableTwoHandedStaffTier16WeaponBlueprint } from "@providers/item/
 import {
   AnimationEffectKeys,
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   EntityAttackType,
@@ -32,21 +33,48 @@ export const itemMysticLightningStaff: IEquippableTwoHandedStaffTier16WeaponBlue
   maxRange: RangeTypes.High,
   basePrice: 190,
   isTwoHanded: true,
-  entityEffects: [EntityEffectBlueprint.Poison, EntityEffectBlueprint.Corruption],
-  entityEffectChance: 105,
+  entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding],
+
+  entityEffectChance: 100,
+
   equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 35,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 45,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Magic,
-      buffPercentage: 15,
+      buffPercentage: 30,
       durationType: CharacterBuffDurationType.Permanent,
     },
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.MagicResistance,
-      buffPercentage: 10,
+      buffPercentage: 35,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 30,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 30,
       durationType: CharacterBuffDurationType.Permanent,
     },
   ],
-  equippedBuffDescription: "Increases magic by 15% and magic resistance by 10%",
+  equippedBuffDescription:
+    "Increases  Max Health by 35%, Max Mana by 45%, Magic by 30%, Magic Resistance by 35%, Resistance by 30%, and Strength by 30%.",
 };

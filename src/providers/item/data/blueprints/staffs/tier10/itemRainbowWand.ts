@@ -3,6 +3,7 @@ import { IEquippableTwoHandedStaffTier10WeaponBlueprint } from "@providers/item/
 import {
   AnimationEffectKeys,
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   EntityAttackType,
@@ -32,6 +33,40 @@ export const itemRainbowWand: IEquippableTwoHandedStaffTier10WeaponBlueprint = {
   maxRange: RangeTypes.High,
   basePrice: 190,
   isTwoHanded: true,
-  entityEffects: [EntityEffectBlueprint.Freezing],
+  entityEffects: [EntityEffectBlueprint.Freezing, EntityEffectBlueprint.Burning],
   entityEffectChance: 80,
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 20,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 20,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.MagicResistance,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription:
+    "The Rainbow Wand grants +10% MaxHealth, +20% MaxMana, +20% Magic, +10% MagicResistance, +10% Resistance.",
 };

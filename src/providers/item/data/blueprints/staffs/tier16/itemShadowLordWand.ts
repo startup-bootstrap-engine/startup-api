@@ -3,6 +3,7 @@ import { IEquippableTwoHandedStaffTier16WeaponBlueprint } from "@providers/item/
 import {
   AnimationEffectKeys,
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   EntityAttackType,
@@ -32,21 +33,48 @@ export const itemShadowLordWand: IEquippableTwoHandedStaffTier16WeaponBlueprint 
   maxRange: RangeTypes.High,
   basePrice: 190,
   isTwoHanded: true,
-  entityEffects: [EntityEffectBlueprint.Poison, EntityEffectBlueprint.Burning],
+  entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Corruption],
+
   entityEffectChance: 100,
+
   equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 60,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 60,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Magic,
-      buffPercentage: 12,
+      buffPercentage: 60,
       durationType: CharacterBuffDurationType.Permanent,
     },
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.MagicResistance,
-      buffPercentage: 5,
+      buffPercentage: 60,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 60,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 60,
       durationType: CharacterBuffDurationType.Permanent,
     },
   ],
-  equippedBuffDescription: "Increases magic by 12% and magic resistance by 7%",
+  equippedBuffDescription:
+    "Increases  Max Health by 60%, Max Mana by 60%, Magic by 60%, Magic Resistance by 60%, Resistance by 60%, and Strength by 60%.",
 };

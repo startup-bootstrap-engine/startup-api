@@ -33,13 +33,39 @@ export const itemGravityStaff: IEquippableTwoHandedStaffTier15WeaponBlueprint = 
   maxRange: RangeTypes.High,
   basePrice: 210,
   isTwoHanded: true,
-  entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],
-  entityEffectChance: 95,
+
+  entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Corruption],
+  entityEffectChance: 90,
+
   equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 25,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 28,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Magic,
-      buffPercentage: 10,
+      buffPercentage: 28,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.MagicResistance,
+      buffPercentage: 28,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 22,
       durationType: CharacterBuffDurationType.Permanent,
     },
     {
@@ -49,5 +75,6 @@ export const itemGravityStaff: IEquippableTwoHandedStaffTier15WeaponBlueprint = 
       durationType: CharacterBuffDurationType.Permanent,
     },
   ],
-  equippedBuffDescription: "Increases magic by 10% and speed by 4%",
+  equippedBuffDescription:
+    "Increases Max Health by 25%, Max Mana by 28%, Magic by 28%, Magic Resistance by 28%, Resistance by 22%, and Speed by 4%.",
 };

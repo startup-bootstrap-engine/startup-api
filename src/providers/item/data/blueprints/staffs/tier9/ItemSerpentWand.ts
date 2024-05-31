@@ -1,6 +1,11 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableTwoHandedStaffTier9WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   AnimationEffectKeys,
+  BasicAttribute,
+  CharacterAttributes,
+  CharacterBuffDurationType,
+  CharacterBuffType,
   EntityAttackType,
   ItemSlotType,
   ItemSubType,
@@ -28,4 +33,22 @@ export const itemSerpentWand: IEquippableTwoHandedStaffTier9WeaponBlueprint = {
   maxRange: RangeTypes.High,
   basePrice: 130,
   isTwoHanded: true,
+  entityEffects: [EntityEffectBlueprint.VineGrasp, EntityEffectBlueprint.Poison],
+  entityEffectChance: 85,
+
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 25,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 8,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "The Serpent Wand grants +25% MaxMana, +8% Magic.",
 };

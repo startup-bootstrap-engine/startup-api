@@ -3,6 +3,7 @@ import { IEquippableTwoHandedStaffTier13WeaponBlueprint } from "@providers/item/
 import {
   AnimationEffectKeys,
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   EntityAttackType,
@@ -32,19 +33,42 @@ export const itemDarkMoonStaff: IEquippableTwoHandedStaffTier13WeaponBlueprint =
   maxRange: RangeTypes.High,
   basePrice: 190,
   isTwoHanded: true,
+
   entityEffects: [EntityEffectBlueprint.Corruption],
-  entityEffectChance: 85,
-  equippedBuff: {
-    type: CharacterBuffType.Skill,
-    trait: BasicAttribute.Magic,
-    buffPercentage: 5,
-    durationType: CharacterBuffDurationType.Permanent,
-    options: {
-      messages: {
-        activation: "You feel the power of magic flowing through your body. (+5% magic)",
-        deactivation: "You feel the power of magic leaving your body. (-5% magic)",
-      },
+  entityEffectChance: 90,
+
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 18,
+      durationType: CharacterBuffDurationType.Permanent,
     },
-  },
-  equippedBuffDescription: "Increases magic by 5%",
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 24,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 24,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.MagicResistance,
+      buffPercentage: 24,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 18,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription:
+    "The Dark Moon Staff grants +18% MaxHealth, +24% MaxMana, +24% Magic, +24% MagicResistance, +18% Resistance.",
 };

@@ -3,6 +3,7 @@ import { IEquippableTwoHandedStaffTier10WeaponBlueprint } from "@providers/item/
 import {
   AnimationEffectKeys,
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   EntityAttackType,
@@ -34,4 +35,25 @@ export const itemOracleStaff: IEquippableTwoHandedStaffTier10WeaponBlueprint = {
   isTwoHanded: true,
   entityEffects: [EntityEffectBlueprint.Burning],
   entityEffectChance: 85,
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 20,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 20,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "The Oracle Staff grants +10% MaxHealth, +20% MaxMana, +20% Magic.",
 };
