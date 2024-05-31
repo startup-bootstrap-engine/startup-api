@@ -45,7 +45,7 @@ export const itemBloodmoonDagger: IEquippableMeleeTier14WeaponBlueprint = {
     {
       type: CharacterBuffType.Skill,
       trait: CombatSkill.Dagger,
-      buffPercentage: 6,
+      buffPercentage: 10,
       durationType: CharacterBuffDurationType.Permanent,
       options: {
         messages: {

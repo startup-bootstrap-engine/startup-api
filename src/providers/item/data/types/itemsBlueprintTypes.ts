@@ -221,7 +221,6 @@ export enum DaggersBlueprint {
   CelestialShardDagger = "celestial-shard-dagger",
   MoonlightDagger = "moonlight-dagger",
   VenomousFangDagger = "venomous-fang-dagger",
-  CrimsonLotusDagger = "crimson-lotus-dagger",
   SeraphicDagger = "seraphic-dagger",
   ObsidianEdgeDagger = "obsidian-edge-dagger",
   SolarflareDagger = "solarflare-dagger",

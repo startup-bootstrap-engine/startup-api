@@ -33,7 +33,7 @@ export const itemObsidianEdgeDagger: IEquippableMeleeTier18WeaponBlueprint = {
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Strength,
-      buffPercentage: 7,
+      buffPercentage: 20,
       durationType: CharacterBuffDurationType.Permanent,
       options: {
         messages: {
@@ -45,7 +45,7 @@ export const itemObsidianEdgeDagger: IEquippableMeleeTier18WeaponBlueprint = {
     {
       type: CharacterBuffType.Skill,
       trait: CombatSkill.Dagger,
-      buffPercentage: 8,
+      buffPercentage: 25,
       durationType: CharacterBuffDurationType.Permanent,
       options: {
         messages: {

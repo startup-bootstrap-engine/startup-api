@@ -9,6 +9,19 @@ import { itemRustedJitte } from "./tier1/ItemRustedJitte";
 import { itemDarkmoonDagger } from "./tier10/itemDarkmoonDagger";
 import { itemStormswiftDagger } from "./tier10/itemStormswiftDagger";
 import { itemThunderboltDagger } from "./tier10/itemThunderboltDagger";
+import { itemArrowheadDagger } from "./tier11/itemArrowheadDagger";
+import { itemAstralDagger } from "./tier11/itemAstralDagger";
+import { itemStarshardDagger } from "./tier11/itemStarshardDagger";
+import { itemAzurefireDagger } from "./tier12/itemAzurefireDagger";
+import { itemEmberbladeDagger } from "./tier12/itemEmberbladeDagger";
+import { itemShadowstrikeDagger } from "./tier12/itemShadowstrikeDagger";
+import { itemCelestialShardDagger } from "./tier13/itemCelestialShardDagger";
+import { itemSolarflareDagger } from "./tier13/itemSolarflareDagger";
+import { itemWildfireDagger } from "./tier13/itemWildfireDagger";
+import { itemBloodmoonDagger } from "./tier14/itemBloodmoonDagger";
+import { itemMoonlightDagger } from "./tier14/itemMoonlightDagger";
+import { itemThunderstrikeDagger } from "./tier15/itemThunderstrikeDagger";
+import { itemVenomousFangDagger } from "./tier15/itemVenomousFangDagger";
 import { itemFrostfangDagger } from "./tier18/itemFrostfangDagger";
 import { itemDamascusJitte } from "./tier2/ItemDamascusJitte";
 import { itemFrostDagger } from "./tier2/ItemFrostDagger";
@@ -32,20 +45,7 @@ import { itemHexBladeDagger } from "./tier8/ItemHexBladeDagger";
 import { itemSpiritBlade } from "./tier9/ItemSpiritBlade";
 import { itemFlameheartDagger } from "./tier9/itemFlameheartDagger";
 import { itemMistfireDagger } from "./tier9/itemMistfireDagger";
-import { itemArrowheadDagger } from "./tier11/itemArrowheadDagger";
-import { itemAstralDagger } from "./tier11/itemAstralDagger";
-import { itemStarshardDagger } from "./tier11/itemStarshardDagger";
-import { itemAzurefireDagger } from "./tier12/itemAzurefireDagger";
-import { itemEmberbladeDagger } from "./tier12/itemEmberbladeDagger";
-import { itemShadowstrikeDagger } from "./tier12/itemShadowstrikeDagger";
-import { itemCelestialShardDagger } from "./tier13/itemCelestialShardDagger";
-import { itemSolarflareDagger } from "./tier13/itemSolarflareDagger";
-import { itemWildfireDagger } from "./tier13/itemWildfireDagger";
-import { itemBloodmoonDagger } from "./tier14/itemBloodmoonDagger";
-import { itemMoonlightDagger } from "./tier14/itemMoonlightDagger";
-import { itemThunderstrikeDagger } from "./tier15/itemThunderstrikeDagger";
-import { itemVenomousFangDagger } from "./tier15/itemVenomousFangDagger";
-import { itemCrimsonLotusDagger } from "./tier16/itemCrimsonLotusDagger";
+
 import { itemEtherealVeilDagger } from "./tier16/itemEtherealVeilDagger";
 import { itemSeraphicDagger } from "./tier17/itemSeraphicDagger";
 import { itemTwilightThornDagger } from "./tier17/itemTwilightThornDagger";
@@ -93,7 +93,6 @@ export const daggersBlueprintIndex = {
   [DaggersBlueprint.CelestialShardDagger]: itemCelestialShardDagger,
   [DaggersBlueprint.MoonlightDagger]: itemMoonlightDagger,
   [DaggersBlueprint.VenomousFangDagger]: itemVenomousFangDagger,
-  [DaggersBlueprint.CrimsonLotusDagger]: itemCrimsonLotusDagger,
   [DaggersBlueprint.SeraphicDagger]: itemSeraphicDagger,
   [DaggersBlueprint.ObsidianEdgeDagger]: itemObsidianEdgeDagger,
   [DaggersBlueprint.SolarflareDagger]: itemSolarflareDagger,

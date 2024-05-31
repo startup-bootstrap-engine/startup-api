@@ -45,7 +45,7 @@ export const itemEtherealVeilDagger: IEquippableMeleeTier16WeaponBlueprint = {
     {
       type: CharacterBuffType.Skill,
       trait: CombatSkill.Dagger,
-      buffPercentage: 6,
+      buffPercentage: 8,
       durationType: CharacterBuffDurationType.Permanent,
       options: {
         messages: {

@@ -33,7 +33,7 @@ export const itemSeraphicDagger: IEquippableMeleeTier17WeaponBlueprint = {
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Strength,
-      buffPercentage: 7,
+      buffPercentage: 15,
       durationType: CharacterBuffDurationType.Permanent,
       options: {
         messages: {
@@ -45,7 +45,7 @@ export const itemSeraphicDagger: IEquippableMeleeTier17WeaponBlueprint = {
     {
       type: CharacterBuffType.Skill,
       trait: CombatSkill.Dagger,
-      buffPercentage: 6,
+      buffPercentage: 10,
       durationType: CharacterBuffDurationType.Permanent,
       options: {
         messages: {
