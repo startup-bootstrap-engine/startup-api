@@ -77,7 +77,7 @@ export class NPCManager {
       await this.setNPCBehavior(npc, true);
 
       const npcSkills = (await Skill.find({ owner: npc._id }).cacheQuery({
-        cacheKey: `npc-${npc.id}-skills`,
+        cacheKey: `${npc._id}-skills`,
       })) as unknown as ISkill;
 
       await this.npcCycleQueue.addToQueue(npc, npcSkills);

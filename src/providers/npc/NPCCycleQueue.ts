@@ -15,6 +15,7 @@ import { Stun } from "@providers/spells/data/logic/warrior/Stun";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { NPCAlignment, NPCMovementType, NPCPathOrientation, ToGridX, ToGridY } from "@rpg-engine/shared";
 import { random } from "lodash";
+import { clearCacheForKey } from "speedgoose";
 import { NPCFreezer } from "./NPCFreezer";
 import { NPCView } from "./NPCView";
 import { NPCMovement } from "./movement/NPCMovement";
@@ -81,34 +82,42 @@ export class NPCCycleQueue {
 
   @TrackNewRelicTransaction()
   private async execNpcCycle(npc: INPC, npcSkills: ISkill): Promise<void> {
-    if (!npc) return;
+    try {
+      if (!npc) return;
 
-    this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Server, "NPCCycles", 1);
+      this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Server, "NPCCycles", 1);
 
-    npc = await NPC.findById(npc?._id).lean({
-      virtuals: true,
-      defaults: true,
-    });
+      npc = await NPC.findById(npc?._id).lean({
+        virtuals: true,
+        defaults: true,
+      });
 
-    const shouldNPCBeCleared = this.shouldNPCBeCleared(npc);
+      const shouldNPCBeCleared = this.shouldNPCBeCleared(npc);
 
-    if (shouldNPCBeCleared) {
-      await this.stop(npc);
-      return;
-    }
+      if (shouldNPCBeCleared) {
+        await this.stop(npc);
+        return;
+      }
 
-    await this.npcFreezeCheck(npc);
+      await this.npcFreezeCheck(npc);
 
-    npc.skills = npcSkills;
+      npc.skills = npcSkills;
 
-    // if NPC is stunned, do not proceed with core npc behavior
-    if (await this.stun.isStun(npc)) {
+      // if NPC is stunned, do not proceed with core npc behavior
+      if (await this.stun.isStun(npc)) {
+        await this.addToQueue(npc, npcSkills);
+        return;
+      }
+
+      await this.startCoreNPCBehavior(npc);
       await this.addToQueue(npc, npcSkills);
-      return;
-    }
+    } catch (error) {
+      console.error(error);
 
-    await this.startCoreNPCBehavior(npc);
-    await this.addToQueue(npc, npcSkills);
+      await clearCacheForKey(`${npc._id}-skills`);
+
+      throw error;
+    }
   }
 
   private async stop(npc: INPC): Promise<void> {

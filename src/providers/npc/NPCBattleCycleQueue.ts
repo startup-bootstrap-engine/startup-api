@@ -14,6 +14,7 @@ import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { NPCAlignment } from "@rpg-engine/shared";
 import _ from "lodash";
+import { clearCacheForKey } from "speedgoose";
 import { NPCFreezer } from "./NPCFreezer";
 import { NPCView } from "./NPCView";
 import { ICharacterHealth } from "./movement/NPCMovementMoveTowards";
@@ -121,7 +122,13 @@ export class NPCBattleCycleQueue {
         this.addToQueue(updatedNPC, npcSkills),
       ]);
     } catch (error) {
-      await this.handleError(npc, updatedNPC, error);
+      await this.locker.unlock(`npc-${npc._id}-npc-battle-cycle`);
+
+      await clearCacheForKey(`${npc._id}-skills`);
+
+      console.error(error);
+
+      throw error;
     }
   }
 
@@ -187,17 +194,6 @@ export class NPCBattleCycleQueue {
     return (
       npc?.alignment === NPCAlignment.Hostile && targetCharacter?.health > 0 && npc.health > 0 && !isTargetInvisible
     );
-  }
-
-  private async handleError(npc: INPC, updatedNPC: INPC, error: any): Promise<void> {
-    await this.locker.unlock(`npc-${npc._id}-npc-battle-cycle`);
-    if (!updatedNPC) {
-      console.error("NPC is null");
-      return;
-    }
-
-    console.error(error);
-    throw error;
   }
 
   @TrackNewRelicTransaction()
