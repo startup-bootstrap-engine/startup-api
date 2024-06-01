@@ -41,6 +41,12 @@ export class DiscordCronJobs {
       await this.sendReviewsAndPrizesMessage();
     });
 
+    // every friday, afternoon
+
+    this.cronJobScheduler.uniqueSchedule("discord-xp-boost-warn", "0 12 * * 5", async () => {
+      await this.sendPreXPBoostWarning();
+    });
+
     //! Special events
 
     // christmas
@@ -72,6 +78,33 @@ export class DiscordCronJobs {
     this.cronJobScheduler.uniqueSchedule("discord-halloween-cron", "0 0 31 10 *", async () => {
       await this.sendHalloweenCronJob();
     });
+  }
+
+  private async sendPreXPBoostWarning(): Promise<void> {
+    try {
+      const message = `🔥 **XP Boost Incoming! Prepare for Double XP!** 🔥
+
+      Brave adventurers, a storm of experience points is on the horizon! Prepare your weapons, gather your allies, and brace yourselves
+      for a weekend of double XP gains in Definya!
+
+      🌟 **Double XP Weekend Details:**
+      - The XP Boost will start on Saturday morning.
+      - All XP gains will be doubled during this period.
+      - This is a great opportunity to level up your characters and learn new skills.
+      - Don't miss out on this chance to advance in your adventures!
+
+      Gather your party, plan your quests, and get ready to take advantage of this XP Boost. See you in Definya!`;
+
+      await this.discordBot.sendMessageWithColor(
+        message,
+        "announcements",
+        "Incoming 2x XP Boost Tomorrow!",
+        "Green",
+        "https://i.imgur.com/j2S00Kj.png"
+      );
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   private async sendReviewsAndPrizesMessage(): Promise<void> {

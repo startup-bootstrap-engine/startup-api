@@ -31,7 +31,7 @@ content-type: application/json
 
 {
   "email": "kahilthezaurus@gmail.com",
-  "accountType": "bronze"
+  "accountType": "silver"
 }
 
 ###
