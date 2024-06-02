@@ -1,13 +1,11 @@
 import { ExtractDoc, Type, createSchema, typedModel } from "ts-mongoose";
 
-const GuildSkillsSchema = createSchema({});
-
 const guildSchema = createSchema({
   name: Type.string({ required: true, unique: true }),
   tag: Type.string({ required: true, unique: true }),
   coatOfArms: Type.string({ required: true }),
   guildLeader: Type.objectId({
-    refPath: "Character",
+    ref: "Character",
   }),
   members: [Type.string({ required: true })], // Array of user IDs
   territoriesOwned: [
@@ -17,7 +15,9 @@ const guildSchema = createSchema({
       controlPoint: Type.boolean({ required: true, default: false }),
     },
   ],
-  guildSkills: Type.ref(Type.objectId()).to("GuildSkills", GuildSkillsSchema),
+  guildSkills: Type.objectId({
+    ref: "GuildSkills",
+  }),
 });
 
 export type IGuild = ExtractDoc<typeof guildSchema>;
