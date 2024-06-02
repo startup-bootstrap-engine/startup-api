@@ -68,6 +68,8 @@ import {
   questRewardsMock,
 } from "./mock/questMock";
 
+import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
+import { guildMock } from "./mock/guildMock";
 import { userMock } from "./mock/userMock";
 
 export enum InteractionQuestSubtype {
@@ -855,5 +857,16 @@ export class UnitTestHelper {
     await this.addItemsToContainer(parentContainer, 1, [bag], [availableSlot]);
 
     return bagCont!;
+  }
+
+  public async createMockGuild(extraProps?: Partial<IGuild>): Promise<IGuild> {
+    const newGuild = new Guild({
+      ...guildMock,
+      ...extraProps,
+    });
+
+    await newGuild.save();
+
+    return newGuild;
   }
 }
