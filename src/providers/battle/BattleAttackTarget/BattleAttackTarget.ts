@@ -34,12 +34,25 @@ export class BattleAttackTarget {
     private characterWeapon: CharacterWeapon,
     private battleAttackValidator: BattleAttackValidator,
     private hitTarget: HitTargetQueue,
-    private npcSpellArea: NPCSpellArea
+    private npcSpellArea: NPCSpellArea,
+    private battleAttackRanged: BattleAttackRanged
   ) {}
 
   @TrackNewRelicTransaction()
   public async checkRangeAndAttack(attacker: ICharacter | INPC, target: ICharacter | INPC): Promise<boolean> {
     if (!target.isAlive) {
+      return false;
+    }
+
+    const hasSolidInTrajectory = await this.battleAttackRanged.isSolidInRangedTrajectory(attacker, target);
+
+    if (hasSolidInTrajectory) {
+      if (attacker.type === EntityType.Character) {
+        this.socketMessaging.sendErrorMessageToCharacter(
+          attacker as ICharacter,
+          "Sorry, you cannot attack through solids."
+        );
+      }
       return false;
     }
 

@@ -352,6 +352,8 @@ describe("SpellArea - PVP", () => {
   });
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     testCharacter = await unitTestHelper.createMockCharacter(
       {
         x: FromGridX(1),
@@ -376,7 +378,6 @@ describe("SpellArea - PVP", () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
     jest.restoreAllMocks();
   });
 
