@@ -47,12 +47,6 @@ export class BattleAttackTarget {
     const hasSolidInTrajectory = await this.battleAttackRanged.isSolidInRangedTrajectory(attacker, target);
 
     if (hasSolidInTrajectory) {
-      if (attacker.type === EntityType.Character) {
-        this.socketMessaging.sendErrorMessageToCharacter(
-          attacker as ICharacter,
-          "Sorry, you cannot attack through solids."
-        );
-      }
       return false;
     }
 
