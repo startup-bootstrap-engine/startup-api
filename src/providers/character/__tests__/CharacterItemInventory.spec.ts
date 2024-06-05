@@ -23,6 +23,8 @@ describe("CharacterItemInventory.ts", () => {
   });
 
   beforeEach(async () => {
+    jest.clearAllMocks(); // Clear all mocks before each test
+
     testCharacter = await unitTestHelper.createMockCharacter(null, {
       hasSkills: true,
       hasInventory: true,
@@ -41,6 +43,7 @@ describe("CharacterItemInventory.ts", () => {
     }
     inventoryContainer.markModified("slots");
     await inventoryContainer.save();
+    jest.restoreAllMocks();
   });
 
   it("should properly get the item in the inventory slot", async () => {

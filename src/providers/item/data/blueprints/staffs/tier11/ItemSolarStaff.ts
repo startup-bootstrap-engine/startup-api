@@ -2,6 +2,10 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import { IEquippableTwoHandedStaffTier11WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   AnimationEffectKeys,
+  BasicAttribute,
+  CharacterAttributes,
+  CharacterBuffDurationType,
+  CharacterBuffType,
   EntityAttackType,
   ItemSlotType,
   ItemSubType,
@@ -29,6 +33,41 @@ export const itemSolarStaff: IEquippableTwoHandedStaffTier11WeaponBlueprint = {
   maxRange: RangeTypes.High,
   basePrice: 160,
   isTwoHanded: true,
-  entityEffects: [EntityEffectBlueprint.Burning],
+  entityEffects: [EntityEffectBlueprint.Corruption, EntityEffectBlueprint.Burning],
   entityEffectChance: 90,
+
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 20,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 20,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.MagicResistance,
+      buffPercentage: 12,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 12,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription:
+    "The Solar Staff grants +15% MaxHealth, +20% MaxMana, +20% Magic, +12% MagicResistance, +12% Resistance.",
 };

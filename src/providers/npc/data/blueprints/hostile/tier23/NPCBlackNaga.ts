@@ -74,6 +74,10 @@ export const npcBlackNaga: INPCTierBlueprint<23> = {
       itemBlueprintKey: SwordsBlueprint.DragonsSword,
       chance: LootProbability.Uncommon,
     },
+    {
+      itemBlueprintKey: DaggersBlueprint.SeraphicDagger,
+      chance: LootProbability.Rare,
+    },
 
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,

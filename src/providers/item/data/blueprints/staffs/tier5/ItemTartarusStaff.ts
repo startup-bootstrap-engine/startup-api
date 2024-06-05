@@ -1,5 +1,9 @@
 import {
   AnimationEffectKeys,
+  BasicAttribute,
+  CharacterAttributes,
+  CharacterBuffDurationType,
+  CharacterBuffType,
   EntityAttackType,
   ItemSlotType,
   ItemSubType,
@@ -29,4 +33,37 @@ export const itemTartarusStaff: IEquippableTwoHandedStaffTier5WeaponBlueprint = 
   maxRange: RangeTypes.High,
   basePrice: 93,
   isTwoHanded: true,
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+      options: {
+        messages: {
+          activation: "You feel the power of max health flowing through your body. (+10% MaxHealth)",
+          deactivation: "You feel the power of max health leaving your body. (-10% MaxHealth)",
+        },
+      },
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.MagicResistance,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "The Tartarus Staff grants +10% MaxHealth, +10% MaxMana, +10% Magic, +10% MagicResistance.",
 };

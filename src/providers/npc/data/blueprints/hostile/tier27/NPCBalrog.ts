@@ -89,6 +89,10 @@ export const npcNPCBalrog: INPCTierBlueprint<27> = {
       chance: LootProbability.Uncommon,
     },
     {
+      itemBlueprintKey: DaggersBlueprint.ObsidianEdgeDagger,
+      chance: LootProbability.Uncommon,
+    },
+    {
       itemBlueprintKey: HammersBlueprint.ThunderForgedHammer,
       chance: LootProbability.Common,
     },

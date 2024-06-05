@@ -80,6 +80,10 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
       chance: LootProbability.SemiCommon,
     },
     {
+      itemBlueprintKey: DaggersBlueprint.FrostfangDagger,
+      chance: LootProbability.Rare,
+    },
+    {
       itemBlueprintKey: ToolsBlueprint.GildedLavaPickaxe,
       chance: LootProbability.Uncommon,
     },

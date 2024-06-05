@@ -12,6 +12,7 @@ import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { Locker } from "@providers/locks/Locker";
 import { MapHelper } from "@providers/map/MapHelper";
 import { clearCacheForKey } from "speedgoose";
+import { ItemOwnership } from "../ItemOwnership";
 import { ItemPickupFromContainer } from "./ItemPickupFromContainer";
 import { ItemPickupFromMap } from "./ItemPickupFromMap";
 import { ItemPickupUpdater } from "./ItemPickupUpdater";
@@ -28,7 +29,8 @@ export class ItemPickup {
     private itemPickupUpdater: ItemPickupUpdater,
     private mapHelper: MapHelper,
     private inMemoryHashTable: InMemoryHashTable,
-    private locker: Locker
+    private locker: Locker,
+    private itemOwnership: ItemOwnership
   ) {}
 
   @TrackNewRelicTransaction()
@@ -167,6 +169,9 @@ export class ItemPickup {
   }
 
   private async handleInventoryItem(itemToBePicked: IItem, character: ICharacter): Promise<void> {
+    // make sure to add ownership
+    await this.itemOwnership.addItemOwnership(itemToBePicked, character);
+
     await this.itemPickupUpdater.refreshEquipmentIfInventoryItem(character);
     await this.itemPickupUpdater.finalizePickup(itemToBePicked, character);
   }

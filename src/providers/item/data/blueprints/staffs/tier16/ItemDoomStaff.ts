@@ -3,6 +3,7 @@ import { IEquippableTwoHandedStaffTier16WeaponBlueprint } from "@providers/item/
 import {
   AnimationEffectKeys,
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   EntityAttackType,
@@ -32,21 +33,53 @@ export const itemDoomStaff: IEquippableTwoHandedStaffTier16WeaponBlueprint = {
   maxRange: RangeTypes.High,
   basePrice: 220,
   isTwoHanded: true,
-  entityEffects: [EntityEffectBlueprint.Poison, EntityEffectBlueprint.Corruption],
-  entityEffectChance: 105,
+  entityEffects: [
+    EntityEffectBlueprint.Poison,
+    EntityEffectBlueprint.Corruption,
+    EntityEffectBlueprint.Burning,
+    EntityEffectBlueprint.Bleeding,
+  ],
+
+  entityEffectChance: 100,
+
   equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 30,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 35,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Magic,
-      buffPercentage: 15,
+      buffPercentage: 35,
       durationType: CharacterBuffDurationType.Permanent,
     },
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.MagicResistance,
-      buffPercentage: 10,
+      buffPercentage: 28,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 22,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 22,
       durationType: CharacterBuffDurationType.Permanent,
     },
   ],
-  equippedBuffDescription: "Increases magic by 15% and magic resistance by 10%",
+  equippedBuffDescription:
+    "Increases  Max Health by 30%, Max Mana by 35%, Magic by 35%, Magic Resistance by 28%, Resistance by 22%, and Strength by 22%.",
 };

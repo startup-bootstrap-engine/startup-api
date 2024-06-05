@@ -34,13 +34,11 @@ export const spellVeilofUndeath: Partial<ISpell> = {
     const characterTextureChange = container.get(CharacterTextureChange);
     const spellCalculator = container.get(SpellCalculator);
 
-    console.log("timeoutInSecs");
     const timeoutInSecs = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
       min: 15,
       max: 60,
     });
 
-    console.log("buffPercentage");
     const buffPercentage = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
       min: 10,
       max: 60,

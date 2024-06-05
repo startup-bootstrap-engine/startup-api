@@ -3,6 +3,7 @@ import { IEquippableTwoHandedStaffTier14WeaponBlueprint } from "@providers/item/
 import {
   AnimationEffectKeys,
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   EntityAttackType,
@@ -32,19 +33,41 @@ export const itemFlameSecretWand: IEquippableTwoHandedStaffTier14WeaponBlueprint
   maxRange: RangeTypes.High,
   basePrice: 190,
   isTwoHanded: true,
-  entityEffects: [EntityEffectBlueprint.VineGrasp, EntityEffectBlueprint.Burning],
-  entityEffectChance: 85,
-  equippedBuff: {
-    type: CharacterBuffType.Skill,
-    trait: BasicAttribute.Magic,
-    buffPercentage: 7,
-    durationType: CharacterBuffDurationType.Permanent,
-    options: {
-      messages: {
-        activation: "You feel the power of magic flowing through your body. (+7% magic)",
-        deactivation: "You feel the power of magic leaving your body. (-7% magic)",
-      },
+  entityEffects: [EntityEffectBlueprint.Burning],
+  entityEffectChance: 90,
+
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 22,
+      durationType: CharacterBuffDurationType.Permanent,
     },
-  },
-  equippedBuffDescription: "Increases magic by 7%",
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 26,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 26,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.MagicResistance,
+      buffPercentage: 26,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 20,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription:
+    "Increases Max Health by 22%, Max Mana by 26%, Magic by 26%, Magic Resistance by 26%, and Resistance by 20%.",
 };

@@ -3,6 +3,7 @@ import { IEquippableTwoHandedStaffTier11WeaponBlueprint } from "@providers/item/
 import {
   AnimationEffectKeys,
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   EntityAttackType,
@@ -32,6 +33,41 @@ export const itemProphecyStaff: IEquippableTwoHandedStaffTier11WeaponBlueprint =
   maxRange: RangeTypes.High,
   basePrice: 190,
   isTwoHanded: true,
-  entityEffects: [EntityEffectBlueprint.Freezing],
+  entityEffects: [EntityEffectBlueprint.Corruption],
   entityEffectChance: 90,
+
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 20,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 20,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.MagicResistance,
+      buffPercentage: 12,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 12,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription:
+    "The Prophecy Staff grants +15% MaxHealth, +20% MaxMana, +20% Magic, +12% MagicResistance, +12% Resistance.",
 };

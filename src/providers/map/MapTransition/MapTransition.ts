@@ -5,6 +5,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { BattleNetworkStopTargeting } from "@providers/battle/network/BattleNetworkStopTargetting";
 import { CharacterUser } from "@providers/character/CharacterUser";
 import { CharacterView } from "@providers/character/CharacterView";
+import { TEMPORARILY_BLOCKED_MAPS } from "@providers/constants/MapConstants";
 import { Locker } from "@providers/locks/Locker";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
@@ -53,6 +54,14 @@ export class MapTransition {
 
     const destination = this.getDestinationFromTransition(transition);
     if (!destination) return;
+
+    if (TEMPORARILY_BLOCKED_MAPS.includes(destination.map)) {
+      this.socketMessaging.sendErrorMessageToCharacter(
+        character,
+        "This map is temporarily blocked due to technical issues. Please try again later."
+      );
+      return;
+    }
 
     const user = await this.getUser(character);
     const userAccountType = user?.accountType || "free";

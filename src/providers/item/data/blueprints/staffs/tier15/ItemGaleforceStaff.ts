@@ -2,6 +2,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import { IEquippableTwoHandedStaffTier15WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   AnimationEffectKeys,
+  BasicAttribute,
   CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
@@ -32,21 +33,42 @@ export const itemGaleforceStaff: IEquippableTwoHandedStaffTier15WeaponBlueprint 
   maxRange: RangeTypes.High,
   basePrice: 200,
   isTwoHanded: true,
-  entityEffects: [EntityEffectBlueprint.Bleeding],
+
+  entityEffects: [EntityEffectBlueprint.Freezing],
   entityEffectChance: 90,
+
   equippedBuff: [
     {
       type: CharacterBuffType.CharacterAttribute,
       trait: CharacterAttributes.MaxHealth,
-      buffPercentage: 10,
+      buffPercentage: 25,
       durationType: CharacterBuffDurationType.Permanent,
     },
     {
       type: CharacterBuffType.CharacterAttribute,
       trait: CharacterAttributes.MaxMana,
-      buffPercentage: 10,
+      buffPercentage: 28,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 28,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.MagicResistance,
+      buffPercentage: 28,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 22,
       durationType: CharacterBuffDurationType.Permanent,
     },
   ],
-  equippedBuffDescription: "Increases max health and max mana by 10%",
+  equippedBuffDescription:
+    "Increases max health by 25%, max mana by 28%, magic and magic resistance by 28%, and resistance by 22%.",
 };

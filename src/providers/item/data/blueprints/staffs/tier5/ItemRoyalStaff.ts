@@ -1,5 +1,10 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   AnimationEffectKeys,
+  BasicAttribute,
+  CharacterAttributes,
+  CharacterBuffDurationType,
+  CharacterBuffType,
   EntityAttackType,
   ItemSlotType,
   ItemSubType,
@@ -27,4 +32,27 @@ export const itemRoyalStaff: IEquippableTwoHandedStaffTier5WeaponBlueprint = {
   maxRange: RangeTypes.High,
   basePrice: 90,
   isTwoHanded: true,
+  entityEffects: [EntityEffectBlueprint.Burning],
+  entityEffectChance: 85,
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.MagicResistance,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "The Royal Staff grants +10% MaxMana, +10% Magic, +10% MagicResistance.",
 };

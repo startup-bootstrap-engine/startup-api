@@ -70,6 +70,10 @@ export const npcLavaGolem: INPCTierBlueprint<23> = {
       chance: LootProbability.SemiCommon,
     },
     {
+      itemBlueprintKey: DaggersBlueprint.BloodmoonDagger,
+      chance: LootProbability.Rare,
+    },
+    {
       itemBlueprintKey: SwordsBlueprint.ZenBroadsword,
       chance: LootProbability.Common,
     },

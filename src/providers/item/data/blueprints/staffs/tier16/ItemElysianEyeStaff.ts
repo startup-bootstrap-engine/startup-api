@@ -3,6 +3,7 @@ import { IEquippableTwoHandedStaffTier16WeaponBlueprint } from "@providers/item/
 import {
   AnimationEffectKeys,
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   EntityAttackType,
@@ -31,27 +32,48 @@ export const itemElysianEyeStaff: IEquippableTwoHandedStaffTier16WeaponBlueprint
   maxRange: RangeTypes.High,
   basePrice: 217,
   isTwoHanded: true,
-  entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
-  entityEffectChance: 110,
+  entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding],
+
+  entityEffectChance: 100,
+
   equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 60,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 60,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Magic,
-      buffPercentage: 18,
+      buffPercentage: 60,
       durationType: CharacterBuffDurationType.Permanent,
     },
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.MagicResistance,
-      buffPercentage: 12,
+      buffPercentage: 60,
       durationType: CharacterBuffDurationType.Permanent,
     },
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Resistance,
-      buffPercentage: 5,
+      buffPercentage: 60,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 60,
       durationType: CharacterBuffDurationType.Permanent,
     },
   ],
-  equippedBuffDescription: "Increases magic by 18%, magic resistance by 12%, and resistance by 5%",
+  equippedBuffDescription:
+    "Increases  Max Health by 35%, Max Mana by 45%, Magic by 30%, Magic Resistance by 35%, Resistance by 30%, and Strength by 30%.",
 };

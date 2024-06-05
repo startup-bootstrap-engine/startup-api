@@ -52,7 +52,7 @@ export class DynamicXPActivator {
           "announcements",
           "Double XP Weekend!",
           "Green",
-          "https://imgur.com/I48LmP3"
+          "https://i.imgur.com/I48LmP3.png"
         );
 
         // Send server message to each online player

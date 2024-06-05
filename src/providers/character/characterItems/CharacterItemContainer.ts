@@ -123,6 +123,8 @@ export class CharacterItemContainer {
         return false;
       }
 
+      await this.clearCache(targetContainer._id, character._id, item.type as ItemType);
+
       const result = await this.tryToAddItemToContainer(
         character,
         item,

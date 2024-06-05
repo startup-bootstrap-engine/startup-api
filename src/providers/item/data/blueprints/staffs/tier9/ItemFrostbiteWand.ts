@@ -2,6 +2,10 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import { IEquippableTwoHandedStaffTier9WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   AnimationEffectKeys,
+  BasicAttribute,
+  CharacterAttributes,
+  CharacterBuffDurationType,
+  CharacterBuffType,
   EntityAttackType,
   ItemSlotType,
   ItemSubType,
@@ -31,4 +35,20 @@ export const itemFrostbiteWand: IEquippableTwoHandedStaffTier9WeaponBlueprint = 
   isTwoHanded: true,
   entityEffects: [EntityEffectBlueprint.Freezing],
   entityEffectChance: 85,
+
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 18,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 18,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "The Frostbite Wand grants +18% MaxMana, +18% Magic.",
 };
