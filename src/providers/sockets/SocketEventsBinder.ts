@@ -4,6 +4,7 @@ import { ChatNetwork } from "@providers/chat/network/ChatNetwork";
 import { DepotNetwork } from "@providers/depot/network/DepotNetwork";
 import { EquipmentNetwork } from "@providers/equipment/network/EquipmentNetwork";
 import { FriendsNetwork } from "@providers/friends/network/FriendsNetwork";
+import { GuildNetwork } from "@providers/guild/network/GuildNetwork";
 import { ItemNetwork } from "@providers/item/network/ItemNetwork";
 import { ItemContainerNetwork } from "@providers/itemContainer/network/ItemContainerNetwork";
 import { MacroNetwork } from "@providers/macro/network/MacroNetwork";
@@ -39,7 +40,8 @@ export class SocketEventsBinder {
     private marketplaceNetwork: MarketplaceNetwork,
     private partyNetwork: PartyNetwork,
     private rankingNetwork: RankingNetwork,
-    private friendsNetwork: FriendsNetwork
+    private friendsNetwork: FriendsNetwork,
+    private guildNetwork: GuildNetwork
   ) {}
 
   public bindEvents(channel: SocketChannel): void {
@@ -61,5 +63,6 @@ export class SocketEventsBinder {
     this.partyNetwork.onAddEventListeners(channel);
     this.rankingNetwork.onAddEventListeners(channel);
     this.friendsNetwork.onAddEventListeners(channel);
+    this.guildNetwork.onAddEventListeners(channel);
   }
 }
