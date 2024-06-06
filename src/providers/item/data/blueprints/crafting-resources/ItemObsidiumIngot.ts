@@ -7,7 +7,7 @@ export const itemObsidiumIngot: ICraftableItemBlueprint = {
   subType: ItemSubType.CraftingResource,
   textureAtlas: "items",
   texturePath: "crafting-resources/obsidium-ingot.png",
-  name: "obsidium-ingot",
+  name: "Obsidium Ingot",
   description: "A rare and powerful ingot imbued with magical properties, used as a material for forging weapons.",
   weight: 1,
   maxStackSize: 999,
