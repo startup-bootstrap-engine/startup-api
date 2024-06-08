@@ -21,7 +21,7 @@ import { DynamicQueueCleaner } from "./DynamicQueueCleaner";
 import { EntityQueueScalingCalculator } from "./EntityQueueScalingCalculator";
 import { QueueActivityMonitor } from "./QueueActivityMonitor";
 
-type QueueJobFn = ((job: Job) => Promise<void>) | ((job: Job) => Promise<boolean>);
+type QueueJobFn = ((job: Job) => Promise<void>) | ((job: Job) => Promise<boolean>) | ((job: Job) => void);
 
 type AvailableScaleFactors = "single" | "custom" | "active-characters" | "active-npcs";
 
@@ -164,7 +164,7 @@ export class DynamicQueue {
       },
       {
         name: `${queueName}-worker`,
-        // concurrency: maxWorkerConcurrency,
+        concurrency: maxWorkerConcurrency,
         removeOnComplete: { age: 86400, count: 1000 },
         removeOnFail: { age: 86400, count: 1000 },
         connection,
