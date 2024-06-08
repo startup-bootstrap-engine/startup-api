@@ -14,8 +14,10 @@ import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { EnvType } from "@rpg-engine/shared";
 import { DefaultJobOptions, Job, Queue, QueueBaseOptions, Worker, WorkerOptions } from "bullmq";
+import fs from "fs";
 import { Redis } from "ioredis";
 import { random } from "lodash";
+import { hostname } from "os";
 import { DynamicQueueCleaner } from "./DynamicQueueCleaner";
 import { EntityQueueScalingCalculator } from "./EntityQueueScalingCalculator";
 import { QueueActivityMonitor } from "./QueueActivityMonitor";
@@ -31,7 +33,9 @@ interface IQueueScaleOptions {
     scene?: string;
   };
   forceCustomScale?: number;
+  stickToOrigin?: boolean;
 }
+
 @provideSingleton(DynamicQueue)
 export class DynamicQueue {
   private queues: Map<string, Queue> = new Map();
@@ -222,6 +226,11 @@ export class DynamicQueue {
   ): Promise<string> {
     const envSuffix = appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id || "prod";
 
+    if (queueScaleOptions?.stickToOrigin) {
+      const machineId = this.getMachineId(); // Implement this method to get a unique machine identifier
+      return `${prefix}-${envSuffix}-${machineId}`;
+    }
+
     switch (queueScaleBy) {
       case "single":
         return prefix;
@@ -264,6 +273,25 @@ export class DynamicQueue {
 
   private buildQueueName(prefix: string, envSuffix: string, factor?: number): string {
     return `${prefix}-${envSuffix}${factor !== undefined ? `-${factor}` : ""}`;
+  }
+
+  private getMachineId(): string {
+    const nodeHostname = hostname();
+    const containerId = this.getDockerContainerId();
+    const pm2Id = process.env.pm_id || "0";
+    return `${nodeHostname}-${containerId}-${pm2Id}`;
+  }
+
+  private getDockerContainerId(): string {
+    const containerIdPath = "/proc/self/cgroup";
+    if (fs.existsSync(containerIdPath)) {
+      const content = fs.readFileSync(containerIdPath, "utf-8");
+      const match = content.match(/docker\/([0-9a-f]+)$/m);
+      if (match) {
+        return match[1];
+      }
+    }
+    throw new Error("Unable to determine Docker container ID");
   }
 
   public async clearAllJobs(): Promise<void> {

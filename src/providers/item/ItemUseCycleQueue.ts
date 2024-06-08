@@ -57,7 +57,10 @@ export class ItemUseCycleQueue {
 
         const callback = this.itemCallbacks.get(`${characterId}-${itemKey}`);
 
+        console.log("Callback: ", callback);
+
         if (!callback) {
+          console.log("Callback not found");
           return;
         }
 
@@ -77,6 +80,7 @@ export class ItemUseCycleQueue {
       },
       {
         queueScaleBy: "single",
+        stickToOrigin: true,
       },
 
       {
