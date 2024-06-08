@@ -3,24 +3,26 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { MAGE_MANA_SHIELD_DAMAGE_REDUCTION } from "@providers/constants/BattleConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { Locker } from "@providers/locks/Locker";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { SpellsBlueprint } from "@rpg-engine/shared";
-import { NamespaceRedisControl } from "../../types/SpellsBlueprintTypes";
 
 @provideSingleton(ManaShield)
 export class ManaShield {
-  constructor(private inMemoryHashTable: InMemoryHashTable, private socketMessaging: SocketMessaging) {}
+  constructor(
+    private inMemoryHashTable: InMemoryHashTable,
+    private socketMessaging: SocketMessaging,
+    private lock: Locker
+  ) {}
 
   @TrackNewRelicTransaction()
   public async handleManaShield(character: ICharacter, damage: number): Promise<boolean> {
     try {
       if (!character || character.mana === character.maxMana) {
+        console.error(`Invalid character or character has full mana: ${character}`);
         return false;
       }
 
-      const absorbed = await this.applyManaShield(character, damage);
-
-      return absorbed;
+      return await this.applyManaShield(character, damage);
     } catch (error) {
       console.error(`Failed to handle sorcerer mana shield: ${error}`);
       return false;
@@ -28,11 +30,8 @@ export class ManaShield {
   }
 
   @TrackNewRelicTransaction()
-  public async getManaShieldSpell(character: ICharacter): Promise<boolean> {
-    const namespace = `${NamespaceRedisControl.CharacterSpell}:${character._id}`;
-    const key = SpellsBlueprint.ManaShield;
-    const spell = await this.inMemoryHashTable.get(namespace, key);
-
+  public async hasManaShield(character: ICharacter): Promise<boolean> {
+    const spell = await this.inMemoryHashTable.get("mana-shield", character._id);
     return !!spell;
   }
 
@@ -41,6 +40,12 @@ export class ManaShield {
     try {
       if (typeof damage !== "number" || isNaN(damage)) {
         throw new Error(`Invalid damage value: ${damage}`);
+      }
+
+      const canProceed = await this.lock.lock(`mana-shield-${character._id}`);
+
+      if (!canProceed) {
+        return false;
       }
 
       const newMana = character.mana - damage / MAGE_MANA_SHIELD_DAMAGE_REDUCTION;
@@ -52,9 +57,7 @@ export class ManaShield {
       }
 
       if (newMana <= 0) {
-        const namespace = `${NamespaceRedisControl.CharacterSpell}:${character._id}`;
-        const key = SpellsBlueprint.ManaShield;
-        await this.inMemoryHashTable.delete(namespace, key);
+        await this.inMemoryHashTable.delete("mana-shield", character._id);
       }
 
       (await Character.findByIdAndUpdate(character._id, {
@@ -68,6 +71,12 @@ export class ManaShield {
     } catch (error) {
       console.error(`Failed to apply sorcerer mana shield: ${error} - ${character._id}`);
       return false;
+    } finally {
+      await this.lock.unlock(`mana-shield-${character._id}`);
     }
+  }
+
+  public async clearAllManaShields(): Promise<void> {
+    await this.inMemoryHashTable.deleteAll("mana-shield");
   }
 }

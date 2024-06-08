@@ -116,8 +116,7 @@ describe("ItemUse.ts", () => {
       expect.objectContaining({
         key: testItem.key,
       }),
-
-      testCharacter.id
+      testCharacter._id
     );
   });
 
@@ -274,7 +273,7 @@ describe("ItemUse.ts", () => {
     expect(applyItemUsageMock).toHaveBeenCalledWith(
       expect.any(String),
       expect.any(Object),
-      testCharacter.id,
+      testCharacter._id,
       testItem.healthRecovery
     );
 

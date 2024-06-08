@@ -1,8 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { CalculateEffectDamage } from "@providers/entityEffects/CalculateEffectDamage";
+import { EntityEffectApplier } from "@providers/entityEffects/EntityEffectApplier";
 import { characterBuffActivator, container } from "@providers/inversify/container";
-import { EffectableAttribute, ItemUsableEffect } from "@providers/item/helper/ItemUsableEffect";
 import {
   AnimationEffectKeys,
   CharacterAttributes,
@@ -23,13 +22,9 @@ export const entityEffectVineGrasp: IEntityEffect = {
   targetAnimationKey: AnimationEffectKeys.Rooted,
   type: EntityAttackType.Melee,
   effect: async (target: ICharacter | INPC, attacker: ICharacter | INPC) => {
-    const itemUsableEffect = container.get(ItemUsableEffect);
-    const calculateEffectDamage = container.get(CalculateEffectDamage);
-    const effectDamage = await calculateEffectDamage.calculateEffectDamage(attacker, target, {
-      maxBonusDamage: MagicPower.Medium,
-    });
+    const entityEffectApplier = container.get(EntityEffectApplier);
 
-    await itemUsableEffect.apply(target, EffectableAttribute.Health, -1 * effectDamage);
+    const effectDamage = await entityEffectApplier.applyEffectDamage(target, attacker, MagicPower.Medium);
 
     if (attacker.type === EntityType.NPC && target.type === EntityType.Character) {
       await characterBuffActivator.enableTemporaryBuff(target as ICharacter, {
