@@ -18,7 +18,6 @@ export class ManaShield {
   public async handleManaShield(character: ICharacter, damage: number): Promise<boolean> {
     try {
       if (!character || character.mana === character.maxMana) {
-        console.error(`Invalid character or character has full mana: ${character}`);
         return false;
       }
 
