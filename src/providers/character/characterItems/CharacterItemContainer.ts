@@ -100,12 +100,14 @@ export class CharacterItemContainer {
 
     try {
       if (!item) {
+        console.error("Item is null");
         return false;
       }
 
       const hasLock = await this.locker.lock(`item-${item._id}-add-item-to-container`);
 
       if (!hasLock) {
+        console.error("Could not lock item");
         return false;
       }
 
@@ -113,6 +115,7 @@ export class CharacterItemContainer {
 
       if (!item) {
         this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The item to be added was not found.");
+        console.error("The item to be added was not found");
         return false;
       }
 
@@ -120,6 +123,7 @@ export class CharacterItemContainer {
 
       if (!targetContainer) {
         this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The target container was not found.");
+        console.error("The target container was not found");
         return false;
       }
 
@@ -134,6 +138,7 @@ export class CharacterItemContainer {
       );
 
       if (!result) {
+        console.error("Failed when executing tryToAddItemToContainer");
         return false;
       }
 
