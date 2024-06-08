@@ -53,14 +53,9 @@ export class ItemUseCycleQueue {
       async (job) => {
         let { characterId, itemKey, iterations, intervalDurationMs } = job.data;
 
-        console.log("ItemUseCycleQueue.addJob", characterId, itemKey, iterations, intervalDurationMs);
-
         const callback = this.itemCallbacks.get(`${characterId}-${itemKey}`);
 
-        console.log("Callback: ", callback);
-
         if (!callback) {
-          console.log("Callback not found");
           return;
         }
 
