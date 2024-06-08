@@ -14,7 +14,6 @@ import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { EnvType } from "@rpg-engine/shared";
 import { DefaultJobOptions, Job, Queue, QueueBaseOptions, Worker, WorkerOptions } from "bullmq";
-import fs from "fs";
 import { Redis } from "ioredis";
 import { random } from "lodash";
 import { hostname } from "os";
@@ -277,21 +276,8 @@ export class DynamicQueue {
 
   private getMachineId(): string {
     const nodeHostname = hostname();
-    const containerId = this.getDockerContainerId();
     const pm2Id = process.env.pm_id || "0";
-    return `${nodeHostname}-${containerId}-${pm2Id}`;
-  }
-
-  private getDockerContainerId(): string {
-    const containerIdPath = "/proc/self/cgroup";
-    if (fs.existsSync(containerIdPath)) {
-      const content = fs.readFileSync(containerIdPath, "utf-8");
-      const match = content.match(/docker\/([0-9a-f]+)$/m);
-      if (match) {
-        return match[1];
-      }
-    }
-    throw new Error("Unable to determine Docker container ID");
+    return `${nodeHostname}-${pm2Id}`;
   }
 
   public async clearAllJobs(): Promise<void> {
