@@ -82,9 +82,9 @@ export class ItemUse {
       }
 
       if (useItem && useItem.subType === ItemSubType.Food && useItem.healthRecovery) {
-        await this.applyItemUsage(character.scene, bluePrintItem, character.id, useItem.healthRecovery);
+        await this.applyItemUsage(character.scene, bluePrintItem, character._id, useItem.healthRecovery);
       } else {
-        await this.applyItemUsage(character.scene, bluePrintItem, character.id);
+        await this.applyItemUsage(character.scene, bluePrintItem, character._id);
       }
 
       const rarity = useItem.rarity || undefined;

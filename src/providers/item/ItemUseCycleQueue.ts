@@ -53,6 +53,8 @@ export class ItemUseCycleQueue {
       async (job) => {
         let { characterId, itemKey, iterations, intervalDurationMs } = job.data;
 
+        console.log("ItemUseCycleQueue.addJob", characterId, itemKey, iterations, intervalDurationMs);
+
         const callback = this.itemCallbacks.get(`${characterId}-${itemKey}`);
 
         if (!callback) {
@@ -73,7 +75,9 @@ export class ItemUseCycleQueue {
         iterations,
         intervalDurationMs,
       },
-      undefined,
+      {
+        queueScaleBy: "single",
+      },
 
       {
         delay: intervalDurationMs,
