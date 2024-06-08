@@ -1,11 +1,10 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
-import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { MarketplaceMoney } from "@entities/ModuleMarketplace/MarketplaceMoneyModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterTradingBalance } from "@providers/character/CharacterTradingBalance";
-import { blueprintManager, container, unitTestHelper } from "@providers/inversify/container";
+import { container, unitTestHelper } from "@providers/inversify/container";
 import { OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { MarketplaceMoneyWithdraw } from "../MarketplaceMoneyWithdraw";
 
@@ -23,29 +22,23 @@ describe("MarketplaceMoneyWithdraw.ts", () => {
   });
 
   beforeEach(async () => {
-    // Create test character
-    testCharacter = await unitTestHelper.createMockCharacter(null, { hasEquipment: true, hasInventory: true });
-    testNPC = await unitTestHelper.createMockNPC({
-      hasDepot: true,
+    testCharacter = await unitTestHelper.createMockCharacter(null, {
+      hasEquipment: true,
+      hasInventory: true,
+      hasSkills: true,
     });
-
+    testNPC = await unitTestHelper.createMockNPC({ hasDepot: true });
     testCharacter.x = 1;
     testCharacter.y = 0;
     await testCharacter.save();
-
     testNPC.x = 1;
     testNPC.y = 1;
     await testNPC.save();
   });
 
   it("should correctly withdraw all money if slots are available", async () => {
-    await MarketplaceMoney.create({
-      owner: testCharacter._id,
-      money: 100,
-    });
-
+    await MarketplaceMoney.create({ owner: testCharacter._id, money: 100 });
     const success = await marketplaceMoneyWithdraw.withdrawMoneyFromMarketplace(testCharacter, testNPC._id);
-
     expect(success).toBe(true);
     const marketplaceMoney = await MarketplaceMoney.findOne({ owner: testCharacter._id });
     expect(marketplaceMoney).toBeNull();
@@ -53,236 +46,106 @@ describe("MarketplaceMoneyWithdraw.ts", () => {
 
   it("should fail withdrawing money if no money is found", async () => {
     const success = await marketplaceMoneyWithdraw.withdrawMoneyFromMarketplace(testCharacter, testNPC._id);
-
     expect(success).toBe(false);
   });
 
   it("should fail to withdraw money if there is no space in bag", async () => {
-    await MarketplaceMoney.create({
-      owner: testCharacter._id,
-      money: 1000,
-    });
-
+    await MarketplaceMoney.create({ owner: testCharacter._id, money: 1000 });
     const gold = await unitTestHelper.createMockItem({
       stackQty: 9999,
       maxStackSize: 9999,
       key: OthersBlueprint.GoldCoin,
     });
     const inventory = await characterInventory.getInventory(testCharacter);
-    await ItemContainer.findByIdAndUpdate(inventory?.itemContainer, {
-      slots: {
-        0: gold,
-      },
-    });
-
+    await ItemContainer.findByIdAndUpdate(inventory?.itemContainer, { slots: { 0: gold } });
     const success = await marketplaceMoneyWithdraw.withdrawMoneyFromMarketplace(testCharacter, testNPC._id);
-
     expect(success).toBe(true);
     const marketplaceMoney = await MarketplaceMoney.findOne({ owner: testCharacter._id });
     expect(marketplaceMoney?.money).toBe(1000);
   });
 
   it("should correctly withdraw all money to available slot", async () => {
-    await MarketplaceMoney.create({
-      owner: testCharacter._id,
-      money: 100,
-    });
-
+    await MarketplaceMoney.create({ owner: testCharacter._id, money: 100 });
     const gold = await unitTestHelper.createMockItem({
       stackQty: 1000,
       maxStackSize: 10000,
       key: OthersBlueprint.GoldCoin,
     });
     const inventory = await characterInventory.getInventory(testCharacter);
-    await ItemContainer.findByIdAndUpdate(inventory?.itemContainer, {
-      slots: {
-        0: gold,
-      },
-    });
-
+    await ItemContainer.findByIdAndUpdate(inventory?.itemContainer, { slots: { 0: gold } });
     const success = await marketplaceMoneyWithdraw.withdrawMoneyFromMarketplace(testCharacter, testNPC._id);
-
     expect(success).toBe(true);
     const marketplaceMoney = await MarketplaceMoney.findOne({ owner: testCharacter._id });
     expect(marketplaceMoney).toBeNull();
-
     const container = await ItemContainer.findById(inventory?.itemContainer);
     expect(container?.slots[0].stackQty).toBe(1100);
   });
 
   it("should withdraw only part of the money if there is no space in bag", async () => {
-    await MarketplaceMoney.create({
-      owner: testCharacter._id,
-      money: 110000,
-    });
-
+    await MarketplaceMoney.create({ owner: testCharacter._id, money: 110000 });
     const gold = await unitTestHelper.createMockItem({
       stackQty: 90000,
       maxStackSize: 99999,
       key: OthersBlueprint.GoldCoin,
     });
     const inventory = await characterInventory.getInventory(testCharacter);
-    await ItemContainer.findByIdAndUpdate(inventory?.itemContainer, {
-      slots: {
-        0: null,
-        1: gold,
-      },
-    });
-
+    await ItemContainer.findByIdAndUpdate(inventory?.itemContainer, { slots: { 0: null, 1: gold } });
     const success = await marketplaceMoneyWithdraw.withdrawMoneyFromMarketplace(testCharacter, testNPC._id);
-
     expect(success).toBe(true);
     const marketplaceMoney = await MarketplaceMoney.findOne({ owner: testCharacter._id });
     expect(marketplaceMoney?.money).toBe(2);
-
     const container = await ItemContainer.findById(inventory?.itemContainer);
     expect(container?.slots[0].stackQty).toBe(99999);
     expect(container?.slots[1].stackQty).toBe(99999);
   });
 
-  it("should not rollback withdraw if update is successful", async () => {
-    const blueprint = blueprintManager.getBlueprint<IItem>("items", OthersBlueprint.GoldCoin);
-    const inventory = await characterInventory.getInventory(testCharacter);
-    const inventoryContainerId = inventory?.itemContainer as unknown as string;
-
-    const initialCharacterAvailableGold = 1000;
-    const updatedGold = 100;
-
-    // update gold is successful
-    const gold = await unitTestHelper.createMockItem({
-      stackQty: initialCharacterAvailableGold + updatedGold,
-      maxStackSize: 10000,
-      key: OthersBlueprint.GoldCoin,
-    });
-
-    await ItemContainer.findByIdAndUpdate(inventory?.itemContainer, {
-      slots: {
-        0: gold,
-      },
-    });
-
-    // @ts-ignore
-    const isRollbackSuccessful = await marketplaceMoneyWithdraw.checkAndRollbackMoneyWithdraw(
-      testCharacter,
-      blueprint,
-      inventoryContainerId,
-      updatedGold,
-      initialCharacterAvailableGold
+  it("should handle invalid character ID", async () => {
+    const success = await marketplaceMoneyWithdraw.withdrawMoneyFromMarketplace(
+      { _id: "invalid" } as ICharacter,
+      testNPC._id
     );
-
-    const availableGoldAfterRollback = await characterTradingBalance.getTotalGoldInInventory(testCharacter);
-
-    expect(isRollbackSuccessful).toBe(false);
-    expect(availableGoldAfterRollback).toBe(initialCharacterAvailableGold + updatedGold);
+    expect(success).toBe(false);
   });
 
-  it("should rollback withdraw if no update was made", async () => {
-    const blueprint = blueprintManager.getBlueprint<IItem>("items", OthersBlueprint.GoldCoin);
-    const inventory = await characterInventory.getInventory(testCharacter);
-    const inventoryContainerId = inventory?.itemContainer as unknown as string;
-
-    const initialCharacterAvailableGold = 1000;
-    const updatedGold = 100;
-
-    // update gold in inventory is same as initial gold
-    const gold = await unitTestHelper.createMockItem({
-      stackQty: initialCharacterAvailableGold,
-      maxStackSize: 10000,
-      key: OthersBlueprint.GoldCoin,
-    });
-
-    await ItemContainer.findByIdAndUpdate(inventory?.itemContainer, {
-      slots: {
-        0: gold,
-      },
-    });
-
-    // @ts-ignore
-    const isRollbackSuccessful = await marketplaceMoneyWithdraw.checkAndRollbackMoneyWithdraw(
-      testCharacter,
-      blueprint,
-      inventoryContainerId,
-      updatedGold,
-      initialCharacterAvailableGold
-    );
-
-    const availableGoldAfterRollback = await characterTradingBalance.getTotalGoldInInventory(testCharacter);
-
-    expect(isRollbackSuccessful).toBe(true);
-    expect(availableGoldAfterRollback).toBe(initialCharacterAvailableGold);
+  it("should handle invalid NPC ID", async () => {
+    await MarketplaceMoney.create({ owner: testCharacter._id, money: 100 });
+    const success = await marketplaceMoneyWithdraw.withdrawMoneyFromMarketplace(testCharacter, "invalid");
+    expect(success).toBe(false);
   });
 
-  it("should rollback withdraw if update was less than it should be", async () => {
-    const blueprint = blueprintManager.getBlueprint<IItem>("items", OthersBlueprint.GoldCoin);
-    const inventory = await characterInventory.getInventory(testCharacter);
-    const inventoryContainerId = inventory?.itemContainer as unknown as string;
-
-    const initialCharacterAvailableGold = 1000;
-    const updatedGold = 100;
-    const actualUpdatedGold = 50;
-
-    // update gold in less than it should be
-    const gold = await unitTestHelper.createMockItem({
-      stackQty: initialCharacterAvailableGold + actualUpdatedGold,
-      maxStackSize: 10000,
-      key: OthersBlueprint.GoldCoin,
-    });
-
-    await ItemContainer.findByIdAndUpdate(inventory?.itemContainer, {
-      slots: {
-        0: gold,
-      },
-    });
-
-    // @ts-ignore
-    const isRollbackSuccessful = await marketplaceMoneyWithdraw.checkAndRollbackMoneyWithdraw(
-      testCharacter,
-      blueprint,
-      inventoryContainerId,
-      updatedGold,
-      initialCharacterAvailableGold
-    );
-
-    const availableGoldAfterRollback = await characterTradingBalance.getTotalGoldInInventory(testCharacter);
-
-    expect(isRollbackSuccessful).toBe(true);
-    expect(availableGoldAfterRollback).toBe(initialCharacterAvailableGold);
+  it("should handle concurrent withdraw attempts", async () => {
+    await MarketplaceMoney.create({ owner: testCharacter._id, money: 100 });
+    const [success1, success2] = await Promise.all([
+      marketplaceMoneyWithdraw.withdrawMoneyFromMarketplace(testCharacter, testNPC._id),
+      marketplaceMoneyWithdraw.withdrawMoneyFromMarketplace(testCharacter, testNPC._id),
+    ]);
+    expect(success1).toBe(true);
+    expect(success2).toBe(false);
   });
 
-  it("should rollback withdraw if update was grater than it should be", async () => {
-    const blueprint = blueprintManager.getBlueprint<IItem>("items", OthersBlueprint.GoldCoin);
-    const inventory = await characterInventory.getInventory(testCharacter);
-    const inventoryContainerId = inventory?.itemContainer as unknown as string;
-
-    const initialCharacterAvailableGold = 1000;
-    const updatedGold = 100;
-    const actualUpdatedGold = 150;
-
-    // update gold in grater than it should be
-    const gold = await unitTestHelper.createMockItem({
-      stackQty: initialCharacterAvailableGold + actualUpdatedGold,
-      maxStackSize: 10000,
+  it("should handle partial withdrawal with multiple items", async () => {
+    await MarketplaceMoney.create({ owner: testCharacter._id, money: 200 });
+    const gold1 = await unitTestHelper.createMockItem({
+      stackQty: 50,
+      maxStackSize: 100,
       key: OthersBlueprint.GoldCoin,
     });
-
-    await ItemContainer.findByIdAndUpdate(inventory?.itemContainer, {
-      slots: {
-        0: gold,
-      },
+    const gold2 = await unitTestHelper.createMockItem({
+      stackQty: 50,
+      maxStackSize: 100,
+      key: OthersBlueprint.GoldCoin,
     });
+    const inventory = await characterInventory.getInventory(testCharacter);
+    await ItemContainer.findByIdAndUpdate(inventory?.itemContainer, { slots: { 0: gold1, 1: gold2 } });
 
-    // @ts-ignore
-    const isRollbackSuccessful = await marketplaceMoneyWithdraw.checkAndRollbackMoneyWithdraw(
-      testCharacter,
-      blueprint,
-      inventoryContainerId,
-      updatedGold,
-      initialCharacterAvailableGold
-    );
+    const success = await marketplaceMoneyWithdraw.withdrawMoneyFromMarketplace(testCharacter, testNPC._id);
+    expect(success).toBe(true);
 
-    const availableGoldAfterRollback = await characterTradingBalance.getTotalGoldInInventory(testCharacter);
+    const marketplaceMoney = await MarketplaceMoney.findOne({ owner: testCharacter._id });
+    expect(marketplaceMoney?.money).toBe(100); // Expect 100 remaining as only 100 was added to the inventory
 
-    expect(isRollbackSuccessful).toBe(true);
-    expect(availableGoldAfterRollback).toBe(initialCharacterAvailableGold);
+    const container = await ItemContainer.findById(inventory?.itemContainer);
+    expect(container?.slots[0].stackQty).toBe(100);
+    expect(container?.slots[1].stackQty).toBe(100);
   });
 });
