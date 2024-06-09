@@ -98,24 +98,21 @@ export class CharacterItemContainer {
   ): Promise<boolean> {
     const { shouldAddOwnership = true, isInventoryItem = false, dropOnMapIfFull = false } = options || {};
 
+    if (!item) {
+      return false;
+    }
+
+    const hasLock = await this.locker.lock(`item-${item._id}-add-item-to-container`);
+
+    if (!hasLock) {
+      return false;
+    }
+
     try {
-      if (!item) {
-        console.error("Item is null");
-        return false;
-      }
-
-      const hasLock = await this.locker.lock(`item-${item._id}-add-item-to-container`);
-
-      if (!hasLock) {
-        console.error("Could not lock item");
-        return false;
-      }
-
       item = (await this.ensureItemHasContainer(item)) as IItem;
 
       if (!item) {
         this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The item to be added was not found.");
-        console.error("The item to be added was not found");
         return false;
       }
 
@@ -123,7 +120,6 @@ export class CharacterItemContainer {
 
       if (!targetContainer) {
         this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The target container was not found.");
-        console.error("The target container was not found");
         return false;
       }
 
@@ -138,7 +134,6 @@ export class CharacterItemContainer {
       );
 
       if (!result) {
-        console.error("Failed when executing tryToAddItemToContainer");
         return false;
       }
 
@@ -165,7 +160,7 @@ export class CharacterItemContainer {
 
       await this.clearCache(toContainerId, character._id, item.type as ItemType);
 
-      await this.locker.unlock(`item-${item?._id}-add-item-to-container`);
+      await this.locker.unlock(`item-${item._id}-add-item-to-container`);
     }
   }
 
