@@ -1,6 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
-import { Guild } from "@entities/ModuleSystem/GuildModel";
+import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
 import { GuildSkills } from "@entities/ModuleSystem/GuildSkillsModel";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
@@ -120,6 +120,12 @@ export class GuildCreate {
 
       // send guild created message
       this.socketMessaging.sendMessageToCharacter(character, "Guild was Created successfully.");
+      // send guild info
+      this.socketMessaging.sendEventToUser<IGuild | null>(
+        character.channelId!,
+        GuildSocketEvents.GuildInfoOpen,
+        newGuild
+      );
     } catch (error) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Error creating guild.");
       console.error(error);
