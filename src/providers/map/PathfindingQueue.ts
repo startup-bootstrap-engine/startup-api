@@ -50,7 +50,7 @@ export class PathfindingQueue {
             return;
           }
 
-          return await this.pathfindingResults.setResult(job.id!, path);
+          void this.pathfindingResults.setResult(job.id!, path);
         },
         {
           npc,

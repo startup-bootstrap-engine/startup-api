@@ -94,7 +94,7 @@ export class HitTargetQueue {
             await this.npcTarget.setTarget(target as INPC, attacker as ICharacter);
           }
 
-          return await this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
+          void this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
         },
         { attacker, target, targetType, magicAttack, bonusDamage, spellHit },
         {
@@ -117,7 +117,7 @@ export class HitTargetQueue {
             return;
           }
 
-          return await this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
+          void this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
         },
         { attacker, target, targetType, magicAttack, bonusDamage, spellHit },
         {
