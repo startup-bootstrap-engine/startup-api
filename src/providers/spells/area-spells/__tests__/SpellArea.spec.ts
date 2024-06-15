@@ -5,6 +5,7 @@ import { SPELL_AREA_MEDIUM_BLAST_RADIUS } from "@providers/constants/SpellConsta
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { entityEffectBurning } from "@providers/entityEffects/data/blueprints/entityEffectBurning";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
 import { FriendlyNPCsBlueprint, HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { PartyCRUD } from "@providers/party/PartyCRUD";
 import { ICharacterParty } from "@providers/party/PartyTypes";
@@ -18,6 +19,7 @@ describe("SpellArea", () => {
   let spellArea: SpellArea;
   let inMemoryHashTable: InMemoryHashTable;
   let partyCRUD: PartyCRUD;
+  let mapSolidsTrajectorySpy: jest.SpyInstance;
 
   beforeAll(() => {
     spellArea = container.get(SpellArea);
@@ -58,6 +60,9 @@ describe("SpellArea", () => {
     await testNPC.populate("skills").execPopulate();
     await testCharacter.populate("skills").execPopulate();
     await testCharacterTarget.populate("skills").execPopulate();
+
+    // @ts-ignore
+    mapSolidsTrajectorySpy = jest.spyOn(MapSolidsTrajectory.prototype, "isSolidInTrajectory").mockResolvedValue(false);
   });
 
   afterEach(() => {
@@ -339,6 +344,7 @@ describe("SpellArea - PVP", () => {
   let isSamePartySpy: jest.SpyInstance;
   let spellArea: SpellArea;
   let partyCRUD: PartyCRUD;
+  let mapSolidsTrajectorySpy: jest.SpyInstance;
 
   const testSpellAreaOptions = {
     effectAnimationKey: AnimationEffectKeys.HitFire,
@@ -375,6 +381,8 @@ describe("SpellArea - PVP", () => {
       },
       { hasSkills: true }
     );
+
+    mapSolidsTrajectorySpy = jest.spyOn(MapSolidsTrajectory.prototype, "isSolidInTrajectory").mockResolvedValue(false);
   });
 
   afterEach(() => {
