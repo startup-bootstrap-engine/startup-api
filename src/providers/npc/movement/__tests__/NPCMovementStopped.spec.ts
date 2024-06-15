@@ -1,6 +1,7 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
 import { FromGridX, FromGridY, NPCMovementType } from "@rpg-engine/shared";
 import { NPCMovementStopped } from "../NPCMovementStopped";
 import { NPCTarget } from "../NPCTarget";
@@ -10,6 +11,7 @@ describe("NPCMovementStopped.ts", () => {
   let npcTarget: NPCTarget;
   let testNPC: INPC;
   let testCharacter: ICharacter;
+  let mapSolidsTrajectorySpy: jest.SpyInstance;
 
   beforeAll(async () => {
     await unitTestHelper.initializeMapLoader();
@@ -30,6 +32,8 @@ describe("NPCMovementStopped.ts", () => {
       x: FromGridX(2),
       y: FromGridY(0),
     });
+
+    mapSolidsTrajectorySpy = jest.spyOn(MapSolidsTrajectory.prototype, "isSolidInTrajectory").mockResolvedValue(false);
   });
 
   it("should properly set a new target once a player is close", async () => {
