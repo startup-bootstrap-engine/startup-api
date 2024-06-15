@@ -1,0 +1,35 @@
+FETCH CRYSTALS BY CHAR NAME
+
+db.items.aggregate([
+  {
+    $match: { key: "social-crystal" }
+  },
+  {
+    $lookup: {
+      from: "characters",
+      localField: "owner",
+      foreignField: "_id",
+      as: "characterInfo"
+    }
+  },
+  {
+    $unwind: "$characterInfo"
+  },
+  {
+    $group: {
+      _id: "$owner",
+      characterName: { $first: "$characterInfo.name" },
+      totalSocialCrystals: { $sum: "$stackQty" }
+    }
+  },
+  {
+    $sort: { totalSocialCrystals: -1 }
+  },
+  {
+    $project: {
+      _id: 0,
+      characterName: 1,
+      totalSocialCrystals: 1
+    }
+  }
+])
