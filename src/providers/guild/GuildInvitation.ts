@@ -84,9 +84,6 @@ export class GuildInvitation {
 
     const message = `${character.name} joined the guild!`;
     await this.sendMessageToAllMembers(message, guild);
-    // send guild info
-    const target = (await Character.findById(targetId).lean()) as ICharacter;
-    this.socketMessaging.sendEventToUser<IGuild | null>(target.channelId!, GuildSocketEvents.GuildInfoOpen, guild);
   }
 
   private async sendMessageToAllMembers(message: string, guild: IGuild): Promise<void> {
@@ -107,6 +104,8 @@ export class GuildInvitation {
         message,
         type: "info",
       });
+
+      this.socketMessaging.sendEventToUser<IGuild | null>(character.channelId!, GuildSocketEvents.GuildInfoOpen, guild);
     }
   }
 }
