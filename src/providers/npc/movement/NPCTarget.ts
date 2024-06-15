@@ -6,6 +6,7 @@ import { STEALTH_DETECTION_THRESHOLD } from "@providers/constants/BattleConstant
 import { NPC_CAN_ATTACK_IN_NON_PVP_ZONE } from "@providers/constants/NPCConstants";
 import { Locker } from "@providers/locks/Locker";
 import { MapNonPVPZone } from "@providers/map/MapNonPVPZone";
+import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
@@ -28,7 +29,8 @@ export class NPCTarget {
     private mapNonPVPZone: MapNonPVPZone,
     private stealth: Stealth,
     private locker: Locker,
-    private socketMessaging: SocketMessaging
+    private socketMessaging: SocketMessaging,
+    private mapSolidsTrajectory: MapSolidsTrajectory
   ) {}
 
   @TrackNewRelicTransaction()
@@ -94,6 +96,12 @@ export class NPCTarget {
       const minDistanceCharacter = await this.npcView.getNearestCharacter(npc);
 
       if (!minDistanceCharacter) {
+        return;
+      }
+
+      const hasSolidOnTrajectory = await this.mapSolidsTrajectory.isSolidInTrajectory(npc, minDistanceCharacter);
+
+      if (hasSolidOnTrajectory) {
         return;
       }
 
