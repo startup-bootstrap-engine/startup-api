@@ -1,8 +1,8 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { BattleAttackRanged } from "@providers/battle/BattleAttackTarget/BattleAttackRanged";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
+import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { spellsBlueprints } from "@providers/spells/data/blueprints";
 import { ISpell, MagicPower, SpellsBlueprint } from "@rpg-engine/shared";
@@ -20,13 +20,13 @@ export class NPCSpellArea {
   constructor(
     private blueprintManager: BlueprintManager,
     private movementHelper: MovementHelper,
-    private battleAttackRanged: BattleAttackRanged
+    private mapSolidsTrajectory: MapSolidsTrajectory
   ) {}
 
   @TrackNewRelicTransaction()
   public async castNPCSpell(attacker: INPC, target: ICharacter | INPC): Promise<boolean | undefined> {
     try {
-      const hasSolidInTrajectory = await this.battleAttackRanged.isSolidInRangedTrajectory(attacker, target);
+      const hasSolidInTrajectory = await this.mapSolidsTrajectory.isSolidInTrajectory(attacker, target);
 
       if (hasSolidInTrajectory) {
         return false;

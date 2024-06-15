@@ -1,6 +1,7 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
 import { CharacterClass, FromGridX, FromGridY } from "@rpg-engine/shared";
 import { BattleAttackTarget } from "../BattleAttackTarget";
 import { BattleAttackTargetDeath } from "../BattleAttackTargetDeath";
@@ -12,6 +13,7 @@ jest.mock("../../../entityEffects/EntityEffectCycle.ts", () => ({
 describe("BattleAttackTarget.spec.ts", () => {
   let battleAttackTarget: BattleAttackTarget;
   let battleAttackTargetDeath: BattleAttackTargetDeath;
+  let mapSolidsTrajectorySpy: jest.SpyInstance;
 
   let testNPC: INPC;
   let testCharacter: ICharacter;
@@ -21,6 +23,8 @@ describe("BattleAttackTarget.spec.ts", () => {
   beforeAll(async () => {
     battleAttackTarget = container.get<BattleAttackTarget>(BattleAttackTarget);
     battleAttackTargetDeath = container.get<BattleAttackTargetDeath>(BattleAttackTargetDeath);
+
+    mapSolidsTrajectorySpy = jest.spyOn(MapSolidsTrajectory.prototype, "isSolidInTrajectory");
 
     await unitTestHelper.initializeMapLoader();
   });
@@ -52,7 +56,7 @@ describe("BattleAttackTarget.spec.ts", () => {
 
   it("should NOT hit a target if there is a solid object in the trajectory", async () => {
     // @ts-ignore
-    jest.spyOn(battleAttackTarget.battleAttackRanged, "isSolidInRangedTrajectory").mockResolvedValue(true);
+    mapSolidsTrajectorySpy.mockResolvedValue(true);
 
     const attacker = testCharacter;
     const defender = testNPC;

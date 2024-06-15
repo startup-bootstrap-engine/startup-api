@@ -24,13 +24,9 @@ import {
   IEquipmentAndInventoryUpdatePayload,
   ItemSlotType,
   ItemSubType,
-  MapLayers,
-  ToGridX,
-  ToGridY,
 } from "@rpg-engine/shared";
 import { EntityAttackType, EntityType } from "@rpg-engine/shared/dist/types/entity.types";
 import { provide } from "inversify-binding-decorators";
-import _ from "lodash";
 import { Types } from "mongoose";
 
 export interface IRangedAttackParams {
@@ -335,31 +331,6 @@ export class BattleAttackRanged {
     }
 
     return { haveMana: false, newMana: 0 };
-  }
-
-  @TrackNewRelicTransaction()
-  public async isSolidInRangedTrajectory(
-    attacker: ICharacter | INPC,
-    target: ICharacter | INPC | IItem
-  ): Promise<boolean> {
-    if (typeof target.x === "undefined" || typeof target.y === "undefined") {
-      return false;
-    }
-    const origin = { x: ToGridX(attacker.x), y: ToGridY(attacker.y) };
-    const destination = { x: ToGridX(target.x), y: ToGridY(target.y) };
-
-    const crossedGridPoints = this.mathHelper.getCrossedGridPoints(origin, destination);
-
-    for (const point of crossedGridPoints) {
-      if (_.isEqual(point, origin) || _.isEqual(point, destination)) {
-        continue;
-      }
-      const isSolid = await this.movementHelper.isSolid(attacker.scene, point.x, point.y, MapLayers.Character);
-      if (isSolid) {
-        return true;
-      }
-    }
-    return false;
   }
 
   private getRequiredManaForAttack(weapon: number): number {

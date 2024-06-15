@@ -7,6 +7,7 @@ import { NPCTarget } from "@providers/npc/movement/NPCTarget";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
 import { NPCSpellArea } from "@providers/spells/area-spells/NPCSpellArea";
 import {
   BattleSocketEvents,
@@ -35,7 +36,7 @@ export class BattleAttackTarget {
     private battleAttackValidator: BattleAttackValidator,
     private hitTarget: HitTargetQueue,
     private npcSpellArea: NPCSpellArea,
-    private battleAttackRanged: BattleAttackRanged
+    private mapSolidsTrajectory: MapSolidsTrajectory
   ) {}
 
   @TrackNewRelicTransaction()
@@ -44,7 +45,7 @@ export class BattleAttackTarget {
       return false;
     }
 
-    const hasSolidInTrajectory = await this.battleAttackRanged.isSolidInRangedTrajectory(attacker, target);
+    const hasSolidInTrajectory = await this.mapSolidsTrajectory.isSolidInTrajectory(attacker, target);
 
     if (hasSolidInTrajectory) {
       return false;
