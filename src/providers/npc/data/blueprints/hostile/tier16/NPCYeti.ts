@@ -68,6 +68,10 @@ export const npcYeti: INPCTierBlueprint<16> = {
       itemBlueprintKey: BootsBlueprint.CopperBoots,
       chance: LootProbability.Uncommon,
     },
+    {
+      itemBlueprintKey: CraftingResourcesBlueprint.SocialCrystal,
+      chance: LootProbability.VeryRare,
+    },
 
     {
       itemBlueprintKey: ShieldsBlueprint.TowerShield,

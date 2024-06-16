@@ -90,6 +90,11 @@ export const npcAncientDragon: INPCTierBlueprint<26> = {
       chance: LootProbability.SemiCommon,
     },
     {
+      itemBlueprintKey: CraftingResourcesBlueprint.SocialCrystal,
+      chance: LootProbability.Rare,
+      quantityRange: [1, 2],
+    },
+    {
       itemBlueprintKey: SwordsBlueprint.InfernoCleaver,
       chance: LootProbability.Uncommon,
     },

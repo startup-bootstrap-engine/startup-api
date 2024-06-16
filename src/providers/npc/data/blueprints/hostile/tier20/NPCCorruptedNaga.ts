@@ -7,6 +7,7 @@ import {
   AxesBlueprint,
   BooksBlueprint,
   BootsBlueprint,
+  CraftingResourcesBlueprint,
   DaggersBlueprint,
   GemsBlueprint,
   HammersBlueprint,
@@ -72,6 +73,10 @@ export const npcCorruptedNaga: INPCTierBlueprint<20> = {
     {
       itemBlueprintKey: SwordsBlueprint.DragonsSword,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: CraftingResourcesBlueprint.SocialCrystal,
+      chance: LootProbability.VeryRare,
     },
     {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,

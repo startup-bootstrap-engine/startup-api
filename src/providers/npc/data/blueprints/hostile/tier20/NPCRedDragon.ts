@@ -79,6 +79,11 @@ export const npcRedDragon: INPCTierBlueprint<20> = {
       chance: LootProbability.Uncommon,
     },
     {
+      itemBlueprintKey: CraftingResourcesBlueprint.SocialCrystal,
+      chance: LootProbability.Rare,
+      quantityRange: [1, 2],
+    },
+    {
       itemBlueprintKey: MacesBlueprint.DragonScalCleaverClub,
       chance: LootProbability.Rare,
     },

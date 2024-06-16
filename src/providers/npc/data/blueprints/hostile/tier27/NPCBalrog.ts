@@ -81,6 +81,11 @@ export const npcNPCBalrog: INPCTierBlueprint<27> = {
       chance: LootProbability.Common,
     },
     {
+      itemBlueprintKey: CraftingResourcesBlueprint.SocialCrystal,
+      chance: LootProbability.Rare,
+      quantityRange: [1, 3],
+    },
+    {
       itemBlueprintKey: ToolsBlueprint.EmeraldEclipsesPickaxe,
       chance: LootProbability.Common,
     },

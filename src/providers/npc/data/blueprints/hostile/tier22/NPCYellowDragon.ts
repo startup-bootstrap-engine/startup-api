@@ -84,6 +84,11 @@ export const npcYellowDragon: INPCTierBlueprint<22> = {
       chance: LootProbability.VeryRare,
     },
     {
+      itemBlueprintKey: CraftingResourcesBlueprint.SocialCrystal,
+      chance: LootProbability.Rare,
+      quantityRange: [1, 2],
+    },
+    {
       itemBlueprintKey: HammersBlueprint.StarlightHammer,
       chance: LootProbability.Rare,
     },
