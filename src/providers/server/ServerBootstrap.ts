@@ -39,6 +39,7 @@ import { ManaShield } from "@providers/spells/data/logic/mage/ManaShield";
 import SpellSilence from "@providers/spells/data/logic/mage/druid/SpellSilence";
 import { BullStrength } from "@providers/spells/data/logic/minotaur/BullStrength";
 import { SpellNetworkCastQueue } from "@providers/spells/network/SpellNetworkCastQueue";
+import { Cooldown } from "@providers/time/Cooldown";
 import { UseWithTileQueue } from "@providers/useWith/abstractions/UseWithTileQueue";
 import { EnvType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -83,7 +84,8 @@ export class ServerBootstrap {
     private itemDropVerifier: ItemDropVerifier,
     private queueActivityMonitor: QueueActivityMonitor,
     private raidManager: RaidManager,
-    private manaShield: ManaShield
+    private manaShield: ManaShield,
+    private cooldown: Cooldown
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -177,6 +179,8 @@ export class ServerBootstrap {
     await this.inMemoryHashTable.deleteAll("item-container-transfer-results");
     await this.raidManager.deleteAllRaids();
     await this.itemDropVerifier.clearAllItemDrops();
+
+    await this.cooldown.clearAll();
 
     await this.manaShield.clearAllManaShields();
 

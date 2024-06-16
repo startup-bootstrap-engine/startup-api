@@ -7,17 +7,21 @@ import { NPC_CAN_ATTACK_IN_NON_PVP_ZONE } from "@providers/constants/NPCConstant
 import { Locker } from "@providers/locks/Locker";
 import { MapNonPVPZone } from "@providers/map/MapNonPVPZone";
 import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
+import { PathfindingQueue } from "@providers/map/PathfindingQueue";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
+import { Cooldown } from "@providers/time/Cooldown";
 import {
   IUIShowMessage,
   NPCAlignment,
   NPCTargetType,
   NPC_MAX_TALKING_DISTANCE_IN_GRID,
+  ToGridX,
   UISocketEvents,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import { random } from "lodash";
 import { NPCView } from "../NPCView";
 import { NPCDirection } from "./NPCMovement";
 
@@ -30,7 +34,9 @@ export class NPCTarget {
     private stealth: Stealth,
     private locker: Locker,
     private socketMessaging: SocketMessaging,
-    private mapSolidsTrajectory: MapSolidsTrajectory
+    private mapSolidsTrajectory: MapSolidsTrajectory,
+    private pathfindingQueue: PathfindingQueue,
+    private cooldown: Cooldown
   ) {}
 
   @TrackNewRelicTransaction()
@@ -102,7 +108,27 @@ export class NPCTarget {
       const hasSolidOnTrajectory = await this.mapSolidsTrajectory.isSolidInTrajectory(npc, minDistanceCharacter);
 
       if (hasSolidOnTrajectory) {
-        return;
+        // add some cooldown to avoid trying to calculate path all the time
+        const isOnCooldown = await this.cooldown.isOnCooldown(`npc-try-set-target-${npc._id}`);
+
+        if (isOnCooldown) {
+          return;
+        }
+
+        await this.cooldown.setCooldown(`npc-try-set-target-${npc._id}`, random(6, 10));
+
+        const isThereAnyPathAvailable = await this.pathfindingQueue.findPathForNPC(
+          npc,
+          minDistanceCharacter,
+          ToGridX(npc.x),
+          ToGridX(npc.y),
+          ToGridX(minDistanceCharacter.x),
+          ToGridX(minDistanceCharacter.y)
+        );
+
+        if (!isThereAnyPathAvailable?.length) {
+          return;
+        }
       }
 
       await this.tryToDetectInvisibleCharacters(npc, minDistanceCharacter);
