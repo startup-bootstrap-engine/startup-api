@@ -198,5 +198,10 @@ export const npcMinotaurMage: INPCTierBlueprint<15> = {
       probability: 10,
       power: MagicPower.Medium,
     },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: 30,
+      power: MagicPower.Low,
+    },
   ],
 };

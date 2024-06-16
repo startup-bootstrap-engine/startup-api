@@ -1,11 +1,13 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
+import { NPC_BOOST_HEALING_WHEN_DYING_PROBABILITY } from "@providers/constants/NPCConstants";
 import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { spellsBlueprints } from "@providers/spells/data/blueprints";
-import { ISpell, MagicPower, SpellsBlueprint } from "@rpg-engine/shared";
+import { ISpell, MagicPower, SpellCastingType, SpellsBlueprint } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { random } from "lodash";
 
@@ -20,7 +22,8 @@ export class NPCSpellArea {
   constructor(
     private blueprintManager: BlueprintManager,
     private movementHelper: MovementHelper,
-    private mapSolidsTrajectory: MapSolidsTrajectory
+    private mapSolidsTrajectory: MapSolidsTrajectory,
+    private animationEffect: AnimationEffect
   ) {}
 
   @TrackNewRelicTransaction()
@@ -47,20 +50,45 @@ export class NPCSpellArea {
         return false;
       }
 
-      // choose randomly one of the areaSpells available
-      const areaSpell = areaSpells[random(0, areaSpells.length - 1)];
+      // If NPC is dying, prioritize self-healing spells
+      const isDying = attacker.health / attacker.maxHealth <= 0.2;
+      let areaSpell: ISpellAreaNPC | undefined;
 
-      // check probability to cast the area spell
+      if (isDying) {
+        areaSpell = areaSpells.find((spell) => spell.spellKey === SpellsBlueprint.SelfHealingSpell);
+      }
+
+      // If no self-healing spell is found or NPC is not dying, choose randomly one of the areaSpells available
+      if (!areaSpell) {
+        areaSpell = areaSpells[random(0, areaSpells.length - 1)];
+      }
+
+      // Dynamically boost probability if NPC is dying
+      let boostedProbability = areaSpell.probability;
+      if (isDying) {
+        boostedProbability = Math.min(100, areaSpell.probability * NPC_BOOST_HEALING_WHEN_DYING_PROBABILITY); //  2.5 is the boost factor
+      }
+
+      // Check probability to cast the area spell
       const n = random(0, 100);
 
-      if (n > areaSpell.probability) {
+      if (n > boostedProbability) {
         return false;
       }
 
       const spell = spellsBlueprints[areaSpell.spellKey] as ISpell;
-
       if (!spell) {
         throw new Error(`Spell ${areaSpell.spellKey} not found!`);
+      }
+
+      if (spell.castingType === SpellCastingType.SelfCasting) {
+        if (spell.castingAnimationKey) {
+          await this.animationEffect.sendAnimationEventToNPC(attacker, spell.castingAnimationKey);
+        }
+
+        await spell.usableEffect(attacker);
+
+        return true;
       }
 
       const attackInRange = this.movementHelper.isUnderRange(

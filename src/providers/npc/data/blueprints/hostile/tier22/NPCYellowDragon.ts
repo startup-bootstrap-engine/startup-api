@@ -296,5 +296,10 @@ export const npcYellowDragon: INPCTierBlueprint<22> = {
       probability: 40,
       power: MagicPower.Medium,
     },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: 30,
+      power: MagicPower.High,
+    },
   ],
 };

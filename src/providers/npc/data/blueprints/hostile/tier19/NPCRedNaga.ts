@@ -18,6 +18,7 @@ import {
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
 import {
   AnimationEffectKeys,
   MagicPower,
@@ -263,6 +264,11 @@ export const npcRedNaga: INPCTierBlueprint<19> = {
       spellKey: SpellsBlueprint.FireStorm,
       probability: 40,
       power: MagicPower.Medium,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Common,
+      power: MagicPower.High,
     },
   ],
 };

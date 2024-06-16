@@ -24,6 +24,7 @@ import {
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
 import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
@@ -211,6 +212,11 @@ export const npcDwarfGuardian: INPCTierBlueprint<12> = {
       spellKey: SpellsBlueprint.CleavingStomp,
       probability: 50,
       power: MagicPower.High,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Rare,
+      power: MagicPower.Low,
     },
   ],
 };

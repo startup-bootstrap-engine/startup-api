@@ -20,6 +20,7 @@ import {
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
 import {
   AnimationEffectKeys,
   MagicPower,
@@ -294,6 +295,11 @@ export const npcRedDragon: INPCTierBlueprint<20> = {
       spellKey: SpellsBlueprint.VampiricStorm,
       probability: 30,
       power: MagicPower.Medium,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Uncommon,
+      power: MagicPower.High,
     },
   ],
 };

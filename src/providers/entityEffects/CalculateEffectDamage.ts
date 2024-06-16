@@ -31,6 +31,14 @@ export class CalculateEffectDamage {
     const minRawDamage = 1;
     const minAttackerLevel = 1;
     try {
+      if (!attacker.type) {
+        if ((attacker as INPC).isBehaviorEnabled) {
+          attacker.type = EntityType.NPC;
+        } else {
+          attacker.type = EntityType.Character;
+        }
+      }
+
       let attackerSkills = attacker.skills as ISkill;
 
       if (!attackerSkills?.level) {

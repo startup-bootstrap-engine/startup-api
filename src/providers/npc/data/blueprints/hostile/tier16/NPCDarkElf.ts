@@ -16,6 +16,7 @@ import {
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
 import {
   AnimationEffectKeys,
   MagicPower,
@@ -153,6 +154,11 @@ export const npcDarkElf: INPCTierBlueprint<16> = {
       spellKey: SpellsBlueprint.Blizzard,
       probability: 25,
       power: MagicPower.UltraHigh,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Uncommon,
+      power: MagicPower.Low,
     },
   ],
 };

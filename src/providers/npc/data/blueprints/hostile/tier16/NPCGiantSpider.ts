@@ -25,6 +25,7 @@ import {
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
 import {
   AnimationEffectKeys,
   MagicPower,
@@ -301,6 +302,11 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
       spellKey: SpellsBlueprint.VampiricStorm,
       probability: 50,
       power: MagicPower.High,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Common,
+      power: MagicPower.Low,
     },
   ],
 };

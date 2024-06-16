@@ -24,7 +24,15 @@ import {
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment, NPCCustomDeathPenalties, NPCSubtype, RangeTypes } from "@rpg-engine/shared";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
+import {
+  MagicPower,
+  NPCAlignment,
+  NPCCustomDeathPenalties,
+  NPCSubtype,
+  RangeTypes,
+  SpellsBlueprint,
+} from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
@@ -221,4 +229,17 @@ export const npcYeti: INPCTierBlueprint<16> = {
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.Blizzard,
+      probability: 70,
+      power: MagicPower.UltraHigh,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Common,
+
+      power: MagicPower.High,
+    },
+  ],
 };

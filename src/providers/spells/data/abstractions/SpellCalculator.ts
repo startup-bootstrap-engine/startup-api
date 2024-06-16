@@ -1,5 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
+import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import {
   SPELL_CALCULATOR_DEFAULT_MAX_SKILL_MULTIPLIER,
@@ -69,7 +70,7 @@ export class SpellCalculator {
 
   @TrackNewRelicTransaction()
   public async calculateBasedOnSkillLevel(
-    character: ICharacter,
+    caster: ICharacter | INPC,
     skillName: SkillsAvailable,
     options: IRequiredOptions
   ): Promise<number> {
@@ -77,7 +78,7 @@ export class SpellCalculator {
       options.formulaType = "linear";
     }
 
-    const skills = await this.getCharacterSkill(character);
+    const skills = await this.getCharacterSkill(caster);
 
     const skillLevel = await this.traitGetter.getSkillLevelWithBuffs(skills, skillName);
 
@@ -176,14 +177,14 @@ export class SpellCalculator {
   }
 
   @TrackNewRelicTransaction()
-  public async getCharacterSkill(character: ICharacter): Promise<ISkill> {
-    const skills = (await Skill.findOne({ _id: character.skills })
+  public async getCharacterSkill(caster: ICharacter | INPC): Promise<ISkill> {
+    const skills = (await Skill.findOne({ _id: caster.skills })
       .lean({
         virtuals: true,
         defaults: true,
       })
       .cacheQuery({
-        cacheKey: `${character._id}-skills`,
+        cacheKey: `${caster._id}-skills`,
       })) as unknown as ISkill;
 
     return skills;

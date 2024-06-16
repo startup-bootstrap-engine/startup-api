@@ -22,6 +22,7 @@ import {
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
 import {
   AnimationEffectKeys,
   MagicPower,
@@ -351,6 +352,11 @@ export const npcNPCBalrog: INPCTierBlueprint<27> = {
       spellKey: SpellsBlueprint.FireStorm,
       probability: 100,
       power: MagicPower.UltraHigh,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Common,
+      power: MagicPower.High,
     },
   ],
 };

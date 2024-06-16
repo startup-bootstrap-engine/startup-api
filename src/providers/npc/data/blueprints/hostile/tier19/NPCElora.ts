@@ -18,7 +18,15 @@ import {
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { AnimationEffectKeys, NPCAlignment, NPCCustomDeathPenalties, RangeTypes } from "@rpg-engine/shared";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
+import {
+  AnimationEffectKeys,
+  MagicPower,
+  NPCAlignment,
+  NPCCustomDeathPenalties,
+  RangeTypes,
+  SpellsBlueprint,
+} from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
@@ -174,4 +182,21 @@ export const npcEloraTheQueen: INPCTierBlueprint<19> = {
     },
   ],
   entityEffects: [EntityEffectBlueprint.VineGrasp],
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.NaturesRevenge,
+      probability: 70,
+      power: MagicPower.UltraHigh,
+    },
+    {
+      spellKey: SpellsBlueprint.FireStorm,
+      probability: 70,
+      power: MagicPower.UltraHigh,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.VeryCommon,
+      power: MagicPower.High,
+    },
+  ],
 };

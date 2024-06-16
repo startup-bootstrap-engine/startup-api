@@ -18,14 +18,15 @@ import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
-import { NPCAlignment, NPCCustomDeathPenalties } from "@rpg-engine/shared";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
+import { MagicPower, NPCAlignment, NPCCustomDeathPenalties, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 
 export const npcAsterion: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
   name: "Asterion",
   key: HostileNPCsBlueprint.Asterion,
-  textureKey: HostileNPCsBlueprint.Minotaur,
+  textureKey: HostileNPCsBlueprint.MinotaurBerserker,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Fast,
@@ -119,6 +120,19 @@ export const npcAsterion: INPCTierBlueprint<15> = {
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
       chance: LootProbability.Rare,
+    },
+  ],
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.CleavingStomp,
+      probability: 25,
+      power: MagicPower.Medium,
+    },
+
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Rare,
+      power: MagicPower.Low,
     },
   ],
 };

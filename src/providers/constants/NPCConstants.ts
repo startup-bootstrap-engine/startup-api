@@ -32,3 +32,5 @@ export const NPC_BATTLE_CYCLE_INTERVAL = 1500;
 export const NPC_INACTIVITY_THRESHOLD = 30000; // 30 seconds
 
 export const NPC_MAX_STUN_LEVEL = 50;
+
+export const NPC_BOOST_HEALING_WHEN_DYING_PROBABILITY = 2.5;
