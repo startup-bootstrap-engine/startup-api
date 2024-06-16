@@ -161,11 +161,13 @@ describe("GuildInvitation.ts", () => {
           _id: updatedGuild._id,
         })
       );
-      expect(mockSocketMessaging.sendEventToUser).toBeCalledWith(
+
+      expect(mockSocketMessaging.sendEventToUser).toHaveBeenLastCalledWith(
         testTargetCharacter.channelId!,
         GuildSocketEvents.GuildInfoOpen,
         expect.objectContaining({
-          _id: testGuild._id,
+          coatOfArms: testGuild.coatOfArms,
+          tag: testGuild.tag,
         })
       );
     });

@@ -1,7 +1,7 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { GuildSocketEvents, IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
+import { GuildSocketEvents, IGuildInfo, IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { GuildGet } from "./GuildGet";
 
@@ -104,8 +104,12 @@ export class GuildInvitation {
         message,
         type: "info",
       });
-
-      this.socketMessaging.sendEventToUser<IGuild | null>(character.channelId!, GuildSocketEvents.GuildInfoOpen, guild);
+      const guildInfo = await this.guildGet.convertTOIGuildInfo(guild);
+      this.socketMessaging.sendEventToUser<IGuildInfo | null>(
+        character.channelId!,
+        GuildSocketEvents.GuildInfoOpen,
+        guildInfo
+      );
     }
   }
 }

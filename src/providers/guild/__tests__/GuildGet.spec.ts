@@ -7,6 +7,7 @@ import { GuildGet } from "../GuildGet";
 describe("GuildGet.ts", () => {
   let testGuild: IGuild;
   let testCharacter: ICharacter;
+  let testCharacter2: ICharacter;
   let guildGet: GuildGet;
 
   const mockSocketMessaging = {
@@ -20,6 +21,11 @@ describe("GuildGet.ts", () => {
   beforeEach(async () => {
     testGuild = await unitTestHelper.createMockGuild();
     testCharacter = await unitTestHelper.createMockCharacter();
+    testCharacter2 = await unitTestHelper.createMockCharacter();
+
+    testGuild.members = [testCharacter._id];
+    testGuild.guildLeader = testCharacter._id;
+    await testGuild.save();
 
     // @ts-ignore
     guildGet.socketMessaging = mockSocketMessaging;
@@ -36,7 +42,7 @@ describe("GuildGet.ts", () => {
       testCharacter.channelId!,
       GuildSocketEvents.GuildInfoOpen,
       expect.objectContaining({
-        id: testGuild.id,
+        _id: testGuild.id,
         name: testGuild.name,
         tag: testGuild.tag,
         coatOfArms: testGuild.coatOfArms,
@@ -56,7 +62,7 @@ describe("GuildGet.ts", () => {
       testCharacter.channelId!,
       GuildSocketEvents.GuildInfoOpen,
       expect.objectContaining({
-        id: testGuild.id,
+        _id: testGuild.id,
         name: testGuild.name,
         tag: testGuild.tag,
         coatOfArms: testGuild.coatOfArms,
@@ -65,10 +71,10 @@ describe("GuildGet.ts", () => {
   });
 
   it("should send undefine if character is not in a guild", async () => {
-    await guildGet.getGuilds(undefined, testCharacter);
+    await guildGet.getGuilds(undefined, testCharacter2);
 
     expect(mockSocketMessaging.sendEventToUser).toHaveBeenCalledWith(
-      testCharacter.channelId!,
+      testCharacter2.channelId!,
       GuildSocketEvents.GuildInfoOpen,
       null
     );
