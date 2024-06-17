@@ -10,6 +10,7 @@ import {
   HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
+  PotionsBlueprint,
   SeedsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
@@ -121,6 +122,10 @@ export const npcBandit: INPCTierBlueprint<4> = {
     },
     {
       itemBlueprintKey: BootsBlueprint.SteelBoots,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: PotionsBlueprint.LightLifePotion,
       chance: LootProbability.Uncommon,
     },
   ],

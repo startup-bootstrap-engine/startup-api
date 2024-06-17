@@ -16,6 +16,7 @@ import {
   HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
+  PotionsBlueprint,
   SeedsBlueprint,
   ShieldsBlueprint,
   SpearsBlueprint,
@@ -289,6 +290,21 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
     {
       itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
       chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: PotionsBlueprint.LightLifePotion,
+      chance: LootProbability.Common,
+      quantityRange: [1, 5],
+    },
+    {
+      itemBlueprintKey: PotionsBlueprint.LightManaPotion,
+      chance: LootProbability.Common,
+      quantityRange: [1, 5],
+    },
+    {
+      itemBlueprintKey: PotionsBlueprint.LightAntidote,
+      chance: LootProbability.Common,
+      quantityRange: [1, 5],
     },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],

@@ -1,6 +1,10 @@
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
-import { CraftingResourcesBlueprint, RangedWeaponsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import {
+  CraftingResourcesBlueprint,
+  PotionsBlueprint,
+  RangedWeaponsBlueprint,
+} from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
@@ -72,6 +76,10 @@ export const npcGhost: INPCTierBlueprint<3> = {
       itemBlueprintKey: CraftingResourcesBlueprint.Silk,
       chance: LootProbability.SemiCommon,
       quantityRange: [5, 10],
+    },
+    {
+      itemBlueprintKey: PotionsBlueprint.LightLifePotion,
+      chance: LootProbability.Uncommon,
     },
   ],
   areaSpells: [

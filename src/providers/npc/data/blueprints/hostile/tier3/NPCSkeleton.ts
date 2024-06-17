@@ -6,6 +6,7 @@ import {
   CraftingResourcesBlueprint,
   HelmetsBlueprint,
   MacesBlueprint,
+  PotionsBlueprint,
   RangedWeaponsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
@@ -59,6 +60,10 @@ export const npcSkeleton: INPCTierBlueprint<3> = {
     {
       itemBlueprintKey: ArmorsBlueprint.LeatherJacket,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: PotionsBlueprint.LightLifePotion,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.Cap,

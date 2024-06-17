@@ -6,6 +6,7 @@ import {
   GlovesBlueprint,
   LegsBlueprint,
   MacesBlueprint,
+  PotionsBlueprint,
   RangedWeaponsBlueprint,
   SeedsBlueprint,
   SwordsBlueprint,
@@ -115,6 +116,10 @@ export const npcGhoul: INPCTierBlueprint<4> = {
       itemBlueprintKey: CraftingResourcesBlueprint.Eye,
       chance: LootProbability.Uncommon,
       quantityRange: [1, 3],
+    },
+    {
+      itemBlueprintKey: PotionsBlueprint.LightLifePotion,
+      chance: LootProbability.Uncommon,
     },
   ],
   areaSpells: [
