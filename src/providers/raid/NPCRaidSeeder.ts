@@ -17,6 +17,8 @@ export class NPCRaidSeeder {
       for (const raid of raids) {
         if (!existingRaids.includes(raid.key)) {
           await this.raid.addRaid(raid);
+        } else {
+          await this.raid.updateRaid(raid.key, raid);
         }
       }
     } catch (error) {
