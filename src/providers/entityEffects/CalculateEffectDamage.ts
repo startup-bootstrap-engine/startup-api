@@ -3,6 +3,7 @@ import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import {
+  ENTITY_EFFECT_DAMAGE_FROM_NPC_MODIFIER,
   ENTITY_EFFECT_DAMAGE_LEVEL_MULTIPLIER_NPC,
   ENTITY_EFFECT_DAMAGE_LEVEL_MULTIPLIER_PVP,
 } from "@providers/constants/EntityEffectsConstants";
@@ -77,7 +78,9 @@ export class CalculateEffectDamage {
         options
       );
 
-      return effectDamage;
+      const modifier = attacker.type === EntityType.NPC ? ENTITY_EFFECT_DAMAGE_FROM_NPC_MODIFIER : 1;
+
+      return effectDamage * modifier;
     } catch (err) {
       console.error(err);
       return minRawDamage;
@@ -149,16 +152,9 @@ export class CalculateEffectDamage {
         isMagicEntity = false;
     }
 
-    const modifier =
-      entity.type === EntityType.Character
-        ? ENTITY_EFFECT_DAMAGE_LEVEL_MULTIPLIER_PVP
-        : ENTITY_EFFECT_DAMAGE_LEVEL_MULTIPLIER_NPC;
-
-    return (
-      (isMagicEntity
-        ? attackerStrengthLevel + 2 * attackerMagicLevel
-        : attackerMagicLevel + 2 * attackerStrengthLevel) * modifier
-    );
+    return isMagicEntity
+      ? attackerStrengthLevel + 2 * attackerMagicLevel
+      : attackerMagicLevel + 2 * attackerStrengthLevel;
   }
 
   private async getAttackerMagicStrengthLevel(attackerSkills: ISkill): Promise<{
