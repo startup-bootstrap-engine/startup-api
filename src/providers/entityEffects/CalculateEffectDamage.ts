@@ -3,6 +3,7 @@ import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import {
+  ENTITY_EFFECT_ADDITIONAL_DAMAGE_NPC_MODIFIER,
   ENTITY_EFFECT_DAMAGE_FROM_NPC_MODIFIER,
   ENTITY_EFFECT_DAMAGE_LEVEL_MULTIPLIER_NPC,
   ENTITY_EFFECT_DAMAGE_LEVEL_MULTIPLIER_PVP,
@@ -111,7 +112,12 @@ export class CalculateEffectDamage {
     }
 
     // Unified approach for calculating maxDamage
-    const additionalDamage = this.getAdditionalDamage(attacker, attackerMagicLevel, attackerStrengthLevel);
+    let additionalDamage = this.getAdditionalDamage(attacker, attackerMagicLevel, attackerStrengthLevel);
+
+    if (attacker.type === EntityType.NPC) {
+      additionalDamage = Math.max(1, additionalDamage * ENTITY_EFFECT_ADDITIONAL_DAMAGE_NPC_MODIFIER); // reduce NPC damage, minimum is 1
+    }
+
     const maxDamage = Math.ceil(baseDamage + additionalDamage + (options?.maxBonusDamage ?? 0));
 
     // Min damage no longer relies on attackerLevel, making it constant
