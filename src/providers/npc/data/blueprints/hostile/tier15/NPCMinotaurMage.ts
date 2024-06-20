@@ -76,7 +76,7 @@ export const npcMinotaurMage: INPCTierBlueprint<15> = {
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
       chance: LootProbability.Common,
-      quantityRange: [1, 5],
+      quantityRange: [5, 10],
     },
     {
       itemBlueprintKey: SeedsBlueprint.PumpkinSeed,

@@ -101,7 +101,7 @@ export const npcSkeleton: INPCTierBlueprint<3> = {
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
       chance: LootProbability.Common,
-      quantityRange: [2, 3],
+      quantityRange: [5, 10],
     },
   ],
 };
