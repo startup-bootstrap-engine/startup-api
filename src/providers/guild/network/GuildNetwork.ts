@@ -1,6 +1,7 @@
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { provide } from "inversify-binding-decorators";
 import { GuildNetworkCreate } from "./GuildNetworkCreate";
+import { GuildNetworkDelete } from "./GuildNetworkDelete";
 import { GuildNetworkGetGuild } from "./GuildNetworkGetGuild";
 import { GuildNetworkInviteToGuild } from "./GuildNetworkInviteToGuild";
 import { GuildNetworkValidate } from "./GuildNetworkValidate";
@@ -11,7 +12,8 @@ export class GuildNetwork {
     private guildNetworkValidate: GuildNetworkValidate,
     private guildNetworkGetGuild: GuildNetworkGetGuild,
     private guildNetworkCreate: GuildNetworkCreate,
-    private guildNetworkInviteToGuild: GuildNetworkInviteToGuild
+    private guildNetworkInviteToGuild: GuildNetworkInviteToGuild,
+    private guildNetworkDelete: GuildNetworkDelete
   ) {}
 
   public onAddEventListeners(channel: SocketChannel): void {
@@ -19,5 +21,6 @@ export class GuildNetwork {
     this.guildNetworkGetGuild.onGetGuild(channel);
     this.guildNetworkCreate.onCreateGuild(channel);
     this.guildNetworkInviteToGuild.onInviteToGuild(channel);
+    this.guildNetworkDelete.onDeleteGuild(channel);
   }
 }
