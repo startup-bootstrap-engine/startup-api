@@ -41,6 +41,7 @@ export class ItemContainerTransactionQueue {
     private dynamicQueue: DynamicQueue
   ) {}
 
+  @TrackNewRelicTransaction()
   public async transferToContainer(
     item: IItem,
     character: ICharacter,
@@ -51,54 +52,85 @@ export class ItemContainerTransactionQueue {
       updateCharacterWeightAfterTransaction: true,
     }
   ): Promise<boolean> {
-    if (!options.shouldAddOwnership) {
-      options.shouldAddOwnership = true;
+    options.shouldAddOwnership = options.shouldAddOwnership ?? true;
+    options.updateCharacterWeightAfterTransaction = options.updateCharacterWeightAfterTransaction ?? true;
+
+    const lockKey = `transfer-${originContainer._id}-${targetContainer._id}`;
+    const canProceed = await this.locker.lock(lockKey);
+
+    if (!canProceed) {
+      return false;
     }
 
-    if (!options.updateCharacterWeightAfterTransaction) {
-      options.updateCharacterWeightAfterTransaction = true;
-    }
-
-    if (appEnv.general.IS_UNIT_TEST) {
-      return await this.execTransferToContainer(item, character, originContainer, targetContainer, options!);
-    }
-
-    await this.dynamicQueue.addJob(
-      "item-container-transaction-queue",
-
-      async (job) => {
-        const { item, character, originContainer, targetContainer, options } = job.data;
-
-        const result = await this.execTransferToContainer(item, character, originContainer, targetContainer, options);
-
-        await this.inMemoryHashTable.set(
-          "item-container-transfer-results",
-          `${originContainer._id}-to-${targetContainer._id}`,
-          result
-        );
-
-        return result;
-      },
-      {
-        item,
-        character,
-        originContainer,
-        targetContainer,
-        options,
+    try {
+      if (appEnv.general.IS_UNIT_TEST) {
+        return await this.execTransferToContainer(item, character, originContainer, targetContainer, options);
       }
-    );
 
-    // we have to do this hack because remember once the job goes to the worker, its processed in a different instance
-    const result = await this.pollForItemContainerTransferResults(
-      originContainer._id.toString(),
-      targetContainer._id.toString()
-    );
+      await this.dynamicQueue.addJob(
+        "item-container-transaction-queue",
+        async (job) => {
+          const { item, character, originContainer, targetContainer, options } = job.data;
+          const result = await this.execTransferToContainer(item, character, originContainer, targetContainer, options);
+          await this.inMemoryHashTable.set(
+            "item-container-transfer-results",
+            `${originContainer._id}-to-${targetContainer._id}`,
+            result
+          );
+          return result;
+        },
+        {
+          item,
+          character,
+          originContainer,
+          targetContainer,
+          options,
+        }
+      );
 
-    return result;
+      const result = await this.pollForItemContainerTransferResults(
+        originContainer._id.toString(),
+        targetContainer._id.toString()
+      );
+
+      if (!result) {
+        await this.rollbackTransfer(item, character, originContainer, targetContainer);
+      }
+
+      return result;
+    } finally {
+      await this.locker.unlock(lockKey);
+    }
   }
 
   public shutdown(): Promise<void> {
     return this.dynamicQueue.shutdown();
+  }
+
+  public pollForItemContainerTransferResults(originContainerId: string, targetContainerId: string): Promise<boolean> {
+    return new Promise(async (resolve) => {
+      let attempt = 0;
+      while (attempt < 10) {
+        const result = await this.inMemoryHashTable.get(
+          "item-container-transfer-results",
+          `${originContainerId}-to-${targetContainerId}`
+        );
+
+        if (result !== undefined) {
+          await this.inMemoryHashTable.delete(
+            "item-container-transfer-results",
+            `${originContainerId}-to-${targetContainerId}`
+          );
+          resolve(result as unknown as boolean);
+          return;
+        }
+
+        attempt++;
+        await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for 100ms before next attempt
+      }
+
+      resolve(false);
+    });
   }
 
   @TrackNewRelicTransaction()
@@ -147,39 +179,128 @@ export class ItemContainerTransactionQueue {
 
       return result;
     } catch (error) {
-      console.error(error);
+      console.error("Execution of transfer failed:", error);
+      await this.rollbackTransfer(item, character, originContainer, targetContainer);
       return false;
     } finally {
       await this.locker.unlock(`${originContainer?._id}-to-${targetContainer?._id}-item-container-transfer`);
-      await this.inMemoryHashTable.delete(
-        "item-container-transfer-results",
-        `${originContainer?._id}-to-${targetContainer?._id}`
-      );
     }
   }
 
-  public pollForItemContainerTransferResults(originContainerId: string, targetContainerId: string): Promise<boolean> {
-    return new Promise(async (resolve) => {
-      let attempt = 0;
-      while (attempt < 10) {
-        const result = await this.inMemoryHashTable.get(
-          "item-container-transfer-results",
-          `${originContainerId}-to-${targetContainerId}`
+  private async performTransaction(
+    item: IItem,
+    character: ICharacter,
+    originContainer: IItemContainer,
+    targetContainer: IItemContainer,
+    options: IItemContainerTransactionOption
+  ): Promise<boolean> {
+    item.baseKey = item.key.replace(/-\d+$/, "");
+
+    const addItemSuccessful = await this.characterItemContainer.addItemToContainer(
+      item,
+      character,
+      targetContainer._id,
+      {
+        shouldAddOwnership: options.shouldAddOwnership,
+      }
+    );
+
+    if (!addItemSuccessful) {
+      console.error("Failed to add item to target container.");
+      return false;
+    }
+
+    const removeItemSuccessful = await this.characterItemContainer.removeItemFromContainer(
+      item,
+      character,
+      originContainer
+    );
+
+    if (!removeItemSuccessful) {
+      this.socketMessaging.sendErrorMessageToCharacter(
+        character,
+        "Failed to remove original item from origin container."
+      );
+
+      // Attempt rollback by removing the item from the target container
+      const rollbackSuccessful = await this.retryOperation(async () => {
+        return await this.characterItemContainer.removeItemFromContainer(item, character, targetContainer);
+      });
+
+      if (!rollbackSuccessful) {
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          "Failed to rollback item addition to target container. Please check your inventory."
         );
-
-        if (result) {
-          await this.inMemoryHashTable.delete(
-            "item-container-transfer-results",
-            `${originContainerId}-to-${targetContainerId}`
-          );
-          resolve(result as unknown as boolean);
-        }
-
-        attempt++;
       }
 
-      resolve(false);
-    });
+      return false;
+    }
+
+    return true;
+  }
+
+  private async retryOperation(operation: () => Promise<boolean>): Promise<boolean> {
+    let attempt = 0;
+    while (attempt < ITEM_CONTAINER_ROLLBACK_MAX_TRIES) {
+      const success = await operation();
+      if (success) return true;
+      attempt++;
+    }
+    return false;
+  }
+
+  private async rollbackTransfer(
+    item: IItem,
+    character: ICharacter,
+    originContainer: IItemContainer,
+    targetContainer: IItemContainer
+  ): Promise<void> {
+    console.log("Rolling back transfer operation");
+
+    try {
+      // First, try to remove the item from the target container
+      const removeFromTargetSuccessful = await this.characterItemContainer.removeItemFromContainer(
+        item,
+        character,
+        targetContainer
+      );
+
+      if (!removeFromTargetSuccessful) {
+        console.error("Failed to remove item from target container during rollback");
+      }
+
+      // Then, try to add the item back to the origin container
+      const addToOriginSuccessful = await this.characterItemContainer.addItemToContainer(
+        item,
+        character,
+        originContainer._id,
+        { shouldAddOwnership: false }
+      );
+
+      if (!addToOriginSuccessful) {
+        console.error("Failed to add item back to origin container during rollback");
+      }
+
+      // Clear caches for both containers
+      await this.clearContainersCache(originContainer, targetContainer);
+
+      // Update character weight
+      await this.characterWeightQueue.updateCharacterWeight(character);
+
+      if (!removeFromTargetSuccessful || !addToOriginSuccessful) {
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          "An error occurred during item transfer. Please check your inventory and contact support if there are any issues."
+        );
+      }
+    } catch (error) {
+      console.error("Rollback failed:", error);
+      this.socketMessaging.sendErrorMessageToCharacter(
+        character,
+        "An error occurred during item transfer. Please check your inventory and contact support if there are any issues."
+      );
+    }
   }
 
   private async clearContainersCache(originContainer: IItemContainer, targetContainer: IItemContainer): Promise<void> {
@@ -213,69 +334,6 @@ export class ItemContainerTransactionQueue {
         type: readContainer.type,
       });
     }
-  }
-
-  private async performTransaction(
-    item: IItem,
-    character: ICharacter,
-    originContainer: IItemContainer,
-    targetContainer: IItemContainer,
-    options: IItemContainerTransactionOption
-  ): Promise<boolean> {
-    item.baseKey = item.key.replace(/-\d+$/, ""); // we have to add this because once this comes from the queue worker, the item becomes a JSON and baseKey is a virtual field
-
-    const addItemSuccessful = await this.characterItemContainer.addItemToContainer(
-      item,
-      character,
-      targetContainer._id,
-      {
-        shouldAddOwnership: options.shouldAddOwnership,
-      }
-    );
-
-    if (!addItemSuccessful) {
-      console.error("Failed to add item to target container.");
-      return false;
-    }
-
-    const removeItemSuccessful = await this.characterItemContainer.removeItemFromContainer(
-      item,
-      character,
-      originContainer
-    );
-
-    if (!removeItemSuccessful) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        "Failed to remove original item from origin container."
-      );
-
-      // Attempt rollback by removing the item from the target container
-      const rollbackSuccessful = await this.retryOperation(async () => {
-        return await this.characterItemContainer.removeItemFromContainer(item, character, targetContainer._id);
-      });
-
-      if (!rollbackSuccessful) {
-        this.socketMessaging.sendErrorMessageToCharacter(
-          character,
-          "Failed to rollback item addition to target container. Please check your inventory."
-        );
-      }
-
-      return false;
-    }
-
-    return true;
-  }
-
-  private async retryOperation(operation: () => Promise<boolean>): Promise<boolean> {
-    let attempt = 0;
-    while (attempt < ITEM_CONTAINER_ROLLBACK_MAX_TRIES) {
-      const success = await operation();
-      if (success) return true;
-      attempt++;
-    }
-    return false;
   }
 
   private async preValidateTransaction(
