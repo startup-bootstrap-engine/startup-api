@@ -9,7 +9,7 @@ export const itemWaterBottle: ICraftableItemBlueprint = {
   textureAtlas: "items",
   texturePath: "crafting-resources/water-bottle.png",
   name: "Water",
-  description: "A bottle of water. It can be used to heal burning effects.",
+  description: "A bottle of water. It can be used for crafting or to heal burning effects.",
   weight: 0.05,
   maxStackSize: 999,
   basePrice: 3,
