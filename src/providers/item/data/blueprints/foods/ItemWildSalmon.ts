@@ -12,7 +12,7 @@ export const itemWildSalmon: IConsumableItemBlueprint = {
   description: "A common fish that can be caught in rivers and it's the favorite food of bears.",
   weight: 1,
   maxStackSize: 999,
-  basePrice: 6,
-  canSell: false,
+  basePrice: 10,
+  canSell: true,
   usableEffectKey: UsableEffectsBlueprint.StrongEatingEffect,
 };
