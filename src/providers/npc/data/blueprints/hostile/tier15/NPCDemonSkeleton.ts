@@ -62,7 +62,7 @@ export const npcDemonSkeleton: INPCTierBlueprint<15> = {
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
       chance: LootProbability.Common,
-      quantityRange: [1, 10],
+      quantityRange: [5, 12],
     },
     {
       itemBlueprintKey: SeedsBlueprint.PumpkinSeed,

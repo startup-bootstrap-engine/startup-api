@@ -67,7 +67,7 @@ export const npcOrcWarrior: INPCTierBlueprint<5> = {
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
       chance: LootProbability.Common,
-      quantityRange: [1, 10],
+      quantityRange: [1, 4],
     },
     {
       itemBlueprintKey: BootsBlueprint.Boots,

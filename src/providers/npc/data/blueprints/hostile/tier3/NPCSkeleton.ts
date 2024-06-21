@@ -46,6 +46,11 @@ export const npcSkeleton: INPCTierBlueprint<3> = {
   fleeOnLowHealth: true,
   loots: [
     {
+      itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
+      chance: LootProbability.Common,
+      quantityRange: [1, 2],
+    },
+    {
       itemBlueprintKey: ArmorsBlueprint.Jacket,
       chance: LootProbability.SemiCommon,
     },
@@ -97,11 +102,6 @@ export const npcSkeleton: INPCTierBlueprint<3> = {
       itemBlueprintKey: CraftingResourcesBlueprint.Skull,
       chance: LootProbability.Uncommon,
       quantityRange: [1, 3],
-    },
-    {
-      itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
-      chance: LootProbability.Common,
-      quantityRange: [5, 10],
     },
   ],
 };

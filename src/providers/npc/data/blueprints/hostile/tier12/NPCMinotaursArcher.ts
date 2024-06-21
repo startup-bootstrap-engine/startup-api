@@ -97,7 +97,7 @@ export const npcMinotaurArcher: INPCTierBlueprint<12> = {
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
       chance: LootProbability.Common,
-      quantityRange: [1, 10],
+      quantityRange: [2, 12],
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.EaglesEyeBow,
