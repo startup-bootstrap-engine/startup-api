@@ -1,7 +1,8 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
+import { GuildSkills } from "@entities/ModuleSystem/GuildSkillsModel";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { GuildSocketEvents, IGuildInfo, IGuildMember } from "@rpg-engine/shared";
+import { GuildSocketEvents, IGuildInfo, IGuildMember, IGuildSkillsInfo } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
 @provide(GuildGet)
@@ -56,6 +57,29 @@ export class GuildGet {
         return this.mapMemberToGuildMember(member);
       })
     ).then((results) => results.filter((member) => member !== null));
+    const guildSkillsInfo = [] as IGuildSkillsInfo[];
+    const guidLevel = 1;
+    try {
+      const guildSkills = await GuildSkills.findOne({ owner: guild._id });
+
+      if (!guildSkills) {
+        throw new Error("Guild skills not found");
+      }
+      guidLevel === guildSkills.level;
+
+      const skills = ["fireSkill", "waterSkill", "earthSkill", "airSkill", "corruptionSkill", "natureSkill"];
+
+      for (const skill of skills) {
+        const skillDetails = guildSkills[skill];
+        guildSkillsInfo.push({
+          name: skillDetails.type,
+          level: skillDetails.level,
+          xp: skillDetails.skillPoints,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching guild skills:", error);
+    }
 
     const guildInfo: IGuildInfo = {
       _id: guild._id.toString(),
@@ -65,7 +89,8 @@ export class GuildGet {
       guildLeader: guild.guildLeader?.toString() ?? "",
       members: memberDetails as IGuildMember[],
       territoriesOwned: guild.territoriesOwned,
-      guildSkills: guild.guildSkills?.toString(),
+      guildSkills: guildSkillsInfo,
+      guidLevel: guidLevel,
     };
 
     return guildInfo;

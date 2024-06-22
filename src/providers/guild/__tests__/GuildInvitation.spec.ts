@@ -1,5 +1,6 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
+import { GuildSkills, IGuildSkills } from "@entities/ModuleSystem/GuildSkillsModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { GuildSocketEvents, UISocketEvents } from "@rpg-engine/shared";
 import mongoose from "mongoose";
@@ -10,6 +11,7 @@ describe("GuildInvitation.ts", () => {
   let testCharacter: ICharacter;
   let testGuild: IGuild;
   let testTargetCharacter: ICharacter;
+  let guildSkills: IGuildSkills;
 
   const mockSocketMessaging = {
     sendEventToUser: jest.fn(),
@@ -26,8 +28,14 @@ describe("GuildInvitation.ts", () => {
     testGuild = await unitTestHelper.createMockGuild();
     testTargetCharacter = await unitTestHelper.createMockCharacter();
 
+    guildSkills = new GuildSkills({
+      owner: testGuild._id,
+    });
+    await guildSkills.save();
+
     testGuild.guildLeader = testCharacter._id;
     testGuild.members = [testCharacter._id];
+    testGuild.guildSkills = guildSkills._id;
     await testGuild.save();
 
     // @ts-ignore
