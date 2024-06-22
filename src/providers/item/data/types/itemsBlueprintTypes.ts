@@ -172,6 +172,7 @@ export enum ContainersBlueprint {
   CrimsonBackpack = "crimson-backpack",
   EmeraldBackpack = "emerald-backpack",
   HuntersBackpack = "hunters-backpack",
+  Pouch = "pouch",
 }
 
 export enum BodiesBlueprint {
@@ -230,6 +231,7 @@ export enum DaggersBlueprint {
   TwilightThornDagger = "twilight-thorn-dagger",
   AzurefireDagger = "azurefire-dagger",
   WildfireDagger = "wildfire-dagger",
+  GreenDagger = "green-dagger",
 }
 
 export enum ArmorsBlueprint {
@@ -272,6 +274,7 @@ export enum GemsBlueprint {
   EarthstoneGem = "earthstone-gem",
   ObsidianGem = "obsidian-gem",
   AmethystGem = "amethyst-gem",
+  EmeraldGlory = "emerald-glory",
 }
 
 export enum AxesBlueprint {

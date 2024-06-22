@@ -5,6 +5,7 @@ import { itemBag } from "./ItemBag";
 import { itemCrimsonBackpack } from "./ItemCrimsonBackpack";
 import { itemEmeraldBackpack } from "./ItemEmeraldBackpack";
 import { itemHuntersBackpack } from "./ItemHuntersBackpack";
+import { itemPouch } from "./ItemPouch";
 
 export const containersBlueprintIndex = {
   [ContainersBlueprint.Bag]: itemBag,
@@ -13,4 +14,5 @@ export const containersBlueprintIndex = {
   [ContainersBlueprint.EmeraldBackpack]: itemEmeraldBackpack,
   [ContainersBlueprint.CrimsonBackpack]: itemCrimsonBackpack,
   [ContainersBlueprint.HuntersBackpack]: itemHuntersBackpack,
+  [ContainersBlueprint.Pouch]: itemPouch,
 };

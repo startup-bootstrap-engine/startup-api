@@ -11,6 +11,7 @@ import { recipeMistyQuartzGem } from "./tier6/recipeMistyQuartzGem";
 import { recipeObsidianGem } from "./tier7/recipeObsidianGem";
 import { recipeRubyGem } from "./tier8/recipeRubyGem";
 import { recipeTopazRadiance } from "./tier9/recipeTopazRadiance";
+import { recipeEmeraldGlory } from "./tier10/recipeEmeraldGlory";
 
 export const recipeGemsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [GemsBlueprint.AmethystGem]: [recipeAmethystGem],
@@ -23,4 +24,5 @@ export const recipeGemsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [GemsBlueprint.EarthstoneGem]: [recipeEarthstoneGem],
   [GemsBlueprint.JasperGem]: [recipeJasperGem],
   [GemsBlueprint.ObsidianGem]: [recipeObsidianGem],
+  [GemsBlueprint.EmeraldGlory]: [recipeEmeraldGlory],
 };
