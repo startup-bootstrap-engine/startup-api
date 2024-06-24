@@ -3,8 +3,10 @@ import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemCon
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IItemMove } from "@rpg-engine/shared";
-import { ItemDragAndDrop } from "../ItemDragAndDrop/ItemDragAndDrop";
+import { ItemDragAndDrop } from "../ItemDragAndDrop";
+import { ItemDragAndDropValidator } from "../ItemDragAndDropValidator";
 
 describe("ItemDragAndDrop.ts", () => {
   let itemDragAndDrop: ItemDragAndDrop;
@@ -57,7 +59,7 @@ describe("ItemDragAndDrop.ts", () => {
     };
 
     // @ts-ignore
-    sendErrorMessageToCharacterSpy = jest.spyOn(itemDragAndDrop.socketMessaging, "sendErrorMessageToCharacter");
+    sendErrorMessageToCharacterSpy = jest.spyOn(SocketMessaging.prototype, "sendErrorMessageToCharacter");
   });
 
   afterEach(() => {
@@ -158,7 +160,7 @@ describe("ItemDragAndDrop.ts", () => {
 
   it("should call isItemMoveValid method and moveItemInInventory", async () => {
     // @ts-ignore
-    const isItemMoveValidSpy = jest.spyOn(itemDragAndDrop, "isItemMoveValid");
+    const isItemMoveValidSpy = jest.spyOn(ItemDragAndDropValidator.prototype, "isItemMoveValid");
     // @ts-ignore
     const moveItemInInventorySpy = jest.spyOn(itemDragAndDrop, "moveItemInInventory");
 
