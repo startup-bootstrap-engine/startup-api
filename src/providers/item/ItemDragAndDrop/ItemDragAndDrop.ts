@@ -1,12 +1,14 @@
-import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem as IModelItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
+import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { blueprintManager } from "@providers/inversify/container";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IEquipmentAndInventoryUpdatePayload, IItem, IItemMove, ItemSocketEvents, ItemType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -20,122 +22,105 @@ export class ItemDragAndDrop {
     private characterValidation: CharacterValidation,
     private characterItemSlots: CharacterItemSlots,
     private characterInventory: CharacterInventory,
-    private inMemoryHashTable: InMemoryHashTable
+    private inMemoryHashTable: InMemoryHashTable,
+    private dynamicQueue: DynamicQueue
   ) {}
 
   //! For now, only a move on inventory is allowed.
   @TrackNewRelicTransaction()
   public async performItemMove(itemMoveData: IItemMove, character: ICharacter): Promise<boolean> {
-    if (!(await this.isItemMoveValid(itemMoveData, character))) {
-      return false;
-    }
+    try {
+      if (!(await this.isItemMoveValid(itemMoveData, character))) {
+        return false;
+      }
 
-    await this.clearCharacterCache(
-      character,
-      itemMoveData.from.containerId,
-      itemMoveData.to.containerId,
-      itemMoveData.from.item
-    );
+      if (appEnv.general.IS_UNIT_TEST) {
+        return await this.processItemMove(itemMoveData, character);
+      }
 
-    const itemToBeMoved = await this.retrieveItem(itemMoveData.from.item._id);
-    if (!itemToBeMoved) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, item to be moved wasn't found.");
-      return false;
-    }
+      await this.dynamicQueue.addJob(
+        "item-move",
+        async (job) => {
+          const { itemMoveData, characterId } = job.data;
 
-    const itemToBeMovedTo = await this.retrieveItem(itemMoveData.to.item?._id!);
-    if (!itemToBeMovedTo && itemMoveData.to.item !== null) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, item to be moved to wasn't found.");
-      return false;
-    }
+          const character = (await Character.findById(characterId).lean()) as ICharacter;
 
-    if (itemMoveData.to.source !== itemMoveData.from.source) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        "Sorry, you can't move items between different sources."
+          if (!character) {
+            throw new Error("Character not found.");
+          }
+
+          void this.processItemMove(itemMoveData, character);
+        },
+        { itemMoveData, characterId: character._id }
       );
+      return true;
+    } catch (error) {
+      console.error(error);
       return false;
     }
+  }
 
-    return await this.processItemMove(itemMoveData, character, itemToBeMoved, itemToBeMovedTo);
+  private async processItemMove(itemMoveData: IItemMove, character: ICharacter): Promise<boolean> {
+    try {
+      await this.clearCharacterCache(
+        character,
+        itemMoveData.from.containerId,
+        itemMoveData.to.containerId,
+        itemMoveData.from.item
+      );
+
+      const itemToBeMoved = await this.retrieveItem(itemMoveData.from.item._id);
+      if (!itemToBeMoved) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, item to be moved wasn't found.");
+        return false;
+      }
+
+      const itemToBeMovedTo = await this.retrieveItem(itemMoveData.to.item?._id!);
+      if (!itemToBeMovedTo && itemMoveData.to.item !== null) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, item to be moved to wasn't found.");
+        return false;
+      }
+
+      if (itemMoveData.to.source !== itemMoveData.from.source) {
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          "Sorry, you can't move items between different sources."
+        );
+        return false;
+      }
+
+      await this.executeItemMoveLogic(itemMoveData, character, itemToBeMoved, itemToBeMovedTo);
+
+      await this.updateInventory(itemMoveData, character);
+
+      return true;
+    } catch (error) {
+      console.error(error);
+
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, an error occurred while moving the item.");
+
+      return false;
+    }
   }
 
   private async retrieveItem(itemId: string): Promise<IItem | null> {
     return await Item.findById(itemId).lean<IItem>();
   }
 
-  private async processItemMove(
-    itemMoveData: IItemMove,
-    character: ICharacter,
-    itemToBeMoved: IItem,
-    itemToBeMovedTo: IItem | null
-  ): Promise<boolean> {
-    try {
-      await this.executeItemMoveLogic(itemMoveData, character, itemToBeMoved);
-      await this.updateInventory(itemMoveData, character);
-      return true;
-    } catch (err) {
-      this.socketMessaging.sendErrorMessageToCharacter(character);
-      console.log(err);
-      return false;
-    }
-  }
-
   private async executeItemMoveLogic(
     itemMoveData: IItemMove,
     character: ICharacter,
-    itemToBeMoved: IItem
+    itemToBeMoved: IItem,
+    itemToBeMovedTo: IItem | null // Add itemToBeMovedTo to the parameters
   ): Promise<void> {
     // Logic extracted from the switch statement in the original method, pertaining to "Inventory"
     await this.moveItemInInventory(
       Object.assign({}, itemMoveData.from, { item: itemToBeMoved }),
-      itemMoveData.to,
+      Object.assign({}, itemMoveData.to, { item: itemToBeMovedTo }), // Pass itemToBeMovedTo
       character,
       itemMoveData.from.containerId,
       itemMoveData.quantity
     );
-  }
-
-  private async updateInventory(itemMoveData: IItemMove, character: ICharacter): Promise<void> {
-    const inventoryContainer = (await ItemContainer.findById(itemMoveData.from.containerId)) as IItemContainer;
-    const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {
-      inventory: inventoryContainer as any,
-      openEquipmentSetOnUpdate: false,
-      openInventoryOnUpdate: false,
-    };
-    this.sendRefreshItemsEvent(payloadUpdate, character);
-  }
-
-  private sendRefreshItemsEvent(payloadUpdate: IEquipmentAndInventoryUpdatePayload, character: ICharacter): void {
-    this.socketMessaging.sendEventToUser<IEquipmentAndInventoryUpdatePayload>(
-      character.channelId!,
-      ItemSocketEvents.EquipmentAndInventoryUpdate,
-      payloadUpdate
-    );
-  }
-
-  private async clearCharacterCache(
-    character: ICharacter,
-    fromContainerId: string,
-    toContainerId: string,
-    itemToBeDropped: IItem
-  ): Promise<void> {
-    const promises = [
-      this.inMemoryHashTable.delete("container-all-items", fromContainerId),
-      this.inMemoryHashTable.delete("container-all-items", toContainerId),
-      clearCacheForKey(`${character._id}-inventory`),
-      clearCacheForKey(`${character._id}-equipment`),
-      this.inMemoryHashTable.delete("equipment-slots", character._id),
-      this.inMemoryHashTable.delete("character-weapon", character._id),
-      this.inMemoryHashTable.delete("inventory-weight", character._id),
-      this.inMemoryHashTable.delete("character-max-weights", character._id),
-    ];
-
-    if (itemToBeDropped.type === ItemType.CraftingResource) {
-      promises.push(this.inMemoryHashTable.delete("load-craftable-items", character._id));
-    }
-
-    await Promise.all(promises);
   }
 
   private async moveItemInInventory(
@@ -355,10 +340,6 @@ export class ItemDragAndDrop {
       itemTo === null || inventoryContainer?.itemIds?.find((itemId) => String(itemId) === String(itemTo._id));
 
     if (!hasItemToMoveInInventory || !hasItemToMoveToInInventory) {
-      // this.socketMessaging.sendErrorMessageToCharacter(
-      //   character,
-      //   "Sorry, you do not have this item in your inventory."
-      // );
       return false;
     }
 
@@ -389,5 +370,47 @@ export class ItemDragAndDrop {
     }
 
     return this.characterValidation.hasBasicValidation(character);
+  }
+
+  private async clearCharacterCache(
+    character: ICharacter,
+    fromContainerId: string,
+    toContainerId: string,
+    itemToBeDropped: IItem
+  ): Promise<void> {
+    const promises = [
+      this.inMemoryHashTable.delete("container-all-items", fromContainerId),
+      this.inMemoryHashTable.delete("container-all-items", toContainerId),
+      clearCacheForKey(`${character._id}-inventory`),
+      clearCacheForKey(`${character._id}-equipment`),
+      this.inMemoryHashTable.delete("equipment-slots", character._id),
+      this.inMemoryHashTable.delete("character-weapon", character._id),
+      this.inMemoryHashTable.delete("inventory-weight", character._id),
+      this.inMemoryHashTable.delete("character-max-weights", character._id),
+    ];
+
+    if (itemToBeDropped.type === ItemType.CraftingResource) {
+      promises.push(this.inMemoryHashTable.delete("load-craftable-items", character._id));
+    }
+
+    await Promise.all(promises);
+  }
+
+  private sendRefreshItemsEvent(payloadUpdate: IEquipmentAndInventoryUpdatePayload, character: ICharacter): void {
+    this.socketMessaging.sendEventToUser<IEquipmentAndInventoryUpdatePayload>(
+      character.channelId!,
+      ItemSocketEvents.EquipmentAndInventoryUpdate,
+      payloadUpdate
+    );
+  }
+
+  private async updateInventory(itemMoveData: IItemMove, character: ICharacter): Promise<void> {
+    const inventoryContainer = (await ItemContainer.findById(itemMoveData.from.containerId)) as IItemContainer;
+    const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {
+      inventory: inventoryContainer as any,
+      openEquipmentSetOnUpdate: false,
+      openInventoryOnUpdate: false,
+    };
+    this.sendRefreshItemsEvent(payloadUpdate, character);
   }
 }
