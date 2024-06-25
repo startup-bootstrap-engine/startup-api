@@ -70,11 +70,7 @@ export const npcInfernoWidow: INPCTierBlueprint<20> = {
       itemBlueprintKey: ToolsBlueprint.GildedLavaPickaxe,
       chance: LootProbability.Rare,
     },
-    {
-      itemBlueprintKey: CraftingResourcesBlueprint.SocialCrystal,
-      chance: LootProbability.Rare,
-      quantityRange: [1, 2],
-    },
+
     {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
       chance: LootProbability.SemiCommon,

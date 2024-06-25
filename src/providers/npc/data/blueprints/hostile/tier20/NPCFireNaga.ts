@@ -7,7 +7,6 @@ import {
   AxesBlueprint,
   BooksBlueprint,
   BootsBlueprint,
-  CraftingResourcesBlueprint,
   DaggersBlueprint,
   GemsBlueprint,
   HammersBlueprint,
@@ -76,10 +75,7 @@ export const npcFireNaga: INPCTierBlueprint<20> = {
       itemBlueprintKey: SwordsBlueprint.DragonsSword,
       chance: LootProbability.SemiCommon,
     },
-    {
-      itemBlueprintKey: CraftingResourcesBlueprint.SocialCrystal,
-      chance: LootProbability.VeryRare,
-    },
+
     {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
       chance: LootProbability.Uncommon,
