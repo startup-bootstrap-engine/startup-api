@@ -128,7 +128,7 @@ export class ItemDragAndDrop {
       Object.assign({}, itemMoveData.to, { item: itemToBeMovedTo }),
       character,
       itemMoveData.from.containerId,
-      itemMoveData.quantity ?? 1,
+      itemMoveData.quantity ?? 0,
       rollbackActions
     );
   }
@@ -170,7 +170,16 @@ export class ItemDragAndDrop {
         );
       });
 
-      await this.characterItemSlots.addItemOnSlot(targetContainer, from.item as unknown as IModelItem, to.slotIndex);
+      const hasAddedItemOnSlot = await this.characterItemSlots.addItemOnSlot(
+        targetContainer,
+        from.item as unknown as IModelItem,
+        to.slotIndex
+      );
+
+      if (!hasAddedItemOnSlot) {
+        throw new Error("Failed to add item on slot.");
+      }
+
       rollbackActions.push(async () => {
         await this.characterItemSlots.deleteItemOnSlot(targetContainer, from.item._id);
         if (originalToItem) {
