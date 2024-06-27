@@ -193,7 +193,7 @@ describe("ItemContainerTransaction", () => {
 
       expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledWith(
         testCharacter,
-        "Failed to remove original item from origin container."
+        "There was an issue moving the item. Please check your inventory."
       );
 
       expect(result).toBe(false);
@@ -208,8 +208,77 @@ describe("ItemContainerTransaction", () => {
 
       expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledWith(
         testCharacter,
-        "Failed to rollback item addition to target container. Please check your inventory."
+        "There was an issue moving the item. Please check your inventory."
       );
+    });
+
+    it("should leave both containers in a valid state after a failed transfer", async () => {
+      // Mock a failed transfer by making the removeItemFromContainer fail
+      jest.spyOn(CharacterItemContainer.prototype, "removeItemFromContainer").mockResolvedValue(false);
+      jest.spyOn(CharacterItemContainer.prototype, "addItemToContainer").mockResolvedValue(true);
+
+      const originalOriginState = await ItemContainer.findById(originContainer._id).lean();
+      const originalTargetState = await ItemContainer.findById(targetContainer._id).lean();
+
+      await itemContainerTransaction.transferToContainer(testItem, testCharacter, originContainer, targetContainer);
+
+      const updatedOriginContainer = await ItemContainer.findById(originContainer._id).lean();
+      const updatedTargetContainer = await ItemContainer.findById(targetContainer._id).lean();
+
+      // Check if the origin container remains unchanged
+      expect(updatedOriginContainer?.slots).toEqual(originalOriginState?.slots);
+
+      // Check if the target container remains unchanged
+      expect(updatedTargetContainer?.slots).toEqual(originalTargetState?.slots);
+    });
+
+    it("should correctly rollback when adding to target container succeeds but removing from origin fails", async () => {
+      jest.spyOn(CharacterItemContainer.prototype, "addItemToContainer").mockResolvedValue(true);
+      jest
+        .spyOn(CharacterItemContainer.prototype, "removeItemFromContainer")
+        .mockResolvedValueOnce(false) // Fail when removing from origin
+        .mockResolvedValueOnce(true); // Succeed when removing from target during rollback
+
+      const originalOriginState = await ItemContainer.findById(originContainer._id).lean();
+      const originalTargetState = await ItemContainer.findById(targetContainer._id).lean();
+
+      await itemContainerTransaction.transferToContainer(testItem, testCharacter, originContainer, targetContainer);
+
+      const updatedOriginContainer = await ItemContainer.findById(originContainer._id).lean();
+      const updatedTargetContainer = await ItemContainer.findById(targetContainer._id).lean();
+
+      // Check if both containers remain unchanged
+      expect(updatedOriginContainer?.slots).toEqual(originalOriginState?.slots);
+      expect(updatedTargetContainer?.slots).toEqual(originalTargetState?.slots);
+    });
+
+    it("should handle rollback failure gracefully", async () => {
+      jest.spyOn(CharacterItemContainer.prototype, "addItemToContainer").mockResolvedValue(true);
+      jest.spyOn(CharacterItemContainer.prototype, "removeItemFromContainer").mockResolvedValue(false);
+
+      await itemContainerTransaction.transferToContainer(testItem, testCharacter, originContainer, targetContainer);
+
+      expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledWith(
+        testCharacter,
+        "There was an issue moving the item. Please check your inventory."
+      );
+    });
+
+    it("should clear caches for both containers after rollback", async () => {
+      const clearCacheForKeySpy = jest.spyOn(require("speedgoose"), "clearCacheForKey");
+      // @ts-ignore
+      const inMemoryHashTableDeleteSpy = jest.spyOn(itemContainerTransaction.inMemoryHashTable, "delete");
+
+      jest.spyOn(CharacterItemContainer.prototype, "addItemToContainer").mockResolvedValue(true);
+      jest.spyOn(CharacterItemContainer.prototype, "removeItemFromContainer").mockResolvedValue(false);
+
+      await itemContainerTransaction.transferToContainer(testItem, testCharacter, originContainer, targetContainer);
+
+      expect(clearCacheForKeySpy).toHaveBeenCalledWith(`${originContainer.owner!.toString()}-inventory`);
+      expect(inMemoryHashTableDeleteSpy).toHaveBeenCalledWith("inventory-weight", originContainer._id.toString());
+      expect(inMemoryHashTableDeleteSpy).toHaveBeenCalledWith("equipment-weight", originContainer._id.toString());
+      expect(inMemoryHashTableDeleteSpy).toHaveBeenCalledWith("container-all-items", originContainer._id.toString());
+      expect(inMemoryHashTableDeleteSpy).toHaveBeenCalledWith("container-all-items", targetContainer._id.toString());
     });
   });
 
