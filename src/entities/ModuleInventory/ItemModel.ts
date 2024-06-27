@@ -14,6 +14,7 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { Equipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 
+import { ItemContainerHelper } from "@providers/itemContainer/ItemContainerHelper";
 import { PlantLifeCycle } from "@providers/plant/data/types/PlantTypes";
 import { updateIfCurrentPlugin } from "mongoose-update-if-current";
 import { GemSchema } from "./GemSchema";
@@ -195,7 +196,7 @@ itemSchema.virtual("fullDescription").get(function (this: IItem): string {
   return message;
 });
 
-const warnAboutItemChanges = async (item: IItem, warnType: "changes" | "removal"): Promise<void> => {
+export const warnAboutItemChanges = async (item: IItem, warnType: "changes" | "removal"): Promise<void> => {
   const mapHelper = container.get<MapHelper>(MapHelper);
 
   const hasCoordinates = item.x && item.y && item.scene;
@@ -227,34 +228,15 @@ itemSchema.post("updateOne", async function (this: UpdateQuery<IItem>) {
 });
 
 itemSchema.post("save", async function (this: IItem) {
-  const hasItemContainer = await ItemContainer.exists({ parentItem: this._id });
+  if (this.isItemContainer && !this.itemContainer) {
+    const itemContainerHelper = container.get<ItemContainerHelper>(ItemContainerHelper);
+    const newContainer = await itemContainerHelper.generateItemContainerIfNotPresentOnItem(this);
 
-  if (this.isItemContainer && !hasItemContainer) {
-    let slotQty: number = 20;
-
-    if (this.generateContainerSlots) {
-      slotQty = this.generateContainerSlots;
+    if (!newContainer) {
+      throw new Error("Could not generate item container");
     }
 
-    // generate slots object
-    const slots = {};
-
-    for (let i = 0; i < slotQty; i++) {
-      slots[Number(i)] = null;
-    }
-
-    const newContainer = new ItemContainer({
-      name: this.name,
-      parentItem: this._id,
-      slotQty,
-      slots,
-      owner: this.owner,
-      isOwnerRestricted: !!this.owner,
-    });
-
-    await newContainer.save();
-
-    this.itemContainer = newContainer._id;
+    this.itemContainer = newContainer?._id;
   }
 
   await warnAboutItemChanges(this, "changes");

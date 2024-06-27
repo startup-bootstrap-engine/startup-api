@@ -6,6 +6,7 @@ import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { EquipmentEquipInventory } from "@providers/equipment/EquipmentEquipInventory";
 import { ItemMap } from "@providers/item/ItemMap";
 import { ItemOwnership } from "@providers/item/ItemOwnership";
+import { ItemContainerHelper } from "@providers/itemContainer/ItemContainerHelper";
 import { Locker } from "@providers/locks/Locker";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { ItemType } from "@rpg-engine/shared";
@@ -31,7 +32,8 @@ export class CharacterItemContainer {
     private characterInventory: CharacterInventory,
     private itemOwnership: ItemOwnership,
     private locker: Locker,
-    private inMemoryHashTable: InMemoryHashTable
+    private inMemoryHashTable: InMemoryHashTable,
+    private itemContainerHelper: ItemContainerHelper
   ) {}
 
   @TrackNewRelicTransaction()
@@ -150,10 +152,13 @@ export class CharacterItemContainer {
 
   private async ensureItemHasContainer(item: IItem): Promise<IItem | null> {
     if (item.isItemContainer && !item.itemContainer) {
-      item = (await Item.findById(item._id)) as IItem;
-      if (item) {
-        await item.save();
+      const newContainer = await this.itemContainerHelper.generateItemContainerIfNotPresentOnItem(item);
+
+      if (!newContainer) {
+        throw new Error("Failed to generate item container.");
       }
+
+      item.itemContainer = newContainer?._id;
     }
     return item;
   }
