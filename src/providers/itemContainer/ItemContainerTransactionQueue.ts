@@ -1,7 +1,7 @@
 /* eslint-disable no-async-promise-executor */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
-import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
+import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
@@ -11,7 +11,6 @@ import { appEnv } from "@providers/config/env";
 import { ITEM_CONTAINER_ROLLBACK_MAX_TRIES } from "@providers/constants/ItemContainerConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { ItemBaseKey } from "@providers/item/ItemBaseKey";
 import { Locker } from "@providers/locks/Locker";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -39,8 +38,7 @@ export class ItemContainerTransactionQueue {
     private locker: Locker,
     private inMemoryHashTable: InMemoryHashTable,
     private characterWeightQueue: CharacterWeightQueue,
-    private dynamicQueue: DynamicQueue,
-    private itemBaseKey: ItemBaseKey
+    private dynamicQueue: DynamicQueue
   ) {}
 
   @TrackNewRelicTransaction()
@@ -196,15 +194,7 @@ export class ItemContainerTransactionQueue {
     targetContainer: IItemContainer,
     options: IItemContainerTransactionOption
   ): Promise<boolean> {
-    item.baseKey = this.itemBaseKey.getBaseKey(item.key);
-
-    // Check if the item still exists before proceeding
-    const itemExists = await Item.exists({ _id: item._id });
-    if (!itemExists) {
-      console.error(`Item ${item._id} no longer exists. Aborting transaction.`);
-      this.socketMessaging.sendErrorMessageToCharacter(character, "The item you're trying to move no longer exists.");
-      return false;
-    }
+    item.baseKey = item.key.replace(/-\d+$/, "");
 
     const addItemSuccessful = await this.characterItemContainer.addItemToContainer(
       item,
@@ -216,8 +206,7 @@ export class ItemContainerTransactionQueue {
     );
 
     if (!addItemSuccessful) {
-      console.error(`Failed to add item ${item._id} to target container ${targetContainer._id}.`);
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Failed to move the item. Please try again.");
+      console.error("Failed to add item to target container.");
       return false;
     }
 
@@ -228,7 +217,10 @@ export class ItemContainerTransactionQueue {
     );
 
     if (!removeItemSuccessful) {
-      console.error(`Failed to remove item ${item._id} from origin container ${originContainer._id}.`);
+      this.socketMessaging.sendErrorMessageToCharacter(
+        character,
+        "Failed to remove original item from origin container."
+      );
 
       // Attempt rollback by removing the item from the target container
       const rollbackSuccessful = await this.retryOperation(async () => {
@@ -236,13 +228,12 @@ export class ItemContainerTransactionQueue {
       });
 
       if (!rollbackSuccessful) {
-        console.error(`Failed to rollback item ${item._id} addition to target container ${targetContainer._id}.`);
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          "Failed to rollback item addition to target container. Please check your inventory."
+        );
       }
 
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        "There was an issue moving the item. Please check your inventory."
-      );
       return false;
     }
 
@@ -265,38 +256,30 @@ export class ItemContainerTransactionQueue {
     originContainer: IItemContainer,
     targetContainer: IItemContainer
   ): Promise<void> {
-    console.log(`Rolling back transfer operation for item ${item._id}`);
+    console.log("Rolling back transfer operation");
 
     try {
-      // Check if the item still exists
-      const itemExists = await Item.exists({ _id: item._id });
-      if (!itemExists) {
-        console.error(`Item ${item._id} no longer exists during rollback. Aborting rollback.`);
-        this.socketMessaging.sendErrorMessageToCharacter(
-          character,
-          "There was an issue with your inventory. Please check it and report any inconsistencies."
-        );
-        return;
-      }
-
       // First, try to remove the item from the target container
-      const removeFromTargetSuccessful = await this.retryOperation(async () => {
-        return await this.characterItemContainer.removeItemFromContainer(item, character, targetContainer);
-      });
+      const removeFromTargetSuccessful = await this.characterItemContainer.removeItemFromContainer(
+        item,
+        character,
+        targetContainer
+      );
 
       if (!removeFromTargetSuccessful) {
-        console.error(`Failed to remove item ${item._id} from target container ${targetContainer._id} during rollback`);
+        console.error("Failed to remove item from target container during rollback");
       }
 
       // Then, try to add the item back to the origin container
-      const addToOriginSuccessful = await this.retryOperation(async () => {
-        return await this.characterItemContainer.addItemToContainer(item, character, originContainer._id, {
-          shouldAddOwnership: false,
-        });
-      });
+      const addToOriginSuccessful = await this.characterItemContainer.addItemToContainer(
+        item,
+        character,
+        originContainer._id,
+        { shouldAddOwnership: false }
+      );
 
       if (!addToOriginSuccessful) {
-        console.error(`Failed to add item ${item._id} back to origin container ${originContainer._id} during rollback`);
+        console.error("Failed to add item back to origin container during rollback");
       }
 
       // Clear caches for both containers
@@ -308,14 +291,14 @@ export class ItemContainerTransactionQueue {
       if (!removeFromTargetSuccessful || !addToOriginSuccessful) {
         this.socketMessaging.sendErrorMessageToCharacter(
           character,
-          "There was an issue with your inventory. Please check it and report any inconsistencies."
+          "An error occurred during item transfer. Please check your inventory and contact support if there are any issues."
         );
       }
     } catch (error) {
-      console.error(`Rollback failed for item ${item._id}:`, error);
+      console.error("Rollback failed:", error);
       this.socketMessaging.sendErrorMessageToCharacter(
         character,
-        "There was an issue with your inventory. Please check it and report any inconsistencies."
+        "An error occurred during item transfer. Please check your inventory and contact support if there are any issues."
       );
     }
   }
