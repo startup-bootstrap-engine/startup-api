@@ -5,7 +5,6 @@ import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { RangedWeaponsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 
-import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { EquipmentSlots } from "../EquipmentSlots";
 
 describe("EquipmentSlots.ts", () => {
@@ -15,7 +14,6 @@ describe("EquipmentSlots.ts", () => {
   let socketMessaging;
   let inventory: IItem;
   let inventoryContainer: IItemContainer;
-  let characterItemContainer: CharacterItemContainer;
 
   // eslint-disable-next-line require-await
   beforeAll(async () => {
@@ -30,18 +28,10 @@ describe("EquipmentSlots.ts", () => {
 
     inventory = await testCharacter.inventory;
     inventoryContainer = (await ItemContainer.findById(inventory.itemContainer)) as unknown as IItemContainer;
-
-    characterItemContainer = container.get<CharacterItemContainer>(CharacterItemContainer);
   });
 
   it("should properly add a NON-STACKABLE item to a equipment slot", async () => {
     const newItem = await unitTestHelper.createMockItem();
-
-    // add item to inventory
-    await characterItemContainer.addItemToContainer(newItem, testCharacter, inventoryContainer._id);
-
-    inventoryContainer = (await ItemContainer.findById(inventoryContainer._id)) as unknown as IItemContainer;
-
     const result = await equipmentSlots.addItemToEquipmentSlot(testCharacter, newItem, equipment, inventoryContainer);
 
     expect(result).toBe(true);
@@ -59,11 +49,6 @@ describe("EquipmentSlots.ts", () => {
     const stackableItem = await unitTestHelper.createMockItemFromBlueprint(RangedWeaponsBlueprint.Arrow, {
       stackQty: 10,
     });
-
-    // add item to inventory
-    await characterItemContainer.addItemToContainer(stackableItem, testCharacter, inventoryContainer._id);
-
-    inventoryContainer = (await ItemContainer.findById(inventoryContainer._id)) as unknown as IItemContainer;
 
     equipment.accessory = stackableItem._id;
     await equipment.save();
@@ -88,11 +73,6 @@ describe("EquipmentSlots.ts", () => {
       stackQty: 10,
       maxStackSize: 10,
     });
-
-    // add item to inventory
-    await characterItemContainer.addItemToContainer(stackableItem, testCharacter, inventoryContainer._id);
-
-    inventoryContainer = (await ItemContainer.findById(inventoryContainer._id)) as unknown as IItemContainer;
 
     equipment.accessory = stackableItem._id;
     await equipment.save();
@@ -123,12 +103,6 @@ describe("EquipmentSlots.ts", () => {
     const stackableItem = await unitTestHelper.createMockItemFromBlueprint(RangedWeaponsBlueprint.Arrow, {
       stackQty: 10,
     });
-
-    // add item to inventory
-    await characterItemContainer.addItemToContainer(stackableItem, testCharacter, inventoryContainer._id);
-
-    inventoryContainer = (await ItemContainer.findById(inventoryContainer._id)) as unknown as IItemContainer;
-
     const result = await equipmentSlots.addItemToEquipmentSlot(
       testCharacter,
       stackableItem,

@@ -290,10 +290,6 @@ describe("ItemContainerTransaction", () => {
       await characterItemContainer.addItemToContainer(item1, testCharacter, originContainer._id);
       await characterItemContainer.addItemToContainer(item2, testCharacter, originContainer._id);
 
-      originContainer = await ItemContainer.findById(originContainer._id).lean();
-
-      targetContainer = await ItemContainer.findById(targetContainer._id).lean();
-
       const transfer1 = itemContainerTransaction.transferToContainer(
         item1,
         testCharacter,

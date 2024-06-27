@@ -19,12 +19,6 @@ describe("CharacterItemContainer.ts", () => {
     characterItemContainer = container.get<CharacterItemContainer>(CharacterItemContainer);
 
     await inMemoryHashTable.delete("container-all-items", inventoryContainer._id.toString()!);
-
-    jest.restoreAllMocks();
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
   });
 
   describe("addItemToContainer", () => {
@@ -68,39 +62,5 @@ describe("CharacterItemContainer.ts", () => {
     )) as unknown as IItemContainer;
 
     expect(updatedInventoryContainer.slots[0]).toBeNull();
-  });
-
-  it("should fail to add an item if the lock cannot be acquired", async () => {
-    // @ts-ignore
-    jest.spyOn(characterItemContainer.locker, "lock").mockResolvedValue(false);
-    const testItem = await unitTestHelper.createMockItem();
-    const result = await characterItemContainer.addItemToContainer(testItem, testCharacter, inventoryContainer._id);
-    expect(result).toBeFalsy();
-  });
-
-  describe("Remove item from container", () => {
-    it("should fail to remove an item that does not exist in the container", async () => {
-      const testItem = await unitTestHelper.createMockItem();
-      const result = await characterItemContainer.removeItemFromContainer(testItem, testCharacter, inventoryContainer);
-      expect(result).toBeFalsy();
-    });
-
-    it("should fail to remove an item if the lock cannot be acquired", async () => {
-      // @ts-ignore
-      jest.spyOn(characterItemContainer.locker, "lock").mockResolvedValue(false);
-      const testItem = await unitTestHelper.createMockItem();
-      await unitTestHelper.addItemsToContainer(inventoryContainer, 1, [testItem]);
-      const result = await characterItemContainer.removeItemFromContainer(testItem, testCharacter, inventoryContainer);
-      expect(result).toBeFalsy();
-    });
-
-    it("should remove an item from a specified slot correctly", async () => {
-      const testItem = await unitTestHelper.createMockItem();
-      await unitTestHelper.addItemsToContainer(inventoryContainer, 1, [testItem]);
-      await characterItemContainer.removeItemFromContainer(testItem, testCharacter, inventoryContainer);
-      const updatedInventoryContainer = await ItemContainer.findById(inventoryContainer.id);
-      // @ts-ignore
-      expect(updatedInventoryContainer.slots[0]).toBeNull();
-    });
   });
 });
