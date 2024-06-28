@@ -10,13 +10,16 @@ import { CharacterBuffValidation } from "@providers/character/characterBuff/Char
 import { CharacterItemBuff } from "@providers/character/characterBuff/CharacterItemBuff";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
 import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
+import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { blueprintManager } from "@providers/inversify/container";
 import { ItemOwnership } from "@providers/item/ItemOwnership";
 import { ItemPickupUpdater } from "@providers/item/ItemPickup/ItemPickupUpdater";
 import { ItemView } from "@providers/item/ItemView";
 import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTypes";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { Time } from "@providers/time/Time";
 import {
   IBaseItemBlueprint,
   IEquipmentAndInventoryUpdatePayload,
@@ -32,6 +35,7 @@ import { EquipmentEquipValidator } from "./EquipmentEquipValidator";
 import { EquipmentSlots } from "./EquipmentSlots";
 
 export type SourceEquipContainerType = "inventory" | "container";
+
 @provide(EquipmentEquip)
 export class EquipmentEquip {
   constructor(
@@ -48,7 +52,9 @@ export class EquipmentEquip {
     private itemPickupUpdater: ItemPickupUpdater,
     private characterItemBuff: CharacterItemBuff,
     private equipmentCharacterClass: EquipmentCharacterClass,
-    private characterBuffValidation: CharacterBuffValidation
+    private characterBuffValidation: CharacterBuffValidation,
+    private dynamicQueue: DynamicQueue,
+    private time: Time
   ) {}
 
   @TrackNewRelicTransaction()
@@ -79,24 +85,82 @@ export class EquipmentEquip {
 
   @TrackNewRelicTransaction()
   public async equip(character: ICharacter, itemId: string, fromItemContainerId: string): Promise<boolean> {
+    try {
+      if (appEnv.general.IS_UNIT_TEST) {
+        return await this.execEquip(character, itemId, fromItemContainerId);
+      }
+
+      await this.dynamicQueue.addJob(
+        "equip-unequip-item",
+        async (job) => {
+          const { character, itemId, fromItemContainerId } = job.data;
+
+          const result = await this.execEquip(character, itemId, fromItemContainerId);
+
+          await this.inMemoryHashTable.set("equip-unequip-results", `${character._id}-${itemId}`, result);
+        },
+        { character, itemId, fromItemContainerId }
+      );
+
+      return await this.poolEquipUnequipResults(character, itemId);
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
+
+  private async poolEquipUnequipResults(character: ICharacter, itemId: string): Promise<boolean> {
+    const checkInterval = 100; // Interval in milliseconds to check for result
+    const maxRetries = 3; // Maximum number of retries before giving up
+
+    for (let i = 0; i < maxRetries; i++) {
+      const result = (await this.inMemoryHashTable.get("equip-unequip-results", `${character._id}-${itemId}`)) as
+        | boolean
+        | undefined;
+      if (result !== undefined) {
+        await this.inMemoryHashTable.delete("equip-unequip-results", `${character._id}-${itemId}`);
+        return result;
+      }
+      await this.time.waitForMilliseconds(checkInterval);
+    }
+
+    return false;
+  }
+
+  private async execEquip(character: ICharacter, itemId: string, fromItemContainerId: string): Promise<boolean> {
     const item = await Item.findById(itemId);
-    if (!item) return this.sendError(character, "Item not found.");
+    if (!item) {
+      this.sendError(character, "Item not found.");
+      return false;
+    }
 
     try {
       const itemContainer = await ItemContainer.findById(fromItemContainerId);
-      if (!itemContainer) return this.sendError(character, "Item container not found.");
-
+      if (!itemContainer) {
+        this.sendError(character, "Unable to locate the specified item container.");
+        return false;
+      }
       const containerType = await this.checkContainerType(itemContainer);
-      if (!(await this.isEquipValid(character, item, containerType))) return false;
+      if (!(await this.isEquipValid(character, item, containerType))) {
+        return false;
+      }
 
       const equipment = await Equipment.findById(character.equipment);
-      if (!equipment) return this.sendError(character, "Equipment not found.");
+      if (!equipment) {
+        this.sendError(character, "Equipment not found.");
+        return false;
+      }
 
-      if (!(await this.equipmentSlots.addItemToEquipmentSlot(character, item, equipment, itemContainer))) return false;
+      if (!(await this.equipmentSlots.addItemToEquipmentSlot(character, item, equipment, itemContainer))) {
+        return false;
+      }
 
       const inventory = await this.characterInventory.getInventory(character);
       const inventoryContainer = await ItemContainer.findById(inventory?.itemContainer);
-      if (!inventoryContainer) return this.sendError(character, "Failed to equip item.");
+      if (!inventoryContainer) {
+        this.sendError(character, "Failed to equip item.");
+        return false;
+      }
 
       const updatedContainer = (await ItemContainer.findById(fromItemContainerId)) as any;
       await this.itemPickupUpdater.sendContainerRead(updatedContainer, character);
@@ -109,8 +173,6 @@ export class EquipmentEquip {
     } catch (error) {
       console.error(error);
       return false;
-    } finally {
-      await item.save();
     }
   }
 
@@ -128,10 +190,14 @@ export class EquipmentEquip {
       };
 
       this.updateItemInventoryCharacter(payloadUpdate, character);
-      await Item.updateOne({ _id: item._id }, { isEquipped: true });
-      if (item.x || item.y || item.scene) {
-        await Item.updateOne({ _id: item._id }, { $unset: { x: "", y: "", scene: "" } });
-      }
+
+      await Item.updateOne(
+        { _id: item._id },
+        {
+          $set: { isEquipped: true },
+          $unset: { x: "", y: "", scene: "" },
+        }
+      );
 
       await this.clearCaches(character);
       await this.characterWeight.updateCharacterWeight(character);
