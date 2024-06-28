@@ -17,6 +17,7 @@ import { ItemOwnership } from "@providers/item/ItemOwnership";
 import { ItemPickupUpdater } from "@providers/item/ItemPickup/ItemPickupUpdater";
 import { ItemView } from "@providers/item/ItemView";
 import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTypes";
+import { ResultsPoller } from "@providers/poller/ResultsPoller";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { Time } from "@providers/time/Time";
@@ -54,7 +55,8 @@ export class EquipmentEquip {
     private equipmentCharacterClass: EquipmentCharacterClass,
     private characterBuffValidation: CharacterBuffValidation,
     private dynamicQueue: DynamicQueue,
-    private time: Time
+    private time: Time,
+    private resultsPoller: ResultsPoller
   ) {}
 
   @TrackNewRelicTransaction()
@@ -91,18 +93,22 @@ export class EquipmentEquip {
       }
 
       await this.dynamicQueue.addJob(
-        "equip-unequip-item",
+        "equip-item",
         async (job) => {
           const { character, itemId, fromItemContainerId } = job.data;
 
           const result = await this.execEquip(character, itemId, fromItemContainerId);
 
-          await this.inMemoryHashTable.set("equip-unequip-results", `${character._id}-${itemId}`, result);
+          await this.resultsPoller.prepareResultToBePolled(
+            "equip-unequip-results",
+            `${character._id}-${itemId}`,
+            result
+          );
         },
         { character, itemId, fromItemContainerId }
       );
 
-      return await this.poolEquipUnequipResults(character, itemId);
+      return await this.resultsPoller.pollResults("equip-unequip-results", `${character._id}-${itemId}`);
     } catch (error) {
       console.error(error);
       return false;
