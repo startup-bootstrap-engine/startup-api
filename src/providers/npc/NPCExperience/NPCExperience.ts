@@ -42,6 +42,7 @@ import { provide } from "inversify-binding-decorators";
 
 import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
 import { DynamicXPRatio } from "@providers/dynamic-xp-ratio/DynamicXPRatio";
+import { GuildExperience } from "@providers/guild/GuildExperience";
 import { PartyCRUD } from "@providers/party/PartyCRUD";
 import { ICharacterParty } from "@providers/party/PartyTypes";
 import { PartyValidator } from "@providers/party/PartyValidator";
@@ -73,7 +74,8 @@ export class NPCExperience {
     private characterPremiumAccount: CharacterPremiumAccount,
     private partyValidator: PartyValidator,
     private partyCRUD: PartyCRUD,
-    private dynamicXPRatio: DynamicXPRatio
+    private dynamicXPRatio: DynamicXPRatio,
+    private guildExperience: GuildExperience
   ) {}
 
   /**
@@ -147,6 +149,9 @@ export class NPCExperience {
           expPerRecipient,
           target
         );
+
+        // update guild xp
+        await this.guildExperience.updateGuildExperience(recipientCharacterAndSkills.character, expPerRecipient);
       }
     }
 

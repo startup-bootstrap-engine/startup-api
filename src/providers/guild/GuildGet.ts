@@ -58,14 +58,14 @@ export class GuildGet {
       })
     ).then((results) => results.filter((member) => member !== null));
     const guildSkillsInfo = [] as IGuildSkillsInfo[];
-    const guidLevel = 1;
+    let guidLevel = 1;
     try {
       const guildSkills = await GuildSkills.findOne({ owner: guild._id });
 
       if (!guildSkills) {
         throw new Error("Guild skills not found");
       }
-      guidLevel === guildSkills.level;
+      guidLevel = guildSkills.level;
 
       const skills = ["fireSkill", "waterSkill", "earthSkill", "airSkill", "corruptionSkill", "natureSkill"];
 
