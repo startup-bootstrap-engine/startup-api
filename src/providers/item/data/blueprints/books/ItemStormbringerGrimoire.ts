@@ -26,12 +26,12 @@ export const itemStormbringerGrimoire: IEquippableItemBlueprint = {
     {
       type: CharacterBuffType.CharacterAttribute,
       trait: CharacterAttributes.AttackIntervalSpeed,
-      buffPercentage: 5,
+      buffPercentage: -5,
       durationType: CharacterBuffDurationType.Permanent,
       options: {
         messages: {
           activation:
-            "You feel the power of attack interval speed flowing through your body. (+5% attack interval speed)",
+            "You feel the power of attack interval speed flowing through your body. (-5% attack interval speed)",
           deactivation: "You feel the power of attack interval speed leaving your body. (-5% attack interval speed)",
         },
       },
