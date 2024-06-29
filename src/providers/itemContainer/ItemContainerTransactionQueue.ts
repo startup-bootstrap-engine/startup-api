@@ -123,64 +123,47 @@ export class ItemContainerTransactionQueue {
     targetContainer: IItemContainer,
     options: IItemContainerTransactionOption
   ): Promise<boolean> {
+    const lockKey = `${originContainer?._id}-to-${targetContainer?._id}-item-container-transfer`;
+
     try {
-      const canProceed = await this.locker.lock(
-        `${originContainer?._id}-to-${targetContainer?._id}-item-container-transfer`
-      );
-
-      if (!canProceed) {
+      if (!(await this.locker.lock(lockKey))) {
         return false;
       }
 
-      const isPreValidationSuccessful = await this.preValidateTransaction(
-        character,
-        originContainer,
-        targetContainer,
-        item
-      );
-
-      if (!isPreValidationSuccessful) {
+      if (!(await this.preValidateTransaction(character, originContainer, targetContainer, item))) {
         return false;
       }
 
-      const originSnapshot = this.takeContainerSnapshot(originContainer);
-      const targetSnapshot = this.takeContainerSnapshot(targetContainer);
+      const [originSnapshot, targetSnapshot] = await Promise.all([
+        this.takeContainerSnapshot(originContainer),
+        this.takeContainerSnapshot(targetContainer),
+      ]);
 
       await this.clearContainersCache(originContainer, targetContainer);
 
       const result = await this.performTransaction(item, character, originContainer, targetContainer, options);
 
-      if (!result) {
+      if (!result || !(await this.wasTransactionConsistent(item, originContainer, targetContainer))) {
         await this.rollbackContainers(originSnapshot, targetSnapshot);
         return false;
       }
 
-      const isConsistent = await this.wasTransactionConsistent(item, originContainer, targetContainer);
+      const { readContainersAfterTransaction, updateCharacterWeightAfterTransaction } = options;
 
-      if (!isConsistent) {
-        await this.rollbackContainers(originSnapshot, targetSnapshot);
-        return false;
-      }
+      await Promise.all([
+        readContainersAfterTransaction &&
+          this.readAndRefreshContainersAfterTransaction(character, readContainersAfterTransaction),
+        this.clearContainersCache(originContainer, targetContainer),
+        updateCharacterWeightAfterTransaction && this.characterWeightQueue.updateCharacterWeight(character),
+      ]);
 
-      const { readContainersAfterTransaction } = options;
-
-      if (result && readContainersAfterTransaction) {
-        await this.readAndRefreshContainersAfterTransaction(character, readContainersAfterTransaction);
-      }
-
-      await this.clearContainersCache(originContainer, targetContainer);
-
-      if (options.updateCharacterWeightAfterTransaction) {
-        await this.characterWeightQueue.updateCharacterWeight(character);
-      }
-
-      return result;
+      return true;
     } catch (error) {
       console.error("Execution of transfer failed:", error);
       await this.rollbackTransfer(item, character, originContainer, targetContainer);
       return false;
     } finally {
-      await this.locker.unlock(`${originContainer?._id}-to-${targetContainer?._id}-item-container-transfer`);
+      await this.locker.unlock(lockKey);
     }
   }
 
