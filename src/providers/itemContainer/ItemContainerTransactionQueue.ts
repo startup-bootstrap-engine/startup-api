@@ -322,19 +322,34 @@ export class ItemContainerTransactionQueue {
     targetContainer: IItemContainer,
     item: IItem
   ): Promise<boolean> {
-    const hasBasicCharacterValidation = this.characterValidation.hasBasicValidation(character);
-
-    if (!hasBasicCharacterValidation) {
+    if (!this.characterValidation.hasBasicValidation(character)) {
       return false;
     }
 
-    const doesOriginContainerExists = await ItemContainer.exists({ _id: originContainer._id, owner: character._id });
+    const [originContainerExists, targetContainerExists, hasSpace] = await Promise.all([
+      ItemContainer.exists({ _id: originContainer._id, owner: character._id }),
+      ItemContainer.exists({ _id: targetContainer._id, owner: character._id }),
+      this.characterItemSlots.hasAvailableSlot(targetContainer._id, item, false),
+    ]);
 
-    if (!doesOriginContainerExists) {
+    if (!originContainerExists) {
       this.socketMessaging.sendErrorMessageToCharacter(
         character,
         "Sorry, the origin container wasn't found for this owner."
       );
+      return false;
+    }
+
+    if (!targetContainerExists) {
+      this.socketMessaging.sendErrorMessageToCharacter(
+        character,
+        "Sorry, the target container wasn't found for this owner."
+      );
+      return false;
+    }
+
+    if (!hasSpace) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, your target container is full.");
       return false;
     }
 
@@ -345,23 +360,6 @@ export class ItemContainerTransactionQueue {
         character,
         "Sorry, the item wasn't found in the origin container."
       );
-      return false;
-    }
-
-    const doesTargetContainerExists = await ItemContainer.exists({ _id: targetContainer._id, owner: character._id });
-
-    if (!doesTargetContainerExists) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        "Sorry, the target container wasn't found for this owner."
-      );
-      return false;
-    }
-
-    const hasSpace = await this.characterItemSlots.hasAvailableSlot(targetContainer._id, item, false);
-
-    if (!hasSpace) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, your target container is full.");
       return false;
     }
 
