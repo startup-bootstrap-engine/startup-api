@@ -182,8 +182,7 @@ export class ItemContainerTransactionQueue {
     originSnapshot: IContainerSnapshot,
     targetSnapshot: IContainerSnapshot
   ): Promise<void> {
-    await this.applyContainerSnapshot(originSnapshot);
-    await this.applyContainerSnapshot(targetSnapshot);
+    await Promise.all([this.applyContainerSnapshot(originSnapshot), this.applyContainerSnapshot(targetSnapshot)]);
   }
 
   private async applyContainerSnapshot(snapshot: IContainerSnapshot): Promise<void> {
