@@ -76,7 +76,7 @@ export const npcMinotaurMage: INPCTierBlueprint<15> = {
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
       chance: LootProbability.Common,
-      quantityRange: [1, 5],
+      quantityRange: [5, 10],
     },
     {
       itemBlueprintKey: SeedsBlueprint.PumpkinSeed,
@@ -197,6 +197,11 @@ export const npcMinotaurMage: INPCTierBlueprint<15> = {
       spellKey: SpellsBlueprint.VampiricStorm,
       probability: 10,
       power: MagicPower.Medium,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: 30,
+      power: MagicPower.Low,
     },
   ],
 };

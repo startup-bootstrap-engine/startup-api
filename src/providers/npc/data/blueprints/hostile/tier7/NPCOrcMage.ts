@@ -19,6 +19,7 @@ import {
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
 import {
   AnimationEffectKeys,
   MagicPower,
@@ -81,7 +82,7 @@ export const npcOrcMage: INPCTierBlueprint<7> = {
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
       chance: LootProbability.Common,
-      quantityRange: [1, 10],
+      quantityRange: [5, 8],
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.BlueSapphire,
@@ -181,6 +182,11 @@ export const npcOrcMage: INPCTierBlueprint<7> = {
       spellKey: SpellsBlueprint.Blizzard,
       probability: 10,
       power: MagicPower.Medium,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Uncommon,
+      power: MagicPower.Low,
     },
   ],
 };

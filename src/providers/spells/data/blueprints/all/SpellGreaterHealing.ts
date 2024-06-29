@@ -19,7 +19,7 @@ export const spellGreaterHealing: Partial<ISpell> = {
   minLevelRequired: 4,
   minMagicLevelRequired: 4,
   cooldown: 10,
-  castingAnimationKey: AnimationEffectKeys.LifeHeal,
+  castingAnimationKey: AnimationEffectKeys.Lifedrain,
 
   usableEffect: async (character: ICharacter) => {
     const itemUsableEffect = container.get(ItemUsableEffect);

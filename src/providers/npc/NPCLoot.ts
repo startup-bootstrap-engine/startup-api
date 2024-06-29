@@ -187,7 +187,7 @@ export class NPCLoot {
   }
 
   private getBaseLootMultiplier(killer: ICharacter, blueprintData: IItem): number {
-    if (blueprintData?.type === ItemType.CraftingResource) {
+    if (blueprintData?.subType === ItemType.CraftingResource || blueprintData?.type === ItemType.CraftingResource) {
       return LOOT_CRAFTING_MATERIAL_DROP_CHANCE;
     }
 

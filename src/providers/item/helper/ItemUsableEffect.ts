@@ -5,7 +5,7 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { Locker } from "@providers/locks/Locker";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { Time } from "@providers/time/Time";
-import { EntityType } from "@rpg-engine/shared";
+import { CharacterSocketEvents, EntityType, ICharacterAttributeChanged } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import random from "lodash/random";
 
@@ -57,12 +57,29 @@ export class ItemUsableEffect {
       const updateObj: any = this.calculateAttributeUpdate(target, attr, value);
 
       await this.updateEntity(target, updateObj);
+
+      if (target.type === EntityType.NPC) {
+        await this.sendNPCAttributeChangedEvent(target as INPC, attr, updateObj[attr]);
+      }
     } catch (error) {
       console.error("Failed to update entity:", error);
       throw error;
     } finally {
       await this.locker.unlock(`${target._id}-applying-usable-effect`);
     }
+  }
+
+  private async sendNPCAttributeChangedEvent(
+    target: INPC,
+    attribute: EffectableAttribute,
+    updatedAttribute: number
+  ): Promise<void> {
+    const payload: ICharacterAttributeChanged = {
+      targetId: target._id,
+      [attribute]: updatedAttribute,
+    };
+
+    await this.socketMessaging.sendEventToCharactersAroundNPC(target, CharacterSocketEvents.AttributeChanged, payload);
   }
 
   private async fetchLatestHealth(target: ICharacter | INPC): Promise<number | undefined> {

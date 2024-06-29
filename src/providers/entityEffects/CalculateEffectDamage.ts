@@ -3,6 +3,7 @@ import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import {
+  ENTITY_EFFECT_ADDITIONAL_DAMAGE_NPC_MODIFIER,
   ENTITY_EFFECT_DAMAGE_FROM_NPC_MODIFIER,
   ENTITY_EFFECT_DAMAGE_LEVEL_MULTIPLIER_NPC,
   ENTITY_EFFECT_DAMAGE_LEVEL_MULTIPLIER_PVP,
@@ -31,6 +32,14 @@ export class CalculateEffectDamage {
     const minRawDamage = 1;
     const minAttackerLevel = 1;
     try {
+      if (!attacker.type) {
+        if ((attacker as INPC).isBehaviorEnabled) {
+          attacker.type = EntityType.NPC;
+        } else {
+          attacker.type = EntityType.Character;
+        }
+      }
+
       let attackerSkills = attacker.skills as ISkill;
 
       if (!attackerSkills?.level) {
@@ -72,7 +81,7 @@ export class CalculateEffectDamage {
 
       const modifier = attacker.type === EntityType.NPC ? ENTITY_EFFECT_DAMAGE_FROM_NPC_MODIFIER : 1;
 
-      return effectDamage * modifier;
+      return effectDamage * modifier ?? 1;
     } catch (err) {
       console.error(err);
       return minRawDamage;
@@ -103,17 +112,21 @@ export class CalculateEffectDamage {
     }
 
     // Unified approach for calculating maxDamage
+    let additionalDamage = this.getAdditionalDamage(attacker, attackerMagicLevel, attackerStrengthLevel);
 
-    const additionalDamage = this.getAdditionalDamage(attacker, attackerMagicLevel, attackerStrengthLevel);
+    if (attacker.type === EntityType.NPC) {
+      additionalDamage = Math.max(1, additionalDamage * ENTITY_EFFECT_ADDITIONAL_DAMAGE_NPC_MODIFIER); // reduce NPC damage, minimum is 1
+    }
+
     const maxDamage = Math.ceil(baseDamage + additionalDamage + (options?.maxBonusDamage ?? 0));
 
     // Min damage no longer relies on attackerLevel, making it constant
     const minDamage = minRawDamage;
 
-    // Random number between min and max damage for attack and defense
+    // Smoothing the random number generation using a weighted average
+    const weight = 0.75; // Adjust the weight for smoothing effect (0.0 to 1.0)
     const averageDamage = (minDamage + maxDamage) / 2;
-    const variance = averageDamage * 0.25; // 25% variance
-    const effectDamageRaw = _.random(averageDamage - variance, averageDamage + variance);
+    const effectDamageRaw = weight * averageDamage + (1 - weight) * _.random(minDamage, maxDamage);
     const maxDefense = _.random(minRawDamage, resistanceLevel + magicResistanceLevel);
 
     // Final effect damage calculation

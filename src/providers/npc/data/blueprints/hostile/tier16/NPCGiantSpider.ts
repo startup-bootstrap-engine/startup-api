@@ -16,6 +16,7 @@ import {
   HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
+  PotionsBlueprint,
   SeedsBlueprint,
   ShieldsBlueprint,
   SpearsBlueprint,
@@ -25,6 +26,7 @@ import {
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
 import {
   AnimationEffectKeys,
   MagicPower,
@@ -289,6 +291,21 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
       itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
       chance: LootProbability.Rare,
     },
+    {
+      itemBlueprintKey: PotionsBlueprint.LightLifePotion,
+      chance: LootProbability.Common,
+      quantityRange: [1, 5],
+    },
+    {
+      itemBlueprintKey: PotionsBlueprint.LightManaPotion,
+      chance: LootProbability.Common,
+      quantityRange: [1, 5],
+    },
+    {
+      itemBlueprintKey: PotionsBlueprint.LightAntidote,
+      chance: LootProbability.Common,
+      quantityRange: [1, 5],
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],
   areaSpells: [
@@ -301,6 +318,11 @@ export const npcGiantSpider: INPCTierBlueprint<16> = {
       spellKey: SpellsBlueprint.VampiricStorm,
       probability: 50,
       power: MagicPower.High,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Common,
+      power: MagicPower.Low,
     },
   ],
 };

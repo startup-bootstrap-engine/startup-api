@@ -6,6 +6,7 @@ import {
   CraftingResourcesBlueprint,
   HelmetsBlueprint,
   MacesBlueprint,
+  PotionsBlueprint,
   RangedWeaponsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
@@ -45,6 +46,11 @@ export const npcSkeleton: INPCTierBlueprint<3> = {
   fleeOnLowHealth: true,
   loots: [
     {
+      itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
+      chance: LootProbability.Common,
+      quantityRange: [1, 2],
+    },
+    {
       itemBlueprintKey: ArmorsBlueprint.Jacket,
       chance: LootProbability.SemiCommon,
     },
@@ -59,6 +65,10 @@ export const npcSkeleton: INPCTierBlueprint<3> = {
     {
       itemBlueprintKey: ArmorsBlueprint.LeatherJacket,
       chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: PotionsBlueprint.LightLifePotion,
+      chance: LootProbability.Rare,
     },
     {
       itemBlueprintKey: HelmetsBlueprint.Cap,
@@ -92,11 +102,6 @@ export const npcSkeleton: INPCTierBlueprint<3> = {
       itemBlueprintKey: CraftingResourcesBlueprint.Skull,
       chance: LootProbability.Uncommon,
       quantityRange: [1, 3],
-    },
-    {
-      itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
-      chance: LootProbability.Common,
-      quantityRange: [2, 3],
     },
   ],
 };

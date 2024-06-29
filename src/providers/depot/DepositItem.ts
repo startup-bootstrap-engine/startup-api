@@ -39,8 +39,6 @@ export class DepositItem {
         return false;
       }
 
-      await this.updateItemKeyIfNeeded(item);
-
       const result = await this.transferItemToContainer(
         item,
         character,
@@ -79,13 +77,6 @@ export class DepositItem {
       throw new Error(`DepotSystem > NPC not found: ${npcId}`);
     }
     return npc as INPC;
-  }
-
-  private async updateItemKeyIfNeeded(item: IItem): Promise<void> {
-    if (item.key !== item.baseKey) {
-      item.key = item.baseKey;
-      await item.save();
-    }
   }
 
   private async transferItemToContainer(

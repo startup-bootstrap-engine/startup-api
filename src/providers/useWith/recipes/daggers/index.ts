@@ -25,6 +25,7 @@ import { recipeGoldenDagger } from "./tier5/recipeGoldenDagger";
 import { recipeHexBladeDagger } from "./tier8/recipeHexBladeDagger";
 import { recipeMistfireDagger } from "./tier9/recipeMistfireDagger";
 import { recipeSpiritBlade } from "./tier9/recipeSpiritBlade";
+import { recipeGreenDagger } from "./tier18/recipeGreenDagger";
 
 export const recipeDaggersIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [DaggersBlueprint.FrostDagger]: [recipeFrostDagger],
@@ -52,4 +53,5 @@ export const recipeDaggersIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [DaggersBlueprint.TwilightThornDagger]: [recipeTwilightThornDagger],
   [DaggersBlueprint.AzurefireDagger]: [recipeAzurefireDagger],
   [DaggersBlueprint.WildfireDagger]: [recipeWildfireDagger],
+  [DaggersBlueprint.GreenDagger]: [recipeGreenDagger],
 };

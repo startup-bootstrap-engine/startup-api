@@ -16,11 +16,12 @@ import { EnvType } from "@rpg-engine/shared";
 import { DefaultJobOptions, Job, Queue, QueueBaseOptions, Worker, WorkerOptions } from "bullmq";
 import { Redis } from "ioredis";
 import { random } from "lodash";
+import { hostname } from "os";
 import { DynamicQueueCleaner } from "./DynamicQueueCleaner";
 import { EntityQueueScalingCalculator } from "./EntityQueueScalingCalculator";
 import { QueueActivityMonitor } from "./QueueActivityMonitor";
 
-type QueueJobFn = ((job: Job) => Promise<void>) | ((job: Job) => Promise<boolean>);
+type QueueJobFn = ((job: Job) => Promise<void>) | ((job: Job) => Promise<boolean>) | ((job: Job) => void);
 
 type AvailableScaleFactors = "single" | "custom" | "active-characters" | "active-npcs";
 
@@ -31,7 +32,9 @@ interface IQueueScaleOptions {
     scene?: string;
   };
   forceCustomScale?: number;
+  stickToOrigin?: boolean;
 }
+
 @provideSingleton(DynamicQueue)
 export class DynamicQueue {
   private queues: Map<string, Queue> = new Map();
@@ -161,7 +164,7 @@ export class DynamicQueue {
       },
       {
         name: `${queueName}-worker`,
-        // concurrency: maxWorkerConcurrency,
+        concurrency: maxWorkerConcurrency,
         removeOnComplete: { age: 86400, count: 1000 },
         removeOnFail: { age: 86400, count: 1000 },
         connection,
@@ -222,6 +225,11 @@ export class DynamicQueue {
   ): Promise<string> {
     const envSuffix = appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id || "prod";
 
+    if (queueScaleOptions?.stickToOrigin) {
+      const machineId = this.getMachineId(); // Implement this method to get a unique machine identifier
+      return `${prefix}-${envSuffix}-${machineId}`;
+    }
+
     switch (queueScaleBy) {
       case "single":
         return prefix;
@@ -264,6 +272,12 @@ export class DynamicQueue {
 
   private buildQueueName(prefix: string, envSuffix: string, factor?: number): string {
     return `${prefix}-${envSuffix}${factor !== undefined ? `-${factor}` : ""}`;
+  }
+
+  private getMachineId(): string {
+    const nodeHostname = hostname();
+    const pm2Id = process.env.pm_id || "0";
+    return `${nodeHostname}-${pm2Id}`;
   }
 
   public async clearAllJobs(): Promise<void> {

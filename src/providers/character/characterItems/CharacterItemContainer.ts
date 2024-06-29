@@ -7,6 +7,7 @@ import { EquipmentEquipInventory } from "@providers/equipment/EquipmentEquipInve
 
 import { ItemMap } from "@providers/item/ItemMap";
 import { ItemOwnership } from "@providers/item/ItemOwnership";
+import { ItemContainerHelper } from "@providers/itemContainer/ItemContainerHelper";
 import { Locker } from "@providers/locks/Locker";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { ItemType } from "@rpg-engine/shared";
@@ -32,7 +33,8 @@ export class CharacterItemContainer {
     private characterInventory: CharacterInventory,
     private itemOwnership: ItemOwnership,
     private locker: Locker,
-    private inMemoryHashTable: InMemoryHashTable
+    private inMemoryHashTable: InMemoryHashTable,
+    private itemContainerHelper: ItemContainerHelper
   ) {}
 
   @TrackNewRelicTransaction()
@@ -98,17 +100,17 @@ export class CharacterItemContainer {
   ): Promise<boolean> {
     const { shouldAddOwnership = true, isInventoryItem = false, dropOnMapIfFull = false } = options || {};
 
+    if (!item) {
+      return false;
+    }
+
+    const hasLock = await this.locker.lock(`item-${item._id}-add-item-to-container`);
+
+    if (!hasLock) {
+      return false;
+    }
+
     try {
-      if (!item) {
-        return false;
-      }
-
-      const hasLock = await this.locker.lock(`item-${item._id}-add-item-to-container`);
-
-      if (!hasLock) {
-        return false;
-      }
-
       item = (await this.ensureItemHasContainer(item)) as IItem;
 
       if (!item) {
@@ -160,14 +162,19 @@ export class CharacterItemContainer {
 
       await this.clearCache(toContainerId, character._id, item.type as ItemType);
 
-      await this.locker.unlock(`item-${item?._id}-add-item-to-container`);
+      await this.locker.unlock(`item-${item._id}-add-item-to-container`);
     }
   }
 
   private async ensureItemHasContainer(item: IItem): Promise<IItem | null> {
     if (item.isItemContainer && !item.itemContainer) {
-      item = (await Item.findById(item._id)) as IItem;
-      await item.save();
+      const newContainer = await this.itemContainerHelper.generateItemContainerIfNotPresentOnItem(item);
+
+      if (!newContainer) {
+        throw new Error("Failed to generate item container.");
+      }
+
+      item.itemContainer = newContainer?._id;
     }
 
     return item;

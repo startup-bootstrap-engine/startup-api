@@ -1,4 +1,5 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { BattleTargeting } from "@providers/battle/BattleTargeting";
 import { CharacterLastAction } from "@providers/character/CharacterLastAction";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -23,7 +24,8 @@ export class PartyMembers {
     private partyBenefitsCalculator: PartyBenefitsCalculator,
     private partyValidator: PartyValidator,
     private partySocketMessaging: PartySocketMessaging,
-    private partyClasses: PartyClasses
+    private partyClasses: PartyClasses,
+    private battleTargeting: BattleTargeting
   ) {}
 
   public async removeMemberFromParty(party: ICharacterParty, character: ICharacter): Promise<boolean> {
@@ -33,6 +35,10 @@ export class PartyMembers {
 
     try {
       let message = `${character.name} has left the party!`;
+
+      // find all characters that has the caller on target, and stop targeting (avoid a bug where the attacker gets a skull if the target comes back, due to target still being set on the attacker, but they're not on the party anymore)
+
+      await this.clearTargetingForCharacters(character);
 
       // Check if member is a party leader. If so, transfer leadership before removing them
       const isLeader = this.partyValidator.checkIfIsLeader(party, character);
@@ -72,6 +78,16 @@ export class PartyMembers {
     } catch (error) {
       console.error("Error while removing member from party:", error);
       return false;
+    }
+  }
+
+  private async clearTargetingForCharacters(character: ICharacter): Promise<void> {
+    const characters = await Character.find({
+      "target.id": character._id,
+    }).lean<ICharacter[]>();
+
+    for (const character of characters) {
+      await this.battleTargeting.cancelTargeting(character);
     }
   }
 

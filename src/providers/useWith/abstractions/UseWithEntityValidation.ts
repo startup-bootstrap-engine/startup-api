@@ -7,6 +7,7 @@ import { BattleAttackRanged } from "@providers/battle/BattleAttackTarget/BattleA
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { ToolsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemValidation } from "@providers/item/validation/ItemValidation";
+import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
@@ -24,7 +25,8 @@ export class UseWithEntityValidation {
     private characterValidation: CharacterValidation,
     private movementHelper: MovementHelper,
     private itemValidation: ItemValidation,
-    private socketMessaging: SocketMessaging
+    private socketMessaging: SocketMessaging,
+    private mapSolidsTrajectory: MapSolidsTrajectory
   ) {}
 
   public baseValidation(
@@ -113,7 +115,7 @@ export class UseWithEntityValidation {
     if (casterMagicLevel < blueprint.minMagicLevelRequired) {
       return `Sorry, '${blueprint.name}' can only be used at magic level '${blueprint.minMagicLevelRequired}' or greater.`;
     }
-    if (await this.battleRangedAttack.isSolidInRangedTrajectory(caster, target)) {
+    if (await this.mapSolidsTrajectory.isSolidInTrajectory(caster, target as ICharacter | INPC)) {
       return "Sorry, there is an obstacle in the way.";
     }
     return null;

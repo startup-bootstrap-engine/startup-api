@@ -1,6 +1,7 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
 import { FromGridX, FromGridY, NPCAlignment, NPCMovementType, NPCPathOrientation } from "@rpg-engine/shared";
 import { NPCMovementMoveTowards } from "../NPCMovementMoveTowards";
 import { NPCTarget } from "../NPCTarget";
@@ -10,6 +11,7 @@ describe("NPCMovementMoveTowards.ts", () => {
   let npcTarget: NPCTarget;
   let testNPC: INPC;
   let testCharacter: ICharacter;
+  let mapSolidsTrajectorySpy: jest.SpyInstance;
 
   beforeAll(async () => {
     npcMovementMoveTowards = container.get<NPCMovementMoveTowards>(NPCMovementMoveTowards);
@@ -37,6 +39,8 @@ describe("NPCMovementMoveTowards.ts", () => {
       { hasSkills: true },
       NPCMovementType.MoveTowards
     );
+
+    mapSolidsTrajectorySpy = jest.spyOn(MapSolidsTrajectory.prototype, "isSolidInTrajectory").mockResolvedValue(false);
   });
 
   afterEach(async () => {

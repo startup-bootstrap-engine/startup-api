@@ -14,6 +14,6 @@ export const itemSalmon: IConsumableItemBlueprint = {
   weight: 0.2,
   maxStackSize: 999,
   basePrice: 7,
-  canSell: false,
+  canSell: true,
   usableEffectKey: UsableEffectsBlueprint.SuperStrongEatingEffect,
 };

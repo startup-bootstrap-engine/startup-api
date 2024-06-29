@@ -2,6 +2,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import { IEquippableMeleeTier12WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   CombatSkill,
@@ -31,29 +32,29 @@ export const itemShadowedReaver: IEquippableMeleeTier12WeaponBlueprint = {
   entityEffectChance: 70,
   equippedBuff: [
     {
-      type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Strength,
-      buffPercentage: 5,
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 14,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of strength flowing through your body. (+5% strength)",
-          deactivation: "You feel the power of strength leaving your body. (-5% strength)",
-        },
-      },
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 14,
+      durationType: CharacterBuffDurationType.Permanent,
     },
     {
       type: CharacterBuffType.Skill,
-      trait: CombatSkill.Axe,
-      buffPercentage: 5,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 14,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of axe flowing through your body. (+5% axe)",
-          deactivation: "You feel the power of axe leaving your body. (-5% axe)",
-        },
-      },
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 14,
+      durationType: CharacterBuffDurationType.Permanent,
     },
   ],
-  equippedBuffDescription: "Increases strength by 5% and axe by 5% respectively",
+  equippedBuffDescription: "Increases Max Health by 14%, Max Mana by 14%, Resistance by 14%, and Strength by 14%.",
 };

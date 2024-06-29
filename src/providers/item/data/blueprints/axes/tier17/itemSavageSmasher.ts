@@ -27,33 +27,46 @@ export const itemSavageSmasher: IEquippableMeleeTier17WeaponBlueprint = {
   tier: 17,
   rangeType: EntityAttackType.Melee,
   basePrice: 148,
-  entityEffects: [EntityEffectBlueprint.Poison, EntityEffectBlueprint.Bleeding],
+  entityEffects: [EntityEffectBlueprint.Bleeding],
   entityEffectChance: 100,
   equippedBuff: [
     {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 28,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 28,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 22,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.MagicResistance,
+      buffPercentage: 22,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Resistance,
-      buffPercentage: 8,
+      buffPercentage: 22,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of resistance flowing through your body. (+8% resistance)",
-          deactivation: "You feel the power of resistance leaving your body. (-8% resistance)",
-        },
-      },
     },
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Strength,
-      buffPercentage: 7,
+      buffPercentage: 22,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the strength and fortitude coursing through your body. (+7% strength)",
-          deactivation: "You feel the strength and fortitude coursing leaving through your body. (-7% strength)",
-        },
-      },
     },
   ],
-  equippedBuffDescription: "Increases resistance by 8% and strength by 7% respectively",
+  equippedBuffDescription:
+    "Increases Max Health by 28%, Max Mana by 28%, Magic by 22%, Magic Resistance by 22%, Resistance by 22%, and Strength by 22%.",
 };

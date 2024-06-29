@@ -26,6 +26,7 @@ import {
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
 
 export const npcForestTroll: INPCTierBlueprint<14> = {
   ...generateMoveTowardsMovement(),
@@ -147,6 +148,11 @@ export const npcForestTroll: INPCTierBlueprint<14> = {
       spellKey: SpellsBlueprint.NaturesRevenge,
       probability: 25,
       power: MagicPower.Medium,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Rare,
+      power: MagicPower.Low,
     },
   ],
 };

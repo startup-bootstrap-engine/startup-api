@@ -49,10 +49,10 @@ export class NPCDeathQueue {
 
     await this.dynamicQueue.addJob(
       "npc-death",
-      async (job) => {
+      (job) => {
         const { killer, npc } = job.data;
 
-        return await this.execHandleNPCDeath(killer, npc);
+        void this.execHandleNPCDeath(killer, npc);
       },
       { killer, npc }
     );

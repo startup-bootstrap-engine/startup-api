@@ -11,12 +11,13 @@ import {
   SwordsBlueprint,
   ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
+import { MagicPower, NPCAlignment, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
 export const npcElf: INPCTierBlueprint<4> = {
   ...generateMoveTowardsMovement(),
@@ -122,6 +123,13 @@ export const npcElf: INPCTierBlueprint<4> = {
       itemBlueprintKey: RangedWeaponsBlueprint.WardenArrow,
       chance: LootProbability.VeryRare,
       quantityRange: [10, 20],
+    },
+  ],
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.VeryRare,
+      power: MagicPower.Low,
     },
   ],
 };

@@ -17,6 +17,7 @@ import {
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
 import {
   AnimationEffectKeys,
   MagicPower,
@@ -152,19 +153,14 @@ export const npcForestOrc: INPCTierBlueprint<16> = {
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.VineGrasp],
   areaSpells: [
     {
-      spellKey: SpellsBlueprint.PoisonArrowCreationSpell,
-      probability: 40,
-      power: MagicPower.Medium,
-    },
-    {
-      spellKey: SpellsBlueprint.PoisonRuneCreationSpell,
-      probability: 70,
+      spellKey: SpellsBlueprint.NaturesRevenge,
+      probability: 10,
       power: MagicPower.UltraHigh,
     },
     {
-      spellKey: SpellsBlueprint.CorruptionBolt,
-      probability: 70,
-      power: MagicPower.UltraHigh,
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Uncommon,
+      power: MagicPower.Low,
     },
   ],
 };

@@ -3,6 +3,7 @@ import { Equipment, IEquipment } from "@entities/ModuleCharacter/EquipmentModel"
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
+import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { EntityType, IItem, ItemSlotType, ItemSubType } from "@rpg-engine/shared";
@@ -17,7 +18,8 @@ export class BattleAttackValidator {
     private movementHelper: MovementHelper,
 
     private characterInventory: CharacterInventory,
-    private socketMessaging: SocketMessaging
+    private socketMessaging: SocketMessaging,
+    private mapSolidsTrajectory: MapSolidsTrajectory
   ) {}
 
   @TrackNewRelicTransaction()
@@ -46,7 +48,7 @@ export class BattleAttackValidator {
       return;
     }
 
-    const solidInTrajectory = await this.battleRangedAttack.isSolidInRangedTrajectory(attacker, target);
+    const solidInTrajectory = await this.mapSolidsTrajectory.isSolidInTrajectory(attacker, target);
     if (solidInTrajectory) {
       if (attacker.type === EntityType.Character) {
         this.sendSolidInTrajectoryEvent(attacker as ICharacter, target);

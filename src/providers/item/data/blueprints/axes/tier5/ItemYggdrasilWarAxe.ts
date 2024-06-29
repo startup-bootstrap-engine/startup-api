@@ -10,6 +10,7 @@ import {
 } from "@rpg-engine/shared";
 import { IEquippableTwoHandedTier5WeaponBlueprint } from "../../../types/TierBlueprintTypes";
 import { AxesBlueprint } from "../../../types/itemsBlueprintTypes";
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 
 export const itemYggdrasilWarAxe: IEquippableTwoHandedTier5WeaponBlueprint = {
   key: AxesBlueprint.YggdrasilWarAxe,
@@ -26,31 +27,28 @@ export const itemYggdrasilWarAxe: IEquippableTwoHandedTier5WeaponBlueprint = {
   tier: 5,
   isTwoHanded: true,
   rangeType: EntityAttackType.Melee,
+  entityEffects: [EntityEffectBlueprint.Bleeding],
+  entityEffectChance: 90,
+
   equippedBuff: [
-    {
-      type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Strength,
-      buffPercentage: 10,
-      durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of strength flowing through your body. (+10% Strength)",
-          deactivation: "You feel the power of strength leaving your body. (-10% Strength)",
-        },
-      },
-    },
     {
       type: CharacterBuffType.CharacterAttribute,
       trait: CharacterAttributes.MaxHealth,
-      buffPercentage: 5,
+      buffPercentage: 6,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of max health flowing through your body. (+5% MaxHealth)",
-          deactivation: "You feel the power of max health leaving your body. (-5% MaxHealth)",
-        },
-      },
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 6,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 6,
+      durationType: CharacterBuffDurationType.Permanent,
     },
   ],
-  equippedBuffDescription: "Increases strength by 10% and max health by 5% respectively",
+  equippedBuffDescription: "Increases max health by 6%, strength by 6% and resistance by 6%.",
 };

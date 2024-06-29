@@ -7,7 +7,7 @@ export const itemGreenIngot: ICraftableItemBlueprint = {
   subType: ItemSubType.CraftingResource,
   textureAtlas: "items",
   texturePath: "crafting-resources/green-ingot.png",
-  name: "green-ingot",
+  name: "Green Ingot",
   description: "A special ingot infused with magical energy, used as a material for crafting weapons.",
   weight: 1.2,
   maxStackSize: 999,

@@ -1,6 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
-import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
+import { IItem, Item, warnAboutItemChanges } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { isSameKey } from "@providers/dataStructures/KeyHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -365,10 +365,12 @@ export class CharacterItemSlots {
 
       // if inventory is full, just drop the item on the ground
       // we must do a .save operation here to send the related events
-      selectedItem.x = character.x;
-      selectedItem.y = character.y;
-      selectedItem.scene = character.scene;
-      await selectedItem.save();
+      await Item.updateOne(
+        { _id: selectedItem._id },
+        { $set: { x: character.x, y: character.y, scene: character.scene } }
+      );
+
+      await warnAboutItemChanges(selectedItem, "changes");
 
       return true;
     }

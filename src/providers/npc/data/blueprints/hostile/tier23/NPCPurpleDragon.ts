@@ -21,6 +21,7 @@ import {
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
 import {
   AnimationEffectKeys,
   MagicPower,
@@ -79,6 +80,7 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
       itemBlueprintKey: ToolsBlueprint.MoonlureFishingRod,
       chance: LootProbability.SemiCommon,
     },
+
     {
       itemBlueprintKey: DaggersBlueprint.FrostfangDagger,
       chance: LootProbability.Rare,
@@ -316,6 +318,11 @@ export const npcPurpleDragon: INPCTierBlueprint<23> = {
       spellKey: SpellsBlueprint.FireStorm,
       probability: 40,
       power: MagicPower.Medium,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Uncommon,
+      power: MagicPower.High,
     },
   ],
 };

@@ -61,10 +61,10 @@ export class CharacterNetworkCreateQueue {
   ): Promise<void> {
     await this.dynamicQueue.addJob(
       "character-create",
-      async (job) => {
+      (job) => {
         const { character, data } = job.data;
 
-        return await this.execCharacterCreate(character, data);
+        void this.execCharacterCreate(character, data);
       },
       { character, data }
     );

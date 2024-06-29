@@ -22,7 +22,15 @@ import { generateMoveTowardsMovement } from "@providers/npc/data/abstractions/Ba
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment, NPCCustomDeathPenalties, NPCSubtype, RangeTypes } from "@rpg-engine/shared";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
+import {
+  MagicPower,
+  NPCAlignment,
+  NPCCustomDeathPenalties,
+  NPCSubtype,
+  RangeTypes,
+  SpellsBlueprint,
+} from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 
 export const npcGorgok: INPCTierBlueprint<17> = {
@@ -175,6 +183,23 @@ export const npcGorgok: INPCTierBlueprint<17> = {
     {
       itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
       chance: LootProbability.Rare,
+    },
+  ],
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.NaturesRevenge,
+      probability: 70,
+      power: MagicPower.UltraHigh,
+    },
+    {
+      spellKey: SpellsBlueprint.CleavingStomp,
+      probability: 70,
+      power: MagicPower.UltraHigh,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.VeryCommon,
+      power: MagicPower.High,
     },
   ],
 };

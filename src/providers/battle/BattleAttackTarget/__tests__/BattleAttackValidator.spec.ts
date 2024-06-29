@@ -4,6 +4,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Equipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { RangedWeaponsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
 import { BattleAttackValidator } from "../BattleAttackValidator";
 
 describe("battleAttackValidator.spec.ts", () => {
@@ -112,7 +113,7 @@ describe("battleAttackValidator.spec.ts", () => {
     const sendSolidTrajectoryEvent = jest.spyOn(battleAttackValidator, "sendSolidInTrajectoryEvent");
 
     // @ts-ignore
-    jest.spyOn(battleAttackValidator.battleRangedAttack, "isSolidInRangedTrajectory").mockImplementation(() => true);
+    jest.spyOn(MapSolidsTrajectory.prototype, "isSolidInTrajectory").mockImplementation(() => true);
 
     const result = await battleAttackValidator.validateAttack(testCharacter, target);
 

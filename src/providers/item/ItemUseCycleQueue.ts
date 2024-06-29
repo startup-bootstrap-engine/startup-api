@@ -73,7 +73,10 @@ export class ItemUseCycleQueue {
         iterations,
         intervalDurationMs,
       },
-      undefined,
+      {
+        queueScaleBy: "single",
+        stickToOrigin: true,
+      },
 
       {
         delay: intervalDurationMs,

@@ -19,6 +19,7 @@ import {
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
 import {
   AnimationEffectKeys,
   MagicPower,
@@ -264,14 +265,19 @@ export const npcVenomNaga: INPCTierBlueprint<21> = {
       power: MagicPower.High,
     },
     {
-      spellKey: SpellsBlueprint.CorruptionWave,
+      spellKey: SpellsBlueprint.CleavingStomp,
       probability: 70,
       power: MagicPower.UltraHigh,
     },
     {
-      spellKey: SpellsBlueprint.FireStorm,
+      spellKey: SpellsBlueprint.NaturesRevenge,
       probability: 40,
       power: MagicPower.Medium,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Uncommon,
+      power: MagicPower.High,
     },
   ],
 };

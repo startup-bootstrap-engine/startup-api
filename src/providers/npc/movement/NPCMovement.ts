@@ -4,11 +4,6 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { CharacterView } from "@providers/character/CharacterView";
 import { appEnv } from "@providers/config/env";
 import { NPC_CAN_ATTACK_IN_NON_PVP_ZONE } from "@providers/constants/NPCConstants";
-import {
-  PATHFINDING_MAX_TRIES,
-  PATHFINDING_POLLER_BACKOFF_FACTOR,
-  PATHFINDING_POLLER_INTERVAL,
-} from "@providers/constants/PathfindingConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { GridManager } from "@providers/map/GridManager";
 import { MapNonPVPZone } from "@providers/map/MapNonPVPZone";
@@ -178,7 +173,7 @@ export class NPCMovement {
           endGridY
         );
       } else {
-        const job = await this.pathfindingQueue.addPathfindingJob(
+        npcPath = await this.pathfindingQueue.findPathForNPC(
           npc,
 
           target,
@@ -187,16 +182,9 @@ export class NPCMovement {
           endGridX,
           endGridY
         );
-        if (!job) {
+        if (!npcPath?.length) {
           return;
         }
-
-        npcPath = await this.pathfinderPoller(job.id!);
-      }
-
-      if (!npcPath?.length) {
-        return;
-        // throw new Error("Failed to calculate shortest path! No output!");
       }
 
       // get first next available position
@@ -228,40 +216,5 @@ export class NPCMovement {
       console.error(error);
       throw error;
     }
-  }
-
-  @TrackNewRelicTransaction()
-  private async pathfinderPoller(jobId: string): Promise<number[][]> {
-    if (!jobId) {
-      throw new Error("Job ID is required!");
-    }
-
-    let tries = 0;
-    let delay = PATHFINDING_POLLER_INTERVAL;
-
-    while (tries <= PATHFINDING_MAX_TRIES) {
-      try {
-        const npcPath: number[][] | null = await this.pathfindingResults.getResult(jobId);
-
-        if (npcPath) {
-          await this.pathfindingResults.deleteResult(jobId);
-          return npcPath;
-        }
-
-        tries++;
-        await this.increaseDelay(delay);
-        delay = delay * PATHFINDING_POLLER_BACKOFF_FACTOR; // Exponential backoff
-      } catch (error) {
-        console.error(error);
-        if (tries >= PATHFINDING_MAX_TRIES) throw error;
-      }
-    }
-
-    await this.pathfindingResults.deleteResult(jobId);
-    throw new Error("Error while trying to fetch pathfinding result for NPC. Timeout!");
-  }
-
-  private async increaseDelay(delay: number): Promise<void> {
-    return await new Promise((resolve) => setTimeout(resolve, delay));
   }
 }
