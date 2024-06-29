@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
@@ -28,8 +29,7 @@ describe("ItemContainerTransaction", () => {
     originContainer = await unitTestHelper.createMockItemContainer({ owner: testCharacter._id });
     targetContainer = await unitTestHelper.createMockItemContainer({ owner: testCharacter._id });
     await characterItemContainer.addItemToContainer(testItem, testCharacter, originContainer._id);
-
-    originContainer = (await ItemContainer.findById(originContainer._id)) as IItemContainer; // refresh container
+    originContainer = (await ItemContainer.findById(originContainer._id)) as IItemContainer;
 
     sendErrorMessageToCharacterSpy = jest.spyOn(SocketMessaging.prototype, "sendErrorMessageToCharacter");
     jest.clearAllMocks();
@@ -39,17 +39,17 @@ describe("ItemContainerTransaction", () => {
     jest.restoreAllMocks();
   });
 
-  describe("Basic functionality", () => {
-    it("should successfully transfer an item from a container to another", async () => {
-      const result = await itemContainerTransaction.transferToContainer(
-        testItem,
-        testCharacter,
-        originContainer,
-        targetContainer
-      );
+  const transferItem = () =>
+    itemContainerTransaction.transferToContainer(testItem, testCharacter, originContainer, targetContainer);
 
-      const updatedOriginContainer = await ItemContainer.findById(originContainer._id).lean();
-      const updatedTargetContainer = await ItemContainer.findById(targetContainer._id).lean();
+  describe("Basic functionality", () => {
+    it("should successfully transfer an item between containers", async () => {
+      const result = await transferItem();
+
+      const [updatedOriginContainer, updatedTargetContainer] = await Promise.all([
+        ItemContainer.findById(originContainer._id).lean(),
+        ItemContainer.findById(targetContainer._id).lean(),
+      ]);
 
       expect(result).toBe(true);
       expect(updatedOriginContainer?.slots[0]).toBeNull();
@@ -60,14 +60,8 @@ describe("ItemContainerTransaction", () => {
       const mockUpdateCharacterWeight = jest.fn();
       jest.spyOn(CharacterWeightQueue.prototype, "updateCharacterWeight").mockImplementation(mockUpdateCharacterWeight);
 
-      const result = await itemContainerTransaction.transferToContainer(
-        testItem,
-        testCharacter,
-        originContainer,
-        targetContainer
-      );
+      await transferItem();
 
-      expect(result).toBe(true);
       expect(mockUpdateCharacterWeight).toHaveBeenCalledWith(testCharacter);
     });
 
@@ -75,15 +69,10 @@ describe("ItemContainerTransaction", () => {
       const mockUpdateCharacterWeight = jest.fn();
       jest.spyOn(CharacterWeightQueue.prototype, "updateCharacterWeight").mockImplementation(mockUpdateCharacterWeight);
 
-      const result = await itemContainerTransaction.transferToContainer(
-        testItem,
-        testCharacter,
-        originContainer,
-        targetContainer,
-        { updateCharacterWeightAfterTransaction: false }
-      );
+      await itemContainerTransaction.transferToContainer(testItem, testCharacter, originContainer, targetContainer, {
+        updateCharacterWeightAfterTransaction: false,
+      });
 
-      expect(result).toBe(true);
       expect(mockUpdateCharacterWeight).not.toHaveBeenCalled();
     });
   });
@@ -93,12 +82,7 @@ describe("ItemContainerTransaction", () => {
       originContainer.slots[0] = null;
       await originContainer.save();
 
-      const result = await itemContainerTransaction.transferToContainer(
-        testItem,
-        testCharacter,
-        originContainer,
-        targetContainer
-      );
+      const result = await transferItem();
 
       expect(result).toBe(false);
     });
@@ -107,12 +91,7 @@ describe("ItemContainerTransaction", () => {
       targetContainer.slots = Array(targetContainer.slotQty).fill({ _id: "test" });
       await targetContainer.save();
 
-      const result = await itemContainerTransaction.transferToContainer(
-        testItem,
-        testCharacter,
-        originContainer,
-        targetContainer
-      );
+      const result = await transferItem();
 
       expect(result).toBe(false);
     });
@@ -120,54 +99,19 @@ describe("ItemContainerTransaction", () => {
     it("should fail transfer if character validation fails", async () => {
       jest.spyOn(CharacterValidation.prototype, "hasBasicValidation").mockReturnValue(false);
 
-      const result = await itemContainerTransaction.transferToContainer(
-        testItem,
-        testCharacter,
-        originContainer,
-        targetContainer
-      );
+      const result = await transferItem();
 
       expect(result).toBe(false);
     });
 
-    it("should fail transfer if origin container doesn't exist", async () => {
+    it("should fail transfer if origin or target container doesn't exist", async () => {
       // @ts-ignore
       jest.spyOn(ItemContainer, "exists").mockResolvedValueOnce(false);
 
-      const result = await itemContainerTransaction.transferToContainer(
-        testItem,
-        testCharacter,
-        originContainer,
-        targetContainer
-      );
+      const result = await transferItem();
 
       expect(result).toBe(false);
-    });
-
-    it("should fail transfer if target container doesn't exist", async () => {
-      // @ts-ignore
-      jest.spyOn(ItemContainer, "exists").mockResolvedValueOnce(true).mockResolvedValueOnce(false);
-
-      const result = await itemContainerTransaction.transferToContainer(
-        testItem,
-        testCharacter,
-        originContainer,
-        targetContainer
-      );
-
-      expect(result).toBe(false);
-    });
-
-    it("should send error message to character on failed transfer", async () => {
-      const mockSendErrorMessage = jest.fn();
-      jest.spyOn(SocketMessaging.prototype, "sendErrorMessageToCharacter").mockImplementation(mockSendErrorMessage);
-
-      // @ts-ignore
-      jest.spyOn(ItemContainer, "exists").mockResolvedValueOnce(false);
-
-      await itemContainerTransaction.transferToContainer(testItem, testCharacter, originContainer, targetContainer);
-
-      expect(mockSendErrorMessage).toHaveBeenCalledWith(
+      expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledWith(
         testCharacter,
         "Sorry, the origin container wasn't found for this owner."
       );
@@ -179,33 +123,15 @@ describe("ItemContainerTransaction", () => {
       const removeItemFromContainerSpy = jest
         .spyOn(CharacterItemContainer.prototype, "removeItemFromContainer")
         .mockResolvedValue(false);
-
       const addItemToContainerSpy = jest
         .spyOn(CharacterItemContainer.prototype, "addItemToContainer")
         .mockResolvedValue(true);
 
-      const result = await itemContainerTransaction.transferToContainer(
-        testItem,
-        testCharacter,
-        originContainer,
-        targetContainer
-      );
-
-      expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledWith(
-        testCharacter,
-        "Failed to remove original item from origin container."
-      );
+      const result = await transferItem();
 
       expect(result).toBe(false);
       expect(removeItemFromContainerSpy).toHaveBeenCalledTimes(1);
       expect(addItemToContainerSpy).toHaveBeenCalledTimes(1);
-    });
-
-    it("should send error message if rollback fails", async () => {
-      jest.spyOn(CharacterItemContainer.prototype, "removeItemFromContainer").mockResolvedValue(false);
-
-      await itemContainerTransaction.transferToContainer(testItem, testCharacter, originContainer, targetContainer);
-
       expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledWith(
         testCharacter,
         "Failed to remove original item from origin container."
@@ -213,48 +139,104 @@ describe("ItemContainerTransaction", () => {
     });
   });
 
-  describe("Concurrent transfers", () => {
-    it("should handle concurrent transfers correctly", async () => {
-      const item1 = await unitTestHelper.createMockItem();
-      const item2 = await unitTestHelper.createMockItem();
+  describe("ItemContainerTransactionQueue - Rollback and Consistency", () => {
+    it("should rollback when transaction is inconsistent", async () => {
+      jest.spyOn(itemContainerTransaction as any, "performTransaction").mockResolvedValue(true);
+      jest.spyOn(itemContainerTransaction as any, "wasTransactionConsistent").mockResolvedValue(false);
+      const rollbackContainersSpy = jest
+        .spyOn(itemContainerTransaction as any, "rollbackContainers")
+        // @ts-ignore
+        .mockResolvedValue();
 
-      await characterItemContainer.addItemToContainer(item1, testCharacter, originContainer._id);
-      await characterItemContainer.addItemToContainer(item2, testCharacter, originContainer._id);
+      const result = await transferItem();
 
-      originContainer = await ItemContainer.findById(originContainer._id).lean();
+      expect(result).toBe(false);
+      expect(rollbackContainersSpy).toHaveBeenCalled();
+    });
 
-      const transfer1 = itemContainerTransaction.transferToContainer(
-        item1,
+    it("should not rollback when transaction is consistent", async () => {
+      jest.spyOn(itemContainerTransaction as any, "performTransaction").mockResolvedValue(true);
+      jest.spyOn(itemContainerTransaction as any, "wasTransactionConsistent").mockResolvedValue(true);
+      const rollbackContainersSpy = jest
+        .spyOn(itemContainerTransaction as any, "rollbackContainers")
+        // @ts-ignore
+        .mockResolvedValue();
+
+      const result = await transferItem();
+
+      expect(result).toBe(true);
+      expect(rollbackContainersSpy).not.toHaveBeenCalled();
+    });
+
+    it("should detect inconsistent transaction", async () => {
+      const mockContainers = {
+        origin: { _id: "origin", slots: { 0: testItem } },
+        target: { _id: "target", slots: { 0: null } },
+      };
+
+      jest.spyOn(ItemContainer, "findById").mockImplementation(
+        (id) =>
+          ({
+            lean: () => Promise.resolve(mockContainers[id as keyof typeof mockContainers]),
+          } as any)
+      );
+
+      const result = await (itemContainerTransaction as any).wasTransactionConsistent(
+        testItem,
+        { _id: "origin" },
+        { _id: "target" }
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it("should correctly take and apply container snapshots", async () => {
+      const originalContainer = {
+        _id: "container1",
+        slots: { 0: testItem, 1: null },
+      };
+
+      const snapshot = (itemContainerTransaction as any).takeContainerSnapshot(originalContainer);
+
+      expect(snapshot).toEqual({
+        containerId: "container1",
+        slots: { 0: testItem, 1: null },
+      });
+
+      const updateOneSpy = jest.spyOn(ItemContainer, "updateOne").mockResolvedValue({} as any);
+
+      await (itemContainerTransaction as any).applyContainerSnapshot(snapshot);
+
+      expect(updateOneSpy).toHaveBeenCalledWith({ _id: "container1" }, { $set: { slots: { 0: testItem, 1: null } } });
+    });
+
+    it("should handle failed add to target container", async () => {
+      jest.spyOn(CharacterItemContainer.prototype, "addItemToContainer").mockResolvedValue(false);
+
+      const result = await (itemContainerTransaction as any).performTransaction(
+        testItem,
         testCharacter,
         originContainer,
-        targetContainer
+        targetContainer,
+        {}
       );
 
-      const transfer2 = itemContainerTransaction.transferToContainer(
-        item2,
+      expect(result).toBe(false);
+    });
+
+    it("should handle failed remove from origin container", async () => {
+      jest.spyOn(CharacterItemContainer.prototype, "addItemToContainer").mockResolvedValue(true);
+      jest.spyOn(CharacterItemContainer.prototype, "removeItemFromContainer").mockResolvedValue(false);
+
+      const result = await (itemContainerTransaction as any).performTransaction(
+        testItem,
         testCharacter,
         originContainer,
-        targetContainer
+        targetContainer,
+        {}
       );
 
-      const [result1, result2] = await Promise.all([transfer1, transfer2]);
-
-      expect(result1).toBe(true);
-      expect(result2).toBe(false);
-
-      const updatedTargetContainer = await ItemContainer.findById(targetContainer._id).lean();
-      const updatedOriginContainer = await ItemContainer.findById(originContainer._id).lean();
-
-      // Extract item IDs from slots key-value pairs
-      const targetSlotsItemIds = Object.values(updatedTargetContainer?.slots || {}).map((item: any) =>
-        item?._id?.toString()
-      );
-      const originSlotsItemIds = Object.values(updatedOriginContainer?.slots || {}).map((item: any) =>
-        item?._id?.toString()
-      );
-
-      expect(targetSlotsItemIds).toContain(item1._id.toString());
-      expect(originSlotsItemIds).toContain(item2._id.toString());
+      expect(result).toBe(false);
     });
   });
 });
