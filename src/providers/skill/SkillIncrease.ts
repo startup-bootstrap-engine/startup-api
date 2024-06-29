@@ -16,6 +16,7 @@ import {
 } from "@providers/constants/SkillConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DiscordBot } from "@providers/discord/DiscordBot";
+import { GuildSkillsIncrease } from "@providers/guild/GuildSkillsIncrease";
 import { NPCExperience } from "@providers/npc/NPCExperience/NPCExperience";
 import { NumberFormatter } from "@providers/text/NumberFormatter";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
@@ -26,6 +27,7 @@ import {
   IIncreaseSPResult,
   ISkillDetails,
   SKILLS_MAP,
+  SkillType,
 } from "@rpg-engine/shared/dist/types/skills.types";
 import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
@@ -49,7 +51,8 @@ export class SkillIncrease {
     private numberFormatter: NumberFormatter,
     private npcExperience: NPCExperience,
     private newRelic: NewRelic,
-    private discordBot: DiscordBot
+    private discordBot: DiscordBot,
+    private guildSkillsIncrease: GuildSkillsIncrease
   ) {}
 
   /**
@@ -101,6 +104,21 @@ export class SkillIncrease {
       let increasedStrengthSP;
       if (weaponSubType !== ItemSubType.Magic && weaponSubType !== ItemSubType.Staff) {
         increasedStrengthSP = this.increaseSP(skills, BasicAttribute.Strength);
+      }
+
+      const guildSkills = await this.guildSkillsIncrease.getGuildSkills(attacker);
+      if (guildSkills) {
+        const guildSkillsDetails: ISkillDetails = {
+          type: SkillType.Guild,
+          level: guildSkills.level,
+          skillPoints: guildSkills.guildPoints,
+          skillPointsToNextLevel: guildSkills.guildPointsToNextLevel,
+        };
+
+        const newSP = this.calculateNewSP(guildSkillsDetails);
+        if (newSP) {
+          await this.guildSkillsIncrease.increaseGuildSkills(guildSkills, newSP);
+        }
       }
 
       await this.skillFunctions.updateSkills(skills, attacker);

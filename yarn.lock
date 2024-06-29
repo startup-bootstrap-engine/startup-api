@@ -1522,6 +1522,13 @@
   dependencies:
     "@bull-board/api" "5.16.0"
 
+"@capacitor/core@^4.6.3":
+  version "4.8.2"
+  resolved "https://registry.yarnpkg.com/@capacitor/core/-/core-4.8.2.tgz#1f44eeed4c8c2d54d22810fb02170dd245df8fdf"
+  integrity sha512-lrDvHyQu3LWWWXkCkHATY8D3GCBIWyqnmQUiGxlTJfu9BEdmfflq+OZuDKIy4H+KYChaXM1QnymNIuWrDFXgXw==
+  dependencies:
+    tslib "^2.1.0"
+
 "@chevrotain/cst-dts-gen@10.5.0":
   version "10.5.0"
   resolved "https://registry.yarnpkg.com/@chevrotain/cst-dts-gen/-/cst-dts-gen-10.5.0.tgz#922ebd8cc59d97241bb01b1b17561a5c1ae0124e"
@@ -2547,10 +2554,10 @@
     estree-walker "^2.0.2"
     picomatch "^2.3.1"
 
-"@rpg-engine/shared@^0.9.49":
-  version "0.9.49"
-  resolved "https://registry.yarnpkg.com/@rpg-engine/shared/-/shared-0.9.49.tgz#fa934ce7e27db152b61c645923c81b2ee7b92690"
-  integrity sha512-61LCsaUtWDoFmF+3So1BhtKjV23yANWjWMhhFD5HqOlqfdzZrQvISU/0sDI2IT4WW30qQyQz5tYAJKtJqdInUg==
+"@rpg-engine/shared@^0.9.60":
+  version "0.9.60"
+  resolved "https://registry.yarnpkg.com/@rpg-engine/shared/-/shared-0.9.60.tgz#88093a1b4783016f2cc1d0dc1e1cbf23d83f3630"
+  integrity sha512-7sRUt+qygOhDFoxb0fzrJgIx4HXrQ0o3r8c3iARboWkvURnXFKtsZ/LWfHlVhmvtXG6XpF76Do/d19P/4VgUDw==
   dependencies:
     husky "^4.3.0"
     mobile-device-detect "^0.4.3"
