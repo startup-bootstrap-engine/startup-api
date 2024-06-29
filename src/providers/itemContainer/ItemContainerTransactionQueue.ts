@@ -12,6 +12,7 @@ import { ITEM_CONTAINER_ROLLBACK_MAX_TRIES } from "@providers/constants/ItemCont
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
+import { ResultsPoller } from "@providers/poller/ResultsPoller";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IItemContainerRead, ItemContainerType, ItemSocketEvents } from "@rpg-engine/shared";
@@ -38,7 +39,8 @@ export class ItemContainerTransactionQueue {
     private locker: Locker,
     private inMemoryHashTable: InMemoryHashTable,
     private characterWeightQueue: CharacterWeightQueue,
-    private dynamicQueue: DynamicQueue
+    private dynamicQueue: DynamicQueue,
+    private resultsPoller: ResultsPoller
   ) {}
 
   @TrackNewRelicTransaction()
@@ -72,11 +74,13 @@ export class ItemContainerTransactionQueue {
         async (job) => {
           const { item, character, originContainer, targetContainer, options } = job.data;
           const result = await this.execTransferToContainer(item, character, originContainer, targetContainer, options);
-          await this.inMemoryHashTable.set(
+
+          await this.resultsPoller.prepareResultToBePolled(
             "item-container-transfer-results",
             `${originContainer._id}-to-${targetContainer._id}`,
             result
           );
+
           return result;
         },
         {
@@ -88,9 +92,9 @@ export class ItemContainerTransactionQueue {
         }
       );
 
-      const result = await this.pollForItemContainerTransferResults(
-        originContainer._id.toString(),
-        targetContainer._id.toString()
+      const result = await this.resultsPoller.pollResults(
+        "item-container-transfer-results",
+        `${originContainer._id}-to-${targetContainer._id}`
       );
 
       if (!result) {
@@ -105,32 +109,6 @@ export class ItemContainerTransactionQueue {
 
   public shutdown(): Promise<void> {
     return this.dynamicQueue.shutdown();
-  }
-
-  public pollForItemContainerTransferResults(originContainerId: string, targetContainerId: string): Promise<boolean> {
-    return new Promise(async (resolve) => {
-      let attempt = 0;
-      while (attempt < 10) {
-        const result = await this.inMemoryHashTable.get(
-          "item-container-transfer-results",
-          `${originContainerId}-to-${targetContainerId}`
-        );
-
-        if (result !== undefined) {
-          await this.inMemoryHashTable.delete(
-            "item-container-transfer-results",
-            `${originContainerId}-to-${targetContainerId}`
-          );
-          resolve(result as unknown as boolean);
-          return;
-        }
-
-        attempt++;
-        await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for 100ms before next attempt
-      }
-
-      resolve(false);
-    });
   }
 
   @TrackNewRelicTransaction()
