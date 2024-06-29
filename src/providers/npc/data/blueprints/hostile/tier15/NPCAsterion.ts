@@ -2,7 +2,6 @@ import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
   BootsBlueprint,
-  CraftingResourcesBlueprint,
   DaggersBlueprint,
   FoodsBlueprint,
   GlovesBlueprint,
@@ -58,10 +57,7 @@ export const npcAsterion: INPCTierBlueprint<15> = {
       itemBlueprintKey: BootsBlueprint.CopperBoots,
       chance: LootProbability.Uncommon,
     },
-    {
-      itemBlueprintKey: CraftingResourcesBlueprint.SocialCrystal,
-      chance: LootProbability.VeryRare,
-    },
+
     {
       itemBlueprintKey: SwordsBlueprint.MinotaurSword,
       chance: LootProbability.Rare,

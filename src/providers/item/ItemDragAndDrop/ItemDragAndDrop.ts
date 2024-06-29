@@ -1,117 +1,319 @@
-import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem as IModelItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { CharacterInventory } from "@providers/character/CharacterInventory";
-import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
+import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { blueprintManager } from "@providers/inversify/container";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IEquipmentAndInventoryUpdatePayload, IItem, IItemMove, ItemSocketEvents, ItemType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
+import { ItemBaseKey } from "../ItemBaseKey";
 import { AvailableBlueprints } from "../data/types/itemsBlueprintTypes";
+import { ItemDragAndDropValidator } from "./ItemDragAndDropValidator";
 
 @provide(ItemDragAndDrop)
 export class ItemDragAndDrop {
   constructor(
     private socketMessaging: SocketMessaging,
-    private characterValidation: CharacterValidation,
     private characterItemSlots: CharacterItemSlots,
-    private characterInventory: CharacterInventory,
-    private inMemoryHashTable: InMemoryHashTable
+    private inMemoryHashTable: InMemoryHashTable,
+    private dynamicQueue: DynamicQueue,
+    private itemDragAndDropValidator: ItemDragAndDropValidator,
+    private itemBaseKey: ItemBaseKey
   ) {}
 
-  //! For now, only a move on inventory is allowed.
   @TrackNewRelicTransaction()
   public async performItemMove(itemMoveData: IItemMove, character: ICharacter): Promise<boolean> {
-    if (!(await this.isItemMoveValid(itemMoveData, character))) {
+    try {
+      if (!(await this.itemDragAndDropValidator.isItemMoveValid(itemMoveData, character))) {
+        return false;
+      }
+
+      if (appEnv.general.IS_UNIT_TEST) {
+        return await this.processItemMove(itemMoveData, character);
+      }
+
+      await this.dynamicQueue.addJob(
+        "item-move",
+        async (job) => {
+          const { itemMoveData, characterId } = job.data;
+          const character = (await Character.findById(characterId).lean()) as ICharacter;
+          if (!character) {
+            throw new Error("Character not found.");
+          }
+          void this.processItemMove(itemMoveData, character);
+        },
+        { itemMoveData, characterId: character._id }
+      );
+      return true;
+    } catch (error) {
+      console.error(error);
       return false;
     }
+  }
 
-    await this.clearCharacterCache(
-      character,
-      itemMoveData.from.containerId,
-      itemMoveData.to.containerId,
-      itemMoveData.from.item
-    );
+  private async processItemMove(itemMoveData: IItemMove, character: ICharacter): Promise<boolean> {
+    const rollbackActions: (() => Promise<void>)[] = [];
+    let success = false;
 
-    const itemToBeMoved = await this.retrieveItem(itemMoveData.from.item._id);
-    if (!itemToBeMoved) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, item to be moved wasn't found.");
-      return false;
-    }
+    try {
+      await this.clearCharacterCache(
+        character,
+        itemMoveData.from.containerId,
+        itemMoveData.to.containerId,
+        itemMoveData.from.item
+      );
 
-    const itemToBeMovedTo = await this.retrieveItem(itemMoveData.to.item?._id!);
-    if (!itemToBeMovedTo && itemMoveData.to.item !== null) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, item to be moved to wasn't found.");
-      return false;
-    }
+      const itemToBeMoved = await this.retrieveItem(itemMoveData.from.item._id);
+      if (!itemToBeMoved) {
+        throw new Error("Item to be moved wasn't found.");
+      }
 
-    if (itemMoveData.to.source !== itemMoveData.from.source) {
+      const itemToBeMovedTo = itemMoveData.to.item ? await this.retrieveItem(itemMoveData.to.item._id!) : null;
+      if (!itemToBeMovedTo && itemMoveData.to.item !== null) {
+        throw new Error("Item to be moved to wasn't found.");
+      }
+
+      if (itemMoveData.to.source !== itemMoveData.from.source) {
+        throw new Error("You can't move items between different sources.");
+      }
+
+      await this.executeItemMoveLogic(itemMoveData, character, itemToBeMoved, itemToBeMovedTo, rollbackActions);
+
+      await this.updateInventory(itemMoveData, character);
+
+      success = true;
+      return true;
+    } catch (error) {
+      console.error(error);
       this.socketMessaging.sendErrorMessageToCharacter(
         character,
-        "Sorry, you can't move items between different sources."
+        `Sorry, an error occurred while moving the item: ${(error as Error).message}`
       );
       return false;
+    } finally {
+      if (!success) {
+        await this.performRollback(rollbackActions);
+      }
     }
+  }
 
-    return await this.processItemMove(itemMoveData, character, itemToBeMoved, itemToBeMovedTo);
+  private async performRollback(rollbackActions: (() => Promise<void>)[]): Promise<void> {
+    for (const action of rollbackActions.reverse()) {
+      try {
+        await action();
+      } catch (error) {
+        console.error("Error during rollback:", error);
+      }
+    }
   }
 
   private async retrieveItem(itemId: string): Promise<IItem | null> {
     return await Item.findById(itemId).lean<IItem>();
   }
 
-  private async processItemMove(
-    itemMoveData: IItemMove,
-    character: ICharacter,
-    itemToBeMoved: IItem,
-    itemToBeMovedTo: IItem | null
-  ): Promise<boolean> {
-    try {
-      await this.executeItemMoveLogic(itemMoveData, character, itemToBeMoved);
-      await this.updateInventory(itemMoveData, character);
-      return true;
-    } catch (err) {
-      this.socketMessaging.sendErrorMessageToCharacter(character);
-      console.log(err);
-      return false;
-    }
-  }
-
   private async executeItemMoveLogic(
     itemMoveData: IItemMove,
     character: ICharacter,
-    itemToBeMoved: IItem
+    itemToBeMoved: IItem,
+    itemToBeMovedTo: IItem | null,
+    rollbackActions: (() => Promise<void>)[]
   ): Promise<void> {
-    // Logic extracted from the switch statement in the original method, pertaining to "Inventory"
     await this.moveItemInInventory(
       Object.assign({}, itemMoveData.from, { item: itemToBeMoved }),
-      itemMoveData.to,
+      Object.assign({}, itemMoveData.to, { item: itemToBeMovedTo }),
       character,
       itemMoveData.from.containerId,
-      itemMoveData.quantity
+      itemMoveData.quantity ?? 0,
+      rollbackActions
     );
   }
 
-  private async updateInventory(itemMoveData: IItemMove, character: ICharacter): Promise<void> {
-    const inventoryContainer = (await ItemContainer.findById(itemMoveData.from.containerId)) as IItemContainer;
-    const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {
-      inventory: inventoryContainer as any,
-      openEquipmentSetOnUpdate: false,
-      openInventoryOnUpdate: false,
+  private async moveItemInInventory(
+    from: { item: IItem; slotIndex: number },
+    to: { item: IItem | null; slotIndex: number },
+    character: ICharacter,
+    containerId: string,
+    quantity: number,
+    rollbackActions: (() => Promise<void>)[]
+  ): Promise<boolean> {
+    const targetContainer = await ItemContainer.findById(containerId);
+
+    if (from.item?.rarity !== to.item?.rarity && to.item !== null) {
+      throw new Error("Unable to move items with different rarities.");
+    }
+
+    if (!from.item || !targetContainer) {
+      throw new Error("Invalid item or container.");
+    }
+
+    let totalMove = false;
+
+    const moveItem = async (): Promise<boolean> => {
+      const originalFromItem = { ...from.item };
+      const originalToItem = to.item ? { ...to.item } : null;
+
+      const result = await this.characterItemSlots.deleteItemOnSlot(targetContainer, from.item._id);
+      if (!result) {
+        throw new Error("Failed to delete item from slot.");
+      }
+
+      rollbackActions.push(async () => {
+        await this.characterItemSlots.addItemOnSlot(
+          targetContainer,
+          originalFromItem as unknown as IModelItem,
+          from.slotIndex
+        );
+      });
+
+      const hasAddedItemOnSlot = await this.characterItemSlots.addItemOnSlot(
+        targetContainer,
+        from.item as unknown as IModelItem,
+        to.slotIndex
+      );
+
+      if (!hasAddedItemOnSlot) {
+        throw new Error("Failed to add item on slot.");
+      }
+
+      rollbackActions.push(async () => {
+        await this.characterItemSlots.deleteItemOnSlot(targetContainer, from.item._id);
+        if (originalToItem) {
+          await this.characterItemSlots.addItemOnSlot(
+            targetContainer,
+            originalToItem as unknown as IModelItem,
+            to.slotIndex
+          );
+        }
+      });
+
+      totalMove = true;
+      return true;
     };
-    this.sendRefreshItemsEvent(payloadUpdate, character);
+
+    if (!quantity && !to.item) {
+      await moveItem();
+    } else if (quantity && from.item.stackQty) {
+      if (to.item && to.item.stackQty) {
+        await this.handleStackableItemMove(targetContainer, from, to, quantity, rollbackActions);
+      } else if (quantity >= from.item.stackQty) {
+        await moveItem();
+      } else {
+        const originalStackQty = from.item.stackQty;
+        await this.updateStackQty(targetContainer, from.slotIndex, from.item.stackQty - quantity);
+        rollbackActions.push(async () => {
+          await this.updateStackQty(targetContainer, from.slotIndex, originalStackQty);
+        });
+      }
+    }
+
+    const hasAddedNewItem = await this.createAndAddNewItem(
+      from,
+      to,
+      character,
+      targetContainer,
+      totalMove,
+      quantity,
+      rollbackActions
+    );
+
+    if (!hasAddedNewItem) {
+      throw new Error("Failed to add new item.");
+    }
+
+    return true;
   }
 
-  private sendRefreshItemsEvent(payloadUpdate: IEquipmentAndInventoryUpdatePayload, character: ICharacter): void {
-    this.socketMessaging.sendEventToUser<IEquipmentAndInventoryUpdatePayload>(
-      character.channelId!,
-      ItemSocketEvents.EquipmentAndInventoryUpdate,
-      payloadUpdate
-    );
+  private async handleStackableItemMove(
+    targetContainer: IItemContainer,
+    from: { item: IItem; slotIndex: number },
+    to: { item: IItem | null; slotIndex: number },
+    quantity: number,
+    rollbackActions: (() => Promise<void>)[]
+  ): Promise<void> {
+    const toStackQty = to.item?.stackQty ?? 0;
+    const futureQuantity = Math.min(toStackQty + quantity, to.item?.maxStackSize ?? Infinity);
+
+    const originalToStackQty = toStackQty;
+    await this.updateStackQty(targetContainer, to.slotIndex, futureQuantity);
+    rollbackActions.push(async () => {
+      await this.updateStackQty(targetContainer, to.slotIndex, originalToStackQty);
+    });
+
+    const remainingQty = from.item.stackQty! - (futureQuantity - toStackQty);
+    if (remainingQty <= 0) {
+      const deletedItem = await this.deleteItemFromSlot(targetContainer, from.item._id);
+      rollbackActions.push(async () => {
+        if (deletedItem) {
+          await Item.create(deletedItem);
+          await this.characterItemSlots.addItemOnSlot(targetContainer, deletedItem as any, from.slotIndex);
+        }
+      });
+    } else {
+      const originalFromStackQty = from.item.stackQty!;
+      await this.updateStackQty(targetContainer, from.slotIndex, remainingQty);
+      rollbackActions.push(async () => {
+        await this.updateStackQty(targetContainer, from.slotIndex, originalFromStackQty);
+      });
+    }
+  }
+
+  private async updateStackQty(targetContainer: IItemContainer, slotIndex: number, newStackQty: number): Promise<void> {
+    await this.characterItemSlots.updateItemOnSlot(slotIndex, targetContainer, {
+      stackQty: newStackQty,
+      owner: targetContainer.owner,
+    } as IItem);
+  }
+
+  private async deleteItemFromSlot(targetContainer: IItemContainer, itemId: string): Promise<IItem | null> {
+    await this.characterItemSlots.deleteItemOnSlot(targetContainer, itemId);
+    return await Item.findByIdAndDelete(itemId).lean();
+  }
+
+  private async createAndAddNewItem(
+    from: { item: IItem; slotIndex: number },
+    to: { item: IItem | null; slotIndex: number },
+    character: ICharacter,
+    targetContainer: IItemContainer,
+    totalMove: boolean,
+    quantity: number,
+    rollbackActions: (() => Promise<void>)[]
+  ): Promise<boolean> {
+    if (!to.item && !totalMove) {
+      const itemBaseKey = this.itemBaseKey.getBaseKey(from.item.key);
+      const blueprint = await blueprintManager.getBlueprint<IItem>("items", itemBaseKey as AvailableBlueprints);
+      if (!blueprint) {
+        return false;
+      }
+
+      const item = new Item({
+        ...blueprint,
+        attack: from.item.attack ?? blueprint.attack,
+        defense: from.item.defense ?? blueprint.defense,
+        rarity: from.item.rarity ?? blueprint.rarity,
+        stackQty: quantity ?? from.item.stackQty,
+        owner: character._id,
+      });
+
+      await item.save();
+      rollbackActions.push(async () => {
+        await Item.findByIdAndDelete(item._id);
+      });
+
+      const success = await this.characterItemSlots.addItemOnSlot(targetContainer, item, to.slotIndex);
+      if (success) {
+        rollbackActions.push(async () => {
+          await this.characterItemSlots.deleteItemOnSlot(targetContainer, item._id);
+        });
+      }
+      return success;
+    }
+
+    return true;
   }
 
   private async clearCharacterCache(
@@ -138,256 +340,21 @@ export class ItemDragAndDrop {
     await Promise.all(promises);
   }
 
-  private async moveItemInInventory(
-    from: { item: IItem; slotIndex: number },
-    to: { item: IItem | null; slotIndex: number },
-    character: ICharacter,
-    containerId: string,
-    quantity?: number
-  ): Promise<boolean> {
-    const targetContainer = await ItemContainer.findById(containerId);
-
-    if (from.item?.rarity !== to.item?.rarity && to.item !== null) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Unable to move items with different rarities.");
-      return false;
-    }
-
-    if (!from.item) {
-      this.socketMessaging.sendErrorMessageToCharacter(character);
-      return false;
-    }
-
-    if (!targetContainer) {
-      this.socketMessaging.sendErrorMessageToCharacter(character);
-      return false;
-    }
-
-    let totalMove = false;
-
-    const moveItem = async (): Promise<boolean> => {
-      try {
-        const result = await this.characterItemSlots.deleteItemOnSlot(targetContainer, from.item._id);
-
-        if (!result) {
-          this.socketMessaging.sendErrorMessageToCharacter(character);
-          return false;
-        }
-
-        await this.characterItemSlots.addItemOnSlot(targetContainer, from.item as unknown as IModelItem, to.slotIndex);
-        totalMove = true;
-
-        return true;
-      } catch (error) {
-        this.socketMessaging.sendErrorMessageToCharacter(character);
-        return false;
-      }
-    };
-
-    if (!quantity && !to.item) {
-      // Move non stackable items to new slot
-      await moveItem();
-    } else if (quantity && from.item.stackQty) {
-      if (to.item && to.item.stackQty) {
-        // Merge stackable items
-        await this.handleStackableItemMove(targetContainer, from, to, quantity);
-      } else if (quantity >= from.item.stackQty) {
-        // Move all stackable items to new slot
-        await moveItem();
-      } else {
-        // Split stackable items
-        await this.updateStackQty(targetContainer, from.slotIndex, from.item.stackQty - quantity);
-      }
-    }
-
-    const hasAddedNewItem = await this.createAndAddNewItem(from, to, character, targetContainer, totalMove, quantity);
-
-    if (!hasAddedNewItem) {
-      return false;
-    }
-
-    return true;
-  }
-
-  private async handleStackableItemMove(
-    targetContainer: IItemContainer,
-    from: {
-      item: IItem;
-      slotIndex: number;
-    },
-    to: {
-      item: IItem | null;
-      slotIndex: number;
-    },
-    quantity: number
-  ): Promise<void> {
-    const toStackQty = to.item?.stackQty;
-    const futureQuantity = Math.min(toStackQty! + quantity, to.item?.maxStackSize!);
-
-    await this.updateStackQty(targetContainer, to.slotIndex, futureQuantity);
-
-    const remainingQty = from.item.stackQty! - (futureQuantity - toStackQty!);
-    if (remainingQty <= 0) {
-      await this.deleteItemFromSlot(targetContainer, from.item._id);
-    } else {
-      await this.updateStackQty(targetContainer, from.slotIndex, remainingQty);
-    }
-  }
-
-  private async updateStackQty(targetContainer: IItemContainer, slotIndex: number, newStackQty: number): Promise<void> {
-    await this.characterItemSlots.updateItemOnSlot(slotIndex, targetContainer, {
-      stackQty: newStackQty,
-      owner: targetContainer.owner,
-    } as IItem);
-  }
-
-  private async deleteItemFromSlot(targetContainer: IItemContainer, itemId: string): Promise<void> {
-    await this.characterItemSlots.deleteItemOnSlot(targetContainer, itemId);
-    await Item.findByIdAndDelete(itemId);
-  }
-
-  private async createAndAddNewItem(
-    from: {
-      item: IItem;
-      slotIndex: number;
-    },
-    to: {
-      item: IItem | null;
-      slotIndex: number;
-    },
-    character: ICharacter,
-    targetContainer: IItemContainer,
-    totalMove: boolean,
-    quantity?: number
-  ): Promise<boolean> {
-    if (!to.item && !totalMove) {
-      const blueprint = await blueprintManager.getBlueprint<IItem>("items", from.item.key as AvailableBlueprints);
-      if (!blueprint) {
-        return false;
-      }
-
-      const item = new Item({
-        ...blueprint,
-        attack: from.item.attack ?? blueprint.attack,
-        defense: from.item.defense ?? blueprint.defense,
-        rarity: from.item.rarity ?? blueprint.rarity,
-        stackQty: quantity ?? from.item.stackQty,
-        owner: character._id,
-      });
-
-      await item.save();
-
-      return await this.characterItemSlots.addItemOnSlot(targetContainer, item, to.slotIndex);
-    }
-
-    return true;
-  }
-
-  private async isItemMoveValid(itemMove: IItemMove, character: ICharacter): Promise<Boolean> {
-    const itemFrom = await Item.findById(itemMove.from.item._id);
-    const itemTo = await Item.findById(itemMove.to.item?._id);
-
-    if (itemFrom?.rarity !== itemTo?.rarity && itemTo !== null) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Unable to move items with different rarities.");
-      return false;
-    }
-
-    if (!itemFrom) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, item to be moved wasn't found.");
-      return false;
-    }
-
-    // should return false if the quantity to be moved is more than the available quantity
-
-    if (itemMove.quantity && itemFrom.stackQty && itemMove.quantity > itemFrom.stackQty) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        "Sorry, you can't move more than the available quantity."
-      );
-      return false;
-    }
-
-    // should return false if the source and target slots are the same
-    if (itemMove.from.slotIndex === itemMove?.to?.slotIndex) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you can't move an item to the same slot.");
-      return false;
-    }
-
-    // check if itemTo is a container. if so, check if there's enough space before proceeding
-
-    if (itemTo?.isItemContainer) {
-      const hasAvailableSlots = await this.characterItemSlots.hasAvailableSlot(
-        itemTo.itemContainer as string,
-        itemFrom
-      );
-
-      if (!hasAvailableSlots) {
-        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, there's no space in this container.");
-        return false;
-      }
-    }
-
-    // TODO: Add other sources to move from or to in future
-    const isInventory = itemMove.from.source === "Inventory" && itemMove.to.source === "Inventory";
-    if (!itemFrom || (!itemTo && itemMove.to.item !== null) || !isInventory) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, this item is not accessible.");
-      return false;
-    }
-
-    const inventory = await this.characterInventory.getInventory(character);
-    if (!inventory) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        "Sorry, you must have a bag or backpack to move this item."
-      );
-      return false;
-    }
-
-    const inventoryContainer = (await ItemContainer.findById(inventory.itemContainer)) as IItemContainer;
-    if (!inventoryContainer) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, inventory container not found.");
-      return false;
-    }
-
-    const hasItemToMoveInInventory = inventoryContainer?.itemIds?.find(
-      (itemId) => String(itemId) === String(itemFrom._id)
+  private sendRefreshItemsEvent(payloadUpdate: IEquipmentAndInventoryUpdatePayload, character: ICharacter): void {
+    this.socketMessaging.sendEventToUser<IEquipmentAndInventoryUpdatePayload>(
+      character.channelId!,
+      ItemSocketEvents.EquipmentAndInventoryUpdate,
+      payloadUpdate
     );
-    const hasItemToMoveToInInventory =
-      itemTo === null || inventoryContainer?.itemIds?.find((itemId) => String(itemId) === String(itemTo._id));
+  }
 
-    if (!hasItemToMoveInInventory || !hasItemToMoveToInInventory) {
-      // this.socketMessaging.sendErrorMessageToCharacter(
-      //   character,
-      //   "Sorry, you do not have this item in your inventory."
-      // );
-      return false;
-    }
-
-    if (
-      itemMove.from.containerId.toString() !== inventoryContainer?._id.toString() ||
-      itemMove.to.containerId.toString() !== inventoryContainer?._id.toString()
-    ) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        "Sorry, this item does not belong to your inventory."
-      );
-      return false;
-    }
-
-    const toSlotItem = inventoryContainer.slots[itemMove.to.slotIndex];
-
-    if (toSlotItem && toSlotItem.key !== itemMove.from.item.key) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you cannot move items of different types.");
-      return false;
-    }
-
-    if (!inventoryContainer) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        "Sorry, you must have a bag or backpack to move this item."
-      );
-      return false;
-    }
-
-    return this.characterValidation.hasBasicValidation(character);
+  private async updateInventory(itemMoveData: IItemMove, character: ICharacter): Promise<void> {
+    const inventoryContainer = (await ItemContainer.findById(itemMoveData.from.containerId)) as IItemContainer;
+    const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {
+      inventory: inventoryContainer as any,
+      openEquipmentSetOnUpdate: false,
+      openInventoryOnUpdate: false,
+    };
+    this.sendRefreshItemsEvent(payloadUpdate, character);
   }
 }

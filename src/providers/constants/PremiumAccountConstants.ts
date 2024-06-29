@@ -54,8 +54,8 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
     manaRegenPercent: 1.05,
   },
   [UserAccountTypes.PremiumSilver]: {
-    SPXPLostOnDeathReduction: 35, // only loses 60% of the regular skill loss
-    InventoryLossOnDeathReduction: 35, // 50% less chance to drop an item
+    SPXPLostOnDeathReduction: 35,
+    InventoryLossOnDeathReduction: 35,
     maxSpeed: MovementSpeed.Fast,
     XPBuff: 15,
     lootDropBuff: 15,
@@ -69,33 +69,33 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
     manaRegenPercent: 1.1,
   },
   [UserAccountTypes.PremiumGold]: {
-    SPXPLostOnDeathReduction: 50, // only loses 50% of the regular skill loss
-    InventoryLossOnDeathReduction: 50, // Do not drop anything on death
-    maxSpeed: MovementSpeed.Fast,
-    XPBuff: 20,
-    lootDropBuff: 20,
-    spellCooldownReduction: {
-      defaultReduction: 0,
-      customReduction: {
-        ...generateCustomCooldownReduction(CUSTOM_COOLDOWN_REDUCTION_DEFAULT_GOLD),
-      },
-    },
-    craftingQtyBuff: 20,
-    manaRegenPercent: 1.15,
-  },
-  [UserAccountTypes.PremiumUltimate]: {
-    SPXPLostOnDeathReduction: 50, // only loses 50% of the regular skill loss
-    InventoryLossOnDeathReduction: 50, // Do not drop anything on death
+    SPXPLostOnDeathReduction: 60,
+    InventoryLossOnDeathReduction: 60,
     maxSpeed: MovementSpeed.Fast,
     XPBuff: 25,
     lootDropBuff: 25,
     spellCooldownReduction: {
       defaultReduction: 0,
       customReduction: {
-        ...generateCustomCooldownReduction(CUSTOM_COOLDOWN_REDUCTION_DEFAULT_ULTIMATE),
+        ...generateCustomCooldownReduction(CUSTOM_COOLDOWN_REDUCTION_DEFAULT_GOLD),
       },
     },
     craftingQtyBuff: 25,
     manaRegenPercent: 1.2,
+  },
+  [UserAccountTypes.PremiumUltimate]: {
+    SPXPLostOnDeathReduction: 80,
+    InventoryLossOnDeathReduction: 80,
+    maxSpeed: MovementSpeed.Fast,
+    XPBuff: 35,
+    lootDropBuff: 35,
+    spellCooldownReduction: {
+      defaultReduction: 0,
+      customReduction: {
+        ...generateCustomCooldownReduction(CUSTOM_COOLDOWN_REDUCTION_DEFAULT_ULTIMATE),
+      },
+    },
+    craftingQtyBuff: 30,
+    manaRegenPercent: 1.4,
   },
 };

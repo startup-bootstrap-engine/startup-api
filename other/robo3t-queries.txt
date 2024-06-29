@@ -33,3 +33,50 @@ db.items.aggregate([
     }
   }
 ])
+
+
+FIND POTENTIAL ITEM BUGGERS
+
+
+db.items.aggregate([
+  // Match items with defense greater than 300
+  {
+   $match: {
+      $or: [
+        { defense: { $gt: 500 } },
+        { attack: { $gt: 500 } }
+      ]
+    }
+  },
+  // Lookup to join with the characters collection
+  {
+    $lookup: {
+      from: "characters",
+      localField: "owner",
+      foreignField: "_id",
+      as: "ownerInfo"
+    }
+  },
+  // Unwind the ownerInfo array
+  {
+    $unwind: "$ownerInfo"
+  },
+  // Group by owner name
+  {
+    $group: {
+      _id: "$ownerInfo.name",
+      items: {
+        $push: {
+          itemId: "$_id",
+          itemName: "$name",
+          defense: "$defense"
+        }
+      },
+      count: { $sum: 1 }
+    }
+  },
+  // Sort by the number of bugged items in descending order
+  {
+    $sort: { count: -1 }
+  }
+])

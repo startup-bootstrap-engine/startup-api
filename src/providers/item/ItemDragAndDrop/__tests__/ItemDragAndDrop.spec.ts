@@ -3,8 +3,10 @@ import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemCon
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IItemMove } from "@rpg-engine/shared";
-import { ItemDragAndDrop } from "../ItemDragAndDrop/ItemDragAndDrop";
+import { ItemDragAndDrop } from "../ItemDragAndDrop";
+import { ItemDragAndDropValidator } from "../ItemDragAndDropValidator";
 
 describe("ItemDragAndDrop.ts", () => {
   let itemDragAndDrop: ItemDragAndDrop;
@@ -57,7 +59,7 @@ describe("ItemDragAndDrop.ts", () => {
     };
 
     // @ts-ignore
-    sendErrorMessageToCharacterSpy = jest.spyOn(itemDragAndDrop.socketMessaging, "sendErrorMessageToCharacter");
+    sendErrorMessageToCharacterSpy = jest.spyOn(SocketMessaging.prototype, "sendErrorMessageToCharacter");
   });
 
   afterEach(() => {
@@ -158,7 +160,7 @@ describe("ItemDragAndDrop.ts", () => {
 
   it("should call isItemMoveValid method and moveItemInInventory", async () => {
     // @ts-ignore
-    const isItemMoveValidSpy = jest.spyOn(itemDragAndDrop, "isItemMoveValid");
+    const isItemMoveValidSpy = jest.spyOn(ItemDragAndDropValidator.prototype, "isItemMoveValid");
     // @ts-ignore
     const moveItemInInventorySpy = jest.spyOn(itemDragAndDrop, "moveItemInInventory");
 
@@ -346,6 +348,127 @@ describe("ItemDragAndDrop.ts", () => {
       expect(updatedInventoryContainer.slots[1]).toMatchObject({
         stackQty: stackableItem.stackQty! + stackableItem2.stackQty!,
       });
+    });
+  });
+
+  describe("ItemDragAndDrop.ts - Rollback cases", () => {
+    let itemDragAndDrop: ItemDragAndDrop;
+    let itemMoveData: IItemMove;
+    let testCharacter: ICharacter;
+    let testItem: IItem;
+    let characterInventory: CharacterInventory;
+    let sendErrorMessageToCharacterSpy: jest.SpyInstance;
+    let inventory: IItem;
+    let inventoryContainer: IItemContainer;
+    let rollbackSpy: jest.SpyInstance;
+
+    beforeAll(() => {
+      itemDragAndDrop = container.get<ItemDragAndDrop>(ItemDragAndDrop);
+      characterInventory = container.get<CharacterInventory>(CharacterInventory);
+    });
+
+    beforeEach(async () => {
+      testCharacter = await unitTestHelper.createMockCharacter(null, {
+        hasEquipment: true,
+        hasInventory: true,
+        hasSkills: true,
+      });
+      testItem = await unitTestHelper.createMockItem();
+      await testItem.save();
+
+      inventory = (await characterInventory.getInventory(testCharacter)) as IItem;
+      inventoryContainer = (await ItemContainer.findById(inventory?.itemContainer)) as IItemContainer;
+
+      if (!inventory || !inventoryContainer) {
+        throw new Error("Inventory or inventory container not found");
+      }
+
+      await unitTestHelper.addItemsToContainer(inventoryContainer, 1, [testItem]);
+
+      // Add this part to create a valid itemMoveData object
+      itemMoveData = {
+        from: {
+          item: testItem as any,
+          slotIndex: 0,
+          source: "Inventory",
+          containerId: inventoryContainer._id,
+        },
+        to: {
+          item: null,
+          slotIndex: 1,
+          source: "Inventory",
+          containerId: inventoryContainer._id,
+        },
+        quantity: 1,
+      };
+
+      // @ts-ignore
+      rollbackSpy = jest.spyOn(itemDragAndDrop, "performRollback");
+
+      // @ts-ignore
+      sendErrorMessageToCharacterSpy = jest.spyOn(SocketMessaging.prototype, "sendErrorMessageToCharacter");
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should rollback when an error occurs during item move", async () => {
+      // Mocking an error during item move
+      jest.spyOn(Item.prototype, "save").mockImplementationOnce(() => {
+        throw new Error("Mocked save error");
+      });
+
+      const result = await itemDragAndDrop.performItemMove(itemMoveData, testCharacter);
+
+      expect(result).toBeFalsy();
+      expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledTimes(1);
+      expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledWith(
+        testCharacter,
+        "Sorry, an error occurred while moving the item: Mocked save error"
+      );
+
+      // Verify rollback actions
+      const updatedInventoryContainer = await ItemContainer.findById(inventory?.itemContainer);
+      if (!updatedInventoryContainer) {
+        throw new Error("Inventory container not found");
+      }
+      expect(updatedInventoryContainer.slots[0]).toMatchObject(testItem.toObject());
+      expect(updatedInventoryContainer.slots[1]).toBeFalsy();
+
+      expect(rollbackSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("should rollback when an error occurs during stackable item move", async () => {
+      const stackableItem = await unitTestHelper.createStackableMockItem({ stackQty: 10 });
+      await unitTestHelper.addItemsToContainer(inventoryContainer, 1, [stackableItem]);
+
+      itemMoveData.from.item = stackableItem as any;
+      itemMoveData.quantity = 5; // Splitting the stack
+
+      // Mocking an error during stackable item move
+      jest.spyOn(Item.prototype, "save").mockImplementationOnce(() => {
+        throw new Error("Mocked save error");
+      });
+
+      const result = await itemDragAndDrop.performItemMove(itemMoveData, testCharacter);
+
+      expect(result).toBeFalsy();
+      expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledTimes(1);
+      expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledWith(
+        testCharacter,
+        "Sorry, an error occurred while moving the item: Mocked save error"
+      );
+
+      // Verify rollback actions
+      const updatedInventoryContainer = await ItemContainer.findById(inventory?.itemContainer);
+      if (!updatedInventoryContainer) {
+        throw new Error("Inventory container not found");
+      }
+      expect(updatedInventoryContainer.slots[0].stackQty).toEqual(stackableItem.stackQty);
+      expect(updatedInventoryContainer.slots[1]).toBeFalsy();
+
+      expect(rollbackSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

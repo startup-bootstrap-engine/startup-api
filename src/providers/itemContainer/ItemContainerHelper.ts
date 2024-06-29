@@ -1,4 +1,5 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
@@ -69,6 +70,40 @@ export class ItemContainerHelper {
       if (item) {
         await fn(item, Number(slotIndex));
       }
+    }
+  }
+
+  @TrackNewRelicTransaction()
+  public async generateItemContainerIfNotPresentOnItem(item: IItem): Promise<IItemContainer | undefined> {
+    const hasItemContainer = await ItemContainer.exists({ parentItem: item._id });
+
+    if (item.isItemContainer && !hasItemContainer) {
+      let slotQty: number = 20;
+
+      if (item.generateContainerSlots) {
+        slotQty = item.generateContainerSlots;
+      }
+
+      // generate slots object
+      const slots = {};
+
+      for (let i = 0; i < slotQty; i++) {
+        slots[Number(i)] = null;
+      }
+
+      const newContainer = (await ItemContainer.create({
+        name: item.name,
+        parentItem: item._id,
+        slotQty,
+        slots,
+        owner: item.owner,
+        isOwnerRestricted: !!item.owner,
+      })) as unknown as IItemContainer;
+
+      // Update the item to include the new container reference
+      await Item.updateOne({ _id: item._id }, { $set: { itemContainer: newContainer._id } });
+
+      return newContainer;
     }
   }
 }
