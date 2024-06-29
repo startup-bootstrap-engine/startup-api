@@ -81,7 +81,7 @@ export class CalculateEffectDamage {
 
       const modifier = attacker.type === EntityType.NPC ? ENTITY_EFFECT_DAMAGE_FROM_NPC_MODIFIER : 1;
 
-      return effectDamage * modifier;
+      return effectDamage * modifier ?? 1;
     } catch (err) {
       console.error(err);
       return minRawDamage;
