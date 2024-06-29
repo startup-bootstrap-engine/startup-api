@@ -8,7 +8,6 @@ import { CharacterItemContainer } from "@providers/character/characterItems/Char
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
 import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { appEnv } from "@providers/config/env";
-import { ITEM_CONTAINER_ROLLBACK_MAX_TRIES } from "@providers/constants/ItemContainerConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
@@ -27,6 +26,11 @@ interface IItemContainerTransactionOption {
   readContainersAfterTransaction?: IItemContainerTransactionRead[];
   shouldAddOwnership?: boolean;
   updateCharacterWeightAfterTransaction?: boolean;
+}
+
+interface IContainerSnapshot {
+  containerId: string;
+  slots: Record<string, IItem | null>;
 }
 
 @provideSingleton(ItemContainerTransactionQueue)
@@ -139,9 +143,24 @@ export class ItemContainerTransactionQueue {
         return false;
       }
 
+      const originSnapshot = this.takeContainerSnapshot(originContainer);
+      const targetSnapshot = this.takeContainerSnapshot(targetContainer);
+
       await this.clearContainersCache(originContainer, targetContainer);
 
       const result = await this.performTransaction(item, character, originContainer, targetContainer, options);
+
+      if (!result) {
+        await this.rollbackContainers(originSnapshot, targetSnapshot);
+        return false;
+      }
+
+      const isConsistent = await this.wasTransactionConsistent(item, originContainer, targetContainer);
+
+      if (!isConsistent) {
+        await this.rollbackContainers(originSnapshot, targetSnapshot);
+        return false;
+      }
 
       const { readContainersAfterTransaction } = options;
 
@@ -163,6 +182,50 @@ export class ItemContainerTransactionQueue {
     } finally {
       await this.locker.unlock(`${originContainer?._id}-to-${targetContainer?._id}-item-container-transfer`);
     }
+  }
+
+  private takeContainerSnapshot(container: IItemContainer): IContainerSnapshot {
+    const snapshot: IContainerSnapshot = {
+      containerId: container._id.toString(),
+      slots: {},
+    };
+    for (const [slotId, item] of Object.entries(container.slots)) {
+      snapshot.slots[slotId] = item ? ({ ...item } as IItem) : null;
+    }
+    return snapshot;
+  }
+
+  private async rollbackContainers(
+    originSnapshot: IContainerSnapshot,
+    targetSnapshot: IContainerSnapshot
+  ): Promise<void> {
+    await this.applyContainerSnapshot(originSnapshot);
+    await this.applyContainerSnapshot(targetSnapshot);
+  }
+
+  private async applyContainerSnapshot(snapshot: IContainerSnapshot): Promise<void> {
+    await ItemContainer.updateOne({ _id: snapshot.containerId }, { $set: { slots: snapshot.slots } });
+  }
+
+  private async wasTransactionConsistent(
+    item: IItem,
+    originContainer: IItemContainer,
+    targetContainer: IItemContainer
+  ): Promise<boolean> {
+    const updatedOriginContainer = await ItemContainer.findById(originContainer._id).lean<IItemContainer>();
+    const updatedTargetContainer = await ItemContainer.findById(targetContainer._id).lean<IItemContainer>();
+
+    if (!updatedOriginContainer || !updatedTargetContainer) {
+      return false;
+    }
+
+    const originSlotIndex = await this.characterItemSlots.findItemSlotIndex(updatedOriginContainer, item._id);
+    const targetSlotIndex = await this.characterItemSlots.findItemSlotIndex(updatedTargetContainer, item._id);
+
+    const wasItemRemovedFromOrigin = originSlotIndex === undefined;
+    const wasItemAddedToTarget = targetSlotIndex !== undefined;
+
+    return wasItemRemovedFromOrigin && wasItemAddedToTarget;
   }
 
   private async performTransaction(
@@ -199,33 +262,10 @@ export class ItemContainerTransactionQueue {
         character,
         "Failed to remove original item from origin container."
       );
-
-      // Attempt rollback by removing the item from the target container
-      const rollbackSuccessful = await this.retryOperation(async () => {
-        return await this.characterItemContainer.removeItemFromContainer(item, character, targetContainer);
-      });
-
-      if (!rollbackSuccessful) {
-        this.socketMessaging.sendErrorMessageToCharacter(
-          character,
-          "Failed to rollback item addition to target container. Please check your inventory."
-        );
-      }
-
       return false;
     }
 
     return true;
-  }
-
-  private async retryOperation(operation: () => Promise<boolean>): Promise<boolean> {
-    let attempt = 0;
-    while (attempt < ITEM_CONTAINER_ROLLBACK_MAX_TRIES) {
-      const success = await operation();
-      if (success) return true;
-      attempt++;
-    }
-    return false;
   }
 
   private async rollbackTransfer(
@@ -237,28 +277,10 @@ export class ItemContainerTransactionQueue {
     console.log("Rolling back transfer operation");
 
     try {
-      // First, try to remove the item from the target container
-      const removeFromTargetSuccessful = await this.characterItemContainer.removeItemFromContainer(
-        item,
-        character,
-        targetContainer
-      );
+      const originSnapshot = await this.takeContainerSnapshot(originContainer);
+      const targetSnapshot = await this.takeContainerSnapshot(targetContainer);
 
-      if (!removeFromTargetSuccessful) {
-        console.error("Failed to remove item from target container during rollback");
-      }
-
-      // Then, try to add the item back to the origin container
-      const addToOriginSuccessful = await this.characterItemContainer.addItemToContainer(
-        item,
-        character,
-        originContainer._id,
-        { shouldAddOwnership: false }
-      );
-
-      if (!addToOriginSuccessful) {
-        console.error("Failed to add item back to origin container during rollback");
-      }
+      await this.rollbackContainers(originSnapshot, targetSnapshot);
 
       // Clear caches for both containers
       await this.clearContainersCache(originContainer, targetContainer);
@@ -266,17 +288,15 @@ export class ItemContainerTransactionQueue {
       // Update character weight
       await this.characterWeightQueue.updateCharacterWeight(character);
 
-      if (!removeFromTargetSuccessful || !addToOriginSuccessful) {
-        this.socketMessaging.sendErrorMessageToCharacter(
-          character,
-          "An error occurred during item transfer. Please check your inventory and contact support if there are any issues."
-        );
-      }
+      this.socketMessaging.sendErrorMessageToCharacter(
+        character,
+        "An error occurred during item transfer. The operation has been rolled back."
+      );
     } catch (error) {
       console.error("Rollback failed:", error);
       this.socketMessaging.sendErrorMessageToCharacter(
         character,
-        "An error occurred during item transfer. Please check your inventory and contact support if there are any issues."
+        "An error occurred during item transfer rollback. Please check your inventory and contact support if there are any issues."
       );
     }
   }

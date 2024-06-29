@@ -197,7 +197,7 @@ describe("ItemContainerTransaction", () => {
       );
 
       expect(result).toBe(false);
-      expect(removeItemFromContainerSpy).toHaveBeenCalledTimes(4);
+      expect(removeItemFromContainerSpy).toHaveBeenCalledTimes(1);
       expect(addItemToContainerSpy).toHaveBeenCalledTimes(1);
     });
 
@@ -208,7 +208,7 @@ describe("ItemContainerTransaction", () => {
 
       expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledWith(
         testCharacter,
-        "Failed to rollback item addition to target container. Please check your inventory."
+        "Failed to remove original item from origin container."
       );
     });
   });
@@ -220,6 +220,8 @@ describe("ItemContainerTransaction", () => {
 
       await characterItemContainer.addItemToContainer(item1, testCharacter, originContainer._id);
       await characterItemContainer.addItemToContainer(item2, testCharacter, originContainer._id);
+
+      originContainer = await ItemContainer.findById(originContainer._id).lean();
 
       const transfer1 = itemContainerTransaction.transferToContainer(
         item1,
