@@ -213,7 +213,7 @@ export class ItemContainerTransactionQueue {
     }
 
     if (item.stackQty && item.stackQty > 0) {
-      return await this.isTransactionConsistentForStackableItems(
+      return this.isTransactionConsistentForStackableItems(
         item,
         originSnapshot,
         targetSnapshot,
@@ -229,23 +229,24 @@ export class ItemContainerTransactionQueue {
     }
   }
 
-  private async isTransactionConsistentForStackableItems(
+  private isTransactionConsistentForStackableItems(
     item: IItem,
     originSnapshot: IContainerSnapshot,
     targetSnapshot: IContainerSnapshot,
     updatedOriginContainer: IItemContainer,
     updatedTargetContainer: IItemContainer
-  ): Promise<boolean> {
-    const preTransactionOriginQty = this.getTotalQtyFromSnapshot(originSnapshot, item, item.rarity!);
-    const preTransactionTargetQty = this.getTotalQtyFromSnapshot(targetSnapshot, item, item.rarity!);
+  ): boolean {
+    const preTransactionOriginQty = this.getTotalQty(originSnapshot, item);
+    const preTransactionTargetQty = this.getTotalQty(targetSnapshot, item);
 
-    const postTransactionOriginQty = await this.getTotalQtyFromContainer(updatedOriginContainer, item, item.rarity!);
-    const postTransactionTargetQty = await this.getTotalQtyFromContainer(updatedTargetContainer, item, item.rarity!);
+    const postTransactionOriginQty = this.getTotalQty(updatedOriginContainer as any, item);
+    const postTransactionTargetQty = this.getTotalQty(updatedTargetContainer as any, item);
 
-    const isOriginConsistent = postTransactionOriginQty === preTransactionOriginQty - item.stackQty!;
-    const isTargetConsistent = postTransactionTargetQty === preTransactionTargetQty + item.stackQty!;
+    // Check if origin quantity is decreasing and target quantity is increasing
+    const isOriginDecreasing = postTransactionOriginQty < preTransactionOriginQty;
+    const isTargetIncreasing = postTransactionTargetQty > preTransactionTargetQty;
 
-    return isOriginConsistent && isTargetConsistent;
+    return isOriginDecreasing && isTargetIncreasing;
   }
 
   private async isTransactionConsistentForNonStackableItems(
@@ -262,18 +263,14 @@ export class ItemContainerTransactionQueue {
     return wasItemRemovedFromOrigin && wasItemAddedToTarget;
   }
 
-  private getTotalQtyFromSnapshot(snapshot: IContainerSnapshot, item: IItem, itemRarity: string): number {
+  private getTotalQty(snapshot: IContainerSnapshot, item: IItem): number {
     let qty = 0;
     for (const slotItem of Object.values(snapshot.slots)) {
-      if (slotItem && slotItem.key === item.key && slotItem.rarity === itemRarity) {
+      if (slotItem && slotItem.key === item.key) {
         qty += slotItem.stackQty || 1;
       }
     }
     return qty;
-  }
-
-  private async getTotalQtyFromContainer(container: IItemContainer, item: IItem, itemRarity: string): Promise<number> {
-    return await this.characterItemSlots.getTotalQty(container, item, itemRarity);
   }
 
   private async performTransaction(
