@@ -111,7 +111,7 @@ describe("GuildCreate.ts", () => {
 
     it("should send error if character is already in a guild", async () => {
       // @ts-ignore
-      guildCreate.guildGet.getCharactersGuild = jest.fn().mockResolvedValue(testGuild);
+      guildCreate.guildCommon.getCharactersGuild = jest.fn().mockResolvedValue(testGuild);
 
       await guildCreate.createGuild(guildData, testCharacter);
 
@@ -123,7 +123,7 @@ describe("GuildCreate.ts", () => {
 
     it("should send error if guild name or tag already exists", async () => {
       // @ts-ignore
-      guildCreate.guildGet.getCharactersGuild = jest.fn().mockResolvedValue(null);
+      guildCreate.guildCommon.getCharactersGuild = jest.fn().mockResolvedValue(null);
 
       jest.spyOn(Guild, "findOne").mockReturnValueOnce({
         lean: jest.fn().mockResolvedValueOnce(testGuild),
@@ -138,9 +138,6 @@ describe("GuildCreate.ts", () => {
     });
 
     it("should create guild and send success message", async () => {
-      // @ts-ignore
-      guildCreate.guildGet.getCharactersGuild = jest.fn().mockResolvedValue(null);
-
       await guildCreate.createGuild(guildData, testCharacter);
 
       expect(mockSocketMessaging.sendMessageToCharacter).toBeCalledWith(
@@ -150,9 +147,6 @@ describe("GuildCreate.ts", () => {
     });
 
     it("should send error if guild creation fails", async () => {
-      // @ts-ignore
-      guildCreate.guildGet.getCharactersGuild = jest.fn().mockResolvedValue(null);
-
       jest.spyOn(Guild, "create").mockReturnValueOnce({
         lean: jest.fn().mockResolvedValueOnce(null),
       } as any);

@@ -3,11 +3,11 @@ import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { GuildSocketEvents, IGuildInfo, IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { GuildGet } from "./GuildGet";
+import { GuildCommon } from "./GuildCommon";
 
 @provide(GuildInvitation)
 export class GuildInvitation {
-  constructor(private socketMessaging: SocketMessaging, private guildGet: GuildGet) {}
+  constructor(private socketMessaging: SocketMessaging, private guildCommon: GuildCommon) {}
 
   public async inviteToGuild(
     character: ICharacter,
@@ -36,7 +36,7 @@ export class GuildInvitation {
         return;
       }
 
-      const targetGuild = await this.guildGet.getCharactersGuild(target);
+      const targetGuild = await this.guildCommon.getCharactersGuild(target);
       if (targetGuild) {
         this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, Your target is already in a guild.");
         return;
@@ -83,7 +83,7 @@ export class GuildInvitation {
     await guild.save();
 
     const message = `${character.name} joined the guild!`;
-    await this.sendMessageToAllMembers(message, guild);
+    await this.guildCommon.sendMessageToAllMembers(message, guild);
   }
 
   private async sendMessageToAllMembers(message: string, guild: IGuild): Promise<void> {
@@ -104,7 +104,7 @@ export class GuildInvitation {
         message,
         type: "info",
       });
-      const guildInfo = await this.guildGet.convertTOIGuildInfo(guild);
+      const guildInfo = await this.guildCommon.convertTOIGuildInfo(guild);
       this.socketMessaging.sendEventToUser<IGuildInfo | null>(
         character.channelId!,
         GuildSocketEvents.GuildInfoOpen,

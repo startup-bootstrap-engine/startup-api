@@ -5,10 +5,15 @@ import { SkillCalculator } from "@providers/skill/SkillCalculator";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import { GuildCommon } from "./GuildCommon";
 
 @provide(GuildSkillsIncrease)
 export class GuildSkillsIncrease {
-  constructor(private socketMessaging: SocketMessaging, private skillCalculator: SkillCalculator) {}
+  constructor(
+    private socketMessaging: SocketMessaging,
+    private skillCalculator: SkillCalculator,
+    private guildCommon: GuildCommon
+  ) {}
 
   public async getGuildSkills(character: ICharacter): Promise<IGuildSkills | null> {
     try {
@@ -39,7 +44,11 @@ export class GuildSkillsIncrease {
       await this.updateGuildSkills(guildSkills._id, updatedGuildPoints, newLevel, newGuildPointsToNextLevel);
 
       if (levelUp) {
-        await this.notifyGuildMembers(guildSkills.owner as string, newLevel);
+        const guild = await Guild.findOne({ _id: guildSkills.owner });
+        if (!guild) {
+          return;
+        }
+        await this.guildCommon.notifyGuildMembers(guild.members, newLevel);
       }
     } catch (error) {
       console.error("Error increasing guild skills:", error);

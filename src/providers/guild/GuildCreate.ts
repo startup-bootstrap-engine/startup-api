@@ -20,6 +20,7 @@ import {
   UserAccountTypes,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import { GuildCommon } from "./GuildCommon";
 import { GuildGet } from "./GuildGet";
 
 const MIN_GOLD_REQUIRED = 100000;
@@ -34,7 +35,8 @@ export class GuildCreate {
     private characterItemInventory: CharacterItemInventory,
     private characterWeight: CharacterWeightQueue,
     private guildGet: GuildGet,
-    private characterInventory: CharacterInventory
+    private characterInventory: CharacterInventory,
+    private guildCommon: GuildCommon
   ) {}
 
   public async validateGuild(character: ICharacter): Promise<void> {
@@ -78,7 +80,7 @@ export class GuildCreate {
       await this.validateGuild(character);
 
       // is character already in a guild
-      const guild = await this.guildGet.getCharactersGuild(character);
+      const guild = await this.guildCommon.getCharactersGuild(character);
       if (guild) {
         this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, You are already in a guild.");
         return;
@@ -123,7 +125,7 @@ export class GuildCreate {
       this.socketMessaging.sendMessageToCharacter(character, "Guild was Created successfully.");
 
       // send guild info
-      const guildInfo = await this.guildGet.convertTOIGuildInfo(newGuild);
+      const guildInfo = await this.guildCommon.convertTOIGuildInfo(newGuild);
       this.socketMessaging.sendEventToUser<IGuildInfo>(
         character.channelId!,
         GuildSocketEvents.GuildInfoOpen,

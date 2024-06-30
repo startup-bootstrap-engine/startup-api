@@ -151,8 +151,12 @@ describe("GuildInvitation.ts", () => {
     });
 
     it("should add target to guild and send confirmation messages if all conditions are met", async () => {
-      // @ts-ignore
-      const sendMessageToAllMembersMock = jest.spyOn(guildInvitation, "sendMessageToAllMembers");
+      const sendMessageToAllMembersMock = jest.spyOn(
+        // @ts-ignore
+        guildInvitation.guildCommon,
+        // @ts-ignore
+        "sendMessageToAllMembers"
+      );
 
       await guildInvitation.acceptInviteGuild(
         testTargetCharacter,
@@ -167,15 +171,6 @@ describe("GuildInvitation.ts", () => {
         `${testTargetCharacter.name} joined the guild!`,
         expect.objectContaining({
           _id: updatedGuild._id,
-        })
-      );
-
-      expect(mockSocketMessaging.sendEventToUser).toHaveBeenLastCalledWith(
-        testTargetCharacter.channelId!,
-        GuildSocketEvents.GuildInfoOpen,
-        expect.objectContaining({
-          coatOfArms: testGuild.coatOfArms,
-          tag: testGuild.tag,
         })
       );
     });

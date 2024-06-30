@@ -2,7 +2,6 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IGuild } from "@entities/ModuleSystem/GuildModel";
 import { GuildSkills, IGuildSkills } from "@entities/ModuleSystem/GuildSkillsModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
-import { UISocketEvents } from "@rpg-engine/shared";
 import mongoose from "mongoose";
 import { GuildExperience } from "../GuildExperience";
 
@@ -51,20 +50,21 @@ describe("GuildExperience.ts", () => {
     expect(mockSocketMessaging.sendEventToUser).not.toHaveBeenCalled();
   });
 
-  it("should update guild experience without leveling up", async () => {
+  it("should update guild experience with leveling up", async () => {
+    // @ts-ignore
+    const notifyGuildMembersSpy = jest.spyOn(guildExperience.guildCommon, "notifyGuildMembers");
+
     const xp = guildSkills.xpToNextLevel * 2 + 10;
     await guildExperience.updateGuildExperience(testCharacter, xp);
 
     const newGuildSkills = await GuildSkills.findOne({ _id: guildSkills._id });
     expect(newGuildSkills?.experience).toEqual(guildSkills.experience + xp / 2);
-    expect(mockSocketMessaging.sendEventToUser).toHaveBeenCalledWith(
-      testCharacter.channelId,
-      UISocketEvents.ShowMessage,
-      {
-        message: `Your guild level is now ${newGuildSkills?.level}.`,
-        type: "info",
-      }
-    );
+    expect(notifyGuildMembersSpy).toHaveBeenCalled();
+
+    const callArgs = notifyGuildMembersSpy.mock.calls[0];
+    expect(callArgs[0]).toEqual(expect.arrayContaining(testGuild.members));
+    expect(callArgs[0].length).toBe(testGuild.members.length);
+    expect(callArgs[1]).toBe(newGuildSkills?.level);
   });
 
   it("should do nothing if guild is not found", async () => {

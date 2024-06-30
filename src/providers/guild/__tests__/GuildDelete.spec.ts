@@ -2,7 +2,6 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
 import { GuildSkills } from "@entities/ModuleSystem/GuildSkillsModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
-import { GuildSocketEvents, UISocketEvents } from "@rpg-engine/shared";
 import mongoose from "mongoose";
 import { GuildDelete } from "../GuildDelete";
 
@@ -78,36 +77,18 @@ describe("GuildDelete.ts", () => {
       jest.spyOn(GuildSkills, "findOne").mockResolvedValueOnce(null);
       const deleteGuildSpy = jest.spyOn(Guild, "deleteOne").mockResolvedValueOnce({ deletedCount: 1 });
       const sendMessageToAllMembersSpy = jest
-        .spyOn<any, any>(guildDelete, "sendMessageToAllMembers")
+        // @ts-ignore
+        .spyOn<any, any>(guildDelete.guildCommon, "sendMessageToAllMembers")
         .mockResolvedValueOnce(null);
 
       await guildDelete.deleteGuild(testGuild._id, testCharacter);
 
       expect(deleteGuildSpy).toHaveBeenCalledWith({ _id: testGuild._id });
-      expect(sendMessageToAllMembersSpy).toHaveBeenCalledWith("The guild has been deleted by the leader.", testGuild);
-    });
-  });
-
-  describe("sendMessageToAllMembers", () => {
-    it("should send messages to all guild members", async () => {
-      // in testGuild the only member is testCharacter
-
-      // @ts-ignore
-      await guildDelete.sendMessageToAllMembers("Test message", testGuild);
-
-      testGuild.members.forEach((memberId) => {
-        expect(mockSocketMessaging.sendEventToUser).toHaveBeenCalledWith(
-          testCharacter.channelId!,
-          UISocketEvents.ShowMessage,
-          { message: "Test message", type: "info" }
-        );
-
-        expect(mockSocketMessaging.sendEventToUser).toHaveBeenCalledWith(
-          testCharacter.channelId!,
-          GuildSocketEvents.GuildInfoOpen,
-          null
-        );
-      });
+      expect(sendMessageToAllMembersSpy).toHaveBeenCalledWith(
+        "The guild has been deleted by the leader.",
+        testGuild,
+        true
+      );
     });
   });
 });
