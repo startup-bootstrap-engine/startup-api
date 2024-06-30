@@ -73,6 +73,12 @@ export class ItemContainerTransactionQueue {
         return await this.execTransferToContainer(item, character, originContainer, targetContainer, options);
       }
 
+      // Take snapshots before performing the transaction
+      const [originSnapshot, targetSnapshot] = await Promise.all([
+        this.takeContainerSnapshot(originContainer),
+        this.takeContainerSnapshot(targetContainer),
+      ]);
+
       await this.dynamicQueue.addJob(
         "item-container-transaction-queue",
         async (job) => {
@@ -102,7 +108,7 @@ export class ItemContainerTransactionQueue {
       );
 
       if (!result) {
-        await this.rollbackTransfer(item, character, originContainer, targetContainer);
+        await this.rollbackTransfer(character, originSnapshot, targetSnapshot);
       }
 
       return result;
@@ -125,6 +131,13 @@ export class ItemContainerTransactionQueue {
   ): Promise<boolean> {
     const lockKey = `${originContainer?._id}-to-${targetContainer?._id}-item-container-transfer`;
 
+    const { readContainersAfterTransaction, updateCharacterWeightAfterTransaction } = options;
+
+    const [originSnapshot, targetSnapshot] = await Promise.all([
+      this.takeContainerSnapshot(originContainer),
+      this.takeContainerSnapshot(targetContainer),
+    ]);
+
     try {
       if (!(await this.locker.lock(lockKey))) {
         return false;
@@ -134,35 +147,38 @@ export class ItemContainerTransactionQueue {
         return false;
       }
 
-      const [originSnapshot, targetSnapshot] = await Promise.all([
-        this.takeContainerSnapshot(originContainer),
-        this.takeContainerSnapshot(targetContainer),
-      ]);
-
       await this.clearContainersCache(originContainer, targetContainer);
 
       const result = await this.performTransaction(item, character, originContainer, targetContainer, options);
 
-      if (!result || !(await this.wasTransactionConsistent(item, originContainer, targetContainer))) {
-        await this.rollbackContainers(originSnapshot, targetSnapshot);
+      const wasTransactionConsistent = await this.wasTransactionConsistent(
+        item,
+        originSnapshot,
+        targetSnapshot,
+        originContainer,
+        targetContainer
+      );
+      if (!result || !wasTransactionConsistent) {
+        await this.rollbackTransfer(character, originSnapshot, targetSnapshot);
         return false;
       }
-
-      const { readContainersAfterTransaction, updateCharacterWeightAfterTransaction } = options;
-
-      await Promise.all([
-        readContainersAfterTransaction &&
-          this.readAndRefreshContainersAfterTransaction(character, readContainersAfterTransaction),
-        this.clearContainersCache(originContainer, targetContainer),
-        updateCharacterWeightAfterTransaction && this.characterWeightQueue.updateCharacterWeight(character),
-      ]);
 
       return true;
     } catch (error) {
       console.error("Execution of transfer failed:", error);
-      await this.rollbackTransfer(item, character, originContainer, targetContainer);
+      await this.rollbackTransfer(character, originSnapshot, targetSnapshot);
       return false;
     } finally {
+      await this.clearContainersCache(originContainer, targetContainer);
+
+      if (readContainersAfterTransaction) {
+        await this.readAndRefreshContainersAfterTransaction(character, readContainersAfterTransaction);
+      }
+
+      if (updateCharacterWeightAfterTransaction) {
+        await this.characterWeightQueue.updateCharacterWeight(character);
+      }
+
       await this.locker.unlock(lockKey);
     }
   }
@@ -178,19 +194,14 @@ export class ItemContainerTransactionQueue {
     return snapshot;
   }
 
-  private async rollbackContainers(
-    originSnapshot: IContainerSnapshot,
-    targetSnapshot: IContainerSnapshot
-  ): Promise<void> {
-    await Promise.all([this.applyContainerSnapshot(originSnapshot), this.applyContainerSnapshot(targetSnapshot)]);
-  }
-
   private async applyContainerSnapshot(snapshot: IContainerSnapshot): Promise<void> {
     await ItemContainer.updateOne({ _id: snapshot.containerId }, { $set: { slots: snapshot.slots } });
   }
 
   private async wasTransactionConsistent(
     item: IItem,
+    originSnapshot: IContainerSnapshot,
+    targetSnapshot: IContainerSnapshot,
     originContainer: IItemContainer,
     targetContainer: IItemContainer
   ): Promise<boolean> {
@@ -201,6 +212,47 @@ export class ItemContainerTransactionQueue {
       return false;
     }
 
+    if (item.stackQty && item.stackQty > 1) {
+      return await this.isTransactionConsistentForStackableItems(
+        item,
+        originSnapshot,
+        targetSnapshot,
+        updatedOriginContainer,
+        updatedTargetContainer
+      );
+    } else {
+      return await this.isTransactionConsistentForNonStackableItems(
+        item,
+        updatedOriginContainer,
+        updatedTargetContainer
+      );
+    }
+  }
+
+  private async isTransactionConsistentForStackableItems(
+    item: IItem,
+    originSnapshot: IContainerSnapshot,
+    targetSnapshot: IContainerSnapshot,
+    updatedOriginContainer: IItemContainer,
+    updatedTargetContainer: IItemContainer
+  ): Promise<boolean> {
+    const preTransactionOriginQty = this.getTotalQtyFromSnapshot(originSnapshot, item, item.rarity!);
+    const preTransactionTargetQty = this.getTotalQtyFromSnapshot(targetSnapshot, item, item.rarity!);
+
+    const postTransactionOriginQty = await this.getTotalQtyFromContainer(updatedOriginContainer, item, item.rarity!);
+    const postTransactionTargetQty = await this.getTotalQtyFromContainer(updatedTargetContainer, item, item.rarity!);
+
+    const isOriginConsistent = postTransactionOriginQty === preTransactionOriginQty - item.stackQty!;
+    const isTargetConsistent = postTransactionTargetQty === preTransactionTargetQty + item.stackQty!;
+
+    return isOriginConsistent && isTargetConsistent;
+  }
+
+  private async isTransactionConsistentForNonStackableItems(
+    item: IItem,
+    updatedOriginContainer: IItemContainer,
+    updatedTargetContainer: IItemContainer
+  ): Promise<boolean> {
     const originSlotIndex = await this.characterItemSlots.findItemSlotIndex(updatedOriginContainer, item._id);
     const targetSlotIndex = await this.characterItemSlots.findItemSlotIndex(updatedTargetContainer, item._id);
 
@@ -208,6 +260,20 @@ export class ItemContainerTransactionQueue {
     const wasItemAddedToTarget = targetSlotIndex !== undefined;
 
     return wasItemRemovedFromOrigin && wasItemAddedToTarget;
+  }
+
+  private getTotalQtyFromSnapshot(snapshot: IContainerSnapshot, item: IItem, itemRarity: string): number {
+    let qty = 0;
+    for (const slotItem of Object.values(snapshot.slots)) {
+      if (slotItem && slotItem.key === item.key && slotItem.rarity === itemRarity) {
+        qty += slotItem.stackQty || 1;
+      }
+    }
+    return qty;
+  }
+
+  private async getTotalQtyFromContainer(container: IItemContainer, item: IItem, itemRarity: string): Promise<number> {
+    return await this.characterItemSlots.getTotalQty(container, item, itemRarity);
   }
 
   private async performTransaction(
@@ -251,24 +317,17 @@ export class ItemContainerTransactionQueue {
   }
 
   private async rollbackTransfer(
-    item: IItem,
     character: ICharacter,
-    originContainer: IItemContainer,
-    targetContainer: IItemContainer
+    originSnapshot: IContainerSnapshot,
+    targetSnapshot: IContainerSnapshot
   ): Promise<void> {
-    console.log("Rolling back transfer operation");
+    console.error(
+      `Rolling back item transfer for character ${character._id} - ${character.name} - originContainer: ${originSnapshot.containerId} - targetContainer: ${targetSnapshot.containerId}`
+    );
 
     try {
-      const originSnapshot = await this.takeContainerSnapshot(originContainer);
-      const targetSnapshot = await this.takeContainerSnapshot(targetContainer);
-
-      await this.rollbackContainers(originSnapshot, targetSnapshot);
-
-      // Clear caches for both containers
-      await this.clearContainersCache(originContainer, targetContainer);
-
-      // Update character weight
-      await this.characterWeightQueue.updateCharacterWeight(character);
+      await this.applyContainerSnapshot(originSnapshot);
+      await this.applyContainerSnapshot(targetSnapshot);
 
       this.socketMessaging.sendErrorMessageToCharacter(
         character,

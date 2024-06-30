@@ -144,7 +144,7 @@ describe("ItemContainerTransaction", () => {
       jest.spyOn(itemContainerTransaction as any, "performTransaction").mockResolvedValue(true);
       jest.spyOn(itemContainerTransaction as any, "wasTransactionConsistent").mockResolvedValue(false);
       const rollbackContainersSpy = jest
-        .spyOn(itemContainerTransaction as any, "rollbackContainers")
+        .spyOn(itemContainerTransaction as any, "rollbackTransfer")
         // @ts-ignore
         .mockResolvedValue();
 
@@ -158,7 +158,7 @@ describe("ItemContainerTransaction", () => {
       jest.spyOn(itemContainerTransaction as any, "performTransaction").mockResolvedValue(true);
       jest.spyOn(itemContainerTransaction as any, "wasTransactionConsistent").mockResolvedValue(true);
       const rollbackContainersSpy = jest
-        .spyOn(itemContainerTransaction as any, "rollbackContainers")
+        .spyOn(itemContainerTransaction as any, "rollbackTransfer")
         // @ts-ignore
         .mockResolvedValue();
 
@@ -174,6 +174,11 @@ describe("ItemContainerTransaction", () => {
         target: { _id: "target", slots: { 0: null } },
       };
 
+      const mockSnapshots = {
+        origin: { containerId: "origin", slots: { 0: testItem } },
+        target: { containerId: "target", slots: { 0: null } },
+      };
+
       jest.spyOn(ItemContainer, "findById").mockImplementation(
         (id) =>
           ({
@@ -183,6 +188,8 @@ describe("ItemContainerTransaction", () => {
 
       const result = await (itemContainerTransaction as any).wasTransactionConsistent(
         testItem,
+        mockSnapshots.origin,
+        mockSnapshots.target,
         { _id: "origin" },
         { _id: "target" }
       );
