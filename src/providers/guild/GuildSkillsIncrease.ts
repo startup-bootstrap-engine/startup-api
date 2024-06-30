@@ -1,9 +1,8 @@
-import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Guild } from "@entities/ModuleSystem/GuildModel";
 import { GuildSkills, IGuildSkills } from "@entities/ModuleSystem/GuildSkillsModel";
 import { SkillCalculator } from "@providers/skill/SkillCalculator";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { GuildCommon } from "./GuildCommon";
 
@@ -89,25 +88,5 @@ export class GuildSkillsIncrease {
         },
       }
     );
-  }
-
-  private async notifyGuildMembers(guildId: string, newLevel: number): Promise<void> {
-    const guild = await Guild.findOne({ _id: guildId });
-    if (!guild) {
-      return;
-    }
-
-    const characters = await Character.find({ _id: { $in: guild.members } })
-      .lean()
-      .select("channelId");
-
-    characters.forEach((character) => {
-      if (character.channelId) {
-        this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId, UISocketEvents.ShowMessage, {
-          message: `Your guild level is now ${newLevel}.`,
-          type: "info",
-        });
-      }
-    });
   }
 }

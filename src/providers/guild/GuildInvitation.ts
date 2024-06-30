@@ -1,7 +1,7 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { GuildSocketEvents, IGuildInfo, IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
+import { GuildSocketEvents, IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { GuildCommon } from "./GuildCommon";
 
@@ -84,32 +84,5 @@ export class GuildInvitation {
 
     const message = `${character.name} joined the guild!`;
     await this.guildCommon.sendMessageToAllMembers(message, guild);
-  }
-
-  private async sendMessageToAllMembers(message: string, guild: IGuild): Promise<void> {
-    if (!guild.members || !guild.guildLeader) {
-      throw new Error("Empty guild to send Message or Data!");
-    }
-
-    const charactersIds = new Set<string>();
-
-    for (const member of guild.members) {
-      charactersIds.add(member);
-    }
-
-    for (const characterId of charactersIds) {
-      const character = (await Character.findById(characterId).lean().select("channelId")) as ICharacter;
-
-      this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId!, UISocketEvents.ShowMessage, {
-        message,
-        type: "info",
-      });
-      const guildInfo = await this.guildCommon.convertTOIGuildInfo(guild);
-      this.socketMessaging.sendEventToUser<IGuildInfo | null>(
-        character.channelId!,
-        GuildSocketEvents.GuildInfoOpen,
-        guildInfo
-      );
-    }
   }
 }

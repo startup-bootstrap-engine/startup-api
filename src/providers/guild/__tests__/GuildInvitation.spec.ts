@@ -1,4 +1,4 @@
-import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
 import { GuildSkills, IGuildSkills } from "@entities/ModuleSystem/GuildSkillsModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
@@ -173,38 +173,6 @@ describe("GuildInvitation.ts", () => {
           _id: updatedGuild._id,
         })
       );
-    });
-  });
-
-  describe("sendMessageToAllMembers", () => {
-    it("should throw error if guild has no members or leader", async () => {
-      // @ts-ignore
-      const guildWithoutMembers = { members: [], guildLeader: null } as IGuild;
-      // @ts-ignore
-      await expect(guildInvitation.sendMessageToAllMembers("message", guildWithoutMembers)).rejects.toThrow(
-        "Empty guild to send Message or Data!"
-      );
-    });
-
-    it("should send message to all guild members", async () => {
-      testGuild.members = [testCharacter._id, testTargetCharacter._id];
-      await testGuild.save();
-
-      const member1 = await Character.findById(testGuild.members[0]);
-      const member2 = await Character.findById(testGuild.members[1]);
-
-      // @ts-ignore
-      await guildInvitation.sendMessageToAllMembers("Test message", testGuild);
-
-      expect(mockSocketMessaging.sendEventToUser).toBeCalledWith(member1?.channelId, UISocketEvents.ShowMessage, {
-        message: "Test message",
-        type: "info",
-      });
-
-      expect(mockSocketMessaging.sendEventToUser).toBeCalledWith(member2?.channelId, UISocketEvents.ShowMessage, {
-        message: "Test message",
-        type: "info",
-      });
     });
   });
 });
