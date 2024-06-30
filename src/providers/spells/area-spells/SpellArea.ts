@@ -9,6 +9,7 @@ import { CharacterSkull } from "@providers/character/CharacterSkull";
 import { PVP_MIN_REQUIRED_LV } from "@providers/constants/PVPConstants";
 import { EntityEffectUse } from "@providers/entityEffects/EntityEffectUse";
 import { MapNonPVPZone } from "@providers/map/MapNonPVPZone";
+import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
 import { IPosition } from "@providers/movement/MovementHelper";
 import { PartyValidator } from "@providers/party/PartyValidator";
 import { RaidManager } from "@providers/raid/RaidManager";
@@ -33,7 +34,8 @@ export class SpellArea {
     private socketMessaging: SocketMessaging,
     private characterSkull: CharacterSkull,
     private raidManager: RaidManager,
-    private partyValidator: PartyValidator
+    private partyValidator: PartyValidator,
+    private mapSolidsTrajectory: MapSolidsTrajectory
   ) {}
 
   @TrackNewRelicTransaction()
@@ -105,6 +107,12 @@ export class SpellArea {
         (targetToHit as INPC).alignment === NPCAlignment.Friendly
       ) {
         return; // avoid Characters hitting friendly NPCs
+      }
+
+      const hasSolidOnTrajectory = await this.mapSolidsTrajectory.isSolidInTrajectory(caster, targetToHit);
+
+      if (hasSolidOnTrajectory) {
+        return;
       }
 
       if (targetToHit.type === EntityType.NPC) {
@@ -222,31 +230,38 @@ export class SpellArea {
 
     const promises: any[] = [];
 
+    const processCell = async (i: number, j: number): Promise<void> => {
+      const intensity = spellAreaGrid[i][j];
+      if (intensity > 0) {
+        const cellX = centerX + (j - halfGridWidth);
+        const cellY = centerY + (i - halfGridLen);
+        animationCells.push({ x: cellX, y: cellY });
+
+        const target = await this.getTarget({ x: cellX, y: cellY }, caster.layer, caster.scene);
+
+        if (!target) {
+          return;
+        }
+
+        const hasSolidInTrajectory = await this.mapSolidsTrajectory.isSolidInTrajectory(caster, target);
+
+        if (hasSolidInTrajectory) {
+          return;
+        }
+
+        if (options?.includeCaster) {
+          targets.push({ target: caster as any, intensity });
+        }
+
+        if (target && target.id !== caster.id && !options?.excludeEntityTypes.includes(target.type as EntityType)) {
+          targets.push({ target: target as any, intensity });
+        }
+      }
+    };
+
     for (let i = 0; i < gridLen; i++) {
       for (let j = 0; j < gridWidth; j++) {
-        const intensity = spellAreaGrid[i][j];
-        if (intensity > 0) {
-          const cellX = centerX + (j - halfGridWidth);
-          const cellY = centerY + (i - halfGridLen);
-          animationCells.push({ x: cellX, y: cellY });
-
-          promises.push(
-            this.getTarget({ x: cellX, y: cellY }, caster.layer, caster.scene).then((target) => {
-              if (options?.includeCaster) {
-                targets.push({ target: caster as any, intensity });
-              }
-
-              if (
-                target &&
-                target.id !== caster.id &&
-                !options?.excludeEntityTypes.includes(target.type as EntityType)
-              ) {
-                /// avoid adding yourself
-                targets.push({ target: target as any, intensity });
-              }
-            })
-          );
-        }
+        promises.push(processCell(i, j));
       }
     }
 

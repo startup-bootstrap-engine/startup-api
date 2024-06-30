@@ -20,6 +20,7 @@ import {
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
 import {
   AnimationEffectKeys,
   MagicPower,
@@ -77,6 +78,7 @@ export const npcBlueDragon: INPCTierBlueprint<21> = {
       itemBlueprintKey: SwordsBlueprint.LeviathanSword,
       chance: LootProbability.Uncommon,
     },
+
     {
       itemBlueprintKey: CraftingResourcesBlueprint.DragonHead,
       chance: LootProbability.VeryCommon,
@@ -267,6 +269,11 @@ export const npcBlueDragon: INPCTierBlueprint<21> = {
     {
       spellKey: SpellsBlueprint.VampiricStorm,
       probability: 40,
+      power: MagicPower.High,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Uncommon,
       power: MagicPower.High,
     },
   ],

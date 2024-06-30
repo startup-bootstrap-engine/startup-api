@@ -1,6 +1,7 @@
 import { GemsBlueprint } from "../../types/itemsBlueprintTypes";
 import { itemEmeraldGem } from "./tier0/itemEmeraldGem";
 import { itemSapphireGem } from "./tier1/itemSapphireGem";
+import { itemEmeraldGlory } from "./tier10/itemEmeraldGlory";
 import { itemAmethystGem } from "./tier2/itemAmethystGem";
 import { itemCoralReefGem } from "./tier3/itemCoralReefGem";
 import { itemEarthstoneGem } from "./tier4/itemEarthstoneGem";
@@ -21,4 +22,5 @@ export const gemsBlueprintIndex = {
   [GemsBlueprint.JasperGem]: itemJasperGem,
   [GemsBlueprint.ObsidianGem]: itemObsidianGem,
   [GemsBlueprint.AmethystGem]: itemAmethystGem,
+  [GemsBlueprint.EmeraldGlory]: itemEmeraldGlory,
 };

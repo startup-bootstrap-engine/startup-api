@@ -20,6 +20,7 @@ export enum UsableEffectsBlueprint {
   SuperStrongEatingEffect = "SuperStrongEatingEffect",
   PoisonEatingEffect = "PoisonEatingEffect",
   ClearBleedingUsableEffect = "ClearBleedingUsableEffect",
+  ClearBurningUsableEffect = "ClearBurningUsableEffect",
 
   // Runes
   CorruptionRuneUsableEffect = "CorruptionRuneUsableEffect",

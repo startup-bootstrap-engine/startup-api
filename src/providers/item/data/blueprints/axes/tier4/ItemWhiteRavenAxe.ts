@@ -10,6 +10,7 @@ import {
 } from "@rpg-engine/shared";
 import { IEquippableMeleeTier4WeaponBlueprint } from "../../../types/TierBlueprintTypes";
 import { AxesBlueprint } from "../../../types/itemsBlueprintTypes";
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 
 export const itemWhiteRavenAxe: IEquippableMeleeTier4WeaponBlueprint = {
   key: AxesBlueprint.WhiteRavenAxe,
@@ -27,6 +28,8 @@ export const itemWhiteRavenAxe: IEquippableMeleeTier4WeaponBlueprint = {
   tier: 4,
   rangeType: EntityAttackType.Melee,
   basePrice: 62,
+  entityEffects: [EntityEffectBlueprint.Burning],
+  entityEffectChance: 90,
   equippedBuff: [
     {
       type: CharacterBuffType.Skill,

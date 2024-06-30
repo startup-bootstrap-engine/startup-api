@@ -16,6 +16,7 @@ import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTyp
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
 import { MagicPower, NPCAlignment, NPCSubtype, RangeTypes, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
@@ -95,8 +96,8 @@ export const npcMinotaurArcher: INPCTierBlueprint<12> = {
     },
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
-      chance: LootProbability.Uncommon,
-      quantityRange: [1, 10],
+      chance: LootProbability.Common,
+      quantityRange: [2, 12],
     },
     {
       itemBlueprintKey: RangedWeaponsBlueprint.EaglesEyeBow,
@@ -117,6 +118,12 @@ export const npcMinotaurArcher: INPCTierBlueprint<12> = {
       spellKey: SpellsBlueprint.WildfireVolley,
       probability: 50,
       power: MagicPower.High,
+    },
+
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Rare,
+      power: MagicPower.Low,
     },
   ],
 };

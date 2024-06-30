@@ -12,7 +12,7 @@ export const itemBrownFish: IConsumableItemBlueprint = {
   description: "A brown fish that can be caught in rivers and lakes.",
   weight: 1,
   maxStackSize: 999,
-  basePrice: 3,
-  canSell: false,
+  basePrice: 4,
+  canSell: true,
   usableEffectKey: UsableEffectsBlueprint.ModerateEatingEffect,
 };

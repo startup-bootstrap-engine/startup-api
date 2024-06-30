@@ -78,10 +78,10 @@ export class ItemCraftableQueue {
 
     await this.dynamicQueue.addJob(
       "craft-item",
-      async (job) => {
+      (job) => {
         const { itemToCraft, character } = job.data;
 
-        return await this.execCraftItem(itemToCraft, character);
+        void this.execCraftItem(itemToCraft, character);
       },
       {
         itemToCraft,

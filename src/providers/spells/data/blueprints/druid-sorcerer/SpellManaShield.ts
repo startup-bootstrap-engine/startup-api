@@ -1,4 +1,4 @@
-import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { container } from "@providers/inversify/container";
@@ -12,7 +12,6 @@ import {
   SpellsBlueprint,
 } from "@rpg-engine/shared";
 import { SpellCalculator } from "../../abstractions/SpellCalculator";
-import { NamespaceRedisControl } from "../../types/SpellsBlueprintTypes";
 
 export const spellManaShield: Partial<ISpell> = {
   key: SpellsBlueprint.ManaShield,
@@ -37,23 +36,28 @@ export const spellManaShield: Partial<ISpell> = {
     const spellCalculator = container.get(SpellCalculator);
 
     const timeout = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
-      min: 40,
-      max: 120,
+      min: 25,
+      max: 80,
     });
 
-    const namespace = `${NamespaceRedisControl.CharacterSpell}:${character._id}`;
-    const key = SpellsBlueprint.ManaShield;
-
-    await inMemoryHashTable.set(namespace, key, true);
-    await inMemoryHashTable.expire(namespace, timeout, "NX");
+    await inMemoryHashTable.set("mana-shield", character._id, true);
 
     const interval = setInterval(async () => {
+      character = await Character.findById(character._id).select("_id channelId x y").lean();
+
+      if (!character) {
+        clearInterval(interval);
+        return;
+      }
+
       await animationEffect.sendAnimationEventToCharacter(character, AnimationEffectKeys.MagicShield);
-    }, 3000);
+    }, 1500);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       clearInterval(interval);
+      character = await Character.findById(character._id).select("_id channelId x y").lean();
 
+      await inMemoryHashTable.delete("mana-shield", character._id);
       socketMessaging.sendMessageToCharacter(character, "🛡️ Your mana shield has expired.");
     }, timeout * 1000);
   },

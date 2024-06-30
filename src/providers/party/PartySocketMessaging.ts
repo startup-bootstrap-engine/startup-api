@@ -16,47 +16,56 @@ export class PartySocketMessaging {
   constructor(private socketMessaging: SocketMessaging) {}
 
   public async partyPayloadSend(party: ICharacterParty, charactersId?: string[]): Promise<void> {
-    const allCharactersId = new Set<string>(charactersId ? [...charactersId] : []);
+    try {
+      const allCharactersId = new Set<string>(charactersId ? [...charactersId] : []);
 
-    allCharactersId.add(party.leader._id);
-    party.members.forEach((member) => allCharactersId.add(member._id));
-    const partyPayload = this.generateDataPayloadFromServer(party);
+      allCharactersId.add(party.leader._id);
+      party.members.forEach((member) => allCharactersId.add(member._id));
 
-    const fetchCharacter = async (id: string): Promise<ICharacter> => {
-      return (await Character.findById(id.toString()).lean().select("channelId")) as ICharacter;
-    };
+      const partyPayload = this.generateDataPayloadFromServer(party);
 
-    const sendPayloadToCharacter = async (characterId: string): Promise<void> => {
-      const character = await fetchCharacter(characterId);
-      if (character && character.channelId) {
-        this.socketMessaging.sendEventToUser<ICharacterPartyShared>(
-          character.channelId,
-          PartySocketEvents.PartyInfoOpen,
-          partyPayload
-        );
-      }
-    };
+      const fetchCharacter = async (id: string): Promise<ICharacter> => {
+        return (await Character.findById(id.toString()).lean().select("channelId")) as ICharacter;
+      };
 
-    await Promise.all(Array.from(allCharactersId).map(sendPayloadToCharacter));
+      const sendPayloadToCharacter = async (characterId: string): Promise<void> => {
+        const character = await fetchCharacter(characterId);
+        if (character && character.channelId) {
+          this.socketMessaging.sendEventToUser<ICharacterPartyShared>(
+            character.channelId,
+            PartySocketEvents.PartyInfoOpen,
+            partyPayload
+          );
+        }
+      };
+
+      await Promise.all(Array.from(allCharactersId).map(sendPayloadToCharacter));
+    } catch (error) {
+      console.error("Error sending party payload: ", error);
+    }
   }
 
   public async notifyPartyDisbanded(charactersId: string[]): Promise<void> {
-    const fetchCharacter = async (id: string): Promise<ICharacter> => {
-      return (await Character.findById(id.toString()).lean().select("channelId")) as ICharacter;
-    };
+    try {
+      const fetchCharacter = async (id: string): Promise<ICharacter> => {
+        return (await Character.findById(id.toString()).lean().select("channelId")) as ICharacter;
+      };
 
-    const sendDisbandNotification = async (characterId: string): Promise<void> => {
-      const character = await fetchCharacter(characterId);
-      if (character && character.channelId) {
-        this.socketMessaging.sendEventToUser<ICharacterPartyShared>(
-          character.channelId,
-          PartySocketEvents.PartyInfoOpen,
-          null as any
-        );
-      }
-    };
+      const sendDisbandNotification = async (characterId: string): Promise<void> => {
+        const character = await fetchCharacter(characterId);
+        if (character && character.channelId) {
+          this.socketMessaging.sendEventToUser<ICharacterPartyShared>(
+            character.channelId,
+            PartySocketEvents.PartyInfoOpen,
+            null as any
+          );
+        }
+      };
 
-    await Promise.all(charactersId.map(sendDisbandNotification));
+      await Promise.all(charactersId.map(sendDisbandNotification));
+    } catch (error) {
+      console.error("Error notifying party disbanded: ", error);
+    }
   }
 
   public async sendMessageToAllMembers(message: string, party: ICharacterParty): Promise<void> {
@@ -71,13 +80,20 @@ export class PartySocketMessaging {
       charactersIds.add(member._id);
     }
 
-    for (const characterId of charactersIds) {
-      const character = (await Character.findById(characterId).lean().select("channelId")) as ICharacter;
-
-      this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId!, UISocketEvents.ShowMessage, {
-        message,
-        type: "info",
-      });
+    try {
+      await Promise.all(
+        Array.from(charactersIds).map(async (characterId) => {
+          const character = (await Character.findById(characterId).lean().select("channelId")) as ICharacter;
+          if (character && character.channelId) {
+            this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId!, UISocketEvents.ShowMessage, {
+              message,
+              type: "info",
+            });
+          }
+        })
+      );
+    } catch (error) {
+      console.error("Error sending message to all members: ", error);
     }
   }
 

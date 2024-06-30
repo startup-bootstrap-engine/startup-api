@@ -15,6 +15,7 @@ import { EntityUtil } from "@providers/entityEffects/EntityUtil";
 import { blueprintManager } from "@providers/inversify/container";
 import { EffectableAttribute, ItemUsableEffect } from "@providers/item/helper/ItemUsableEffect";
 import { MapNonPVPZone } from "@providers/map/MapNonPVPZone";
+import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -58,7 +59,8 @@ export class SpellCast {
     private mapNonPVPZone: MapNonPVPZone,
     private characterPremiumAccount: CharacterPremiumAccount,
     private battleCharacterAttackValidation: BattleCharacterAttackValidation,
-    private battleAttackRanged: BattleAttackRanged
+    private battleAttackRanged: BattleAttackRanged,
+    private mapSolidsTrajectory: MapSolidsTrajectory
   ) {}
 
   public isSpellCasting(msg: string): boolean {
@@ -290,7 +292,7 @@ export class SpellCast {
     }
 
     // Check if there is an obstacle in the way
-    if (await this.battleAttackRanged.isSolidInRangedTrajectory(caster, target)) {
+    if (await this.mapSolidsTrajectory.isSolidInTrajectory(caster, target)) {
       this.socketMessaging.sendErrorMessageToCharacter(caster, "Sorry, there is an obstacle in the way.");
       return false;
     }

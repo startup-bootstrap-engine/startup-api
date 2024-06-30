@@ -1,6 +1,7 @@
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableMeleeTier13WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
+  BasicAttribute,
   CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
@@ -28,17 +29,32 @@ export const itemFrostbiteCleaver: IEquippableMeleeTier13WeaponBlueprint = {
   basePrice: 130,
   entityEffects: [EntityEffectBlueprint.Freezing],
   entityEffectChance: 80,
-  equippedBuff: {
-    type: CharacterBuffType.CharacterAttribute,
-    trait: CharacterAttributes.MaxHealth,
-    buffPercentage: 6,
-    durationType: CharacterBuffDurationType.Permanent,
-    options: {
-      messages: {
-        activation: "You feel the power of max health flowing through your body. (+6% MaxHealth)",
-        deactivation: "You feel the power of max health leaving your body. (-6% MaxHealth)",
-      },
+
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
     },
-  },
-  equippedBuffDescription: "Increases max health by 6% respectively",
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "Increases Max Health by 15%, Max Mana by 15%, Resistance by 15%, and Strength by 15%.",
 };

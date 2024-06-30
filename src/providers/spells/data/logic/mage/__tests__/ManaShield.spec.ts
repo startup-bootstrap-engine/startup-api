@@ -34,18 +34,16 @@ describe("Mana Shield", () => {
   });
 
   it("should return true when the spell exists", async () => {
-    const namespace = `${NamespaceRedisControl.CharacterSpell}:${testCharacter._id}`;
-    const key = SpellsBlueprint.ManaShield;
-    await inMemoryHashTable.set(namespace, key, true);
+    await inMemoryHashTable.set("mana-shield", testCharacter._id, true);
 
     // @ts-ignore
-    const spellActivated = await manaShield.getManaShieldSpell(testCharacter);
+    const spellActivated = await manaShield.hasManaShield(testCharacter);
     expect(spellActivated).toBe(true);
   });
 
   it("should return false when the spell does not exist", async () => {
     // @ts-ignore
-    const spellActivated = await manaShield.getManaShieldSpell(testCharacter);
+    const spellActivated = await manaShield.hasManaShield(testCharacter);
     expect(spellActivated).toBe(false);
   });
 
@@ -71,7 +69,7 @@ describe("Mana Shield", () => {
     const shieldApplied = await manaShield.applyManaShield(testCharacter, damage);
     const updatedCharacter = (await Character.findById(testCharacter._id).lean().select("mana health")) as ICharacter;
 
-    const spellActivated = await manaShield.getManaShieldSpell(testCharacter);
+    const spellActivated = await manaShield.hasManaShield(testCharacter);
 
     expect(spellActivated).toBe(false);
     expect(shieldApplied).toBe(true);

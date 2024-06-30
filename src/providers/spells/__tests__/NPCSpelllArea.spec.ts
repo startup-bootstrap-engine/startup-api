@@ -1,8 +1,8 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { BattleAttackRanged } from "@providers/battle/BattleAttackTarget/BattleAttackRanged";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { spellsBlueprints } from "@providers/spells/data/blueprints";
 import { ISpell, MagicPower } from "@rpg-engine/shared";
@@ -14,7 +14,7 @@ describe("NPCSpellArea", () => {
   let npcSpellArea: NPCSpellArea;
   let blueprintManagerSpy: jest.SpyInstance;
   let movementHelperSpy: jest.SpyInstance;
-  let battleAttackRangedSpy: jest.SpyInstance;
+  let mapSolidsTrajectory: jest.SpyInstance;
 
   beforeAll(() => {
     npcSpellArea = container.get(NPCSpellArea);
@@ -26,7 +26,7 @@ describe("NPCSpellArea", () => {
 
     blueprintManagerSpy = jest.spyOn(BlueprintManager.prototype, "getBlueprint");
     movementHelperSpy = jest.spyOn(MovementHelper.prototype, "isUnderRange");
-    battleAttackRangedSpy = jest.spyOn(BattleAttackRanged.prototype, "isSolidInRangedTrajectory");
+    mapSolidsTrajectory = jest.spyOn(MapSolidsTrajectory.prototype, "isSolidInTrajectory");
   });
 
   afterEach(() => {
@@ -34,7 +34,7 @@ describe("NPCSpellArea", () => {
   });
 
   it("should return false if there is a solid object in trajectory", async () => {
-    battleAttackRangedSpy.mockResolvedValue(true);
+    mapSolidsTrajectory.mockResolvedValue(true);
 
     const result = await npcSpellArea.castNPCSpell(testNPC, testCharacter);
 
@@ -42,7 +42,7 @@ describe("NPCSpellArea", () => {
   });
 
   it("should return false if NPC blueprint is not found", async () => {
-    battleAttackRangedSpy.mockResolvedValue(false);
+    mapSolidsTrajectory.mockResolvedValue(false);
     blueprintManagerSpy.mockResolvedValue(null);
 
     const result = await npcSpellArea.castNPCSpell(testNPC, testCharacter);
@@ -51,7 +51,7 @@ describe("NPCSpellArea", () => {
   });
 
   it("should return false if no area spells are available", async () => {
-    battleAttackRangedSpy.mockResolvedValue(false);
+    mapSolidsTrajectory.mockResolvedValue(false);
     blueprintManagerSpy.mockResolvedValue({ areaSpells: [] });
 
     const result = await npcSpellArea.castNPCSpell(testNPC, testCharacter);
@@ -60,7 +60,7 @@ describe("NPCSpellArea", () => {
   });
 
   it("should return false if target is out of range", async () => {
-    battleAttackRangedSpy.mockResolvedValue(false);
+    mapSolidsTrajectory.mockResolvedValue(false);
     blueprintManagerSpy.mockResolvedValue({
       areaSpells: [{ spellKey: "testSpell", probability: 100, power: {} as MagicPower }],
     });
@@ -75,7 +75,7 @@ describe("NPCSpellArea", () => {
 
   it("should call spell's usableEffect if all checks pass", async () => {
     const usableEffectMock = jest.fn();
-    battleAttackRangedSpy.mockResolvedValue(false);
+    mapSolidsTrajectory.mockResolvedValue(false);
     blueprintManagerSpy.mockResolvedValue({
       areaSpells: [{ spellKey: "testSpell", probability: 100, power: {} as MagicPower }],
     });
@@ -91,7 +91,7 @@ describe("NPCSpellArea", () => {
 
   it("should log an error if an exception occurs", async () => {
     const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
-    battleAttackRangedSpy.mockRejectedValue(new Error("test error"));
+    mapSolidsTrajectory.mockRejectedValue(new Error("test error"));
 
     await npcSpellArea.castNPCSpell(testNPC, testCharacter);
 

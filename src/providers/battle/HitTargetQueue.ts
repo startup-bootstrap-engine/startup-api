@@ -94,7 +94,7 @@ export class HitTargetQueue {
             await this.npcTarget.setTarget(target as INPC, attacker as ICharacter);
           }
 
-          return await this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
+          void this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
         },
         { attacker, target, targetType, magicAttack, bonusDamage, spellHit },
         {
@@ -117,7 +117,7 @@ export class HitTargetQueue {
             return;
           }
 
-          return await this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
+          void this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
         },
         { attacker, target, targetType, magicAttack, bonusDamage, spellHit },
         {
@@ -169,7 +169,11 @@ export class HitTargetQueue {
       const damageRelatedPromises: any[] = [];
 
       if (damage > 0) {
-        await this.handleDamage(attacker, target, damage, lastestHealth, spellHit, damageRelatedPromises);
+        const manaShieldActive = await this.manaShield.hasManaShield(target as ICharacter);
+
+        if (!manaShieldActive || !(await this.manaShield.handleManaShield(target as ICharacter, damage))) {
+          await this.handleDamage(attacker, target, damage, lastestHealth, spellHit, damageRelatedPromises);
+        }
 
         if (attacker.type === EntityType.NPC && target.type === EntityType.Character) {
           await this.handleNPCTargetAttackSkillIncreaseAndEffects(
@@ -211,7 +215,7 @@ export class HitTargetQueue {
     attacker: ICharacter | INPC,
     target: ICharacter | INPC,
     damage: number,
-    lastestHealth: number,
+    latestHealth: number,
     spellHit: boolean | undefined,
     damageRelatedPromises: any[]
   ): Promise<void> {
@@ -228,23 +232,37 @@ export class HitTargetQueue {
     }
 
     if (target.type === EntityType.NPC) {
-      await this.updateTargetHealth(target, lastestHealth, damage);
+      await this.updateTargetHealth(target, latestHealth, damage);
     } else if (target.type === EntityType.Character) {
-      await this.handleCharacterTarget(target as ICharacter, lastestHealth, damage);
+      await this.handleCharacterTarget(target as ICharacter, latestHealth, damage);
     }
   }
 
-  private async handleCharacterTarget(target: ICharacter, lastestHealth: number, damage: number): Promise<void> {
-    let sorcererManaShield = false;
-    if ([CharacterClass.Sorcerer, CharacterClass.Druid].includes(target.class as CharacterClass)) {
-      const hasManaShieldSpell = await this.manaShield.getManaShieldSpell(target);
-      if (hasManaShieldSpell) {
-        sorcererManaShield = await this.manaShield.handleManaShield(target, damage);
-      }
-    }
+  private async handleCharacterTarget(target: ICharacter, latestHealth: number, damage: number): Promise<void> {
+    try {
+      const canProceed = await this.locker.lock(`handle-character-target-${target._id}`);
 
-    if (!sorcererManaShield) {
-      await this.updateTargetHealth(target, lastestHealth, damage);
+      if (!canProceed) {
+        return;
+      }
+
+      let sorcererManaShield = false;
+
+      if ([CharacterClass.Sorcerer, CharacterClass.Druid].includes(target.class as CharacterClass)) {
+        const hasManaShieldSpell = await this.manaShield.hasManaShield(target);
+
+        if (hasManaShieldSpell) {
+          sorcererManaShield = await this.manaShield.handleManaShield(target, damage);
+        }
+      }
+
+      if (!sorcererManaShield) {
+        await this.updateTargetHealth(target, latestHealth, damage);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      await this.locker.unlock(`handle-character-target-${target._id}`);
     }
   }
 
@@ -252,6 +270,7 @@ export class HitTargetQueue {
     const newTargetHealth = Math.max(lastestHealth - damage, 0);
     target.health = newTargetHealth;
     target.isAlive = newTargetHealth > 0;
+
     await this.updateHealthInDatabase(target, target.health);
   }
 

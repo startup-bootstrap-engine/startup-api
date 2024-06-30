@@ -19,6 +19,7 @@ import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
 import { EntityAttackType, MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 
@@ -137,6 +138,11 @@ export const npcDarkWraith: INPCTierBlueprint<15> = {
       spellKey: SpellsBlueprint.VampiricStorm,
       probability: 10,
       power: MagicPower.High,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Rare,
+      power: MagicPower.Low,
     },
   ],
 };

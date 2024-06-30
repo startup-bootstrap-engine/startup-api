@@ -1,4 +1,5 @@
 import { clearBleedingUsableEffect } from "../ClearBleedingUsableEffect";
+import { clearBurningEntityEffect } from "../ClearBurningUsableEffect";
 import { UsableEffectsBlueprint } from "../types";
 import {
   minorEatingUsableEffect,
@@ -15,4 +16,5 @@ export const foodsUsableEffect = {
   [UsableEffectsBlueprint.SuperStrongEatingEffect]: superStrongEatingUsableEffect,
   [UsableEffectsBlueprint.PoisonEatingEffect]: poisonEatingUsableEffect,
   [UsableEffectsBlueprint.ClearBleedingUsableEffect]: clearBleedingUsableEffect,
+  [UsableEffectsBlueprint.ClearBurningUsableEffect]: clearBurningEntityEffect,
 };

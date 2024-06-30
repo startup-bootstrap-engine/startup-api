@@ -15,6 +15,7 @@ import {
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
 import {
   AnimationEffectKeys,
   MagicPower,
@@ -147,6 +148,12 @@ export const npcForestWalker: INPCTierBlueprint<8> = {
     {
       spellKey: SpellsBlueprint.NaturesRevenge,
       probability: 5,
+      power: MagicPower.Low,
+    },
+
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Uncommon,
       power: MagicPower.Low,
     },
   ],

@@ -50,6 +50,7 @@ import { itemEtherealVeilDagger } from "./tier16/itemEtherealVeilDagger";
 import { itemSeraphicDagger } from "./tier17/itemSeraphicDagger";
 import { itemTwilightThornDagger } from "./tier17/itemTwilightThornDagger";
 import { itemObsidianEdgeDagger } from "./tier18/itemObsidianEdgeDagger";
+import { itemGreenDagger } from "./tier18/itemGreenDagger";
 
 export const daggersBlueprintIndex = {
   [DaggersBlueprint.Dagger]: itemDagger,
@@ -102,4 +103,5 @@ export const daggersBlueprintIndex = {
   [DaggersBlueprint.TwilightThornDagger]: itemTwilightThornDagger,
   [DaggersBlueprint.AzurefireDagger]: itemAzurefireDagger,
   [DaggersBlueprint.WildfireDagger]: itemWildfireDagger,
+  [DaggersBlueprint.GreenDagger]: itemGreenDagger,
 };

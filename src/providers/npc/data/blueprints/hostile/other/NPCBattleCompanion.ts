@@ -1,7 +1,8 @@
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
-import { NPCAlignment } from "@rpg-engine/shared";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
+import { MagicPower, NPCAlignment, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
 import { IBaseNPCBlueprint } from "../../../types/npcTierTypes";
@@ -34,4 +35,11 @@ export const npcBattleCompanion: IBaseNPCBlueprint = {
   fleeOnLowHealth: true,
 
   loots: [],
+  areaSpells: [
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.VeryCommon,
+      power: MagicPower.High,
+    },
+  ],
 };

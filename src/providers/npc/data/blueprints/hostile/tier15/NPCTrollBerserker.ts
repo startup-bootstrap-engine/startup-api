@@ -31,6 +31,7 @@ import {
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
 
 export const npcTrollBerserker: INPCTierBlueprint<15> = {
   ...generateMoveTowardsMovement(),
@@ -169,9 +170,14 @@ export const npcTrollBerserker: INPCTierBlueprint<15> = {
   entityEffects: [EntityEffectBlueprint.Bleeding],
   areaSpells: [
     {
-      spellKey: SpellsBlueprint.VampiricStorm,
-      probability: 10,
+      spellKey: SpellsBlueprint.CleavingStomp,
+      probability: 20,
       power: MagicPower.Medium,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Rare,
+      power: MagicPower.Low,
     },
   ],
 };

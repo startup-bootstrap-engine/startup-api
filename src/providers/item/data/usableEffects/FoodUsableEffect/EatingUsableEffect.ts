@@ -6,10 +6,10 @@ import { shuffle } from "lodash";
 import { IUsableEffect, UsableEffectsBlueprint } from "../types";
 
 export const recoveryPowerLevels = {
-  [UsableEffectsBlueprint.MinorEatingEffect]: 1,
-  [UsableEffectsBlueprint.ModerateEatingEffect]: 5,
-  [UsableEffectsBlueprint.StrongEatingEffect]: 7,
-  [UsableEffectsBlueprint.SuperStrongEatingEffect]: 10,
+  [UsableEffectsBlueprint.MinorEatingEffect]: 3,
+  [UsableEffectsBlueprint.ModerateEatingEffect]: 7,
+  [UsableEffectsBlueprint.StrongEatingEffect]: 10,
+  [UsableEffectsBlueprint.SuperStrongEatingEffect]: 14,
   [UsableEffectsBlueprint.PoisonEatingEffect]: -2,
 };
 
@@ -28,22 +28,22 @@ function createEatingUsableEffect(key: UsableEffectsBlueprint, description: stri
 
 export const minorEatingUsableEffect = createEatingUsableEffect(
   UsableEffectsBlueprint.MinorEatingEffect,
-  "Restores 1 HP and Mana 5 times"
+  "Restores 3 HP and Mana 5 times"
 );
 
 export const moderateEatingUsableEffect = createEatingUsableEffect(
   UsableEffectsBlueprint.ModerateEatingEffect,
-  "Restores 5 HP and Mana 5 times"
+  "Restores 7 HP and Mana 5 times"
 );
 
 export const strongEatingUsableEffect = createEatingUsableEffect(
   UsableEffectsBlueprint.StrongEatingEffect,
-  "Restores 7 HP and Mana 5 times"
+  "Restores 10 HP and Mana 5 times"
 );
 
 export const superStrongEatingUsableEffect = createEatingUsableEffect(
   UsableEffectsBlueprint.SuperStrongEatingEffect,
-  "Restores 10 HP and Mana 5 times"
+  "Restores 14 HP and Mana 5 times"
 );
 
 export const poisonEatingUsableEffect: IUsableEffect = {

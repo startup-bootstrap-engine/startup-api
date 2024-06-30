@@ -3,6 +3,7 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
 import { FromGridX, FromGridY, NPCTargetType, NPC_MAX_TALKING_DISTANCE_IN_GRID } from "@rpg-engine/shared";
 import { NPCTarget } from "../movement/NPCTarget";
 
@@ -11,6 +12,7 @@ describe("NPCTarget.ts", () => {
   let testNPC: INPC;
   let testCharacter: ICharacter;
   let inMemoryHashTable: InMemoryHashTable;
+  let mapSolidsTrajectorySpy: jest.SpyInstance;
 
   beforeAll(async () => {
     await unitTestHelper.initializeMapLoader();
@@ -30,6 +32,8 @@ describe("NPCTarget.ts", () => {
         hasSkills: true,
       }
     );
+
+    mapSolidsTrajectorySpy = jest.spyOn(MapSolidsTrajectory.prototype, "isSolidInTrajectory").mockResolvedValue(false);
   });
 
   it("should properly get target direction", async () => {

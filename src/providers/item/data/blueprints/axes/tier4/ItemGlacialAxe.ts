@@ -1,6 +1,16 @@
-import { EntityAttackType, ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterAttributes,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  EntityAttackType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { IEquippableTwoHandedTier4WeaponBlueprint } from "../../../types/TierBlueprintTypes";
 import { AxesBlueprint } from "../../../types/itemsBlueprintTypes";
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 
 export const itemGlacialAxe: IEquippableTwoHandedTier4WeaponBlueprint = {
   key: AxesBlueprint.GlacialAxe,
@@ -18,4 +28,29 @@ export const itemGlacialAxe: IEquippableTwoHandedTier4WeaponBlueprint = {
   tier: 4,
   isTwoHanded: true,
   rangeType: EntityAttackType.Melee,
+
+  entityEffects: [EntityEffectBlueprint.Freezing],
+  entityEffectChance: 90,
+
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 5,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 5,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 5,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "Increases max health by 5%, strength by 5% and resistance by 5%.",
 };

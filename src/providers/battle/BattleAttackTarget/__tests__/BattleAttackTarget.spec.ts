@@ -1,6 +1,7 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
 import { CharacterClass, FromGridX, FromGridY } from "@rpg-engine/shared";
 import { BattleAttackTarget } from "../BattleAttackTarget";
 import { BattleAttackTargetDeath } from "../BattleAttackTargetDeath";
@@ -12,16 +13,25 @@ jest.mock("../../../entityEffects/EntityEffectCycle.ts", () => ({
 describe("BattleAttackTarget.spec.ts", () => {
   let battleAttackTarget: BattleAttackTarget;
   let battleAttackTargetDeath: BattleAttackTargetDeath;
+  let mapSolidsTrajectorySpy: jest.SpyInstance;
 
   let testNPC: INPC;
   let testCharacter: ICharacter;
 
-  beforeAll(() => {
+  let hitTargetSpy: jest.SpyInstance;
+
+  beforeAll(async () => {
     battleAttackTarget = container.get<BattleAttackTarget>(BattleAttackTarget);
     battleAttackTargetDeath = container.get<BattleAttackTargetDeath>(BattleAttackTargetDeath);
+
+    mapSolidsTrajectorySpy = jest.spyOn(MapSolidsTrajectory.prototype, "isSolidInTrajectory");
+
+    await unitTestHelper.initializeMapLoader();
   });
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     testNPC = await unitTestHelper.createMockNPC(null, { hasSkills: true });
     testCharacter = await unitTestHelper.createMockCharacter(null, {
       hasEquipment: true,
@@ -35,12 +45,28 @@ describe("BattleAttackTarget.spec.ts", () => {
     testNPC.x = FromGridX(1);
     testNPC.y = FromGridX(1);
     (await NPC.findByIdAndUpdate(testNPC._id, testNPC).lean()) as INPC;
+
+    // @ts-ignore
+    hitTargetSpy = jest.spyOn(battleAttackTarget.hitTarget, "hit" as any);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("should NOT hit a target if there is a solid object in the trajectory", async () => {
+    // @ts-ignore
+    mapSolidsTrajectorySpy.mockResolvedValue(true);
+
+    const attacker = testCharacter;
+    const defender = testNPC;
+
+    await battleAttackTarget.checkRangeAndAttack(attacker, defender);
+
+    expect(hitTargetSpy).not.toHaveBeenCalled();
   });
 
   it("should NOT hit a target if attacker has melee attack type and target is out of range", async () => {
-    // @ts-ignore
-    const hitTarget = jest.spyOn(battleAttackTarget.hitTarget, "hit" as any);
-
     const attacker = testCharacter;
     attacker.x = FromGridX(0);
     attacker.y = FromGridY(0);
@@ -55,7 +81,7 @@ describe("BattleAttackTarget.spec.ts", () => {
 
     // expect battleAttackTarget to not have been called
 
-    expect(hitTarget).not.toHaveBeenCalled();
+    expect(hitTargetSpy).not.toHaveBeenCalled();
   });
 
   it("should hit a target if attacker has melee attack type and target is in range", async () => {
@@ -66,10 +92,7 @@ describe("BattleAttackTarget.spec.ts", () => {
 
     // expect battleAttackTarget to not have been called
 
-    // @ts-ignore
-    const hitTarget = jest.spyOn(battleAttackTarget.hitTarget, "hit" as any);
-
-    expect(hitTarget).toHaveBeenCalled();
+    expect(hitTargetSpy).toHaveBeenCalled();
   });
 });
 
@@ -79,8 +102,9 @@ describe("PVP battle", () => {
   let targetCharacter: ICharacter;
   let attackerCharacter: ICharacter;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     battleAttackTarget = container.get<BattleAttackTarget>(BattleAttackTarget);
+    await unitTestHelper.initializeMapLoader();
   });
 
   afterEach(() => {

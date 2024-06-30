@@ -264,7 +264,7 @@ export class DiscordCronJobs {
         
         ⚔️ **Training Room Access**: You can train there 24/7 if you wish!
  
-        🌈 **Colorful Identity**: Stand out with a custom-colored character name depending on your plan. Show your true colors!
+        🌈 **Colorful Names**: Stand out with a custom-colored character name depending on your plan. Show your true colors!
         
         💀 **Reduced Penalties**: Fear less, venture more with lowered SP XP and inventory loss on death.
         

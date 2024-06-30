@@ -83,6 +83,7 @@ export const npcYellowDragon: INPCTierBlueprint<22> = {
       itemBlueprintKey: BooksBlueprint.MysteryOrb,
       chance: LootProbability.VeryRare,
     },
+
     {
       itemBlueprintKey: HammersBlueprint.StarlightHammer,
       chance: LootProbability.Rare,
@@ -290,6 +291,11 @@ export const npcYellowDragon: INPCTierBlueprint<22> = {
       spellKey: SpellsBlueprint.VampiricStorm,
       probability: 40,
       power: MagicPower.Medium,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: 30,
+      power: MagicPower.High,
     },
   ],
 };

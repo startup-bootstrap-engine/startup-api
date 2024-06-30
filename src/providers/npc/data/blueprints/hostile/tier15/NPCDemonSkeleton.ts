@@ -19,6 +19,7 @@ import {
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
 import { MagicPower, NPCAlignment, NPCSubtype, SpellsBlueprint } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
@@ -61,7 +62,7 @@ export const npcDemonSkeleton: INPCTierBlueprint<15> = {
     {
       itemBlueprintKey: CraftingResourcesBlueprint.WaterBottle,
       chance: LootProbability.Common,
-      quantityRange: [1, 5],
+      quantityRange: [5, 12],
     },
     {
       itemBlueprintKey: SeedsBlueprint.PumpkinSeed,
@@ -162,6 +163,11 @@ export const npcDemonSkeleton: INPCTierBlueprint<15> = {
       spellKey: SpellsBlueprint.VampiricStorm,
       probability: 10,
       power: MagicPower.Medium,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Rare,
+      power: MagicPower.Low,
     },
   ],
 };

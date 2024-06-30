@@ -22,6 +22,7 @@ import {
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
 import {
   AnimationEffectKeys,
   MagicPower,
@@ -89,6 +90,7 @@ export const npcAncientDragon: INPCTierBlueprint<26> = {
       itemBlueprintKey: ToolsBlueprint.GildedLavaPickaxe,
       chance: LootProbability.SemiCommon,
     },
+
     {
       itemBlueprintKey: SwordsBlueprint.InfernoCleaver,
       chance: LootProbability.Uncommon,
@@ -314,6 +316,11 @@ export const npcAncientDragon: INPCTierBlueprint<26> = {
       spellKey: SpellsBlueprint.FireStorm,
       probability: 40,
       power: MagicPower.Medium,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Uncommon,
+      power: MagicPower.High,
     },
   ],
 };

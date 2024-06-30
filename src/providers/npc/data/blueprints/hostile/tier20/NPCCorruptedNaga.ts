@@ -19,6 +19,7 @@ import {
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
+import { SpellAreaProbability } from "@providers/spells/area-spells/NPCSpellAreaTypes";
 import {
   AnimationEffectKeys,
   MagicPower,
@@ -73,6 +74,7 @@ export const npcCorruptedNaga: INPCTierBlueprint<20> = {
       itemBlueprintKey: SwordsBlueprint.DragonsSword,
       chance: LootProbability.Uncommon,
     },
+
     {
       itemBlueprintKey: ArmorsBlueprint.GoldenArmor,
       chance: LootProbability.SemiCommon,
@@ -268,6 +270,11 @@ export const npcCorruptedNaga: INPCTierBlueprint<20> = {
       spellKey: SpellsBlueprint.FireStorm,
       probability: 40,
       power: MagicPower.Medium,
+    },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: SpellAreaProbability.Uncommon,
+      power: MagicPower.High,
     },
   ],
 };

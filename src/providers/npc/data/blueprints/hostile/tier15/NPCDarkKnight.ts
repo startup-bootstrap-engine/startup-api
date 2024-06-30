@@ -235,5 +235,10 @@ export const npcDarkKnight: INPCTierBlueprint<15> = {
       probability: 5,
       power: MagicPower.High,
     },
+    {
+      spellKey: SpellsBlueprint.SelfHealingSpell,
+      probability: 20,
+      power: MagicPower.Low,
+    },
   ],
 };

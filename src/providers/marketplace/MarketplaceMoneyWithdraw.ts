@@ -4,13 +4,12 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { IMarketplaceMoney, MarketplaceMoney } from "@entities/ModuleMarketplace/MarketplaceMoneyModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
-import { CharacterTradingBalance } from "@providers/character/CharacterTradingBalance";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
-import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
 import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { blueprintManager } from "@providers/inversify/container";
 import { OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { Locker } from "@providers/locks/Locker";
 import { MathHelper } from "@providers/math/MathHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
@@ -32,33 +31,46 @@ export class MarketplaceMoneyWithdraw {
     private characterWeight: CharacterWeightQueue,
     private mathHelper: MathHelper,
     private characterItemSlots: CharacterItemSlots,
-    private characterTradingBalance: CharacterTradingBalance,
-    private characterItemInventory: CharacterItemInventory
+    private locker: Locker
   ) {}
 
   @TrackNewRelicTransaction()
   public async withdrawMoneyFromMarketplace(character: ICharacter, npcId: string): Promise<boolean> {
-    const marketplaceValid = await this.marketplaceValidation.hasBasicValidation(character, npcId);
-    if (!marketplaceValid) {
+    const canProceed = await this.locker.lock(`marketplace-withdraw-${character._id}`);
+
+    if (!canProceed) {
+      console.log("lock activated!");
       return false;
     }
 
-    const marketplaceMoney = await MarketplaceMoney.findOne({ owner: character._id });
-    if (!marketplaceMoney || marketplaceMoney.money <= 0) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "You don't have gold in the marketplace");
+    try {
+      const marketplaceValid = await this.marketplaceValidation.hasBasicValidation(character, npcId);
+      if (!marketplaceValid) {
+        return false;
+      }
+
+      const marketplaceMoney = await MarketplaceMoney.findOne({ owner: character._id });
+      if (!marketplaceMoney || marketplaceMoney.money <= 0) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "You don't have gold in the marketplace");
+        return false;
+      }
+
+      const added = await this.addGoldToInventory(character, marketplaceMoney);
+      if (!added) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Could not add gold to inventory");
+        return false;
+      }
+
+      this.socketMessaging.sendEventToUser(character.channelId!, MarketplaceSocketEvents.RefreshItems);
+      await this.sendRefreshItemsEvent(character);
+
+      return true;
+    } catch (error) {
+      console.error(error);
       return false;
+    } finally {
+      await this.locker.unlock(`marketplace-withdraw-${character._id}`);
     }
-
-    const added = await this.addGoldToInventory(character, marketplaceMoney);
-    if (!added) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Could not add gold to inventory");
-      return false;
-    }
-
-    this.socketMessaging.sendEventToUser(character.channelId!, MarketplaceSocketEvents.RefreshItems);
-    await this.sendRefreshItemsEvent(character);
-
-    return true;
   }
 
   @TrackNewRelicTransaction()
@@ -82,111 +94,60 @@ export class MarketplaceMoneyWithdraw {
     const inventory = await this.characterInventory.getInventory(character);
     const inventoryContainerId = inventory?.itemContainer as unknown as string;
 
-    const initialCharacterAvailableGold = await this.characterTradingBalance.getTotalGoldInInventory(character);
-
     let qty = marketplaceMoney.money;
     let moneyLeft = marketplaceMoney.money;
 
-    while (qty > 0) {
-      const newItem = new Item({ ...blueprint, owner: character._id });
+    const rollbackItems: string[] = [];
 
-      const qtyToAdd = newItem.maxStackSize < qty ? newItem.maxStackSize : qty;
-      const availableQtyOnFirstItemSlot = await this.characterItemSlots.getAvailableQuantityOnSlotToStack(
-        inventoryContainerId,
-        newItem.key,
-        qtyToAdd
-      );
+    try {
+      while (qty > 0) {
+        const newItem = new Item({ ...blueprint, owner: character._id });
 
-      if (newItem.maxStackSize >= qty && availableQtyOnFirstItemSlot >= qty) {
-        newItem.stackQty = qty;
-        qty = 0;
-      } else {
-        newItem.stackQty = availableQtyOnFirstItemSlot;
-        qty = this.mathHelper.fixPrecision(qty - newItem.stackQty);
-      }
-
-      await newItem.save();
-
-      const wasAdded = await this.characterItemContainer.addItemToContainer(newItem, character, inventoryContainerId);
-
-      if (wasAdded) {
-        moneyLeft = qty;
-      } else break;
-    }
-    const updatedGold = marketplaceMoney.money - moneyLeft;
-
-    const isRollbackSuccessful = await this.checkAndRollbackMoneyWithdraw(
-      character,
-      blueprint,
-      inventoryContainerId,
-      updatedGold,
-      initialCharacterAvailableGold
-    );
-
-    if (isRollbackSuccessful) {
-      this.socketMessaging.sendMessageToCharacter(
-        character,
-        "Sorry, Withdrawal is not successful. Rollback to original state"
-      );
-
-      return false;
-    }
-
-    if (moneyLeft > 0) {
-      await marketplaceMoney.updateOne({ money: moneyLeft });
-    } else {
-      await marketplaceMoney.remove();
-    }
-
-    await this.characterWeight.updateCharacterWeight(character);
-
-    return true;
-  }
-
-  private async checkAndRollbackMoneyWithdraw(
-    character: ICharacter,
-    blueprint: IItem,
-    inventoryContainerId: string,
-    updatedGold: number,
-    initialCharacterAvailableGold: number
-  ): Promise<boolean> {
-    const characterAvailableGold = await this.characterTradingBalance.getTotalGoldInInventory(character);
-
-    if (initialCharacterAvailableGold + updatedGold !== characterAvailableGold) {
-      if (initialCharacterAvailableGold === characterAvailableGold) {
-        return true;
-      }
-
-      if (characterAvailableGold > initialCharacterAvailableGold) {
-        const qty = characterAvailableGold - initialCharacterAvailableGold;
-        await this.characterItemInventory.decrementItemFromNestedInventoryByKey(
-          OthersBlueprint.GoldCoin,
-          character,
-          qty
+        const qtyToAdd = newItem.maxStackSize < qty ? newItem.maxStackSize : qty;
+        const availableQtyOnFirstItemSlot = await this.characterItemSlots.getAvailableQuantityOnSlotToStack(
+          inventoryContainerId,
+          newItem.key,
+          qtyToAdd
         );
-      } else {
-        let qty = initialCharacterAvailableGold - characterAvailableGold;
-        while (qty > 0) {
-          const newItem = new Item({ ...blueprint, owner: character._id });
 
-          if (newItem.maxStackSize >= qty) {
-            newItem.stackQty = qty;
-            qty = 0;
-          } else {
-            newItem.stackQty = newItem.maxStackSize;
-            qty = this.mathHelper.fixPrecision(qty - newItem.maxStackSize);
-          }
-
-          await newItem.save();
-
-          await this.characterItemContainer.addItemToContainer(newItem, character, inventoryContainerId);
+        if (newItem.maxStackSize >= qty && availableQtyOnFirstItemSlot >= qty) {
+          newItem.stackQty = qty;
+          qty = 0;
+        } else {
+          newItem.stackQty = availableQtyOnFirstItemSlot;
+          qty = this.mathHelper.fixPrecision(qty - newItem.stackQty);
         }
+
+        await newItem.save();
+        rollbackItems.push(newItem._id);
+
+        const wasAdded = await this.characterItemContainer.addItemToContainer(newItem, character, inventoryContainerId);
+
+        if (wasAdded) {
+          moneyLeft = qty;
+        } else break;
       }
+
+      if (moneyLeft > 0) {
+        await marketplaceMoney.updateOne({ money: moneyLeft });
+      } else {
+        await marketplaceMoney.remove();
+      }
+
+      await this.characterWeight.updateCharacterWeight(character);
 
       return true;
+    } catch (error) {
+      // Rollback in case of error
+      await this.rollbackItems(rollbackItems);
+      throw error;
     }
+  }
 
-    return false;
+  private async rollbackItems(itemIds: string[]): Promise<void> {
+    for (const itemId of itemIds) {
+      await Item.findByIdAndRemove(itemId);
+    }
   }
 
   private async sendRefreshItemsEvent(character: ICharacter): Promise<void> {
