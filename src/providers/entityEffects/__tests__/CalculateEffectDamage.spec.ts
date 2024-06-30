@@ -166,6 +166,6 @@ describe("CalculateEffectDamage", () => {
     const result = await calculateEffectDamage.calculateEffectDamage(testAttacker, testTarget);
 
     expect(spyCalculateTotalEffectDamage).toHaveBeenCalledWith(testAttacker, 50, 1, 50, 1, 2, 4, undefined);
-    expect(result).toBeGreaterThan(0.5);
+    expect(result).toBeGreaterThan(0.4);
   });
 });

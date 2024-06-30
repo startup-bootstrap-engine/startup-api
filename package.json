@@ -43,7 +43,6 @@
     "@amplitude/identify": "^1.8.2",
     "@amplitude/node": "^1.8.3",
     "@bull-board/express": "^5.16.0",
-    "@capacitor/core": "^4.6.3",
     "@geckos.io/server": "^2.1.8",
     "@sendgrid/mail": "^7.4.0",
     "@side/jest-runtime": "^1.1.0",
@@ -85,6 +84,7 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.16.11",
+    "@capacitor/core": "^6.1.0",
     "@jonit-dev/decorators-utils": "^0.1.4",
     "@rpg-engine/shared": "^0.9.60",
     "@rpg-engine/soul": "^0.1.16",

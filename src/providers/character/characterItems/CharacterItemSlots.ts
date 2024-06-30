@@ -156,23 +156,20 @@ export class CharacterItemSlots {
   }
 
   @TrackNewRelicTransaction()
-  public async findItemOnSlots(targetContainer: IItemContainer, itemId: string): Promise<IItem | undefined> {
+  public findItemOnSlots(targetContainer: IItemContainer, itemId: string): IItem | undefined {
     try {
-      const container = (await ItemContainer.findById(targetContainer._id)) as unknown as IItemContainer;
-
-      if (!container) {
+      if (!targetContainer) {
         throw new Error("Container not found");
       }
 
-      if (container) {
-        for (let i = 0; i < container.slotQty; i++) {
-          const slotItem = container.slots?.[i] as unknown as IItem;
+      for (let i = 0; i < targetContainer.slotQty; i++) {
+        const slotItem = targetContainer.slots?.[i] as unknown as IItem;
 
-          if (!slotItem) continue;
+        if (!slotItem) continue;
 
-          if (slotItem._id.toString() === itemId.toString()) {
-            return slotItem;
-          }
+        if (slotItem._id.toString() === itemId.toString()) {
+          console.log(`Found item ${slotItem.key} on slot ${i}`);
+          return slotItem;
         }
       }
     } catch (error) {

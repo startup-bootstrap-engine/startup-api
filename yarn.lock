@@ -1522,10 +1522,10 @@
   dependencies:
     "@bull-board/api" "5.16.0"
 
-"@capacitor/core@^4.6.3":
-  version "4.8.2"
-  resolved "https://registry.yarnpkg.com/@capacitor/core/-/core-4.8.2.tgz#1f44eeed4c8c2d54d22810fb02170dd245df8fdf"
-  integrity sha512-lrDvHyQu3LWWWXkCkHATY8D3GCBIWyqnmQUiGxlTJfu9BEdmfflq+OZuDKIy4H+KYChaXM1QnymNIuWrDFXgXw==
+"@capacitor/core@^6.1.0":
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/@capacitor/core/-/core-6.1.0.tgz#1b4a93f3d5976ce3fd4a7f1b797c48c1243ec934"
+  integrity sha512-Kt4ONm0X9xxJXn9Q73oBaKdzep5B/VJw3VjXa2eGul4cD2k37mJwgjpXSMRnLH0Aju5bCiRL8J/hMAfTlokO6A==
   dependencies:
     tslib "^2.1.0"
 
