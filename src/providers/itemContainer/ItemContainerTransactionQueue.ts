@@ -212,7 +212,7 @@ export class ItemContainerTransactionQueue {
       return false;
     }
 
-    if (item.stackQty && item.stackQty > 1) {
+    if (item.stackQty && item.stackQty > 0) {
       return await this.isTransactionConsistentForStackableItems(
         item,
         originSnapshot,
