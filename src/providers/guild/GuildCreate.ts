@@ -62,6 +62,23 @@ export class GuildCreate {
         return;
       }
 
+      // decrement gold
+      const result = await this.characterItemInventory.decrementItemFromNestedInventoryByKey(
+        OthersBlueprint.GoldCoin,
+        character,
+        GUILD_CREATE_MIN_GOLD_REQUIRED
+      );
+
+      if (!result.success) {
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          `Sorry, not enough gold to create guild. You need at least ${GUILD_CREATE_MIN_GOLD_REQUIRED}.`
+        );
+        return;
+      }
+
+      await this.characterWeight.refreshContainersAfterWeightChange(character);
+
       // create guild
       const newGuild = await Guild.create({
         guildLeader: character._id,
@@ -75,17 +92,6 @@ export class GuildCreate {
       const newSkills = await GuildSkills.create({ owner: newGuild._id });
       newGuild.guildSkills = newSkills;
       await newGuild.save();
-
-      // decrement gold
-      const result = await this.characterItemInventory.decrementItemFromNestedInventoryByKey(
-        OthersBlueprint.GoldCoin,
-        character,
-        GUILD_CREATE_MIN_GOLD_REQUIRED
-      );
-
-      if (result.success) {
-        await this.characterWeight.refreshContainersAfterWeightChange(character);
-      }
 
       // send guild created message
       this.socketMessaging.sendMessageToCharacter(character, "Guild was Created successfully.");
