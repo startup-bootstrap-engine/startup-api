@@ -1,8 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { Guild } from "@entities/ModuleSystem/GuildModel";
 import { GuildSkills } from "@entities/ModuleSystem/GuildSkillsModel";
-import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
 import { CharacterTradingBalance } from "@providers/character/CharacterTradingBalance";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
@@ -11,15 +9,7 @@ import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeigh
 import { GUILD_CREATE_MIN_GOLD_REQUIRED } from "@providers/constants/GuildConstants";
 import { OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import {
-  GuildSocketEvents,
-  IEquipmentAndInventoryUpdatePayload,
-  IGuildForm,
-  IGuildInfo,
-  IItemContainer,
-  ItemSocketEvents,
-  UserAccountTypes,
-} from "@rpg-engine/shared";
+import { GuildSocketEvents, IGuildForm, IGuildInfo } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { GuildCommon } from "./GuildCommon";
 import { GuildValidation } from "./GuildValidation";
@@ -33,7 +23,6 @@ export class GuildCreate {
     private characterTradingBalance: CharacterTradingBalance,
     private characterItemInventory: CharacterItemInventory,
     private characterWeight: CharacterWeightQueue,
-    private characterInventory: CharacterInventory,
     private guildCommon: GuildCommon,
     private guildValidation: GuildValidation
   ) {}
@@ -95,7 +84,7 @@ export class GuildCreate {
       );
 
       if (result.success) {
-        await this.updateCharacterWeight(character);
+        await this.characterWeight.refreshContainersAfterWeightChange(character);
       }
 
       // send guild created message
@@ -120,7 +109,7 @@ export class GuildCreate {
       return;
     }
 
-    if (!(await this.isCharacterPremium(character))) {
+    if (!(await this.characterPremiumAccount.isCharacterPremium(character))) {
       this.socketMessaging.sendErrorMessageToCharacter(
         character,
         "Sorry, you must be a premium user to create guilds."
@@ -139,34 +128,8 @@ export class GuildCreate {
     this.socketMessaging.sendEventToUser<boolean>(character.channelId!, GuildSocketEvents.CanCreateGuild, true);
   }
 
-  private async isCharacterPremium(character: ICharacter): Promise<boolean> {
-    const premiumAccountType = await this.characterPremiumAccount.getPremiumAccountType(character);
-    return !!(premiumAccountType && premiumAccountType !== UserAccountTypes.Free);
-  }
-
   private async isCharacterHasGold(character: ICharacter): Promise<boolean> {
     const availableGold = await this.characterTradingBalance.getTotalGoldInInventory(character);
     return availableGold >= GUILD_CREATE_MIN_GOLD_REQUIRED;
-  }
-
-  private async updateCharacterWeight(character: ICharacter): Promise<void> {
-    await this.characterWeight.updateCharacterWeight(character);
-    const inventory = await this.characterInventory.getInventory(character);
-    if (!inventory) return;
-
-    const inventoryContainer = (await ItemContainer.findById(inventory.itemContainer).lean()) as IItemContainer | null;
-    if (inventoryContainer) {
-      const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {
-        inventory: inventoryContainer,
-        openEquipmentSetOnUpdate: false,
-        openInventoryOnUpdate: true,
-      };
-
-      this.socketMessaging.sendEventToUser<IEquipmentAndInventoryUpdatePayload>(
-        character.channelId!,
-        ItemSocketEvents.EquipmentAndInventoryUpdate,
-        payloadUpdate
-      );
-    }
   }
 }
