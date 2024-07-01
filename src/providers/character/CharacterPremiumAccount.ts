@@ -29,4 +29,9 @@ export class CharacterPremiumAccount {
 
     return PREMIUM_ACCOUNT_METADATA[user.accountType];
   }
+
+  public async isCharacterPremium(character: ICharacter): Promise<boolean> {
+    const premiumAccountType = await this.getPremiumAccountType(character);
+    return !!(premiumAccountType && premiumAccountType !== UserAccountTypes.Free);
+  }
 }

@@ -1,9 +1,18 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { BasicAttribute, CharacterClass, CharacterSocketEvents, ICharacterAttributeChanged } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterClass,
+  CharacterSocketEvents,
+  ICharacterAttributeChanged,
+  IEquipmentAndInventoryUpdatePayload,
+  IItemContainer,
+  ItemSocketEvents,
+} from "@rpg-engine/shared";
 
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
+import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
@@ -11,6 +20,7 @@ import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { TraitGetter } from "@providers/skill/TraitGetter";
 import { Job } from "bullmq";
+import { CharacterInventory } from "../CharacterInventory";
 import { CharacterWeightCalculator } from "./CharacterWeightCalculator";
 
 @provideSingleton(CharacterWeightQueue)
@@ -20,7 +30,8 @@ export class CharacterWeightQueue {
     private traitGetter: TraitGetter,
     private inMemoryHashTable: InMemoryHashTable,
     private characterWeightCalculator: CharacterWeightCalculator,
-    private dynamicQueue: DynamicQueue
+    private dynamicQueue: DynamicQueue,
+    private characterInventory: CharacterInventory
   ) {}
 
   async updateCharacterWeight(character: ICharacter): Promise<Job | undefined> {
@@ -150,5 +161,26 @@ export class CharacterWeightQueue {
     }
 
     return (weight + item.weight) / maxWeight;
+  }
+
+  public async refreshContainersAfterWeightChange(character: ICharacter): Promise<void> {
+    await this.updateCharacterWeight(character);
+    const inventory = await this.characterInventory.getInventory(character);
+    if (!inventory) return;
+
+    const inventoryContainer = (await ItemContainer.findById(inventory.itemContainer).lean()) as IItemContainer | null;
+    if (inventoryContainer) {
+      const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {
+        inventory: inventoryContainer,
+        openEquipmentSetOnUpdate: false,
+        openInventoryOnUpdate: true,
+      };
+
+      this.socketMessaging.sendEventToUser<IEquipmentAndInventoryUpdatePayload>(
+        character.channelId!,
+        ItemSocketEvents.EquipmentAndInventoryUpdate,
+        payloadUpdate
+      );
+    }
   }
 }
