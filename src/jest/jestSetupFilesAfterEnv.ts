@@ -58,6 +58,8 @@ jest.mock("@providers/constants/SkillConstants", () => ({
 
 jest.mock("@providers/constants/GuildConstants", () => ({
   GUILD_CREATE_MIN_GOLD_REQUIRED: 100000,
+  GUILD_XP_GAIN_DIFFICULTY: 1,
+  GUILD_SKILL_GAIN_DIFFICULTY: 1,
 }));
 
 jest.mock("@providers/constants/PartyConstants", () => ({

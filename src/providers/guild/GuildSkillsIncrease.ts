@@ -1,6 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Guild } from "@entities/ModuleSystem/GuildModel";
 import { GuildSkills, IGuildSkills } from "@entities/ModuleSystem/GuildSkillsModel";
+import { GUILD_SKILL_GAIN_DIFFICULTY } from "@providers/constants/GuildConstants";
 import { SkillCalculator } from "@providers/skill/SkillCalculator";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { provide } from "inversify-binding-decorators";
@@ -65,7 +66,8 @@ export class GuildSkillsIncrease {
 
     if (updatedGuildPoints >= guildSkills.guildPointsToNextLevel) {
       newLevel++;
-      newGuildPointsToNextLevel = this.skillCalculator.calculateSPToNextLevel(0, newLevel + 1);
+      newGuildPointsToNextLevel =
+        this.skillCalculator.calculateSPToNextLevel(0, newLevel + 1) * GUILD_SKILL_GAIN_DIFFICULTY;
       levelUp = true;
     }
 

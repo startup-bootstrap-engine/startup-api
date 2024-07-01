@@ -46,7 +46,7 @@ describe("GuildExperience.ts", () => {
     await guildExperience.updateGuildExperience(testCharacter, xp);
 
     const newGuildSkills = await GuildSkills.findOne({ _id: guildSkills._id });
-    expect(newGuildSkills?.experience).toEqual(guildSkills.experience + xp / 2);
+    expect(newGuildSkills?.experience).toEqual(Math.round(guildSkills.experience + xp / 10));
     expect(mockSocketMessaging.sendEventToUser).not.toHaveBeenCalled();
   });
 
@@ -54,11 +54,11 @@ describe("GuildExperience.ts", () => {
     // @ts-ignore
     const notifyGuildMembersSpy = jest.spyOn(guildExperience.guildCommon, "notifyGuildMembers");
 
-    const xp = guildSkills.xpToNextLevel * 2 + 10;
+    const xp = guildSkills.xpToNextLevel * 20 + 10;
     await guildExperience.updateGuildExperience(testCharacter, xp);
 
     const newGuildSkills = await GuildSkills.findOne({ _id: guildSkills._id });
-    expect(newGuildSkills?.experience).toEqual(guildSkills.experience + xp / 2);
+    expect(newGuildSkills?.experience).toEqual(Math.round(guildSkills.experience + xp / 10));
     expect(notifyGuildMembersSpy).toHaveBeenCalled();
 
     const callArgs = notifyGuildMembersSpy.mock.calls[0];

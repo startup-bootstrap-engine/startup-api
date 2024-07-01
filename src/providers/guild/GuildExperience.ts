@@ -4,6 +4,7 @@ import { GuildSkills, IGuildSkills } from "@entities/ModuleSystem/GuildSkillsMod
 import { SkillCalculator } from "@providers/skill/SkillCalculator";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 
+import { GUILD_XP_GAIN_DIFFICULTY } from "@providers/constants/GuildConstants";
 import { provide } from "inversify-binding-decorators";
 import { GuildCommon } from "./GuildCommon";
 
@@ -37,14 +38,15 @@ export class GuildExperience {
     guildSkills: IGuildSkills,
     exp: number
   ): Promise<{ levelUp: boolean; newLevel: number }> {
-    const newExperience = guildSkills.experience + exp / 2;
+    const newExperience = Math.round(guildSkills.experience + exp / 10);
+
     let newLevel = guildSkills.level;
     let newXpToNextLevel = guildSkills.xpToNextLevel;
     let levelUp = false;
 
     if (newExperience >= newXpToNextLevel) {
       newLevel++;
-      newXpToNextLevel = this.skillCalculator.calculateXPToNextLevel(0, newLevel + 1);
+      newXpToNextLevel = this.skillCalculator.calculateXPToNextLevel(0, newLevel + 1) * GUILD_XP_GAIN_DIFFICULTY;
       levelUp = true;
     }
 
