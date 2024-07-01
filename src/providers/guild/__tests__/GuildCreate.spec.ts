@@ -162,7 +162,7 @@ describe("GuildCreate.ts", () => {
         .fn()
         .mockResolvedValue({ success: true });
       // @ts-ignore
-      guildCreate.guildCommon.convertTOIGuildInfo = jest.fn().mockResolvedValue({});
+      guildCreate.guildCommon.convertToGuildInfo = jest.fn().mockResolvedValue({});
 
       await guildCreate.createGuild(guildData, testCharacter);
 

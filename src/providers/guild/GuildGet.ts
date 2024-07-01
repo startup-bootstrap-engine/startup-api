@@ -14,14 +14,14 @@ export class GuildGet {
       // check if guildId exists and return guild
       if (guildId) {
         const guild = (await Guild.findOne({ _id: guildId })) as IGuild;
-        const guildInfo = await this.guildCommon.convertTOIGuildInfo(guild);
+        const guildInfo = await this.guildCommon.convertToGuildInfo(guild);
         this.sendGuild(guildInfo, character);
         return;
       }
 
       const newGuild = await this.guildCommon.getCharactersGuild(character);
       if (newGuild) {
-        const guildInfo = await this.guildCommon.convertTOIGuildInfo(newGuild);
+        const guildInfo = await this.guildCommon.convertToGuildInfo(newGuild);
         this.sendGuild(guildInfo, character);
       } else {
         this.sendGuild(null, character);

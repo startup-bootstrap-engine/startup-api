@@ -102,7 +102,7 @@ export class GuildCreate {
       this.socketMessaging.sendMessageToCharacter(character, "Guild was Created successfully.");
 
       // send guild info
-      const guildInfo = await this.guildCommon.convertTOIGuildInfo(newGuild);
+      const guildInfo = await this.guildCommon.convertToGuildInfo(newGuild);
       this.socketMessaging.sendEventToUser<IGuildInfo>(
         character.channelId!,
         GuildSocketEvents.GuildInfoOpen,

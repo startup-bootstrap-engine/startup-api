@@ -98,7 +98,7 @@ describe("GuildCommon.ts", () => {
       );
 
       // @ts-ignore
-      jest.spyOn(guildCommon as any, "convertTOIGuildInfo").mockResolvedValue({ id: "guild1" } as IGuildInfo);
+      jest.spyOn(guildCommon as any, "convertToGuildInfo").mockResolvedValue({ id: "guild1" } as IGuildInfo);
     });
 
     it("should send message to all guild members", async () => {
