@@ -15,16 +15,23 @@ describe("GuildCreate.ts", () => {
     sendMessageToCharacter: jest.fn(),
   };
 
+  const mockGuildValidation = {
+    validateGuildName: jest.fn(),
+    validateGuildTag: jest.fn(),
+  };
+
   beforeAll(() => {
     guildCreate = container.get<GuildCreate>(GuildCreate);
   });
 
   beforeEach(async () => {
     testGuild = await unitTestHelper.createMockGuild();
-    testCharacter = await unitTestHelper.createMockCharacter();
+    testCharacter = await unitTestHelper.createMockCharacter(null, { hasEquipment: true });
 
     // @ts-ignore
     guildCreate.socketMessaging = mockSocketMessaging;
+    // @ts-ignore
+    guildCreate.guildValidation = mockGuildValidation;
   });
 
   afterEach(() => {
@@ -36,6 +43,7 @@ describe("GuildCreate.ts", () => {
       // @ts-ignore
       guildCreate.characterValidation.hasBasicValidation = jest.fn().mockReturnValue(false);
 
+      // @ts-ignore
       await guildCreate.validateGuild(testCharacter);
 
       expect(mockSocketMessaging.sendErrorMessageToCharacter).not.toBeCalled();
@@ -48,6 +56,7 @@ describe("GuildCreate.ts", () => {
       // @ts-ignore
       guildCreate.characterPremiumAccount.getPremiumAccountType = jest.fn().mockResolvedValue(UserAccountTypes.Free);
 
+      // @ts-ignore
       await guildCreate.validateGuild(testCharacter);
 
       expect(mockSocketMessaging.sendErrorMessageToCharacter).toHaveBeenCalledWith(
@@ -67,6 +76,7 @@ describe("GuildCreate.ts", () => {
       // @ts-ignore
       guildCreate.characterTradingBalance.getTotalGoldInInventory = jest.fn().mockResolvedValue(50000);
 
+      // @ts-ignore
       await guildCreate.validateGuild(testCharacter);
 
       expect(mockSocketMessaging.sendErrorMessageToCharacter).toHaveBeenCalledWith(
@@ -74,6 +84,7 @@ describe("GuildCreate.ts", () => {
         "Sorry, you must have at least 100000 gold to create guilds."
       );
     });
+
     it("should send event to user if validation passes", async () => {
       // @ts-ignore
       guildCreate.characterValidation.hasBasicValidation = jest.fn().mockReturnValue(true);
@@ -85,6 +96,7 @@ describe("GuildCreate.ts", () => {
       // @ts-ignore
       guildCreate.characterTradingBalance.getTotalGoldInInventory = jest.fn().mockResolvedValue(100000);
 
+      // @ts-ignore
       await guildCreate.validateGuild(testCharacter);
 
       expect(mockSocketMessaging.sendEventToUser).toBeCalledWith(
@@ -103,10 +115,14 @@ describe("GuildCreate.ts", () => {
         guildTag: "testTag",
         guildCoatOfArms: "testCoatOfArms",
       };
-    });
 
-    afterEach(() => {
-      jest.restoreAllMocks();
+      // Mock the validateGuild method to pass validation
+      // @ts-ignore
+      guildCreate.validateGuild = jest.fn().mockResolvedValue(undefined);
+
+      // Mock the guild validation to pass
+      mockGuildValidation.validateGuildName.mockReturnValue({ isValid: true });
+      mockGuildValidation.validateGuildTag.mockReturnValue({ isValid: true });
     });
 
     it("should send error if character is already in a guild", async () => {
@@ -125,9 +141,7 @@ describe("GuildCreate.ts", () => {
       // @ts-ignore
       guildCreate.guildCommon.getCharactersGuild = jest.fn().mockResolvedValue(null);
 
-      jest.spyOn(Guild, "findOne").mockReturnValueOnce({
-        lean: jest.fn().mockResolvedValueOnce(testGuild),
-      } as any);
+      jest.spyOn(Guild, "findOne").mockResolvedValue(testGuild as any);
 
       await guildCreate.createGuild(guildData, testCharacter);
 
@@ -138,6 +152,18 @@ describe("GuildCreate.ts", () => {
     });
 
     it("should create guild and send success message", async () => {
+      // @ts-ignore
+      guildCreate.guildCommon.getCharactersGuild = jest.fn().mockResolvedValue(null);
+      jest.spyOn(Guild, "findOne").mockResolvedValue(null);
+      // @ts-ignore
+      jest.spyOn(Guild, "create").mockResolvedValue(testGuild as any);
+      // @ts-ignore
+      guildCreate.characterItemInventory.decrementItemFromNestedInventoryByKey = jest
+        .fn()
+        .mockResolvedValue({ success: true });
+      // @ts-ignore
+      guildCreate.guildCommon.convertTOIGuildInfo = jest.fn().mockResolvedValue({});
+
       await guildCreate.createGuild(guildData, testCharacter);
 
       expect(mockSocketMessaging.sendMessageToCharacter).toBeCalledWith(
@@ -147,13 +173,31 @@ describe("GuildCreate.ts", () => {
     });
 
     it("should send error if guild creation fails", async () => {
-      jest.spyOn(Guild, "create").mockReturnValueOnce({
-        lean: jest.fn().mockResolvedValueOnce(null),
-      } as any);
+      // @ts-ignore
+      guildCreate.guildCommon.getCharactersGuild = jest.fn().mockResolvedValue(null);
+      jest.spyOn(Guild, "findOne").mockResolvedValue(null);
+      // @ts-ignore
+      jest.spyOn(Guild, "create").mockRejectedValue(new Error("Database error"));
 
       await guildCreate.createGuild(guildData, testCharacter);
 
       expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(testCharacter, "Error creating guild.");
+    });
+
+    it("should send error if guild name is invalid", async () => {
+      mockGuildValidation.validateGuildName.mockReturnValue({ isValid: false, message: "Invalid guild name" });
+
+      await guildCreate.createGuild(guildData, testCharacter);
+
+      expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(testCharacter, "Invalid guild name");
+    });
+
+    it("should send error if guild tag is invalid", async () => {
+      mockGuildValidation.validateGuildTag.mockReturnValue({ isValid: false, message: "Invalid guild tag" });
+
+      await guildCreate.createGuild(guildData, testCharacter);
+
+      expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(testCharacter, "Invalid guild tag");
     });
   });
 });

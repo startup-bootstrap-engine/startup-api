@@ -56,6 +56,10 @@ jest.mock("@providers/constants/SkillConstants", () => ({
   SPELL_CALCULATOR_DEFAULT_MAX_SKILL_MULTIPLIER: 1.5,
 }));
 
+jest.mock("@providers/constants/GuildConstants", () => ({
+  GUILD_CREATE_MIN_GOLD_REQUIRED: 100000,
+}));
+
 jest.mock("@providers/constants/PartyConstants", () => ({
   PARTY_BONUS_RATIO: 1,
 }));

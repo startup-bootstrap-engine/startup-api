@@ -8,6 +8,7 @@ import { CharacterTradingBalance } from "@providers/character/CharacterTradingBa
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
 import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
+import { GUILD_CREATE_MIN_GOLD_REQUIRED } from "@providers/constants/GuildConstants";
 import { OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
@@ -21,9 +22,7 @@ import {
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { GuildCommon } from "./GuildCommon";
-import { GuildGet } from "./GuildGet";
-
-const MIN_GOLD_REQUIRED = 100000;
+import { GuildValidation } from "./GuildValidation";
 
 @provide(GuildCreate)
 export class GuildCreate {
@@ -34,45 +33,10 @@ export class GuildCreate {
     private characterTradingBalance: CharacterTradingBalance,
     private characterItemInventory: CharacterItemInventory,
     private characterWeight: CharacterWeightQueue,
-    private guildGet: GuildGet,
     private characterInventory: CharacterInventory,
-    private guildCommon: GuildCommon
+    private guildCommon: GuildCommon,
+    private guildValidation: GuildValidation
   ) {}
-
-  public async validateGuild(character: ICharacter): Promise<void> {
-    const hasBasicValidation = this.characterValidation.hasBasicValidation(character);
-    if (!hasBasicValidation) {
-      return;
-    }
-
-    if (!(await this.isCharacterPremium(character))) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        "Sorry, you must be a premium user to create guilds."
-      );
-      return;
-    }
-
-    if (!(await this.isCharacterHasGold(character))) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        "Sorry, you must have at least " + MIN_GOLD_REQUIRED + " gold to create guilds."
-      );
-      return;
-    }
-
-    this.socketMessaging.sendEventToUser<boolean>(character.channelId!, GuildSocketEvents.CanCreateGuild, true);
-  }
-
-  private async isCharacterPremium(character: ICharacter): Promise<boolean> {
-    const premiumAccountType = await this.characterPremiumAccount.getPremiumAccountType(character);
-    return !!(premiumAccountType && premiumAccountType !== UserAccountTypes.Free);
-  }
-
-  private async isCharacterHasGold(character: ICharacter): Promise<boolean> {
-    const availableGold = await this.characterTradingBalance.getTotalGoldInInventory(character);
-    return availableGold >= MIN_GOLD_REQUIRED;
-  }
 
   public async createGuild(guildData: IGuildForm, character: ICharacter): Promise<any> {
     try {
@@ -86,7 +50,20 @@ export class GuildCreate {
         return;
       }
 
-      // check if guild name exists
+      // validate guild name and tag
+      const nameValidation = this.guildValidation.validateGuildName(guildData.guildName);
+      if (!nameValidation.isValid) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, nameValidation.message!);
+        return;
+      }
+
+      const tagValidation = this.guildValidation.validateGuildTag(guildData.guildTag);
+      if (!tagValidation.isValid) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, tagValidation.message!);
+        return;
+      }
+
+      // check if guild name or tag exists
       const guildExists = await Guild.findOne({
         $or: [{ name: guildData.guildName }, { tag: guildData.guildTag }],
       });
@@ -114,7 +91,7 @@ export class GuildCreate {
       const result = await this.characterItemInventory.decrementItemFromNestedInventoryByKey(
         OthersBlueprint.GoldCoin,
         character,
-        MIN_GOLD_REQUIRED
+        GUILD_CREATE_MIN_GOLD_REQUIRED
       );
 
       if (result.success) {
@@ -135,6 +112,41 @@ export class GuildCreate {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Error creating guild.");
       console.error(error);
     }
+  }
+
+  private async validateGuild(character: ICharacter): Promise<void> {
+    const hasBasicValidation = this.characterValidation.hasBasicValidation(character);
+    if (!hasBasicValidation) {
+      return;
+    }
+
+    if (!(await this.isCharacterPremium(character))) {
+      this.socketMessaging.sendErrorMessageToCharacter(
+        character,
+        "Sorry, you must be a premium user to create guilds."
+      );
+      return;
+    }
+
+    if (!(await this.isCharacterHasGold(character))) {
+      this.socketMessaging.sendErrorMessageToCharacter(
+        character,
+        "Sorry, you must have at least " + GUILD_CREATE_MIN_GOLD_REQUIRED + " gold to create guilds."
+      );
+      return;
+    }
+
+    this.socketMessaging.sendEventToUser<boolean>(character.channelId!, GuildSocketEvents.CanCreateGuild, true);
+  }
+
+  private async isCharacterPremium(character: ICharacter): Promise<boolean> {
+    const premiumAccountType = await this.characterPremiumAccount.getPremiumAccountType(character);
+    return !!(premiumAccountType && premiumAccountType !== UserAccountTypes.Free);
+  }
+
+  private async isCharacterHasGold(character: ICharacter): Promise<boolean> {
+    const availableGold = await this.characterTradingBalance.getTotalGoldInInventory(character);
+    return availableGold >= GUILD_CREATE_MIN_GOLD_REQUIRED;
   }
 
   private async updateCharacterWeight(character: ICharacter): Promise<void> {
