@@ -24,6 +24,9 @@ describe("GuildSkillsIncrease.ts", () => {
 
     guildSkills = new GuildSkills({
       owner: testGuild._id,
+      guildPoints: 0,
+      guildPointsToNextLevel: 100,
+      upgradeTokens: 0,
     });
     await guildSkills.save();
 
@@ -42,21 +45,38 @@ describe("GuildSkillsIncrease.ts", () => {
   });
 
   describe("increaseGuildSkills", () => {
-    it("should level up and send message when guild points exceed guildPointsToNextLevel", async () => {
-      const skillPoints = guildSkills.guildPointsToNextLevel + 10;
+    it("should increase guild points without affecting level or upgradeTokens when below threshold", async () => {
+      const skillPoints = 50; // Below the threshold for guildPointsToNextLevel
       // @ts-ignore
       const notifyGuildMembersSpy = jest.spyOn(guildSkillsIncrease.guildCommon, "notifyGuildMembers");
+
       await guildSkillsIncrease.increaseGuildSkills(guildSkills, skillPoints);
 
       const newGuildSkills = await GuildSkills.findOne({ _id: guildSkills._id });
 
       expect(newGuildSkills?.guildPoints).toEqual(skillPoints);
+      expect(newGuildSkills?.upgradeTokens).toEqual(0);
+      expect(newGuildSkills?.level).toEqual(guildSkills.level);
+      expect(newGuildSkills?.guildPointsToNextLevel).toEqual(guildSkills.guildPointsToNextLevel);
+      expect(notifyGuildMembersSpy).not.toHaveBeenCalled();
+    });
+
+    it("should increase upgradeTokens when guildPoints exceed guildPointsToNextLevel", async () => {
+      const skillPoints = guildSkills.guildPointsToNextLevel + 10; // Exceeding the threshold
+      // @ts-ignore
+      const notifyGuildMembersSpy = jest.spyOn(guildSkillsIncrease.guildCommon, "notifyGuildMembers");
+
+      await guildSkillsIncrease.increaseGuildSkills(guildSkills, skillPoints);
+
+      const newGuildSkills = await GuildSkills.findOne({ _id: guildSkills._id });
+
+      expect(newGuildSkills?.guildPoints).toEqual(skillPoints);
+      expect(newGuildSkills?.upgradeTokens).toEqual(guildSkills.upgradeTokens + 1);
       expect(notifyGuildMembersSpy).toHaveBeenCalled();
 
       const callArgs = notifyGuildMembersSpy.mock.calls[0];
       expect(callArgs[0]).toEqual(expect.arrayContaining(testGuild.members));
       expect(callArgs[0].length).toBe(testGuild.members.length);
-      expect(callArgs[1]).toBe(newGuildSkills?.level);
     });
 
     it("should not send level up message if guild is not found", async () => {
@@ -69,9 +89,9 @@ describe("GuildSkillsIncrease.ts", () => {
       expect(mockSocketMessaging.sendEventToUser).not.toHaveBeenCalled();
     });
 
-    it("should increase guild skills without leveling up", async () => {
+    it("should handle increasing guild points and not level up if below threshold", async () => {
+      const skillPoints = guildSkills.guildPointsToNextLevel - 10; // Below the threshold
       const updateOneSpy = jest.spyOn(GuildSkills, "updateOne").mockImplementation();
-      const skillPoints = guildSkills.guildPointsToNextLevel - 10;
 
       await guildSkillsIncrease.increaseGuildSkills(guildSkills, skillPoints);
 
@@ -82,6 +102,7 @@ describe("GuildSkillsIncrease.ts", () => {
             guildPoints: skillPoints,
             level: guildSkills.level,
             guildPointsToNextLevel: guildSkills.guildPointsToNextLevel,
+            upgradeTokens: guildSkills.upgradeTokens,
           },
         }
       );

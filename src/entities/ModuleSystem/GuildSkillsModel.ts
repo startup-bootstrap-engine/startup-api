@@ -25,14 +25,6 @@ function skillDetails(type: ElementalType): Record<string, any> {
       required: true,
       default: 0,
     }),
-    skillPointsToNextLevel: Type.number({
-      required: true,
-      default: calculateSPToNextLevel(0, 2),
-    }),
-    lastSkillGain: Type.date({
-      required: true,
-      default: new Date(),
-    }),
   };
 }
 
@@ -46,6 +38,14 @@ const GuildSkillsSchema = createSchema(
       required: true,
       default: 1,
     }),
+    experience: Type.number({
+      required: true,
+      default: 0,
+    }),
+    xpToNextLevel: Type.number({
+      required: true,
+      default: calculateXPToNextLevel(0, 2),
+    }),
     guildPoints: Type.number({
       required: true,
       default: 0,
@@ -54,13 +54,9 @@ const GuildSkillsSchema = createSchema(
       required: true,
       default: calculateSPToNextLevel(0, 2),
     }),
-    experience: Type.number({
+    upgradeTokens: Type.number({
       required: true,
       default: 0,
-    }),
-    xpToNextLevel: Type.number({
-      required: true,
-      default: calculateXPToNextLevel(0, 2),
     }),
     // Elemental skills
     fireSkill: skillDetails(ElementalType.Fire),

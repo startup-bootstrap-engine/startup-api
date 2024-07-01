@@ -31,31 +31,25 @@ describe("GuildSkillsModel.ts", () => {
     expect(guildSkills.fireSkill.type).toBe(ElementalType.Fire);
     expect(guildSkills.fireSkill.level).toBe(1);
     expect(guildSkills.fireSkill.skillPoints).toBe(0);
-    expect(guildSkills.fireSkill.skillPointsToNextLevel).toBe(calculateSPToNextLevel(0, 2));
 
     expect(guildSkills.waterSkill.type).toBe(ElementalType.Water);
     expect(guildSkills.waterSkill.level).toBe(1);
     expect(guildSkills.waterSkill.skillPoints).toBe(0);
-    expect(guildSkills.waterSkill.skillPointsToNextLevel).toBe(calculateSPToNextLevel(0, 2));
 
     expect(guildSkills.earthSkill.type).toBe(ElementalType.Earth);
     expect(guildSkills.earthSkill.level).toBe(1);
     expect(guildSkills.earthSkill.skillPoints).toBe(0);
-    expect(guildSkills.earthSkill.skillPointsToNextLevel).toBe(calculateSPToNextLevel(0, 2));
 
     expect(guildSkills.airSkill.type).toBe(ElementalType.Air);
     expect(guildSkills.airSkill.level).toBe(1);
     expect(guildSkills.airSkill.skillPoints).toBe(0);
-    expect(guildSkills.airSkill.skillPointsToNextLevel).toBe(calculateSPToNextLevel(0, 2));
 
     expect(guildSkills.corruptionSkill.type).toBe(ElementalType.Corruption);
     expect(guildSkills.corruptionSkill.level).toBe(1);
     expect(guildSkills.corruptionSkill.skillPoints).toBe(0);
-    expect(guildSkills.corruptionSkill.skillPointsToNextLevel).toBe(calculateSPToNextLevel(0, 2));
 
     expect(guildSkills.natureSkill.type).toBe(ElementalType.Nature);
     expect(guildSkills.natureSkill.level).toBe(1);
     expect(guildSkills.natureSkill.skillPoints).toBe(0);
-    expect(guildSkills.natureSkill.skillPointsToNextLevel).toBe(calculateSPToNextLevel(0, 2));
   });
 });

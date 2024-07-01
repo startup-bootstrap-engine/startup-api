@@ -17,7 +17,6 @@ export class GuildSkillsIncrease {
 
   public async getGuildSkills(character: ICharacter): Promise<IGuildSkills | null> {
     try {
-      // find guild
       const guild = await Guild.findOne({
         $or: [{ guildLeader: character._id }, { members: { $in: [character._id] } }],
       });
@@ -36,12 +35,16 @@ export class GuildSkillsIncrease {
 
   public async increaseGuildSkills(guildSkills: IGuildSkills, skillPoints: number): Promise<void> {
     try {
-      const { levelUp, newLevel, updatedGuildPoints, newGuildPointsToNextLevel } = this.calculateGuildSkillLevelUp(
-        guildSkills,
-        skillPoints
-      );
+      const { levelUp, newLevel, updatedGuildPoints, newGuildPointsToNextLevel, newUpgradeTokens } =
+        this.calculateGuildSkillLevelUp(guildSkills, skillPoints);
 
-      await this.updateGuildSkills(guildSkills._id, updatedGuildPoints, newLevel, newGuildPointsToNextLevel);
+      await this.updateGuildSkills(
+        guildSkills._id,
+        updatedGuildPoints,
+        newLevel,
+        newGuildPointsToNextLevel,
+        newUpgradeTokens
+      );
 
       if (levelUp) {
         const guild = await Guild.findOne({ _id: guildSkills.owner });
@@ -58,27 +61,36 @@ export class GuildSkillsIncrease {
   private calculateGuildSkillLevelUp(
     guildSkills: IGuildSkills,
     skillPoints: number
-  ): { levelUp: boolean; newLevel: number; updatedGuildPoints: number; newGuildPointsToNextLevel: number } {
+  ): {
+    levelUp: boolean;
+    newLevel: number;
+    updatedGuildPoints: number;
+    newGuildPointsToNextLevel: number;
+    newUpgradeTokens: number;
+  } {
     let levelUp = false;
     let newLevel = guildSkills.level;
     let newGuildPointsToNextLevel = guildSkills.guildPointsToNextLevel;
     const updatedGuildPoints = skillPoints;
+    let newUpgradeTokens = guildSkills.upgradeTokens;
 
     if (updatedGuildPoints >= guildSkills.guildPointsToNextLevel) {
       newLevel++;
       newGuildPointsToNextLevel =
         this.skillCalculator.calculateSPToNextLevel(0, newLevel + 1) * GUILD_SKILL_GAIN_DIFFICULTY;
       levelUp = true;
+      newUpgradeTokens++;
     }
 
-    return { levelUp, newLevel, updatedGuildPoints, newGuildPointsToNextLevel };
+    return { levelUp, newLevel, updatedGuildPoints, newGuildPointsToNextLevel, newUpgradeTokens };
   }
 
   private async updateGuildSkills(
     guildSkillsId: string,
     guildPoints: number,
     level: number,
-    guildPointsToNextLevel: number
+    guildPointsToNextLevel: number,
+    upgradeTokens: number
   ): Promise<void> {
     await GuildSkills.updateOne(
       { _id: guildSkillsId },
@@ -87,6 +99,7 @@ export class GuildSkillsIncrease {
           guildPoints,
           level,
           guildPointsToNextLevel,
+          upgradeTokens,
         },
       }
     );
