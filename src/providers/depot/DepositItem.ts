@@ -67,8 +67,6 @@ export class DepositItem {
 
       if (result) {
         await this.handleItemInDepot(item);
-      } else {
-        console.error(`Failed to deposit item ${item._id} for character ${character.id}`);
       }
 
       return result;
