@@ -5,6 +5,7 @@ import { GUILD_SKILL_GAIN_DIFFICULTY } from "@providers/constants/GuildConstants
 import { SkillCalculator } from "@providers/skill/SkillCalculator";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { provide } from "inversify-binding-decorators";
+import { clearCacheForKey } from "speedgoose";
 import { GuildCommon } from "./GuildCommon";
 
 @provide(GuildSkillsIncrease)
@@ -19,13 +20,17 @@ export class GuildSkillsIncrease {
     try {
       const guild = await Guild.findOne({
         $or: [{ guildLeader: character._id }, { members: { $in: [character._id] } }],
-      });
+      }).lean<IGuildSkills>({ virtuals: true, defaults: true });
 
       if (!guild) {
         return null;
       }
 
-      const guildSkills = await GuildSkills.findOne({ owner: guild._id });
+      const guildSkills = await GuildSkills.findOne({ owner: guild._id }).lean<IGuildSkills>({
+        virtuals: true,
+        defaults: true,
+      });
+
       return guildSkills || null;
     } catch (error) {
       console.error("Error fetching guild skills:", error);
@@ -35,6 +40,8 @@ export class GuildSkillsIncrease {
 
   public async increaseGuildSkills(guildSkills: IGuildSkills, skillPoints: number): Promise<void> {
     try {
+      await clearCacheForKey(`${guildSkills.owner}-guild-skills`);
+
       const { levelUp, newLevel, updatedGuildPoints, newGuildPointsToNextLevel, newUpgradeTokens } =
         this.calculateGuildSkillLevelUp(guildSkills, skillPoints);
 
@@ -47,7 +54,7 @@ export class GuildSkillsIncrease {
       );
 
       if (levelUp) {
-        const guild = await Guild.findOne({ _id: guildSkills.owner });
+        const guild = await Guild.findOne({ _id: guildSkills.owner }).lean();
         if (!guild) {
           return;
         }

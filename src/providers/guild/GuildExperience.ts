@@ -22,7 +22,10 @@ export class GuildExperience {
 
       if (!guild) return;
 
-      const guildSkills = await GuildSkills.findOne({ owner: guild._id });
+      const guildSkills = await GuildSkills.findOne({ owner: guild._id }).lean<IGuildSkills>({
+        virtuals: true,
+        defaults: true,
+      });
       if (!guildSkills) return;
 
       const { levelUp, newLevel } = await this.updateGuildSkills(guildSkills, exp);

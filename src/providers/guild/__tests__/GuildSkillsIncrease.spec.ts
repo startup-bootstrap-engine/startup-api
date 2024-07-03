@@ -113,13 +113,19 @@ describe("GuildSkillsIncrease.ts", () => {
   describe("getGuildSkills", () => {
     it("should return guild skills", async () => {
       // @ts-ignore
-      jest.spyOn(Guild, "findOne").mockResolvedValueOnce(testGuild);
+      jest.spyOn(Guild, "findOne").mockReturnValueOnce({
+        lean: jest.fn().mockResolvedValueOnce(testGuild),
+      });
       const result = await guildSkillsIncrease.getGuildSkills(testCharacter);
-      expect(result?.id).toEqual(guildSkills.id);
+
+      expect(result?._id).toEqual(guildSkills._id);
     });
 
     it("should return null if guild is not found", async () => {
-      jest.spyOn(Guild, "findOne").mockResolvedValueOnce(null);
+      // @ts-ignore
+      jest.spyOn(Guild, "findOne").mockImplementationOnce(() => ({
+        lean: jest.fn().mockResolvedValueOnce(null),
+      }));
       const result = await guildSkillsIncrease.getGuildSkills(testCharacter);
       expect(result).toBeNull();
     });

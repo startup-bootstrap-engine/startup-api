@@ -20,9 +20,12 @@ export class GuildDelete {
         this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you are not the leader of this guild.");
         return;
       }
-      const guildSkills = await GuildSkills.findOne({ owner: guildId });
+      const guildSkills = await GuildSkills.findOne({ owner: guildId }).lean({
+        virtuals: true,
+        defaults: true,
+      });
       if (guildSkills) {
-        await GuildSkills.deleteOne({ _id: guildSkills.id });
+        await GuildSkills.deleteOne({ _id: guildSkills._id });
       }
       await Guild.deleteOne({ _id: guildId });
       await this.guildCommon.sendMessageToAllMembers("The guild has been deleted by the leader.", guild, true);

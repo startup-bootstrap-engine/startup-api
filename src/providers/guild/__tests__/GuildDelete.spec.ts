@@ -64,7 +64,10 @@ describe("GuildDelete.ts", () => {
 
     it("should delete guild skills if they exist", async () => {
       jest.spyOn(Guild, "findById").mockResolvedValueOnce(testGuild as any);
-      jest.spyOn(GuildSkills, "findOne").mockResolvedValueOnce({ id: "guild-skills-id" } as any);
+      // @ts-ignore
+      jest.spyOn(GuildSkills, "findOne").mockReturnValueOnce({
+        lean: jest.fn().mockResolvedValueOnce({ _id: "guild-skills-id" }),
+      });
       const deleteGuildSkillsSpy = jest.spyOn(GuildSkills, "deleteOne").mockResolvedValueOnce({ deletedCount: 1 });
 
       await guildDelete.deleteGuild(testGuild._id, testCharacter);
@@ -74,7 +77,10 @@ describe("GuildDelete.ts", () => {
 
     it("should delete the guild and send messages to members", async () => {
       jest.spyOn(Guild, "findById").mockResolvedValueOnce(testGuild as any);
-      jest.spyOn(GuildSkills, "findOne").mockResolvedValueOnce(null);
+      // @ts-ignore
+      jest.spyOn(GuildSkills, "findOne").mockReturnValueOnce({
+        lean: jest.fn().mockResolvedValueOnce(null),
+      });
       const deleteGuildSpy = jest.spyOn(Guild, "deleteOne").mockResolvedValueOnce({ deletedCount: 1 });
       const sendMessageToAllMembersSpy = jest
         // @ts-ignore

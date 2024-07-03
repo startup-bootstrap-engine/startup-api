@@ -72,7 +72,10 @@ describe("GuildExperience.ts", () => {
       _id: new mongoose.Types.ObjectId(),
     } as ICharacter;
 
-    const findOneSpy = jest.spyOn(GuildSkills, "findOne").mockResolvedValueOnce(null);
+    // @ts-ignore
+    const findOneSpy = jest.spyOn(GuildSkills, "findOne").mockReturnValueOnce({
+      lean: jest.fn().mockResolvedValueOnce(null),
+    });
     const updateOneSpy = jest.spyOn(GuildSkills, "updateOne").mockImplementation();
 
     await guildExperience.updateGuildExperience(testCharacter2, 10);
@@ -85,6 +88,12 @@ describe("GuildExperience.ts", () => {
   it("should not update if guild skills are not found", async () => {
     guildSkills.owner = new mongoose.Types.ObjectId();
     await guildSkills.save();
+
+    // @ts-ignore
+    jest.spyOn(GuildSkills, "findOne").mockReturnValueOnce({
+      lean: jest.fn().mockResolvedValueOnce(null),
+    });
+
     const updateOneSpy = jest.spyOn(GuildSkills, "updateOne").mockImplementation();
 
     await guildExperience.updateGuildExperience(testCharacter, 30);

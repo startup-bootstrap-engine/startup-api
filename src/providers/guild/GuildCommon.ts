@@ -38,7 +38,10 @@ export class GuildCommon {
     let guildLevel = 1;
 
     try {
-      const guildSkills = await GuildSkills.findOne({ owner: guild._id }).lean();
+      const guildSkills = await GuildSkills.findOne({ owner: guild._id }).lean({
+        virtuals: true,
+        defaults: true,
+      });
       if (!guildSkills) {
         throw new Error("Guild skills not found");
       }
