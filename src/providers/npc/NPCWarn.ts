@@ -64,6 +64,12 @@ export class NPCWarn {
 
   @TrackNewRelicTransaction()
   public async warnCharacterAboutSingleNPCCreation(npc: INPC, character: ICharacter): Promise<void> {
+    const isOnCharacterView = await this.characterView.getElementOnView(character, npc._id, "npcs");
+
+    if (isOnCharacterView) {
+      return;
+    }
+
     await this.characterView.addToCharacterView(
       character._id,
       {
