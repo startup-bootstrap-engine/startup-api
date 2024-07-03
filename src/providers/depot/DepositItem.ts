@@ -28,14 +28,33 @@ export class DepositItem {
     const { itemId, npcId, fromContainerId } = data;
 
     try {
-      const [originContainer, targetContainer, item, npc] = await Promise.all([
-        this.getOriginContainer(fromContainerId!),
-        this.openDepot.getContainer(character.id, npcId),
-        this.getItem(character, itemId),
-        this.getNPC(character, npcId),
-      ]);
+      // Fetch origin container first
+      const originContainer = await this.getOriginContainer(fromContainerId!);
+      if (!originContainer) {
+        console.error(`Origin container not found: ${fromContainerId}`);
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, origin container not found.");
+        return false;
+      }
 
-      if (!item || !npc) {
+      // Fetch target container
+      const targetContainer = await this.openDepot.getContainer(character.id, npcId);
+      if (!targetContainer) {
+        console.error(`Target container not found: ${npcId}`);
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, target container not found.");
+        return false;
+      }
+
+      // Fetch item
+      const item = await this.getItem(character, itemId);
+      if (!item) {
+        // Error message is sent in getItem method
+        return false;
+      }
+
+      // Fetch NPC
+      const npc = await this.getNPC(character, npcId);
+      if (!npc) {
+        // Error message is sent in getNPC method
         return false;
       }
 
@@ -48,33 +67,46 @@ export class DepositItem {
 
       if (result) {
         await this.handleItemInDepot(item);
+      } else {
+        console.error(`Failed to deposit item ${item._id} for character ${character.id}`);
       }
 
       return result;
     } catch (error) {
-      console.error(error);
+      console.error(`Error in deposit method for character ${character.id}, item ${itemId}:`, error);
+      this.socketMessaging.sendErrorMessageToCharacter(
+        character,
+        "An error occurred while processing your deposit. Please try again."
+      );
       return false;
     }
   }
 
-  private async getOriginContainer(fromContainerId: string): Promise<IItemContainer> {
-    return (await ItemContainer.findById(fromContainerId).lean()) as unknown as IItemContainer;
+  private async getOriginContainer(fromContainerId: string): Promise<IItemContainer | null> {
+    const container = await ItemContainer.findById(fromContainerId).lean();
+    if (!container) {
+      console.error(`Origin container not found: ${fromContainerId}`);
+      return null;
+    }
+    return container as unknown as IItemContainer;
   }
 
   private async getItem(character: ICharacter, itemId: string): Promise<IItem | null> {
-    const item = (await Item.findById(itemId)) as unknown as IItem;
+    const item = await Item.findById(itemId);
     if (!item) {
+      console.error(`Item not found: ${itemId}`);
       this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, item not found.");
-      throw new Error(`DepotSystem > Item not found: ${itemId}`);
+      return null;
     }
-    return item;
+    return item as unknown as IItem;
   }
 
   private async getNPC(character: ICharacter, npcId: string): Promise<INPC | null> {
     const npc = await NPC.findById(npcId).lean();
     if (!npc) {
+      console.error(`NPC not found: ${npcId}`);
       this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, NPC not found.");
-      throw new Error(`DepotSystem > NPC not found: ${npcId}`);
+      return null;
     }
     return npc as INPC;
   }

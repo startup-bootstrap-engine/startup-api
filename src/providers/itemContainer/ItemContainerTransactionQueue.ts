@@ -73,12 +73,6 @@ export class ItemContainerTransactionQueue {
         return await this.execTransferToContainer(item, character, originContainer, targetContainer, options);
       }
 
-      // Take snapshots before performing the transaction
-      const [originSnapshot, targetSnapshot] = await Promise.all([
-        this.takeContainerSnapshot(originContainer),
-        this.takeContainerSnapshot(targetContainer),
-      ]);
-
       await this.dynamicQueue.addJob(
         "item-container-transaction-queue",
         async (job) => {
@@ -106,10 +100,6 @@ export class ItemContainerTransactionQueue {
         "item-container-transfer-results",
         `${originContainer._id}-to-${targetContainer._id}`
       );
-
-      if (!result) {
-        await this.rollbackTransfer(character, originSnapshot, targetSnapshot);
-      }
 
       return result;
     } finally {
@@ -151,6 +141,12 @@ export class ItemContainerTransactionQueue {
 
       const result = await this.performTransaction(item, character, originContainer, targetContainer, options);
 
+      if (!result) {
+        console.error("Failed to perform transaction");
+        await this.rollbackTransfer(character, originSnapshot, targetSnapshot);
+        return false;
+      }
+
       const wasTransactionConsistent = await this.wasTransactionConsistent(
         item,
         originSnapshot,
@@ -158,7 +154,11 @@ export class ItemContainerTransactionQueue {
         originContainer,
         targetContainer
       );
-      if (!result || !wasTransactionConsistent) {
+
+      if (!wasTransactionConsistent) {
+        console.error(
+          `Transaction was inconsistent for character ${character._id} - ${character.name} - item ${item._id} - ${item.key} - ${item.name}`
+        );
         await this.rollbackTransfer(character, originSnapshot, targetSnapshot);
         return false;
       }
@@ -167,6 +167,7 @@ export class ItemContainerTransactionQueue {
     } catch (error) {
       console.error("Execution of transfer failed:", error);
       await this.rollbackTransfer(character, originSnapshot, targetSnapshot);
+
       return false;
     } finally {
       await this.clearContainersCache(originContainer, targetContainer);
@@ -209,6 +210,16 @@ export class ItemContainerTransactionQueue {
     const updatedTargetContainer = await ItemContainer.findById(targetContainer._id).lean<IItemContainer>();
 
     if (!updatedOriginContainer || !updatedTargetContainer) {
+      console.error("One of the containers could not be found.");
+      return false;
+    }
+
+    const preTransactionTotal = this.getTotalQty(originSnapshot, item) + this.getTotalQty(targetSnapshot, item);
+    const postTransactionTotal =
+      this.getTotalQty(updatedOriginContainer, item) + this.getTotalQty(updatedTargetContainer, item);
+
+    if (preTransactionTotal !== postTransactionTotal) {
+      console.error(`Inconsistent total quantity: pre=${preTransactionTotal}, post=${postTransactionTotal}`);
       return false;
     }
 
@@ -221,12 +232,19 @@ export class ItemContainerTransactionQueue {
         updatedTargetContainer
       );
     } else {
-      return await this.isTransactionConsistentForNonStackableItems(
-        item,
-        updatedOriginContainer,
-        updatedTargetContainer
-      );
+      return this.isTransactionConsistentForNonStackableItems(item, updatedOriginContainer, updatedTargetContainer);
     }
+  }
+
+  private getTotalQty(container: IContainerSnapshot | IItemContainer, item: IItem): number {
+    let qty = 0;
+    const slots = "slots" in container ? container.slots : container;
+    for (const slotItem of Object.values(slots) as IItem[]) {
+      if (slotItem && slotItem.key === item.key) {
+        qty += slotItem.stackQty || 1;
+      }
+    }
+    return qty;
   }
 
   private isTransactionConsistentForStackableItems(
@@ -242,35 +260,42 @@ export class ItemContainerTransactionQueue {
     const postTransactionOriginQty = this.getTotalQty(updatedOriginContainer as any, item);
     const postTransactionTargetQty = this.getTotalQty(updatedTargetContainer as any, item);
 
-    // Check if origin quantity is decreasing and target quantity is increasing
-    const isOriginDecreasing = postTransactionOriginQty < preTransactionOriginQty;
-    const isTargetIncreasing = postTransactionTargetQty > preTransactionTargetQty;
+    const qtyDifference = postTransactionTargetQty - preTransactionTargetQty;
 
-    return isOriginDecreasing && isTargetIncreasing;
+    if (qtyDifference === 0) {
+      console.error("No change in item quantity after transaction");
+      return false;
+    }
+
+    const isOriginDecreased = postTransactionOriginQty <= preTransactionOriginQty;
+    const isTargetIncreased = postTransactionTargetQty >= preTransactionTargetQty;
+    const isTotalUnchanged =
+      preTransactionOriginQty + preTransactionTargetQty === postTransactionOriginQty + postTransactionTargetQty;
+
+    return isOriginDecreased && isTargetIncreased && isTotalUnchanged;
   }
 
-  private async isTransactionConsistentForNonStackableItems(
+  private isTransactionConsistentForNonStackableItems(
     item: IItem,
     updatedOriginContainer: IItemContainer,
     updatedTargetContainer: IItemContainer
-  ): Promise<boolean> {
-    const originSlotIndex = await this.characterItemSlots.findItemSlotIndex(updatedOriginContainer, item._id);
-    const targetSlotIndex = await this.characterItemSlots.findItemSlotIndex(updatedTargetContainer, item._id);
+  ): boolean {
+    const originSlotIndex = this.findItemInContainer(updatedOriginContainer, item._id);
+    const targetSlotIndex = this.findItemInContainer(updatedTargetContainer, item._id);
 
-    const wasItemRemovedFromOrigin = originSlotIndex === undefined;
-    const wasItemAddedToTarget = targetSlotIndex !== undefined;
+    const wasItemRemovedFromOrigin = originSlotIndex === -1;
+    const wasItemAddedToTarget = targetSlotIndex !== -1;
 
     return wasItemRemovedFromOrigin && wasItemAddedToTarget;
   }
 
-  private getTotalQty(snapshot: IContainerSnapshot, item: IItem): number {
-    let qty = 0;
-    for (const slotItem of Object.values(snapshot.slots)) {
-      if (slotItem && slotItem.key === item.key) {
-        qty += slotItem.stackQty || 1;
+  private findItemInContainer(container: IItemContainer, itemId: string): number {
+    for (const [index, slotItem] of Object.entries(container.slots) as [string, IItem][]) {
+      if (slotItem && slotItem._id.toString() === itemId.toString()) {
+        return parseInt(index);
       }
     }
-    return qty;
+    return -1;
   }
 
   private async performTransaction(
