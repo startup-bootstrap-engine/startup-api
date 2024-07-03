@@ -25,8 +25,8 @@ export const SOCKET_IO_CONFIG: Partial<ServerOptions> = {
 
   // Adjusted configuration to balance performance and resource usage
   maxHttpBufferSize: 1e8, // Increase to 100MB if needed
-  pingTimeout: 1000 * 60 * 10, // 10 minutes timeout
-  pingInterval: 2000,
+  pingTimeout: 30000, // 30 seconds timeout
+  pingInterval: 7000, // 7 seconds interval
 };
 
 /* Ping Interval
