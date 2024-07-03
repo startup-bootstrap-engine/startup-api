@@ -147,13 +147,7 @@ export class ItemContainerTransactionQueue {
         return false;
       }
 
-      const wasTransactionConsistent = await this.wasTransactionConsistent(
-        item,
-        originSnapshot,
-        targetSnapshot,
-        originContainer,
-        targetContainer
-      );
+      const wasTransactionConsistent = await this.wasTransactionConsistent(item, originContainer, targetContainer);
 
       if (!wasTransactionConsistent) {
         console.error(
@@ -201,8 +195,6 @@ export class ItemContainerTransactionQueue {
 
   private async wasTransactionConsistent(
     item: IItem,
-    originSnapshot: IContainerSnapshot,
-    targetSnapshot: IContainerSnapshot,
     originContainer: IItemContainer,
     targetContainer: IItemContainer
   ): Promise<boolean> {
@@ -214,68 +206,10 @@ export class ItemContainerTransactionQueue {
       return false;
     }
 
-    const preTransactionTotal = this.getTotalQty(originSnapshot, item) + this.getTotalQty(targetSnapshot, item);
-    const postTransactionTotal =
-      this.getTotalQty(updatedOriginContainer, item) + this.getTotalQty(updatedTargetContainer, item);
-
-    if (preTransactionTotal !== postTransactionTotal) {
-      console.error(`Inconsistent total quantity: pre=${preTransactionTotal}, post=${postTransactionTotal}`);
-      return false;
-    }
-
-    if (item.stackQty && item.stackQty > 0) {
-      return this.isTransactionConsistentForStackableItems(
-        item,
-        originSnapshot,
-        targetSnapshot,
-        updatedOriginContainer,
-        updatedTargetContainer
-      );
-    } else {
-      return this.isTransactionConsistentForNonStackableItems(item, updatedOriginContainer, updatedTargetContainer);
-    }
+    return this.isTransactionConsistentForItem(item, updatedOriginContainer, updatedTargetContainer);
   }
 
-  private getTotalQty(container: IContainerSnapshot | IItemContainer, item: IItem): number {
-    let qty = 0;
-    const slots = "slots" in container ? container.slots : container;
-    for (const slotItem of Object.values(slots) as IItem[]) {
-      if (slotItem && slotItem.key === item.key) {
-        qty += slotItem.stackQty || 1;
-      }
-    }
-    return qty;
-  }
-
-  private isTransactionConsistentForStackableItems(
-    item: IItem,
-    originSnapshot: IContainerSnapshot,
-    targetSnapshot: IContainerSnapshot,
-    updatedOriginContainer: IItemContainer,
-    updatedTargetContainer: IItemContainer
-  ): boolean {
-    const preTransactionOriginQty = this.getTotalQty(originSnapshot, item);
-    const preTransactionTargetQty = this.getTotalQty(targetSnapshot, item);
-
-    const postTransactionOriginQty = this.getTotalQty(updatedOriginContainer as any, item);
-    const postTransactionTargetQty = this.getTotalQty(updatedTargetContainer as any, item);
-
-    const qtyDifference = postTransactionTargetQty - preTransactionTargetQty;
-
-    if (qtyDifference === 0) {
-      console.error("No change in item quantity after transaction");
-      return false;
-    }
-
-    const isOriginDecreased = postTransactionOriginQty <= preTransactionOriginQty;
-    const isTargetIncreased = postTransactionTargetQty >= preTransactionTargetQty;
-    const isTotalUnchanged =
-      preTransactionOriginQty + preTransactionTargetQty === postTransactionOriginQty + postTransactionTargetQty;
-
-    return isOriginDecreased && isTargetIncreased && isTotalUnchanged;
-  }
-
-  private isTransactionConsistentForNonStackableItems(
+  private isTransactionConsistentForItem(
     item: IItem,
     updatedOriginContainer: IItemContainer,
     updatedTargetContainer: IItemContainer
