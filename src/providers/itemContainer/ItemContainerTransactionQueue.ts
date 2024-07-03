@@ -10,6 +10,7 @@ import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeigh
 import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { ItemBaseKey } from "@providers/item/ItemBaseKey";
 import { Locker } from "@providers/locks/Locker";
 import { ResultsPoller } from "@providers/poller/ResultsPoller";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
@@ -44,7 +45,8 @@ export class ItemContainerTransactionQueue {
     private inMemoryHashTable: InMemoryHashTable,
     private characterWeightQueue: CharacterWeightQueue,
     private dynamicQueue: DynamicQueue,
-    private resultsPoller: ResultsPoller
+    private resultsPoller: ResultsPoller,
+    private itemBaseKey: ItemBaseKey
   ) {}
 
   @TrackNewRelicTransaction()
@@ -147,7 +149,13 @@ export class ItemContainerTransactionQueue {
         return false;
       }
 
-      const wasTransactionConsistent = await this.wasTransactionConsistent(item, originContainer, targetContainer);
+      const wasTransactionConsistent = await this.wasTransactionConsistent(
+        item,
+        originSnapshot,
+        targetSnapshot,
+        originContainer,
+        targetContainer
+      );
 
       if (!wasTransactionConsistent) {
         console.error(
@@ -195,6 +203,8 @@ export class ItemContainerTransactionQueue {
 
   private async wasTransactionConsistent(
     item: IItem,
+    originSnapshot: IContainerSnapshot,
+    targetSnapshot: IContainerSnapshot,
     originContainer: IItemContainer,
     targetContainer: IItemContainer
   ): Promise<boolean> {
@@ -206,10 +216,55 @@ export class ItemContainerTransactionQueue {
       return false;
     }
 
-    return this.isTransactionConsistentForItem(item, updatedOriginContainer, updatedTargetContainer);
+    if (item.maxStackSize > 1) {
+      return this.isTransactionConsistentForStackableItem(
+        item,
+        originSnapshot,
+        targetSnapshot,
+        updatedOriginContainer,
+        updatedTargetContainer
+      );
+    }
+
+    return this.isTransactionConsistentForNonStackableItem(item, updatedOriginContainer, updatedTargetContainer);
   }
 
-  private isTransactionConsistentForItem(
+  private isTransactionConsistentForStackableItem(
+    item: IItem,
+    originSnapshot: IContainerSnapshot,
+    targetSnapshot: IContainerSnapshot,
+    updatedOriginContainer: IItemContainer,
+    updatedTargetContainer: IItemContainer
+  ): boolean {
+    const originSlotIndex = this.findItemInContainer(updatedOriginContainer, item._id);
+
+    const wasItemRemovedFromOrigin = originSlotIndex === -1;
+
+    // compare item quantity on target on snapshot and after update
+    const targetQtySnapshot = this.countStackQtyInContainer(targetSnapshot, item.key);
+    const targetQtyUpdated = this.countStackQtyInContainer(updatedTargetContainer, item.key);
+
+    if (targetQtySnapshot === targetQtyUpdated) {
+      return false;
+    }
+
+    if (!wasItemRemovedFromOrigin) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private countStackQtyInContainer(container: IItemContainer | IContainerSnapshot, itemKey: string): number {
+    return Object.values(container.slots as Record<string, IItem>).reduce((acc, slotItem: IItem) => {
+      if (slotItem && this.itemBaseKey.getBaseKey(itemKey) === this.itemBaseKey.getBaseKey(slotItem.key)) {
+        return acc + (slotItem.stackQty || 0);
+      }
+      return acc;
+    }, 0);
+  }
+
+  private isTransactionConsistentForNonStackableItem(
     item: IItem,
     updatedOriginContainer: IItemContainer,
     updatedTargetContainer: IItemContainer
