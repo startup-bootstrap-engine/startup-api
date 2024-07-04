@@ -83,7 +83,7 @@ export class DepositItem {
   private async getOriginContainer(fromContainerId: string): Promise<IItemContainer | null> {
     const container = await ItemContainer.findById(fromContainerId).lean();
     if (!container) {
-      console.error(`Origin container not found: ${fromContainerId}`);
+      console.error(`Deposit failed: Origin container not found: ${fromContainerId}`);
       return null;
     }
     return container as unknown as IItemContainer;
@@ -92,7 +92,7 @@ export class DepositItem {
   private async getItem(character: ICharacter, itemId: string): Promise<IItem | null> {
     const item = await Item.findById(itemId);
     if (!item) {
-      console.error(`Item not found: ${itemId}`);
+      console.error(`Deposit failed: Item not found: ${itemId} for character ${character.id}`);
       this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, item not found.");
       return null;
     }

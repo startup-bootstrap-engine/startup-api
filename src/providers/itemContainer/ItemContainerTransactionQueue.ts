@@ -240,15 +240,9 @@ export class ItemContainerTransactionQueue {
 
     const wasItemRemovedFromOrigin = originSlotIndex === -1;
 
-    // compare item quantity on target on snapshot and after update
-    const targetQtySnapshot = this.countStackQtyInContainer(targetSnapshot, item.key);
-    const targetQtyUpdated = this.countStackQtyInContainer(updatedTargetContainer, item.key);
+    const wasItemAddedToTarget = this.countStackQtyInContainer(updatedTargetContainer, item.key) > 0;
 
-    if (targetQtySnapshot === targetQtyUpdated) {
-      return false;
-    }
-
-    if (!wasItemRemovedFromOrigin) {
+    if (!wasItemRemovedFromOrigin || !wasItemAddedToTarget) {
       return false;
     }
 
