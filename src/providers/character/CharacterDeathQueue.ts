@@ -228,7 +228,7 @@ export class CharacterDeath {
 
   private async sendBattleDeathEvents(character: ICharacter): Promise<void> {
     const characterDeathData: IBattleDeath = {
-      id: character.id,
+      id: character._id,
       type: "Character",
     };
 
