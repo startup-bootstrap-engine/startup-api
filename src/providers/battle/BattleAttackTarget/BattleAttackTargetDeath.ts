@@ -2,7 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { CharacterDeath } from "@providers/character/CharacterDeath";
+import { CharacterDeath } from "@providers/character/CharacterDeathQueue";
 import { GENERATE_BLOOD_ON_DEATH } from "@providers/constants/BattleConstants";
 import { NPCDeathQueue } from "@providers/npc/NPCDeathQueue";
 import { NPCExperience } from "@providers/npc/NPCExperience/NPCExperience";

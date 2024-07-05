@@ -9,7 +9,7 @@ import { AccessoriesBlueprint } from "@providers/item/data/types/itemsBlueprintT
 import { CharacterSkullType, Modes, NPCCustomDeathPenalties } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import _ from "lodash";
-import { CharacterDeath } from "../CharacterDeath";
+import { CharacterDeath } from "../CharacterDeathQueue";
 import { CharacterWeapon } from "../CharacterWeapon";
 
 jest.mock("@providers/constants/DeathConstants", () => ({

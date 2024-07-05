@@ -67,7 +67,8 @@ export class ItemDeleteCrons {
         scene: { $exists: true, $ne: null },
 
         //* And also without an owner
-        $or: [{ owner: null }, { owner: { $exists: false } }],
+        owner: { $exists: false, $eq: null },
+
         //* Are not equipped and not picked up
         isEquipped: { $ne: true },
 
@@ -83,6 +84,8 @@ export class ItemDeleteCrons {
 
         //* And were manipulated more than an hour ago
         updatedAt: { $lt: oneHourAgo }, // delete items that are older than 1 hour!
+
+        isInContainer: { $ne: true },
       });
 
       for (const item of items) {

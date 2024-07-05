@@ -1,6 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { CharacterDeath } from "@providers/character/CharacterDeath";
+import { CharacterDeath } from "@providers/character/CharacterDeathQueue";
 import { CharacterWeapon } from "@providers/character/CharacterWeapon";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { NPCTarget } from "@providers/npc/movement/NPCTarget";
