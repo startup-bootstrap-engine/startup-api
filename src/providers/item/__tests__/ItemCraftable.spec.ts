@@ -191,7 +191,7 @@ describe("ItemCraftable.ts", () => {
 
     await craftableItem.craftItem(itemToCraft, testCharacter);
 
-    const container = (await ItemContainer.findById(inventory.itemContainer)) as unknown as IItemContainer;
+    const container = (await ItemContainer.findById(inventory.itemContainer).lean()) as unknown as IItemContainer;
 
     expect(sendEventToUser).toHaveBeenCalledTimes(6);
 
@@ -375,7 +375,7 @@ describe("ItemCraftable.ts", () => {
     const itemToCraft: ICraftItemPayload = { itemKey: itemManaPotion.key! };
     await craftableItem.craftItem(itemToCraft, testCharacter);
 
-    const container = (await ItemContainer.findById(inventory.itemContainer)) as unknown as IItemContainer;
+    const container = (await ItemContainer.findById(inventory.itemContainer).lean()) as unknown as IItemContainer;
 
     expect(container.slots[0]).toBe(null);
     expect(container.slots[1]).toBe(null);

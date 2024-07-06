@@ -118,7 +118,10 @@ export class CharacterItemContainer {
         return false;
       }
 
-      const targetContainer = await ItemContainer.findOne({ _id: toContainerId });
+      const targetContainer = await ItemContainer.findOne({ _id: toContainerId }).lean<IItemContainer>({
+        virtuals: true,
+        defaults: true,
+      });
 
       if (!targetContainer) {
         this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The target container was not found.");
@@ -232,7 +235,10 @@ export class CharacterItemContainer {
   @TrackNewRelicTransaction()
   public async getInventoryItemContainer(character: ICharacter): Promise<IItemContainer | null> {
     const inventory = await this.characterInventory.getInventory(character);
-    const inventoryContainer = await ItemContainer.findById(inventory?.itemContainer);
+    const inventoryContainer = await ItemContainer.findById(inventory?.itemContainer).lean<IItemContainer>({
+      virtuals: true,
+      defaults: true,
+    });
 
     if (!inventoryContainer) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The character does not have an inventory.");

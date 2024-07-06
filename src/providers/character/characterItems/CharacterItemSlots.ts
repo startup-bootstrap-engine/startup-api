@@ -56,7 +56,7 @@ export class CharacterItemSlots {
         slotItem.key.replace(/-\d+$/, "").toString() === item.key.replace(/-\d+$/, "").toString() &&
         slotItem.rarity === item.rarity
       ) {
-        const dbItem = (await Item.findById(slotItem._id)) as unknown as IItem;
+        const dbItem = (await Item.findById(slotItem._id).lean()) as unknown as IItem;
 
         dbItem && items.push(dbItem);
       }
@@ -212,7 +212,7 @@ export class CharacterItemSlots {
     itemKeyToBeAdded: string,
     qty: number
   ): Promise<number> {
-    const targetContainer = (await ItemContainer.findById(targetContainerId)) as unknown as IItemContainer;
+    const targetContainer = (await ItemContainer.findById(targetContainerId).lean()) as unknown as IItemContainer;
 
     for (const slotItem of Object.values(targetContainer.slots)) {
       if (!slotItem) {
@@ -281,7 +281,9 @@ export class CharacterItemSlots {
     targetContainer: IItemContainer,
     itemToBeAdded?: IItem
   ): Promise<number | null> {
-    const itemContainer = (await ItemContainer.findById(targetContainer.id)) as unknown as IItemContainer;
+    const itemContainer = (await ItemContainer.findById(targetContainer._id)
+      .lean()
+      .select("slots")) as unknown as IItemContainer;
 
     if (!itemContainer) {
       return null;
