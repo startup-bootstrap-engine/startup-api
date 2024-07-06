@@ -8,7 +8,8 @@ export const itemGreenOre: ICraftableItemBlueprint = {
   textureAtlas: "items",
   texturePath: "crafting-resources/green-ore.png",
   name: "Green Ore",
-  description: "Green ore that can be smelted into ingots.",
+  description:
+    "Green ore that can be smelted into ingots. To do this, click on a hammer, select 'Use with...' and then click on an anvil or furnace with this item in your inventory.",
   weight: 1.4,
   maxStackSize: 999,
   basePrice: 30,
