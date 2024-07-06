@@ -13,7 +13,7 @@ describe("EquipmentRangeUpdate.spec.ts", () => {
   let equipment: IEquipment;
   let equipmentSlots: EquipmentSlots;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     equipmentEquipInventory = container.get<EquipmentEquipInventory>(EquipmentEquipInventory);
     equipmentSlots = container.get<EquipmentSlots>(EquipmentSlots);
   });
