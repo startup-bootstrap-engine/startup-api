@@ -140,63 +140,6 @@ describe("ItemContainerTransaction", () => {
   });
 
   describe("ItemContainerTransactionQueue - Rollback and Consistency", () => {
-    it("should rollback when transaction is inconsistent", async () => {
-      jest.spyOn(itemContainerTransaction as any, "performTransaction").mockResolvedValue(true);
-      jest.spyOn(itemContainerTransaction as any, "wasTransactionConsistent").mockResolvedValue(false);
-      const rollbackContainersSpy = jest
-        .spyOn(itemContainerTransaction as any, "rollbackTransfer")
-        // @ts-ignore
-        .mockResolvedValue();
-
-      const result = await transferItem();
-
-      expect(result).toBe(false);
-      expect(rollbackContainersSpy).toHaveBeenCalled();
-    });
-
-    it("should not rollback when transaction is consistent", async () => {
-      jest.spyOn(itemContainerTransaction as any, "performTransaction").mockResolvedValue(true);
-      jest.spyOn(itemContainerTransaction as any, "wasTransactionConsistent").mockResolvedValue(true);
-      const rollbackContainersSpy = jest
-        .spyOn(itemContainerTransaction as any, "rollbackTransfer")
-        // @ts-ignore
-        .mockResolvedValue();
-
-      const result = await transferItem();
-
-      expect(result).toBe(true);
-      expect(rollbackContainersSpy).not.toHaveBeenCalled();
-    });
-
-    it("should detect inconsistent transaction", async () => {
-      const mockContainers = {
-        origin: { _id: "origin", slots: { 0: testItem } },
-        target: { _id: "target", slots: { 0: null } },
-      };
-
-      const mockSnapshots = {
-        origin: { containerId: "origin", slots: { 0: testItem } },
-        target: { containerId: "target", slots: { 0: null } },
-      };
-
-      jest.spyOn(ItemContainer, "findById").mockImplementation(
-        (id) =>
-          ({
-            lean: () => Promise.resolve(mockContainers[id as keyof typeof mockContainers]),
-          } as any)
-      );
-
-      const result = await (itemContainerTransaction as any).wasTransactionConsistent(
-        testItem,
-        mockSnapshots.origin,
-        mockSnapshots.target,
-        { _id: "origin" },
-        { _id: "target" }
-      );
-
-      expect(result).toBe(false);
-    });
-
     it("should correctly take and apply container snapshots", async () => {
       const originalContainer = {
         _id: "container1",

@@ -3,7 +3,6 @@ import { Equipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { NewRelicTransactionCategory } from "@providers/types/NewRelicTypes";
 import { provide } from "inversify-binding-decorators";
 
 // this class is just to deal with the edge case of the character equipping an inventory
@@ -13,9 +12,11 @@ export class EquipmentEquipInventory {
 
   @TrackNewRelicTransaction()
   public async equipInventory(character: ICharacter, item: IItem): Promise<boolean> {
-    const equipment = await Equipment.findById(character.equipment).cacheQuery({
-      cacheKey: `${character._id}-equipment`,
-    });
+    const equipment = await Equipment.findById(character.equipment)
+      .lean()
+      .cacheQuery({
+        cacheKey: `${character._id}-equipment`,
+      });
 
     if (!equipment) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, equipment not found.");
@@ -29,8 +30,7 @@ export class EquipmentEquipInventory {
       return false;
     }
 
-    equipment.inventory = item._id;
-    await equipment.save();
+    await Equipment.updateOne({ _id: character.equipment }, { inventory: item._id });
 
     return true;
   }

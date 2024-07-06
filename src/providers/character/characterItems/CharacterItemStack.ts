@@ -4,6 +4,7 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { ItemContainerHelper } from "@providers/itemContainer/ItemContainerHelper";
 import { provide } from "inversify-binding-decorators";
 import { CharacterItemSlots } from "./CharacterItemSlots";
 
@@ -14,7 +15,11 @@ import { CharacterItemSlots } from "./CharacterItemSlots";
 
 @provide(CharacterItemStack)
 export class CharacterItemStack {
-  constructor(private socketMessaging: SocketMessaging, private characterItemSlots: CharacterItemSlots) {}
+  constructor(
+    private socketMessaging: SocketMessaging,
+    private characterItemSlots: CharacterItemSlots,
+    private itemContainerHelper: ItemContainerHelper
+  ) {}
 
   @TrackNewRelicTransaction()
   public async tryAddingItemToStack(
@@ -113,17 +118,9 @@ export class CharacterItemStack {
 
       itemToBeAdded.stackQty = difference;
 
-      if (!itemToBeAdded.save) {
-        // edge case
-        itemToBeAdded = (await Item.findById(itemToBeAdded._id)) as IItem;
-
-        if (!itemToBeAdded) {
-          console.error("No item found");
-          return;
-        }
+      if (itemToBeAdded.isItemContainer && !itemToBeAdded.itemContainer) {
+        await this.itemContainerHelper.generateItemContainerIfNotPresentOnItem(itemToBeAdded);
       }
-
-      await itemToBeAdded.save();
 
       await Item.updateOne({ _id: itemToBeAdded._id }, { $set: { stackQty: difference } });
     } catch (error) {

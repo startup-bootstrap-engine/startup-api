@@ -141,7 +141,11 @@ export class ItemDragAndDrop {
     quantity: number,
     rollbackActions: (() => Promise<void>)[]
   ): Promise<boolean> {
-    const targetContainer = await ItemContainer.findById(containerId);
+    const targetContainer = await ItemContainer.findById(containerId).lean<IItemContainer>();
+
+    if (!targetContainer) {
+      throw new Error("Invalid container.");
+    }
 
     if (from.item?.rarity !== to.item?.rarity && to.item !== null) {
       throw new Error("Unable to move items with different rarities.");
@@ -266,7 +270,7 @@ export class ItemDragAndDrop {
     await this.characterItemSlots.updateItemOnSlot(slotIndex, targetContainer, {
       stackQty: newStackQty,
       owner: targetContainer.owner,
-    } as IItem);
+    });
   }
 
   private async deleteItemFromSlot(targetContainer: IItemContainer, itemId: string): Promise<IItem | null> {
@@ -301,7 +305,7 @@ export class ItemDragAndDrop {
 
       await item.save();
       rollbackActions.push(async () => {
-        await Item.findByIdAndDelete(item._id);
+        await Item.findByIdAndDelete(item._id).lean();
       });
 
       const success = await this.characterItemSlots.addItemOnSlot(targetContainer, item, to.slotIndex);
@@ -349,7 +353,7 @@ export class ItemDragAndDrop {
   }
 
   private async updateInventory(itemMoveData: IItemMove, character: ICharacter): Promise<void> {
-    const inventoryContainer = (await ItemContainer.findById(itemMoveData.from.containerId)) as IItemContainer;
+    const inventoryContainer = (await ItemContainer.findById(itemMoveData.from.containerId).lean()) as IItemContainer;
     const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {
       inventory: inventoryContainer as any,
       openEquipmentSetOnUpdate: false,

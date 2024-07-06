@@ -4,7 +4,6 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { EquipmentEquipInventory } from "@providers/equipment/EquipmentEquipInventory";
-
 import { ItemMap } from "@providers/item/ItemMap";
 import { ItemOwnership } from "@providers/item/ItemOwnership";
 import { ItemContainerHelper } from "@providers/itemContainer/ItemContainerHelper";
@@ -43,52 +42,76 @@ export class CharacterItemContainer {
     character: ICharacter,
     fromContainer: IItemContainer
   ): Promise<boolean> {
-    const itemToBeRemoved = item;
+    const lockKey = `item-${item._id}-remove-item-from-container-${fromContainer._id}`;
 
-    if (!itemToBeRemoved) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The item to be removed was not found.");
+    const hasLock = await this.locker.lock(lockKey);
+
+    if (!hasLock) {
       return false;
     }
 
-    if (!fromContainer) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The origin container was not found.");
-      return false;
-    }
+    try {
+      const itemToBeRemoved = item;
 
-    const clearCache = async (): Promise<void> => {
-      await this.inMemoryHashTable.delete("load-craftable-items", character._id);
-      await this.inMemoryHashTable.delete("character-max-weights", character._id);
-    };
-
-    for (let i = 0; i < fromContainer.slotQty; i++) {
-      const slotItem = fromContainer.slots?.[i];
-
-      if (!slotItem) continue;
-      if (slotItem._id.toString() === item._id.toString()) {
-        fromContainer.slots[i] = null;
-
-        await ItemContainer.updateOne(
-          {
-            _id: fromContainer._id,
-          },
-          {
-            $set: {
-              slots: {
-                ...fromContainer.slots,
-              },
-            },
-          }
-        );
-
-        await clearCache();
-
-        return true;
+      if (!itemToBeRemoved) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The item to be removed was not found.");
+        return false;
       }
+
+      if (!fromContainer || !fromContainer.slots) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The origin container was not found.");
+        return false;
+      }
+
+      const clearCache = async (): Promise<void> => {
+        await this.inMemoryHashTable.delete("load-craftable-items", character._id);
+        await this.inMemoryHashTable.delete("character-max-weights", character._id);
+      };
+
+      for (let i = 0; i < fromContainer.slotQty; i++) {
+        const slotItem = fromContainer.slots?.[i];
+
+        if (!slotItem) continue;
+        if (slotItem._id.toString() === item._id.toString()) {
+          fromContainer.slots[i] = null;
+
+          await ItemContainer.updateOne(
+            {
+              _id: fromContainer._id,
+            },
+            {
+              $set: {
+                slots: {
+                  ...fromContainer.slots,
+                },
+              },
+            }
+          );
+
+          await clearCache();
+
+          await Item.updateOne(
+            {
+              _id: item._id,
+            },
+            {
+              $set: {
+                isInContainer: false,
+              },
+            }
+          );
+
+          return true;
+        }
+      }
+
+      return false;
+    } catch (error) {
+      console.error(error);
+      return false;
+    } finally {
+      await this.locker.unlock(lockKey);
     }
-
-    await clearCache();
-
-    return true;
   }
 
   @TrackNewRelicTransaction()
@@ -118,7 +141,10 @@ export class CharacterItemContainer {
         return false;
       }
 
-      const targetContainer = await ItemContainer.findOne({ _id: toContainerId });
+      const targetContainer = await ItemContainer.findOne({ _id: toContainerId }).lean<IItemContainer>({
+        virtuals: true,
+        defaults: true,
+      });
 
       if (!targetContainer) {
         this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The target container was not found.");
@@ -232,7 +258,10 @@ export class CharacterItemContainer {
   @TrackNewRelicTransaction()
   public async getInventoryItemContainer(character: ICharacter): Promise<IItemContainer | null> {
     const inventory = await this.characterInventory.getInventory(character);
-    const inventoryContainer = await ItemContainer.findById(inventory?.itemContainer);
+    const inventoryContainer = await ItemContainer.findById(inventory?.itemContainer).lean<IItemContainer>({
+      virtuals: true,
+      defaults: true,
+    });
 
     if (!inventoryContainer) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The character does not have an inventory.");
