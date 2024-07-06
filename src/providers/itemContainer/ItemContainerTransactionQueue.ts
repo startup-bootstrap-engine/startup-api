@@ -192,7 +192,7 @@ export class ItemContainerTransactionQueue {
     targetContainer: IItemContainer,
     options: IItemContainerTransactionOption
   ): Promise<boolean> {
-    item.baseKey = item.key.replace(/-\d+$/, "");
+    item.baseKey = this.itemBaseKey.getBaseKey(item.key);
 
     const addItemSuccessful = await this.characterItemContainer.addItemToContainer(
       item,

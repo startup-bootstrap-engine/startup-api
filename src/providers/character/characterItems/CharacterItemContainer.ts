@@ -42,61 +42,76 @@ export class CharacterItemContainer {
     character: ICharacter,
     fromContainer: IItemContainer
   ): Promise<boolean> {
-    const itemToBeRemoved = item;
+    const lockKey = `item-${item._id}-remove-item-from-container-${fromContainer._id}`;
 
-    if (!itemToBeRemoved) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The item to be removed was not found.");
+    const hasLock = await this.locker.lock(lockKey);
+
+    if (!hasLock) {
       return false;
     }
 
-    if (!fromContainer || !fromContainer.slots) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The origin container was not found.");
-      return false;
-    }
+    try {
+      const itemToBeRemoved = item;
 
-    const clearCache = async (): Promise<void> => {
-      await this.inMemoryHashTable.delete("load-craftable-items", character._id);
-      await this.inMemoryHashTable.delete("character-max-weights", character._id);
-    };
-
-    for (let i = 0; i < fromContainer.slotQty; i++) {
-      const slotItem = fromContainer.slots?.[i];
-
-      if (!slotItem) continue;
-      if (slotItem._id.toString() === item._id.toString()) {
-        fromContainer.slots[i] = null;
-
-        await ItemContainer.updateOne(
-          {
-            _id: fromContainer._id,
-          },
-          {
-            $set: {
-              slots: {
-                ...fromContainer.slots,
-              },
-            },
-          }
-        );
-
-        await clearCache();
-
-        await Item.updateOne(
-          {
-            _id: item._id,
-          },
-          {
-            $set: {
-              isInContainer: false,
-            },
-          }
-        );
-
-        return true;
+      if (!itemToBeRemoved) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The item to be removed was not found.");
+        return false;
       }
-    }
 
-    return false;
+      if (!fromContainer || !fromContainer.slots) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The origin container was not found.");
+        return false;
+      }
+
+      const clearCache = async (): Promise<void> => {
+        await this.inMemoryHashTable.delete("load-craftable-items", character._id);
+        await this.inMemoryHashTable.delete("character-max-weights", character._id);
+      };
+
+      for (let i = 0; i < fromContainer.slotQty; i++) {
+        const slotItem = fromContainer.slots?.[i];
+
+        if (!slotItem) continue;
+        if (slotItem._id.toString() === item._id.toString()) {
+          fromContainer.slots[i] = null;
+
+          await ItemContainer.updateOne(
+            {
+              _id: fromContainer._id,
+            },
+            {
+              $set: {
+                slots: {
+                  ...fromContainer.slots,
+                },
+              },
+            }
+          );
+
+          await clearCache();
+
+          await Item.updateOne(
+            {
+              _id: item._id,
+            },
+            {
+              $set: {
+                isInContainer: false,
+              },
+            }
+          );
+
+          return true;
+        }
+      }
+
+      return false;
+    } catch (error) {
+      console.error(error);
+      return false;
+    } finally {
+      await this.locker.unlock(lockKey);
+    }
   }
 
   @TrackNewRelicTransaction()
