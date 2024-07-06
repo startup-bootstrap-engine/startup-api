@@ -42,17 +42,56 @@ export class CharacterItemContainer {
     character: ICharacter,
     fromContainer: IItemContainer
   ): Promise<boolean> {
-    if (!item || !fromContainer) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Invalid item or container.");
+    const itemToBeRemoved = item;
+
+    if (!itemToBeRemoved) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The item to be removed was not found.");
       return false;
     }
 
+    if (!fromContainer || !fromContainer.slots) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The origin container was not found.");
+      return false;
+    }
+
+    const clearCache = async (): Promise<void> => {
+      await this.inMemoryHashTable.delete("load-craftable-items", character._id);
+      await this.inMemoryHashTable.delete("character-max-weights", character._id);
+    };
+
     for (let i = 0; i < fromContainer.slotQty; i++) {
       const slotItem = fromContainer.slots?.[i];
-      if (slotItem && slotItem._id.toString() === item._id.toString()) {
+
+      if (!slotItem) continue;
+      if (slotItem._id.toString() === item._id.toString()) {
         fromContainer.slots[i] = null;
-        await this.updateContainerSlots(fromContainer);
-        await this.clearCacheForCharacter(character._id);
+
+        await ItemContainer.updateOne(
+          {
+            _id: fromContainer._id,
+          },
+          {
+            $set: {
+              slots: {
+                ...fromContainer.slots,
+              },
+            },
+          }
+        );
+
+        await clearCache();
+
+        await Item.updateOne(
+          {
+            _id: item._id,
+          },
+          {
+            $set: {
+              isInContainer: false,
+            },
+          }
+        );
+
         return true;
       }
     }
@@ -65,47 +104,139 @@ export class CharacterItemContainer {
     item: IItem,
     character: ICharacter,
     toContainerId: string,
-    options: IAddItemToContainerOptions = {
-      shouldAddOwnership: true,
-      isInventoryItem: false,
-      dropOnMapIfFull: false,
-    }
+    options?: IAddItemToContainerOptions
   ): Promise<boolean> {
-    const lockKey = `item-${item._id}-add-item-to-container`;
-    const hasLock = await this.locker.lock(lockKey);
+    const { shouldAddOwnership = true, isInventoryItem = false, dropOnMapIfFull = false } = options || {};
+
+    if (!item) {
+      return false;
+    }
+
+    const hasLock = await this.locker.lock(`item-${item._id}-add-item-to-container`);
 
     if (!hasLock) {
       return false;
     }
 
     try {
-      item = await this.ensureItemHasContainer(item);
-      const targetContainer = await this.getTargetContainer(toContainerId);
+      item = (await this.ensureItemHasContainer(item)) as IItem;
 
-      if (!targetContainer) {
-        this.socketMessaging.sendErrorMessageToCharacter(character, "Target container not found.");
+      if (!item) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The item to be added was not found.");
         return false;
       }
 
-      await this.clearCacheForItemAddition(targetContainer._id, character._id, item.type as ItemType);
+      const targetContainer = await ItemContainer.findOne({ _id: toContainerId }).lean<IItemContainer>({
+        virtuals: true,
+        defaults: true,
+      });
 
-      const result = await this.processItemAddition(character, item, targetContainer, options);
-
-      if (result) {
-        await this.updateItemContainerStatus(item);
+      if (!targetContainer) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The target container was not found.");
+        return false;
       }
+
+      await this.clearCache(targetContainer._id, character._id, item.type as ItemType);
+
+      const result = await this.tryToAddItemToContainer(
+        character,
+        item,
+        targetContainer,
+        isInventoryItem,
+        dropOnMapIfFull
+      );
+
+      if (!result) {
+        return false;
+      }
+
+      await Item.updateOne(
+        {
+          _id: item._id,
+          scene: item.scene,
+        },
+        {
+          $set: {
+            isInContainer: true,
+          },
+        }
+      );
 
       return result;
     } catch (error) {
       console.error(error);
-      this.socketMessaging.sendErrorMessageToCharacter(character, "An error occurred while adding the item.");
       return false;
     } finally {
-      if (options.shouldAddOwnership) {
+      if (shouldAddOwnership) {
         await this.itemOwnership.addItemOwnership(item, character);
       }
-      await this.clearCacheForItemAddition(toContainerId, character._id, item.type as ItemType);
-      await this.locker.unlock(lockKey);
+
+      await this.clearCache(toContainerId, character._id, item.type as ItemType);
+
+      await this.locker.unlock(`item-${item._id}-add-item-to-container`);
+    }
+  }
+
+  private async ensureItemHasContainer(item: IItem): Promise<IItem | null> {
+    if (item.isItemContainer && !item.itemContainer) {
+      const newContainer = await this.itemContainerHelper.generateItemContainerIfNotPresentOnItem(item);
+
+      if (!newContainer) {
+        throw new Error("Failed to generate item container.");
+      }
+
+      item.itemContainer = newContainer?._id;
+    }
+
+    return item;
+  }
+
+  private async tryToAddItemToContainer(
+    character: ICharacter,
+    item: IItem,
+    targetContainer: IItemContainer,
+    isInventoryItem: boolean,
+    dropOnMapIfFull: boolean
+  ): Promise<boolean> {
+    if (isInventoryItem) {
+      return await this.equipmentEquipInventory.equipInventory(character, item);
+    }
+
+    if (!this.isItemTypeValid(targetContainer, item)) {
+      this.socketMessaging.sendErrorMessageToCharacter(
+        character,
+        "Oops! The item type is not valid for this container."
+      );
+      return false;
+    }
+
+    await this.itemMap.clearItemCoordinates(item, targetContainer);
+
+    if (item.maxStackSize > 1) {
+      const wasStacked = await this.characterItemStack.tryAddingItemToStack(character, targetContainer, item);
+
+      if (wasStacked || wasStacked === undefined) {
+        return true;
+      }
+    }
+
+    return await this.characterItemSlots.tryAddingItemOnFirstSlot(character, item, targetContainer, dropOnMapIfFull);
+  }
+
+  private isItemTypeValid(targetContainer: IItemContainer, item: IItem): boolean {
+    const isItemTypeValid = targetContainer.allowedItemTypes?.filter((entry) => {
+      return entry === item?.type;
+    });
+
+    return !!isItemTypeValid;
+  }
+
+  private async clearCache(toContainerId: string, characterId: string, itemType: ItemType): Promise<void> {
+    await this.inMemoryHashTable.delete("container-all-items", toContainerId);
+    await this.inMemoryHashTable.delete("character-max-weights", characterId);
+
+    if (itemType === ItemType.CraftingResource) {
+      await this.inMemoryHashTable.delete("load-craftable-items", characterId);
     }
   }
 
@@ -118,7 +249,7 @@ export class CharacterItemContainer {
     });
 
     if (!inventoryContainer) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Character does not have an inventory.");
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The character does not have an inventory.");
       return null;
     }
 
@@ -136,80 +267,5 @@ export class CharacterItemContainer {
     }
 
     await container.save();
-  }
-
-  private async ensureItemHasContainer(item: IItem): Promise<IItem> {
-    if (item.isItemContainer && !item.itemContainer) {
-      const newContainer = await this.itemContainerHelper.generateItemContainerIfNotPresentOnItem(item);
-      if (!newContainer) {
-        throw new Error("Failed to generate item container.");
-      }
-      item.itemContainer = newContainer._id;
-    }
-    return item;
-  }
-
-  private async getTargetContainer(containerId: string): Promise<IItemContainer | null> {
-    return await ItemContainer.findOne({ _id: containerId }).lean<IItemContainer>({
-      virtuals: true,
-      defaults: true,
-    });
-  }
-
-  private async processItemAddition(
-    character: ICharacter,
-    item: IItem,
-    targetContainer: IItemContainer,
-    options: IAddItemToContainerOptions
-  ): Promise<boolean> {
-    if (options.isInventoryItem) {
-      return this.equipmentEquipInventory.equipInventory(character, item);
-    }
-
-    if (!this.isItemTypeValid(targetContainer, item)) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Item type is not valid for this container.");
-      return false;
-    }
-
-    await this.itemMap.clearItemCoordinates(item, targetContainer);
-
-    if (item.maxStackSize > 1) {
-      const wasStacked = await this.characterItemStack.tryAddingItemToStack(character, targetContainer, item);
-      if (wasStacked || wasStacked === undefined) {
-        return true;
-      }
-    }
-
-    return this.characterItemSlots.tryAddingItemOnFirstSlot(character, item, targetContainer, options.dropOnMapIfFull);
-  }
-
-  private isItemTypeValid(targetContainer: IItemContainer, item: IItem): boolean {
-    const isItemTypeValid = targetContainer.allowedItemTypes?.filter((entry) => {
-      return entry === item?.type;
-    });
-
-    return !!isItemTypeValid;
-  }
-
-  private async updateItemContainerStatus(item: IItem): Promise<void> {
-    await Item.updateOne({ _id: item._id, scene: item.scene }, { $set: { isInContainer: true } });
-  }
-
-  private async updateContainerSlots(container: IItemContainer): Promise<void> {
-    await ItemContainer.updateOne({ _id: container._id }, { $set: { slots: { ...container.slots } } });
-  }
-
-  private async clearCacheForCharacter(characterId: string): Promise<void> {
-    await this.inMemoryHashTable.delete("load-craftable-items", characterId);
-    await this.inMemoryHashTable.delete("character-max-weights", characterId);
-  }
-
-  private async clearCacheForItemAddition(containerId: string, characterId: string, itemType: ItemType): Promise<void> {
-    await this.inMemoryHashTable.delete("container-all-items", containerId);
-    await this.inMemoryHashTable.delete("character-max-weights", characterId);
-
-    if (itemType === ItemType.CraftingResource) {
-      await this.inMemoryHashTable.delete("load-craftable-items", characterId);
-    }
   }
 }
