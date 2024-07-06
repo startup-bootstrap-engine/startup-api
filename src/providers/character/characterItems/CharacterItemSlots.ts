@@ -3,111 +3,82 @@ import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemCon
 import { IItem, Item, warnAboutItemChanges } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { isSameKey } from "@providers/dataStructures/KeyHelper";
+import { ItemBaseKey } from "@providers/item/ItemBaseKey";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 
 import { provide } from "inversify-binding-decorators";
 
 @provide(CharacterItemSlots)
 export class CharacterItemSlots {
-  constructor(private socketMessaging: SocketMessaging) {}
+  constructor(private socketMessaging: SocketMessaging, private itemBaseKey: ItemBaseKey) {}
 
   @TrackNewRelicTransaction()
   public async getTotalQty(targetContainer: IItemContainer, item: IItem, itemRarity: string): Promise<number> {
     const allItemsSameKey = await this.getAllItemsFromKey(targetContainer, item);
-    let qty = 0;
-    for (const item of allItemsSameKey) {
-      if (item.stackQty && item.rarity === itemRarity) {
-        qty += item.stackQty;
-      } else if (item.rarity === itemRarity) {
-        qty += 1;
-      }
-    }
 
-    return qty;
+    return allItemsSameKey.reduce((qty, currentItem) => {
+      if (currentItem.rarity === itemRarity) {
+        return qty + (currentItem.stackQty || 1);
+      }
+      return qty;
+    }, 0);
   }
 
   public getTotalQtyByKey(items: IItem[]): Map<string, number> {
-    const res: Map<string, number> = new Map();
-    for (const item of items) {
+    const itemsMap = items.reduce((res, item) => {
       const itemKey = item.baseKey;
-      let existing = res.get(itemKey);
-      if (!existing) {
-        existing = 0;
-      }
-      if (item.stackQty) {
-        res.set(itemKey, existing + item.stackQty);
-      } else {
-        res.set(itemKey, existing + 1);
-      }
-    }
-    return res;
+      const existing = res.get(itemKey) || 0;
+      res.set(itemKey, existing + (item.stackQty || 1));
+      return res;
+    }, new Map<string, number>());
+
+    return itemsMap;
   }
 
   @TrackNewRelicTransaction()
   public async getAllItemsFromKey(targetContainer: IItemContainer, item: IItem): Promise<IItem[]> {
-    const items: IItem[] = [];
+    const itemIds = Object.values(targetContainer.slots)
+      .filter(
+        (slotItem: IItem) =>
+          !!slotItem &&
+          this.itemBaseKey.getBaseKey(slotItem.key) === this.itemBaseKey.getBaseKey(item.key) &&
+          slotItem.rarity === item.rarity
+      )
+      .map((slotItem: IItem) => slotItem._id);
 
-    for (let i = 0; i < targetContainer.slotQty; i++) {
-      const slotItem = targetContainer.slots?.[i] as unknown as IItem;
-
-      if (!slotItem) continue;
-
-      if (
-        slotItem.key.replace(/-\d+$/, "").toString() === item.key.replace(/-\d+$/, "").toString() &&
-        slotItem.rarity === item.rarity
-      ) {
-        const dbItem = (await Item.findById(slotItem._id).lean()) as unknown as IItem;
-
-        dbItem && items.push(dbItem);
-      }
-    }
-
-    return items;
+    return await Item.find({ _id: { $in: itemIds } }).lean({ virtuals: true, defaults: true });
   }
 
   @TrackNewRelicTransaction()
   public async updateItemOnSlot(
     slotIndex: number,
     targetContainer: IItemContainer,
-    payload: Record<string, any>
+    payload: Partial<IItem>
   ): Promise<void> {
-    // Input validation
-    if (slotIndex < 0 || slotIndex >= targetContainer.slots.length) {
+    if (slotIndex < 0 || slotIndex >= targetContainer.slotQty) {
       throw new Error("Invalid slot index");
     }
 
-    if (!payload || typeof payload !== "object" || Object.keys(payload).length === 0) {
+    if (!payload || Object.keys(payload).length === 0) {
       throw new Error("Payload must be a non-empty object");
     }
 
-    const slotItem = targetContainer.slots[slotIndex];
+    const slotItem = targetContainer.slots[slotIndex] as IItem | null;
 
-    // Check if slotItem exists
     if (!slotItem) {
       throw new Error("No item found in the given slot");
     }
 
-    // Updating the item
-    targetContainer.slots[slotIndex] = {
-      ...slotItem,
-      ...payload,
-    };
+    const updatedSlotItem = { ...slotItem, ...payload };
 
     try {
-      // Updating the container and the item in the database concurrently
       await Promise.all([
-        ItemContainer.updateOne(
-          { _id: targetContainer._id },
-          {
-            $set: {
-              [`slots.${slotIndex}`]: targetContainer.slots[slotIndex],
-            },
-          }
-        ),
-        Item.updateOne({ _id: slotItem._id }, { $set: { ...payload } }),
+        ItemContainer.updateOne({ _id: targetContainer._id }, { $set: { [`slots.${slotIndex}`]: updatedSlotItem } }),
+        Item.updateOne({ _id: slotItem._id }, { $set: payload }),
       ]);
+
+      targetContainer.slots[slotIndex] = updatedSlotItem;
     } catch (error) {
-      // Error handling
       console.error(error);
       throw new Error("Failed to update the item on the slot");
     }
@@ -115,66 +86,33 @@ export class CharacterItemSlots {
 
   @TrackNewRelicTransaction()
   public async findItemSlotIndex(targetContainer: IItemContainer, itemId: string): Promise<number | undefined> {
-    try {
-      const container = (await ItemContainer.findById(targetContainer._id).lean()) as unknown as IItemContainer;
+    const container = (await ItemContainer.findById(targetContainer._id).lean()) as IItemContainer | null;
 
-      if (!container) {
-        throw new Error("Container not found");
-      }
-
-      if (container) {
-        for (let i = 0; i < container.slotQty; i++) {
-          const slotItem = container.slots?.[i] as unknown as IItem;
-
-          if (!slotItem) continue;
-
-          if (slotItem?._id.toString() === itemId.toString()) {
-            return i;
-          }
-        }
-      }
-    } catch (error) {
-      console.error(error);
+    if (!container) {
+      throw new Error("Container not found");
     }
+
+    const slotIndex = Object.entries(container.slots).find(
+      ([_, item]: [string, IItem | null]) => item?._id.toString() === itemId
+    )?.[0] as number | undefined;
+
+    return Number(slotIndex);
   }
 
   public findItemWithSameKey(targetContainer: IItemContainer, itemKey: string): IItem | undefined {
-    try {
-      for (let i = 0; i < targetContainer.slotQty; i++) {
-        const slotItem = targetContainer.slots?.[i];
-
-        if (!slotItem) continue;
-
-        // TODO: Find a better way to do this
-        if (slotItem.key.replace(/-\d+$/, "") === itemKey.replace(/-\d+$/, "")) {
-          return slotItem;
-        }
-      }
-    } catch (error) {
-      console.error(error);
-    }
+    return Object.values(targetContainer.slots).find(
+      (slotItem: IItem) => slotItem && slotItem.key.replace(/-\d+$/, "") === itemKey.replace(/-\d+$/, "")
+    ) as IItem | undefined;
   }
 
-  @TrackNewRelicTransaction()
   public findItemOnSlots(targetContainer: IItemContainer, itemId: string): IItem | undefined {
-    try {
-      if (!targetContainer) {
-        throw new Error("Container not found");
-      }
-
-      for (let i = 0; i < targetContainer.slotQty; i++) {
-        const slotItem = targetContainer.slots?.[i] as unknown as IItem;
-
-        if (!slotItem) continue;
-
-        if (slotItem._id.toString() === itemId.toString()) {
-          console.log(`Found item ${slotItem.key} on slot ${i}`);
-          return slotItem;
-        }
-      }
-    } catch (error) {
-      console.error(error);
+    if (!targetContainer) {
+      throw new Error("Container not found");
     }
+
+    return Object.values(targetContainer.slots).find((slotItem: IItem) => slotItem?._id.toString() === itemId) as
+      | IItem
+      | undefined;
   }
 
   @TrackNewRelicTransaction()
@@ -212,25 +150,22 @@ export class CharacterItemSlots {
     itemKeyToBeAdded: string,
     qty: number
   ): Promise<number> {
-    const targetContainer = (await ItemContainer.findById(targetContainerId).lean()) as unknown as IItemContainer;
+    const targetContainer = (await ItemContainer.findById(targetContainerId).lean()) as IItemContainer | null;
 
-    for (const slotItem of Object.values(targetContainer.slots)) {
+    if (!targetContainer) {
+      throw new Error("Container not found");
+    }
+
+    for (const slotItem of Object.values(targetContainer.slots) as IItem[]) {
       if (!slotItem) {
         return qty;
-      } else if (slotItem as unknown as IItem) {
-        const slotItemKey = (slotItem as unknown as IItem).key;
-        const slotItemQty = (slotItem as unknown as IItem).stackQty;
+      }
 
-        if (slotItemKey === itemKeyToBeAdded && slotItemQty) {
-          const availableQty = (slotItem as unknown as IItem).maxStackSize - slotItemQty;
-          if (availableQty === 0) continue;
+      if (slotItem.key === itemKeyToBeAdded && slotItem.stackQty !== undefined) {
+        const availableQty = slotItem.maxStackSize - slotItem.stackQty;
+        if (availableQty === 0) continue;
 
-          if (qty <= availableQty) {
-            return qty;
-          }
-
-          return availableQty;
-        }
+        return Math.min(qty, availableQty);
       }
     }
 
@@ -243,51 +178,35 @@ export class CharacterItemSlots {
     itemToBeAdded: IItem,
     checkForEmptyOnly: boolean = false
   ): Promise<boolean> {
-    const targetContainer = (await ItemContainer.findById(targetContainerId).lean()) as unknown as IItemContainer;
+    const targetContainer = (await ItemContainer.findById(targetContainerId).lean()) as IItemContainer | null;
 
     if (!targetContainer) {
       return false;
     }
 
-    const hasEmptySlot = this.getFirstAvailableSlotId(targetContainer) !== null;
+    const emptySlotIndex = Object.values(targetContainer.slots).findIndex((slot) => !slot);
 
-    if (hasEmptySlot) {
+    if (emptySlotIndex !== -1) {
       return true;
     }
 
     if (!checkForEmptyOnly && itemToBeAdded.maxStackSize > 1) {
-      // if item is stackable, check if there's a stackable item with the same type, and the stack is not full
-
-      // loop through all slots
-      for (const slot of Object.values(targetContainer.slots)) {
-        const slotItem = slot as unknown as IItem;
-
-        if (slotItem.maxStackSize > 1) {
-          if (isSameKey(slotItem.key, itemToBeAdded.key) && slotItem.rarity === itemToBeAdded.rarity) {
-            const futureStackQty = slotItem.stackQty! + itemToBeAdded.stackQty!;
-            if (futureStackQty <= slotItem.maxStackSize) {
-              return true;
-            }
-          }
-        }
-      }
+      return Object.values(targetContainer.slots).some(
+        (slotItem: IItem) =>
+          slotItem &&
+          slotItem.maxStackSize > 1 &&
+          isSameKey(slotItem.key, itemToBeAdded.key) &&
+          slotItem.rarity === itemToBeAdded.rarity &&
+          (slotItem.stackQty ?? 0) + (itemToBeAdded.stackQty ?? 1) <= slotItem.maxStackSize
+      );
     }
 
     return checkForEmptyOnly && Object.keys(targetContainer.slots).length < targetContainer.slotQty;
   }
 
   public getFirstAvailableSlotId(targetContainer: IItemContainer): number | null {
-    if (!targetContainer.slots) {
-      return null;
-    }
-
-    for (let i = 0; i < targetContainer.slotQty; i++) {
-      if (!targetContainer.slots[i]) {
-        return i;
-      }
-    }
-
-    return null;
+    const emptySlotIndex = Object.entries(targetContainer.slots).find(([_, slot]) => !slot)?.[0];
+    return emptySlotIndex !== undefined ? Number(emptySlotIndex) : null;
   }
 
   @TrackNewRelicTransaction()
@@ -297,26 +216,25 @@ export class CharacterItemSlots {
   ): Promise<number | null> {
     const itemContainer = (await ItemContainer.findById(targetContainer._id)
       .lean()
-      .select("slots")) as unknown as IItemContainer;
+      .select("slots")) as IItemContainer | null;
 
     if (!itemContainer) {
       return null;
     }
 
-    for (const [id, slot] of Object.entries(targetContainer.slots)) {
-      const slotItem = slot as unknown as IItem;
+    for (const [index, slotItem] of Object.entries(itemContainer.slots) as [string, IItem | null][]) {
+      if (!slotItem) {
+        return Number(index);
+      }
 
-      if (itemToBeAdded && slotItem && slotItem.maxStackSize > 1) {
-        if (slotItem.baseKey === itemToBeAdded.baseKey && slotItem.rarity === itemToBeAdded.rarity) {
-          const futureStackQty = slotItem.stackQty! + itemToBeAdded.stackQty!;
-          if (futureStackQty <= slotItem.maxStackSize) {
-            return Number(id);
-          }
-        }
-      } else {
-        if (!slotItem) {
-          return Number(id);
-        }
+      if (
+        itemToBeAdded &&
+        slotItem.maxStackSize > 1 &&
+        slotItem.baseKey === itemToBeAdded.baseKey &&
+        slotItem.rarity === itemToBeAdded.rarity &&
+        (slotItem.stackQty ?? 0) + (itemToBeAdded.stackQty ?? 1) <= slotItem.maxStackSize
+      ) {
+        return Number(index);
       }
     }
 
@@ -329,24 +247,16 @@ export class CharacterItemSlots {
     itemToBeAdded: IItem,
     slotIndex: number
   ): Promise<boolean> {
-    const targetContainerItem = (await ItemContainer.findById(targetContainer.id).lean()) as unknown as IItemContainer;
+    const targetContainerItem = (await ItemContainer.findById(targetContainer._id).lean()) as IItemContainer | null;
 
     if (!targetContainerItem) {
       return false;
     }
 
-    const slotItem = targetContainerItem.slots[slotIndex] as unknown as IItem;
-
-    if (!slotItem) {
+    if (!targetContainerItem.slots[slotIndex]) {
       await ItemContainer.updateOne(
-        {
-          _id: targetContainerItem._id,
-        },
-        {
-          $set: {
-            [`slots.${slotIndex}`]: itemToBeAdded,
-          },
-        }
+        { _id: targetContainerItem._id },
+        { $set: { [`slots.${slotIndex}`]: itemToBeAdded } }
       );
 
       return true;
@@ -362,7 +272,7 @@ export class CharacterItemSlots {
     targetContainer: IItemContainer,
     dropOnMapIfFull: boolean = true
   ): Promise<boolean> {
-    const hasSameItemOnSlot = this.findItemOnSlots(targetContainer, selectedItem._id);
+    const hasSameItemOnSlot = this.findItemOnSlots(targetContainer, selectedItem._id.toString());
 
     if (hasSameItemOnSlot && selectedItem.maxStackSize === 1) {
       return false;
@@ -376,8 +286,6 @@ export class CharacterItemSlots {
         return false;
       }
 
-      // if inventory is full, just drop the item on the ground
-      // we must do a .save operation here to send the related events
       await Item.updateOne(
         { _id: selectedItem._id },
         { $set: { x: character.x, y: character.y, scene: character.scene } }

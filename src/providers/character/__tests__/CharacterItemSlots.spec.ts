@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
-import { IItem } from "@entities/ModuleInventory/ItemModel";
+import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { FromGridX, FromGridY, ItemRarities } from "@rpg-engine/shared";
 import { CharacterItemSlots } from "../characterItems/CharacterItemSlots";
@@ -380,5 +380,146 @@ describe("CharacterItemSlots.ts", () => {
     );
 
     expect(result).toBeFalsy();
+  });
+
+  describe("getTotalQtyByKey", () => {
+    it("should correctly calculate total quantity for multiple items with the same key", async () => {
+      const items: IItem[] = [
+        await unitTestHelper.createStackableMockItem({ key: "item1", stackQty: 5 }),
+        await unitTestHelper.createStackableMockItem({ key: "item1", stackQty: 3 }),
+        await unitTestHelper.createStackableMockItem({ key: "item2", stackQty: 2 }),
+      ];
+
+      const result = characterItemSlots.getTotalQtyByKey(items);
+
+      expect(result.get("item1")).toBe(8);
+      expect(result.get("item2")).toBe(2);
+    });
+
+    it("should handle items without stackQty", async () => {
+      const items: IItem[] = [
+        await unitTestHelper.createMockItem({ key: "item1" }),
+        await unitTestHelper.createMockItem({ key: "item1" }),
+        await unitTestHelper.createMockItem({ key: "item2" }),
+      ];
+
+      const result = characterItemSlots.getTotalQtyByKey(items);
+
+      expect(result.get("item1")).toBe(2);
+      expect(result.get("item2")).toBe(1);
+    });
+  });
+
+  describe("updateItemOnSlot", () => {
+    it("should successfully update an item on a slot", async () => {
+      const item = await unitTestHelper.createMockItem({ name: "Original Item" });
+      inventoryContainer.slots = { 0: item.toJSON({ virtuals: true }) };
+      await inventoryContainer.save();
+
+      await characterItemSlots.updateItemOnSlot(0, inventoryContainer, { name: "Updated Item" });
+
+      const updatedContainer = await ItemContainer.findById(inventoryContainer._id);
+      expect(updatedContainer?.slots[0].name).toBe("Updated Item");
+    });
+
+    it("should throw an error when trying to update an item on an invalid slot", async () => {
+      await expect(
+        characterItemSlots.updateItemOnSlot(-1, inventoryContainer, { name: "Updated Item" })
+      ).rejects.toThrow("Invalid slot index");
+    });
+
+    it("should throw an error when trying to update a non-existent item", async () => {
+      inventoryContainer.slots = {};
+      await inventoryContainer.save();
+
+      await expect(
+        characterItemSlots.updateItemOnSlot(0, inventoryContainer, { name: "Updated Item" })
+      ).rejects.toThrow("No item found in the given slot");
+    });
+  });
+
+  describe("getAvailableQuantityOnSlotToStack", () => {
+    it("should return the correct available quantity for stacking", async () => {
+      const item = await unitTestHelper.createStackableMockItem({
+        key: "stackable-item",
+        stackQty: 5,
+        maxStackSize: 10,
+      });
+      inventoryContainer.slots = { 0: item.toJSON({ virtuals: true }) };
+      await inventoryContainer.save();
+
+      const availableQty = await characterItemSlots.getAvailableQuantityOnSlotToStack(
+        inventoryContainer._id,
+        "stackable-item",
+        7
+      );
+
+      expect(availableQty).toBe(5); // 10 max - 5 current = 5 available
+    });
+
+    it("should return the input quantity if an empty slot is available", async () => {
+      inventoryContainer.slots = { 0: null };
+      await inventoryContainer.save();
+
+      const availableQty = await characterItemSlots.getAvailableQuantityOnSlotToStack(
+        inventoryContainer._id,
+        "new-item",
+        3
+      );
+
+      expect(availableQty).toBe(3);
+    });
+
+    it("should return 0 if no suitable slot is found", async () => {
+      const item = await unitTestHelper.createStackableMockItem({
+        key: "full-stack",
+        stackQty: 10,
+        maxStackSize: 10,
+      });
+      inventoryContainer.slots = { 0: item.toJSON({ virtuals: true }) };
+      await inventoryContainer.save();
+
+      const availableQty = await characterItemSlots.getAvailableQuantityOnSlotToStack(
+        inventoryContainer._id,
+        "full-stack",
+        5
+      );
+
+      expect(availableQty).toBe(0);
+    });
+  });
+
+  describe("tryAddingItemOnFirstSlot", () => {
+    it("should add item to an empty slot when container is not full", async () => {
+      const newItem = await unitTestHelper.createMockItem();
+      inventoryContainer.slots = { 0: null, 1: null };
+      await inventoryContainer.save();
+
+      const result = await characterItemSlots.tryAddingItemOnFirstSlot(testCharacter, newItem, inventoryContainer);
+
+      expect(result).toBeTruthy();
+      const updatedContainer = await ItemContainer.findById(inventoryContainer._id);
+      expect(updatedContainer?.slots[0]._id.toString()).toBe(newItem._id.toString());
+    });
+
+    it("should drop item on map when container is full and dropOnMapIfFull is true", async () => {
+      const newItem = await unitTestHelper.createMockItem();
+      inventoryContainer.slots = { 0: await unitTestHelper.createMockItem() };
+      inventoryContainer.slotQty = 1;
+      await inventoryContainer.save();
+
+      const result = await characterItemSlots.tryAddingItemOnFirstSlot(
+        testCharacter,
+        newItem,
+        inventoryContainer,
+        true
+      );
+
+      expect(result).toBeTruthy();
+      const updatedItem = await Item.findById(newItem._id);
+      expect(updatedItem?.x).toBe(testCharacter.x);
+      expect(updatedItem?.y).toBe(testCharacter.y);
+      expect(updatedItem?.scene).toBe(testCharacter.scene);
+    });
   });
 });
