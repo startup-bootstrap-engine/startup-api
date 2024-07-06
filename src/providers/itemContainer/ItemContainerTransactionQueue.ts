@@ -149,22 +149,6 @@ export class ItemContainerTransactionQueue {
         return false;
       }
 
-      const wasTransactionConsistent = await this.wasTransactionConsistent(
-        item,
-        originSnapshot,
-        targetSnapshot,
-        originContainer,
-        targetContainer
-      );
-
-      if (!wasTransactionConsistent) {
-        console.error(
-          `Transaction was inconsistent for character ${character._id} - ${character.name} - item ${item._id} - ${item.key} - ${item.name}`
-        );
-        await this.rollbackTransfer(character, originSnapshot, targetSnapshot);
-        return false;
-      }
-
       return true;
     } catch (error) {
       console.error("Execution of transfer failed:", error);
@@ -199,86 +183,6 @@ export class ItemContainerTransactionQueue {
 
   private async applyContainerSnapshot(snapshot: IContainerSnapshot): Promise<void> {
     await ItemContainer.updateOne({ _id: snapshot.containerId }, { $set: { slots: snapshot.slots } });
-  }
-
-  private async wasTransactionConsistent(
-    item: IItem,
-    originSnapshot: IContainerSnapshot,
-    targetSnapshot: IContainerSnapshot,
-    originContainer: IItemContainer,
-    targetContainer: IItemContainer
-  ): Promise<boolean> {
-    const updatedOriginContainer = await ItemContainer.findById(originContainer._id).lean<IItemContainer>();
-    const updatedTargetContainer = await ItemContainer.findById(targetContainer._id).lean<IItemContainer>();
-
-    if (!updatedOriginContainer || !updatedTargetContainer) {
-      console.error("One of the containers could not be found.");
-      return false;
-    }
-
-    if (item.maxStackSize > 1) {
-      return this.isTransactionConsistentForStackableItem(
-        item,
-        originSnapshot,
-        targetSnapshot,
-        updatedOriginContainer,
-        updatedTargetContainer
-      );
-    }
-
-    return this.isTransactionConsistentForNonStackableItem(item, updatedOriginContainer, updatedTargetContainer);
-  }
-
-  private isTransactionConsistentForStackableItem(
-    item: IItem,
-    originSnapshot: IContainerSnapshot,
-    targetSnapshot: IContainerSnapshot,
-    updatedOriginContainer: IItemContainer,
-    updatedTargetContainer: IItemContainer
-  ): boolean {
-    const originSlotIndex = this.findItemInContainer(updatedOriginContainer, item._id);
-
-    const wasItemRemovedFromOrigin = originSlotIndex === -1;
-
-    const wasItemAddedToTarget = this.countStackQtyInContainer(updatedTargetContainer, item.key) > 0;
-
-    if (!wasItemRemovedFromOrigin || !wasItemAddedToTarget) {
-      return false;
-    }
-
-    return true;
-  }
-
-  private countStackQtyInContainer(container: IItemContainer | IContainerSnapshot, itemKey: string): number {
-    return Object.values(container.slots as Record<string, IItem>).reduce((acc, slotItem: IItem) => {
-      if (slotItem && this.itemBaseKey.getBaseKey(itemKey) === this.itemBaseKey.getBaseKey(slotItem.key)) {
-        return acc + (slotItem.stackQty || 0);
-      }
-      return acc;
-    }, 0);
-  }
-
-  private isTransactionConsistentForNonStackableItem(
-    item: IItem,
-    updatedOriginContainer: IItemContainer,
-    updatedTargetContainer: IItemContainer
-  ): boolean {
-    const originSlotIndex = this.findItemInContainer(updatedOriginContainer, item._id);
-    const targetSlotIndex = this.findItemInContainer(updatedTargetContainer, item._id);
-
-    const wasItemRemovedFromOrigin = originSlotIndex === -1;
-    const wasItemAddedToTarget = targetSlotIndex !== -1;
-
-    return wasItemRemovedFromOrigin && wasItemAddedToTarget;
-  }
-
-  private findItemInContainer(container: IItemContainer, itemId: string): number {
-    for (const [index, slotItem] of Object.entries(container.slots) as [string, IItem][]) {
-      if (slotItem && slotItem._id.toString() === itemId.toString()) {
-        return parseInt(index);
-      }
-    }
-    return -1;
   }
 
   private async performTransaction(
