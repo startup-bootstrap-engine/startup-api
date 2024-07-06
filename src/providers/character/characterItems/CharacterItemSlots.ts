@@ -243,13 +243,13 @@ export class CharacterItemSlots {
     itemToBeAdded: IItem,
     checkForEmptyOnly: boolean = false
   ): Promise<boolean> {
-    const targetContainer = (await ItemContainer.findById(targetContainerId)) as unknown as IItemContainer;
+    const targetContainer = (await ItemContainer.findById(targetContainerId).lean()) as unknown as IItemContainer;
 
     if (!targetContainer) {
       return false;
     }
 
-    const hasEmptySlot = targetContainer.firstAvailableSlotId !== null;
+    const hasEmptySlot = this.getFirstAvailableSlotId(targetContainer) !== null;
 
     if (hasEmptySlot) {
       return true;
@@ -274,6 +274,20 @@ export class CharacterItemSlots {
     }
 
     return checkForEmptyOnly && Object.keys(targetContainer.slots).length < targetContainer.slotQty;
+  }
+
+  public getFirstAvailableSlotId(targetContainer: IItemContainer): number | null {
+    if (!targetContainer.slots) {
+      return null;
+    }
+
+    for (let i = 0; i < targetContainer.slotQty; i++) {
+      if (!targetContainer.slots[i]) {
+        return i;
+      }
+    }
+
+    return null;
   }
 
   @TrackNewRelicTransaction()
@@ -348,7 +362,7 @@ export class CharacterItemSlots {
     targetContainer: IItemContainer,
     dropOnMapIfFull: boolean = true
   ): Promise<boolean> {
-    const hasSameItemOnSlot = await this.findItemOnSlots(targetContainer, selectedItem._id);
+    const hasSameItemOnSlot = this.findItemOnSlots(targetContainer, selectedItem._id);
 
     if (hasSameItemOnSlot && selectedItem.maxStackSize === 1) {
       return false;
