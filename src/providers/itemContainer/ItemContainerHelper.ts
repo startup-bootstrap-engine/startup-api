@@ -1,6 +1,5 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
-
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
@@ -18,92 +17,87 @@ export class ItemContainerHelper {
       const item = await Item.findById(itemContainer.parentItem).lean();
 
       if (!item) {
-        throw new Error("Failed to get item type: item not found");
+        console.error("Failed to get item type: item not found");
+        return undefined;
       }
+
       if (item.name.includes("body")) {
         return ItemContainerType.Loot;
       }
 
-      // if we use item.x that will be falsy.
-      // because 0 is a "falsy" value in JavaScript.
-      // better use isNumber() fn.
       if (isNumber(item.x) && isNumber(item.y) && item.scene) {
         return ItemContainerType.MapContainer;
       }
 
-      const owner = (await Character.findById(item.owner)) as unknown as ICharacter;
-      const inventory = await this.characterInventory.getInventory(owner);
+      const owner = (await Character.findById(item.owner).lean()) as ICharacter;
+      if (owner) {
+        const inventory = await this.characterInventory.getInventory(owner);
 
-      if (item?._id.toString() === inventory?._id.toString()) {
-        return ItemContainerType.Inventory;
+        if (!inventory) {
+          console.error("Failed to get item type: inventory not found");
+          return undefined;
+        }
+
+        if (item._id.equals(inventory._id)) {
+          return ItemContainerType.Inventory;
+        }
       }
 
-      return ItemContainerType.Loot; // last resort, lets consider its a loot container
+      return ItemContainerType.Loot;
     } catch (error) {
       console.error(error);
+      return undefined;
     }
   }
 
-  //! This method can potentially cause a recursion. Please use it with careful! Make sure you use a set to avoid infinite loops (check usage)
   @TrackNewRelicTransaction()
   public async execFnInAllItemContainerSlots(
     itemContainer: IItemContainer,
     fn: (item: IItem, slotIndex: number) => Promise<void>
   ): Promise<void> {
     const slots = itemContainer.slots;
+    if (!slots) return;
 
     const loopedItems = new Set<string>();
 
-    if (!slots) {
-      return;
-    }
+    await Promise.all(
+      Object.entries(slots).map(async ([slotIndex, itemData]) => {
+        if (!itemData || loopedItems.has(itemData._id)) return;
 
-    for (const [slotIndex, itemData] of Object.entries(slots)) {
-      if (loopedItems.has(itemData?._id)) {
-        continue;
-      }
+        loopedItems.add(itemData._id);
 
-      loopedItems.add(itemData?._id);
-
-      const item = itemData as IItem;
-
-      if (item) {
-        await fn(item, Number(slotIndex));
-      }
-    }
+        const item = itemData as IItem;
+        if (item) {
+          await fn(item, Number(slotIndex));
+        }
+      })
+    );
   }
 
   @TrackNewRelicTransaction()
   public async generateItemContainerIfNotPresentOnItem(item: IItem): Promise<IItemContainer | undefined> {
+    if (!item.isItemContainer) return undefined;
+
     const hasItemContainer = await ItemContainer.exists({ parentItem: item._id });
+    if (hasItemContainer) return undefined;
 
-    if (item.isItemContainer && !hasItemContainer) {
-      let slotQty: number = 20;
+    const slotQty = item.generateContainerSlots ?? 20;
+    const slots = Array.from({ length: slotQty }, (_, i) => ({ [i]: null })).reduce(
+      (acc, slot) => ({ ...acc, ...slot }),
+      {}
+    );
 
-      if (item.generateContainerSlots) {
-        slotQty = item.generateContainerSlots;
-      }
+    const newContainer = (await ItemContainer.create({
+      name: item.name,
+      parentItem: item._id,
+      slotQty,
+      slots,
+      owner: item.owner,
+      isOwnerRestricted: !!item.owner,
+    })) as unknown as IItemContainer;
 
-      // generate slots object
-      const slots = {};
+    await Item.updateOne({ _id: item._id }, { $set: { itemContainer: newContainer._id } });
 
-      for (let i = 0; i < slotQty; i++) {
-        slots[Number(i)] = null;
-      }
-
-      const newContainer = (await ItemContainer.create({
-        name: item.name,
-        parentItem: item._id,
-        slotQty,
-        slots,
-        owner: item.owner,
-        isOwnerRestricted: !!item.owner,
-      })) as unknown as IItemContainer;
-
-      // Update the item to include the new container reference
-      await Item.updateOne({ _id: item._id }, { $set: { itemContainer: newContainer._id } });
-
-      return newContainer;
-    }
+    return newContainer;
   }
 }

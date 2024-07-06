@@ -13,33 +13,26 @@ export class ItemOwnership {
   @TrackNewRelicTransaction()
   public async addItemOwnership(item: IItem, character: ICharacter): Promise<boolean> {
     try {
-      // if our item owner is our character, just skip. Nothing to do here.
       if (item.owner?.toString() === character._id.toString()) {
         return false;
       }
 
-      await Item.updateOne({ _id: item._id }, { owner: character._id });
+      const updatePromises: any[] = [Item.updateOne({ _id: item._id }, { owner: character._id })];
 
       if (item?.itemContainer) {
-        // adds ownership for the container itself
-        await ItemContainer.updateOne(
-          {
-            _id: item.itemContainer,
-          },
-          { owner: character._id }
-        );
-
-        // and for all nested items
-
-        await this.addOwnershipToAllItemsInContainer(
-          item.itemContainer as unknown as string,
-          character._id as unknown as string
+        updatePromises.push(
+          ItemContainer.updateOne({ _id: item.itemContainer }, { owner: character._id }),
+          this.addOwnershipToAllItemsInContainer(
+            item.itemContainer as unknown as string,
+            character._id as unknown as string
+          )
         );
       }
 
+      await Promise.all(updatePromises);
       return true;
     } catch (error) {
-      console.error(error);
+      console.error("Error in addItemOwnership:", error);
       return false;
     }
   }
@@ -47,35 +40,24 @@ export class ItemOwnership {
   @TrackNewRelicTransaction()
   public async removeItemOwnership(item: IItem): Promise<boolean> {
     try {
-      await Item.updateOne(
-        {
-          _id: item._id,
-        },
-        { $unset: { owner: "" } }
-      );
+      const updatePromises: any[] = [Item.updateOne({ _id: item._id }, { $unset: { owner: "" } })];
 
       if (item?.itemContainer) {
-        const itemContainer = await ItemContainer.findById(item.itemContainer);
-
+        const itemContainer = await ItemContainer.findById(item.itemContainer).lean<IItemContainer>();
         if (!itemContainer) {
           throw new Error("ItemOwnership: Item container not found");
         }
 
-        // this remover ownership from the container itself
-        await ItemContainer.updateOne(
-          {
-            _id: item.itemContainer,
-          },
-          { $unset: { owner: "" } }
+        updatePromises.push(
+          ItemContainer.updateOne({ _id: item.itemContainer }, { $unset: { owner: "" } }),
+          this.removeOwnershipFromAllItemsInContainer(itemContainer as unknown as IItemContainer)
         );
-
-        // this removes from all nested items
-        await this.removeOwnershipFromAllItemsInContainer(itemContainer as unknown as IItemContainer);
       }
 
+      await Promise.all(updatePromises);
       return true;
     } catch (error) {
-      console.error(error);
+      console.error("Error in removeItemOwnership:", error);
       return false;
     }
   }
@@ -89,11 +71,9 @@ export class ItemOwnership {
     if (visited.has(itemContainerId)) {
       return;
     }
-
     visited.add(itemContainerId);
 
-    const itemContainer = await ItemContainer.findById(itemContainerId);
-
+    const itemContainer = await ItemContainer.findById(itemContainerId).lean<IItemContainer>();
     if (!itemContainer) {
       throw new Error("ItemOwnership: Item container not found");
     }
@@ -104,15 +84,11 @@ export class ItemOwnership {
       if (processedItems.has(item._id.toString())) {
         return;
       }
-
       processedItems.add(item._id.toString());
 
       const success = await this.addItemOwnership(item, { _id: owner } as unknown as ICharacter);
-
       if (success) {
-        await this.characterItemSlot.updateItemOnSlot(slotIndex, itemContainer as any, {
-          owner,
-        });
+        await this.characterItemSlot.updateItemOnSlot(slotIndex, itemContainer as any, { owner });
       }
     });
   }
@@ -123,11 +99,9 @@ export class ItemOwnership {
     visited = new Set<string>()
   ): Promise<void> {
     const containerId = itemContainer._id.toString();
-
     if (visited.has(containerId)) {
       return;
     }
-
     visited.add(containerId);
 
     const processedItems = new Set<string>();
@@ -136,12 +110,9 @@ export class ItemOwnership {
       if (processedItems.has(item._id.toString())) {
         return;
       }
-
       processedItems.add(item._id.toString());
 
-      await this.characterItemSlot.updateItemOnSlot(slotIndex, itemContainer, {
-        owner: undefined,
-      });
+      await this.characterItemSlot.updateItemOnSlot(slotIndex, itemContainer, { owner: undefined });
     });
   }
 }
