@@ -31,6 +31,7 @@ export class ReadCharacterUseCase {
   }
 
   private async fetchCharacter(id: string, selectFields: string[]): Promise<ICharacter | null> {
+    // eslint-disable-next-line mongoose-lean/require-lean
     const modelQuery = Character.findOne({ _id: id });
     return selectFields.length > 0
       ? ((await modelQuery.select(selectFields.join(" ")).lean()) as ICharacter)

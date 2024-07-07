@@ -15,6 +15,7 @@ export class LoginCharacterUseCase {
       );
     }
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const allUsersOnline = await Character.find({ isOnline: true }).select("owner").exec();
 
     const result = allUsersOnline.map((obj) => ({ _id: obj._id, owner: obj.owner.toString() }));

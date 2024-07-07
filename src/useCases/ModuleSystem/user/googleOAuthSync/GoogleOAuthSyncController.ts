@@ -30,6 +30,7 @@ export class GoogleOAuthSyncController implements interfaces.Controller {
     const googleUserInfo: IGoogleOAuthUserInfoResponse = await this.getGoogleUserUseCase.getGoogleUser(String(code));
 
     // Check if this user was registered using a Basic auth flow (instead of Google OAuth)
+    // eslint-disable-next-line mongoose-lean/require-lean
     const user = await User.findOne({ email: googleUserInfo.email });
 
     if (user && user.authFlow === UserAuthFlow.Basic) {
@@ -78,7 +79,7 @@ export class GoogleOAuthSyncController implements interfaces.Controller {
     }
 
     // Check if this user was registered using a Basic auth flow (instead of Google OAuth)
-    const user = await User.findOne({ email: googleUserInfo.email });
+    const user = await User.findOne({ email: googleUserInfo.email }).lean();
 
     if (user && user.authFlow === UserAuthFlow.Basic) {
       // on this case it's google only oauth method...

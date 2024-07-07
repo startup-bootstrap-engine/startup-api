@@ -1,3 +1,4 @@
+/* eslint-disable mongoose-lean/require-lean */
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { CharacterPvPKillLog } from "@entities/ModuleCharacter/CharacterPvPKillLogModel";
 import { Equipment, IEquipment } from "@entities/ModuleCharacter/EquipmentModel";

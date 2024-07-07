@@ -16,6 +16,7 @@ export class UnsubscribeUserUseCase {
     }
 
     user.unsubscribed = true;
+    // eslint-disable-next-line mongoose-lean/require-lean
     await user.save();
   }
 }

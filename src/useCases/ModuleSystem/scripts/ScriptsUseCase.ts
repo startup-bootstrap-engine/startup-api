@@ -180,6 +180,7 @@ export class ScriptsUseCase {
   }
 
   public async farmlandDepotFix(): Promise<void> {
+    // eslint-disable-next-line mongoose-lean/require-lean
     const depots = await Depot.find({
       key: "trader-farm-7",
     });

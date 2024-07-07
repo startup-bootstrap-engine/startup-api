@@ -15,6 +15,7 @@ export class CreateCharacterUseCase {
 
   public async create(newCharacter: CreateCharacterDTO, ownerId: string): Promise<ICharacter> {
     // assign character to user
+    // eslint-disable-next-line mongoose-lean/require-lean
     const user = await User.findOne({ _id: ownerId });
     if (!user) {
       throw new BadRequestError("Character creation error: User not found!");
@@ -45,6 +46,7 @@ export class CreateCharacterUseCase {
     );
 
     user.characters?.push(createdCharacter._id);
+    // eslint-disable-next-line mongoose-lean/require-lean
     await user.save();
 
     return createdCharacter;

@@ -3,6 +3,7 @@ import { BadRequestError } from "@providers/errors/BadRequestError";
 import { HttpStatus } from "@rpg-engine/shared";
 import { Response } from "express";
 import rateLimit from "express-rate-limit";
+// eslint-disable-next-line no-unused-vars
 import { controller, httpPost, interfaces, request, requestBody, response } from "inversify-express-utils";
 import { CreateReferralRewardDTO } from "./update/CreateReferralRewardDTO";
 import { CreateReferralRewardUseCase } from "./update/CreateReferralRewardUseCase";

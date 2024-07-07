@@ -15,7 +15,9 @@ export class RejectFriendRequestsController implements interfaces.Controller {
     // receiverId is the one who received the request aka me
     const { senderId, receiverId } = body;
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const character = await Character.findById(senderId);
+    // eslint-disable-next-line mongoose-lean/require-lean
     const myCharacter = await Character.findById(receiverId);
 
     if (!myCharacter || !character) {
@@ -27,8 +29,10 @@ export class RejectFriendRequestsController implements interfaces.Controller {
       myCharacter.friendRequests?.splice(friendRequestIndex, 1);
     }
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     await myCharacter.save();
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const friendRequests = await Character.find({ _id: { $in: myCharacter.friendRequests } });
     return res.status(200).send(friendRequests);
   }

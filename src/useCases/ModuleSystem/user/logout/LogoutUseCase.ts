@@ -13,6 +13,7 @@ export class LogoutUseCase {
     // @ts-ignore
     user.refreshTokens = user.refreshTokens?.filter((item) => item.token !== refreshToken);
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     await user.save();
 
     await this.analyticsHelper.track("UserLogout", user);

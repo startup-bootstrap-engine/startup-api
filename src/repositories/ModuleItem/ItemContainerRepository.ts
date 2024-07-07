@@ -32,10 +32,12 @@ export class ItemContainerRepository extends CRUD {
     newItemContainer.slots = slots;
     // @ts-ignore
     newItemContainer.parentItem.id;
+    // eslint-disable-next-line mongoose-lean/require-lean
     await newItemContainer.save();
 
     parentItem.isItemContainer = true;
     parentItem.itemContainer = newItemContainer._id;
+    // eslint-disable-next-line mongoose-lean/require-lean
     await parentItem.save();
 
     return newItemContainer;

@@ -50,6 +50,7 @@ export class CharacterRepository extends CRUD {
   @TrackNewRelicTransaction()
   public async createCharacter(newCharacter: CreateCharacterDTO, ownerId: string): Promise<ICharacter> {
     const skills = new Skill({ ownerType: "Character" });
+    // eslint-disable-next-line mongoose-lean/require-lean
     await skills.save();
 
     let extraProps: Partial<ICharacter> = {};
@@ -92,14 +93,17 @@ export class CharacterRepository extends CRUD {
     equipment.boot = boot;
     equipment.neck = neck;
     equipment.rightHand = rightHand;
+    // eslint-disable-next-line mongoose-lean/require-lean
     equipment = await equipment.save();
 
     createdCharacter.equipment = equipment._id;
 
     skills.owner = createdCharacter._id;
+    // eslint-disable-next-line mongoose-lean/require-lean
     await skills.save();
 
     equipment.owner = createdCharacter._id;
+    // eslint-disable-next-line mongoose-lean/require-lean
     await equipment.save();
 
     await this.generateInventoryItems(createdCharacter); // items to be added on character's bag!
@@ -109,6 +113,7 @@ export class CharacterRepository extends CRUD {
     createdCharacter.weight = weight;
     createdCharacter.maxWeight = maxWeight;
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     await createdCharacter.save();
 
     await this.spellLearn.learnLatestSkillLevelSpells(createdCharacter._id, false);
@@ -142,6 +147,7 @@ export class CharacterRepository extends CRUD {
       isEquipped: true,
       ...extraProps,
     });
+    // eslint-disable-next-line mongoose-lean/require-lean
     await item.save();
     return item;
   }

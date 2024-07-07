@@ -1,5 +1,5 @@
 import { CraftingResourcesBlueprint, SwordsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
-import { CraftingSkill, MagicsBlueprint } from "@rpg-engine/shared";
+import { CraftingSkill } from "@rpg-engine/shared";
 import { IUseWithCraftingRecipe } from "../../../useWithTypes";
 
 export const recipeStormcallerScimitar: IUseWithCraftingRecipe = {

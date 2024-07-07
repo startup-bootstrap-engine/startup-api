@@ -29,6 +29,7 @@ export class AppleOAuthUseCase {
       throw new BadRequestError("Apple SignIn: failed to validate user");
     }
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const dbUser = await User.findOne({
       authFlow: UserAuthFlow.AppleOAuth,
       email: validationPayload.email,

@@ -109,6 +109,7 @@ export class PremiumAccountUseCase {
         owner: characterId,
       });
 
+      // eslint-disable-next-line mongoose-lean/require-lean
       await item.save();
 
       const result = await this.characterItemContainer.addItemToContainer(item, character, inventoryContainerId, {

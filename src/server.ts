@@ -32,6 +32,7 @@ if (!appEnv.general.IS_UNIT_TEST) {
   require("newrelic");
 }
 
+// eslint-disable-next-line no-unused-vars
 const server = app.listen(port, async () => {
   const startTime = dayjs();
 

@@ -26,6 +26,7 @@ export class GetGoogleUserController implements interfaces.Controller {
     const googleUserInfo: IGoogleOAuthUserInfoResponse = await this.getGoogleUserUseCase.getGoogleUser(String(code));
 
     // Check if this user was registered using a Basic auth flow (instead of Google OAuth)
+    // eslint-disable-next-line mongoose-lean/require-lean
     const user = await User.findOne({ email: googleUserInfo.email });
 
     if (user && user.authFlow === UserAuthFlow.Basic) {

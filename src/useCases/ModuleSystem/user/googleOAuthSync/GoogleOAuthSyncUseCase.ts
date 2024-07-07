@@ -15,6 +15,7 @@ export class GoogleOAuthSyncUseCase {
       throw new InternalServerError(TS.translate("auth", "oauthGoogleEmailNotProvided"));
     }
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const user = await User.findOne({ email: googleUserInfo.email });
 
     if (!user) {

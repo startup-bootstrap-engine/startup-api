@@ -15,6 +15,7 @@ export class ForgotPasswordUseCase {
 
   public async forgotPassword(email: string): Promise<boolean> {
     // try to get user with mentioned e-mail
+    // eslint-disable-next-line mongoose-lean/require-lean
     const user = await User.findOne({ email });
 
     if (!user) {

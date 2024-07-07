@@ -32,6 +32,7 @@ export class ChangePasswordUseCase {
     if (currentPasswordHash === user.password) {
       // if currentPassword is correct, just change our current password to the new one provided.
       user.password = newPassword;
+      // eslint-disable-next-line mongoose-lean/require-lean
       await user.save();
 
       // Send confirmation to user
