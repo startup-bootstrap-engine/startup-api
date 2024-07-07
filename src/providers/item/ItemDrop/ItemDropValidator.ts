@@ -1,4 +1,3 @@
-/* eslint-disable mongoose-lean/require-lean */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
@@ -22,6 +21,11 @@ export class ItemDropValidator {
 
     if (!item) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, this item is not accessible.");
+      return false;
+    }
+
+    if (item.owner?.toString() !== character._id.toString()) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you don't own this item.");
       return false;
     }
 
@@ -52,7 +56,6 @@ export class ItemDropValidator {
     }
 
     const inventoryContainer = await ItemContainer.findById(inventory.itemContainer);
-
     if (!inventoryContainer) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, inventory container not found.");
       return false;
