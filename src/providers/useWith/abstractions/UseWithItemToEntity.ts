@@ -164,6 +164,7 @@ export class UseWithItemToEntity {
           stackQty: isArray(reward.qty) ? random(reward.qty[0], reward.qty[1]) : reward.qty,
           owner: character._id,
         });
+        // eslint-disable-next-line mongoose-lean/require-lean
         await item.save();
 
         const inventory = await this.characterInventory.getInventory(character);

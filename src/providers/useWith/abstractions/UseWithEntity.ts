@@ -72,10 +72,18 @@ export class UseWithEntity {
   @TrackNewRelicTransaction()
   public async execute(payload: IUseWithEntity, character: ICharacter): Promise<void> {
     try {
-      const item = payload.itemId ? ((await Item.findById(payload.itemId)) as unknown as IItem) : null;
+      const item = payload.itemId
+        ? ((await Item.findById(payload.itemId).lean({
+            virtuals: true,
+            defaults: true,
+          })) as unknown as IItem)
+        : null;
 
       if (payload.entityType === EntityType.Item && item && item.isRefillable) {
-        const targetItem = await Item.findById(payload.entityId);
+        const targetItem = await Item.findById(payload.entityId).lean({
+          virtuals: true,
+          defaults: true,
+        });
 
         if (!targetItem) {
           this.socketMessaging.sendErrorMessageToCharacter(character, "Target item is not found");
@@ -126,7 +134,10 @@ export class UseWithEntity {
       const isSelfTarget = blueprint.hasSelfAutoTarget;
 
       if (isSelfTarget) {
-        character = (await Character.findById(character._id)) as unknown as ICharacter;
+        character = (await Character.findById(character._id).lean({
+          virtuals: true,
+          defaults: true,
+        })) as unknown as ICharacter;
 
         await this.executeEffect(character, character, item!);
 
@@ -160,8 +171,6 @@ export class UseWithEntity {
 
     // Operations that can be parallelized because they are independent
     await Promise.all([
-      // Save the state of the target
-      target.save(),
       // Handle inventory count and character weight
       this.handleItemCountAndWeight(caster, item),
 
@@ -275,6 +284,7 @@ export class UseWithEntity {
 
       if (target.type in classMapping) {
         const Model = classMapping[target.type];
+        // eslint-disable-next-line mongoose-lean/require-lean
         const newTarget = await Model.findById(target.id);
         if (newTarget) {
           nTarget = newTarget;

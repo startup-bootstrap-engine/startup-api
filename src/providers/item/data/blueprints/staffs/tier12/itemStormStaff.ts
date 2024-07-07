@@ -2,9 +2,6 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import { IEquippableTwoHandedStaffTier12WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   AnimationEffectKeys,
-  BasicAttribute,
-  CharacterBuffDurationType,
-  CharacterBuffType,
   EntityAttackType,
   ItemSlotType,
   ItemSubType,

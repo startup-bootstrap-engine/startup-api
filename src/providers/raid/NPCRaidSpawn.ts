@@ -9,6 +9,7 @@ export class NPCRaidSpawn {
 
   @TrackNewRelicTransaction()
   public async fetchDeadNPCsFromActiveRaids(): Promise<INPC[]> {
+    // eslint-disable-next-line mongoose-lean/require-lean
     const deadRaidNPCs = await NPC.find({
       health: 0,
       raidKey: { $exists: true },

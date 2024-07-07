@@ -1,3 +1,4 @@
+/* eslint-disable mongoose-lean/require-lean */
 import { ChatLog } from "@entities/ModuleSystem/ChatLogModel";
 import { TradeChatLog } from "@entities/ModuleSystem/TradeChatLogModal";
 import { NewRelic } from "@providers/analytics/NewRelic";

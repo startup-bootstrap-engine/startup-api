@@ -29,6 +29,7 @@ export class MarketplaceItemBuy {
       return false;
     }
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const marketplaceItem = await MarketplaceItem.findById(marketPlaceItemId).populate("item").exec();
     if (!marketplaceItem || marketplaceItem.isBeingBought) {
       this.socketMessaging.sendErrorMessageToCharacter(

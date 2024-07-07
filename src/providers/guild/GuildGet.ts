@@ -13,6 +13,7 @@ export class GuildGet {
     try {
       // check if guildId exists and return guild
       if (guildId) {
+        // eslint-disable-next-line mongoose-lean/require-lean
         const guild = (await Guild.findOne({ _id: guildId })) as IGuild;
         const guildInfo = await this.guildCommon.convertToGuildInfo(guild);
         this.sendGuild(guildInfo, character);

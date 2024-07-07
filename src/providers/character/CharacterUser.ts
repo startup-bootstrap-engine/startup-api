@@ -6,6 +6,7 @@ import { provide } from "inversify-binding-decorators";
 export class CharacterUser {
   public async findUserByCharacter(character: ICharacter): Promise<IUser | undefined> {
     try {
+      // eslint-disable-next-line mongoose-lean/require-lean
       const user = await User.findOne({ _id: character.owner });
 
       if (!user) {

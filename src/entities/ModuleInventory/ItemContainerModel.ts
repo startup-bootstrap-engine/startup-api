@@ -184,6 +184,7 @@ itemContainerSchema.post("remove", async function (this: IItemContainer) {
 
   if (this.itemIds) {
     for (const itemId of this.itemIds) {
+      // eslint-disable-next-line mongoose-lean/require-lean
       const item = await Item.findById(itemId);
 
       if (item) {

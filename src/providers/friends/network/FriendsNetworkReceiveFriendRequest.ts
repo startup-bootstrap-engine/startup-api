@@ -1,3 +1,4 @@
+/* eslint-disable mongoose-lean/require-lean */
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { SocketAuth } from "@providers/sockets/SocketAuth";

@@ -1,5 +1,5 @@
 import { IItem } from "@entities/ModuleInventory/ItemModel";
-import { ItemSubType, ItemType, MapLayers } from "@rpg-engine/shared";
+import { ItemSubType, ItemType } from "@rpg-engine/shared";
 import dayjs from "dayjs";
 
 export const itemNPCBody: Partial<IItem> = {

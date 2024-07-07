@@ -22,6 +22,7 @@ export class MapControlTime {
 
   @TrackNewRelicTransaction()
   public async controlTime(time: string, periodOfDay: PeriodOfDay): Promise<IControlTime> {
+    // eslint-disable-next-line mongoose-lean/require-lean
     const onlineCharacters = await Character.find({ isOnline: true });
 
     const dataOfWeather: IControlTime = {

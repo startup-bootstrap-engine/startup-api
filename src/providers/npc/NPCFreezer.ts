@@ -44,6 +44,7 @@ export class NPCFreezer {
 
   @TrackNewRelicTransaction()
   public async freezeNPCsWithoutCharactersAround(): Promise<void> {
+    // eslint-disable-next-line mongoose-lean/require-lean
     const activeNPCs = await NPC.find({
       isBehaviorEnabled: true,
     });
@@ -124,6 +125,7 @@ export class NPCFreezer {
     let npcToFreeze: INPC | null = null;
 
     for (const npc of npcs) {
+      // eslint-disable-next-line mongoose-lean/require-lean
       const targetCharacter = characters.find((character) => String(character._id) === String(npc.targetCharacter));
 
       if (!targetCharacter) continue;

@@ -108,6 +108,7 @@ skillsSchema.index(
 );
 
 skillsSchema.post("save", async function (this: ISkill) {
+  // eslint-disable-next-line mongoose-lean/require-lean
   const npc = (await NPC.findById(this.owner)) as INPC;
 
   if (!npc || npc?.experience) {

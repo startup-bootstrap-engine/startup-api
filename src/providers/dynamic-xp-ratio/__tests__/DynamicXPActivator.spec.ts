@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Character } from "@entities/ModuleCharacter/CharacterModel";
 import {
   DYNAMIC_XP_RATIO_BASE_RATIO,

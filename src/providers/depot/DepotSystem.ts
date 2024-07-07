@@ -12,6 +12,7 @@ export class DepotSystem {
    */
   @TrackNewRelicTransaction()
   public async npcBasicValidation(npcId: string): Promise<INPC> {
+    // eslint-disable-next-line mongoose-lean/require-lean
     const npc = await NPC.findOne({
       _id: npcId,
     });

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { container, unitTestHelper } from "@providers/inversify/container";

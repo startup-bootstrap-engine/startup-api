@@ -1,3 +1,4 @@
+/* eslint-disable mongoose-lean/require-lean */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Guild } from "@entities/ModuleSystem/GuildModel";
 import { GuildSkills } from "@entities/ModuleSystem/GuildSkillsModel";

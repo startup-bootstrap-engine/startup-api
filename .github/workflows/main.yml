@@ -33,11 +33,8 @@ jobs:
         run: yarn env:switch:dev
       - name: Install dependencies
         run: yarn install
-        #! Linting temporarily disabled
-      # - name: Run typescript and linter
-      #   run: yarn tsc && yarn lint
-      - name: Run typescript
-        run: yarn tsc
+      - name: Run typescript and linter
+        run: yarn tsc && yarn lint
       - name: Run formatter
         run: yarn format
       - name: Run update shared-deps

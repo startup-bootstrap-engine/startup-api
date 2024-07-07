@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";

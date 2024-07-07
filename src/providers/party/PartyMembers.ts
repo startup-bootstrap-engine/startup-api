@@ -92,6 +92,7 @@ export class PartyMembers {
   }
 
   private async handleLeadershipTransfer(party: ICharacterParty, character: ICharacter): Promise<string> {
+    // eslint-disable-next-line mongoose-lean/require-lean
     const memberToTransferTo = await Character.findById(party.members[0]._id);
     if (memberToTransferTo) {
       await this.transferLeadership(party._id, memberToTransferTo, character);

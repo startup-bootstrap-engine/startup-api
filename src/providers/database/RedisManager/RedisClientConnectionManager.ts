@@ -1,3 +1,4 @@
+/* eslint-disable mongoose-lean/require-lean */
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { provide } from "inversify-binding-decorators";

@@ -39,6 +39,7 @@ export class CharacterBaseSpeed {
       let baseSpeedBuffValue = 0; // Default value
 
       if (buffs) {
+        // eslint-disable-next-line mongoose-lean/require-lean
         const baseSpeedBuff = buffs.find((buff) => buff.trait === CharacterAttributes.Speed);
         baseSpeedBuffValue = baseSpeedBuff?.absoluteChange || 0;
       }

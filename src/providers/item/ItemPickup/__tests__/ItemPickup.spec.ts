@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Equipment } from "@entities/ModuleCharacter/EquipmentModel";

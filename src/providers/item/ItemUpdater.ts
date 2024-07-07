@@ -21,6 +21,7 @@ export class ItemUpdater {
       // first, update the item itself
       await Item.updateOne({ _id: item._id }, updateQuery);
 
+      // eslint-disable-next-line mongoose-lean/require-lean
       const itemContainer = (await ItemContainer.findById(item.itemContainer)) as unknown as IItemContainer;
 
       const processedItems = new Set<string>();

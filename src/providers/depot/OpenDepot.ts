@@ -1,3 +1,4 @@
+/* eslint-disable mongoose-lean/require-lean */
 import { Depot } from "@entities/ModuleDepot/DepotModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { NPC } from "@entities/ModuleNPC/NPCModel";

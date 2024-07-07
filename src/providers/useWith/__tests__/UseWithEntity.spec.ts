@@ -32,6 +32,7 @@ describe("UseWithEntity.ts", () => {
   let characterSkills: ISkill;
   let targetCharacterSkills: ISkill;
   let item1: IItem;
+  // eslint-disable-next-line no-unused-vars
   let healRune: IItem;
   let inventory: IItem;
   let inventoryContainer: IItemContainer;
@@ -694,6 +695,10 @@ describe("UseWithEntity.ts", () => {
   });
 
   describe("Side effects & events", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it("should deal extra damage depending on magic level", async () => {
       characterSkills.magic.level = 12;
       await characterSkills.save();

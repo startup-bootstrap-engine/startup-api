@@ -1,10 +1,11 @@
+/* eslint-disable mongoose-lean/require-lean */
+import { Character, ICharacter as DBICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
-import { Character, ICharacter as DBICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { FriendsSocketEvents, IFriendsNetworkRemoveFriendPayload, ICharacter } from "@rpg-engine/shared";
+import { FriendsSocketEvents, ICharacter, IFriendsNetworkRemoveFriendPayload } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
 @provide(FriendsNetworkRemoveFriend)

@@ -343,6 +343,7 @@ export class PlantGrowth {
   private async warnOwnersAboutWateringTime(plantsNeedingUpdate: IItem[]): Promise<void> {
     const ownerIds = plantsNeedingUpdate.map((plant) => plant.owner);
     const uniqueOwnerIds = [...new Set(ownerIds)];
+    // eslint-disable-next-line mongoose-lean/require-lean
     const owners: ICharacter[] = await Character.find({
       _id: { $in: uniqueOwnerIds },
     });

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";

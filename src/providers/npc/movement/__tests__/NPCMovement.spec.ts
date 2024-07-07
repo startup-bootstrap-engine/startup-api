@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";

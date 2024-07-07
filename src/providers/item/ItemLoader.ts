@@ -59,6 +59,7 @@ export class ItemLoader {
       return;
     }
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const propertyData = properties.find((prop) => prop.name === property);
 
     if (!propertyData) {

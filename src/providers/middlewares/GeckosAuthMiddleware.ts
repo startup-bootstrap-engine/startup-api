@@ -24,6 +24,7 @@ export const GeckosAuthMiddleware = async (
           reject(HttpStatus.Unauthorized);
         }
 
+        // eslint-disable-next-line mongoose-lean/require-lean
         const dbUser = (await User.findOne({ email: jwtPayload.email })) as IUser;
 
         if (!dbUser) {

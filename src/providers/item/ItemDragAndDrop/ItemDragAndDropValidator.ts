@@ -1,3 +1,4 @@
+/* eslint-disable mongoose-lean/require-lean */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";

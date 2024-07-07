@@ -43,6 +43,7 @@ export class CharacterSkull {
   @TrackNewRelicTransaction()
   public async updateWhiteSkull(characterId: string, targetId: string): Promise<void> {
     try {
+      // eslint-disable-next-line mongoose-lean/require-lean
       const character = await Character.findOne({ _id: characterId });
       if (!character) {
         return;
@@ -147,6 +148,7 @@ export class CharacterSkull {
 
   @TrackNewRelicTransaction()
   public async updateSkullAfterKill(characterId: string): Promise<void> {
+    // eslint-disable-next-line mongoose-lean/require-lean
     const character = await Character.findById(characterId);
     if (!character || !character.skullExpiredAt) return;
 

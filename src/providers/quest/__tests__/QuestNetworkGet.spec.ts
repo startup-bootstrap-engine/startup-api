@@ -15,7 +15,7 @@ describe("QuestNetworkGet.ts", () => {
     testInteractionQuest: IQuest;
   const objectivesCount = 2;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     questNetworkGet = container.get<QuestNetworkGet>(QuestNetworkGet);
   });
 

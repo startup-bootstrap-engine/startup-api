@@ -84,6 +84,7 @@ function checkIfQuestBlueprintsExists(keys: INPCQuestKeys[], mapName: string): v
 
 async function getNPCsIds(keys: INPCQuestKeys[]): Promise<void> {
   for (const i in keys) {
+    // eslint-disable-next-line mongoose-lean/require-lean
     const npcData = (await NPC.findOne({ key: keys[i].npcKey })) as INPC;
     if (!npcData) {
       throw new Error(

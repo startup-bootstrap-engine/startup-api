@@ -68,6 +68,7 @@ export class CharacterBan {
     character.isBanned = true;
     character.isOnline = false;
     character.banRemovalDate = dayjs(new Date()).add(character.penalty, "day").toDate();
+    // eslint-disable-next-line mongoose-lean/require-lean
     await character.save();
 
     this.socketMessaging.sendEventToUser(character.channelId!, CharacterSocketEvents.CharacterForceDisconnect, {

@@ -1,3 +1,4 @@
+/* eslint-disable mongoose-lean/require-lean */
 /* eslint-disable array-callback-return */
 import { CharacterBuff, ICharacterBuff } from "@entities/ModuleCharacter/CharacterBuffModel";
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";

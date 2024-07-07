@@ -5,7 +5,6 @@ import {
   CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
-  CombatSkill,
   EntityAttackType,
   ItemSlotType,
   ItemSubType,

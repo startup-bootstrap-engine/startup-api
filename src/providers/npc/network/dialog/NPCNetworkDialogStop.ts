@@ -23,6 +23,7 @@ export class NPCNetworkDialogStop {
         try {
           const { npcId } = data;
 
+          // eslint-disable-next-line mongoose-lean/require-lean
           const npc = await NPC.findOne({
             _id: npcId,
           });
@@ -46,6 +47,7 @@ export class NPCNetworkDialogStop {
               npc.currentMovementType = npc.originalMovementType;
               npc.targetCharacter = undefined;
               npc.targetType = NPCTargetType.Default;
+              // eslint-disable-next-line mongoose-lean/require-lean
               await npc.save();
             } else {
               throw new Error("Failed to stop NPC dialog, character is out of range.");

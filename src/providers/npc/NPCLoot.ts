@@ -149,6 +149,7 @@ export class NPCLoot {
   }
 
   private async fetchItemContainer(npcBody: IItem): Promise<IItemContainer> {
+    // eslint-disable-next-line mongoose-lean/require-lean
     const itemContainer = await ItemContainer.findById(npcBody.itemContainer);
     if (!itemContainer) {
       throw new Error(`Error fetching itemContainer for Item with key ${npcBody.key}`);

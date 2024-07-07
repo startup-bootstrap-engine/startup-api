@@ -12,7 +12,6 @@ import {
   RangeTypes,
   SpellCastingType,
   SpellsBlueprint,
-  UserAccountTypes,
 } from "@rpg-engine/shared";
 import { SpellLifeSteal } from "../../logic/other/SpellLifeSteal/SpellLifeSteal";
 

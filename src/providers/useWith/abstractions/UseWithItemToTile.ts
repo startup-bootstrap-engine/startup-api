@@ -308,6 +308,7 @@ export class UseWithItemToTile {
     inventoryContainerId: string
   ): Promise<boolean> {
     const item = new Item({ ...itemBlueprint, stackQty: qty, owner: character._id });
+    // eslint-disable-next-line mongoose-lean/require-lean
     await item.save(); // Consider batching these operations if possible, or using an upsert operation to reduce the number of database calls
 
     return this.characterItemContainer.addItemToContainer(item, character, inventoryContainerId);
@@ -315,6 +316,7 @@ export class UseWithItemToTile {
 
   private async refreshInventory(character: ICharacter): Promise<void> {
     const inventory = await this.characterInventory.getInventory(character);
+    // eslint-disable-next-line mongoose-lean/require-lean
     const inventoryContainer = (await ItemContainer.findById(inventory?.itemContainer)) as unknown as IItemContainer;
 
     const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {

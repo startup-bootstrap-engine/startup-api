@@ -80,6 +80,7 @@ export class ReferralBonusAwarder {
       owner: characterId,
     });
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     await newItem.save();
     return newItem;
   }

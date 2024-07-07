@@ -18,6 +18,7 @@ export class GuildExperience {
 
   public async updateGuildExperience(character: ICharacter, exp: number): Promise<void> {
     try {
+      // eslint-disable-next-line mongoose-lean/require-lean
       const guild = await Guild.findOne({ $or: [{ guildLeader: character._id }, { members: character._id }] });
 
       if (!guild) return;

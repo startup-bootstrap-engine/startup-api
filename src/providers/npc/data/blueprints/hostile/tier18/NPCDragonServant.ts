@@ -14,7 +14,6 @@ import {
   OthersBlueprint,
   SeedsBlueprint,
   ShieldsBlueprint,
-  StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";

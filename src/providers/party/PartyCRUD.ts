@@ -147,6 +147,7 @@ export class PartyCRUD {
 
     const parties = Object.values(allParties) as ICharacterParty[];
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const party = parties.find(
       (party) =>
         party.leader._id.toString() === characterId.toString() ||

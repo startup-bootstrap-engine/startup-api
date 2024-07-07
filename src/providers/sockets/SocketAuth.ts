@@ -1,3 +1,4 @@
+/* eslint-disable mongoose-lean/require-lean */
 /* eslint-disable require-await */
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IUser } from "@entities/ModuleSystem/UserModel";

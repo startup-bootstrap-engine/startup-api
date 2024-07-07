@@ -98,6 +98,7 @@ export class ItemView {
 
     for (let i = 0; i < itemsNearby.length; i++) {
       const item = itemsNearby[i];
+      // eslint-disable-next-line mongoose-lean/require-lean
       const itemOnCharView = itemsOnCharView?.find((el) => el.id === item.id);
 
       const shouldSkip =

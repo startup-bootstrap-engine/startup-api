@@ -63,6 +63,7 @@ export class BattleAttackValidator {
     character: ICharacter,
     target: ICharacter | INPC
   ): Promise<Partial<IRangedAttackParams> | undefined> {
+    // eslint-disable-next-line mongoose-lean/require-lean
     const equipment = (await Equipment.findById(character.equipment).cacheQuery({
       cacheKey: `${character._id}-equipment`,
     })) as IEquipment;

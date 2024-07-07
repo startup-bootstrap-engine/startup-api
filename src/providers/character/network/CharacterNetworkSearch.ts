@@ -1,11 +1,11 @@
-import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { SocketAuth } from "@providers/sockets/SocketAuth";
-import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { CharacterSocketEvents } from "@rpg-engine/shared";
-import { CharacterValidation } from "../CharacterValidation";
-import { provide } from "inversify-binding-decorators";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { SocketAuth } from "@providers/sockets/SocketAuth";
+import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { SocketChannel } from "@providers/sockets/SocketsTypes";
+import { CharacterSocketEvents } from "@rpg-engine/shared";
+import { provide } from "inversify-binding-decorators";
+import { CharacterValidation } from "../CharacterValidation";
 
 interface ICharacterSearchByNameResponse {
   characters: ICharacter[];
@@ -36,6 +36,7 @@ export class CharacterNetworkSearch {
     }
 
     const regex = new RegExp(name, "i");
+    // eslint-disable-next-line mongoose-lean/require-lean
     const charactersFound = (await Character.find({ name: { $regex: regex } }).limit(5)).reverse();
     if (!charactersFound) {
       return;

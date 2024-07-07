@@ -43,6 +43,7 @@ export class NPCWarn {
       async (npc) => {
         if (!options?.always) {
           // Fetch all elements and proceed with object checks
+          // eslint-disable-next-line mongoose-lean/require-lean
           const npcOnCharView = allNpcsOnCharView?.find((npcOnCharView) => npcOnCharView.id === npc._id);
           if (npcOnCharView) {
             const doesServerNPCMatchesClientNPC = this.objectHelper.doesObjectAttrMatches(npcOnCharView, npc, [

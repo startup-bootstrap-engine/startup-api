@@ -125,10 +125,12 @@ export class UseWithRefill {
         );
 
         targetItem.isTileTinted = true;
+        // eslint-disable-next-line mongoose-lean/require-lean
         await targetItem.save();
 
         await this.simpleTutorial.sendSimpleTutorialActionToCharacter(character, "plant-water");
 
+        // eslint-disable-next-line mongoose-lean/require-lean
         await originItem.save();
 
         await skillIncrease.increaseCraftingSP(character, ItemType.Plant, true);

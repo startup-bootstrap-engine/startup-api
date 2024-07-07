@@ -7,6 +7,7 @@ import { provide } from "inversify-binding-decorators";
 export class NPCQuest {
   @TrackNewRelicTransaction()
   public async hasQuest(npc: INPC): Promise<boolean> {
+    // eslint-disable-next-line mongoose-lean/require-lean
     const npcQuests = await Quest.find({ npcId: npc._id });
     return !!npcQuests.length;
   }

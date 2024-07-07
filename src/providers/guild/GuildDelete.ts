@@ -11,6 +11,7 @@ export class GuildDelete {
 
   public async deleteGuild(guildId: string, character: ICharacter): Promise<void> {
     try {
+      // eslint-disable-next-line mongoose-lean/require-lean
       const guild = await Guild.findById(guildId);
       if (!guild) {
         this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, guild not found.");

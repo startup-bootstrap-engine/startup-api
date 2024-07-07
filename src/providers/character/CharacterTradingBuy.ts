@@ -110,6 +110,7 @@ export class CharacterTradingBuy {
           stackQty: purchasedItem.qty,
           owner: character._id,
         });
+        // eslint-disable-next-line mongoose-lean/require-lean
         await newItem.save();
 
         // add it to the character's inventory
@@ -133,6 +134,7 @@ export class CharacterTradingBuy {
             ...itemBlueprint,
             owner: character._id,
           });
+          // eslint-disable-next-line mongoose-lean/require-lean
           await newItem.save();
 
           // add it to the character's inventory
@@ -200,6 +202,7 @@ export class CharacterTradingBuy {
     // finally, update character's weight
     void this.characterWeight.updateCharacterWeight(character);
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const inventoryContainer = (await ItemContainer.findById(inventory?.itemContainer)) as unknown as IItemContainer;
 
     const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {

@@ -29,6 +29,7 @@ export class WithdrawItem {
 
       const targetContainer = (await ItemContainer.findById(toContainerId).lean()) as unknown as IItemContainer;
 
+      // eslint-disable-next-line mongoose-lean/require-lean
       const item = await Item.findById(itemId);
 
       if (!item) {

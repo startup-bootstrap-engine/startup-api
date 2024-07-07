@@ -1,3 +1,4 @@
+/* eslint-disable mongoose-lean/require-lean */
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { PrivateChatLog } from "@entities/ModuleSystem/PrivateChatLogModal";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
@@ -12,7 +13,6 @@ import {
   IPrivateChatMessageCreatePayload,
   IPrivateChatMessageReadPayload,
   IPrivateChatMessageReadResponse,
-  ICharacter as ISharedCharacter,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { ChatUtils } from "./ChatUtils";

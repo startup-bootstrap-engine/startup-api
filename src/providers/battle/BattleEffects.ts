@@ -27,6 +27,7 @@ export class BattleEffects {
       name: `${target.name}'s blood`,
     });
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     await newGroundBlood.save();
   }
 }

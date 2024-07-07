@@ -55,6 +55,7 @@ export class NPCSpellArea {
       let areaSpell: ISpellAreaNPC | undefined;
 
       if (isDying) {
+        // eslint-disable-next-line mongoose-lean/require-lean
         areaSpell = areaSpells.find((spell) => spell.spellKey === SpellsBlueprint.SelfHealingSpell);
       }
 

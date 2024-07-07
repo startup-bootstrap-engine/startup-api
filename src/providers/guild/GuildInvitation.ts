@@ -1,3 +1,4 @@
+/* eslint-disable mongoose-lean/require-lean */
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";

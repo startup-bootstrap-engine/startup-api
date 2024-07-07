@@ -1,3 +1,4 @@
+/* eslint-disable mongoose-lean/require-lean */
 import { Character, type ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { TradeChatLog } from "@entities/ModuleSystem/TradeChatLogModal";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";

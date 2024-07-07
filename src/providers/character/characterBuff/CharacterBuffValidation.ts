@@ -93,6 +93,7 @@ export class CharacterBuffValidation {
     });
 
     const duplicatedBuffsToRemove = Object.values(itemBuffsGroupedWithDuplicates).reduce((acc, buffs) => {
+      // eslint-disable-next-line no-unused-vars
       const [buffToKeep, ...buffsToRemove] = buffs;
 
       acc.push(...buffsToRemove);

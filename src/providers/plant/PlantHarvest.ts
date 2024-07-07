@@ -100,6 +100,7 @@ export class PlantHarvest {
 
     const rarity = this.getRandomRarity(skillLevel);
     newItem.rarity = rarity;
+    // eslint-disable-next-line mongoose-lean/require-lean
     await newItem.save();
 
     const wasItemAddedToContainer = await this.addItemToContainer(newItem, character, inventoryContainerId);
@@ -242,6 +243,7 @@ export class PlantHarvest {
       stackQty: harvestableItemQuantity,
       owner: character._id,
     });
+    // eslint-disable-next-line mongoose-lean/require-lean
     await newItem.save();
     return newItem;
   }
@@ -299,6 +301,7 @@ export class PlantHarvest {
       plant.growthPoints = 0;
       plant.requiredGrowthPoints = blueprint.stagesRequirements[PlantLifeCycle.Seed]?.requiredGrowthPoints ?? 0;
       plant.regrowthCount = currentRegrowthCount;
+      // eslint-disable-next-line mongoose-lean/require-lean
       await plant.save();
       const itemToUpdate = this.prepareItemToUpdate(plant);
 

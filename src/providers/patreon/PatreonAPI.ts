@@ -238,6 +238,7 @@ export class PatreonAPI {
   private addTierNamesToMembers(members: any[], tiers: any[]): any[] {
     return members.map((member: any) => {
       const tierId = member.relationships.currently_entitled_tiers.data[0]?.id;
+      // eslint-disable-next-line mongoose-lean/require-lean
       const tier = tiers.find((tier: any) => tier.id === tierId);
       if (tier) {
         const tierTitle = tier.attributes.title;

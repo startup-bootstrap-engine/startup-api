@@ -28,6 +28,7 @@ export class SpellLearnedSpells {
     }
 
     if (learnedSpellsArr.length > 0) {
+      // eslint-disable-next-line mongoose-lean/require-lean
       const skills = await Skill.findById(character.skills).cacheQuery({
         cacheKey: `${character?._id}-skills`,
       });

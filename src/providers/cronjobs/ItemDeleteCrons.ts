@@ -1,3 +1,4 @@
+/* eslint-disable mongoose-lean/require-lean */
 import { Character } from "@entities/ModuleCharacter/CharacterModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
 import { NewRelic } from "@providers/analytics/NewRelic";

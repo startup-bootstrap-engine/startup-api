@@ -52,6 +52,7 @@ export const itemButchersKnife: IToolItemBlueprint = {
     const rarityOfTool = originItem?.rarity ?? ItemRarities.Common;
 
     const targetEntity =
+      // eslint-disable-next-line mongoose-lean/require-lean
       (await NPC.findOne({ _id: targetItem.bodyFromId })) || (await Character.findOne({ _id: targetItem.bodyFromId }));
 
     if (!targetEntity) {
@@ -153,6 +154,7 @@ export const itemButchersKnife: IToolItemBlueprint = {
 
     // set hasButchered to true
     targetItem.hasButchered = true;
+    // eslint-disable-next-line mongoose-lean/require-lean
     await targetItem.save();
   },
   usableEffectDescription: "Use it to butcher a dead body",

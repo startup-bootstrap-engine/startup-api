@@ -57,12 +57,14 @@ export class BattleNetworkInitTargeting {
           let target: INPC | ICharacter | null = null;
 
           if (data.type === EntityType.NPC) {
+            // eslint-disable-next-line mongoose-lean/require-lean
             target = await NPC.findOne({
               _id: data.targetId,
             });
           }
 
           if (data.type === EntityType.Character) {
+            // eslint-disable-next-line mongoose-lean/require-lean
             target = await Character.findOne({
               _id: data.targetId,
             });

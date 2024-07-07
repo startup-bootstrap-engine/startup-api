@@ -118,6 +118,7 @@ export class ChatNetworkGlobalMessagingQueue {
           scene: character.scene,
         });
 
+        // eslint-disable-next-line mongoose-lean/require-lean
         await chatLog.save();
 
         const chatLogs = await this.getChatLogsInZone(character, data.limit);

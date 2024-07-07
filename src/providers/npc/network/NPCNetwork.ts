@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { provide } from "inversify-binding-decorators";
 import { NPCPosition } from "./NPCPosition";

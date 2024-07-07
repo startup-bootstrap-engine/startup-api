@@ -11,6 +11,7 @@ describe("NPCMovementMoveTowards.ts", () => {
   let npcTarget: NPCTarget;
   let testNPC: INPC;
   let testCharacter: ICharacter;
+  // eslint-disable-next-line no-unused-vars
   let mapSolidsTrajectorySpy: jest.SpyInstance;
 
   beforeAll(async () => {

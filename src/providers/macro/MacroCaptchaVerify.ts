@@ -25,6 +25,7 @@ export class MacroCaptchaVerify {
   }
 
   private async verifyUserCaptcha(character: ICharacter, code: string): Promise<boolean> {
+    // eslint-disable-next-line mongoose-lean/require-lean
     const fetchedCharacter = await Character.findById(character._id).select("+captchaVerifyCode");
 
     if (!fetchedCharacter?.captchaVerifyCode) {

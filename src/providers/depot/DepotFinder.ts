@@ -9,6 +9,7 @@ export class DepotFinder {
     const depots = (await Depot.find({ owner: character._id }).lean()) as IDepot[];
 
     for (const depot of depots) {
+      // eslint-disable-next-line mongoose-lean/require-lean
       const itemContainer = await ItemContainer.findById(depot.itemContainer);
 
       if (!itemContainer) {

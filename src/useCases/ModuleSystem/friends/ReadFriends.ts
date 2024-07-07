@@ -19,6 +19,7 @@ export class ReadFriendsController implements interfaces.Controller {
       throw new BadRequestError("Character not found");
     }
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const friends = await Character.find({ _id: { $in: character.friends } });
 
     return res.status(200).send(friends);

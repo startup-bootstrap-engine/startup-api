@@ -35,6 +35,7 @@ export class PartyBuff {
     const numberOfMembers = size || members.length + 1;
     const benefits = this.partyBenefitsCalculator.calculatePartyBenefits(numberOfMembers, differentClasses);
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const skillBenefit = benefits.find((benefit) => benefit.benefit === CharacterPartyBenefits.Skill);
 
     if (!skillBenefit) return;
@@ -103,6 +104,7 @@ export class PartyBuff {
     )} fades, reducing your skills by ${buffPercentage}% respectively.`;
 
     const applyBuffPromises = traits.map(async (trait) => {
+      // eslint-disable-next-line mongoose-lean/require-lean
       const existingBuff = await CharacterBuff.findOne({
         owner: character._id,
         trait,

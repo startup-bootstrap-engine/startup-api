@@ -1,3 +1,4 @@
+/* eslint-disable mongoose-lean/require-lean */
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";

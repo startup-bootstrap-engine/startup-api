@@ -39,11 +39,11 @@ questSchema.index(
 questSchema.virtual("objectivesDetails").get(async function (this: IQuest) {
   const killObj = (await QuestObjectiveKill.find({
     _id: { $in: this.objectives },
-  })) as any[];
+  }).lean()) as any[];
 
   const interactionObj = (await QuestObjectiveInteraction.find({
     _id: { $in: this.objectives },
-  })) as any[];
+  }).lean()) as any[];
 
   const objectives: any[] = [];
 
@@ -71,7 +71,7 @@ questSchema.methods.hasStatus = async function (
     (await QuestRecord.find({
       character: Types.ObjectId(characterId),
       quest: this._id,
-    })) || [];
+    }).lean()) || [];
   // Case pending && completed ==> All should be same state
   // Case in progress ==> With 1 in progress is inProgress state
   // Case in progress ==> With 1 completed and 1 pending, is also inProgress state

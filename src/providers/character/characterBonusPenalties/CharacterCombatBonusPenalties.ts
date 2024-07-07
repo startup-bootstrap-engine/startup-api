@@ -161,6 +161,7 @@ export class CharacterCombatBonusPenalties {
         break;
     }
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const char = (await Character.findById(skills.owner)) as ICharacter;
     const isMultipleOfTen = skillSpData.skillLevelAfter % 10 === 0;
 

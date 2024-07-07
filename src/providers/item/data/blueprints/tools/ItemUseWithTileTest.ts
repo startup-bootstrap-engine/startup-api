@@ -27,6 +27,7 @@ export const itemUseWithTileTest: Partial<IItemUseWith> = {
     skillIncrease: SkillIncrease
   ): Promise<void> => {
     character.name = "Impacted by effect";
+    // eslint-disable-next-line mongoose-lean/require-lean
     await character.save();
   },
 };

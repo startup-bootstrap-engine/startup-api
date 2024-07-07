@@ -16,6 +16,7 @@ export class ItemContainerBodyCleaner {
 
       // Create an array of promises to be resolved
       const charBodyRemovals = bodyItems.map(async (charBodyItem) => {
+        // eslint-disable-next-line mongoose-lean/require-lean
         const itemContainer = await ItemContainer.findOne({ _id: charBodyItem.itemContainer });
 
         if (itemContainer) {
@@ -45,12 +46,14 @@ export class ItemContainerBodyCleaner {
     const fiveMinutesAgo = new Date();
     fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const npcBodies = await Item.find({
       createdAt: { $lt: fiveMinutesAgo },
       subType: ItemSubType.DeadBody,
       $or: [{ deadBodyEntityType: EntityType.NPC }, { deadBodyEntityType: { $exists: false } }],
     });
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const characterBodies = await Item.find({
       createdAt: { $lt: oneHourAgo },
       subType: ItemSubType.DeadBody,

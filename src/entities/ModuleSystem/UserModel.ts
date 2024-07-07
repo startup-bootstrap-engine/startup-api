@@ -1,3 +1,4 @@
+/* eslint-disable mongoose-lean/require-lean */
 import { appEnv } from "@providers/config/env";
 import { InternalServerError } from "@providers/errors/InternalServerError";
 import { NotFoundError } from "@providers/errors/NotFoundError";

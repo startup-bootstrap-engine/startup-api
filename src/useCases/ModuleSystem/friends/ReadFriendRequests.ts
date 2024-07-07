@@ -23,6 +23,7 @@ export class ReadFriendRequestsController implements interfaces.Controller {
       return [];
     }
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const friendRequests = await Character.find({ _id: { $in: friendRequestIds } });
 
     return res.status(200).send(friendRequests);

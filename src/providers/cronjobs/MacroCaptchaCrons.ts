@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable mongoose-lean/require-lean */
 import { Character } from "@entities/ModuleCharacter/CharacterModel";
 import { CharacterBan } from "@providers/character/CharacterBan";
 import { ANTI_MACRO_PROBABILITY_TRIGGER } from "@providers/constants/AntiMacroConstants";

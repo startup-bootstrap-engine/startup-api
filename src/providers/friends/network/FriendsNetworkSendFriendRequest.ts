@@ -1,9 +1,10 @@
-import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+/* eslint-disable mongoose-lean/require-lean */
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
+import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
-import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { FriendsSocketEvents, IFriendActionCreatePayload, ISendFriendRequestReadPayload } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 

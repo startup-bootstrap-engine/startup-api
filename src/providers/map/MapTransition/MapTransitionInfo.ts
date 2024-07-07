@@ -29,6 +29,7 @@ export class MapTransitionInfo {
       const sameXTransitions = transitions.filter((transition) => transition.x === x);
 
       if (sameXTransitions) {
+        // eslint-disable-next-line mongoose-lean/require-lean
         const transition = sameXTransitions.find((transition) => {
           return transition.y === y;
         });

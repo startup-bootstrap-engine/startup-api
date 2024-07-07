@@ -69,6 +69,7 @@ export class ItemContainerOpen {
       return;
     }
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const itemContainer = (await ItemContainer.findById(item.itemContainer)) as unknown as IItemContainer;
 
     if (!itemContainer) {

@@ -59,6 +59,7 @@ export class PlantDead {
   public async removeDeadPlants(): Promise<void> {
     const thresholdDate = new Date(Date.now() - DEAD_PLANT_REMOVE_HOURS * 60 * 60 * 1000);
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const removingPlants = await Item.find({
       type: ItemType.Plant,
       isDead: true,

@@ -234,6 +234,7 @@ npcSchema.virtual("xpPerDamage").get(function (this: INPC) {
 npcSchema.post("remove", async function (this: INPC) {
   // remove associated skill model
 
+  // eslint-disable-next-line mongoose-lean/require-lean
   const skill = await Skill.findOne({ _id: this.skills });
 
   if (skill) {

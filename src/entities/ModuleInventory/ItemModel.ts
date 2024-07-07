@@ -223,6 +223,7 @@ itemSchema.post("updateOne", async function (this: UpdateQuery<IItem>) {
   const { _id } = this._conditions;
   if (!_id) return;
 
+  // eslint-disable-next-line mongoose-lean/require-lean
   const updatedItem = (await Item.findById(_id)) as IItem | undefined;
   if (updatedItem) await warnAboutItemChanges(updatedItem, "changes");
 });
@@ -264,6 +265,7 @@ itemSchema.pre("remove", async function (next) {
     return;
   }
 
+  // eslint-disable-next-line mongoose-lean/require-lean
   const equipment = await Equipment.findById(character.equipment).cacheQuery({
     cacheKey: `${character._id}-equipment`,
   });
@@ -302,6 +304,7 @@ itemSchema.pre("deleteOne", { document: false, query: true }, async function (ne
       return;
     }
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const equipment = await Equipment.findById(character.equipment).cacheQuery({
       cacheKey: `${character._id}-equipment`,
     });

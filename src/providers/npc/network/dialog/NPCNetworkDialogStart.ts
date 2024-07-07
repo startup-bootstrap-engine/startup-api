@@ -33,6 +33,7 @@ export class NPCNetworkDialogStart {
       NPCSocketEvents.NPCTalkToNPC,
       async (data: INPCGetInfoEmitterClient, character) => {
         try {
+          // eslint-disable-next-line mongoose-lean/require-lean
           const npc = await NPC.findOne({
             _id: data.npcId,
           });
@@ -52,6 +53,7 @@ export class NPCNetworkDialogStart {
             npc.currentMovementType = NPCMovementType.Stopped;
             npc.targetType = NPCTargetType.Talking;
             npc.targetCharacter = character._id;
+            // eslint-disable-next-line mongoose-lean/require-lean
             await npc.save();
 
             const dialogText = this.interpolationParser.parseDialog(npc.dialogText, character, npc);

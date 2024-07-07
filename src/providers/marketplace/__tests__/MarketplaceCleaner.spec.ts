@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IDepot } from "@entities/ModuleDepot/DepotModel";
 import { MarketplaceItem } from "@entities/ModuleMarketplace/MarketplaceItemModel";

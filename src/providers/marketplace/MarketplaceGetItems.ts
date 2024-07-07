@@ -165,6 +165,7 @@ export class MarketplaceGetItems {
     const items = result[0].paginatedResults;
     const totalItems = result[0].totalCount.length > 0 ? result[0].totalCount[0].totalItems : 0;
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const marketplaceMoney = await MarketplaceMoney.findOne({ owner: character._id });
 
     this.socketMessaging.sendEventToUser<IMarketplaceGetItemsResponse>(

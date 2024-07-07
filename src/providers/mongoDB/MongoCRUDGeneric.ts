@@ -1,3 +1,4 @@
+/* eslint-disable mongoose-lean/require-lean */
 import { IUser } from "@entities/ModuleSystem/UserModel";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { NotFoundError } from "@providers/errors/NotFoundError";

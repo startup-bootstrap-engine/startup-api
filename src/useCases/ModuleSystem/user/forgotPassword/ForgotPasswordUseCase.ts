@@ -32,6 +32,7 @@ export class ForgotPasswordUseCase {
     const randomPassword = randomString({ length: 10 });
 
     user.password = randomPassword;
+    // eslint-disable-next-line mongoose-lean/require-lean
     await user.save();
 
     // send e-mail to user with the new password content

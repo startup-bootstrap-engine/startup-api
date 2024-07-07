@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { MapHelper } from "@providers/map/MapHelper";
 import { FromGridX, FromGridY, ToGridX, ToGridY } from "@rpg-engine/shared";

@@ -108,6 +108,7 @@ export class BattleCharacterAttack {
         return;
       }
 
+      // eslint-disable-next-line mongoose-lean/require-lean
       const updatedCharacterSkills = await Skill.findOne({ owner: target._id, ownerType: "Character" }).cacheQuery({
         cacheKey: `${target._id}-skills`,
       });

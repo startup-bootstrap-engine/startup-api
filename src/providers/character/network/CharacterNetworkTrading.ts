@@ -41,6 +41,7 @@ export class CharacterNetworkTrading {
       async (data: ICharacterNPCTradeRequest, character: ICharacter) => {
         const { npcId, type, items } = data;
 
+        // eslint-disable-next-line mongoose-lean/require-lean
         const npc = await NPC.findById(npcId);
 
         if (!npc) {

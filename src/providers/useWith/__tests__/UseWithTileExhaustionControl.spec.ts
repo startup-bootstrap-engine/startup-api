@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { RESOURCE_MAX_GATHERING_PER_TILE_XY } from "@providers/constants/ResourceGatheringConstants";
 import { container } from "@providers/inversify/container";
 import { MapLayers } from "@rpg-engine/shared";

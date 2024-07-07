@@ -12,6 +12,7 @@ export class ItemContainerCleaner {
   }
 
   private async cleanupItemContainersWithMissingParentItems(): Promise<void> {
+    // eslint-disable-next-line mongoose-lean/require-lean
     const itemContainers = await ItemContainer.find({});
 
     const itemContainerIds: string[] = [];

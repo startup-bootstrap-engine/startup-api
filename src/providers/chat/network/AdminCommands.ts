@@ -199,6 +199,7 @@ export class AdminCommands {
   }
 
   public async handleOnlineCommand(character: ICharacter): Promise<void> {
+    // eslint-disable-next-line mongoose-lean/require-lean
     const onlineCharacters = await Character.find({ isOnline: true });
     const onlineCount = onlineCharacters.length;
 

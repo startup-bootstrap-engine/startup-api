@@ -301,6 +301,7 @@ export class MapTiles {
   }
 
   private getTargetChunk(chunks: ITiledChunk[], gridX: number, gridY: number): ITiledChunk | undefined {
+    // eslint-disable-next-line mongoose-lean/require-lean
     return chunks.find(
       (chunk) => chunk.x <= gridX && chunk.x + chunk.width > gridX && chunk.y <= gridY && chunk.y + chunk.height > gridY
     );

@@ -85,6 +85,7 @@ export class CharacterCreateInteractionManager {
 
   public async warnAboutWeatherStatus(channelId: string): Promise<void> {
     // how we keep only one record in registry, we have just one do find.
+    // eslint-disable-next-line mongoose-lean/require-lean
     const lastTimeWeatherChanged = await MapControlTimeModel.findOne();
     if (lastTimeWeatherChanged) {
       const dataOfWeather: IControlTime = {

@@ -1,3 +1,4 @@
+/* eslint-disable mongoose-lean/require-lean */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { NPC } from "@entities/ModuleNPC/NPCModel";
 import { Quest } from "@entities/ModuleQuest/QuestModel";

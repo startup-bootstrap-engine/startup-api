@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { CharacterClass, PartySocketEvents, UISocketEvents } from "@rpg-engine/shared";

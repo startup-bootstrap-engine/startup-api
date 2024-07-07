@@ -53,6 +53,7 @@ export class QuestSeeder {
         let newReward = new QuestReward({
           ...reward,
         });
+        // eslint-disable-next-line mongoose-lean/require-lean
         newReward = await newReward.save();
         newQuestData.rewards!.push(newReward._id);
       }
@@ -60,6 +61,7 @@ export class QuestSeeder {
       let newQuest = new Quest({
         ...newQuestData,
       });
+      // eslint-disable-next-line mongoose-lean/require-lean
       newQuest = await newQuest.save();
 
       for (const obj of QuestData.objectives) {
@@ -69,12 +71,14 @@ export class QuestSeeder {
             newObj = new QuestObjectiveKill({
               ...obj,
             });
+            // eslint-disable-next-line mongoose-lean/require-lean
             newObj = await newObj.save();
             break;
           case QuestType.Interaction:
             newObj = new QuestObjectiveInteraction({
               ...obj,
             });
+            // eslint-disable-next-line mongoose-lean/require-lean
             newObj = await newObj.save();
             break;
           default:
@@ -82,6 +86,7 @@ export class QuestSeeder {
         }
         newQuest.objectives!.push(newObj._id);
       }
+      // eslint-disable-next-line mongoose-lean/require-lean
       await newQuest.save();
     } catch (error) {
       console.log(`❌ Failed to spawn Quest ${QuestData.key}. Is the blueprint for this Quest missing?`);

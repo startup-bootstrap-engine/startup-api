@@ -11,6 +11,7 @@ export class MarketplaceGetPVPZone {
 
   @TrackNewRelicTransaction()
   public async isNonPVPZone(characterId: string): Promise<void> {
+    // eslint-disable-next-line mongoose-lean/require-lean
     const character = await Character.findById(characterId);
     if (!character) {
       console.error(`Character not found with ID: ${characterId}`);

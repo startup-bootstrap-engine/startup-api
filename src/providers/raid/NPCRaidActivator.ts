@@ -47,6 +47,7 @@ export class NPCRaidActivator {
 
       await this.enableRaid(selectedRaid);
 
+      // eslint-disable-next-line mongoose-lean/require-lean
       const npcsFromRaid = await NPC.find({ raidKey: selectedRaid.key });
 
       await this.spawnNPCs(npcsFromRaid);

@@ -24,6 +24,7 @@ export class ItemSeeder {
         const newItem = new Item({
           ...itemData,
         });
+        // eslint-disable-next-line mongoose-lean/require-lean
         await newItem.save();
       } else {
         // console.log(`🗡️ Updating Item ${itemData.key} database data...`);

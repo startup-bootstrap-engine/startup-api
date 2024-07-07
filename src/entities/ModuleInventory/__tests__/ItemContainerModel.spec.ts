@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { container, inMemoryHashTable, unitTestHelper } from "@providers/inversify/container";

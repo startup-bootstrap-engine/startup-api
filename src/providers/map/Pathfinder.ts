@@ -104,6 +104,7 @@ export class Pathfinder {
       return false;
     };
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const targetDirectionPosition = nonSolidPositions.find((pos) => pos.direction === targetDirection);
 
     if (targetDirectionPosition) {

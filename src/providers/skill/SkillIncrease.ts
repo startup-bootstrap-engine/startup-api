@@ -302,6 +302,7 @@ export class SkillIncrease {
         throw new Error(`skill not found for item ${craftedItemKey}`);
       }
 
+      // eslint-disable-next-line mongoose-lean/require-lean
       const skills = (await Skill.findById(character.skills)) as unknown as ISkill;
       if (!skills) {
         throw new Error(`skills not found for character ${character.id}`);

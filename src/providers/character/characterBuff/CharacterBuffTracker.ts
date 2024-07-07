@@ -1,3 +1,4 @@
+/* eslint-disable mongoose-lean/require-lean */
 import { CharacterBuff } from "@entities/ModuleCharacter/CharacterBuffModel";
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";

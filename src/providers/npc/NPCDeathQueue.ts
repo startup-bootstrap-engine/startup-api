@@ -190,6 +190,7 @@ export class NPCDeathQueue {
       deadBodyEntityType: EntityType.NPC,
     });
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     return await npcBody.save();
   }
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { MapLayers } from "@rpg-engine/shared";

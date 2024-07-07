@@ -16,6 +16,7 @@ export class CharacterRaceBonusOrPenalties {
     combatSkills: ICombatSkillsBonusAndPenalties;
     craftingSkills: ICraftingSkillsBonusAndPenalties;
   } {
+    // eslint-disable-next-line mongoose-lean/require-lean
     const foundRace = RACE_BONUS_OR_PENALTIES.find((data) => data.race === characterRace);
 
     if (!foundRace) {
