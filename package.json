@@ -15,7 +15,7 @@
     "dev:debug": "yarn install && ts-node-dev --transpile-only --inspect=0.0.0.0:9229 --trace-deprecation --respawn -r tsconfig-paths/register ./src/server.ts --host",
     "build": "tsc -p .",
     "update:shared-deps": "yarn add @rpg-engine/shared",
-    "lint": "eslint 'src/**/*.ts' --fix",
+    "lint": "eslint 'src/**/*.ts'",
     "start:prod": "./environment/start-prod.sh",
     "format": "yarn prettier -w ./src/** --loglevel silent",
     "check-formatting": "prettier --check 'src/**/*.ts'",

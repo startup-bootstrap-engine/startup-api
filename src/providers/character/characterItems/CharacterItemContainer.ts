@@ -277,10 +277,10 @@ export class CharacterItemContainer {
       return;
     }
 
-    for (let i = 0; i < container.slotQty; i++) {
-      container.slots[i] = null;
-    }
+    // Create an array of null values with the length of slotQty
+    const updatedSlots = new Array(container.slotQty).fill(null);
 
-    await container.save();
+    // Use updateOne to set all slots to null
+    await ItemContainer.updateOne({ _id: container._id }, { $set: { slots: updatedSlots } });
   }
 }
