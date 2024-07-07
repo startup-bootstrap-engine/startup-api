@@ -1,7 +1,6 @@
-/* eslint-disable mongoose-lean/require-lean */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
-import { Item } from "@entities/ModuleInventory/ItemModel";
+import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
@@ -18,9 +17,9 @@ export class ItemDragAndDropValidator {
     private characterInventory: CharacterInventory
   ) {}
 
-  public async isItemMoveValid(itemMove: IItemMove, character: ICharacter): Promise<Boolean> {
-    const itemFrom = await Item.findById(itemMove.from.item._id);
-    const itemTo = await Item.findById(itemMove.to.item?._id);
+  public async isItemMoveValid(itemMove: IItemMove, character: ICharacter, itemMoveData: IItemMove): Promise<Boolean> {
+    const itemFrom = await Item.findById(itemMove.from.item._id).lean<IItem>();
+    const itemTo = await Item.findById(itemMove.to.item?._id).lean<IItem>();
 
     if (itemFrom?.rarity !== itemTo?.rarity && itemTo !== null) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Unable to move items with different rarities.");
@@ -32,12 +31,34 @@ export class ItemDragAndDropValidator {
       return false;
     }
 
+    if (
+      itemFrom?.owner?.toString() !== character._id.toString() ||
+      (itemTo && itemTo.owner?.toString() !== character._id.toString())
+    ) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you don't own this item.");
+      return false;
+    }
+
     if (itemMove.quantity && itemFrom.stackQty && itemMove.quantity > itemFrom.stackQty) {
       this.socketMessaging.sendErrorMessageToCharacter(
         character,
         "Sorry, you can't move more than the available quantity."
       );
       return false;
+    }
+
+    if (itemMove.quantity && itemMove.quantity < 0) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you can't move negative quantities.");
+      return false;
+    }
+
+    if (itemMoveData.quantity !== undefined) {
+      const sourceContainer = await ItemContainer.findById(itemMoveData.from.containerId).lean();
+      const sourceItem = sourceContainer?.slots[itemMoveData.from.slotIndex];
+      if (!sourceItem || sourceItem.stackQty < itemMoveData.quantity) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Invalid item quantity.");
+        return false;
+      }
     }
 
     if (itemMove.from.slotIndex === itemMove?.to?.slotIndex) {
@@ -72,6 +93,7 @@ export class ItemDragAndDropValidator {
       return false;
     }
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     const inventoryContainer = (await ItemContainer.findById(inventory.itemContainer)) as IItemContainer;
     if (!inventoryContainer) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, inventory container not found.");

@@ -57,7 +57,7 @@
     "csv-writer": "^1.6.0",
     "discord.js": "^14.13.0",
     "email-validator": "^2.0.4",
-    "eslint-plugin-mongoose-lean": "^1.0.5",
+    "eslint-plugin-mongoose-lean": "1.0.7",
     "express": "^4.17.1",
     "express-rate-limit": "^5.2.6",
     "fs-extra": "^11.2.0",
