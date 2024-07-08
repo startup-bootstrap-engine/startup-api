@@ -41,7 +41,7 @@ export class ItemUpdater {
 
         await Item.updateOne({ _id: item._id }, updateQuery);
 
-        await this.characterItemSlot.updateItemOnSlot(slotIndex, itemContainer as any, updateQuery);
+        await this.characterItemSlot.updateItemOnSlot(slotIndex, itemContainer as any, updateQuery as any);
       });
       return;
     }

@@ -110,7 +110,7 @@ export class GuildCreate {
     }
   }
 
-  private async validateGuild(character: ICharacter): Promise<void> {
+  public async validateGuild(character: ICharacter): Promise<void> {
     const hasBasicValidation = this.characterValidation.hasBasicValidation(character);
     if (!hasBasicValidation) {
       return;
