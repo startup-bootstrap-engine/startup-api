@@ -1,6 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
-import { Item } from "@entities/ModuleInventory/ItemModel";
+import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -16,7 +16,7 @@ export class ItemDropValidator {
   ) {}
 
   public async isItemDropValid(itemDrop: IItemDrop, character: ICharacter): Promise<Boolean> {
-    const item = await Item.findById(itemDrop.itemId);
+    const item = await Item.findById(itemDrop.itemId).lean<IItem>();
     const isFromEquipmentSet = itemDrop.source === "equipment";
 
     if (!item) {
@@ -40,11 +40,7 @@ export class ItemDropValidator {
     return this.characterValidation.hasBasicValidation(character);
   }
 
-  public async validateItemDropFromInventory(
-    itemDrop: IItemDrop,
-
-    character: ICharacter
-  ): Promise<boolean> {
+  public async validateItemDropFromInventory(itemDrop: IItemDrop, character: ICharacter): Promise<boolean> {
     const inventory = await this.characterInventory.getInventory(character);
 
     if (!inventory) {
@@ -54,10 +50,18 @@ export class ItemDropValidator {
       );
       return false;
     }
-
+    // eslint-disable-next-line mongoose-lean/require-lean
     const inventoryContainer = await ItemContainer.findById(inventory.itemContainer);
     if (!inventoryContainer) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, inventory container not found.");
+      return false;
+    }
+
+    if (itemDrop.fromContainerId.toString() !== inventoryContainer?._id.toString()) {
+      this.socketMessaging.sendErrorMessageToCharacter(
+        character,
+        "Sorry, this item does not belong to your inventory."
+      );
       return false;
     }
 
@@ -69,14 +73,6 @@ export class ItemDropValidator {
       this.socketMessaging.sendErrorMessageToCharacter(
         character,
         "Sorry, you do not have this item in your inventory."
-      );
-      return false;
-    }
-
-    if (itemDrop.fromContainerId.toString() !== inventoryContainer?.id.toString()) {
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        "Sorry, this item does not belong to your inventory."
       );
       return false;
     }
