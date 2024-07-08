@@ -29,7 +29,7 @@ describe("ItemDragAndDrop.ts", () => {
       hasInventory: true,
       hasSkills: true,
     });
-    testItem = await unitTestHelper.createMockItem();
+    testItem = await unitTestHelper.createMockItem({ owner: testCharacter._id });
     await testItem.save();
 
     inventory = (await characterInventory.getInventory(testCharacter)) as IItem;
@@ -67,7 +67,7 @@ describe("ItemDragAndDrop.ts", () => {
   });
 
   it("should handle moving non-stackable items successfully", async () => {
-    const nonStackableItem = await unitTestHelper.createMockItem({ stackQty: undefined });
+    const nonStackableItem = await unitTestHelper.createMockItem({ stackQty: undefined, owner: testCharacter._id });
     await unitTestHelper.addItemsToContainer(inventoryContainer, 1, [nonStackableItem]);
 
     itemMoveData.from.item = nonStackableItem as any;
@@ -78,7 +78,7 @@ describe("ItemDragAndDrop.ts", () => {
   });
 
   it("should prevent moving items if the target slot is occupied by a different type", async () => {
-    const differentTypeItem = await unitTestHelper.createMockItem();
+    const differentTypeItem = await unitTestHelper.createMockItem({ owner: testCharacter._id });
     await differentTypeItem.save();
     itemMoveData.to.item = differentTypeItem as any;
 
@@ -87,7 +87,7 @@ describe("ItemDragAndDrop.ts", () => {
   });
 
   it("should handle the edge case where moving an item results in splitting stacks correctly", async () => {
-    const stackableItem = await unitTestHelper.createStackableMockItem({ stackQty: 10 });
+    const stackableItem = await unitTestHelper.createStackableMockItem({ stackQty: 10, owner: testCharacter._id });
     await unitTestHelper.addItemsToContainer(inventoryContainer, 1, [stackableItem]);
 
     itemMoveData.from.item = stackableItem as any;
@@ -112,8 +112,8 @@ describe("ItemDragAndDrop.ts", () => {
   });
 
   it("should validate the rarity of items before moving", async () => {
-    const highRarityItem = await unitTestHelper.createMockItem({ rarity: "Rare" });
-    const lowRarityItem = await unitTestHelper.createMockItem({ rarity: "Common" });
+    const highRarityItem = await unitTestHelper.createMockItem({ rarity: "Rare", owner: testCharacter._id });
+    const lowRarityItem = await unitTestHelper.createMockItem({ rarity: "Common", owner: testCharacter._id });
     await unitTestHelper.addItemsToContainer(inventoryContainer, 1, [highRarityItem, lowRarityItem]);
 
     itemMoveData.from.item = highRarityItem as any;
@@ -179,7 +179,7 @@ describe("ItemDragAndDrop.ts", () => {
   });
 
   it("should return false if the target slot is occupied by a different item", async () => {
-    const anotherTestItem = await unitTestHelper.createMockItem();
+    const anotherTestItem = await unitTestHelper.createMockItem({ owner: testCharacter._id });
     await anotherTestItem.save();
     itemMoveData.to.item = anotherTestItem as any; // Change the item to a different item
 
@@ -189,7 +189,7 @@ describe("ItemDragAndDrop.ts", () => {
   });
 
   it("should return false if the quantity to be moved is more than the available quantity", async () => {
-    const stackableItem = await unitTestHelper.createStackableMockItem();
+    const stackableItem = await unitTestHelper.createStackableMockItem({ owner: testCharacter._id });
 
     const inventory = await characterInventory.getInventory(testCharacter);
     const inventoryContainer = await ItemContainer.findById(inventory?.itemContainer);
@@ -221,7 +221,7 @@ describe("ItemDragAndDrop.ts", () => {
   });
 
   it("when moving a stackable item, make sure to preserve its stackQty", async () => {
-    const stackableItem = await unitTestHelper.createStackableMockItem();
+    const stackableItem = await unitTestHelper.createStackableMockItem({ owner: testCharacter._id });
 
     const beforeMoveStackQty = stackableItem.stackQty;
 
@@ -264,7 +264,7 @@ describe("ItemDragAndDrop.ts", () => {
     };
 
     it("when moving a stackable item with a quantity equal to the stackQty, it should move the whole stack", async () => {
-      const stackableItem = await unitTestHelper.createStackableMockItem();
+      const stackableItem = await unitTestHelper.createStackableMockItem({ owner: testCharacter._id });
 
       await setupDragAndDropItem(stackableItem, stackableItem.stackQty!);
 
@@ -285,6 +285,7 @@ describe("ItemDragAndDrop.ts", () => {
 
     it("when moving a stackable item with a quantity less than the current stackQty, a new stack should be created", async () => {
       const stackableItem = await unitTestHelper.createStackableMockItem({
+        owner: testCharacter._id,
         stackQty: 10,
       });
 
@@ -310,9 +311,11 @@ describe("ItemDragAndDrop.ts", () => {
     it("when moving the stackable item to a slot occupied by the same item, it should merge the stacks", async () => {
       const stackableItem = await unitTestHelper.createStackableMockItem({
         stackQty: 2,
+        owner: testCharacter._id,
       });
       const stackableItem2 = await unitTestHelper.createStackableMockItem({
         stackQty: 3,
+        owner: testCharacter._id,
       });
 
       await unitTestHelper.addItemsToContainer(inventoryContainer, 10, [stackableItem, stackableItem2]);
@@ -373,7 +376,7 @@ describe("ItemDragAndDrop.ts", () => {
         hasInventory: true,
         hasSkills: true,
       });
-      testItem = await unitTestHelper.createMockItem();
+      testItem = await unitTestHelper.createMockItem({ owner: testCharacter._id });
       await testItem.save();
 
       inventory = (await characterInventory.getInventory(testCharacter)) as IItem;
@@ -440,7 +443,7 @@ describe("ItemDragAndDrop.ts", () => {
     });
 
     it("should rollback when an error occurs during stackable item move", async () => {
-      const stackableItem = await unitTestHelper.createStackableMockItem({ stackQty: 10 });
+      const stackableItem = await unitTestHelper.createStackableMockItem({ stackQty: 10, owner: testCharacter._id });
       await unitTestHelper.addItemsToContainer(inventoryContainer, 1, [stackableItem]);
 
       itemMoveData.from.item = stackableItem as any;
