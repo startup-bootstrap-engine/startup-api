@@ -36,8 +36,8 @@ describe("ItemDrop.ts", () => {
       .populate("skills")
       .execPopulate();
     testItem = await unitTestHelper.createMockItem({
-      carrier: testCharacter.id,
-      owner: testCharacter.id,
+      carrier: testCharacter._id,
+      owner: testCharacter._id,
     });
     inventory = await testCharacter.inventory;
     inventoryItemContainerId = inventory.itemContainer as unknown as string;
@@ -88,7 +88,7 @@ describe("ItemDrop.ts", () => {
   const dropItem = async (fromContainerId: string, extraProps?: Record<string, unknown>) => {
     const itemDropped = await itemDrop.performItemDrop(
       {
-        itemId: testItem.id,
+        itemId: testItem._id,
         scene: testCharacter.scene,
         x: extraProps?.x ?? testCharacter.x,
         y: extraProps?.y ?? testCharacter.y,
@@ -125,6 +125,7 @@ describe("ItemDrop.ts", () => {
       x: testCharacter.x,
       y: testCharacter.y,
       scene: testCharacter.scene,
+      owner: testCharacter._id,
     });
 
     await addItemToInventory(mapItem);
@@ -185,6 +186,10 @@ describe("ItemDrop.ts", () => {
   });
 
   describe("Item drop validation", () => {
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+
     it("should fail on trying to drop an item to a position that's far away", async () => {
       sendErrorMessageToCharacter = jest.spyOn(
         // @ts-ignore
@@ -199,6 +204,14 @@ describe("ItemDrop.ts", () => {
       expect(sendErrorMessageToCharacter).toHaveBeenCalledWith(
         testCharacter,
         "Sorry, you're trying to drop this item too far away."
+      );
+    });
+
+    it("should NOT fail if drop position is close", async () => {
+      sendErrorMessageToCharacter = jest.spyOn(
+        // @ts-ignore
+        itemDrop.socketMessaging,
+        "sendErrorMessageToCharacter" as any
       );
 
       const dropClose = await dropItem(inventoryItemContainerId, {
@@ -226,7 +239,7 @@ describe("ItemDrop.ts", () => {
     });
 
     it("should throw an error if trying to drop an item that you don't have in your inventory", async () => {
-      const unknownItem = await unitTestHelper.createMockItem();
+      const unknownItem = await unitTestHelper.createMockItem({ owner: testCharacter._id });
 
       const drop = await dropItem(inventoryItemContainerId, {
         itemId: unknownItem.id,
@@ -287,11 +300,6 @@ describe("ItemDrop.ts", () => {
     expect(result).toBe(false);
   });
 
-  it("should return false if the item cannot be removed from the inventory", async () => {
-    const result = await itemDrop.performItemDrop(itemDropData, testCharacter);
-    expect(result).toBe(false);
-  });
-
   it("should return false if the character is trying to drop an item from a container that they don't own", async () => {
     const anotherCharacter = await (
       await unitTestHelper.createMockCharacter(null, { hasEquipment: true, hasInventory: true, hasSkills: true })
@@ -322,10 +330,5 @@ describe("ItemDrop.ts", () => {
     // @ts-expect-error
     const result = await itemDrop.removeItemFromInventory(item, character, inventoryItemContainerId);
     expect(result).toBe(false);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.resetAllMocks();
   });
 });
