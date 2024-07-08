@@ -7,6 +7,7 @@ import { CharacterItemSlots } from "@providers/character/characterItems/Characte
 import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { blueprintManager } from "@providers/inversify/container";
+import { Locker } from "@providers/locks/Locker";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IEquipmentAndInventoryUpdatePayload, IItem, IItemMove, ItemSocketEvents, ItemType } from "@rpg-engine/shared";
@@ -24,7 +25,8 @@ export class ItemDragAndDrop {
     private inMemoryHashTable: InMemoryHashTable,
     private dynamicQueue: DynamicQueue,
     private itemDragAndDropValidator: ItemDragAndDropValidator,
-    private itemBaseKey: ItemBaseKey
+    private itemBaseKey: ItemBaseKey,
+    private locker: Locker
   ) {}
 
   @TrackNewRelicTransaction()
@@ -58,6 +60,14 @@ export class ItemDragAndDrop {
   }
 
   private async processItemMove(itemMoveData: IItemMove, character: ICharacter): Promise<boolean> {
+    const lockKey = `item-move-${character._id}`;
+
+    const canProceed = await this.locker.lock(lockKey);
+
+    if (!canProceed) {
+      return false;
+    }
+
     const rollbackActions: (() => Promise<void>)[] = [];
     let success = false;
 
@@ -100,6 +110,8 @@ export class ItemDragAndDrop {
       if (!success) {
         await this.performRollback(rollbackActions);
       }
+
+      await this.locker.unlock(lockKey);
     }
   }
 
