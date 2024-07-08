@@ -105,10 +105,7 @@ describe("ItemDragAndDrop.ts", () => {
 
     const result = await itemDragAndDrop.performItemMove(itemMoveData, testCharacter);
     expect(result).toBeFalsy();
-    expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledWith(
-      testCharacter,
-      "Sorry, this item does not belong to your inventory."
-    );
+    expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledWith(testCharacter, "Invalid container or item ID.");
   });
 
   it("should validate the rarity of items before moving", async () => {

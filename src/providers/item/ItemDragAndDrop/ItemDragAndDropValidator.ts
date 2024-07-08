@@ -4,6 +4,7 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
+import { MongoDBValidation } from "@providers/database/MongoDBValidation";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IItemMove } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -14,12 +15,24 @@ export class ItemDragAndDropValidator {
     private socketMessaging: SocketMessaging,
     private characterValidation: CharacterValidation,
     private characterItemSlots: CharacterItemSlots,
-    private characterInventory: CharacterInventory
+    private characterInventory: CharacterInventory,
+    private mongoDBValidation: MongoDBValidation
   ) {}
 
   public async isItemMoveValid(itemMove: IItemMove, character: ICharacter, itemMoveData: IItemMove): Promise<Boolean> {
     const itemFrom = await Item.findById(itemMove.from.item._id).lean<IItem>();
     const itemTo = await Item.findById(itemMove.to.item?._id).lean<IItem>();
+
+    // Validate ObjectIDs
+    if (
+      !this.mongoDBValidation.isValidObjectId(itemMove.from.containerId) ||
+      !this.mongoDBValidation.isValidObjectId(itemMove.to.containerId) ||
+      !this.mongoDBValidation.isValidObjectId(itemMove.from.item._id) ||
+      (itemMove.to.item && !this.mongoDBValidation.isValidObjectId(itemMove.to.item._id))
+    ) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Invalid container or item ID.");
+      return false;
+    }
 
     if (itemFrom?.rarity !== itemTo?.rarity && itemTo !== null) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Unable to move items with different rarities.");
@@ -39,11 +52,22 @@ export class ItemDragAndDropValidator {
       return false;
     }
 
+    if (itemTo && itemTo.owner?.toString() !== character._id.toString()) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you don't own the destination item.");
+      return false;
+    }
+
     if (itemMove.quantity && itemFrom.stackQty && itemMove.quantity > itemFrom.stackQty) {
       this.socketMessaging.sendErrorMessageToCharacter(
         character,
         "Sorry, you can't move more than the available quantity."
       );
+      return false;
+    }
+
+    // Ensure quantities are valid
+    if (itemFrom.stackQty && itemMove.quantity && itemMove.quantity > itemFrom.stackQty) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Invalid item quantity.");
       return false;
     }
 
