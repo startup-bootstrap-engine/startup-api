@@ -42,18 +42,19 @@ export class Pathfinder {
       });
     }
 
-    const isUnderRange = this.movementHelper.isUnderRange(npc.x, npc.y, target.x, target.y, 5);
+    //! Dump pathfinding to save resources
+    // const isUnderRange = this.movementHelper.isUnderRange(npc.x, npc.y, target.x, target.y, 5);
 
-    if (isUnderRange) {
-      const nearestGridToTarget = await this.getNearestGridToTarget(npc, target.x, target.y, [
-        ToGridX(npc.x),
-        ToGridY(npc.y),
-      ]);
+    // if (isUnderRange) {
+    //   const nearestGridToTarget = await this.getNearestGridToTarget(npc, target.x, target.y, [
+    //     ToGridX(npc.x),
+    //     ToGridY(npc.y),
+    //   ]);
 
-      if (nearestGridToTarget?.length) {
-        return nearestGridToTarget;
-      }
-    }
+    //   if (nearestGridToTarget?.length) {
+    //     return nearestGridToTarget;
+    //   }
+    // }
 
     return await this.findShortestPathBetweenPoints(map, {
       start: { x: startGridX, y: startGridY },

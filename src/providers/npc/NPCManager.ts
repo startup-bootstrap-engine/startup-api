@@ -77,9 +77,11 @@ export class NPCManager {
       await this.setNPCBehavior(npc, true);
 
       // eslint-disable-next-line mongoose-lean/require-lean
-      const npcSkills = (await Skill.find({ owner: npc._id }).cacheQuery({
-        cacheKey: `npc-${npc.id}-skills`,
-      })) as unknown as ISkill;
+      const npcSkills = (await Skill.find({ owner: npc._id })
+        .lean()
+        .cacheQuery({
+          cacheKey: `npc-${npc.id}-skills`,
+        })) as unknown as ISkill;
 
       await this.npcCycleQueue.addToQueue(npc, npcSkills);
     }
