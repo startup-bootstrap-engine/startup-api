@@ -45,7 +45,6 @@ export class SkillFunctions {
   @TrackNewRelicTransaction()
   public async updateSkills(skills: ISkill, character: ICharacter): Promise<void> {
     try {
-      await this.clearCharacterCache(character);
       //! Warning: Chaching this causes the skill not to update
       await Skill.findByIdAndUpdate(skills._id, skills).lean({ virtuals: true, defaults: true });
 
