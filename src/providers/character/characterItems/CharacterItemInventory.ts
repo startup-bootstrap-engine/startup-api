@@ -558,10 +558,10 @@ export class CharacterItemInventory {
       carrier: character._id,
       isEquipped: true,
     });
+    // eslint-disable-next-line mongoose-lean/require-lean
     await backpack.save();
 
-    equipment.inventory = backpack._id;
-    await equipment.save();
+    await Equipment.updateOne({ _id: equipment._id }, { $set: { inventory: backpack._id } });
 
     return equipment;
   }
