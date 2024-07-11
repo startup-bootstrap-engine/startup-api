@@ -1,4 +1,3 @@
-/* eslint-disable mongoose-lean/require-lean */
 import { Depot } from "@entities/ModuleDepot/DepotModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { NPC } from "@entities/ModuleNPC/NPCModel";
@@ -32,7 +31,9 @@ export class OpenDepot {
     const depot = await Depot.findOne({
       owner: Types.ObjectId(characterId),
       key: npc.key,
-    }).populate("itemContainer");
+    })
+      .populate("itemContainer")
+      .lean();
 
     if (depot) {
       itemContainer = depot.itemContainer as unknown as IItemContainer;
@@ -43,6 +44,7 @@ export class OpenDepot {
         key: npc.key,
       });
 
+      // eslint-disable-next-line mongoose-lean/require-lean
       newDepot = await newDepot.save();
       let depotItemContainer = new ItemContainer({
         parentItem: newDepot._id,
@@ -50,6 +52,7 @@ export class OpenDepot {
         slotQty: 40,
         owner: Types.ObjectId(characterId),
       });
+      // eslint-disable-next-line mongoose-lean/require-lean
       depotItemContainer = await depotItemContainer.save();
 
       await Depot.updateOne(
