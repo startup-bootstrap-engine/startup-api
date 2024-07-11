@@ -477,7 +477,7 @@ export class CharacterItemInventory {
   }
 
   private async removeItemFromInventory(itemId: string, character: ICharacter): Promise<boolean> {
-    const item = (await Item.findById(itemId)) as unknown as IItem;
+    const item = (await Item.findById(itemId).lean<IItem>()) as unknown as IItem;
 
     if (!item) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The item to be removed was not found.");
@@ -491,7 +491,7 @@ export class CharacterItemInventory {
       return false;
     }
 
-    const inventoryItemContainer = await ItemContainer.findById(inventory.itemContainer);
+    const inventoryItemContainer = await ItemContainer.findById(inventory.itemContainer).lean<IItemContainer>();
 
     if (!inventoryItemContainer) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The character does not have an inventory.");
