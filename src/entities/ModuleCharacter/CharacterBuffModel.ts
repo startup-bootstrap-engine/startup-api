@@ -34,12 +34,45 @@ const characterBuffModel = createLeanSchema({
   isStackable: Type.boolean(),
 });
 
+// Compound index for frequently combined queries
 characterBuffModel.index(
   {
     owner: 1,
     type: 1,
     itemId: 1,
     durationType: 1,
+  },
+  { background: true }
+);
+
+// Separate indexes for single field queries
+characterBuffModel.index(
+  {
+    trait: 1,
+  },
+  { background: true }
+);
+
+characterBuffModel.index(
+  {
+    itemKey: 1,
+  },
+  { background: true }
+);
+
+// TTL index for temporary buffs
+characterBuffModel.index(
+  {
+    durationSeconds: 1,
+  },
+  { background: true, expireAfterSeconds: 0 }
+);
+
+// Compound index for queries involving owner and trait
+characterBuffModel.index(
+  {
+    owner: 1,
+    trait: 1,
   },
   { background: true }
 );
