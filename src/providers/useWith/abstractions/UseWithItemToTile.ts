@@ -316,8 +316,10 @@ export class UseWithItemToTile {
 
   private async refreshInventory(character: ICharacter): Promise<void> {
     const inventory = await this.characterInventory.getInventory(character);
-    // eslint-disable-next-line mongoose-lean/require-lean
-    const inventoryContainer = (await ItemContainer.findById(inventory?.itemContainer)) as unknown as IItemContainer;
+
+    const inventoryContainer = (await ItemContainer.findById(
+      inventory?.itemContainer
+    ).lean()) as unknown as IItemContainer;
 
     const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {
       inventory: inventoryContainer,
