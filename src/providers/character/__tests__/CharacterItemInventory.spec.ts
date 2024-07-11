@@ -4,7 +4,7 @@ import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemCon
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { FoodsBlueprint, OthersBlueprint, SwordsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
-import { ItemSubType } from "@rpg-engine/shared";
+import { ItemRarities, ItemSubType } from "@rpg-engine/shared";
 import { Types } from "mongoose";
 import { CharacterTradingBalance } from "../CharacterTradingBalance";
 import { CharacterItemInventory } from "../characterItems/CharacterItemInventory";
@@ -99,7 +99,7 @@ describe("CharacterItemInventory.ts", () => {
 
     const updatedInventoryContainer = (await ItemContainer.findById(
       inventory.itemContainer
-    )) as unknown as IItemContainer;
+    ).lean()) as unknown as IItemContainer;
 
     expect(updatedInventoryContainer.slots[0]).toBe(null);
 
@@ -526,6 +526,60 @@ describe("CharacterItemInventory.ts", () => {
     expect(addedItem).toBeTruthy();
     expect(addedItem.subType).toBe(ItemSubType.Food);
     expect(addedItem.healthRecovery).toBeGreaterThan(0);
+  });
+
+  it("should return false when trying to decrement more items than available in nested containers", async () => {
+    const goldCoins1 = await unitTestHelper.createMockItemFromBlueprint(OthersBlueprint.GoldCoin, { stackQty: 50 });
+    const goldCoins2 = await unitTestHelper.createMockItemFromBlueprint(OthersBlueprint.GoldCoin, { stackQty: 30 });
+
+    inventoryContainer = await unitTestHelper.addItemsToContainer(inventoryContainer, 1, [goldCoins1]);
+    const nestedContainer = await unitTestHelper.addNestedContainer(testCharacter.id, inventoryContainer, 1);
+    await unitTestHelper.addItemsToContainer(nestedContainer, 1, [goldCoins2]);
+
+    const result = await characterItemInventory.decrementItemFromNestedInventoryByKey(
+      OthersBlueprint.GoldCoin,
+      testCharacter,
+      100
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.updatedQty).toBe(20);
+
+    const totalGold = await characterTradingBalance.getTotalGoldInInventory(testCharacter);
+    expect(totalGold).toBe(0);
+  });
+
+  it("should properly handle decrementing items with different rarities", async () => {
+    const commonSword = await unitTestHelper.createMockItemFromBlueprint(SwordsBlueprint.ShortSword, {
+      rarity: ItemRarities.Common,
+    });
+    const rareSword = await unitTestHelper.createMockItemFromBlueprint(SwordsBlueprint.ShortSword, {
+      rarity: ItemRarities.Rare,
+    });
+
+    inventoryContainer = await unitTestHelper.addItemsToContainer(inventoryContainer, 2, [commonSword, rareSword]);
+
+    const resultCommon = await characterItemInventory.decrementItemFromInventoryByKey(
+      SwordsBlueprint.ShortSword,
+      testCharacter,
+      1,
+      ItemRarities.Common
+    );
+    const resultRare = await characterItemInventory.decrementItemFromInventoryByKey(
+      SwordsBlueprint.ShortSword,
+      testCharacter,
+      1,
+      ItemRarities.Rare
+    );
+
+    expect(resultCommon).toBe(true);
+    expect(resultRare).toBe(true);
+
+    const updatedInventoryContainer = (await ItemContainer.findById(
+      inventory.itemContainer
+    )) as unknown as IItemContainer;
+    expect(updatedInventoryContainer.slots[0]).toBe(null);
+    expect(updatedInventoryContainer.slots[1]).toBe(null);
   });
 
   describe("Edge case - Depot x Inventory", () => {

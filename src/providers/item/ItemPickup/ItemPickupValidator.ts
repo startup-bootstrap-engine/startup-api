@@ -1,4 +1,3 @@
-/* eslint-disable mongoose-lean/require-lean */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Equipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
@@ -38,7 +37,7 @@ export class ItemPickupValidator {
 
   @TrackNewRelicTransaction()
   public async isItemPickupValid(itemPickupData: IItemPickup, character: ICharacter): Promise<boolean | IItem> {
-    const item = (await Item.findById(itemPickupData.itemId)) as IItem;
+    const item = (await Item.findById(itemPickupData.itemId).lean({ virtuals: true, defaults: true })) as IItem;
 
     if (!item) {
       this.sendErrorMessage(character, "Sorry, the item to be picked up was not found.");
@@ -134,9 +133,11 @@ export class ItemPickupValidator {
   private async hasEquipmentContainer(character: ICharacter, item: IItem, inventory: any): Promise<boolean> {
     const isInventoryItem = item.isItemContainer && inventory === null;
     if (isInventoryItem) {
-      const equipmentContainer = await Equipment.findById(character.equipment).cacheQuery({
-        cacheKey: `${character._id}-equipment`,
-      });
+      const equipmentContainer = await Equipment.findById(character.equipment)
+        .lean({ virtuals: true, defaults: true })
+        .cacheQuery({
+          cacheKey: `${character._id}-equipment`,
+        });
       if (!equipmentContainer) {
         this.sendErrorMessage(character, "Sorry, equipment container not found");
         return false;

@@ -1,4 +1,3 @@
-/* eslint-disable mongoose-lean/require-lean */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Equipment, IEquipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { IItemContainer as IItemContainerModel, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
@@ -101,25 +100,41 @@ export class CharacterInventory {
     inventoryType: ContainersBlueprint,
     useExistingEquipment = false
   ): Promise<IEquipment> {
-    let equipment: IEquipment;
+    const equipment = await this.getOrCreateEquipment(character, useExistingEquipment);
 
-    if (useExistingEquipment) {
-      equipment = (await Equipment.findById(character.equipment)) as IEquipment;
-      if (!equipment) throw new Error("Equipment not found");
-    } else {
-      equipment = new Equipment();
-    }
-
-    equipment.owner = character._id;
     const containerBlueprint = await blueprintManager.getBlueprint<IItem>("items", inventoryType);
 
     const bag = new Item({ ...containerBlueprint, owner: character._id, carrier: character._id, isEquipped: true });
+    // eslint-disable-next-line mongoose-lean/require-lean
     await bag.save();
 
-    equipment.inventory = bag._id;
-    await equipment.save();
+    await this.updateEquipmentInventory(equipment, bag._id, useExistingEquipment);
 
     return equipment;
+  }
+
+  private async getOrCreateEquipment(character: ICharacter, useExistingEquipment: boolean): Promise<IEquipment> {
+    if (useExistingEquipment) {
+      const existingEquipment = (await Equipment.findById(character.equipment).lean().exec()) as IEquipment;
+      if (!existingEquipment) throw new Error("Equipment not found");
+      return new Equipment(existingEquipment);
+    } else {
+      return new Equipment({ owner: character._id });
+    }
+  }
+
+  private async updateEquipmentInventory(
+    equipment: IEquipment,
+    inventoryId: string,
+    useExistingEquipment: boolean
+  ): Promise<void> {
+    if (useExistingEquipment) {
+      await Equipment.updateOne({ _id: equipment._id }, { inventory: inventoryId });
+    } else {
+      equipment.inventory = inventoryId;
+      // eslint-disable-next-line mongoose-lean/require-lean
+      await equipment.save();
+    }
   }
 
   @TrackNewRelicTransaction()

@@ -1,5 +1,4 @@
-/* eslint-disable mongoose-lean/require-lean */
-import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Equipment, IEquipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
@@ -135,6 +134,7 @@ export class CharacterItemInventory {
       this.updateItemWithFoodRarityData(item, foodRarityData);
     }
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     await item.save();
 
     return this.characterItemsContainer.addItemToContainer(item, character, inventory.itemContainer.toString());
@@ -171,7 +171,7 @@ export class CharacterItemInventory {
     decrementQty: number
   ): Promise<boolean> {
     const inventory = (await this.characterInventory.getInventory(character)) as unknown as IItem;
-    const inventoryItemContainer = await ItemContainer.findById(inventory?.itemContainer);
+    const inventoryItemContainer = (await ItemContainer.findById(inventory?.itemContainer).lean()) as IItemContainer;
 
     if (!inventoryItemContainer) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! Inventory container not found.");
@@ -210,7 +210,7 @@ export class CharacterItemInventory {
   ): Promise<boolean> {
     const inventory = (await this.characterInventory.getInventory(character)) as unknown as IItem;
 
-    const inventoryItemContainer = await ItemContainer.findById(inventory?.itemContainer);
+    const inventoryItemContainer = await ItemContainer.findById(inventory?.itemContainer).lean<IItemContainer>();
 
     if (!inventoryItemContainer) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! Inventory container not found.");
@@ -238,7 +238,9 @@ export class CharacterItemInventory {
     character: ICharacter,
     decrementQty: number
   ): Promise<IDecrementItemByKeyResult> {
-    const itemContainers = await ItemContainer.find({ owner: character._id, name: { $ne: "Depot" } });
+    const itemContainers = await ItemContainer.find({ owner: character._id, name: { $ne: "Depot" } }).lean<
+      IItemContainer[]
+    >();
 
     if (!itemContainers) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! Inventory container not found.");
@@ -281,7 +283,7 @@ export class CharacterItemInventory {
       return false;
     }
 
-    const item = await Item.findById(itemId);
+    const item = await Item.findById(itemId).lean<IItem>();
 
     if (!item) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The item to be deleted was not found.");
@@ -302,7 +304,7 @@ export class CharacterItemInventory {
   ): Promise<string | undefined> {
     const inventory = (await this.characterInventory.getInventory(character)) as unknown as IItem;
 
-    const inventoryItemContainer = await ItemContainer.findById(inventory?.itemContainer);
+    const inventoryItemContainer = await ItemContainer.findById(inventory?.itemContainer).lean<IItemContainer>();
 
     if (!inventoryItemContainer) {
       return;
@@ -322,7 +324,7 @@ export class CharacterItemInventory {
       if (!slotItem) continue;
 
       if (!slotItem.key) {
-        slotItem = (await Item.findById(slotItem as any)) as unknown as IItem;
+        slotItem = (await Item.findById(slotItem as any).lean<IItem>()) as unknown as IItem;
       }
       if (isSameKey(slotItem.key, itemKey) && (rarity === undefined || slotItem.rarity === rarity)) {
         return slotItem._id;
@@ -341,7 +343,7 @@ export class CharacterItemInventory {
   ): Promise<{ slotListId: string[]; qty: number }> {
     const inventory = (await this.characterInventory.getInventory(character)) as unknown as IItem;
 
-    const inventoryItemContainer = await ItemContainer.findById(inventory?.itemContainer);
+    const inventoryItemContainer = await ItemContainer.findById(inventory?.itemContainer).lean<IItemContainer>();
 
     if (!inventoryItemContainer) {
       return {
@@ -366,7 +368,7 @@ export class CharacterItemInventory {
       if (!slotItem) continue;
 
       if (!slotItem.key) {
-        slotItem = (await Item.findById(slotItem as any)) as unknown as IItem;
+        slotItem = (await Item.findById(slotItem as any).lean<IItem>()) as unknown as IItem;
       }
       if (isSameKey(slotItem.key, itemKey) && (rarity === undefined || slotItem.rarity === rarity)) {
         qty += slotItem.stackQty ?? 0;
@@ -385,7 +387,7 @@ export class CharacterItemInventory {
   @TrackNewRelicTransaction()
   public async checkItemInInventory(itemId: string, character: ICharacter): Promise<number | undefined> {
     const inventory = (await this.characterInventory.getInventory(character)) as unknown as IItem;
-    const inventoryItemContainer = await ItemContainer.findById(inventory?.itemContainer);
+    const inventoryItemContainer = await ItemContainer.findById(inventory?.itemContainer).lean<IItemContainer>();
 
     if (!inventoryItemContainer) {
       return;
@@ -418,7 +420,7 @@ export class CharacterItemInventory {
       if (!slotItem) continue;
 
       if (!slotItem.key) {
-        slotItem = (await Item.findById(slotItem as any)) as unknown as IItem;
+        slotItem = (await Item.findById(slotItem as any).lean<IItem>()) as unknown as IItem;
       }
 
       let result = true;
@@ -449,7 +451,7 @@ export class CharacterItemInventory {
 
             // we need to fetch updated container in case some quantity remains to be substracted
             if (result && decrementQty > 0) {
-              const updatedCont = await ItemContainer.findById(container.id);
+              const updatedCont = await ItemContainer.findById(container._id).lean<IItemContainer>();
               if (!updatedCont) {
                 result = false;
                 break;
@@ -475,7 +477,7 @@ export class CharacterItemInventory {
   }
 
   private async removeItemFromInventory(itemId: string, character: ICharacter): Promise<boolean> {
-    const item = (await Item.findById(itemId)) as unknown as IItem;
+    const item = (await Item.findById(itemId).lean<IItem>()) as unknown as IItem;
 
     if (!item) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The item to be removed was not found.");
@@ -489,7 +491,7 @@ export class CharacterItemInventory {
       return false;
     }
 
-    const inventoryItemContainer = await ItemContainer.findById(inventory.itemContainer);
+    const inventoryItemContainer = await ItemContainer.findById(inventory.itemContainer).lean<IItemContainer>();
 
     if (!inventoryItemContainer) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The character does not have an inventory.");
@@ -540,8 +542,7 @@ export class CharacterItemInventory {
   public async addEquipmentToCharacter(character: ICharacter): Promise<void> {
     const equipment = await this.createEquipmentWithInventory(character);
 
-    character.equipment = equipment._id;
-    await character.save();
+    await Character.updateOne({ _id: character._id }, { $set: { equipment: equipment._id } });
   }
 
   @TrackNewRelicTransaction()
@@ -557,10 +558,10 @@ export class CharacterItemInventory {
       carrier: character._id,
       isEquipped: true,
     });
+    // eslint-disable-next-line mongoose-lean/require-lean
     await backpack.save();
 
-    equipment.inventory = backpack._id;
-    await equipment.save();
+    await Equipment.updateOne({ _id: equipment._id }, { $set: { inventory: backpack._id } });
 
     return equipment;
   }
@@ -607,7 +608,7 @@ export class CharacterItemInventory {
     decrementQty: number,
     inventoryId: string
   ): Promise<boolean> {
-    const itemContainer = (await ItemContainer.findById(inventoryId)) as IItemContainer;
+    const itemContainer = (await ItemContainer.findById(inventoryId).lean<IItemContainer>()) as IItemContainer;
 
     if (!itemContainer) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! Inventory container not found.");

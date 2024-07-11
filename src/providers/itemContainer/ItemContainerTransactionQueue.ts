@@ -215,6 +215,7 @@ export class ItemContainerTransactionQueue {
     );
 
     if (!removeItemSuccessful) {
+      console.error("Failed to remove item from origin container.");
       this.socketMessaging.sendErrorMessageToCharacter(
         character,
         "Failed to remove original item from origin container."

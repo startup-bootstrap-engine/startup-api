@@ -55,7 +55,7 @@ export class ItemView {
 
     await Item.updateOne(
       {
-        _id: item.id,
+        _id: item._id,
       },
       {
         x,
@@ -80,7 +80,7 @@ export class ItemView {
           }
         );
 
-        await this.characterView.removeFromCharacterView(character._id, item.id, "items");
+        await this.characterView.removeFromCharacterView(character._id, item._id, "items");
       }
     } else {
       throw new Error("You cannot call this method without x, y and scene");
@@ -99,7 +99,7 @@ export class ItemView {
     for (let i = 0; i < itemsNearby.length; i++) {
       const item = itemsNearby[i];
       // eslint-disable-next-line mongoose-lean/require-lean
-      const itemOnCharView = itemsOnCharView?.find((el) => el.id === item.id);
+      const itemOnCharView = itemsOnCharView?.find((el) => el.id === item._id);
 
       const shouldSkip =
         !options?.always &&

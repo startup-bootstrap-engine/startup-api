@@ -12,6 +12,7 @@ import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { Locker } from "@providers/locks/Locker";
 import { MapHelper } from "@providers/map/MapHelper";
 import { clearCacheForKey } from "speedgoose";
+import { ItemBaseKey } from "../ItemBaseKey";
 import { ItemOwnership } from "../ItemOwnership";
 import { ItemPickupFromContainer } from "./ItemPickupFromContainer";
 import { ItemPickupFromMap } from "./ItemPickupFromMap";
@@ -30,7 +31,8 @@ export class ItemPickup {
     private mapHelper: MapHelper,
     private inMemoryHashTable: InMemoryHashTable,
     private locker: Locker,
-    private itemOwnership: ItemOwnership
+    private itemOwnership: ItemOwnership,
+    private itemBaseKey: ItemBaseKey
   ) {}
 
   @TrackNewRelicTransaction()
@@ -52,7 +54,7 @@ export class ItemPickup {
       const isPickupFromMap = this.isPickupFromMap(itemToBePicked);
       const isPickupFromContainer = this.isPickupFromContainer(itemPickupData, isPickupFromMap);
 
-      itemToBePicked.key = itemToBePicked.baseKey;
+      itemToBePicked.key = this.itemBaseKey.getBaseKey(itemToBePicked.key);
 
       const inventory = await this.prepareItemAndFetchInventory(itemPickupData, character);
       const isInventoryItem = itemToBePicked.isItemContainer && inventory === null;

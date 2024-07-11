@@ -143,7 +143,7 @@ async function onEquipmentUpdate(doc, next): Promise<void> {
   // @ts-ignore
   const equipment = await this.model.findOne(this.getQuery());
 
-  if (!equipment.owner) {
+  if (!equipment?.owner) {
     return next();
   }
   await clearEquipmentSlotCaching(equipment.owner.toString());

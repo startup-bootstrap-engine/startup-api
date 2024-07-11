@@ -1,4 +1,3 @@
-/* eslint-disable mongoose-lean/require-lean */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
@@ -91,7 +90,7 @@ export class DepositItem {
   }
 
   private async getItem(character: ICharacter, itemId: string): Promise<IItem | null> {
-    const item = await Item.findById(itemId);
+    const item = await Item.findById(itemId).lean();
     if (!item) {
       console.error(`Deposit failed: Item not found: ${itemId} for character ${character.id}`);
       this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, item not found.");
@@ -154,7 +153,7 @@ export class DepositItem {
     // If an item has a x, y and scene, it means its coming from a map pickup. So we should destroy its representation and warn other characters nearby.
     const itemRemovedFromMap = await this.itemView.removeItemFromMap(item);
     if (!itemRemovedFromMap) {
-      throw new Error(`DepotSystem > Error removing item with id ${item.id} from map`);
+      throw new Error(`DepotSystem > Error removing item with id ${item._id} from map`);
     }
   }
 }
