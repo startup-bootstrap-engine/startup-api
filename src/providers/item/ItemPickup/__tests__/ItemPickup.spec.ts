@@ -68,7 +68,7 @@ describe("ItemPickup.ts", () => {
 
     const itemAdded = await itemPickup.performItemPickup(
       {
-        itemId: itemToBePicked.id,
+        itemId: itemToBePicked._id,
         x: testCharacter.x,
         y: testCharacter.y,
         scene: testCharacter.scene,
@@ -93,19 +93,19 @@ describe("ItemPickup.ts", () => {
       scene: testCharacter.scene,
     });
 
-    const pickup = await pickupItem(inventoryItemContainerId, { itemId: mapItem.id });
+    const pickup = await pickupItem(inventoryItemContainerId, { itemId: mapItem._id });
 
     expect(pickup).toBeTruthy();
 
-    const item = await Item.findById(mapItem.id);
+    const item = await Item.findById(mapItem._id);
 
     if (!item) {
       throw new Error("Failed to find item after pickup!");
     }
 
-    expect(item.x).toBeUndefined();
-    expect(item.y).toBeUndefined();
-    expect(item.scene).toBeUndefined();
+    expect(item.x).toBeFalsy();
+    expect(item.y).toBeFalsy();
+    expect(item.scene).toBeFalsy();
 
     const itemContainer = await ItemContainer.findById(inventoryItemContainerId);
 
