@@ -77,7 +77,7 @@ export class CharacterBuffAttribute {
 
     // then delete the buff from redis
 
-    const hasDeletedBuff = await this.characterBuffTracker.deleteBuff(character, buff._id!);
+    const hasDeletedBuff = await this.characterBuffTracker.deleteBuff(character, buff._id!, buff.trait!);
 
     if (!hasDeletedBuff) {
       throw new Error(`Could not delete buff from character ${character._id} - ${buff._id}`);

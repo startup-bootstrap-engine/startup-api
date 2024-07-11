@@ -61,7 +61,7 @@ describe("CharacterBuffTracker", () => {
 
     testBuff = (await characterBuffTracker.addBuff(testCharacter._id, testBuff)) as ICharacterTemporaryBuff;
 
-    const result = await characterBuffTracker.deleteBuff(testCharacter, testBuff._id!);
+    const result = await characterBuffTracker.deleteBuff(testCharacter, testBuff._id!, testBuff.trait!);
 
     expect(result).toBeTruthy();
 
@@ -342,7 +342,7 @@ describe("CharacterBuffTracker", () => {
   it("should handle errors when deleting a non-existent buff", async () => {
     const nonExistentBuffId = "non-existent-buff-id";
 
-    const result = await characterBuffTracker.deleteBuff(testCharacter, nonExistentBuffId);
+    const result = await characterBuffTracker.deleteBuff(testCharacter, nonExistentBuffId, BasicAttribute.Strength);
     expect(result).toBe(false);
   });
 
@@ -361,9 +361,9 @@ describe("CharacterBuffTracker", () => {
     const clearCacheSpy = jest.spyOn(characterBuffTracker, "clearCache");
 
     if (addedBuff && addedBuff._id) {
-      await characterBuffTracker.deleteBuff(testCharacter, addedBuff._id);
+      await characterBuffTracker.deleteBuff(testCharacter, addedBuff._id, testBuff.trait);
     }
 
-    expect(clearCacheSpy).toHaveBeenCalledWith(testCharacter);
+    expect(clearCacheSpy).toHaveBeenCalledWith(expect.objectContaining({ _id: testCharacter._id }), testBuff.trait);
   });
 });

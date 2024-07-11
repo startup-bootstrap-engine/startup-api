@@ -11,8 +11,6 @@ import { CharacterBuffTracker } from "./CharacterBuffTracker";
 
 @provide(CharacterBuffSkill)
 export class CharacterBuffSkill {
-  private skillCache: Map<string, ISkill> = new Map();
-
   constructor(
     private characterBuffTracker: CharacterBuffTracker,
     private socketMessaging: SocketMessaging,
@@ -44,7 +42,7 @@ export class CharacterBuffSkill {
       return false;
     }
 
-    const hasDeletedBuff = await this.characterBuffTracker.deleteBuff(character, buff._id!);
+    const hasDeletedBuff = await this.characterBuffTracker.deleteBuff(character, buff._id!, buff.trait!);
 
     if (!hasDeletedBuff) {
       throw new Error("Could not delete buff from character");
@@ -55,18 +53,16 @@ export class CharacterBuffSkill {
   }
 
   private async getSkill(character: ICharacter): Promise<ISkill> {
-    if (!this.skillCache.has(character._id)) {
-      const skill = await Skill.findById(character.skills)
-        .lean()
-        .cacheQuery({
-          cacheKey: `${character?._id}-skills`,
-        });
-      if (!skill) {
-        throw new Error("Skill not found");
-      }
-      this.skillCache.set(character._id, skill as unknown as ISkill);
+    const skill = await Skill.findById(character.skills)
+      .lean<ISkill>()
+      .cacheQuery({
+        cacheKey: `${character?._id}-skills`,
+      });
+    if (!skill) {
+      throw new Error("Skill not found");
     }
-    return this.skillCache.get(character._id)!;
+
+    return skill;
   }
 
   private async performBuffValueCalculations(

@@ -25,7 +25,7 @@ export class CharacterBuffTracker {
       // eslint-disable-next-line mongoose-lean/require-lean
       await newCharacterBuff.save();
 
-      await this.clearCache({ _id: characterId } as ICharacter, buff.trait);
+      await this.clearCache(characterId, buff.trait);
 
       return newCharacterBuff.toObject() as ICharacterBuff;
     } catch (error) {
@@ -107,14 +107,14 @@ export class CharacterBuffTracker {
   }
 
   @TrackNewRelicTransaction()
-  public async deleteBuff(character: ICharacter, buffId: string): Promise<boolean> {
+  public async deleteBuff(character: ICharacter, buffId: string, skillName: string): Promise<boolean> {
     try {
       const result = await CharacterBuff.deleteOne({ _id: buffId, owner: character._id });
       if (result.deletedCount === 0) {
         throw new Error("Buff not found");
       }
 
-      await this.clearCache(character);
+      await this.clearCache(character._id, skillName);
       return true;
     } catch (error) {
       console.error(error);
@@ -130,7 +130,7 @@ export class CharacterBuffTracker {
       }
 
       await CharacterBuff.deleteMany(query);
-      await this.clearCache(character);
+      await this.clearCache(character._id);
 
       return true;
     } catch (error) {
@@ -139,18 +139,12 @@ export class CharacterBuffTracker {
     }
   }
 
-  public async clearCache(character: ICharacter, skillName?: string): Promise<void> {
-    const cacheKeys = [
-      `characterBuffs_${character._id}`,
-      `${character._id}-skills`,
-      skillName ? `${character._id}-skill-level-with-buff:${skillName}` : null,
-    ].filter(Boolean);
-
-    await Promise.all([
-      ...cacheKeys.filter((key) => key !== null).map((key) => clearCacheForKey(key!)),
-      this.inMemoryHashTable.delete("skills-with-buff", character._id),
-      this.inMemoryHashTable.delete(character._id.toString(), "totalAttack"),
-      this.inMemoryHashTable.delete(character._id.toString(), "totalDefense"),
-    ]);
+  public async clearCache(characterId: string, skillName?: string): Promise<void> {
+    await clearCacheForKey(`characterBuffs_${characterId}`);
+    await clearCacheForKey(`${characterId}-skills`);
+    await this.inMemoryHashTable.delete("skills-with-buff", characterId);
+    await this.inMemoryHashTable.delete(characterId.toString(), "totalAttack");
+    await this.inMemoryHashTable.delete(characterId.toString(), "totalDefense");
+    skillName && (await this.inMemoryHashTable.delete(`${characterId}-skill-level-with-buff`, skillName));
   }
 }
