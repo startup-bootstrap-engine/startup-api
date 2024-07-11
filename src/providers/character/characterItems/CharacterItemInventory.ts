@@ -1,4 +1,4 @@
-import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Equipment, IEquipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
@@ -542,8 +542,7 @@ export class CharacterItemInventory {
   public async addEquipmentToCharacter(character: ICharacter): Promise<void> {
     const equipment = await this.createEquipmentWithInventory(character);
 
-    character.equipment = equipment._id;
-    await character.save();
+    await Character.updateOne({ _id: character._id }, { $set: { equipment: equipment._id } });
   }
 
   @TrackNewRelicTransaction()
@@ -609,7 +608,7 @@ export class CharacterItemInventory {
     decrementQty: number,
     inventoryId: string
   ): Promise<boolean> {
-    const itemContainer = (await ItemContainer.findById(inventoryId)) as IItemContainer;
+    const itemContainer = (await ItemContainer.findById(inventoryId).lean<IItemContainer>()) as IItemContainer;
 
     if (!itemContainer) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! Inventory container not found.");
