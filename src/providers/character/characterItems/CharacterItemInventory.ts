@@ -283,7 +283,7 @@ export class CharacterItemInventory {
       return false;
     }
 
-    const item = await Item.findById(itemId);
+    const item = await Item.findById(itemId).lean<IItem>();
 
     if (!item) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! The item to be deleted was not found.");
@@ -304,7 +304,7 @@ export class CharacterItemInventory {
   ): Promise<string | undefined> {
     const inventory = (await this.characterInventory.getInventory(character)) as unknown as IItem;
 
-    const inventoryItemContainer = await ItemContainer.findById(inventory?.itemContainer);
+    const inventoryItemContainer = await ItemContainer.findById(inventory?.itemContainer).lean<IItemContainer>();
 
     if (!inventoryItemContainer) {
       return;
@@ -324,7 +324,7 @@ export class CharacterItemInventory {
       if (!slotItem) continue;
 
       if (!slotItem.key) {
-        slotItem = (await Item.findById(slotItem as any)) as unknown as IItem;
+        slotItem = (await Item.findById(slotItem as any).lean<IItem>()) as unknown as IItem;
       }
       if (isSameKey(slotItem.key, itemKey) && (rarity === undefined || slotItem.rarity === rarity)) {
         return slotItem._id;
@@ -343,7 +343,7 @@ export class CharacterItemInventory {
   ): Promise<{ slotListId: string[]; qty: number }> {
     const inventory = (await this.characterInventory.getInventory(character)) as unknown as IItem;
 
-    const inventoryItemContainer = await ItemContainer.findById(inventory?.itemContainer);
+    const inventoryItemContainer = await ItemContainer.findById(inventory?.itemContainer).lean<IItemContainer>();
 
     if (!inventoryItemContainer) {
       return {
@@ -368,7 +368,7 @@ export class CharacterItemInventory {
       if (!slotItem) continue;
 
       if (!slotItem.key) {
-        slotItem = (await Item.findById(slotItem as any)) as unknown as IItem;
+        slotItem = (await Item.findById(slotItem as any).lean<IItem>()) as unknown as IItem;
       }
       if (isSameKey(slotItem.key, itemKey) && (rarity === undefined || slotItem.rarity === rarity)) {
         qty += slotItem.stackQty ?? 0;
@@ -387,7 +387,7 @@ export class CharacterItemInventory {
   @TrackNewRelicTransaction()
   public async checkItemInInventory(itemId: string, character: ICharacter): Promise<number | undefined> {
     const inventory = (await this.characterInventory.getInventory(character)) as unknown as IItem;
-    const inventoryItemContainer = await ItemContainer.findById(inventory?.itemContainer);
+    const inventoryItemContainer = await ItemContainer.findById(inventory?.itemContainer).lean<IItemContainer>();
 
     if (!inventoryItemContainer) {
       return;
@@ -420,7 +420,7 @@ export class CharacterItemInventory {
       if (!slotItem) continue;
 
       if (!slotItem.key) {
-        slotItem = (await Item.findById(slotItem as any).lean()) as unknown as IItem;
+        slotItem = (await Item.findById(slotItem as any).lean<IItem>()) as unknown as IItem;
       }
 
       let result = true;
@@ -451,7 +451,7 @@ export class CharacterItemInventory {
 
             // we need to fetch updated container in case some quantity remains to be substracted
             if (result && decrementQty > 0) {
-              const updatedCont = await ItemContainer.findById(container._id).lean();
+              const updatedCont = await ItemContainer.findById(container._id).lean<IItemContainer>();
               if (!updatedCont) {
                 result = false;
                 break;
