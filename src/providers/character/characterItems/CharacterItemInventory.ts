@@ -1,4 +1,3 @@
-/* eslint-disable mongoose-lean/require-lean */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Equipment, IEquipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
@@ -135,6 +134,7 @@ export class CharacterItemInventory {
       this.updateItemWithFoodRarityData(item, foodRarityData);
     }
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     await item.save();
 
     return this.characterItemsContainer.addItemToContainer(item, character, inventory.itemContainer.toString());
@@ -171,7 +171,7 @@ export class CharacterItemInventory {
     decrementQty: number
   ): Promise<boolean> {
     const inventory = (await this.characterInventory.getInventory(character)) as unknown as IItem;
-    const inventoryItemContainer = await ItemContainer.findById(inventory?.itemContainer);
+    const inventoryItemContainer = (await ItemContainer.findById(inventory?.itemContainer).lean()) as IItemContainer;
 
     if (!inventoryItemContainer) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! Inventory container not found.");
@@ -210,7 +210,7 @@ export class CharacterItemInventory {
   ): Promise<boolean> {
     const inventory = (await this.characterInventory.getInventory(character)) as unknown as IItem;
 
-    const inventoryItemContainer = await ItemContainer.findById(inventory?.itemContainer);
+    const inventoryItemContainer = await ItemContainer.findById(inventory?.itemContainer).lean<IItemContainer>();
 
     if (!inventoryItemContainer) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! Inventory container not found.");
@@ -238,7 +238,9 @@ export class CharacterItemInventory {
     character: ICharacter,
     decrementQty: number
   ): Promise<IDecrementItemByKeyResult> {
-    const itemContainers = await ItemContainer.find({ owner: character._id, name: { $ne: "Depot" } });
+    const itemContainers = await ItemContainer.find({ owner: character._id, name: { $ne: "Depot" } }).lean<
+      IItemContainer[]
+    >();
 
     if (!itemContainers) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Oops! Inventory container not found.");
@@ -418,7 +420,7 @@ export class CharacterItemInventory {
       if (!slotItem) continue;
 
       if (!slotItem.key) {
-        slotItem = (await Item.findById(slotItem as any)) as unknown as IItem;
+        slotItem = (await Item.findById(slotItem as any).lean()) as unknown as IItem;
       }
 
       let result = true;
@@ -449,7 +451,7 @@ export class CharacterItemInventory {
 
             // we need to fetch updated container in case some quantity remains to be substracted
             if (result && decrementQty > 0) {
-              const updatedCont = await ItemContainer.findById(container.id);
+              const updatedCont = await ItemContainer.findById(container._id).lean();
               if (!updatedCont) {
                 result = false;
                 break;
