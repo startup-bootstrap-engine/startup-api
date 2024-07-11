@@ -1,12 +1,12 @@
-/* eslint-disable mongoose-lean/require-lean */
 import { CharacterBuff } from "@entities/ModuleCharacter/CharacterBuffModel";
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { CharacterBuffDurationType, CharacterTrait, ICharacterBuff, ICharacterItemBuff } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-
-import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
+import { Types } from "mongoose";
 import { clearCacheForKey } from "speedgoose";
+
 interface ICharacterBuffDeleteOptions {
   deleteTemporaryOnly?: boolean;
 }
@@ -22,12 +22,12 @@ export class CharacterBuffTracker {
         owner: characterId,
         ...buff,
       });
-
+      // eslint-disable-next-line mongoose-lean/require-lean
       await newCharacterBuff.save();
 
       await this.clearCache({ _id: characterId } as ICharacter, buff.trait);
 
-      return newCharacterBuff as ICharacterBuff;
+      return newCharacterBuff.toObject() as ICharacterBuff;
     } catch (error) {
       console.error(error);
       throw error;
@@ -36,69 +36,58 @@ export class CharacterBuffTracker {
 
   @TrackNewRelicTransaction()
   public async getAllCharacterBuffs(characterId: string): Promise<ICharacterBuff[]> {
-    // cacheQuery dose not work
-    const allCharacterBuffs = (await CharacterBuff.find({ owner: characterId })
-      .lean()
+    const allCharacterBuffs = await CharacterBuff.find({ owner: characterId })
+      .lean<ICharacterBuff[]>()
       .cacheQuery({
         cacheKey: `characterBuffs_${characterId}`,
-      })) as ICharacterBuff[];
+      });
 
     return allCharacterBuffs;
   }
 
   @TrackNewRelicTransaction()
   public async hasBuffs(characterId: string): Promise<boolean> {
-    const buffs = await this.getAllCharacterBuffs(characterId);
-
-    return buffs.length > 0;
+    const count = await CharacterBuff.countDocuments({ owner: characterId });
+    return count > 0;
   }
 
   public async hasBuffsByTrait(characterId: string, trait: CharacterTrait): Promise<boolean> {
-    const buffs = await this.getAllCharacterBuffs(characterId);
-
-    return buffs.some((buff) => buff.trait === trait);
+    const count = await CharacterBuff.countDocuments({ owner: characterId, trait });
+    return count > 0;
   }
 
   @TrackNewRelicTransaction()
   public async getAllBuffAbsoluteChanges(characterId: string, trait: CharacterTrait): Promise<number> {
-    const characterBuffs = await this.getAllCharacterBuffs(characterId);
+    const result = await CharacterBuff.aggregate([
+      { $match: { owner: Types.ObjectId(characterId), trait } },
+      { $group: { _id: null, totalChange: { $sum: "$absoluteChange" } } },
+    ]);
 
-    const buffs = characterBuffs.filter((buff) => buff.trait === trait);
-
-    if (!buffs) {
-      return 0;
-    }
-
-    return buffs.reduce((acc, buff) => acc + buff.absoluteChange!, 0);
+    return result[0]?.totalChange || 0;
   }
 
   @TrackNewRelicTransaction()
   public async getAllBuffPercentageChanges(characterId: string, trait: CharacterTrait): Promise<number> {
-    const characterBuffs = await this.getAllCharacterBuffs(characterId);
+    const result = await CharacterBuff.aggregate([
+      { $match: { owner: Types.ObjectId(characterId), trait } },
+      { $group: { _id: null, totalPercentage: { $sum: "$buffPercentage" } } },
+    ]);
 
-    const buffs = characterBuffs.filter((buff) => buff.trait === trait);
-
-    if (!buffs) {
-      return 0;
-    }
-
-    return buffs.reduce((acc, buff) => acc + buff.buffPercentage!, 0);
+    return result[0]?.totalPercentage || 0;
   }
 
   @TrackNewRelicTransaction()
-  public async getBuffByItemId(characterId: string, itemId: string): Promise<ICharacterItemBuff[]> {
-    const currentBuffs = (await this.getAllCharacterBuffs(characterId)) as ICharacterItemBuff[];
-
-    const buffs = currentBuffs.filter((buff) => String(buff?.itemId) === String(itemId));
-
-    return buffs;
+  public async getBuffsByItemId(characterId: string, itemId: string): Promise<ICharacterItemBuff[]> {
+    const query = {
+      owner: Types.ObjectId(characterId),
+      itemId: itemId, // Keep itemId as string
+    };
+    return await CharacterBuff.find(query).lean<ICharacterItemBuff[]>();
   }
 
   @TrackNewRelicTransaction()
-  public async getBuffByItemKey(character: ICharacter, itemKey: string): Promise<ICharacterItemBuff | undefined> {
-    const buff = (await CharacterBuff.findOne({ owner: character._id, itemKey }).lean()) as ICharacterItemBuff;
-
-    return buff;
+  public async getBuffByItemKey(character: ICharacter, itemKey: string): Promise<ICharacterItemBuff | null> {
+    return await CharacterBuff.findOne({ owner: character._id, itemKey }).lean<ICharacterItemBuff>();
   }
 
   @TrackNewRelicTransaction()
@@ -120,16 +109,12 @@ export class CharacterBuffTracker {
   @TrackNewRelicTransaction()
   public async deleteBuff(character: ICharacter, buffId: string): Promise<boolean> {
     try {
-      const buff = (await this.getBuff(character._id, buffId)) as ICharacterBuff;
-
-      if (!buff) {
+      const result = await CharacterBuff.deleteOne({ _id: buffId, owner: character._id });
+      if (result.deletedCount === 0) {
         throw new Error("Buff not found");
       }
 
-      await CharacterBuff.deleteOne({ _id: buffId, owner: character._id });
-
-      await this.clearCache(character, buff?.trait);
-
+      await this.clearCache(character);
       return true;
     } catch (error) {
       console.error(error);
@@ -139,29 +124,33 @@ export class CharacterBuffTracker {
 
   public async deleteAllCharacterBuffs(character: ICharacter, options?: ICharacterBuffDeleteOptions): Promise<boolean> {
     try {
+      const query: Record<string, any> = { owner: character._id };
       if (options?.deleteTemporaryOnly) {
-        await CharacterBuff.deleteMany({
-          owner: character._id,
-          durationType: CharacterBuffDurationType.Temporary,
-        });
-      } else {
-        await CharacterBuff.deleteMany({ owner: character._id });
+        query.durationType = CharacterBuffDurationType.Temporary;
       }
+
+      await CharacterBuff.deleteMany(query);
+      await this.clearCache(character);
 
       return true;
     } catch (error) {
       console.error(error);
-
       return false;
     }
   }
 
-  public async clearCache(character: ICharacter, skillName: string): Promise<void> {
-    await clearCacheForKey(`characterBuffs_${character._id}`);
-    await clearCacheForKey(`${character._id}-skills`);
-    await this.inMemoryHashTable.delete("skills-with-buff", character._id);
-    await this.inMemoryHashTable.delete(character._id.toString(), "totalAttack");
-    await this.inMemoryHashTable.delete(character._id.toString(), "totalDefense");
-    await this.inMemoryHashTable.delete(`${character._id}-skill-level-with-buff`, skillName);
+  public async clearCache(character: ICharacter, skillName?: string): Promise<void> {
+    const cacheKeys = [
+      `characterBuffs_${character._id}`,
+      `${character._id}-skills`,
+      skillName ? `${character._id}-skill-level-with-buff:${skillName}` : null,
+    ].filter(Boolean);
+
+    await Promise.all([
+      ...cacheKeys.filter((key) => key !== null).map((key) => clearCacheForKey(key!)),
+      this.inMemoryHashTable.delete("skills-with-buff", character._id),
+      this.inMemoryHashTable.delete(character._id.toString(), "totalAttack"),
+      this.inMemoryHashTable.delete(character._id.toString(), "totalDefense"),
+    ]);
   }
 }

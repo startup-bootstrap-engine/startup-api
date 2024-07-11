@@ -129,7 +129,7 @@ export class EquipmentUnequip {
       inventory: newInventoryContainer,
     });
 
-    const buffs = await this.characterBuffTracker.getBuffByItemId(character._id, item._id);
+    const buffs = await this.characterBuffTracker.getBuffsByItemId(character._id, item._id);
 
     for (const buff of buffs) {
       await this.characterBuffActivator.disableBuff(character, buff._id!, buff.type, true);

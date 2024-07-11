@@ -56,7 +56,7 @@ export class CharacterItemBuff {
         await Promise.all(
           equippedBuffs.map(async (buff) => {
             // avoid same item stacking
-            const hasSameItemBuff = await this.characterBuffTracker.getBuffByItemId(character._id, item._id);
+            const hasSameItemBuff = await this.characterBuffTracker.getBuffsByItemId(character._id, item._id);
 
             if (hasSameItemBuff.length > 0) {
               return null; // return null instead of sending a message
@@ -85,7 +85,7 @@ export class CharacterItemBuff {
   @TrackNewRelicTransaction()
   public async disableItemBuff(character: ICharacter, itemId: string): Promise<void> {
     try {
-      const itemBuffs = await this.characterBuffTracker.getBuffByItemId(character._id, itemId);
+      const itemBuffs = await this.characterBuffTracker.getBuffsByItemId(character._id, itemId);
 
       if (itemBuffs.length === 0) {
         return;

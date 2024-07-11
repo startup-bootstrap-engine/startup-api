@@ -211,7 +211,7 @@ describe("CharacterBuffTracker", () => {
 
     await characterBuffTracker.addBuff(testCharacter._id, testBuff);
 
-    const retrievedBuff = await characterBuffTracker.getBuffByItemId(testCharacter._id, "test-item-id");
+    const retrievedBuff = await characterBuffTracker.getBuffsByItemId(testCharacter._id, "test-item-id");
 
     expect(retrievedBuff).toBeDefined();
     expect(retrievedBuff).toMatchObject([testBuff]);
@@ -234,7 +234,7 @@ describe("CharacterBuffTracker", () => {
     await characterBuffTracker.addBuff(testCharacter._id, testBuff2);
 
     // Get buffs by item ID
-    const retrievedBuffs = await characterBuffTracker.getBuffByItemId(testCharacter.id, "test-item-id");
+    const retrievedBuffs = await characterBuffTracker.getBuffsByItemId(testCharacter.id, "test-item-id");
 
     // Assertions
     expect(retrievedBuffs).toBeDefined();
@@ -243,7 +243,7 @@ describe("CharacterBuffTracker", () => {
   });
 
   it("should return empty array if buff with item ID is not found", async () => {
-    const retrievedBuff = await characterBuffTracker.getBuffByItemId(testCharacter._id, "nonexistent-item-id");
+    const retrievedBuff = await characterBuffTracker.getBuffsByItemId(testCharacter._id, "nonexistent-item-id");
 
     expect(retrievedBuff).toEqual([]);
   });
@@ -266,5 +266,104 @@ describe("CharacterBuffTracker", () => {
     const retrievedBuff = await characterBuffTracker.getBuffByItemKey(testCharacter, "nonexistent-item-key");
 
     expect(retrievedBuff).toBeFalsy();
+  });
+
+  it("should return true when character has buffs", async () => {
+    const testBuff = createTestBuff() as ICharacterTemporaryBuff;
+    await characterBuffTracker.addBuff(testCharacter._id, testBuff);
+
+    const hasBuffs = await characterBuffTracker.hasBuffs(testCharacter._id);
+    expect(hasBuffs).toBe(true);
+  });
+
+  it("should return false when character has no buffs", async () => {
+    const hasBuffs = await characterBuffTracker.hasBuffs(testCharacter._id);
+    expect(hasBuffs).toBe(false);
+  });
+
+  it("should return true when character has buffs for a specific trait", async () => {
+    const testBuff = createTestBuff() as ICharacterTemporaryBuff;
+    await characterBuffTracker.addBuff(testCharacter._id, testBuff);
+
+    const hasBuffs = await characterBuffTracker.hasBuffsByTrait(testCharacter._id, BasicAttribute.Strength);
+    expect(hasBuffs).toBe(true);
+  });
+
+  it("should return false when character has no buffs for a specific trait", async () => {
+    const hasBuffs = await characterBuffTracker.hasBuffsByTrait(testCharacter._id, BasicAttribute.Dexterity);
+    expect(hasBuffs).toBe(false);
+  });
+
+  it("should get all buff percentage changes for a specific trait", async () => {
+    const testBuff1 = {
+      ...createTestBuff(),
+      buffPercentage: 5,
+    } as ICharacterTemporaryBuff;
+    const testBuff2 = {
+      ...createTestBuff(),
+      buffPercentage: 10,
+    } as ICharacterTemporaryBuff;
+
+    await characterBuffTracker.addBuff(testCharacter._id, testBuff1);
+    await characterBuffTracker.addBuff(testCharacter._id, testBuff2);
+
+    const totalPercentageChange = await characterBuffTracker.getAllBuffPercentageChanges(
+      testCharacter._id,
+      BasicAttribute.Strength
+    );
+
+    expect(totalPercentageChange).toEqual(15);
+  });
+
+  it("should return 0 for buff absolute changes when no buffs exist", async () => {
+    const totalAbsoluteChange = await characterBuffTracker.getAllBuffAbsoluteChanges(
+      testCharacter._id,
+      BasicAttribute.Strength
+    );
+
+    expect(totalAbsoluteChange).toEqual(0);
+  });
+
+  it("should return 0 for buff percentage changes when no buffs exist", async () => {
+    const totalPercentageChange = await characterBuffTracker.getAllBuffPercentageChanges(
+      testCharacter._id,
+      BasicAttribute.Strength
+    );
+
+    expect(totalPercentageChange).toEqual(0);
+  });
+
+  it("should handle errors when adding a buff", async () => {
+    const invalidBuff = {} as ICharacterTemporaryBuff; // Invalid buff object
+
+    await expect(characterBuffTracker.addBuff(testCharacter._id, invalidBuff)).rejects.toThrow();
+  });
+
+  it("should handle errors when deleting a non-existent buff", async () => {
+    const nonExistentBuffId = "non-existent-buff-id";
+
+    const result = await characterBuffTracker.deleteBuff(testCharacter, nonExistentBuffId);
+    expect(result).toBe(false);
+  });
+
+  it("should clear cache after adding a buff", async () => {
+    const testBuff = createTestBuff() as ICharacterTemporaryBuff;
+    const clearCacheSpy = jest.spyOn(characterBuffTracker, "clearCache");
+
+    await characterBuffTracker.addBuff(testCharacter._id, testBuff);
+
+    expect(clearCacheSpy).toHaveBeenCalledWith(expect.objectContaining({ _id: testCharacter._id }), testBuff.trait);
+  });
+
+  it("should clear cache after deleting a buff", async () => {
+    const testBuff = createTestBuff() as ICharacterTemporaryBuff;
+    const addedBuff = await characterBuffTracker.addBuff(testCharacter._id, testBuff);
+    const clearCacheSpy = jest.spyOn(characterBuffTracker, "clearCache");
+
+    if (addedBuff && addedBuff._id) {
+      await characterBuffTracker.deleteBuff(testCharacter, addedBuff._id);
+    }
+
+    expect(clearCacheSpy).toHaveBeenCalledWith(testCharacter);
   });
 });
