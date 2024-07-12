@@ -68,12 +68,29 @@ export class CharacterBuffTracker {
 
   @TrackNewRelicTransaction()
   public async getAllBuffPercentageChanges(characterId: string, trait: CharacterTrait): Promise<number> {
+    const cacheKey = "character-total-buff-percentage-changes";
+
+    let totalBuffPercentagesChangesCache = await this.inMemoryHashTable.get(cacheKey, characterId);
+
+    if (totalBuffPercentagesChangesCache && totalBuffPercentagesChangesCache[trait] !== undefined) {
+      return totalBuffPercentagesChangesCache[trait];
+    }
+
     const result = await CharacterBuff.aggregate([
       { $match: { owner: Types.ObjectId(characterId), trait } },
       { $group: { _id: null, totalPercentage: { $sum: "$buffPercentage" } } },
     ]);
 
-    return result[0]?.totalPercentage || 0;
+    const totalPercentage = result[0]?.totalPercentage || 0;
+
+    if (!totalBuffPercentagesChangesCache) {
+      totalBuffPercentagesChangesCache = {};
+    }
+    totalBuffPercentagesChangesCache[trait] = totalPercentage;
+
+    await this.inMemoryHashTable.set(cacheKey, characterId, totalBuffPercentagesChangesCache);
+
+    return totalPercentage;
   }
 
   @TrackNewRelicTransaction()
@@ -146,5 +163,6 @@ export class CharacterBuffTracker {
     await this.inMemoryHashTable.delete(characterId.toString(), "totalAttack");
     await this.inMemoryHashTable.delete(characterId.toString(), "totalDefense");
     skillName && (await this.inMemoryHashTable.delete(`${characterId}-skill-level-with-buff`, skillName));
+    await this.inMemoryHashTable.delete("character-total-buff-percentage-changes", characterId);
   }
 }
