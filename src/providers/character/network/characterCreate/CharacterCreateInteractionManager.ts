@@ -105,7 +105,7 @@ export class CharacterCreateInteractionManager {
   private async recalculateSpeed(character: ICharacter): Promise<{ speed: number }> {
     //! temporary ugly hack until we figure out why the hell sometimes the speed bugs out of nowhere
 
-    await this.characterBuffTracker.clearCache(character, "speed");
+    await this.characterBuffTracker.clearCache(character._id, "speed");
 
     const baseSpeed = await this.characterBaseSpeed.getBaseSpeed(character);
 
