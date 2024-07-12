@@ -7,6 +7,7 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { container } from "@providers/inversify/container";
+import { ItemView } from "@providers/item/ItemView";
 import { PlantGrowth } from "@providers/plant/PlantGrowth";
 import { SimpleTutorial } from "@providers/simpleTutorial/SimpleTutorial";
 import {
@@ -39,7 +40,8 @@ export class UseWithRefill {
     private movementHelper: MovementHelper,
     private plantGrowth: PlantGrowth,
     private simpleTutorial: SimpleTutorial,
-    private animationEffect: AnimationEffect
+    private animationEffect: AnimationEffect,
+    private itemView: ItemView
   ) {}
 
   public async executeUse(character: ICharacter, options: IUseWithRefill, skillIncrease: SkillIncrease): Promise<void> {
@@ -125,13 +127,11 @@ export class UseWithRefill {
         );
 
         targetItem.isTileTinted = true;
-        // eslint-disable-next-line mongoose-lean/require-lean
-        await targetItem.save();
+        await Item.updateOne({ _id: targetItem._id }, { $set: { isTileTinted: true } });
 
         await this.simpleTutorial.sendSimpleTutorialActionToCharacter(character, "plant-water");
 
-        // eslint-disable-next-line mongoose-lean/require-lean
-        await originItem.save();
+        await Item.updateOne({ _id: originItem._id }, { $set: { remainingUses: originItem.remainingUses } });
 
         await skillIncrease.increaseCraftingSP(character, ItemType.Plant, true);
 
@@ -140,6 +140,8 @@ export class UseWithRefill {
         }
 
         await this.animationEffect.sendAnimationEventToCharacter(character, AnimationEffectKeys.SkillLevelUp);
+
+        await this.itemView.warnCharacterAboutItemsInView(character, { always: true });
       }
     } catch (error) {
       console.log(error);
