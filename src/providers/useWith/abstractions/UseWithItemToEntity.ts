@@ -120,7 +120,7 @@ export class UseWithItemToEntity {
       return;
     }
 
-    void this.characterWeight.updateCharacterWeight(character);
+    await this.characterWeight.updateCharacterWeight(character);
 
     if (successAnimationEffectKey) {
       await this.animationEffect.sendAnimationEventToCharacter(

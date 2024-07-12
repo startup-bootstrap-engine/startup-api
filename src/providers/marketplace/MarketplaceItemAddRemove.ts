@@ -68,7 +68,7 @@ export class MarketplaceItemAddRemove {
       return false;
     }
 
-    void this.characterWeight.updateCharacterWeight(character);
+    await this.characterWeight.updateCharacterWeight(character);
     await this.sendRefreshItemsEvent(character);
 
     await new MarketplaceItem({
@@ -147,7 +147,7 @@ export class MarketplaceItemAddRemove {
       return false;
     }
 
-    void this.characterWeight.updateCharacterWeight(character);
+    await this.characterWeight.updateCharacterWeight(character);
     await marketplaceItem.remove();
     await this.sendRefreshItemsEvent(character);
 

@@ -301,7 +301,7 @@ export class QuestSystem {
       backpackContainer.markModified("slots");
       await backpackContainer.save();
 
-      void this.characterWeight.updateCharacterWeight(character);
+      await this.characterWeight.updateCharacterWeight(character);
 
       const equipmentSlots = await this.equipmentSlots.getEquipmentSlots(
         character._id,

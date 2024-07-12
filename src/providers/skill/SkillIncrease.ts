@@ -130,7 +130,7 @@ export class SkillIncrease {
 
       if (increasedStrengthSP?.skillLevelUp && attacker.channelId) {
         await this.skillFunctions.sendSkillLevelUpEvents(increasedStrengthSP, attacker, target);
-        void this.characterWeight.updateCharacterWeight(attacker);
+        await this.characterWeight.updateCharacterWeight(attacker);
       }
 
       if (increasedWeaponSP?.skillLevelUp && attacker.channelId) {

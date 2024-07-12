@@ -200,7 +200,7 @@ export class CharacterTradingBuy {
     }
 
     // finally, update character's weight
-    void this.characterWeight.updateCharacterWeight(character);
+    await this.characterWeight.updateCharacterWeight(character);
 
     // eslint-disable-next-line mongoose-lean/require-lean
     const inventoryContainer = (await ItemContainer.findById(inventory?.itemContainer)) as unknown as IItemContainer;

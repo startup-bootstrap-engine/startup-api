@@ -65,7 +65,7 @@ export class CharacterTradingMarketplaceBuy {
       return false;
     }
 
-    void this.characterWeight.updateCharacterWeight(character);
+    await this.characterWeight.updateCharacterWeight(character);
 
     const inventoryContainer = (await ItemContainer.findById(inventory?.itemContainer)) as unknown as IItemContainer;
 

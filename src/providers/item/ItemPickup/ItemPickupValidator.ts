@@ -39,7 +39,7 @@ export class ItemPickupValidator {
   public async isItemPickupValid(itemPickupData: IItemPickup, character: ICharacter): Promise<boolean | IItem> {
     //! Adding lean here will cause a bug where plants can be harvested forever. This is because the item here goes to PlantHarvest and its called a .remove() on it. Needs to be fixed first.
     // eslint-disable-next-line mongoose-lean/require-lean
-    const item = (await Item.findById(itemPickupData.itemId)) as IItem;
+    const item = (await Item.findById(itemPickupData.itemId).lean({ virtuals: true, defaults: true })) as IItem;
 
     if (!item) {
       this.sendErrorMessage(character, "Sorry, the item to be picked up was not found.");
