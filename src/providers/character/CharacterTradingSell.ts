@@ -79,7 +79,7 @@ export class CharacterTradingSell {
 
     await this.addGoldToInventory(soldItems, character, npc);
 
-    void this.characterWeight.updateCharacterWeight(character);
+    await this.characterWeight.updateCharacterWeight(character);
 
     await clearCacheForKey(`${character._id}-inventory`);
     const inventoryItemContainer = (await this.characterInventory.getInventoryItemContainer(
