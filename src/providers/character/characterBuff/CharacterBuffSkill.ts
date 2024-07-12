@@ -4,7 +4,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { SkillBuff } from "@providers/skill/SkillBuff";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { TextFormatter } from "@providers/text/TextFormatter";
-import { ICharacterBuff, ISkill, ISkillDetails, SkillSocketEvents } from "@rpg-engine/shared";
+import { ICharacterBuff, ISkillDetails, SkillSocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { IBuffValueCalculations } from "./CharacterBuffAttribute";
 import { CharacterBuffTracker } from "./CharacterBuffTracker";
@@ -35,7 +35,6 @@ export class CharacterBuffSkill {
 
   @TrackNewRelicTransaction()
   public async disableBuff(character: ICharacter, buffId: string, noMessage = false): Promise<boolean> {
-    await this.getSkill(character);
     const buff = await this.characterBuffTracker.getBuff(character._id, buffId);
 
     if (!buff) {
@@ -50,19 +49,6 @@ export class CharacterBuffSkill {
 
     await this.sendUpdateToClient(character, buff, "deactivation", noMessage);
     return true;
-  }
-
-  private async getSkill(character: ICharacter): Promise<ISkill> {
-    const skill = await Skill.findById(character.skills)
-      .lean<ISkill>()
-      .cacheQuery({
-        cacheKey: `${character?._id}-skills`,
-      });
-    if (!skill) {
-      throw new Error("Skill not found");
-    }
-
-    return skill;
   }
 
   private async performBuffValueCalculations(

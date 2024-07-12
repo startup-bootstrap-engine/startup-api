@@ -27,7 +27,7 @@ export class CharacterBuffTracker {
 
       await this.clearCache(characterId, buff.trait);
 
-      return newCharacterBuff.toObject() as ICharacterBuff;
+      return newCharacterBuff as ICharacterBuff;
     } catch (error) {
       console.error(error);
       throw error;
@@ -110,8 +110,8 @@ export class CharacterBuffTracker {
   public async deleteBuff(character: ICharacter, buffId: string, skillName: string): Promise<boolean> {
     try {
       const result = await CharacterBuff.deleteOne({ _id: buffId, owner: character._id });
-      if (result.deletedCount === 0) {
-        throw new Error("Buff not found");
+      if (!result.ok) {
+        throw new Error(`Could not delete buff ${buffId}(${skillName}) from character ${character._id}`);
       }
 
       await this.clearCache(character._id, skillName);
