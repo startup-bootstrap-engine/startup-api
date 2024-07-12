@@ -6,7 +6,7 @@ import { CharacterClassBonusOrPenalties } from "@providers/character/characterBo
 import { CharacterBuffTracker } from "@providers/character/characterBuff/CharacterBuffTracker";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { NumberFormatter } from "@providers/text/NumberFormatter";
-import { CharacterAttributes, CharacterTrait } from "@rpg-engine/shared";
+import { CharacterAttributes, CharacterTrait, EntityType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { SkillsAvailable } from "./SkillTypes";
 
@@ -88,7 +88,7 @@ export class TraitGetter {
 
     let totalBuffPercentages = 0;
 
-    if (skills.ownerType === "Character") {
+    if (skills.ownerType === EntityType.Character) {
       const [allBuffPercentageChanges, classBonusPenaltiesBuff] = await Promise.all([
         this.characterBuffTracker.getAllBuffPercentageChanges(ownerStr, skillName as CharacterTrait),
         this.characterBonusOrPenalties.getClassBonusOrPenaltiesBuffs(ownerStr),
