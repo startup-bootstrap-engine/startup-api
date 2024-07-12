@@ -1,6 +1,7 @@
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   CombatSkill,
@@ -31,41 +32,23 @@ export const itemStarshardDagger: IEquippableMeleeTier11WeaponBlueprint = {
   entityEffectChance: 130,
   equippedBuff: [
     {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 12,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Strength,
-      buffPercentage: 7,
+      buffPercentage: 12,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel strength flowing through your body. (+7% strength)",
-          deactivation: "You feel strength leaving your body. (-7% strength)",
-        },
-      },
     },
     {
       type: CharacterBuffType.Skill,
-      trait: CombatSkill.Dagger,
-      buffPercentage: 6,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 12,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of dagger flowing through your body. (+6% dagger)",
-          deactivation: "You feel the power of dagger leaving your body. (-6% dagger)",
-        },
-      },
-    },
-    {
-      type: CharacterBuffType.Skill,
-      trait: BasicAttribute.MagicResistance,
-      buffPercentage: 6,
-      durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of magicResistance flowing through your body. (+6% magicResistance)",
-          deactivation: "You feel the power of magicResistance leaving your body. (-6% magicResistance)",
-        },
-      },
     },
   ],
-  equippedBuffDescription: "Increases strength by 7%, dagger by 6% and magicResistance by 6% respectively",
+  equippedBuffDescription: "Increases max health by 12%, strength by 12% and resistance by 12%.",
 };

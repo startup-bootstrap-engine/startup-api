@@ -1,6 +1,7 @@
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   CombatSkill,
@@ -31,41 +32,29 @@ export const itemShadowstrikeDagger: IEquippableMeleeTier12WeaponBlueprint = {
   entityEffectChance: 85,
   equippedBuff: [
     {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 16,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 14,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 14,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Strength,
-      buffPercentage: 7,
+      buffPercentage: 14,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel strength flowing through your body. (+7% strength)",
-          deactivation: "You feel strength leaving your body. (-7% strength)",
-        },
-      },
-    },
-    {
-      type: CharacterBuffType.Skill,
-      trait: CombatSkill.Dagger,
-      buffPercentage: 6,
-      durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of dagger flowing through your body. (+6% dagger)",
-          deactivation: "You feel the power of dagger leaving your body. (-6% dagger)",
-        },
-      },
-    },
-    {
-      type: CharacterBuffType.Skill,
-      trait: BasicAttribute.MagicResistance,
-      buffPercentage: 6,
-      durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of magicResistance flowing through your body. (+6% magicResistance)",
-          deactivation: "You feel the power of magicResistance leaving your body. (-6% magicResistance)",
-        },
-      },
     },
   ],
-  equippedBuffDescription: "Increases strength by 7%, dagger by 6% and magicResistance by 6% respectively",
+  equippedBuffDescription: "Increases Max Health by 16%, Max Mana by 14%, Resistance by 14%, and Strength by 14%.",
 };

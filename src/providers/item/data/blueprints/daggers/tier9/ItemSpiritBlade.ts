@@ -1,6 +1,8 @@
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableMeleeTier9WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
+  BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   CombatSkill,
@@ -29,17 +31,25 @@ export const itemSpiritBlade: IEquippableMeleeTier9WeaponBlueprint = {
   basePrice: 81,
   entityEffects: [EntityEffectBlueprint.Bleeding],
   entityEffectChance: 90,
-  equippedBuff: {
-    type: CharacterBuffType.Skill,
-    trait: CombatSkill.Dagger,
-    buffPercentage: 10,
-    durationType: CharacterBuffDurationType.Permanent,
-    options: {
-      messages: {
-        activation: "You feel the power of dagger flowing through your body. (+10% dagger)",
-        deactivation: "You feel the power of dagger leaving your body. (-10% dagger)",
-      },
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
     },
-  },
-  equippedBuffDescription: "Increases dagger by 10%",
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "Increases max health by 10%, strength by 10% and resistance by 10%.",
 };

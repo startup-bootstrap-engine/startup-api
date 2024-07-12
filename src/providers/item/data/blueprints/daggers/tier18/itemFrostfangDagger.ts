@@ -2,6 +2,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import { IEquippableMeleeTier18WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   CombatSkill,
@@ -29,19 +30,45 @@ export const itemFrostfangDagger: IEquippableMeleeTier18WeaponBlueprint = {
   rangeType: EntityAttackType.Melee,
   basePrice: 250,
   entityEffects: [EntityEffectBlueprint.Freezing, EntityEffectBlueprint.Burning],
-  entityEffectChance: 85,
+  entityEffectChance: 105,
   equippedBuff: [
     {
-      type: CharacterBuffType.Skill,
-      trait: CombatSkill.Dagger,
-      buffPercentage: 20,
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 35,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 30,
       durationType: CharacterBuffDurationType.Permanent,
     },
     {
       type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Dexterity,
-      buffPercentage: 20,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 28,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.MagicResistance,
+      buffPercentage: 28,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 28,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 28,
       durationType: CharacterBuffDurationType.Permanent,
     },
   ],
+  equippedBuffDescription:
+    "Increases Max Health by 35%, Max Mana by 30%, Magic by 28%, Magic Resistance by 28%, Resistance by 28%, and Strength by 28%.",
 };

@@ -1,6 +1,7 @@
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   CombatSkill,
@@ -31,41 +32,29 @@ export const itemSolarflareDagger: IEquippableMeleeTier13WeaponBlueprint = {
   entityEffectChance: 120,
   equippedBuff: [
     {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 18,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 16,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Strength,
-      buffPercentage: 7,
+      buffPercentage: 15,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel strength flowing through your body. (+7% strength)",
-          deactivation: "You feel strength leaving your body. (-7% strength)",
-        },
-      },
-    },
-    {
-      type: CharacterBuffType.Skill,
-      trait: CombatSkill.Dagger,
-      buffPercentage: 6,
-      durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of dagger flowing through your body. (+6% dagger)",
-          deactivation: "You feel the power of dagger leaving your body. (-6% dagger)",
-        },
-      },
-    },
-    {
-      type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Dexterity,
-      buffPercentage: 6,
-      durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of dexterity flowing through your body. (+6% dexterity)",
-          deactivation: "You feel the power of dexterity leaving your body. (-6% dexterity)",
-        },
-      },
     },
   ],
-  equippedBuffDescription: "Increases strength by 7%, dagger by 6% and dexterity by 6% respectively",
+  equippedBuffDescription: "Increases Max Health by 18%, Max Mana by 16%, Resistance by 15%, and Strength by 15%.",
 };
