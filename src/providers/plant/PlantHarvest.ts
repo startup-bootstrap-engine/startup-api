@@ -11,6 +11,7 @@ import {
   FARMING_RANDOM_REWARD_QTY_CAP,
   FARMING_SKILL_FACTOR,
 } from "@providers/constants/FarmingConstants";
+import { ItemView } from "@providers/item/ItemView";
 import { CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { TraitGetter } from "@providers/skill/TraitGetter";
@@ -45,7 +46,8 @@ export class PlantHarvest {
     private animationEffect: AnimationEffect,
     private skillIncrease: SkillIncrease,
     private traitGetter: TraitGetter,
-    private characterPlantActions: CharacterPlantActions
+    private characterPlantActions: CharacterPlantActions,
+    private itemView: ItemView
   ) {}
 
   @TrackNewRelicTransaction()
@@ -99,9 +101,7 @@ export class PlantHarvest {
     const newItem = await this.createAndSaveNewItem(character, harvestedItemBlueprint, harvestableItemQuantity);
 
     const rarity = this.getRandomRarity(skillLevel);
-    newItem.rarity = rarity;
-    // eslint-disable-next-line mongoose-lean/require-lean
-    await newItem.save();
+    await Item.updateOne({ _id: newItem._id }, { $set: { rarity } });
 
     const wasItemAddedToContainer = await this.addItemToContainer(newItem, character, inventoryContainerId);
 
@@ -286,24 +286,32 @@ export class PlantHarvest {
 
   private async handlePlantAfterHarvest(plant: IItem, blueprint: IPlantItem, character: ICharacter): Promise<void> {
     if (!blueprint.regrowsAfterHarvest) {
-      await plant.remove();
+      await Item.deleteOne({ _id: plant._id });
+      await this.itemView.warnCharactersAboutItemRemovalInView(plant, plant.x!, plant.y!, plant.scene!);
     } else {
       const currentRegrowthCount = (plant.regrowthCount ?? 0) + 1;
       const regrowAfterHarvestLimit = blueprint.regrowAfterHarvestLimit;
 
       if (!regrowAfterHarvestLimit || currentRegrowthCount > regrowAfterHarvestLimit) {
-        await plant.remove();
+        await Item.deleteOne({ _id: plant._id });
+        await this.itemView.warnCharactersAboutItemRemovalInView(plant, plant.x!, plant.y!, plant.scene!);
         return;
       }
 
-      plant.currentPlantCycle = PlantLifeCycle.Seed;
-      plant.texturePath = blueprint.stagesRequirements[PlantLifeCycle.Seed]?.texturePath ?? "";
-      plant.growthPoints = 0;
-      plant.requiredGrowthPoints = blueprint.stagesRequirements[PlantLifeCycle.Seed]?.requiredGrowthPoints ?? 0;
-      plant.regrowthCount = currentRegrowthCount;
-      // eslint-disable-next-line mongoose-lean/require-lean
-      await plant.save();
-      const itemToUpdate = this.prepareItemToUpdate(plant);
+      const updatedFields = {
+        currentPlantCycle: PlantLifeCycle.Seed,
+        texturePath: blueprint.stagesRequirements[PlantLifeCycle.Seed]?.texturePath ?? "",
+        growthPoints: 0,
+        requiredGrowthPoints: blueprint.stagesRequirements[PlantLifeCycle.Seed]?.requiredGrowthPoints ?? 0,
+        regrowthCount: currentRegrowthCount,
+      };
+
+      await Item.updateOne({ _id: plant._id }, { $set: updatedFields });
+
+      const updatedPlant = await Item.findById(plant._id).lean();
+      const itemToUpdate = this.prepareItemToUpdate(updatedPlant as IItem);
+
+      await this.itemView.warnCharacterAboutItemsInView(character, { always: true });
 
       await this.socketMessaging.sendEventToCharactersAroundCharacter<IItemUpdateAll>(
         character,
