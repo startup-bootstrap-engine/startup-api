@@ -127,6 +127,7 @@ export class SkillStatsIncrease {
     };
   }
 
+  @TrackNewRelicTransaction()
   private async updateEntitiesAttributes(
     character: ICharacter,
     updateAttributes: { maxHealth: number; maxMana: number }

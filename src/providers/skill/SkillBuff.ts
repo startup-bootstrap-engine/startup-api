@@ -71,6 +71,7 @@ export class SkillBuff {
   }
 
   // Separate method to apply each buff, returns a Promise
+  @TrackNewRelicTransaction()
   private async applyBuffToSkill(clonedSkills: ISkill, character: ICharacter, buff: ICharacterBuff): Promise<void> {
     try {
       const buffValue = await this.characterBuffTracker.getAllBuffPercentageChanges(
