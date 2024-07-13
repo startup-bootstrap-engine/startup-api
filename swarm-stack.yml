@@ -160,6 +160,44 @@ services:
       timeout: 15s
       retries: 3
 
+  swarm-cleaner:
+    image: docker:cli
+    command: >
+      sh -c "
+      while true; do
+        echo 'Running safe cleanup tasks...'
+        while true; do
+          RPG_DB_STATUS=$(docker inspect --format='{{.State.Health.Status}}' $(docker ps -qf name=rpg-db))
+          RPG_REDIS_STATUS=$(docker inspect --format='{{.State.Health.Status}}' $(docker ps -qf name=rpg-redis))
+          if [ \"$RPG_DB_STATUS\" == \"healthy\" ] && [ \"$RPG_REDIS_STATUS\" == \"healthy\" ]; then
+            break
+          else
+            echo 'rpg-db or rpg-redis is not healthy. Waiting for 1 minute...'
+            sleep 60
+          fi
+        done
+        # Remove stopped containers
+        docker container prune -f
+        # Remove dangling images
+        docker image prune -f
+        # Remove unused networks (excluding rpg-network)
+        docker network prune -f --filter \"until=24h\" --filter \"label!=com.docker.stack.namespace\"
+        # Remove unused volumes (excluding named volumes)
+        docker volume prune -f --filter \"label!=com.docker.stack.namespace\"
+        sleep 86400  # Run daily
+      done
+      "
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      mode: global
+      restart_policy:
+        condition: any
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 networks:
   rpg-network:
     external: true
