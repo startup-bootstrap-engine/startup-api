@@ -83,6 +83,7 @@ export class TraitGetter {
     return skillLevel;
   }
 
+  @TrackNewRelicTransaction()
   private async calculateTotalBuffPercentages(skills: ISkill, skillName: SkillsAvailable): Promise<number> {
     const ownerStr = skills.owner?.toString() as string;
 

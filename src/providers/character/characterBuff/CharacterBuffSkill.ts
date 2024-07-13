@@ -51,6 +51,7 @@ export class CharacterBuffSkill {
     return true;
   }
 
+  @TrackNewRelicTransaction()
   private async performBuffValueCalculations(
     character: ICharacter,
     buff: ICharacterBuff

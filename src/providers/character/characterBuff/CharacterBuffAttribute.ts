@@ -137,6 +137,7 @@ export class CharacterBuffAttribute {
     });
   }
 
+  @TrackNewRelicTransaction()
   private async performBuffValueCalculations(
     characterId: string,
     buff: ICharacterBuff
