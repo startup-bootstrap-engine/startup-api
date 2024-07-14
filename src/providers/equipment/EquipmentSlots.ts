@@ -1,4 +1,3 @@
-/* eslint-disable mongoose-lean/require-lean */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Equipment, IEquipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
@@ -80,44 +79,29 @@ export class EquipmentSlots {
       const equipmentSet = await this.getEquipmentSlots(equipment.owner?.toString()!, equipment._id);
 
       const targetSlotItemId = equipmentSet[availableSlot];
-      const targetSlotItem = await Item.findById(targetSlotItemId);
+      const targetSlotItem = await Item.findById(targetSlotItemId).lean();
 
       if (!targetSlotItem) {
-        equipment[availableSlot] = item;
-        await equipment.save();
+        await Equipment.findByIdAndUpdate(equipment._id, { [availableSlot]: item }, { new: true }).lean();
         await this.inMemoryHashTable.delete("equipment-slots", character._id.toString());
-
         return true;
       }
 
       const futureStackSize = targetSlotItem.stackQty! + item.stackQty!;
 
       if (isSameKey(targetSlotItem?.key, item.key)) {
-        // if we have the same item, check if the stack is full or not
         if (futureStackSize <= targetSlotItem?.maxStackSize) {
-          targetSlotItem.stackQty! = futureStackSize; // just add it to the existing stack, and that's it.
-          await targetSlotItem?.save();
-
-          // delete item from inventory
+          await Item.findByIdAndUpdate(targetSlotItem._id, { stackQty: futureStackSize }).lean();
           await this.inMemoryHashTable.delete("equipment-slots", character._id.toString());
-
           return true;
         } else {
-          // calculate the difference
           const difference = Math.abs(targetSlotItem?.maxStackSize - futureStackSize);
 
-          // set the stack to max
-          targetSlotItem.stackQty! = targetSlotItem?.maxStackSize;
-          await targetSlotItem?.save();
-
-          // set the item to the difference
-          item.stackQty! = difference;
-          await item.save();
-
-          // then add it to the inventory
+          await Item.findByIdAndUpdate(targetSlotItem._id, { stackQty: targetSlotItem?.maxStackSize }).lean();
+          await Item.findByIdAndUpdate(item._id, { stackQty: difference }).lean();
 
           const inventory = await this.characterInventory.getInventory(character);
-          const inventoryContainer = await ItemContainer.findById(inventory?.itemContainer);
+          const inventoryContainer = await ItemContainer.findById(inventory?.itemContainer).lean();
 
           if (!inventoryContainer) {
             throw new Error(`Item container ${inventory?._id} not found`);
@@ -142,9 +126,7 @@ export class EquipmentSlots {
       return false;
     }
 
-    equipment[availableSlot] = item;
-    await equipment.save();
-    // await this.characterItemsInventory.deleteItemFromInventory(item.id, character);
+    await Equipment.findByIdAndUpdate(equipment._id, { [availableSlot]: item }, { new: true }).lean();
     await this.inMemoryHashTable.delete("equipment-slots", character._id.toString());
 
     return true;

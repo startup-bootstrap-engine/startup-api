@@ -116,24 +116,6 @@ export class EquipmentEquip {
     }
   }
 
-  private async poolEquipUnequipResults(character: ICharacter, itemId: string): Promise<boolean> {
-    const checkInterval = 100; // Interval in milliseconds to check for result
-    const maxRetries = 3; // Maximum number of retries before giving up
-
-    for (let i = 0; i < maxRetries; i++) {
-      const result = (await this.inMemoryHashTable.get("equip-unequip-results", `${character._id}-${itemId}`)) as
-        | boolean
-        | undefined;
-      if (result !== undefined) {
-        await this.inMemoryHashTable.delete("equip-unequip-results", `${character._id}-${itemId}`);
-        return result;
-      }
-      await this.time.waitForMilliseconds(checkInterval);
-    }
-
-    return false;
-  }
-
   private async execEquip(character: ICharacter, itemId: string, fromItemContainerId: string): Promise<boolean> {
     const item = await Item.findById(itemId);
     if (!item) {
