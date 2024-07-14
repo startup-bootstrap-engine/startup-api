@@ -1,4 +1,3 @@
-/* eslint-disable mongoose-lean/require-lean */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Equipment, IEquipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { Skill } from "@entities/ModuleCharacter/SkillsModel";
@@ -62,20 +61,20 @@ export class EquipmentEquip {
 
   @TrackNewRelicTransaction()
   public async equipInventory(character: ICharacter, itemId: string): Promise<boolean> {
-    const item = await Item.findById(itemId);
+    const item = await Item.findById(itemId).lean<IItem>();
     if (!item) return this.sendError(character, "Item not found.");
 
     if (!item.isItemContainer) return this.sendError(character, "Cannot equip this as an inventory.");
 
-    const equipment = await Equipment.findById(character.equipment);
+    const equipment = await Equipment.findById(character.equipment).lean<IEquipment>();
     if (!equipment) return this.sendError(character, "Equipment not found.");
 
-    await Equipment.updateOne({ _id: equipment._id }, { $set: { inventory: item._id } });
+    await Equipment.findByIdAndUpdate(equipment._id, { $set: { inventory: item._id } }).lean();
 
     const inventory = await this.characterInventory.getInventory(character);
     if (!inventory) return this.sendError(character, "Inventory not found.");
 
-    const inventoryContainer = await ItemContainer.findById(inventory.itemContainer);
+    const inventoryContainer = await ItemContainer.findById(inventory.itemContainer).lean<IItemContainer>();
     if (!inventoryContainer) return this.sendError(character, "Inventory container not found.");
 
     await this.itemView.removeItemFromMap(item);
@@ -117,14 +116,14 @@ export class EquipmentEquip {
   }
 
   private async execEquip(character: ICharacter, itemId: string, fromItemContainerId: string): Promise<boolean> {
-    const item = await Item.findById(itemId);
+    const item = await Item.findById(itemId).lean<IItem>();
     if (!item) {
       this.sendError(character, "Item not found.");
       return false;
     }
 
     try {
-      const itemContainer = await ItemContainer.findById(fromItemContainerId);
+      const itemContainer = await ItemContainer.findById(fromItemContainerId).lean<IItemContainer>();
       if (!itemContainer) {
         this.sendError(character, "Unable to locate the specified item container.");
         return false;
@@ -134,7 +133,7 @@ export class EquipmentEquip {
         return false;
       }
 
-      const equipment = await Equipment.findById(character.equipment);
+      const equipment = await Equipment.findById(character.equipment).lean<IEquipment>();
       if (!equipment) {
         this.sendError(character, "Equipment not found.");
         return false;
@@ -145,14 +144,14 @@ export class EquipmentEquip {
       }
 
       const inventory = await this.characterInventory.getInventory(character);
-      const inventoryContainer = await ItemContainer.findById(inventory?.itemContainer);
+      const inventoryContainer = await ItemContainer.findById(inventory?.itemContainer).lean<IItemContainer>();
       if (!inventoryContainer) {
         this.sendError(character, "Failed to equip item.");
         return false;
       }
 
-      const updatedContainer = (await ItemContainer.findById(fromItemContainerId)) as any;
-      await this.itemPickupUpdater.sendContainerRead(updatedContainer, character);
+      const updatedContainer = await ItemContainer.findById(fromItemContainerId).lean<IItemContainer>();
+      await this.itemPickupUpdater.sendContainerRead(updatedContainer as any, character);
 
       await this.finalizeEquipItem(inventoryContainer, equipment, item, character);
       await this.clearCaches(character);
@@ -180,13 +179,14 @@ export class EquipmentEquip {
 
       this.updateItemInventoryCharacter(payloadUpdate, character);
 
-      await Item.updateOne(
-        { _id: item._id },
+      await Item.findByIdAndUpdate(
+        item._id,
         {
           $set: { isEquipped: true },
           $unset: { x: "", y: "", scene: "" },
-        }
-      );
+        },
+        { new: true }
+      ).lean();
 
       await this.clearCaches(character);
       await this.characterWeight.updateCharacterWeight(character);
@@ -206,6 +206,13 @@ export class EquipmentEquip {
     }
   }
 
+  private async checkContainerType(itemContainer: IItemContainer): Promise<SourceEquipContainerType> {
+    const parentItem = await Item.findById(itemContainer.parentItem).lean();
+    if (!parentItem) throw new Error("Parent item not found");
+
+    return parentItem.allowedEquipSlotType?.includes(ItemSlotType.Inventory) ? "inventory" : "container";
+  }
+
   private async clearCaches(character: ICharacter): Promise<void> {
     const cacheKeys = [
       `${character._id}-inventory`,
@@ -219,13 +226,6 @@ export class EquipmentEquip {
     ];
 
     await Promise.all(cacheKeys.map((key) => clearCacheForKey(key)));
-  }
-
-  private async checkContainerType(itemContainer: IItemContainer): Promise<SourceEquipContainerType> {
-    const parentItem = await Item.findById(itemContainer.parentItem);
-    if (!parentItem) throw new Error("Parent item not found");
-
-    return parentItem.allowedEquipSlotType?.includes(ItemSlotType.Inventory) ? "inventory" : "container";
   }
 
   private async isEquipValid(
