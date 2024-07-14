@@ -267,7 +267,7 @@ export class EquipmentSlots {
 
   @TrackNewRelicTransaction()
   public async removeItemFromSlot(character: ICharacter, key: string, slot: EquipmentSlotTypes): Promise<boolean> {
-    const equipment = await Equipment.findById(character.equipment).populate(this.slots.join(" ")).exec();
+    const equipment = await Equipment.findById(character.equipment).populate(this.slots.join(" ")).lean().exec();
 
     if (!equipment) {
       return false;
@@ -280,11 +280,9 @@ export class EquipmentSlots {
     }
 
     if (isSameKey(item.key, key)) {
-      equipment[slot] = undefined;
-      await equipment.save();
-
+      const update = { [slot]: null };
+      await Equipment.findByIdAndUpdate(character.equipment, update, { new: true }).lean();
       await this.characterItemBuff.disableItemBuff(character, item._id);
-
       return true;
     }
 

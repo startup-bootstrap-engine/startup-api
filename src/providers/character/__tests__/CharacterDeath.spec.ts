@@ -284,8 +284,8 @@ describe("CharacterDeath.ts", () => {
       const updatedEquipment = (await Equipment.findById(characterEquipment._id)) as IEquipment;
 
       // character equipment is empty
-      expect(updatedEquipment.neck).not.toBeDefined();
-      expect(updatedEquipment.head).not.toBeDefined();
+      expect(updatedEquipment.neck).toBeFalsy();
+      expect(updatedEquipment.head).toBeFalsy();
 
       bodyItemContainer = (await ItemContainer.findById(characterBody.itemContainer)) as IItemContainer;
 
@@ -378,7 +378,7 @@ describe("CharacterDeath.ts", () => {
 
         if (!equipment) throw new Error("Equipment not found");
 
-        expect(equipment.neck).toBeUndefined();
+        expect(equipment.neck).toBeFalsy();
       });
 
       it("If the character has NO amulet of death, it should drop items", async () => {
