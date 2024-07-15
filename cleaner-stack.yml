@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  docker-cleanup:
+    image: docker:stable
+    command: >
+      sh -c "
+      while true; do
+        echo 'Starting cleanup process...';
+        
+        if [ \"$$(docker node inspect self --format '{{ .Spec.Role }}')\" = 'manager' ]; then
+          echo 'On manager node. Performing selective cleanup...';
+          # Remove unused images, but not volumes
+          docker image prune -af;
+          # Remove containers not linked to running services, excluding rpg-db and rpg-redis
+          docker container prune -f --filter 'label!=com.docker.swarm.service.name=rpg-db' --filter 'label!=com.docker.swarm.service.name=rpg-redis';
+          # Remove networks not used by at least one container, excluding rpg-network
+          docker network prune -f --filter 'label!=com.docker.stack.namespace=rpg';
+        else
+          echo 'On worker node. Performing full cleanup...';
+          # Full cleanup on worker nodes
+          docker system prune -af --volumes;
+        fi
+        
+        echo 'Cleanup complete. Sleeping for 24 hours...';
+        sleep 86400;
+      done
+      "
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      mode: global
+      restart_policy:
+        condition: any
+    networks:
+      - rpg-network
+
+networks:
+  rpg-network:
+    external: true

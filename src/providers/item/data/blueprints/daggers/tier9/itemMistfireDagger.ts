@@ -1,6 +1,7 @@
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   CombatSkill,
@@ -31,41 +32,23 @@ export const itemMistfireDagger: IEquippableMeleeTier9WeaponBlueprint = {
   entityEffectChance: 85,
   equippedBuff: [
     {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Resistance,
-      buffPercentage: 6,
+      buffPercentage: 10,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of resistance flowing through your body. (+6% resistance)",
-          deactivation: "You feel the power of resistance leaving your body. (-6% resistance)",
-        },
-      },
-    },
-    {
-      type: CharacterBuffType.Skill,
-      trait: CombatSkill.Dagger,
-      buffPercentage: 6,
-      durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of dagger flowing through your body. (+6% dagger)",
-          deactivation: "You feel the power of dagger leaving your body. (-6% dagger)",
-        },
-      },
-    },
-    {
-      type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Dexterity,
-      buffPercentage: 5,
-      durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of dexterity flowing through your body. (+5% dexterity)",
-          deactivation: "You feel the power of dexterity leaving your body. (-5% dexterity)",
-        },
-      },
     },
   ],
-  equippedBuffDescription: "Increases resistance by 6%, dagger by 6% and dexterity by 5% respectively",
+  equippedBuffDescription: "Increases max health by 10%, strength by 10% and resistance by 10%.",
 };

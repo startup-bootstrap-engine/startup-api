@@ -1,6 +1,7 @@
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   CombatSkill,
@@ -29,44 +30,26 @@ export const itemHellishDagger: IEquippableMeleeTier4WeaponBlueprint = {
   rangeType: EntityAttackType.Melee,
   basePrice: 57,
   entityEffects: [EntityEffectBlueprint.Burning],
-  entityEffectChance: 80,
+  entityEffectChance: 90,
   equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 5,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 5,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Resistance,
       buffPercentage: 5,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of resistance flowing through your body. (+5% resistance)",
-          deactivation: "You feel the power of resistance leaving your body. (-5% resistance)",
-        },
-      },
-    },
-    {
-      type: CharacterBuffType.Skill,
-      trait: CombatSkill.Dagger,
-      buffPercentage: 5,
-      durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of dagger flowing through your body. (+5% dagger)",
-          deactivation: "You feel the power of dagger leaving your body. (-5% dagger)",
-        },
-      },
-    },
-    {
-      type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Dexterity,
-      buffPercentage: 5,
-      durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of dexterity flowing through your body. (+5% dexterity)",
-          deactivation: "You feel the power of dexterity leaving your body. (-5% dexterity)",
-        },
-      },
     },
   ],
-  equippedBuffDescription: "Increases resistance by 5%, dagger by 5% and dexterity by 5% respectively",
+  equippedBuffDescription: "Increases max health by 5%, strength by 5% and resistance by 5%.",
 };

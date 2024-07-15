@@ -2,6 +2,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import { IEquippableMeleeTier7WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   EntityAttackType,
@@ -28,18 +29,26 @@ export const itemFrostBiteDagger: IEquippableMeleeTier7WeaponBlueprint = {
   rangeType: EntityAttackType.Melee,
   basePrice: 66,
   entityEffects: [EntityEffectBlueprint.Freezing],
-  entityEffectChance: 85,
-  equippedBuff: {
-    type: CharacterBuffType.Skill,
-    trait: BasicAttribute.Resistance,
-    buffPercentage: 5,
-    durationType: CharacterBuffDurationType.Permanent,
-    options: {
-      messages: {
-        activation: "You feel the power of resistance flowing through your body. (+5% resistance)",
-        deactivation: "You feel the power of resistance leaving your body. (-5% resistance)",
-      },
+  entityEffectChance: 90,
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 8,
+      durationType: CharacterBuffDurationType.Permanent,
     },
-  },
-  equippedBuffDescription: "Increases resistance by 5%",
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 8,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 8,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "Increases max health by 8%, strength by 8% and resistance by 8%.",
 };

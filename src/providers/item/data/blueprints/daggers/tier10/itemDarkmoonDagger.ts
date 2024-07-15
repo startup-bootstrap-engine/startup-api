@@ -2,6 +2,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import { IEquippableMeleeTier10WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   CombatSkill,
@@ -31,41 +32,23 @@ export const itemDarkmoonDagger: IEquippableMeleeTier10WeaponBlueprint = {
   entityEffectChance: 100,
   equippedBuff: [
     {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 11,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 11,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Resistance,
-      buffPercentage: 8,
+      buffPercentage: 11,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of resistance flowing through your body. (+8% resistance)",
-          deactivation: "You feel the power of resistance leaving your body. (-8% resistance)",
-        },
-      },
-    },
-    {
-      type: CharacterBuffType.Skill,
-      trait: CombatSkill.Dagger,
-      buffPercentage: 8,
-      durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of dagger flowing through your body. (+8% dagger)",
-          deactivation: "You feel the power of dagger leaving your body. (-8% dagger)",
-        },
-      },
-    },
-    {
-      type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Dexterity,
-      buffPercentage: 7,
-      durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of dexterity flowing through your body. (+7% dexterity)",
-          deactivation: "You feel the power of dexterity leaving your body. (-7% dexterity)",
-        },
-      },
     },
   ],
-  equippedBuffDescription: "Increases resistance by 8%, dagger by 8% and dexterity by 7% respectively",
+  equippedBuffDescription: "Increases max health by 11%, strength by 11% and resistance by 11%.",
 };

@@ -1,7 +1,16 @@
-import { ItemSlotType, ItemSubType, ItemType } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterAttributes,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+} from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { IEquippableMeleeTier5WeaponBlueprint } from "../../../types/TierBlueprintTypes";
 import { DaggersBlueprint } from "../../../types/itemsBlueprintTypes";
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 
 export const itemGoldenDagger: IEquippableMeleeTier5WeaponBlueprint = {
   key: DaggersBlueprint.GoldenDagger,
@@ -19,4 +28,27 @@ export const itemGoldenDagger: IEquippableMeleeTier5WeaponBlueprint = {
   tier: 5,
   rangeType: EntityAttackType.Melee,
   basePrice: 52,
+  entityEffects: [EntityEffectBlueprint.Bleeding],
+  entityEffectChance: 85,
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 6,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 6,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 6,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "Increases max health by 6%, strength by 6% and resistance by 6%.",
 };

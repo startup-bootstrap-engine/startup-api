@@ -1,6 +1,7 @@
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   CombatSkill,
@@ -31,41 +32,42 @@ export const itemVenomousFangDagger: IEquippableMeleeTier15WeaponBlueprint = {
   entityEffectChance: 95,
   equippedBuff: [
     {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 24,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 22,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 20,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.MagicResistance,
+      buffPercentage: 20,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.Resistance,
-      buffPercentage: 8,
+      buffPercentage: 20,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of resistance flowing through your body. (+8% resistance)",
-          deactivation: "You feel the power of resistance leaving your body. (-8% resistance)",
-        },
-      },
     },
     {
       type: CharacterBuffType.Skill,
-      trait: CombatSkill.Dagger,
-      buffPercentage: 8,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 20,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of dagger flowing through your body. (+8% dagger)",
-          deactivation: "You feel the power of dagger leaving your body. (-8% dagger)",
-        },
-      },
-    },
-    {
-      type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Dexterity,
-      buffPercentage: 7,
-      durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of dexterity flowing through your body. (+7% dexterity)",
-          deactivation: "You feel the power of dexterity leaving your body. (-7% dexterity)",
-        },
-      },
     },
   ],
-  equippedBuffDescription: "Increases resistance by 8%, dagger by 8% and dexterity by 7% respectively",
+  equippedBuffDescription:
+    "Increases Max Health by 24%, Max Mana by 22%, Magic by 20%, Magic Resistance by 20%, Resistance by 20%, and Strength by 20%.",
 };

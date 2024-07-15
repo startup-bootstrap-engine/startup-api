@@ -1,6 +1,7 @@
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   CombatSkill,
@@ -31,41 +32,42 @@ export const itemTwilightThornDagger: IEquippableMeleeTier17WeaponBlueprint = {
   entityEffectChance: 85,
   equippedBuff: [
     {
-      type: CharacterBuffType.Skill,
-      trait: BasicAttribute.Strength,
-      buffPercentage: 10,
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 32,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel strength flowing through your body. (+8% strength)",
-          deactivation: "You feel strength leaving your body. (-8% strength)",
-        },
-      },
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 30,
+      durationType: CharacterBuffDurationType.Permanent,
     },
     {
       type: CharacterBuffType.Skill,
-      trait: CombatSkill.Dagger,
-      buffPercentage: 10,
+      trait: BasicAttribute.Magic,
+      buffPercentage: 25,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of dagger flowing through your body. (+7% dagger)",
-          deactivation: "You feel the power of dagger leaving your body. (-7% dagger)",
-        },
-      },
     },
     {
       type: CharacterBuffType.Skill,
       trait: BasicAttribute.MagicResistance,
-      buffPercentage: 7,
+      buffPercentage: 25,
       durationType: CharacterBuffDurationType.Permanent,
-      options: {
-        messages: {
-          activation: "You feel the power of magicResistance flowing through your body. (+7% magicResistance)",
-          deactivation: "You feel the power of magicResistance leaving your body. (-7% magicResistance)",
-        },
-      },
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 25,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 25,
+      durationType: CharacterBuffDurationType.Permanent,
     },
   ],
-  equippedBuffDescription: "Increases strength by 8%, dagger by 7% and magicResistance by 7% respectively",
+  equippedBuffDescription:
+    "Increases Max Health by 32%, Max Mana by 30%, Magic by 25%, Magic Resistance by 25%, Resistance by 25%, and Strength by 25%.",
 };
