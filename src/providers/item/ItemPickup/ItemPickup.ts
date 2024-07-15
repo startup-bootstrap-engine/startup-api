@@ -49,6 +49,7 @@ export class ItemPickup {
       }
 
       const itemToBePicked = await this.validateItemPickup(itemPickupData, character);
+
       if (!itemToBePicked) return false;
 
       const isPickupFromMap = this.isPickupFromMap(itemToBePicked);

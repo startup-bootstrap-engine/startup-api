@@ -12,6 +12,7 @@ export class ItemPickupFromMap {
   @TrackNewRelicTransaction()
   public async pickupFromMapContainer(itemToBePicked: IItem, character: ICharacter): Promise<boolean> {
     // If an item has a x, y and scene, it means its coming from a map pickup. So we should destroy its representation and warn other characters nearby.
+
     const itemRemovedFromMap = await this.itemView.removeItemFromMap(itemToBePicked);
 
     if (!itemRemovedFromMap) {

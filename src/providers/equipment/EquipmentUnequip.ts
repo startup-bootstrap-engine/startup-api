@@ -1,4 +1,3 @@
-/* eslint-disable mongoose-lean/require-lean */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
@@ -94,7 +93,7 @@ export class EquipmentUnequip {
       character.equipment as unknown as string
     );
 
-    const updatedItem = (await Item.findById(item._id)) || item;
+    const updatedItem = (await Item.findById(item._id).lean<IItem>({ virtuals: true, defaults: true })) || item;
 
     const hasItemOnEquipment = await this.characterItems.hasItem(item._id, character, "equipment");
 
@@ -108,21 +107,21 @@ export class EquipmentUnequip {
       return false;
     }
 
-    const inventoryContainer = await ItemContainer.findById(inventoryContainerId);
+    const inventoryContainer = await ItemContainer.findById(inventoryContainerId).lean();
 
     this.socketMessaging.sendEventToUser(character.channelId!, ItemSocketEvents.EquipmentAndInventoryUpdate, {
       equipment: equipmentSlots,
       inventory: inventoryContainer,
     });
 
-    await Item.updateOne({ _id: item._id }, { isEquipped: false });
+    await Item.findByIdAndUpdate(item._id, { isEquipped: false }).lean();
 
     const newEquipmentSlots = await this.equipmentSlots.getEquipmentSlots(
       character._id,
       character.equipment as unknown as string
     );
 
-    const newInventoryContainer = await ItemContainer.findById(inventoryContainerId);
+    const newInventoryContainer = await ItemContainer.findById(inventoryContainerId).lean();
 
     this.socketMessaging.sendEventToUser(character.channelId!, ItemSocketEvents.EquipmentAndInventoryUpdate, {
       equipment: newEquipmentSlots,
@@ -187,7 +186,7 @@ export class EquipmentUnequip {
   }
 
   private async isUnequipValid(character: ICharacter, item: IItem, inventoryContainerId: string): Promise<boolean> {
-    const baseValidation = this.characterValidation.hasBasicValidation(character);
+    const baseValidation = await this.characterValidation.hasBasicValidation(character);
 
     if (!baseValidation) {
       return false;

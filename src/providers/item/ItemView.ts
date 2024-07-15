@@ -42,7 +42,7 @@ export class ItemView {
 
       return true;
     } catch (error) {
-      console.error(error);
+      console.error("Error removing item from map:", error);
       return false;
     }
   }
@@ -75,7 +75,7 @@ export class ItemView {
           character.channelId!,
           ViewSocketEvents.Destroy,
           {
-            id: item.id,
+            id: item._id,
             type: "items",
           }
         );

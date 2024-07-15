@@ -21,8 +21,7 @@ export class EquipmentUnequipNetwork {
       ItemSocketEvents.Unequip,
       async (data: IEquipItemPayload, character: ICharacter) => {
         const itemId = data.itemId;
-        // eslint-disable-next-line mongoose-lean/require-lean
-        const item = (await Item.findById(itemId)) as unknown as IItem;
+        const item = (await Item.findById(itemId).lean({ virtuals: true, defaults: true })) as unknown as IItem;
 
         const inventory = (await this.characterInventory.getInventory(character)) as unknown as IItem;
 

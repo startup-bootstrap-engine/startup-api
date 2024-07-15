@@ -62,24 +62,37 @@ export class EquipmentEquip {
   @TrackNewRelicTransaction()
   public async equipInventory(character: ICharacter, itemId: string): Promise<boolean> {
     const item = await Item.findById(itemId).lean<IItem>();
-    if (!item) return this.sendError(character, "Item not found.");
+    if (!item) {
+      return this.sendError(character, "Item not found.");
+    }
 
-    if (!item.isItemContainer) return this.sendError(character, "Cannot equip this as an inventory.");
+    if (!item.isItemContainer) {
+      return this.sendError(character, "Cannot equip this as an inventory.");
+    }
 
     const equipment = await Equipment.findById(character.equipment).lean<IEquipment>();
-    if (!equipment) return this.sendError(character, "Equipment not found.");
+    if (!equipment) {
+      return this.sendError(character, "Equipment not found.");
+    }
 
     await Equipment.findByIdAndUpdate(equipment._id, { $set: { inventory: item._id } }).lean();
 
     const inventory = await this.characterInventory.getInventory(character);
-    if (!inventory) return this.sendError(character, "Inventory not found.");
+    if (!inventory) {
+      return this.sendError(character, "Inventory not found.");
+    }
 
     const inventoryContainer = await ItemContainer.findById(inventory.itemContainer).lean<IItemContainer>();
-    if (!inventoryContainer) return this.sendError(character, "Inventory container not found.");
+    if (!inventoryContainer) {
+      return this.sendError(character, "Inventory container not found.");
+    }
 
     await this.itemView.removeItemFromMap(item);
+
     await this.finalizeEquipItem(inventoryContainer, equipment, item, character);
+
     await this.clearCaches(character);
+
     await this.characterWeight.updateCharacterWeight(character);
 
     return true;
