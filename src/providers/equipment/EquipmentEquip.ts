@@ -129,7 +129,7 @@ export class EquipmentEquip {
   }
 
   private async execEquip(character: ICharacter, itemId: string, fromItemContainerId: string): Promise<boolean> {
-    const item = await Item.findById(itemId).lean<IItem>();
+    const item = await Item.findById(itemId).lean<IItem>({ virtuals: true, defaults: true });
     if (!item) {
       this.sendError(character, "Item not found.");
       return false;

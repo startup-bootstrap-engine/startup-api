@@ -4,9 +4,9 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "blueprintKey": "bag",
+  "blueprintKey": "dark-armor",
   "quantity": 1,
-  "characterId": "65ffd7a39f32490044e90d7d" 
+  "characterId": "6692e422dd344a0035203564" 
 }
 
 ###
