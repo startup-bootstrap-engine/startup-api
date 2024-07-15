@@ -5,7 +5,6 @@ import {
   CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
-  CombatSkill,
   EntityAttackType,
   ItemSlotType,
   ItemSubType,
@@ -18,7 +17,7 @@ export const itemGreenDagger: IEquippableMeleeTier18WeaponBlueprint = {
   type: ItemType.Weapon,
   subType: ItemSubType.Dagger,
   textureAtlas: "items",
-  texturePath: "swords/green-dagger.png",
+  texturePath: "daggers/green-dagger.png",
   name: "Green Dagger",
   description:
     "Forged with the essence of nature, this dagger strikes with the agility of the forest, leaving a trail of poison.",
