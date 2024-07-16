@@ -77,6 +77,7 @@ export class CharacterBuffSkill {
     return { baseTraitValue, buffAbsoluteChange, updatedTraitValue };
   }
 
+  @TrackNewRelicTransaction()
   private async sendUpdateToClient(
     character: ICharacter,
     buff: ICharacterBuff,

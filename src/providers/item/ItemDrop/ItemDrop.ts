@@ -1,4 +1,3 @@
-/* eslint-disable mongoose-lean/require-lean */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Equipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
@@ -57,7 +56,7 @@ export class ItemDrop {
         return false;
       }
 
-      const itemToBeDropped = await Item.findById(itemDropData.itemId);
+      const itemToBeDropped = await Item.findById(itemDropData.itemId).lean<IItem>({ virtuals: true, defaults: true });
       if (!itemToBeDropped) {
         this.sendErrorMessage(character, "Sorry, item to be dropped wasn't found.");
         return false;
@@ -136,7 +135,7 @@ export class ItemDrop {
         if (isItemRemoved) {
           const inventoryContainer = (await ItemContainer.findById(
             itemDropData.fromContainerId
-          )) as unknown as IItemContainer;
+          ).lean()) as unknown as IItemContainer;
           const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {
             inventory: inventoryContainer,
             openEquipmentSetOnUpdate: false,
@@ -226,9 +225,11 @@ export class ItemDrop {
 
   private async removeItemFromEquipmentSet(item: IItem, character: ICharacter): Promise<boolean> {
     const equipmentSetId = character.equipment;
-    const equipmentSet = await Equipment.findById(equipmentSetId).cacheQuery({
-      cacheKey: `${character._id}-equipment`,
-    });
+    const equipmentSet = await Equipment.findById(equipmentSetId)
+      .lean()
+      .cacheQuery({
+        cacheKey: `${character._id}-equipment`,
+      });
 
     if (!equipmentSet) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, equipment set not found.");
@@ -248,7 +249,7 @@ export class ItemDrop {
    * This method will remove a item from the character inventory
    */
   private async removeItemFromInventory(item: IItem, character: ICharacter, fromContainerId: string): Promise<boolean> {
-    const targetContainer = await ItemContainer.findById(fromContainerId);
+    const targetContainer = await ItemContainer.findById(fromContainerId).lean();
 
     if (!item) {
       this.socketMessaging.sendErrorMessageToCharacter(character);
@@ -276,6 +277,7 @@ export class ItemDrop {
       items[i].y = FromGridY(droppintPoints[i].y);
       items[i].scene = scene;
 
+      // eslint-disable-next-line mongoose-lean/require-lean
       await items[i].save();
     }
   }

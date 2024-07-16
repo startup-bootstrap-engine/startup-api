@@ -305,6 +305,7 @@ export class NPCExperience {
     }
   }
 
+  @TrackNewRelicTransaction()
   private async warnCharactersAroundAboutExpGains(character: ICharacter, exp: number): Promise<void> {
     const levelUpEventPayload: IDisplayTextEvent = {
       targetId: character._id,
