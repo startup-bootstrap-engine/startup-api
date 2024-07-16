@@ -19,38 +19,38 @@ export class SkillBuff {
 
   @TrackNewRelicTransaction()
   public async getSkillsWithBuff(character: ICharacter): Promise<ISkill> {
-    const skillsWithBuff = (await this.inMemoryHashTable.get("skills-with-buff", character._id)) as ISkill;
+    const cacheKey = "skills-with-buff";
+    const cachedSkills = (await this.inMemoryHashTable.get(cacheKey, character._id)) as ISkill | null;
 
-    if (skillsWithBuff) {
-      return skillsWithBuff;
+    if (cachedSkills) {
+      return cachedSkills;
     }
 
     const skills = await this.fetchSkills(character);
-    this.validateSkills(skills, character);
+    if (!skills) {
+      throw new Error(`Skills not found for character ${character._id.toString()}`);
+    }
+
     const clonedSkills = _.cloneDeep(skills);
 
     if (clonedSkills.ownerType === "Character") {
-      await this.applyBuffs(clonedSkills, character);
-      await this.applyBonusesAndPenalties(clonedSkills, character);
+      await Promise.all([
+        this.applyBuffs(clonedSkills, character),
+        this.applyBonusesAndPenalties(clonedSkills, character),
+      ]);
     }
 
-    await this.inMemoryHashTable.set("skills-with-buff", character._id, clonedSkills);
+    await this.inMemoryHashTable.set(cacheKey, character._id, clonedSkills);
 
     return clonedSkills;
   }
 
-  private async fetchSkills(character: ICharacter): Promise<ISkill> {
-    return (await Skill.findById(character.skills)
-      .lean({ virtuals: true, defaults: true })
+  private async fetchSkills(character: ICharacter): Promise<ISkill | null> {
+    return await Skill.findById(character.skills)
+      .lean<ISkill>({ virtuals: true, defaults: true })
       .cacheQuery({
         cacheKey: `${character._id}-skills`,
-      })) as ISkill;
-  }
-
-  private validateSkills(skills: ISkill, character: ICharacter): void {
-    if (!skills) {
-      throw new Error(`Skills not found for character ${character._id.toString()}`);
-    }
+      });
   }
 
   private async applyBuffs(clonedSkills: ISkill, character: ICharacter): Promise<void> {
@@ -61,16 +61,13 @@ export class SkillBuff {
       .lean({ virtuals: true, defaults: true })
       .cacheQuery({ cacheKey: `characterBuffs_${clonedSkills.owner?.toString()}` })) as ICharacterBuff[];
 
-    // Map buffs to promises and filter out unnecessary operations
     const buffPromises = buffedSkills
-      .filter((buff) => buff.type === CharacterBuffType.Skill && clonedSkills[buff.trait]?.level)
+      .filter((buff) => buff.type === CharacterBuffType.Skill && clonedSkills[buff.trait as keyof ISkill]?.level)
       .map((buff) => this.applyBuffToSkill(clonedSkills, character, buff));
 
-    // Wait for all promises to resolve
     await Promise.all(buffPromises);
   }
 
-  // Separate method to apply each buff, returns a Promise
   @TrackNewRelicTransaction()
   private async applyBuffToSkill(clonedSkills: ISkill, character: ICharacter, buff: ICharacterBuff): Promise<void> {
     try {
@@ -78,7 +75,9 @@ export class SkillBuff {
         character._id,
         buff.trait as CharacterTrait
       );
-      clonedSkills[buff.trait].buffAndDebuff = buffValue;
+      if (clonedSkills[buff.trait as keyof ISkill]) {
+        (clonedSkills[buff.trait as keyof ISkill] as any).buffAndDebuff = buffValue;
+      }
     } catch (error) {
       console.error(`Error applying buff to skill for character ${character._id} trait ${buff.trait}`, error);
     }
@@ -87,15 +86,18 @@ export class SkillBuff {
   private async applyBonusesAndPenalties(clonedSkills: ISkill, character: ICharacter): Promise<void> {
     const parsedBonusAndPenalties = await this.characterBonusOrPenalties.getClassBonusOrPenaltiesBuffs(character._id);
 
-    for (const [key, value] of Object.entries(parsedBonusAndPenalties)) {
-      if (!clonedSkills[key]) continue;
-
-      const currentValue = clonedSkills[key].buffAndDebuff ?? 0;
-      clonedSkills[key].buffAndDebuff = currentValue + value;
-
-      if (clonedSkills[key].buffAndDebuff === 0) {
-        delete clonedSkills[key].buffAndDebuff;
+    Object.entries(parsedBonusAndPenalties).forEach(([key, value]) => {
+      const skillKey = key as keyof ISkill;
+      if (clonedSkills[skillKey] && typeof clonedSkills[skillKey] === "object") {
+        const skill = clonedSkills[skillKey] as any;
+        const currentValue = skill.buffAndDebuff ?? 0;
+        const newValue = currentValue + value;
+        if (newValue !== 0) {
+          skill.buffAndDebuff = newValue;
+        } else {
+          delete skill.buffAndDebuff;
+        }
       }
-    }
+    });
   }
 }
