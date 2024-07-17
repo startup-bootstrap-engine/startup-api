@@ -29,8 +29,7 @@ export class WithdrawItem {
 
       const targetContainer = (await ItemContainer.findById(toContainerId).lean()) as unknown as IItemContainer;
 
-      // eslint-disable-next-line mongoose-lean/require-lean
-      const item = await Item.findById(itemId);
+      const item = await Item.findById(itemId).lean<IItem>({ virtuals: true, defaults: true });
 
       if (!item) {
         this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, item not found.");

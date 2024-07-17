@@ -1,4 +1,3 @@
-/* eslint-disable mongoose-lean/require-lean */
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem as IModelItem, Item } from "@entities/ModuleInventory/ItemModel";
@@ -316,6 +315,7 @@ export class ItemDragAndDrop {
         owner: character._id,
       });
 
+      // eslint-disable-next-line mongoose-lean/require-lean
       await item.save();
       rollbackActions.push(async () => {
         await Item.findByIdAndDelete(item._id).lean();
