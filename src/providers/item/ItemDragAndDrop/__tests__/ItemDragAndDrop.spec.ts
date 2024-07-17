@@ -471,4 +471,71 @@ describe("ItemDragAndDrop.ts", () => {
       expect(rollbackSpy).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe("ItemDragAndDrop - isInContainer property", () => {
+    let itemDragAndDrop: ItemDragAndDrop;
+    let itemMoveData: IItemMove;
+    let testCharacter: ICharacter;
+    let testItem: IItem;
+    let characterInventory: CharacterInventory;
+    let inventory: IItem;
+    let inventoryContainer: IItemContainer;
+
+    beforeAll(() => {
+      itemDragAndDrop = container.get<ItemDragAndDrop>(ItemDragAndDrop);
+      characterInventory = container.get<CharacterInventory>(CharacterInventory);
+    });
+
+    beforeEach(async () => {
+      testCharacter = await unitTestHelper.createMockCharacter(null, {
+        hasEquipment: true,
+        hasInventory: true,
+        hasSkills: true,
+      });
+      testItem = await unitTestHelper.createMockItem({ owner: testCharacter._id, isInContainer: false });
+      await testItem.save();
+
+      inventory = (await characterInventory.getInventory(testCharacter)) as IItem;
+      inventoryContainer = (await ItemContainer.findById(inventory?.itemContainer)) as IItemContainer;
+
+      if (!inventory || !inventoryContainer) {
+        throw new Error("Inventory or inventory container not found");
+      }
+
+      await unitTestHelper.addItemsToContainer(inventoryContainer, 1, [testItem]);
+
+      itemMoveData = {
+        from: {
+          item: testItem as any,
+          slotIndex: 0,
+          source: "Inventory",
+          containerId: inventoryContainer._id,
+        },
+        to: {
+          item: null,
+          slotIndex: 1,
+          source: "Inventory",
+          containerId: inventoryContainer._id,
+        },
+        quantity: 1,
+      };
+    });
+
+    it("should set isInContainer to true when moving an item", async () => {
+      // Ensure the item starts with isInContainer set to false
+      expect(testItem.isInContainer).toBe(false);
+
+      // Perform the item move
+      const result = await itemDragAndDrop.performItemMove(itemMoveData, testCharacter);
+
+      // Check if the move was successful
+      expect(result).toBe(true);
+
+      // Fetch the updated item from the database
+      const updatedItem = await Item.findById(testItem._id);
+
+      // Check if the isInContainer property is now set to true
+      expect(updatedItem?.isInContainer).toBe(true);
+    });
+  });
 });
