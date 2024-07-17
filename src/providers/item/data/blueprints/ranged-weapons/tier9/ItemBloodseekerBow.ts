@@ -2,6 +2,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import { IEquippableRangedTier9WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   EntityAttackType,
@@ -44,17 +45,25 @@ export const itemBloodseekerBow: IEquippableRangedTier9WeaponBlueprint = {
   basePrice: 190,
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Poison],
   entityEffectChance: 90,
-  equippedBuff: {
-    type: CharacterBuffType.Skill,
-    trait: BasicAttribute.Strength,
-    buffPercentage: 4,
-    durationType: CharacterBuffDurationType.Permanent,
-    options: {
-      messages: {
-        activation: "You feel the strength and fortitude coursing through your body. (+4% strength)",
-        deactivation: "You feel the strength and fortitude coursing leaving through your body. (-4% strength)",
-      },
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
     },
-  },
-  equippedBuffDescription: "Increases strength by 4%",
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "Increases max health by 10%, strength by 10% and resistance by 10%.",
 };

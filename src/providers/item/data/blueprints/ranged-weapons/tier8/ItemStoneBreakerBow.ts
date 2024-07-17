@@ -1,6 +1,17 @@
 import { IEquippableRangedTier8WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
-import { EntityAttackType, ItemSlotType, ItemSubType, ItemType, RangeTypes } from "@rpg-engine/shared";
+import {
+  BasicAttribute,
+  CharacterAttributes,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  EntityAttackType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+  RangeTypes,
+} from "@rpg-engine/shared";
 import { RangedWeaponsBlueprint } from "../../../types/itemsBlueprintTypes";
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 
 export const itemStoneBreakerBow: IEquippableRangedTier8WeaponBlueprint = {
   key: RangedWeaponsBlueprint.StoneBreakerBow,
@@ -31,4 +42,27 @@ export const itemStoneBreakerBow: IEquippableRangedTier8WeaponBlueprint = {
   tier: 8,
   isTwoHanded: true,
   basePrice: 180,
+  entityEffects: [EntityEffectBlueprint.Bleeding],
+  entityEffectChance: 90,
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 9,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 9,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 9,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "Increases max health by 9%, strength by 9% and resistance by 9%.",
 };
