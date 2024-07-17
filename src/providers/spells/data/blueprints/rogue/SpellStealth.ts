@@ -19,10 +19,10 @@ export const spellStealth: Partial<ISpell> = {
   texturePath: "spell-icons/rogue-stealth-spell.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "talas nelluon",
-  manaCost: 80,
+  manaCost: 120,
   minLevelRequired: 10,
   minMagicLevelRequired: 8,
-  cooldown: 80,
+  cooldown: 120,
   castingAnimationKey: AnimationEffectKeys.ManaHeal,
   characterClass: [CharacterClass.Rogue],
 
@@ -31,7 +31,7 @@ export const spellStealth: Partial<ISpell> = {
     const spellCalculator = container.get(SpellCalculator);
     const timeout = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
       min: 15,
-      max: 60,
+      max: 40,
     });
 
     return await stealth.turnInvisible(character, timeout);
