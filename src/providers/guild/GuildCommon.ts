@@ -75,8 +75,14 @@ export class GuildCommon {
     };
   }
 
-  public async sendMessageToAllMembers(message: string, guild: IGuild, isDelete?: boolean): Promise<void> {
-    const characterIds = new Set<string>(guild.members);
+  public async sendMessageToAllMembers(
+    message: string,
+    guild: IGuild,
+    isDelete?: boolean,
+    members?: string[]
+  ): Promise<void> {
+    members = members || guild.members;
+    const characterIds = new Set<string>(members);
 
     for (const characterId of characterIds) {
       try {
