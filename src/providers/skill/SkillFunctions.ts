@@ -25,7 +25,7 @@ import {
 import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
 import { clearCacheForKey } from "speedgoose";
-import { SkillBuffQueue } from "./SkillBuff";
+import { SkillBuffQueue } from "./SkillBuffQueue";
 import { SkillCalculator } from "./SkillCalculator";
 
 @provide(SkillFunctions)

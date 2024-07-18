@@ -11,7 +11,7 @@ import { MODE_EXP_MULTIPLIER } from "@providers/constants/SkillConstants";
 import { DiscordBot } from "@providers/discord/DiscordBot";
 import { spellLearn } from "@providers/inversify/container";
 import { Locker } from "@providers/locks/Locker";
-import { SkillBuffQueue } from "@providers/skill/SkillBuff";
+import { SkillBuffQueue } from "@providers/skill/SkillBuffQueue";
 import { SkillCalculator } from "@providers/skill/SkillCalculator";
 import { SkillFunctions } from "@providers/skill/SkillFunctions";
 import { SkillStatsIncrease } from "@providers/skill/SkillStatsIncrease";

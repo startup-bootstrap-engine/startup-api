@@ -7,7 +7,7 @@ import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { IUIShowMessage, SkillSocketEvents, UISocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
-import { SkillBuffQueue } from "../SkillBuff";
+import { SkillBuffQueue } from "../SkillBuffQueue";
 
 @provide(SkillNetworkReadInfo)
 export class SkillNetworkReadInfo {

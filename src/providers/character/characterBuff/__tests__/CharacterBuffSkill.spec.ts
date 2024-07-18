@@ -2,7 +2,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
-import { SkillBuffQueue } from "@providers/skill/SkillBuff";
+import { SkillBuffQueue } from "@providers/skill/SkillBuffQueue";
 import { TraitGetter } from "@providers/skill/TraitGetter";
 import {
   BasicAttribute,

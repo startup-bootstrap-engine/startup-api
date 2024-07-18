@@ -35,7 +35,7 @@ import { PartyCRUD } from "@providers/party/PartyCRUD";
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
 import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { RaidManager } from "@providers/raid/RaidManager";
-import { SkillBuffQueue } from "@providers/skill/SkillBuff";
+import { SkillBuffQueue } from "@providers/skill/SkillBuffQueue";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import { ManaShield } from "@providers/spells/data/logic/mage/ManaShield";
 import SpellSilence from "@providers/spells/data/logic/mage/druid/SpellSilence";

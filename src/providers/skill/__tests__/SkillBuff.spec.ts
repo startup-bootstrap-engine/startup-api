@@ -3,7 +3,7 @@ import { CharacterBuffActivator } from "@providers/character/characterBuff/Chara
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { BasicAttribute, CharacterBuffDurationType, CharacterBuffType } from "@rpg-engine/shared";
-import { SkillBuffQueue } from "../SkillBuff";
+import { SkillBuffQueue } from "../SkillBuffQueue";
 
 describe("SkillBuff", () => {
   let characterBuffActivator: CharacterBuffActivator;

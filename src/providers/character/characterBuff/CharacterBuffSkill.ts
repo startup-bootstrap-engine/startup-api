@@ -1,7 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { SkillBuffQueue } from "@providers/skill/SkillBuff";
+import { SkillBuffQueue } from "@providers/skill/SkillBuffQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { TextFormatter } from "@providers/text/TextFormatter";
 import { ICharacterBuff, ISkillDetails, SkillSocketEvents } from "@rpg-engine/shared";
