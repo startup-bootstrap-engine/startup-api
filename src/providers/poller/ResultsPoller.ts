@@ -5,7 +5,7 @@ import { provide } from "inversify-binding-decorators";
 export class ResultsPoller {
   constructor(private inMemoryHashTable: InMemoryHashTable) {}
 
-  public async prepareResultToBePolled(namespace: string, key: string, result: boolean): Promise<void> {
+  public async prepareResultToBePolled(namespace: string, key: string, result: any): Promise<void> {
     await this.inMemoryHashTable.set(namespace, key, result);
   }
 

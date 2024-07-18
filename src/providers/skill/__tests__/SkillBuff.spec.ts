@@ -3,17 +3,17 @@ import { CharacterBuffActivator } from "@providers/character/characterBuff/Chara
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { BasicAttribute, CharacterBuffDurationType, CharacterBuffType } from "@rpg-engine/shared";
-import { SkillBuff } from "../SkillBuff";
+import { SkillBuffQueue } from "../SkillBuff";
 
 describe("SkillBuff", () => {
   let characterBuffActivator: CharacterBuffActivator;
   let testCharacter: ICharacter;
-  let skillBuff: SkillBuff;
+  let skillBuff: SkillBuffQueue;
   let inMemoryHashTable: InMemoryHashTable;
 
   beforeAll(() => {
     characterBuffActivator = container.get(CharacterBuffActivator);
-    skillBuff = container.get(SkillBuff);
+    skillBuff = container.get(SkillBuffQueue);
     inMemoryHashTable = container.get(InMemoryHashTable);
   });
 

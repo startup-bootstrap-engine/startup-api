@@ -25,7 +25,7 @@ import {
 import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
 import { clearCacheForKey } from "speedgoose";
-import { SkillBuff } from "./SkillBuff";
+import { SkillBuffQueue } from "./SkillBuff";
 import { SkillCalculator } from "./SkillCalculator";
 
 @provide(SkillFunctions)
@@ -36,7 +36,7 @@ export class SkillFunctions {
     private socketMessaging: SocketMessaging,
     private characterBuffSkill: CharacterBuffSkill,
     private numberFormatter: NumberFormatter,
-    private skillBuff: SkillBuff,
+    private skillBuff: SkillBuffQueue,
     private inMemoryHashTable: InMemoryHashTable,
     private newRelic: NewRelic,
     private characterBaseSpeed: CharacterBaseSpeed

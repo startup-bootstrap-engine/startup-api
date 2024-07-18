@@ -34,6 +34,7 @@ import { PartyCRUD } from "@providers/party/PartyCRUD";
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
 import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { RaidManager } from "@providers/raid/RaidManager";
+import { SkillBuffQueue } from "@providers/skill/SkillBuff";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import { ManaShield } from "@providers/spells/data/logic/mage/ManaShield";
 import SpellSilence from "@providers/spells/data/logic/mage/druid/SpellSilence";
@@ -85,7 +86,8 @@ export class ServerBootstrap {
     private queueActivityMonitor: QueueActivityMonitor,
     private raidManager: RaidManager,
     private manaShield: ManaShield,
-    private cooldown: Cooldown
+    private cooldown: Cooldown,
+    private skillBuffQueue: SkillBuffQueue
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -227,6 +229,7 @@ export class ServerBootstrap {
     await this.npcDeathQueue.clearAllJobs();
     await this.characterNetworkCreateQueue.clearAllJobs();
     await this.npcCycleQueue.clearAllJobs();
+    await this.skillBuffQueue.clearAllJobs();
 
     console.log("🧹 BullMQ queues cleared!");
   }
