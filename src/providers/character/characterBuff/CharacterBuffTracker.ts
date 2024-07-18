@@ -76,12 +76,9 @@ export class CharacterBuffTracker {
       return totalBuffPercentagesChangesCache[trait];
     }
 
-    const result = await CharacterBuff.aggregate([
-      { $match: { owner: Types.ObjectId(characterId), trait } },
-      { $group: { _id: null, totalPercentage: { $sum: "$buffPercentage" } } },
-    ]).allowDiskUse(true);
-
-    const totalPercentage = result[0]?.totalPercentage || 0;
+    // Replace aggregate with find and reduce
+    const buffs = await CharacterBuff.find({ owner: Types.ObjectId(characterId), trait }).lean();
+    const totalPercentage = buffs.reduce((sum, buff) => sum + buff.buffPercentage, 0);
 
     if (!totalBuffPercentagesChangesCache) {
       totalBuffPercentagesChangesCache = {};
