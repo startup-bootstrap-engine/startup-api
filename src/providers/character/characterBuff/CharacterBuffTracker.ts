@@ -77,7 +77,11 @@ export class CharacterBuffTracker {
     }
 
     // Replace aggregate with find and reduce
-    const buffs = await CharacterBuff.find({ owner: Types.ObjectId(characterId), trait }).lean();
+    const buffs = await CharacterBuff.find({ owner: Types.ObjectId(characterId), trait })
+      .lean<ICharacterBuff[]>()
+      .cacheQuery({
+        cacheKey: `characterBuffs_${characterId}_${trait}`,
+      });
     const totalPercentage = buffs.reduce((sum, buff) => sum + buff.buffPercentage, 0);
 
     if (!totalBuffPercentagesChangesCache) {
@@ -159,6 +163,7 @@ export class CharacterBuffTracker {
     await this.inMemoryHashTable.delete("skills-with-buff", characterId);
     await this.inMemoryHashTable.delete(characterId.toString(), "totalAttack");
     await this.inMemoryHashTable.delete(characterId.toString(), "totalDefense");
+    skillName && (await clearCacheForKey(`characterBuffs_${characterId}_${skillName}`));
     skillName && (await this.inMemoryHashTable.delete(`${characterId}-skill-level-with-buff`, skillName));
     await this.inMemoryHashTable.delete("character-total-buff-percentage-changes", characterId);
   }
