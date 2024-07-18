@@ -19,8 +19,9 @@ export class PlantDead {
 
     const deadPlants = await this.findDeadPlants(thresholdDate);
 
-    const updatePromises = deadPlants.map((plant) => this.updateDeadPlant(plant, blueprintManager));
-    await Promise.all(updatePromises);
+    for (const plant of deadPlants) {
+      await this.updateDeadPlant(plant, blueprintManager);
+    }
   }
 
   private async findDeadPlants(thresholdDate: Date): Promise<IItem[]> {

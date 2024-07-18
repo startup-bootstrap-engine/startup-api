@@ -90,13 +90,12 @@ export class SkillBuffQueue {
       .lean({ virtuals: true, defaults: true })
       .cacheQuery({ cacheKey: `characterBuffs_${clonedSkills.owner?.toString()}` })) as ICharacterBuff[];
 
-    // Map buffs to promises and filter out unnecessary operations
-    const buffPromises = buffedSkills
-      .filter((buff) => buff.type === CharacterBuffType.Skill && clonedSkills[buff.trait]?.level)
-      .map((buff) => this.applyBuffToSkill(clonedSkills, character, buff));
-
-    // Wait for all promises to resolve
-    await Promise.all(buffPromises);
+    // Traditional loop for processing buffs
+    for (const buff of buffedSkills) {
+      if (buff.type === CharacterBuffType.Skill && clonedSkills[buff.trait]?.level) {
+        await this.applyBuffToSkill(clonedSkills, character, buff);
+      }
+    }
   }
 
   // Separate method to apply each buff, returns a Promise
