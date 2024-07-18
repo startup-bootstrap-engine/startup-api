@@ -39,6 +39,7 @@ export class SkillBuff {
     return clonedSkills;
   }
 
+  @TrackNewRelicTransaction()
   private async fetchSkills(character: ICharacter): Promise<ISkill> {
     return (await Skill.findById(character.skills)
       .lean({ virtuals: true, defaults: true })
@@ -53,6 +54,7 @@ export class SkillBuff {
     }
   }
 
+  @TrackNewRelicTransaction()
   private async applyBuffs(clonedSkills: ISkill, character: ICharacter): Promise<void> {
     const buffedSkills = (await CharacterBuff.find({
       owner: clonedSkills.owner,
@@ -84,6 +86,7 @@ export class SkillBuff {
     }
   }
 
+  @TrackNewRelicTransaction()
   private async applyBonusesAndPenalties(clonedSkills: ISkill, character: ICharacter): Promise<void> {
     const parsedBonusAndPenalties = await this.characterBonusOrPenalties.getClassBonusOrPenaltiesBuffs(character._id);
 
