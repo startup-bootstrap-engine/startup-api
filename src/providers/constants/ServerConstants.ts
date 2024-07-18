@@ -75,6 +75,6 @@ export const THROTTABLE_EVENTS = {
   [ChatSocketEvents.PrivateChatMessageCreate]: THROTTABLE_DEFAULT_MS_THRESHOLD,
 };
 
-export const PROMISE_DEFAULT_CONCURRENCY = os.cpus().length || 2;
+export const PROMISE_DEFAULT_CONCURRENCY = os.cpus().length || SERVER_API_NODES_PM2_PROCESSES_QTY;
 
 export const MAX_PING_TRACKING_THRESHOLD = 10000;

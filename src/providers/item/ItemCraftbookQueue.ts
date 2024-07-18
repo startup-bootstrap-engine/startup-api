@@ -1,9 +1,11 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { appEnv } from "@providers/config/env";
 import { PROMISE_DEFAULT_CONCURRENCY } from "@providers/constants/ServerConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { blueprintManager } from "@providers/inversify/container";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IUseWithCraftingRecipe, IUseWithCraftingRecipeItem } from "@providers/useWith/useWithTypes";
 import { ICraftableItem, ICraftableItemIngredient, IItem, ItemSocketEvents } from "@rpg-engine/shared";
@@ -12,16 +14,33 @@ import { provide } from "inversify-binding-decorators";
 import { ItemCraftingRecipes } from "./ItemCraftingRecipes";
 import { AvailableBlueprints } from "./data/types/itemsBlueprintTypes";
 
-@provide(ItemCraftbook)
-export class ItemCraftbook {
+@provide(ItemCraftbookQueue)
+export class ItemCraftbookQueue {
   constructor(
     private inMemoryHashTable: InMemoryHashTable,
     private socketMessaging: SocketMessaging,
-    private itemCraftingRecipes: ItemCraftingRecipes
+    private itemCraftingRecipes: ItemCraftingRecipes,
+    private dynamicQueue: DynamicQueue
   ) {}
 
   @TrackNewRelicTransaction()
   public async loadCraftableItems(itemSubType: string, character: ICharacter): Promise<void> {
+    if (appEnv.general.IS_UNIT_TEST) {
+      return await this.execLoadCraftableItems(itemSubType, character);
+    }
+
+    await this.dynamicQueue.addJob(
+      "load-craftable-items",
+      async (job) => {
+        const { itemSubType, character } = job.data;
+
+        await this.execLoadCraftableItems(itemSubType, character);
+      },
+      { itemSubType, character }
+    );
+  }
+
+  public async execLoadCraftableItems(itemSubType: string, character: ICharacter): Promise<void> {
     const cache = await this.inMemoryHashTable.get("load-craftable-items", character._id);
 
     const itemSubTypeCache = cache?.[itemSubType];
@@ -47,8 +66,11 @@ export class ItemCraftbook {
         : await this.getRecipes(itemSubType);
 
     // Process each recipe to generate craftable items
-    const craftableItemsPromises = recipes.map((recipe) => this.getCraftableItem(inventoryIngredients, recipe, skills));
-    const craftableItems = ((await Promise.all(craftableItemsPromises)) as ICraftableItem[]).sort((a, b) => {
+    const craftableItems = (
+      (await Promise.map(recipes, (recipe) => this.getCraftableItem(inventoryIngredients, recipe, skills), {
+        concurrency: PROMISE_DEFAULT_CONCURRENCY,
+      })) as ICraftableItem[]
+    ).sort((a, b) => {
       // this what is craftable should be first
       if (a.canCraft && !b.canCraft) return -1;
       if (!a.canCraft && b.canCraft) return 1;
@@ -112,8 +134,10 @@ export class ItemCraftbook {
 
     const itemKeys = await blueprintManager.getAllBlueprintKeys("items");
 
-    const items = await Promise.all(
-      itemKeys.map((itemKey) => blueprintManager.getBlueprint<IItem>("items", itemKey as AvailableBlueprints))
+    const items = await Promise.map(
+      itemKeys,
+      (itemKey) => blueprintManager.getBlueprint<IItem>("items", itemKey as AvailableBlueprints),
+      { concurrency: PROMISE_DEFAULT_CONCURRENCY }
     );
 
     const availableRecipes = items.reduce((acc, item) => {
@@ -215,5 +239,9 @@ export class ItemCraftbook {
 
   private generateUniqueHash(items: IUseWithCraftingRecipeItem[]): string {
     return items.map((item) => `${item.key}-${item.qty}`).join(";");
+  }
+
+  public async clearAllJobs(): Promise<void> {
+    await this.dynamicQueue.clearAllJobs();
   }
 }

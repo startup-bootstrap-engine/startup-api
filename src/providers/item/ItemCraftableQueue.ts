@@ -46,7 +46,7 @@ import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import _ from "lodash";
-import { ItemCraftbook } from "./ItemCraftbook";
+import { ItemCraftbookQueue } from "./ItemCraftbookQueue";
 import { ItemCraftingRecipes } from "./ItemCraftingRecipes";
 
 @provideSingleton(ItemCraftableQueue)
@@ -64,7 +64,7 @@ export class ItemCraftableQueue {
     private inMemoryHashTable: InMemoryHashTable,
     private traitGetter: TraitGetter,
     private itemCraftingRecipes: ItemCraftingRecipes,
-    private itemCraftbook: ItemCraftbook,
+    private itemCraftbook: ItemCraftbookQueue,
     private characterPremiumAccount: CharacterPremiumAccount,
     private locker: Locker,
     private dynamicQueue: DynamicQueue
