@@ -13,6 +13,7 @@ import { CharacterRespawn } from "@providers/character/CharacterRespawn";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { Locker } from "@providers/locks/Locker";
+import { NPCManager } from "@providers/npc/NPCManager";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterDailyPlayTracker } from "../../CharacterDailyPlayTracker";
@@ -40,7 +41,8 @@ export class CharacterNetworkCreateQueue {
     private characterCreateInteractionManager: CharacterCreateInteractionManager,
     private characterCreateRegen: CharacterCreateRegen,
     private characterRespawn: CharacterRespawn,
-    private dynamicQueue: DynamicQueue
+    private dynamicQueue: DynamicQueue,
+    private npcManager: NPCManager
   ) {}
 
   public onCharacterCreate(channel: SocketChannel): void {
@@ -91,6 +93,7 @@ export class CharacterNetworkCreateQueue {
       this.characterCreateInteractionManager.sendCharacterCreateMessages(character, dataFromServer),
       this.characterCreateInteractionManager.warnAboutWeatherStatus(character.channelId!),
       this.characterCreateRegen.handleCharacterRegen(character),
+      this.npcManager.startNearbyNPCsBehaviorLoop(character),
     ]);
   }
 

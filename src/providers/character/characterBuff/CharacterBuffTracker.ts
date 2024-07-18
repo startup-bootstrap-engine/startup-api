@@ -79,7 +79,7 @@ export class CharacterBuffTracker {
     const result = await CharacterBuff.aggregate([
       { $match: { owner: Types.ObjectId(characterId), trait } },
       { $group: { _id: null, totalPercentage: { $sum: "$buffPercentage" } } },
-    ]);
+    ]).allowDiskUse(true);
 
     const totalPercentage = result[0]?.totalPercentage || 0;
 

@@ -21,7 +21,6 @@ import {
   UISocketEvents,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { random } from "lodash";
 import { NPCView } from "../NPCView";
 import { NPCDirection } from "./NPCMovement";
 
@@ -115,7 +114,7 @@ export class NPCTarget {
           return;
         }
 
-        await this.cooldown.setCooldown(`npc-try-set-target-${npc._id}`, random(6, 10));
+        await this.cooldown.setCooldown(`npc-try-set-target-${npc._id}`, 1);
 
         const isThereAnyPathAvailable = await this.pathfindingQueue.findPathForNPC(
           npc,

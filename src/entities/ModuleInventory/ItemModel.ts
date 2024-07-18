@@ -170,6 +170,14 @@ itemSchema.index(
   { background: true }
 );
 
+itemSchema.index({ type: 1, subType: 1, owner: 1, isItemContainer: 1 }, { background: true });
+itemSchema.index({ type: 1, isDead: 1, currentPlantCycle: 1, lastWatering: -1 }, { background: true });
+itemSchema.index({ owner: 1, isEquipped: 1 }, { background: true });
+itemSchema.index({ isItemContainer: 1, itemContainer: 1 }, { background: true });
+itemSchema.index({ x: 1, y: 1, scene: 1, layer: 1 }, { background: true });
+itemSchema.index({ rarity: 1, tier: 1 }, { background: true });
+itemSchema.index({ isUsable: 1, type: 1 }, { background: true });
+
 itemSchema.virtual("baseKey").get(function (this: IItem) {
   return this.key.replace(/-\d+$/, "");
 });

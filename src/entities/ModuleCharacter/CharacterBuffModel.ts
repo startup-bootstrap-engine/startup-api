@@ -77,6 +77,8 @@ characterBuffModel.index(
   { background: true }
 );
 
+characterBuffModel.index({ owner: 1, trait: 1, buffPercentage: 1 }, { background: true });
+
 characterBuffModel.plugin(SpeedGooseCacheAutoCleaner);
 
 export type ICharacterBuff = ExtractDoc<typeof characterBuffModel>;

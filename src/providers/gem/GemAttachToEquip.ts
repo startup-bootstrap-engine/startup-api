@@ -261,6 +261,12 @@ export class GemAttachToEquip {
       return false;
     }
 
+    const isRangedAmmo = targetItem.subType === ItemSubType.Ranged && !targetItem.maxRange;
+    if (isRangedAmmo) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you can't attach gems to ranged ammo.");
+      return false;
+    }
+
     if (
       targetItem.type !== ItemType.Weapon &&
       targetItem.type !== ItemType.Armor &&
