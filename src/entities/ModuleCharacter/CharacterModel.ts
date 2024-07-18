@@ -301,6 +301,20 @@ characterSchema.index(
   { background: true }
 );
 
+// Index on scene, x, and y for spatial queries
+characterSchema.index({ scene: 1, x: 1, y: 1 }, { background: true });
+
+// Index on isOnline for filtering online characters
+characterSchema.index({ isOnline: 1 }, { background: true });
+
+// Composite Index on scene, x, y, and isOnline for spatial and state-based filtering
+characterSchema.index({ scene: 1, x: 1, y: 1, isOnline: 1 }, { background: true });
+
+// Additional indexes to cover other frequent query patterns
+characterSchema.index({ isBanned: 1 }, { background: true });
+characterSchema.index({ class: 1 }, { background: true });
+characterSchema.index({ scene: 1, class: 1 }, { background: true });
+
 characterSchema.virtual("movementIntervalMs").get(function (this: ICharacter) {
   return 1000 / this.speed / 48;
 });
