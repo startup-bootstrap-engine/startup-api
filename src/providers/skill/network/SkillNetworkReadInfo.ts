@@ -1,12 +1,11 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { CharacterBuffSkill } from "@providers/character/characterBuff/CharacterBuffSkill";
-import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
+import { CharacterBuffTracker } from "@providers/character/characterBuff/CharacterBuffTracker";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { IUIShowMessage, SkillSocketEvents, UISocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { clearCacheForKey } from "speedgoose";
 import { SkillBuffQueue } from "../SkillBuffQueue";
 
 @provide(SkillNetworkReadInfo)
@@ -16,13 +15,12 @@ export class SkillNetworkReadInfo {
     private socketMessaging: SocketMessaging,
     private characterBuffSkill: CharacterBuffSkill,
     private skillBuff: SkillBuffQueue,
-    private inMemoryHashTable: InMemoryHashTable
+    private characterBuffTracker: CharacterBuffTracker
   ) {}
 
   public onGetInfo(channel: SocketChannel): void {
     this.socketAuth.authCharacterOn(channel, SkillSocketEvents.ReadInfo, async (data, character: ICharacter) => {
-      await clearCacheForKey(`${character._id}-skills`);
-      await this.inMemoryHashTable.delete("skills-with-buff", character._id);
+      await this.characterBuffTracker.clearCache(character._id);
 
       const skill = await this.skillBuff.getSkillsWithBuff(character);
 
