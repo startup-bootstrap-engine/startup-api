@@ -6,7 +6,7 @@ export const DAMAGE_COMBAT_SKILL_WEIGHT = 1.6;
 
 export const EXP_CALCULATION_RATIO = 1.2;
 
-export const SP_INCREASE_BASE = 0.8;
+export const SP_INCREASE_BASE = 0.7;
 
 export const LOW_SKILL_LEVEL_SP_INCREASE_BONUS = 10;
 
