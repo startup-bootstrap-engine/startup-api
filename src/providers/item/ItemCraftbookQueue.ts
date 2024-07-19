@@ -31,10 +31,10 @@ export class ItemCraftbookQueue {
 
     await this.dynamicQueue.addJob(
       "load-craftable-items",
-      async (job) => {
+      (job) => {
         const { itemSubType, character } = job.data;
 
-        await this.execLoadCraftableItems(itemSubType, character);
+        void this.execLoadCraftableItems(itemSubType, character);
       },
       { itemSubType, character }
     );

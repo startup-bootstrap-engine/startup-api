@@ -9,7 +9,7 @@ export class ResultsPoller {
     await this.inMemoryHashTable.set(namespace, key, result);
   }
 
-  public async pollResults(namespace: string, key: string): Promise<boolean> {
+  public async pollResults(namespace: string, key: string): Promise<any> {
     let checkInterval = 1;
     const maxRetries = 5;
 

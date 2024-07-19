@@ -3,7 +3,6 @@ import { CharacterConnection } from "@providers/character/CharacterConnection";
 import { CharacterTextureChange } from "@providers/character/CharacterTextureChange";
 import { CharacterBuffActivator } from "@providers/character/characterBuff/CharacterBuffActivator";
 import { PathfindingQueue } from "@providers/map/PathfindingQueue";
-import { PathfindingResults } from "@providers/map/PathfindingResults";
 import { NPCManager } from "@providers/npc/NPCManager";
 import { PushNotificationHelper } from "@providers/pushNotification/PushNotificationHelper";
 import { Seeder } from "@providers/seeds/Seeder";
@@ -59,7 +58,6 @@ export class ServerBootstrap {
     private characterBuffActivator: CharacterBuffActivator,
     private spellSilence: SpellSilence,
     private characterTextureChange: CharacterTextureChange,
-    private pathfindingResults: PathfindingResults,
     private npcFreezer: NPCFreezer,
     private locker: Locker,
     private partyCRUD: PartyCRUD,
@@ -168,8 +166,6 @@ export class ServerBootstrap {
     await this.spellSilence.removeAllSilence();
 
     await this.characterTextureChange.removeAllTextureChange();
-
-    await this.pathfindingResults.clearAllResults();
 
     await this.inMemoryHashTable.deleteAll("crafting-recipes");
     await this.inMemoryHashTable.deleteAll("craftable-item-ingredients");
