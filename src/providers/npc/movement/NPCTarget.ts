@@ -56,127 +56,32 @@ export class NPCTarget {
   }
 
   public getTargetDirection(npc: INPC, targetX: number, targetY: number): NPCDirection {
-    if (npc.y < targetY) {
-      return "down";
-    }
-
-    if (npc.y > targetY) {
-      return "up";
-    }
-
-    if (npc.x < targetX) {
-      return "right";
-    }
-
-    if (npc.x > targetX) {
-      return "left";
-    }
-
+    if (npc.y < targetY) return "down";
+    if (npc.y > targetY) return "up";
+    if (npc.x < targetX) return "right";
+    if (npc.x > targetX) return "left";
     return "down";
   }
 
   @TrackNewRelicTransaction()
   public async tryToSetTarget(npc: INPC): Promise<void> {
+    if (npc.targetCharacter || !npc.isAlive || npc.health === 0 || !npc.maxRangeInGridCells) {
+      return;
+    }
+
+    const canProceed = await this.locker.lock(`npc-try-set-target-${npc._id}`);
+    if (!canProceed) return;
+
     try {
-      if (npc.targetCharacter) {
-        return;
-      }
-
-      const canProceed = await this.locker.lock(`npc-try-set-target-${npc._id}`);
-
-      if (!canProceed) {
-        return;
-      }
-
-      if (!npc.isAlive || npc.health === 0) {
-        return;
-      }
-
-      if (!npc.maxRangeInGridCells) {
-        throw new Error(
-          `NPC ${npc.key} is trying to set target, but no maxRangeInGridCells is specified (required for range)!`
-        );
-      }
-
       const minDistanceCharacter = await this.npcView.getNearestCharacter(npc);
+      if (!minDistanceCharacter) return;
 
-      if (!minDistanceCharacter) {
-        return;
-      }
+      const character = await this.getCharacter(minDistanceCharacter.id);
+      if (!character) return;
 
-      const hasSolidOnTrajectory = await this.mapSolidsTrajectory.isSolidInTrajectory(npc, minDistanceCharacter);
+      if (!(await this.canTargetCharacter(npc, character))) return;
 
-      if (hasSolidOnTrajectory) {
-        // add some cooldown to avoid trying to calculate path all the time
-        const isOnCooldown = await this.cooldown.isOnCooldown(`npc-try-set-target-${npc._id}`);
-
-        if (isOnCooldown) {
-          return;
-        }
-
-        await this.cooldown.setCooldown(`npc-try-set-target-${npc._id}`, 1);
-
-        const isThereAnyPathAvailable = await this.pathfindingQueue.findPathForNPC(
-          npc,
-          minDistanceCharacter,
-          ToGridX(npc.x),
-          ToGridX(npc.y),
-          ToGridX(minDistanceCharacter.x),
-          ToGridX(minDistanceCharacter.y)
-        );
-
-        if (!isThereAnyPathAvailable?.length) {
-          return;
-        }
-      }
-
-      await this.tryToDetectInvisibleCharacters(npc, minDistanceCharacter);
-
-      if (await this.stealth.isInvisible(minDistanceCharacter)) {
-        return;
-      }
-
-      const rangeThresholdDefinition = this.getRangeThreshold(npc);
-
-      if (!rangeThresholdDefinition) {
-        throw new Error(`NPC ${npc.key} is trying to set target, failed ot calculate rangeThresholdDefinition!`);
-      }
-
-      // check if character is under range
-      const isMovementUnderRange = this.movementHelper.isUnderRange(
-        npc.x,
-        npc.y,
-        minDistanceCharacter.x,
-        minDistanceCharacter.y,
-        rangeThresholdDefinition
-      );
-
-      if (!isMovementUnderRange) {
-        await this.clearTarget(npc);
-        return;
-      }
-
-      const character = await Character.findById(minDistanceCharacter.id).lean();
-
-      if (!character) {
-        return;
-      }
-
-      const isRaid = npc.raidKey !== undefined;
-      const freeze = !isRaid;
-
-      if (!NPC_CAN_ATTACK_IN_NON_PVP_ZONE && freeze) {
-        const isCharInNonPVPZone = this.mapNonPVPZone.isNonPVPZoneAtXY(character.scene, character.x, character.y);
-        // This is needed to prevent NPCs(Hostile) from attacking players in non-PVP zones
-        if (isCharInNonPVPZone && npc.alignment === NPCAlignment.Hostile) {
-          await this.clearTarget(npc);
-
-          return;
-        }
-      }
-
-      // set target using updateOne
-      await NPC.updateOne({ _id: npc._id }, { $set: { targetCharacter: character._id, isBehaviorEnabled: true } });
+      await this.setTargetCharacter(npc, character);
     } catch (error) {
       console.error(error);
       throw error;
@@ -187,96 +92,144 @@ export class NPCTarget {
 
   @TrackNewRelicTransaction()
   public async tryToClearOutOfRangeTargets(npc: INPC): Promise<void> {
-    if (!npc.targetCharacter) {
-      // no target set, nothing to remove here!
-      return;
-    }
+    if (!npc.targetCharacter || !npc.maxRangeInGridCells) return;
 
-    if (!npc.maxRangeInGridCells) {
-      throw new Error(`NPC ${npc.key} is trying to verify target, but no maxRangeInGridCells is specified!`);
-    }
-
-    const targetCharacter = await Character.findById(npc.targetCharacter).lean();
-
+    const targetCharacter = await this.getCharacter(npc.targetCharacter as string);
     if (!targetCharacter) {
       console.debug(`Error in ${npc.key}: Failed to find targetCharacter!`);
+      await this.clearTarget(npc);
       return;
     }
 
-    const rangeThresholdDefinition = this.getRangeThreshold(npc);
-
-    if (!rangeThresholdDefinition) {
-      throw new Error(`NPC ${npc.key} is trying to set target, failed to calculate rangeThresholdDefinition!`);
+    const rangeThreshold = this.getRangeThreshold(npc);
+    if (!rangeThreshold) {
+      throw new Error(`NPC ${npc.key}: Failed to calculate rangeThresholdDefinition!`);
     }
 
-    const isCharacterUnderRange = this.movementHelper.isUnderRange(
-      npc.x,
-      npc.y,
-      targetCharacter.x,
-      targetCharacter.y,
-      rangeThresholdDefinition
-    );
-
-    // if target is out of range or not online or invisible, lets remove it
-    if ((targetCharacter && !isCharacterUnderRange) || !targetCharacter.isOnline) {
-      // remove npc.targetCharacter
+    if (
+      !this.isTargetInRange(npc, targetCharacter, rangeThreshold) ||
+      !targetCharacter.isOnline ||
+      !(await this.hasPathToTarget(npc, targetCharacter))
+    ) {
       await this.clearTarget(npc);
     }
   }
 
   @TrackNewRelicTransaction()
   public async setTarget(npc: INPC, character: ICharacter): Promise<void> {
-    if (!(npc.isAlive || npc.health === 0) || character?.health === 0) {
-      return;
+    if (!npc.isAlive || npc.health === 0 || character?.health === 0) return;
+
+    const char = await this.getCharacter(character._id);
+    if (!char) return;
+
+    await this.setTargetCharacter(npc, char);
+  }
+
+  private async getCharacter(characterId: string): Promise<ICharacter | null> {
+    return await Character.findById(characterId).lean<ICharacter>();
+  }
+
+  private async canTargetCharacter(npc: INPC, character: ICharacter): Promise<boolean> {
+    if (await this.stealth.isInvisible(character)) {
+      await this.tryToDetectInvisibleCharacters(npc, character);
+      if (await this.stealth.isInvisible(character)) return false;
     }
 
-    const char = await Character.findById(character._id).lean();
-    if (!char) {
-      return;
+    const rangeThreshold = this.getRangeThreshold(npc);
+    if (!rangeThreshold) {
+      throw new Error(`NPC ${npc.key}: Failed to calculate rangeThresholdDefinition!`);
     }
 
-    await NPC.updateOne({ _id: npc._id }, { $set: { targetCharacter: char._id } });
+    if (!this.isTargetInRange(npc, character, rangeThreshold)) {
+      await this.clearTarget(npc);
+      return false;
+    }
+
+    if (this.shouldPreventNPCAttack(npc, character)) {
+      await this.clearTarget(npc);
+      return false;
+    }
+
+    const hasPathToTarget = await this.hasPathToTarget(npc, character);
+
+    return hasPathToTarget;
   }
 
   private getRangeThreshold(npc: INPC): number | undefined {
-    switch (npc.targetType) {
-      case NPCTargetType.Default:
-        return npc.maxRangeInGridCells;
-
-      case NPCTargetType.Talking:
-        return NPC_MAX_TALKING_DISTANCE_IN_GRID;
-    }
-
-    return npc.maxRangeInGridCells;
+    return npc.targetType === NPCTargetType.Talking ? NPC_MAX_TALKING_DISTANCE_IN_GRID : npc.maxRangeInGridCells;
   }
 
-  private async tryToDetectInvisibleCharacters(npc: INPC, minDistanceCharacter: ICharacter): Promise<void> {
-    const isTargetInvisible = await this.stealth.isInvisible(minDistanceCharacter as ICharacter);
+  private async tryToDetectInvisibleCharacters(npc: INPC, target: ICharacter): Promise<void> {
     const npcLevel = (npc.skills as ISkill)?.level ?? 1;
+    const wasDetected = this.checkInvisibilityDetected(npcLevel);
 
-    if (isTargetInvisible) {
-      const wasDetected = this.checkInvisibilityDetected(npcLevel);
-
-      if (wasDetected) {
-        await this.stealth.turnVisible(minDistanceCharacter as ICharacter);
-
-        this.socketMessaging.sendEventToUser<IUIShowMessage>(
-          (minDistanceCharacter as ICharacter).channelId!,
-          UISocketEvents.ShowMessage,
-          {
-            message: "Oops! You have been detected!",
-            type: "info",
-          }
-        );
-      }
+    if (wasDetected) {
+      await this.stealth.turnVisible(target);
+      this.notifyDetection(target);
     }
   }
 
   private checkInvisibilityDetected(npcLevel: number): boolean {
     const sigmoid = (x: number): number => 1 / (1 + Math.exp(-x));
     const detectionThreshold = sigmoid(npcLevel - 5) * 100 * STEALTH_DETECTION_THRESHOLD;
+    return Math.random() * 100 <= detectionThreshold;
+  }
 
-    const randomNumber = Math.random() * 100;
-    return randomNumber <= detectionThreshold;
+  private notifyDetection(character: ICharacter): void {
+    this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId!, UISocketEvents.ShowMessage, {
+      message: "Oops! You have been detected!",
+      type: "info",
+    });
+  }
+
+  private async hasPathToTarget(npc: INPC, target: ICharacter): Promise<boolean> {
+    // add some cooldown to avoid trying to calculate path all the time
+    const isOnCooldown = await this.cooldown.isOnCooldown(`npc-try-set-target-${npc._id}`);
+
+    if (isOnCooldown) {
+      return false;
+    }
+
+    const hasSolidOnTrajectory = await this.mapSolidsTrajectory.isSolidInTrajectory(npc, target);
+
+    if (hasSolidOnTrajectory) {
+      const path = await this.pathfindingQueue.findPathForNPC(
+        npc,
+        target,
+        ToGridX(npc.x),
+        ToGridX(npc.y),
+        ToGridX(target.x),
+        ToGridX(target.y)
+      );
+
+      const hasPathToTarget = path?.length! > 0;
+
+      if (!hasPathToTarget) {
+        await this.clearTarget(npc);
+        return false; // Return false here to indicate no path
+      }
+
+      await this.cooldown.setCooldown(`npc-try-set-target-${npc._id}`, 0.5);
+
+      return true;
+    }
+
+    return true;
+  }
+
+  private isTargetInRange(npc: INPC, target: ICharacter, range: number): boolean {
+    return this.movementHelper.isUnderRange(npc.x, npc.y, target.x, target.y, range);
+  }
+
+  private shouldPreventNPCAttack(npc: INPC, character: ICharacter): boolean {
+    if (npc.raidKey !== undefined) return false;
+    if (NPC_CAN_ATTACK_IN_NON_PVP_ZONE) return false;
+
+    const isCharInNonPVPZone = this.mapNonPVPZone.isNonPVPZoneAtXY(character.scene, character.x, character.y)!;
+    return isCharInNonPVPZone && npc.alignment === NPCAlignment.Hostile;
+  }
+
+  private async setTargetCharacter(npc: INPC, character: ICharacter): Promise<void> {
+    await NPC.updateOne({ _id: npc._id }, { $set: { targetCharacter: character._id, isBehaviorEnabled: true } });
   }
 }

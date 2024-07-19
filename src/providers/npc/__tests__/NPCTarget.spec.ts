@@ -1,14 +1,13 @@
 /* eslint-disable no-unused-vars */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
-import { FromGridX, FromGridY, NPCTargetType, NPC_MAX_TALKING_DISTANCE_IN_GRID } from "@rpg-engine/shared";
+import { FromGridX, FromGridY, NPCAlignment } from "@rpg-engine/shared";
 import { NPCTarget } from "../movement/NPCTarget";
 
-describe("NPCTarget.ts", () => {
+describe("NPCTarget", () => {
   let npcTarget: NPCTarget;
   let testNPC: INPC;
   let testCharacter: ICharacter;
@@ -17,7 +16,6 @@ describe("NPCTarget.ts", () => {
 
   beforeAll(async () => {
     await unitTestHelper.initializeMapLoader();
-
     npcTarget = container.get<NPCTarget>(NPCTarget);
     inMemoryHashTable = container.get<InMemoryHashTable>(InMemoryHashTable);
   });
@@ -28,6 +26,7 @@ describe("NPCTarget.ts", () => {
         x: FromGridX(0),
         y: FromGridY(0),
         maxAntiLuringRangeInGridCells: 150,
+        maxRangeInGridCells: 10,
       },
       {
         hasSkills: true,
@@ -37,201 +36,267 @@ describe("NPCTarget.ts", () => {
     mapSolidsTrajectorySpy = jest.spyOn(MapSolidsTrajectory.prototype, "isSolidInTrajectory").mockResolvedValue(false);
   });
 
-  it("should properly get target direction", async () => {
-    testCharacter = await unitTestHelper.createMockCharacter({
-      x: FromGridX(10),
-      y: FromGridY(0),
-    });
-
-    const targetDirection = npcTarget.getTargetDirection(testNPC, testCharacter.x, testCharacter.y);
-
-    expect(targetDirection).toBe("right");
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  it("should properly set a target to the closest character, if inside the NPC range", async () => {
-    const maxGridRange = testNPC.maxRangeInGridCells!;
-
-    testCharacter = await unitTestHelper.createMockCharacter({
-      x: FromGridX(maxGridRange),
-      y: FromGridY(0),
+  describe("getTargetDirection", () => {
+    it("should return correct direction for all cases", () => {
+      expect(npcTarget.getTargetDirection(testNPC, FromGridX(5), FromGridY(0))).toBe("right");
+      expect(npcTarget.getTargetDirection(testNPC, FromGridX(-5), FromGridY(0))).toBe("left");
+      expect(npcTarget.getTargetDirection(testNPC, FromGridX(0), FromGridY(5))).toBe("down");
+      expect(npcTarget.getTargetDirection(testNPC, FromGridX(0), FromGridY(-5))).toBe("up");
+      expect(npcTarget.getTargetDirection(testNPC, FromGridX(0), FromGridY(0))).toBe("down");
     });
-
-    // too far away, shouldn't be the range!
-    const anotherCharacter = await unitTestHelper.createMockCharacter({
-      x: FromGridX(30),
-      y: FromGridY(30),
-    });
-
-    await npcTarget.tryToSetTarget(testNPC);
-
-    testNPC = (await NPC.findById(testNPC.id)) as INPC;
-
-    expect(testNPC.targetCharacter).toBeDefined();
-    expect(testNPC.targetCharacter?.toString()).toEqual(testCharacter.id.toString());
-    expect(testNPC.targetCharacter?.toString()).not.toEqual(anotherCharacter.id.toString());
   });
 
-  it("should not set a target, if character is out of range", async () => {
-    await unitTestHelper.createMockCharacter({
-      x: FromGridX(999),
-      y: FromGridY(999),
-    });
-
-    await npcTarget.tryToSetTarget(testNPC);
-
-    testNPC = (await NPC.findById(testNPC.id)) as INPC;
-
-    expect(testNPC.targetCharacter).toBeUndefined();
-  });
-
-  it("should clear the target if character is out of range", async () => {
-    testCharacter = await unitTestHelper.createMockCharacter({
-      x: FromGridX(0),
-      y: FromGridY(0),
-    });
-
-    await npcTarget.tryToSetTarget(testNPC);
-
-    testNPC = (await NPC.findById(testNPC.id)) as INPC;
-
-    expect(testNPC.targetCharacter).toBeDefined();
-
-    testCharacter.x = 999;
-    testCharacter.y = 999;
-    await testCharacter.save();
-
-    testCharacter = (await Character.findById(testCharacter.id)) as ICharacter;
-
-    await npcTarget.tryToClearOutOfRangeTargets(testNPC);
-
-    testNPC = (await NPC.findById(testNPC.id)) as INPC;
-
-    expect(testNPC.targetCharacter).toBeUndefined();
-  });
-
-  it("should clear the target if character logs out", async () => {
-    testCharacter = await unitTestHelper.createMockCharacter({
-      x: FromGridX(0),
-      y: FromGridY(0),
-    });
-
-    await npcTarget.tryToSetTarget(testNPC);
-
-    testNPC = (await NPC.findById(testNPC.id)) as INPC;
-
-    expect(testNPC.targetCharacter).toBeDefined();
-
-    testCharacter.isOnline = false;
-    await testCharacter.save();
-
-    await npcTarget.tryToClearOutOfRangeTargets(testNPC);
-
-    testNPC = (await NPC.findById(testNPC.id)) as INPC;
-
-    expect(testNPC.targetCharacter).toBeUndefined();
-  });
-
-  it("should clear the target if character starts dialog near, but then go beyond max threshold", async () => {
-    testCharacter = await unitTestHelper.createMockCharacter({
-      x: FromGridX(0),
-      y: FromGridY(0),
-    });
-
-    await npcTarget.tryToSetTarget(testNPC);
-
-    testNPC = (await NPC.findById(testNPC.id)) as INPC;
-
-    expect(testNPC.targetCharacter).toBeDefined();
-    expect(testNPC.targetCharacter?.toString()).toBe(testCharacter.id.toString());
-
-    testNPC.targetType = NPCTargetType.Talking;
-    await testNPC.save();
-
-    testCharacter.x = FromGridX(NPC_MAX_TALKING_DISTANCE_IN_GRID - 1);
-    testCharacter.y = FromGridY(0);
-    await testCharacter.save();
-
-    await npcTarget.tryToClearOutOfRangeTargets(testNPC);
-
-    testNPC = (await NPC.findById(testNPC.id)) as INPC;
-
-    expect(testNPC.targetCharacter).toBeDefined();
-
-    testCharacter.x = FromGridX(NPC_MAX_TALKING_DISTANCE_IN_GRID + 1);
-    testCharacter.y = FromGridY(0);
-    await testCharacter.save();
-
-    await npcTarget.tryToClearOutOfRangeTargets(testNPC);
-
-    testNPC = (await NPC.findById(testNPC.id)) as INPC;
-
-    expect(testNPC.targetCharacter).toBeUndefined();
-  });
-
-  it("should not call isNonPVPZoneAtXY if the NPC is a raid NPC", async () => {
-    testNPC.raidKey = "test-raid";
-    await testNPC.save();
-
-    testCharacter = await unitTestHelper.createMockCharacter({
-      x: FromGridX(0),
-      y: FromGridY(0),
-    });
-
-    // @ts-ignore
-    const mockIsNonPVPZoneAtXY = jest.spyOn(npcTarget.mapNonPVPZone, "isNonPVPZoneAtXY").mockReturnValue(true);
-
-    await npcTarget.tryToSetTarget(testNPC);
-
-    expect(mockIsNonPVPZoneAtXY).not.toHaveBeenCalled();
-  });
-
-  it("should call isNonPVPZoneAtXY if the NPC not a raid NPC", async () => {
-    testNPC.raidKey = undefined;
-    await testNPC.save();
-
-    testCharacter = await unitTestHelper.createMockCharacter({
-      x: FromGridX(0),
-      y: FromGridY(0),
-    });
-
-    // @ts-ignore
-    const mockIsNonPVPZoneAtXY = jest.spyOn(npcTarget.mapNonPVPZone, "isNonPVPZoneAtXY").mockReturnValue(true);
-
-    await npcTarget.tryToSetTarget(testNPC);
-
-    expect(mockIsNonPVPZoneAtXY).toHaveBeenCalled();
-  });
-
-  describe("Validation", () => {
-    it("should throw an error if the NPC is dead", async () => {
-      testNPC.isAlive = false;
-      await testNPC.save();
-
-      const result = await npcTarget.tryToSetTarget(testNPC);
-
-      expect(result).toBeUndefined();
-    });
-
-    it("clears target if tries to set it but its out of range", async () => {
-      const clearTarget = jest.spyOn(npcTarget, "clearTarget");
-
-      testCharacter = await unitTestHelper.createMockCharacter({
-        x: FromGridX(0),
+  describe("tryToSetTarget", () => {
+    it("should not set target if NPC already has a target", async () => {
+      const testCharacter = await unitTestHelper.createMockCharacter({
+        x: FromGridX(5),
         y: FromGridY(0),
       });
 
-      await npcTarget.setTarget(testNPC, testCharacter);
+      testNPC.targetCharacter = testCharacter.id;
+      await testNPC.save();
+      await npcTarget.tryToSetTarget(testNPC);
+      expect(String(testNPC.targetCharacter)).toStrictEqual(String(testCharacter.id));
+    });
 
-      testCharacter.x = 999;
-      testCharacter.y = 999;
-      await testCharacter.save();
+    it("should not set target if NPC is dead", async () => {
+      testNPC.isAlive = false;
+      await npcTarget.tryToSetTarget(testNPC);
+      expect(testNPC.targetCharacter).toBeUndefined();
+    });
+
+    it("should not set target if NPC has 0 health", async () => {
+      testNPC.health = 0;
+      await npcTarget.tryToSetTarget(testNPC);
+      expect(testNPC.targetCharacter).toBeUndefined();
+    });
+
+    it("should not set target if no maxRangeInGridCells is defined", async () => {
+      testNPC.maxRangeInGridCells = undefined;
+      await npcTarget.tryToSetTarget(testNPC);
+      expect(testNPC.targetCharacter).toBeUndefined();
+    });
+
+    it("should set target to nearest character within range", async () => {
+      const nearCharacter = await unitTestHelper.createMockCharacter({
+        x: FromGridX(5),
+        y: FromGridY(0),
+      });
+      const farCharacter = await unitTestHelper.createMockCharacter({
+        x: FromGridX(20),
+        y: FromGridY(0),
+      });
+
+      await npcTarget.tryToSetTarget(testNPC);
 
       testNPC = (await NPC.findById(testNPC.id)) as INPC;
-      testCharacter = (await Character.findById(testCharacter.id)) as ICharacter;
+      expect(testNPC.targetCharacter?.toString()).toBe(nearCharacter.id.toString());
+    });
+  });
+
+  describe("tryToClearOutOfRangeTargets", () => {
+    it("should do nothing if NPC has no target", async () => {
+      await npcTarget.tryToClearOutOfRangeTargets(testNPC);
+      expect(testNPC.targetCharacter).toBeUndefined();
+    });
+
+    it("should clear target if target character is not found", async () => {
+      testNPC.targetCharacter = "nonexistentId";
+      await npcTarget.tryToClearOutOfRangeTargets(testNPC);
+      testNPC = (await NPC.findById(testNPC.id)) as INPC;
+      expect(testNPC.targetCharacter).toBeUndefined();
+    });
+
+    it("should clear target if target is out of range", async () => {
+      testCharacter = await unitTestHelper.createMockCharacter({
+        x: FromGridX(5),
+        y: FromGridY(0),
+      });
+      testNPC.targetCharacter = testCharacter.id;
+      await testNPC.save();
+
+      testCharacter.x = FromGridX(20);
+      await testCharacter.save();
 
       await npcTarget.tryToClearOutOfRangeTargets(testNPC);
+      testNPC = (await NPC.findById(testNPC.id)) as INPC;
+      expect(testNPC.targetCharacter).toBeUndefined();
+    });
 
-      expect(clearTarget).toHaveBeenCalled();
+    it("should clear target if target is offline", async () => {
+      testCharacter = await unitTestHelper.createMockCharacter({
+        x: FromGridX(5),
+        y: FromGridY(0),
+        isOnline: true,
+      });
+      testNPC.targetCharacter = testCharacter.id;
+      await testNPC.save();
+
+      testCharacter.isOnline = false;
+      await testCharacter.save();
+
+      await npcTarget.tryToClearOutOfRangeTargets(testNPC);
+      testNPC = (await NPC.findById(testNPC.id)) as INPC;
+      expect(testNPC.targetCharacter).toBeUndefined();
+    });
+  });
+
+  describe("setTarget", () => {
+    it("should not set target if NPC is dead", async () => {
+      let deadNPC = await unitTestHelper.createMockNPC(
+        {
+          x: FromGridX(0),
+          y: FromGridY(0),
+          isAlive: false,
+          health: 0,
+        },
+        {
+          hasSkills: true,
+        }
+      );
+
+      testCharacter = await unitTestHelper.createMockCharacter({
+        x: FromGridX(5),
+        y: FromGridY(0),
+      });
+
+      await npcTarget.setTarget(deadNPC, testCharacter);
+      deadNPC = (await NPC.findById(deadNPC.id)) as INPC;
+      expect(testNPC.targetCharacter).toBeUndefined();
+    });
+
+    it("should not set target if character has 0 health", async () => {
+      testCharacter = await unitTestHelper.createMockCharacter({
+        x: FromGridX(5),
+        y: FromGridY(0),
+        health: 0,
+      });
+      await npcTarget.setTarget(testNPC, testCharacter);
+      testNPC = (await NPC.findById(testNPC.id)) as INPC;
+      expect(testNPC.targetCharacter).toBeUndefined();
+    });
+
+    it("should set target if all conditions are met", async () => {
+      testCharacter = await unitTestHelper.createMockCharacter({
+        x: FromGridX(5),
+        y: FromGridY(0),
+      });
+      await npcTarget.setTarget(testNPC, testCharacter);
+      testNPC = (await NPC.findById(testNPC.id)) as INPC;
+      expect(testNPC.targetCharacter?.toString()).toBe(testCharacter.id.toString());
+    });
+  });
+
+  describe("Stealth and detection", () => {
+    it("should not set target if character is in stealth and not detected", async () => {
+      // @ts-ignore
+
+      const stealthSpy = jest.spyOn(npcTarget.stealth, "isInvisible").mockResolvedValue(true);
+      testCharacter = await unitTestHelper.createMockCharacter({
+        x: FromGridX(5),
+        y: FromGridY(0),
+      });
+      await npcTarget.tryToSetTarget(testNPC);
+      testNPC = (await NPC.findById(testNPC.id)) as INPC;
+      expect(testNPC.targetCharacter).toBeUndefined();
+      stealthSpy.mockRestore();
+    });
+
+    it("should set target if character is detected despite being in stealth", async () => {
+      const stealthSpy = jest
+        // @ts-ignore
+        .spyOn(npcTarget.stealth, "isInvisible")
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      const detectSpy = jest.spyOn(npcTarget as any, "checkInvisibilityDetected").mockReturnValue(true);
+      testCharacter = await unitTestHelper.createMockCharacter({
+        x: FromGridX(5),
+        y: FromGridY(0),
+      });
+      await npcTarget.tryToSetTarget(testNPC);
+      testNPC = (await NPC.findById(testNPC.id)) as INPC;
+      expect(testNPC.targetCharacter?.toString()).toBe(testCharacter.id.toString());
+      stealthSpy.mockRestore();
+      detectSpy.mockRestore();
+    });
+  });
+
+  describe("Non-PVP zone behavior", () => {
+    it("should not set target if character is in non-PVP zone and NPC is hostile", async () => {
+      testNPC.alignment = NPCAlignment.Hostile;
+      await testNPC.save();
+
+      // @ts-ignore
+      const nonPvpZoneSpy = jest.spyOn(npcTarget.mapNonPVPZone, "isNonPVPZoneAtXY").mockReturnValue(true);
+      testCharacter = await unitTestHelper.createMockCharacter({
+        x: FromGridX(5),
+        y: FromGridY(0),
+      });
+
+      await npcTarget.tryToSetTarget(testNPC);
+      testNPC = (await NPC.findById(testNPC.id)) as INPC;
+      expect(testNPC.targetCharacter).toBeUndefined();
+      nonPvpZoneSpy.mockRestore();
+    });
+
+    it("should set target if character is in non-PVP zone but NPC is not hostile", async () => {
+      testNPC.alignment = NPCAlignment.Friendly;
+      await testNPC.save();
+
+      // @ts-ignore
+      const nonPvpZoneSpy = jest.spyOn(npcTarget.mapNonPVPZone, "isNonPVPZoneAtXY").mockReturnValue(true);
+      testCharacter = await unitTestHelper.createMockCharacter({
+        x: FromGridX(5),
+        y: FromGridY(0),
+      });
+
+      await npcTarget.tryToSetTarget(testNPC);
+      testNPC = (await NPC.findById(testNPC.id)) as INPC;
+      expect(testNPC.targetCharacter?.toString()).toBe(testCharacter.id.toString());
+      nonPvpZoneSpy.mockRestore();
+    });
+  });
+
+  describe("Path finding", () => {
+    it("should not set target if there's no path to the character", async () => {
+      mapSolidsTrajectorySpy.mockResolvedValue(true);
+      // @ts-ignore
+      const pathfindingSpy = jest.spyOn(npcTarget.pathfindingQueue, "findPathForNPC").mockResolvedValue([]);
+
+      testCharacter = await unitTestHelper.createMockCharacter({
+        x: FromGridX(5),
+        y: FromGridY(0),
+      });
+
+      await npcTarget.tryToSetTarget(testNPC);
+      testNPC = (await NPC.findById(testNPC.id)) as INPC;
+      expect(testNPC.targetCharacter).toBeUndefined();
+
+      pathfindingSpy.mockRestore();
+    });
+
+    it("should set target if there's a path to the character", async () => {
+      mapSolidsTrajectorySpy.mockResolvedValue(true);
+      const pathfindingSpy = jest
+        // @ts-ignore
+        .spyOn(npcTarget.pathfindingQueue, "findPathForNPC")
+        // @ts-ignore
+        .mockResolvedValue([{ x: 1, y: 1 }]);
+
+      testCharacter = await unitTestHelper.createMockCharacter({
+        x: FromGridX(5),
+        y: FromGridY(0),
+      });
+
+      await npcTarget.tryToSetTarget(testNPC);
+      testNPC = (await NPC.findById(testNPC.id)) as INPC;
+      expect(testNPC.targetCharacter?.toString()).toBe(testCharacter.id.toString());
+
+      pathfindingSpy.mockRestore();
     });
   });
 });
