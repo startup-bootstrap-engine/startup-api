@@ -10,8 +10,8 @@ export class ResultsPoller {
   }
 
   public async pollResults(namespace: string, key: string): Promise<boolean> {
-    const checkInterval = 100; // Interval in milliseconds to check for result
-    const maxRetries = 5; // Maximum number of retries before giving up
+    let checkInterval = 1;
+    const maxRetries = 5;
 
     for (let i = 0; i < maxRetries; i++) {
       const result = (await this.inMemoryHashTable.get(namespace, key)) as boolean | undefined;
@@ -20,6 +20,7 @@ export class ResultsPoller {
         return result;
       }
       await new Promise((resolve) => setTimeout(resolve, checkInterval));
+      checkInterval *= 2;
     }
 
     return false;

@@ -22,7 +22,6 @@ export class SkillBuffQueue {
     private resultsPoller: ResultsPoller
   ) {}
 
-  @TrackNewRelicTransaction()
   public async getSkillsWithBuff(character: ICharacter): Promise<ISkill> {
     if (appEnv.general.IS_UNIT_TEST) {
       return await this.execGetSkillsWithBuff(character);
@@ -45,6 +44,7 @@ export class SkillBuffQueue {
     return result as unknown as ISkill;
   }
 
+  @TrackNewRelicTransaction()
   public async execGetSkillsWithBuff(character: ICharacter): Promise<ISkill> {
     const skillsWithBuff = (await this.inMemoryHashTable.get("skills-with-buff", character._id)) as ISkill;
 
@@ -98,7 +98,6 @@ export class SkillBuffQueue {
     }
   }
 
-  // Separate method to apply each buff, returns a Promise
   @TrackNewRelicTransaction()
   private async applyBuffToSkill(clonedSkills: ISkill, character: ICharacter, buff: ICharacterBuff): Promise<void> {
     try {
