@@ -6,7 +6,6 @@ import { STEALTH_DETECTION_THRESHOLD } from "@providers/constants/BattleConstant
 import { NPC_CAN_ATTACK_IN_NON_PVP_ZONE } from "@providers/constants/NPCConstants";
 import { Locker } from "@providers/locks/Locker";
 import { MapNonPVPZone } from "@providers/map/MapNonPVPZone";
-import { PathfindingQueue } from "@providers/map/PathfindingQueue";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
@@ -29,12 +28,16 @@ export class NPCTarget {
     private mapNonPVPZone: MapNonPVPZone,
     private stealth: Stealth,
     private locker: Locker,
-    private socketMessaging: SocketMessaging,
-    private pathfindingQueue: PathfindingQueue
+    private socketMessaging: SocketMessaging
   ) {}
 
   @TrackNewRelicTransaction()
   public async clearTarget(npc: INPC): Promise<void> {
+    if (npc.targetType === NPCTargetType.Default && !npc.targetCharacter) {
+      // If targetType is already Default and targetCharacter is unset, no need to proceed
+      return;
+    }
+
     await NPC.updateOne(
       { _id: npc.id },
       {
