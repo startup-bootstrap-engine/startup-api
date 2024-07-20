@@ -1,6 +1,7 @@
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableMeleeTier8WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
+  BasicAttribute,
   CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
@@ -27,17 +28,25 @@ export const itemStoneFangCleaverClub: IEquippableMeleeTier8WeaponBlueprint = {
   rangeType: EntityAttackType.Melee,
   entityEffects: [EntityEffectBlueprint.Poison],
   entityEffectChance: 90,
-  equippedBuff: {
-    type: CharacterBuffType.CharacterAttribute,
-    trait: CharacterAttributes.MaxHealth,
-    buffPercentage: 4,
-    durationType: CharacterBuffDurationType.Permanent,
-    options: {
-      messages: {
-        activation: "You feel the power of max health flowing through your body. (+4% MaxHealth)",
-        deactivation: "You feel the power of max health leaving your body. (-4% MaxHealth)",
-      },
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
     },
-  },
-  equippedBuffDescription: "Increases max health by 4% respectively",
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 9,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "Increases max health by 10%, strength by 10% and resistance by 9%.",
 };
