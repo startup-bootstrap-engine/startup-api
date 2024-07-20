@@ -31,9 +31,6 @@ describe("NPCTarget", () => {
         hasSkills: true,
       }
     );
-
-    // @ts-ignore
-    hasPathToTargetSpy = jest.spyOn(NPCTarget.prototype, "hasPathToTarget").mockResolvedValue(true);
   });
 
   afterEach(() => {
@@ -259,41 +256,6 @@ describe("NPCTarget", () => {
       testNPC = (await NPC.findById(testNPC.id)) as INPC;
       expect(testNPC.targetCharacter?.toString()).toBe(testCharacter.id.toString());
       nonPvpZoneSpy.mockRestore();
-    });
-  });
-
-  describe("Path finding", () => {
-    it("should not set target if there's no path to the character", async () => {
-      hasPathToTargetSpy.mockResolvedValue(false);
-
-      testCharacter = await unitTestHelper.createMockCharacter({
-        x: FromGridX(5),
-        y: FromGridY(0),
-      });
-
-      await npcTarget.tryToSetTarget(testNPC);
-      testNPC = (await NPC.findById(testNPC.id)) as INPC;
-      expect(testNPC.targetCharacter).toBeUndefined();
-    });
-
-    it("should set target if there's a path to the character", async () => {
-      hasPathToTargetSpy.mockResolvedValue(true);
-      const pathfindingSpy = jest
-        // @ts-ignore
-        .spyOn(npcTarget.pathfindingQueue, "findPathForNPC")
-        // @ts-ignore
-        .mockResolvedValue([{ x: 1, y: 1 }]);
-
-      testCharacter = await unitTestHelper.createMockCharacter({
-        x: FromGridX(5),
-        y: FromGridY(0),
-      });
-
-      await npcTarget.tryToSetTarget(testNPC);
-      testNPC = (await NPC.findById(testNPC.id)) as INPC;
-      expect(testNPC.targetCharacter?.toString()).toBe(testCharacter.id.toString());
-
-      pathfindingSpy.mockRestore();
     });
   });
 });

@@ -292,7 +292,10 @@ export class NPCMovementMoveTowards {
       );
       if (!shortestPath) {
         // throw new Error("No shortest path found!");
-        // await this.npcTarget.clearTarget(npc);
+
+        if (npc.targetCharacter) {
+          await this.npcTarget.clearTarget(npc);
+        }
         return;
       }
       const { newGridX, newGridY, nextMovementDirection } = shortestPath;

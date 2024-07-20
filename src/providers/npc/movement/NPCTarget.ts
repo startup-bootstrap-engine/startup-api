@@ -15,7 +15,6 @@ import {
   NPCAlignment,
   NPCTargetType,
   NPC_MAX_TALKING_DISTANCE_IN_GRID,
-  ToGridX,
   UISocketEvents,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -45,7 +44,6 @@ export class NPCTarget {
         },
         $unset: {
           targetCharacter: "",
-          isBehaviorEnabled: "",
         },
       }
     );
@@ -103,11 +101,7 @@ export class NPCTarget {
       throw new Error(`NPC ${npc.key}: Failed to calculate rangeThresholdDefinition!`);
     }
 
-    if (
-      !this.isTargetInRange(npc, targetCharacter, rangeThreshold) ||
-      !targetCharacter.isOnline ||
-      !(await this.hasPathToTarget(npc, targetCharacter))
-    ) {
+    if (!this.isTargetInRange(npc, targetCharacter, rangeThreshold) || !targetCharacter.isOnline) {
       await this.clearTarget(npc);
     }
   }
@@ -147,9 +141,7 @@ export class NPCTarget {
       return false;
     }
 
-    const hasPathToTarget = await this.hasPathToTarget(npc, character);
-
-    return hasPathToTarget;
+    return true;
   }
 
   private getRangeThreshold(npc: INPC): number | undefined {
@@ -177,26 +169,6 @@ export class NPCTarget {
       message: "Oops! You have been detected!",
       type: "info",
     });
-  }
-
-  private async hasPathToTarget(npc: INPC, target: ICharacter): Promise<boolean> {
-    const path = await this.pathfindingQueue.findPathForNPC(
-      npc,
-      target,
-      ToGridX(npc.x),
-      ToGridX(npc.y),
-      ToGridX(target.x),
-      ToGridX(target.y)
-    );
-
-    const hasPathToTarget = path?.length! > 0;
-
-    if (!hasPathToTarget) {
-      await this.clearTarget(npc);
-      return false; // Return false here to indicate no path
-    }
-
-    return true;
   }
 
   private isTargetInRange(npc: INPC, target: ICharacter, range: number): boolean {
