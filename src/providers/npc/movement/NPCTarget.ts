@@ -6,12 +6,10 @@ import { STEALTH_DETECTION_THRESHOLD } from "@providers/constants/BattleConstant
 import { NPC_CAN_ATTACK_IN_NON_PVP_ZONE } from "@providers/constants/NPCConstants";
 import { Locker } from "@providers/locks/Locker";
 import { MapNonPVPZone } from "@providers/map/MapNonPVPZone";
-import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
 import { PathfindingQueue } from "@providers/map/PathfindingQueue";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
-import { Cooldown } from "@providers/time/Cooldown";
 import {
   IUIShowMessage,
   NPCAlignment,
@@ -33,9 +31,7 @@ export class NPCTarget {
     private stealth: Stealth,
     private locker: Locker,
     private socketMessaging: SocketMessaging,
-    private mapSolidsTrajectory: MapSolidsTrajectory,
-    private pathfindingQueue: PathfindingQueue,
-    private cooldown: Cooldown
+    private pathfindingQueue: PathfindingQueue
   ) {}
 
   @TrackNewRelicTransaction()
@@ -49,6 +45,7 @@ export class NPCTarget {
         },
         $unset: {
           targetCharacter: "",
+          isBehaviorEnabled: "",
         },
       }
     );
@@ -183,35 +180,20 @@ export class NPCTarget {
   }
 
   private async hasPathToTarget(npc: INPC, target: ICharacter): Promise<boolean> {
-    // add some cooldown to avoid trying to calculate path all the time
-    const isOnCooldown = await this.cooldown.isOnCooldown(`npc-try-set-target-${npc._id}`);
+    const path = await this.pathfindingQueue.findPathForNPC(
+      npc,
+      target,
+      ToGridX(npc.x),
+      ToGridX(npc.y),
+      ToGridX(target.x),
+      ToGridX(target.y)
+    );
 
-    if (isOnCooldown) {
-      return false;
-    }
+    const hasPathToTarget = path?.length! > 0;
 
-    const hasSolidOnTrajectory = await this.mapSolidsTrajectory.isSolidInTrajectory(npc, target);
-
-    if (hasSolidOnTrajectory) {
-      const path = await this.pathfindingQueue.findPathForNPC(
-        npc,
-        target,
-        ToGridX(npc.x),
-        ToGridX(npc.y),
-        ToGridX(target.x),
-        ToGridX(target.y)
-      );
-
-      const hasPathToTarget = path?.length! > 0;
-
-      if (!hasPathToTarget) {
-        await this.clearTarget(npc);
-        return false; // Return false here to indicate no path
-      }
-
-      await this.cooldown.setCooldown(`npc-try-set-target-${npc._id}`, 0.5);
-
-      return true;
+    if (!hasPathToTarget) {
+      await this.clearTarget(npc);
+      return false; // Return false here to indicate no path
     }
 
     return true;

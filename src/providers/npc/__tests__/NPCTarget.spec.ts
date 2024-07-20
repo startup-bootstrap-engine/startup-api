@@ -3,7 +3,6 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { container, unitTestHelper } from "@providers/inversify/container";
-import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
 import { FromGridX, FromGridY, NPCAlignment } from "@rpg-engine/shared";
 import { NPCTarget } from "../movement/NPCTarget";
 
@@ -12,7 +11,7 @@ describe("NPCTarget", () => {
   let testNPC: INPC;
   let testCharacter: ICharacter;
   let inMemoryHashTable: InMemoryHashTable;
-  let mapSolidsTrajectorySpy: jest.SpyInstance;
+  let hasPathToTargetSpy: jest.SpyInstance;
 
   beforeAll(async () => {
     await unitTestHelper.initializeMapLoader();
@@ -33,7 +32,8 @@ describe("NPCTarget", () => {
       }
     );
 
-    mapSolidsTrajectorySpy = jest.spyOn(MapSolidsTrajectory.prototype, "isSolidInTrajectory").mockResolvedValue(false);
+    // @ts-ignore
+    hasPathToTargetSpy = jest.spyOn(NPCTarget.prototype, "hasPathToTarget").mockResolvedValue(true);
   });
 
   afterEach(() => {
@@ -212,6 +212,7 @@ describe("NPCTarget", () => {
         .spyOn(npcTarget.stealth, "isInvisible")
         .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(false);
+
       const detectSpy = jest.spyOn(npcTarget as any, "checkInvisibilityDetected").mockReturnValue(true);
       testCharacter = await unitTestHelper.createMockCharacter({
         x: FromGridX(5),
@@ -263,9 +264,7 @@ describe("NPCTarget", () => {
 
   describe("Path finding", () => {
     it("should not set target if there's no path to the character", async () => {
-      mapSolidsTrajectorySpy.mockResolvedValue(true);
-      // @ts-ignore
-      const pathfindingSpy = jest.spyOn(npcTarget.pathfindingQueue, "findPathForNPC").mockResolvedValue([]);
+      hasPathToTargetSpy.mockResolvedValue(false);
 
       testCharacter = await unitTestHelper.createMockCharacter({
         x: FromGridX(5),
@@ -275,12 +274,10 @@ describe("NPCTarget", () => {
       await npcTarget.tryToSetTarget(testNPC);
       testNPC = (await NPC.findById(testNPC.id)) as INPC;
       expect(testNPC.targetCharacter).toBeUndefined();
-
-      pathfindingSpy.mockRestore();
     });
 
     it("should set target if there's a path to the character", async () => {
-      mapSolidsTrajectorySpy.mockResolvedValue(true);
+      hasPathToTargetSpy.mockResolvedValue(true);
       const pathfindingSpy = jest
         // @ts-ignore
         .spyOn(npcTarget.pathfindingQueue, "findPathForNPC")
