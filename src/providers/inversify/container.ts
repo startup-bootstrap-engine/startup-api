@@ -14,6 +14,7 @@ import { EquipmentSlots } from "@providers/equipment/EquipmentSlots";
 import { HashGenerator } from "@providers/hash/HashGenerator";
 import { Locker } from "@providers/locks/Locker";
 import { MapLoader } from "@providers/map/MapLoader";
+import { MapTransitionDifferentMap } from "@providers/map/MapTransition/MapTransitionDifferentMap";
 import { NPCExperience } from "@providers/npc/NPCExperience/NPCExperience";
 import { NPCLoader } from "@providers/npc/NPCLoader";
 import { NPCManager } from "@providers/npc/NPCManager";
@@ -113,5 +114,7 @@ export const blueprint = container.get<BlueprintManager>(BlueprintManager);
 export const characterBaseSpeed = container.get<CharacterBaseSpeed>(CharacterBaseSpeed);
 
 export const battleAttackTarget = container.get<BattleAttackTarget>(BattleAttackTarget);
+
+export const mapTransitionDifferentMap = container.get<MapTransitionDifferentMap>(MapTransitionDifferentMap);
 
 export { container };

@@ -19,7 +19,7 @@ export const itemRavenfallSanctuaryTeleport: IEquippableItemBlueprint = {
   canBePurchasedOnlyByPremiumPlans: [UserAccountTypes.PremiumGold, UserAccountTypes.PremiumUltimate],
   usableEffect: async (character: ICharacter) => {
     const mapTransition = container.get(MapTransition);
-    await mapTransition.changeCharacterScene(character, {
+    await mapTransition.teleportCharacter(character, {
       map: "ravenfall-sanctuary",
       gridX: 158,
       gridY: 19,

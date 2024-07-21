@@ -24,7 +24,7 @@ export const itemDungeonIlyaTeleport: IEquippableItemBlueprint = {
   ],
   usableEffect: async (character: ICharacter) => {
     const mapTransition = container.get(MapTransition);
-    await mapTransition.changeCharacterScene(character, {
+    await mapTransition.teleportCharacter(character, {
       map: "dungeon-ilya-01",
       gridX: 6,
       gridY: 17,

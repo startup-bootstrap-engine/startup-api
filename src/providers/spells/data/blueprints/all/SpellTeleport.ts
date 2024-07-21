@@ -20,7 +20,7 @@ export const spellTeleport: Partial<ISpell> = {
   usableEffect: async (character: ICharacter) => {
     const mapTransition = container.get(MapTransition);
 
-    await mapTransition.changeCharacterScene(character, {
+    await mapTransition.teleportCharacter(character, {
       map: character.initialScene,
       gridX: ToGridX(character.initialX),
       gridY: ToGridY(character.initialY),

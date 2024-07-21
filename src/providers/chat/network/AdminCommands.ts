@@ -1,6 +1,5 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { container } from "@providers/inversify/container";
-import { MapTransition } from "@providers/map/MapTransition/MapTransition";
+import { MapTransitionDifferentMap } from "@providers/map/MapTransition/MapTransitionDifferentMap";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { CharacterSocketEvents, ToGridX, ToGridY } from "@rpg-engine/shared";
 import dayjs from "dayjs";
@@ -14,7 +13,10 @@ function formatPlayerName(playerName: string): string {
 
 @provide(AdminCommands)
 export class AdminCommands {
-  constructor(private socketMessaging: SocketMessaging, private mapTransition: MapTransition) {}
+  constructor(
+    private socketMessaging: SocketMessaging,
+    private mapTransitionDifferentScene: MapTransitionDifferentMap
+  ) {}
 
   public async handleBanCommand(params: string[], character: ICharacter): Promise<void> {
     if (params.length < 2) {
@@ -96,7 +98,7 @@ export class AdminCommands {
       `Player '${targetCharacterName}' has been teleported to coordinates x: ${newX}, y: ${newY}`
     );
 
-    await this.mapTransition.changeCharacterScene(targetPlayer, {
+    await this.mapTransitionDifferentScene.changeCharacterScene(targetPlayer, {
       map: newScene,
       gridX: ToGridX(newX),
       gridY: ToGridY(newY),
@@ -120,7 +122,7 @@ export class AdminCommands {
 
     this.socketMessaging.sendMessageToCharacter(character, `Player '${playerName}' has been teleported to the temple`);
 
-    await this.mapTransition.changeCharacterScene(targetCharacter, {
+    await this.mapTransitionDifferentScene.changeCharacterScene(targetCharacter, {
       map: targetCharacter.initialScene,
       gridX: ToGridX(targetCharacter.initialX),
       gridY: ToGridY(targetCharacter.initialY),
@@ -143,9 +145,8 @@ export class AdminCommands {
     }
 
     this.socketMessaging.sendMessageToCharacter(character, `Teleported to player '${characterName}' location`);
-    const mapTransition = container.get(MapTransition);
 
-    await mapTransition.changeCharacterScene(character, {
+    await this.mapTransitionDifferentScene.changeCharacterScene(character, {
       map: character.initialScene,
       gridX: ToGridX(targetCharacter.x),
       gridY: ToGridY(targetCharacter.y),
@@ -191,7 +192,7 @@ export class AdminCommands {
     this.socketMessaging.sendMessageToCharacter(character, `Summoned player '${characterName}' to your location`);
     this.socketMessaging.sendMessageToCharacter(targetCharacter, "You have been summoned");
 
-    await this.mapTransition.changeCharacterScene(targetCharacter, {
+    await this.mapTransitionDifferentScene.changeCharacterScene(targetCharacter, {
       map: targetCharacter.initialScene,
       gridX: ToGridX(character.x),
       gridY: ToGridY(character.y),

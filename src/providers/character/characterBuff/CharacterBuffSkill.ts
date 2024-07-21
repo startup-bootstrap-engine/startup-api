@@ -90,7 +90,7 @@ export class CharacterBuffSkill {
     ]);
 
     if (!skill) {
-      throw new Error("Skill not found");
+      return;
     }
 
     this.socketMessaging.sendEventToUser(character.channelId!, SkillSocketEvents.ReadInfo, { skill, buffs });

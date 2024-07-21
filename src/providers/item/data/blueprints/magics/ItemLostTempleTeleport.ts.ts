@@ -19,7 +19,7 @@ export const itemLostTempleTeleport: IEquippableItemBlueprint = {
   canBePurchasedOnlyByPremiumPlans: [UserAccountTypes.PremiumGold, UserAccountTypes.PremiumUltimate],
   usableEffect: async (character: ICharacter) => {
     const mapTransition = container.get(MapTransition);
-    await mapTransition.changeCharacterScene(character, {
+    await mapTransition.teleportCharacter(character, {
       map: "lost-temple",
       gridX: 71,
       gridY: 99,

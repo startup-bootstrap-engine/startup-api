@@ -24,7 +24,7 @@ export const itemWildwoodTeleport: IEquippableItemBlueprint = {
   ],
   usableEffect: async (character: ICharacter) => {
     const mapTransition = container.get(MapTransition);
-    await mapTransition.changeCharacterScene(character, {
+    await mapTransition.teleportCharacter(character, {
       map: "wildwood",
       gridX: 40,
       gridY: 92,

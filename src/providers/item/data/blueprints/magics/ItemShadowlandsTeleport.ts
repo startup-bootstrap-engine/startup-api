@@ -24,7 +24,7 @@ export const itemShadowlandsTeleport: IEquippableItemBlueprint = {
   ],
   usableEffect: async (character: ICharacter) => {
     const mapTransition = container.get(MapTransition);
-    await mapTransition.changeCharacterScene(character, {
+    await mapTransition.teleportCharacter(character, {
       map: "shadowlands",
       gridX: 161,
       gridY: 148,

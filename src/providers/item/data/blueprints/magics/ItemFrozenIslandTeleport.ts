@@ -19,7 +19,7 @@ export const itemFrozenIslandTeleport: IEquippableItemBlueprint = {
   canBePurchasedOnlyByPremiumPlans: [UserAccountTypes.PremiumGold, UserAccountTypes.PremiumUltimate],
   usableEffect: async (character: ICharacter) => {
     const mapTransition = container.get(MapTransition);
-    await mapTransition.changeCharacterScene(character, {
+    await mapTransition.teleportCharacter(character, {
       map: "frozen-island",
       gridX: 116,
       gridY: 64,

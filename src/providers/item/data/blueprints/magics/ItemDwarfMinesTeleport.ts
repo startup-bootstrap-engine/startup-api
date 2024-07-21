@@ -24,7 +24,7 @@ export const itemDwarfMinesTeleport: IEquippableItemBlueprint = {
   basePrice: 1200,
   usableEffect: async (character: ICharacter) => {
     const mapTransition = container.get(MapTransition);
-    await mapTransition.changeCharacterScene(character, {
+    await mapTransition.teleportCharacter(character, {
       map: "dwarf-mines",
       gridX: 53,
       gridY: 41,

@@ -1,8 +1,11 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import { MapTransitionDifferentMap } from "@providers/map/MapTransition/MapTransitionDifferentMap";
+import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { ToGridX, ToGridY } from "@rpg-engine/shared";
 import dayjs from "dayjs";
 import { AdminCommands } from "../AdminCommands";
+
 describe("AdminCommands", () => {
   let adminCommands: AdminCommands;
   let testCharacter: ICharacter;
@@ -15,11 +18,12 @@ describe("AdminCommands", () => {
 
   beforeEach(async () => {
     testCharacter = await unitTestHelper.createMockCharacter();
-
-    // @ts-ignore
-    sendMessageToCharacterSpy = jest.spyOn(adminCommands.socketMessaging, "sendMessageToCharacter");
-
+    sendMessageToCharacterSpy = jest.spyOn(SocketMessaging.prototype, "sendMessageToCharacter");
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe("Banning", () => {
@@ -47,9 +51,8 @@ describe("AdminCommands", () => {
   describe("Teleporting", () => {
     let changeCharacterSceneSpy: jest.SpyInstance;
 
-    beforeAll(() => {
-      // @ts-ignore
-      changeCharacterSceneSpy = jest.spyOn(adminCommands.mapTransition, "changeCharacterScene");
+    beforeEach(() => {
+      changeCharacterSceneSpy = jest.spyOn(MapTransitionDifferentMap.prototype, "changeCharacterScene");
     });
 
     it("properly teleports a character", async () => {
@@ -65,6 +68,10 @@ describe("AdminCommands", () => {
           gridY: ToGridY(1170),
         })
       );
+    });
+
+    afterEach(() => {
+      changeCharacterSceneSpy.mockRestore();
     });
   });
 
@@ -123,6 +130,7 @@ describe("AdminCommands", () => {
     beforeEach(async () => {
       await Character.deleteMany({});
     });
+
     it("lists all online players", async () => {
       await unitTestHelper.createMockCharacter({ isOnline: true });
       await unitTestHelper.createMockCharacter({ isOnline: true });

@@ -24,7 +24,7 @@ export const itemFrostIslandCavesTeleport: IEquippableItemBlueprint = {
   ],
   usableEffect: async (character: ICharacter) => {
     const mapTransition = container.get(MapTransition);
-    await mapTransition.changeCharacterScene(character, {
+    await mapTransition.teleportCharacter(character, {
       map: "frost-island-caves",
       gridX: 59,
       gridY: 38,

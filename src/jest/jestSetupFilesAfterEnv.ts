@@ -36,6 +36,23 @@ mongoose.Query.prototype.cacheQuery = function () {
   return this;
 };
 
+jest.mock("@providers/constants/MapConstants", () => ({
+  EXTERIOR_LIGHTENING_MAPS: [
+    "frozen-island",
+    "ilya",
+    "minotaurs island",
+    "farm-land",
+    "ilya-dwarf-island",
+    "lost-temple",
+    "ravenfall-sanctuary",
+    "wildwood",
+  ],
+  NO_LIGHTENING_MAPS: ["ilya-village-interiors", "arena-hell"],
+  UNIT_TESTING_MAPS: ["unit-test-map.json", "example.json", "unit-test-map-negative-coordinate.json"],
+  DYNAMIC_MAP_DARKNESS: 0.8,
+  TEMPORARILY_BLOCKED_MAPS: ["elf-continent_2"],
+}));
+
 // mock skill constants to always the same, to avoid having to adjust all tests whenever we change them
 jest.mock("@providers/constants/SkillConstants", () => ({
   SP_INCREASE_BASE: 0.2,
