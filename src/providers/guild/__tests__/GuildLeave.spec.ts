@@ -26,13 +26,17 @@ describe("GuildLeave.ts", () => {
     testCharacter = await unitTestHelper.createMockCharacter();
     testCharacter2 = await unitTestHelper.createMockCharacter();
     testCharacter3 = await unitTestHelper.createMockCharacter();
-    testGuild = await unitTestHelper.createMockGuild();
 
+    // Generate unique tags
+    const uniqueTag1 = `TestGuild${Date.now()}`;
+    const uniqueTag2 = `TestGuild${Date.now() + 1}`;
+
+    testGuild = await unitTestHelper.createMockGuild({ tag: uniqueTag1 });
     testGuild.guildLeader = testCharacter._id;
     testGuild.members = [testCharacter._id, testCharacter2._id];
     await testGuild.save();
 
-    testGuild2 = await unitTestHelper.createMockGuild();
+    testGuild2 = await unitTestHelper.createMockGuild({ tag: uniqueTag2 });
 
     // @ts-ignore
     guildLeave.socketMessaging = mockSocketMessaging;
