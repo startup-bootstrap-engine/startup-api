@@ -1,4 +1,3 @@
-/* eslint-disable mongoose-lean/require-lean */
 /* eslint-disable array-callback-return */
 import { CharacterBuff, ICharacterBuff } from "@entities/ModuleCharacter/CharacterBuffModel";
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
@@ -167,6 +166,7 @@ export class CharacterDeath {
       y: character.y,
       createdAt: new Date(),
     });
+    // eslint-disable-next-line mongoose-lean/require-lean
     await characterDeathLog.save();
 
     if (!characterDeathLog.isJustify) {
@@ -197,9 +197,7 @@ export class CharacterDeath {
 
     if (isKillerNPC && !shouldForceDropAll) {
       const killerNPC = killer as INPC;
-      shouldForceDropAll =
-        killerNPC.hasCustomDeathPenalty === NPCCustomDeathPenalties.Hardcore ||
-        killerNPC.hasCustomDeathPenalty === NPCCustomDeathPenalties.FullLootDrop;
+      shouldForceDropAll = killerNPC.hasCustomDeathPenalty === NPCCustomDeathPenalties.FullLootDrop;
     }
 
     if (!isCharacterInSoftModeWithoutSkull) {
@@ -222,6 +220,7 @@ export class CharacterDeath {
       deadBodyEntityType: EntityType.Character,
     });
 
+    // eslint-disable-next-line mongoose-lean/require-lean
     await charBody.save();
 
     return charBody;
@@ -307,7 +306,10 @@ export class CharacterDeath {
 
     const inventory = await this.characterInventory.getInventory(character);
 
-    const inventoryContainer = (await ItemContainer.findById(inventory?.itemContainer)) as any;
+    const inventoryContainer = (await ItemContainer.findById(inventory?.itemContainer).lean({
+      virtuals: true,
+      defaults: true,
+    })) as any;
 
     this.socketMessaging.sendEventToUser<IEquipmentAndInventoryUpdatePayload>(
       character.channelId!,
@@ -346,9 +348,11 @@ export class CharacterDeath {
       return;
     }
 
-    const equipment = await Equipment.findById(character.equipment).cacheQuery({
-      cacheKey: `${character._id}-equipment`,
-    });
+    const equipment = await Equipment.findById(character.equipment)
+      .lean<IEquipment>()
+      .cacheQuery({
+        cacheKey: `${character._id}-equipment`,
+      });
 
     if (!equipment) {
       throw new Error(`No equipment found for id ${equipmentId}`);
@@ -566,7 +570,7 @@ export class CharacterDeath {
     forceDropAll: boolean = false
   ): Promise<void> {
     if (character.mode === Modes.PermadeathMode) {
-      await this.dropCharacterItemsOnBody(character, characterBody, character.equipment, forceDropAll);
+      await this.dropCharacterItemsOnBody(character, characterBody, character.equipment, true);
       return;
     }
 
@@ -582,28 +586,31 @@ export class CharacterDeath {
     );
 
     if (!amuletOfDeath || forceDropAll) {
-      // drop equipped items and backpack items
+      // Apply full penalties
       await this.dropCharacterItemsOnBody(character, characterBody, character.equipment, forceDropAll);
-
       const deathPenalty = await this.skillDecrease.deathPenalty(character);
+
       if (deathPenalty) {
-        // Set timeout to not overwrite the msg "You are Died"
         setTimeout(() => {
           this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId!, UISocketEvents.ShowMessage, {
-            message: "You lost some XP and skill points.",
+            message: "You lost some items, XP, and skill points.",
             type: "info",
           });
         }, 2000);
       }
     } else {
-      setTimeout(() => {
-        this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId!, UISocketEvents.ShowMessage, {
-          message: "Your Amulet of Death protected your XP and skill points.",
-          type: "info",
-        });
-      }, 2000);
-
-      await equipmentSlots.removeItemFromSlot(character, AccessoriesBlueprint.AmuletOfDeath, "neck");
+      // Amulet of Death protects against all penalties
+      try {
+        await equipmentSlots.removeItemFromSlot(character, AccessoriesBlueprint.AmuletOfDeath, "neck");
+        setTimeout(() => {
+          this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId!, UISocketEvents.ShowMessage, {
+            message: "Your Amulet of Death protected your items, XP, and skill points.",
+            type: "info",
+          });
+        }, 2000);
+      } catch (error) {
+        console.error("Failed to remove Amulet of Death:", error);
+      }
     }
   }
 }

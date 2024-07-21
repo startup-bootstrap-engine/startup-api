@@ -5,6 +5,7 @@ import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemCon
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { DROP_EQUIPMENT_CHANCE } from "@providers/constants/DeathConstants";
+import { EquipmentSlots } from "@providers/equipment/EquipmentSlots";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { AccessoriesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { CharacterSkullType, Modes, NPCCustomDeathPenalties } from "@rpg-engine/shared";
@@ -344,12 +345,20 @@ describe("CharacterDeath.ts", () => {
 
     describe("Amulet of Death", () => {
       let dropCharacterItemsOnBodySpy: jest.SpyInstance;
+      let skillDecreaseSpy: jest.SpyInstance;
+      let removeItemFromSlotSpy: jest.SpyInstance;
 
       beforeEach(async () => {
         jest.clearAllMocks();
 
         // @ts-ignore
         dropCharacterItemsOnBodySpy = jest.spyOn(characterDeath, "dropCharacterItemsOnBody");
+
+        // @ts-ignore
+        skillDecreaseSpy = jest.spyOn(characterDeath.skillDecrease, "deathPenalty");
+
+        // @ts-ignore
+        removeItemFromSlotSpy = jest.spyOn(EquipmentSlots.prototype, "removeItemFromSlot");
 
         testCharacter.mode = Modes.HardcoreMode;
         await testCharacter.save();
@@ -366,6 +375,78 @@ describe("CharacterDeath.ts", () => {
 
         await equipment.save();
       };
+
+      it("should protect against item drops and skill/XP loss when Amulet of Death is equipped", async () => {
+        await equipAmuletOfDeath();
+        await characterDeath.handleCharacterDeath(testNPC, testCharacter);
+
+        expect(dropCharacterItemsOnBodySpy).not.toHaveBeenCalled();
+        expect(skillDecreaseSpy).not.toHaveBeenCalled();
+        expect(removeItemFromSlotSpy).toHaveBeenCalledWith(testCharacter, AccessoriesBlueprint.AmuletOfDeath, "neck");
+      });
+
+      it("should not protect if Amulet of Death is not in the neck slot", async () => {
+        const amuletOfDeath = await unitTestHelper.createMockItemFromBlueprint(AccessoriesBlueprint.AmuletOfDeath);
+        const equipment = await Equipment.findById(testCharacter.equipment);
+        if (!equipment) throw new Error("Equipment not found");
+        equipment.ring = amuletOfDeath._id; // Equip in wrong slot
+        await equipment.save();
+
+        await characterDeath.handleCharacterDeath(testNPC, testCharacter);
+
+        expect(dropCharacterItemsOnBodySpy).toHaveBeenCalled();
+        expect(skillDecreaseSpy).toHaveBeenCalled();
+      });
+
+      it("should not protect against forceDropAll even with Amulet of Death", async () => {
+        await equipAmuletOfDeath();
+
+        const mockBody = await unitTestHelper.createMockCharacterDeadBody(testCharacter);
+
+        // @ts-ignore - Accessing private method for testing
+        await characterDeath.applyPenalties(testCharacter, mockBody, true);
+
+        expect(dropCharacterItemsOnBodySpy).toHaveBeenCalledWith(
+          testCharacter,
+          expect.anything(),
+          expect.anything(),
+          true
+        );
+        expect(skillDecreaseSpy).toHaveBeenCalled();
+      });
+
+      it("should protect in Hardcore mode", async () => {
+        testCharacter.mode = Modes.HardcoreMode;
+        await testCharacter.save();
+        await equipAmuletOfDeath();
+
+        await characterDeath.handleCharacterDeath(testNPC, testCharacter);
+
+        expect(dropCharacterItemsOnBodySpy).not.toHaveBeenCalled();
+        expect(skillDecreaseSpy).not.toHaveBeenCalled();
+      });
+
+      it("should not protect in Permadeath mode", async () => {
+        testCharacter.mode = Modes.PermadeathMode;
+        await testCharacter.save();
+        await equipAmuletOfDeath();
+
+        await characterDeath.handleCharacterDeath(testNPC, testCharacter);
+
+        expect(dropCharacterItemsOnBodySpy).toHaveBeenCalled();
+        // Note: In Permadeath mode, skillDecrease might not be called as the character is deleted
+      });
+
+      it("should protect against custom NPC death penalties", async () => {
+        await equipAmuletOfDeath();
+        testNPC.hasCustomDeathPenalty = NPCCustomDeathPenalties.Hardcore;
+        await testNPC.save();
+
+        await characterDeath.handleCharacterDeath(testNPC, testCharacter);
+
+        expect(dropCharacterItemsOnBodySpy).not.toHaveBeenCalled();
+        expect(skillDecreaseSpy).not.toHaveBeenCalled();
+      });
 
       it("If the character has an amulet of death, it should not drop any items, but the amulet should be removed", async () => {
         await equipAmuletOfDeath();
