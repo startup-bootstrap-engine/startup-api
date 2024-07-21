@@ -23,6 +23,7 @@ import { MAX_PING_TRACKING_THRESHOLD } from "@providers/constants/ServerConstant
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MapTransition } from "@providers/map/MapTransition/MapTransition";
+import { MapTransitionNonPVPZone } from "@providers/map/MapTransition/MapTransitionNonPvpZone";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import dayjs from "dayjs";
@@ -44,7 +45,8 @@ export class CharacterNetworkUpdateQueue {
     private newRelic: NewRelic,
     private locker: Locker,
     private mapTransition: MapTransition,
-    private dynamicQueue: DynamicQueue
+    private dynamicQueue: DynamicQueue,
+    private mapTransitionNonPVPZone: MapTransitionNonPVPZone
   ) {}
 
   public onCharacterUpdatePosition(channel: SocketChannel): void {
@@ -141,7 +143,7 @@ export class CharacterNetworkUpdateQueue {
     this.characterMovementWarn.warn(character, data);
     void this.npcManager.startNearbyNPCsBehaviorLoop(character);
     await this.updateServerSideEmitterInfo(character, data.newX, data.newY, isMoving, data.direction);
-    void this.mapTransition.handleNonPVPZone(character, data.newX, data.newY);
+    void this.mapTransitionNonPVPZone.handleNonPVPZone(character, data.newX, data.newY);
     await this.mapTransition.handleMapTransition(character, data.newX, data.newY);
     this.sendConfirmation(character, data.direction, true);
   }
