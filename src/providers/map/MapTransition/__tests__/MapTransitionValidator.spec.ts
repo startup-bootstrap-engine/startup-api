@@ -3,8 +3,8 @@ import { CharacterUser } from "@providers/character/CharacterUser";
 import { container } from "@providers/inversify/container";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { ITiledObject, IUser } from "@rpg-engine/shared";
-import { IDestination } from "../MapTransition";
 import { MapTransitionInfo } from "../MapTransitionInfo";
+import { IDestination } from "../MapTransitionQueue";
 import { MapTransitionReferralBonus } from "../MapTransitionReferralBonus";
 import { MapTransitionValidator } from "../MapTransitionValidator";
 describe("MapTransitionValidator", () => {

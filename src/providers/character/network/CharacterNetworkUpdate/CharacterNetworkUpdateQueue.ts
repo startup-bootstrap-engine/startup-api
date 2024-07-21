@@ -22,8 +22,8 @@ import { NewRelic } from "@providers/analytics/NewRelic";
 import { MAX_PING_TRACKING_THRESHOLD } from "@providers/constants/ServerConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { MapTransition } from "@providers/map/MapTransition/MapTransition";
 import { MapTransitionNonPVPZone } from "@providers/map/MapTransition/MapTransitionNonPvpZone";
+import { MapTransitionQueue } from "@providers/map/MapTransition/MapTransitionQueue";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import dayjs from "dayjs";
@@ -44,7 +44,7 @@ export class CharacterNetworkUpdateQueue {
     private mathHelper: MathHelper,
     private newRelic: NewRelic,
     private locker: Locker,
-    private mapTransition: MapTransition,
+    private mapTransition: MapTransitionQueue,
     private dynamicQueue: DynamicQueue,
     private mapTransitionNonPVPZone: MapTransitionNonPVPZone
   ) {}

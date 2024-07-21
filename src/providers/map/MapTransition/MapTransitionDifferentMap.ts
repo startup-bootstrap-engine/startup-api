@@ -12,7 +12,7 @@ import {
   ViewSocketEvents,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { IDestination } from "./MapTransition";
+import { IDestination } from "./MapTransitionQueue";
 
 @provide(MapTransitionDifferentMap)
 export class MapTransitionDifferentMap {
@@ -21,7 +21,7 @@ export class MapTransitionDifferentMap {
   @TrackNewRelicTransaction()
   public async changeCharacterScene(character: ICharacter, destination: IDestination): Promise<void> {
     try {
-      const canProceed = await this.locker.lock(`character-changing-scene-${character._id}`, 1);
+      const canProceed = await this.locker.lock(`character-changing-scene-${character._id}`, 2);
 
       if (!canProceed) {
         return;

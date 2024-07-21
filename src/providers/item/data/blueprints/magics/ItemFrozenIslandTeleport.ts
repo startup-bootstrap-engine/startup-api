@@ -1,6 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { container } from "@providers/inversify/container";
-import { MapTransition } from "@providers/map/MapTransition/MapTransition";
+import { MapTransitionQueue } from "@providers/map/MapTransition/MapTransitionQueue";
 import { IEquippableItemBlueprint, ItemSlotType, ItemSubType, ItemType, UserAccountTypes } from "@rpg-engine/shared";
 import { MagicsBlueprint } from "../../types/itemsBlueprintTypes";
 
@@ -18,7 +18,7 @@ export const itemFrozenIslandTeleport: IEquippableItemBlueprint = {
   basePrice: 2000,
   canBePurchasedOnlyByPremiumPlans: [UserAccountTypes.PremiumGold, UserAccountTypes.PremiumUltimate],
   usableEffect: async (character: ICharacter) => {
-    const mapTransition = container.get(MapTransition);
+    const mapTransition = container.get<MapTransitionQueue>(MapTransitionQueue);
     await mapTransition.teleportCharacter(character, {
       map: "frozen-island",
       gridX: 116,

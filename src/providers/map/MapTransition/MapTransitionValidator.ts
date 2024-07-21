@@ -6,8 +6,8 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { ITiledObject } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { capitalize } from "lodash";
-import { IDestination } from "./MapTransition";
 import { MapTransitionInfo } from "./MapTransitionInfo";
+import { IDestination } from "./MapTransitionQueue";
 import { MapTransitionReferralBonus } from "./MapTransitionReferralBonus"; // Assuming MapTransitionReferralBonus exists
 
 @provide(MapTransitionValidator)

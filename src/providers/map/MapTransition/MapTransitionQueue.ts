@@ -1,6 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { CharacterUser } from "@providers/character/CharacterUser";
+import { appEnv } from "@providers/config/env";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { ITiledObject } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { MapNonPVPZone } from "../MapNonPVPZone";
@@ -15,15 +16,16 @@ export interface IDestination {
   gridY: number;
 }
 
-@provide(MapTransition)
-export class MapTransition {
+@provide(MapTransitionQueue)
+export class MapTransitionQueue {
   constructor(
     private mapTransitionInfo: MapTransitionInfo,
-    private characterUser: CharacterUser,
+
     private mapNonPVPZone: MapNonPVPZone,
     private mapTransitionSameMap: MapTransitionSameMap,
     private mapTransitionDifferentMap: MapTransitionDifferentMap,
-    private mapTransitionValidator: MapTransitionValidator
+    private mapTransitionValidator: MapTransitionValidator,
+    private dynamicQueue: DynamicQueue
   ) {}
 
   @TrackNewRelicTransaction()
@@ -54,6 +56,26 @@ export class MapTransition {
   }
 
   public async teleportCharacter(character: ICharacter, destination: IDestination): Promise<void> {
+    if (appEnv.general.IS_UNIT_TEST) {
+      await this.execTeleportCharacter(character, destination);
+      return;
+    }
+
+    await this.dynamicQueue.addJob(
+      "map-transition",
+      (job) => {
+        const { character, destination } = job.data;
+
+        void this.execTeleportCharacter(character, destination);
+      },
+      {
+        character,
+        destination,
+      }
+    );
+  }
+
+  public async execTeleportCharacter(character: ICharacter, destination: IDestination): Promise<void> {
     if (destination.map === character.scene) {
       await this.mapTransitionSameMap.sameMapTeleport(character, destination);
     } else {

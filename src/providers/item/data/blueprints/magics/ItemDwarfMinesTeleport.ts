@@ -1,6 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { container } from "@providers/inversify/container";
-import { MapTransition } from "@providers/map/MapTransition/MapTransition";
+import { MapTransitionQueue } from "@providers/map/MapTransition/MapTransitionQueue";
 import { IEquippableItemBlueprint, ItemSlotType, ItemSubType, ItemType, UserAccountTypes } from "@rpg-engine/shared";
 import { MagicsBlueprint } from "../../types/itemsBlueprintTypes";
 
@@ -23,7 +23,7 @@ export const itemDwarfMinesTeleport: IEquippableItemBlueprint = {
   canSell: false,
   basePrice: 1200,
   usableEffect: async (character: ICharacter) => {
-    const mapTransition = container.get(MapTransition);
+    const mapTransition = container.get<MapTransitionQueue>(MapTransitionQueue);
     await mapTransition.teleportCharacter(character, {
       map: "dwarf-mines",
       gridX: 53,

@@ -6,7 +6,7 @@ import { Locker } from "@providers/locks/Locker";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { FromGridX, IViewDestroyElementPayload, MapSocketEvents, ViewSocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { IDestination } from "./MapTransition";
+import { IDestination } from "./MapTransitionQueue";
 
 @provide(MapTransitionSameMap)
 export class MapTransitionSameMap {
@@ -15,7 +15,7 @@ export class MapTransitionSameMap {
   @TrackNewRelicTransaction()
   public async sameMapTeleport(character: ICharacter, destination: IDestination): Promise<void> {
     try {
-      const canProceed = await this.locker.lock(`character-changing-scene-${character._id}`, 1);
+      const canProceed = await this.locker.lock(`character-changing-scene-${character._id}`, 2);
 
       if (!canProceed) {
         return;

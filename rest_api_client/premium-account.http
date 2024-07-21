@@ -4,9 +4,9 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "blueprintKey": "dark-armor",
+  "blueprintKey": "frozen-castle-dungeon-teleport",
   "quantity": 1,
-  "characterId": "6692e422dd344a0035203564" 
+  "characterId": "66974a3288418600350a4a15" 
 }
 
 ###
