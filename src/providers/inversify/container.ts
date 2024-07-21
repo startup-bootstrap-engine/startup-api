@@ -2,6 +2,7 @@ import { NewRelic } from "@providers/analytics/NewRelic";
 import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { CharacterConnection } from "@providers/character/CharacterConnection";
 
+import { BattleAttackTarget } from "@providers/battle/BattleAttackTarget/BattleAttackTarget";
 import { CharacterBuffActivator } from "@providers/character/characterBuff/CharacterBuffActivator";
 import { CharacterBaseSpeed } from "@providers/character/characterMovement/CharacterBaseSpeed";
 import { ContainerSlotsCaching } from "@providers/container/ContainerSlotsCaching";
@@ -110,5 +111,7 @@ export const locker = container.get<Locker>(Locker);
 export const blueprint = container.get<BlueprintManager>(BlueprintManager);
 
 export const characterBaseSpeed = container.get<CharacterBaseSpeed>(CharacterBaseSpeed);
+
+export const battleAttackTarget = container.get<BattleAttackTarget>(BattleAttackTarget);
 
 export { container };

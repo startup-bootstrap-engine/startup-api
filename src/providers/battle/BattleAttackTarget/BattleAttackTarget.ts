@@ -161,6 +161,28 @@ export class BattleAttackTarget {
     return true;
   }
 
+  public async clearCharacterBattleTarget(character: ICharacter): Promise<void> {
+    if (character.target?.id && character.target?.type) {
+      const targetId = character.target.id as unknown as string;
+      const targetType = character.target.type as unknown as EntityType;
+      const targetReason = "Your battle target was lost.";
+
+      const dataOfCancelTargeting: IBattleCancelTargeting = {
+        targetId: targetId,
+        type: targetType,
+        reason: targetReason,
+      };
+
+      this.socketMessaging.sendEventToUser<IBattleCancelTargeting>(
+        character.channelId!,
+        BattleSocketEvents.CancelTargeting,
+        dataOfCancelTargeting
+      );
+
+      await this.battleNetworkStopTargeting.stopTargeting(character);
+    }
+  }
+
   @TrackNewRelicTransaction()
   private async performRangedAttack(
     attacker: ICharacter | INPC,

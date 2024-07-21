@@ -7,7 +7,7 @@ import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterSkull } from "@providers/character/CharacterSkull";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
-import { CharacterWeapon } from "@providers/character/CharacterWeapon";
+import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { EntityType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { BattleAttackTarget } from "../BattleAttackTarget/BattleAttackTarget";
@@ -26,7 +26,7 @@ export class BattleCharacterAttack {
     private battleNetworkStopTargeting: BattleNetworkStopTargeting,
     private characterValidation: CharacterValidation,
     private battleCycle: BattleCycle,
-    private characterWeapon: CharacterWeapon,
+    private socketMessaging: SocketMessaging,
 
     private characterSkull: CharacterSkull
   ) {}

@@ -1,9 +1,10 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { NPC } from "@entities/ModuleNPC/NPCModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { MapTransition } from "@providers/map/MapTransition/MapTransition";
-import { ITiledObject } from "@rpg-engine/shared";
+import { ITiledObject, NPCAlignment } from "@rpg-engine/shared";
 
-describe("CharacterLastAction", () => {
+describe("MapTransition", () => {
   let mapTransition: MapTransition;
   let testCharacter: ICharacter;
 
@@ -86,6 +87,48 @@ describe("CharacterLastAction", () => {
 
       // Clean up
       sendMessageSpy.mockRestore();
+    });
+  });
+
+  describe("handleNonPVPZone", () => {
+    it("should not stop attack if character has no target", async () => {
+      // @ts-ignore
+      const stopAttackSpy = jest.spyOn(mapTransition.mapNonPVPZone, "stopCharacterAttack");
+
+      // @ts-ignore
+      await mapTransition.handleNonPVPZone({ ...testCharacter, target: null }, 10, 20);
+
+      expect(stopAttackSpy).not.toHaveBeenCalled();
+    });
+
+    it("should not stop attack if target is not a friendly NPC", async () => {
+      const mockNPC = { alignment: NPCAlignment.Hostile };
+      jest.spyOn(NPC, "findById").mockReturnValue({
+        lean: jest.fn().mockReturnValue(mockNPC),
+      } as any);
+      // @ts-ignore
+      const stopAttackSpy = jest.spyOn(mapTransition.mapNonPVPZone, "stopCharacterAttack");
+
+      // @ts-ignore
+      await mapTransition.handleNonPVPZone({ ...testCharacter, target: { id: "npc-id", type: "NPC" } }, 10, 20);
+
+      expect(stopAttackSpy).not.toHaveBeenCalled();
+    });
+
+    it("should stop attack in non-PVP zone with friendly NPC target", async () => {
+      const mockNPC = { alignment: NPCAlignment.Friendly };
+      jest.spyOn(NPC, "findById").mockReturnValue({
+        lean: jest.fn().mockReturnValue(mockNPC),
+      } as any);
+      // @ts-ignore
+      jest.spyOn(mapTransition.mapNonPVPZone, "isNonPVPZoneAtXY").mockReturnValue(true);
+      // @ts-ignore
+      const stopAttackSpy = jest.spyOn(mapTransition.mapNonPVPZone, "stopCharacterAttack");
+
+      // @ts-ignore
+      await mapTransition.handleNonPVPZone({ ...testCharacter, target: { id: "npc-id", type: "NPC" } }, 10, 20);
+
+      expect(stopAttackSpy).toHaveBeenCalled();
     });
   });
 });
