@@ -52,6 +52,7 @@ describe("MapTransitionNonPVPZone", () => {
 
     const stopAttackSpy = jest.spyOn(MapNonPVPZone.prototype, "stopCharacterAttack");
 
+    // @ts-ignore
     await mapTransitionNonPVPZone.handleNonPVPZone({ ...testCharacter, target: { id: "npc-id", type: "NPC" } }, 10, 20);
 
     expect(stopAttackSpy).toHaveBeenCalled();
