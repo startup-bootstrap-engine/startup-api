@@ -14,17 +14,16 @@ describe("MapTransitionDifferentMap", () => {
   let clearCharacterBattleTargetSpy: jest.SpyInstance;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     testCharacter = await unitTestHelper.createMockCharacter(null, {});
-
     mapTransitionDifferentMap = container.get<MapTransitionDifferentMap>(MapTransitionDifferentMap);
-
     await unitTestHelper.initializeMapLoader();
 
-    clearCharacterBattleTargetSpy = jest.spyOn(BattleAttackTarget.prototype, "clearCharacterBattleTarget");
+    clearCharacterBattleTargetSpy = jest
+      .spyOn(BattleAttackTarget.prototype, "clearCharacterBattleTarget")
+      .mockResolvedValue();
 
     jest.spyOn(battleAttackTarget, "clearCharacterBattleTarget").mockResolvedValue();
-
-    jest.clearAllMocks();
   });
 
   afterEach(() => {
@@ -133,8 +132,6 @@ describe("MapTransitionDifferentMap", () => {
 
       // @ts-ignore
       characterUpdateOneMock = jest.spyOn(Character, "updateOne").mockResolvedValue(null);
-
-      jest.clearAllMocks();
     });
 
     afterEach(() => {

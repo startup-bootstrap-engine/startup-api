@@ -7,12 +7,12 @@ import { TEMPORARILY_BLOCKED_MAPS } from "@providers/constants/MapConstants";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { ITiledObject, NPCAlignment } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { capitalize } from "lodash";
 import { MapNonPVPZone } from "../MapNonPVPZone";
 import { MapTransitionDifferentMap } from "./MapTransitionDifferentMap";
 import { MapTransitionInfo } from "./MapTransitionInfo";
 import { MapTransitionReferralBonus } from "./MapTransitionReferralBonus";
 import { MapTransitionSameMap } from "./MapTransitionSameMap";
+import { MapTransitionValidator } from "./MapTransitionValidator";
 
 export interface IDestination {
   map: string;
@@ -29,7 +29,8 @@ export class MapTransition {
     private mapNonPVPZone: MapNonPVPZone,
     private mapTransitionReferralBonus: MapTransitionReferralBonus,
     private mapTransitionSameMap: MapTransitionSameMap,
-    private mapTransitionDifferentMap: MapTransitionDifferentMap
+    private mapTransitionDifferentMap: MapTransitionDifferentMap,
+    private mapTransitionValidator: MapTransitionValidator
   ) {}
 
   @TrackNewRelicTransaction()
@@ -63,8 +64,11 @@ export class MapTransition {
       if (!hasEnoughCrystals) return;
     }
 
-    if (this.isPremiumAccountRequired(transition) && !this.isUserAllowedAccess(transition, userAccountType)) {
-      this.sendAccessErrorMessage(character, transition);
+    if (
+      this.mapTransitionValidator.isPremiumAccountRequired(transition) &&
+      !this.mapTransitionValidator.isUserAllowedAccess(transition, userAccountType)
+    ) {
+      this.mapTransitionValidator.sendAccessErrorMessage(character, transition);
       return;
     }
 
@@ -101,29 +105,6 @@ export class MapTransition {
     const gridY = Number(this.mapTransitionInfo.getTransitionProperty(transitionTiledObject, "gridY"));
 
     return map && gridX && gridY ? { map, gridX, gridY } : null;
-  }
-
-  private isPremiumAccountRequired(transitionTiledObj: ITiledObject): boolean {
-    return Boolean(this.mapTransitionInfo.getTransitionProperty(transitionTiledObj, "accountType"));
-  }
-
-  private isUserAllowedAccess(transition: ITiledObject, userAccountType: string): boolean {
-    const allowOnlyPremiumAccountType = this.mapTransitionInfo.getTransitionProperty(transition, "accountType");
-    const allowedTypes = allowOnlyPremiumAccountType?.split(",").map((type) => type.trim());
-
-    return allowedTypes?.includes(userAccountType) || false;
-  }
-
-  private sendAccessErrorMessage(character: ICharacter, transitionTiledObj: ITiledObject): void {
-    const allowOnlyPremiumAccountType = this.mapTransitionInfo.getTransitionProperty(transitionTiledObj, "accountType");
-    const allowedTypes = allowOnlyPremiumAccountType?.split(",").map((type) => type.trim());
-
-    this.socketMessaging.sendErrorMessageToCharacter(
-      character,
-      `Sorry, a premium account of type '${allowedTypes
-        ?.map((x) => `${capitalize(x)}`)
-        .join(", or ")}' is required to access this area.`
-    );
   }
 
   @TrackNewRelicTransaction()

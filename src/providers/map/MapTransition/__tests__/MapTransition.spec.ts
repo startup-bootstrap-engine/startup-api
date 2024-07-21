@@ -2,6 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { NPC } from "@entities/ModuleNPC/NPCModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { MapTransition } from "@providers/map/MapTransition/MapTransition";
+import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { ITiledObject, NPCAlignment } from "@rpg-engine/shared";
 
 describe("MapTransition", () => {
@@ -68,7 +69,7 @@ describe("MapTransition", () => {
 
       const sendMessageSpy = jest.spyOn(
         // @ts-ignore
-        mapTransition.socketMessaging,
+        SocketMessaging.prototype,
         "sendErrorMessageToCharacter"
       );
 
