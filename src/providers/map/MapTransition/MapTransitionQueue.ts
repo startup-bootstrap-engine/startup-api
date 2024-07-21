@@ -5,6 +5,7 @@ import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { ITiledObject } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { MapNonPVPZone } from "../MapNonPVPZone";
+import { MapTiles } from "../MapTiles";
 import { MapTransitionDifferentMap } from "./MapTransitionDifferentMap";
 import { MapTransitionInfo } from "./MapTransitionInfo";
 import { MapTransitionSameMap } from "./MapTransitionSameMap";
@@ -25,7 +26,8 @@ export class MapTransitionQueue {
     private mapTransitionSameMap: MapTransitionSameMap,
     private mapTransitionDifferentMap: MapTransitionDifferentMap,
     private mapTransitionValidator: MapTransitionValidator,
-    private dynamicQueue: DynamicQueue
+    private dynamicQueue: DynamicQueue,
+    private mapTiles: MapTiles
   ) {}
 
   @TrackNewRelicTransaction()
@@ -36,7 +38,15 @@ export class MapTransitionQueue {
     const destination = this.getDestinationFromTransition(transition);
     if (!destination) return;
 
-    const isMapTemporarilyBlocked = await this.mapTransitionValidator.isMapTemporarilyBlocked(destination, character);
+    const isDestinationCoordinateValid = this.mapTiles.isCoordinateValid(
+      destination.map,
+      destination.gridX,
+      destination.gridY
+    );
+
+    if (!isDestinationCoordinateValid) return;
+
+    const isMapTemporarilyBlocked = this.mapTransitionValidator.isMapTemporarilyBlocked(destination, character);
 
     if (isMapTemporarilyBlocked) return;
 

@@ -97,6 +97,29 @@ export class MapTiles {
     };
   }
 
+  public isCoordinateValid(map: string, gridX: number, gridY: number): boolean {
+    const mapData = MapLoader.maps.get(map);
+
+    if (!mapData) {
+      throw new Error(`Failed to find map ${map}`);
+    }
+
+    let maxWidth = 0;
+    let maxHeight = 0;
+
+    // Loop through the layers in the map to find boundaries
+    for (const layer of mapData.layers) {
+      if (!layer.chunks) continue;
+
+      for (const chunk of layer.chunks) {
+        maxWidth = Math.max(maxWidth, chunk.x + chunk.width);
+        maxHeight = Math.max(maxHeight, chunk.y + chunk.height);
+      }
+    }
+
+    return gridX >= 0 && gridX <= maxWidth && gridY >= 0 && gridY <= maxHeight;
+  }
+
   public isSolid(map: string, gridX: number, gridY: number, mapLayer: MapLayers): boolean {
     const areAllLayersTileEmpty = this.areAllLayersTileEmpty(map, gridX, gridY);
 
