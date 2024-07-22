@@ -93,7 +93,6 @@ export class CharacterNetworkCreateQueue {
       this.characterCreateInteractionManager.sendCharacterCreateMessages(character, dataFromServer),
       this.characterCreateInteractionManager.warnAboutWeatherStatus(character.channelId!),
       this.characterCreateRegen.handleCharacterRegen(character),
-      this.npcManager.startNearbyNPCsBehaviorLoop(character),
     ]);
   }
 
