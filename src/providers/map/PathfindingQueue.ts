@@ -1,5 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { ResultsPoller } from "@providers/poller/ResultsPoller";
@@ -16,6 +17,7 @@ export class PathfindingQueue {
     private resultsPoller: ResultsPoller
   ) {}
 
+  @TrackNewRelicTransaction()
   public async findPathForNPC(
     npc: INPC,
     target: ICharacter | null,
@@ -75,6 +77,9 @@ export class PathfindingQueue {
           startGridY,
           endGridX,
           endGridY,
+        },
+        {
+          queueScaleBy: "active-npcs",
         }
       );
     } catch (error) {
