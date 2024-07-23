@@ -89,7 +89,9 @@ export class NPCCycleQueue {
 
       this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Server, "NPCCycles", 1);
 
-      await this.npcCycleTracker.trackCycle(npc._id);
+      if (npc.alignment === NPCAlignment.Hostile) {
+        await this.npcCycleTracker.trackCycle(npc._id);
+      }
 
       npc = await NPC.findById(npc?._id).lean({
         virtuals: true,

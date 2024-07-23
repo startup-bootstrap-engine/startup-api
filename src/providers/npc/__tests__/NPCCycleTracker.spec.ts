@@ -11,6 +11,10 @@ describe("NPCCycleTracker.ts", () => {
   beforeAll(() => {
     npcCycleTracker = container.get<NPCCycleTracker>(NPCCycleTracker);
     inMemoryHashTable = container.get<InMemoryHashTable>(InMemoryHashTable);
+
+    jest.useFakeTimers({
+      advanceTimers: true,
+    });
   });
 
   beforeEach(async () => {
@@ -46,9 +50,9 @@ describe("NPCCycleTracker.ts", () => {
     await npcCycleTracker.trackCycle(npcId);
 
     const intervals = (await inMemoryHashTable.get("npc-cycle-tracker", `${npcId}:intervals`)) as { data: number[] };
-    console.log(intervals.data);
     expect(intervals).toBeDefined();
     expect(intervals.data.length).toBe(1);
+    expect(intervals.data[0]).toBeGreaterThan(1000);
   });
 
   it("should return null for getAverageInterval when no data is available", async () => {

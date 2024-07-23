@@ -47,10 +47,8 @@ export class NPCCycleTracker {
   public async getOverallAverageCycleTime(): Promise<number> {
     const keys = await this.inMemoryHashTable.getAllKeys(this.namespace);
     const intervalKeys = keys.filter((key) => key.endsWith(":intervals"));
-
     let totalSum = 0;
     let totalCount = 0;
-
     for (const key of intervalKeys) {
       const intervals = await this.inMemoryHashTable.get(this.namespace, key);
       if (intervals && intervals.data.length > 0) {
@@ -58,7 +56,8 @@ export class NPCCycleTracker {
         totalCount += intervals.data.length;
       }
     }
-
-    return Math.round(totalCount > 0 ? totalSum / totalCount : 0);
+    const averageTime = Math.round(totalCount > 0 ? totalSum / totalCount : 0);
+    await this.clearAllData(); // Clear all data after calculating the average
+    return averageTime;
   }
 }
