@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 @provideSingleton(NPCCycleTracker)
 export class NPCCycleTracker {
   private readonly namespace = "npc-cycle-tracker";
-  private readonly maxSamples = 10000;
+  private readonly maxSamples = 1000;
 
   constructor(private inMemoryHashTable: InMemoryHashTable) {}
 

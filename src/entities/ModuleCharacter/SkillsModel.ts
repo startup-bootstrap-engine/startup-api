@@ -2,6 +2,7 @@ import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { createLeanSchema } from "@providers/database/mongooseHelpers";
 import { calculateExperience } from "@providers/npc/NPCExperience/NPCExperienceCalculator";
 import {
+  EntityType,
   NPCAlignment,
   SkillType,
   TypeHelper,
@@ -108,8 +109,14 @@ skillsSchema.index(
 );
 
 skillsSchema.post("save", async function (this: ISkill) {
-  // eslint-disable-next-line mongoose-lean/require-lean
-  const npc = (await NPC.findById(this.owner)) as INPC;
+  if (this.ownerType === EntityType.Character) {
+    return;
+  }
+
+  const npc = (await NPC.findById(this.owner).lean({
+    virtuals: true,
+    defaults: true,
+  })) as INPC;
 
   if (!npc || npc?.experience) {
     return;
