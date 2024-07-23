@@ -8,6 +8,7 @@ import { NPCRaidSpawn } from "@providers/raid/NPCRaidSpawn";
 import { provide } from "inversify-binding-decorators";
 
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
+import { NPCCycleTracker } from "@providers/npc/NPCCycleTracker";
 import { NPCDuplicateCleaner } from "@providers/npc/NPCDuplicateCleaner";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { CronJobScheduler } from "./CronJobScheduler";
@@ -22,7 +23,8 @@ export class NPCCrons {
     private npcFreezer: NPCFreezer,
     private cronJobScheduler: CronJobScheduler,
     private npcDuplicateChecker: NPCDuplicateCleaner,
-    private inMemoryHashTable: InMemoryHashTable
+    private inMemoryHashTable: InMemoryHashTable,
+    private npcCycleTracker: NPCCycleTracker
   ) {}
 
   public schedule(): void {
@@ -48,6 +50,12 @@ export class NPCCrons {
 
     this.cronJobScheduler.uniqueSchedule("npc-active-count", "* * * * *", async () => {
       await this.calculateActiveNPCs();
+    });
+
+    this.cronJobScheduler.uniqueSchedule("npc-cycle-tracker", "* * * * *", async () => {
+      const avg = await this.npcCycleTracker.getOverallAverageCycleTime();
+
+      this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.NPCs, "NPCCycleIntervalAvg", avg);
     });
   }
 

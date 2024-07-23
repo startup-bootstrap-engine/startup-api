@@ -28,6 +28,7 @@ import { ItemContainerTransactionQueue } from "@providers/itemContainer/ItemCont
 import { Locker } from "@providers/locks/Locker";
 import { NPCBattleCycleQueue } from "@providers/npc/NPCBattleCycleQueue";
 import { NPCCycleQueue } from "@providers/npc/NPCCycleQueue";
+import { NPCCycleTracker } from "@providers/npc/NPCCycleTracker";
 import { NPCDeathQueue } from "@providers/npc/NPCDeathQueue";
 import { NPCFreezer } from "@providers/npc/NPCFreezer";
 import { PartyCRUD } from "@providers/party/PartyCRUD";
@@ -87,7 +88,8 @@ export class ServerBootstrap {
     private manaShield: ManaShield,
     private cooldown: Cooldown,
     private skillBuffQueue: SkillBuffQueue,
-    private itemCraftbookQueue: ItemCraftbookQueue
+    private itemCraftbookQueue: ItemCraftbookQueue,
+    private npcCycleTracker: NPCCycleTracker
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -188,6 +190,8 @@ export class ServerBootstrap {
     await this.characterMonitorCallbackTracker.clearAll();
 
     await this.bullStrength.clearAllGiantForms();
+
+    await this.npcCycleTracker.clearAllData();
 
     await this.characterActionsTracker.clearAllCharacterActions();
 

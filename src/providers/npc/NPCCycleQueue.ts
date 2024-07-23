@@ -16,6 +16,7 @@ import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/Ne
 import { NPCAlignment, NPCMovementType, NPCPathOrientation, ToGridX, ToGridY } from "@rpg-engine/shared";
 import { random } from "lodash";
 import { clearCacheForKey } from "speedgoose";
+import { NPCCycleTracker } from "./NPCCycleTracker";
 import { NPCFreezer } from "./NPCFreezer";
 import { NPCView } from "./NPCView";
 import { NPCMovement } from "./movement/NPCMovement";
@@ -38,7 +39,8 @@ export class NPCCycleQueue {
     private stun: Stun,
     private newRelic: NewRelic,
     private locker: Locker,
-    private dynamicQueue: DynamicQueue
+    private dynamicQueue: DynamicQueue,
+    private npcCycleTracker: NPCCycleTracker
   ) {}
 
   @TrackNewRelicTransaction()
@@ -86,6 +88,8 @@ export class NPCCycleQueue {
       if (!npc) return;
 
       this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Server, "NPCCycles", 1);
+
+      await this.npcCycleTracker.trackCycle(npc._id);
 
       npc = await NPC.findById(npc?._id).lean({
         virtuals: true,

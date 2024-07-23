@@ -53,6 +53,7 @@ export class NPCMovementMoveTowards {
     private npcFreezer: NPCFreezer
   ) {}
 
+  @TrackNewRelicTransaction()
   public async startMoveTowardsMovement(npc: INPC): Promise<void> {
     const targetCharacter = await this.getTargetCharacter(npc);
 
@@ -84,7 +85,6 @@ export class NPCMovementMoveTowards {
     }
   }
 
-  @TrackNewRelicTransaction()
   private async execStartMoveTowardsMovement(npc: INPC, targetCharacter: ICharacter): Promise<void> {
     await this.handleValidTarget(npc, targetCharacter);
   }
@@ -102,12 +102,14 @@ export class NPCMovementMoveTowards {
       !targetCharacter.isBanned) as boolean;
   }
 
+  @TrackNewRelicTransaction()
   private async handleInvalidTarget(npc: INPC): Promise<void> {
     await this.npcTarget.tryToSetTarget(npc);
 
     await this.tryToFreezeIfTooManyFailedTargetChecks(npc);
   }
 
+  @TrackNewRelicTransaction()
   private async handleValidTarget(npc: INPC, targetCharacter: ICharacter): Promise<void> {
     await Promise.all([this.npcTarget.tryToClearOutOfRangeTargets(npc), this.fleeIfHealthIsLow(npc)]);
 
@@ -121,6 +123,7 @@ export class NPCMovementMoveTowards {
     }
   }
 
+  @TrackNewRelicTransaction()
   private async handleReachedTarget(npc: INPC, targetCharacter: ICharacter): Promise<void> {
     if (npc.pathOrientation === NPCPathOrientation.Backward) {
       await NPC.updateOne({ _id: npc._id }, { pathOrientation: NPCPathOrientation.Forward });
@@ -134,6 +137,7 @@ export class NPCMovementMoveTowards {
     }
   }
 
+  @TrackNewRelicTransaction()
   private async handleNotReachedTarget(npc: INPC, targetCharacter: ICharacter): Promise<void> {
     if (npc.pathOrientation === NPCPathOrientation.Forward) {
       const isUnderOriginalPositionRange = this.movementHelper.isUnderRange(

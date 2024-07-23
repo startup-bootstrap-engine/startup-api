@@ -150,6 +150,7 @@ export class Pathfinder {
     return path.length > 0;
   }
 
+  @TrackNewRelicTransaction()
   private async findShortestPathBetweenPoints(map: string, gridCourse: IGridCourse, retries = 0): Promise<number[][]> {
     const data = this.gridManager.generateGridBetweenPoints(map, gridCourse);
     const grid = data.grid;
