@@ -63,7 +63,7 @@ export class NPCTarget {
 
   @TrackNewRelicTransaction()
   public async tryToSetTarget(npc: INPC): Promise<void> {
-    if (npc.targetCharacter || !npc.isAlive || npc.health === 0 || !npc.maxRangeInGridCells) {
+    if (npc.targetCharacter || npc.health === 0 || !npc.maxRangeInGridCells) {
       return;
     }
 

@@ -99,14 +99,12 @@ export class NPCMovementMoveTowards {
     return (targetCharacter &&
       targetCharacter.isOnline &&
       targetCharacter.scene === npc.scene &&
-      !targetCharacter.isBanned) as boolean;
+      npc.targetCharacter) as boolean;
   }
 
   @TrackNewRelicTransaction()
   private async handleInvalidTarget(npc: INPC): Promise<void> {
     await this.npcTarget.tryToSetTarget(npc);
-
-    await this.tryToFreezeIfTooManyFailedTargetChecks(npc);
   }
 
   @TrackNewRelicTransaction()
@@ -156,18 +154,6 @@ export class NPCMovementMoveTowards {
       }
     } else if (npc.pathOrientation === NPCPathOrientation.Backward) {
       await this.moveTowardsPosition(npc, targetCharacter, npc.initialX, npc.initialY);
-    }
-  }
-
-  @TrackNewRelicTransaction()
-  private async tryToFreezeIfTooManyFailedTargetChecks(npc: INPC): Promise<void> {
-    const targetCheckCount = ((await this.inMemoryHashTable.get("npc-target-check-count", npc._id)) ?? 0) as number;
-
-    await this.inMemoryHashTable.set("npc-target-check-count", npc._id, targetCheckCount + 1);
-
-    if (targetCheckCount >= 3) {
-      await this.npcFreezer.freezeNPC(npc, "freezing NPC due to invalid target");
-      await this.inMemoryHashTable.delete("npc-target-check-count", npc._id);
     }
   }
 

@@ -82,7 +82,7 @@ export class NPCSpellArea {
         throw new Error(`Spell ${areaSpell.spellKey} not found!`);
       }
 
-      if (spell.castingType === SpellCastingType.SelfCasting) {
+      if (spell.castingType === SpellCastingType.SelfCasting && attacker.health !== attacker.maxHealth) {
         if (spell.castingAnimationKey) {
           await this.animationEffect.sendAnimationEventToNPC(attacker, spell.castingAnimationKey);
         }
