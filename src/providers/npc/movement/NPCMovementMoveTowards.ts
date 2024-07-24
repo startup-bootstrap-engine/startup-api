@@ -27,6 +27,7 @@ import { NPCMovement } from "./NPCMovement";
 import { NPCTarget } from "./NPCTarget";
 
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 
 export interface ICharacterHealth {
   id: string;
@@ -46,11 +47,27 @@ export class NPCMovementMoveTowards {
     private mapHelper: MapHelper,
     private pathfindingCaching: PathfindingCaching,
     private locker: Locker,
-    private npcBattleCycleQueue: NPCBattleCycleQueue
+    private npcBattleCycleQueue: NPCBattleCycleQueue,
+    private dynamicQueue: DynamicQueue
   ) {}
 
   @TrackNewRelicTransaction()
   public async startMoveTowardsMovement(npc: INPC): Promise<void> {
+    await this.dynamicQueue.addJob(
+      "npc-move-towards-queue",
+      (job) => {
+        const { npc } = job.data;
+
+        void this.execStartMoveTowardsMovement(npc);
+      },
+      { npc },
+      {
+        queueScaleBy: "active-npcs",
+      }
+    );
+  }
+
+  private async execStartMoveTowardsMovement(npc: INPC): Promise<void> {
     const targetCharacter = await this.getTargetCharacter(npc);
 
     if (!this.isValidTarget(npc, targetCharacter)) {
@@ -72,17 +89,13 @@ export class NPCMovementMoveTowards {
         return;
       }
 
-      await this.execStartMoveTowardsMovement(npc, targetCharacter);
+      await this.handleValidTarget(npc, targetCharacter);
     } catch (error) {
       console.error(error);
       throw error;
     } finally {
       await this.locker.unlock(`movement-move-towards-${npc._id}`);
     }
-  }
-
-  private async execStartMoveTowardsMovement(npc: INPC, targetCharacter: ICharacter): Promise<void> {
-    await this.handleValidTarget(npc, targetCharacter);
   }
 
   private async getTargetCharacter(npc: INPC): Promise<ICharacter> {
@@ -279,6 +292,7 @@ export class NPCMovementMoveTowards {
         ToGridX(x),
         ToGridY(y)
       );
+
       if (!shortestPath) {
         // try to set target to nearest character again
         await this.npcTarget.tryToSetTarget(npc);
@@ -288,6 +302,7 @@ export class NPCMovementMoveTowards {
       }
       const { newGridX, newGridY, nextMovementDirection } = shortestPath;
       const validCoordinates = this.mapHelper.areAllCoordinatesValid([newGridX, newGridY]);
+
       if (validCoordinates && nextMovementDirection) {
         const hasMoved = await this.npcMovement.moveNPC(
           npc,
