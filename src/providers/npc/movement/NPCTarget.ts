@@ -58,10 +58,6 @@ export class NPCTarget {
 
   @TrackNewRelicTransaction()
   public async tryToSetTarget(npc: INPC): Promise<void> {
-    if (npc.targetCharacter || npc.health === 0 || !npc.maxRangeInGridCells) {
-      return;
-    }
-
     const canProceed = await this.locker.lock(`npc-try-set-target-${npc._id}`);
     if (!canProceed) return;
 
@@ -99,7 +95,7 @@ export class NPCTarget {
       throw new Error(`NPC ${npc.key}: Failed to calculate rangeThresholdDefinition!`);
     }
 
-    if (!this.isTargetInRange(npc, targetCharacter, rangeThreshold)) {
+    if (!this.isTargetInRange(npc, targetCharacter, rangeThreshold) || !targetCharacter.isOnline) {
       await this.clearTarget(npc);
     }
   }

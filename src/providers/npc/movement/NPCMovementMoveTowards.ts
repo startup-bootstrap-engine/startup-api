@@ -278,14 +278,10 @@ export class NPCMovementMoveTowards {
         ToGridY(y)
       );
       if (!shortestPath) {
+        // try to set target to nearest character again
+        await this.npcTarget.tryToSetTarget(npc);
         // throw new Error("No shortest path found!");
 
-        if (npc.targetCharacter) {
-          console.log(`Clearing ${npc.key} target: no shortest path found`);
-
-          await this.npcTarget.clearTarget(npc);
-          await this.npcTarget.tryToSetTarget(npc);
-        }
         return;
       }
       const { newGridX, newGridY, nextMovementDirection } = shortestPath;
