@@ -53,6 +53,11 @@ export class NPCMovementMoveTowards {
 
   @TrackNewRelicTransaction()
   public async startMoveTowardsMovement(npc: INPC): Promise<void> {
+    if (appEnv.general.IS_UNIT_TEST) {
+      await this.execStartMoveTowardsMovement(npc);
+      return;
+    }
+
     await this.dynamicQueue.addJob(
       "npc-move-towards-queue",
       (job) => {
