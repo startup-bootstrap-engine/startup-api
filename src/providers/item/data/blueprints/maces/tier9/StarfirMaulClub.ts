@@ -2,6 +2,7 @@ import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entit
 import { IEquippableMeleeTier9WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   BasicAttribute,
+  CharacterAttributes,
   CharacterBuffDurationType,
   CharacterBuffType,
   EntityAttackType,
@@ -27,17 +28,25 @@ export const itemStarfirMaulClub: IEquippableMeleeTier9WeaponBlueprint = {
   rangeType: EntityAttackType.Melee,
   entityEffects: [EntityEffectBlueprint.Poison],
   entityEffectChance: 95,
-  equippedBuff: {
-    type: CharacterBuffType.Skill,
-    trait: BasicAttribute.Strength,
-    buffPercentage: 7,
-    durationType: CharacterBuffDurationType.Permanent,
-    options: {
-      messages: {
-        activation: "You feel the strength and fortitude coursing through your body. (+7% strength)",
-        deactivation: "You feel the strength and fortitude coursing leaving through your body. (-7% strength)",
-      },
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 12,
+      durationType: CharacterBuffDurationType.Permanent,
     },
-  },
-  equippedBuffDescription: "Increases strength by 7%",
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 12,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 10,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "Increases max health by 12%, strength by 12% and resistance by 10%.",
 };

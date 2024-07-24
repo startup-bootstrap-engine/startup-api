@@ -36,10 +36,7 @@ export class Pathfinder {
     }
 
     if (!target) {
-      return await this.findShortestPathBetweenPoints(map, {
-        start: { x: startGridX, y: startGridY },
-        end: { x: endGridX, y: endGridY },
-      });
+      return;
     }
 
     //! Dump pathfinding to save resources
@@ -163,7 +160,7 @@ export class Pathfinder {
 
     const finder = appEnv.general.IS_UNIT_TEST ? new PF.BestFirstFinder() : new PF.BreadthFirstFinder();
 
-    const path = finder.findPath(firstNode.x, firstNode.y, lastNode.x, lastNode.y, grid);
+    const path = PF.Util.compressPath(finder.findPath(firstNode.x, firstNode.y, lastNode.x, lastNode.y, grid));
     const pathWithoutOffset = path.map(([x, y]) => [x + data.startX, y + data.startY]);
 
     if (pathWithoutOffset.length < 1 && retries < 3) {

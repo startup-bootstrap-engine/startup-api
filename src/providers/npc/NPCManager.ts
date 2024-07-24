@@ -38,7 +38,7 @@ export class NPCManager {
         this.mathHelper.getDistanceInGridCells(npc.x, npc.y, character.x, character.y) <= NPC_MIN_DISTANCE_TO_ACTIVATE
     );
 
-    //! Dont use Promise.all here. This will lead to some NPCs getting stuckd
+    //! Dont use Promise.all here. This will lead to some NPCs getting stuck
     for (const npc of npcsToActivate) {
       await this.time.waitForMilliseconds(random(1, 10));
       await this.startBehaviorLoop(npc);
