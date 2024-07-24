@@ -281,6 +281,7 @@ export class NPCMovementMoveTowards {
 
         if (npc.targetCharacter) {
           await this.npcTarget.clearTarget(npc);
+          await this.npcTarget.tryToSetTarget(npc);
         }
         return;
       }
