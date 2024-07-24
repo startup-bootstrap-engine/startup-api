@@ -34,12 +34,12 @@ export class SkillBuffQueue {
 
         const skills = await this.execGetSkillsWithBuff(character);
 
-        await this.resultsPoller.prepareResultToBePolled("skills-buff-results", character._id.toString(), skills);
+        await this.resultsPoller.prepareResultToBePolled("skills-buff-results", character._id, skills);
       },
       { character }
     );
 
-    const result = await this.resultsPoller.pollResults("skills-buff-results", character._id.toString());
+    const result = await this.resultsPoller.pollResults("skills-buff-results", character._id);
 
     return result as unknown as ISkill;
   }

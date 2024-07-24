@@ -3,7 +3,6 @@ import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
-import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { Locker } from "@providers/locks/Locker";
 import { MapHelper } from "@providers/map/MapHelper";
 import { PathfindingCaching } from "@providers/map/PathfindingCaching";
@@ -23,7 +22,6 @@ import {
 } from "@rpg-engine/shared";
 import _, { debounce } from "lodash";
 import { NPCBattleCycleQueue } from "../NPCBattleCycleQueue";
-import { NPCFreezer } from "../NPCFreezer";
 import { NPCView } from "../NPCView";
 import { NPCMovement } from "./NPCMovement";
 import { NPCTarget } from "./NPCTarget";
@@ -48,9 +46,7 @@ export class NPCMovementMoveTowards {
     private mapHelper: MapHelper,
     private pathfindingCaching: PathfindingCaching,
     private locker: Locker,
-    private npcBattleCycleQueue: NPCBattleCycleQueue,
-    private inMemoryHashTable: InMemoryHashTable,
-    private npcFreezer: NPCFreezer
+    private npcBattleCycleQueue: NPCBattleCycleQueue
   ) {}
 
   @TrackNewRelicTransaction()

@@ -13,7 +13,7 @@ export class ResultsPoller {
   @TrackNewRelicTransaction()
   public async pollResults(namespace: string, key: string): Promise<any> {
     let checkInterval = 1;
-    const maxRetries = 14;
+    const maxRetries = 12;
 
     for (let i = 0; i < maxRetries; i++) {
       const result = (await this.inMemoryHashTable.get(namespace, key)) as boolean | undefined;
