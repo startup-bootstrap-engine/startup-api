@@ -2,6 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterView } from "@providers/character/CharacterView";
+import { appEnv } from "@providers/config/env";
 import { NPC_CAN_ATTACK_IN_NON_PVP_ZONE } from "@providers/constants/NPCConstants";
 import { GridManager } from "@providers/map/GridManager";
 import { MapNonPVPZone } from "@providers/map/MapNonPVPZone";
@@ -229,6 +230,10 @@ export class NPCMovement {
     endGridX: number,
     endGridY: number
   ): Promise<number[][] | undefined> {
-    return await this.pathfinder.findShortestPath(npc, target, npc.scene, startGridX, startGridY, endGridX, endGridY);
+    if (appEnv.general.IS_UNIT_TEST) {
+      return await this.pathfinder.findShortestPath(npc, target, npc.scene, startGridX, startGridY, endGridX, endGridY);
+    } else {
+      return await this.pathfindingQueue.findPathForNPC(npc, target, startGridX, startGridY, endGridX, endGridY);
+    }
   }
 }
