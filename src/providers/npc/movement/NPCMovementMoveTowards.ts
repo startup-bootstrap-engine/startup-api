@@ -105,7 +105,9 @@ export class NPCMovementMoveTowards {
 
   @TrackNewRelicTransaction()
   private async handleValidTarget(npc: INPC, targetCharacter: ICharacter): Promise<void> {
-    await Promise.all([this.npcTarget.tryToClearOutOfRangeTargets(npc), this.fleeIfHealthIsLow(npc)]);
+    await this.npcTarget.tryToClearOutOfRangeTargets(npc);
+
+    await this.fleeIfHealthIsLow(npc);
 
     const attackRange = npc.attackType === EntityAttackType.Melee ? 2 : npc.maxRangeAttack;
     await this.initOrClearBattleCycle(npc, targetCharacter, attackRange!);
