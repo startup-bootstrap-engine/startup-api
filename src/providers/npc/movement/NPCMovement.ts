@@ -162,9 +162,11 @@ export class NPCMovement {
     character: ICharacter,
     chosenMovementDirection: NPCDirection
   ): Promise<void> {
-    const clearTarget = this.shouldClearTarget(npc, character);
+    const clearTarget = await this.shouldClearTarget(npc, character);
 
     if (clearTarget) {
+      console.log(`Clearing ${npc.key} target: handling character interaction`);
+
       await this.npcTarget.clearTarget(npc);
     }
 
@@ -177,11 +179,22 @@ export class NPCMovement {
     }
   }
 
-  private shouldClearTarget(npc: INPC, character: ICharacter): boolean {
-    if (!NPC_CAN_ATTACK_IN_NON_PVP_ZONE && !npc.raidKey) {
+  private async shouldClearTarget(npc: INPC, character: ICharacter): Promise<boolean> {
+    const isRaid = npc.raidKey !== undefined;
+    const freeze = !isRaid;
+
+    if (!NPC_CAN_ATTACK_IN_NON_PVP_ZONE && freeze) {
       const isCharInNonPVPZone = this.mapNonPVPZone.isNonPVPZoneAtXY(character.scene, character.x, character.y);
-      return !!(isCharInNonPVPZone && npc.alignment === NPCAlignment.Hostile);
+      if (isCharInNonPVPZone && npc.alignment === NPCAlignment.Hostile) {
+        return true;
+      }
     }
+
+    const isTargetInvisible = await this.stealth.isInvisible(character);
+    if (isTargetInvisible) {
+      return true;
+    }
+
     return false;
   }
 

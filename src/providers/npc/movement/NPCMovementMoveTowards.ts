@@ -87,7 +87,7 @@ export class NPCMovementMoveTowards {
 
   private async getTargetCharacter(npc: INPC): Promise<ICharacter> {
     return (await Character.findById(npc.targetCharacter)
-      .lean()
+      .lean({ virtuals: true, defaults: true })
       .select("_id x y scene health isOnline isBanned target")) as ICharacter;
   }
 
@@ -243,6 +243,7 @@ export class NPCMovementMoveTowards {
     }
 
     if (!targetCharacter.isOnline || targetCharacter.isBanned || targetCharacter.health <= 0) {
+      console.log(`Clearing ${npc.key} target: ${targetCharacter._id} is offline or banned or dead`);
       await this.npcTarget.clearTarget(npc);
       return;
     }
@@ -280,6 +281,8 @@ export class NPCMovementMoveTowards {
         // throw new Error("No shortest path found!");
 
         if (npc.targetCharacter) {
+          console.log(`Clearing ${npc.key} target: no shortest path found`);
+
           await this.npcTarget.clearTarget(npc);
           await this.npcTarget.tryToSetTarget(npc);
         }

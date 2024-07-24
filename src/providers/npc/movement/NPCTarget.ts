@@ -33,11 +33,6 @@ export class NPCTarget {
 
   @TrackNewRelicTransaction()
   public async clearTarget(npc: INPC): Promise<void> {
-    if (npc.targetType === NPCTargetType.Default && !npc.targetCharacter) {
-      // If targetType is already Default and targetCharacter is unset, no need to proceed
-      return;
-    }
-
     await NPC.updateOne(
       { _id: npc.id },
       {
@@ -104,7 +99,7 @@ export class NPCTarget {
       throw new Error(`NPC ${npc.key}: Failed to calculate rangeThresholdDefinition!`);
     }
 
-    if (!this.isTargetInRange(npc, targetCharacter, rangeThreshold) || !targetCharacter.isOnline) {
+    if (!this.isTargetInRange(npc, targetCharacter, rangeThreshold)) {
       await this.clearTarget(npc);
     }
   }
