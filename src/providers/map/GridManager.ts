@@ -1,22 +1,15 @@
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { MapLayers } from "@rpg-engine/shared";
 import PF from "pathfinding";
+import mapVersions from "../../../public/config/map-versions.json";
+import { MapProperties } from "./MapProperties";
 import { MapSolids } from "./MapSolids";
 import { MapGridSolidsStorage } from "./storage/MapGridSolidsStorage";
 
-import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import mapVersions from "../../../public/config/map-versions.json";
-import { MapProperties } from "./MapProperties";
-
 export interface IGridCourse {
-  start: {
-    x: number;
-    y: number;
-  };
-  end: {
-    x: number;
-    y: number;
-  };
+  start: { x: number; y: number };
+  end: { x: number; y: number };
   offset?: number;
 }
 
@@ -26,6 +19,7 @@ export interface IGridBounds {
   height: number;
   width: number;
 }
+
 interface IGridBetweenPoints {
   grid: PF.Grid;
   startX: number;
@@ -34,7 +28,7 @@ interface IGridBetweenPoints {
 
 @provideSingleton(GridManager)
 export class GridManager {
-  private grids: Map<string, number[][]> = new Map();
+  private grids: Map<string, Uint8Array> = new Map();
 
   constructor(
     private mapSolids: MapSolids,
@@ -42,8 +36,8 @@ export class GridManager {
     private mapProperties: MapProperties
   ) {}
 
-  public getGrid(map: string): number[][] {
-    return this.grids.get(map)!;
+  public getGrid(map: string): Uint8Array | undefined {
+    return this.grids.get(map);
   }
 
   public hasGrid(map: string): boolean {
@@ -54,33 +48,23 @@ export class GridManager {
   public async generateGridSolids(map: string): Promise<void> {
     const bounds = this.mapProperties.getMapDimensions(map, true);
     const offset = this.mapProperties.getMapOffset(bounds.startX, bounds.startY)!;
-
     const currentMapVersion = mapVersions[map];
 
-    // check if we already have the grid for this map on redis (pre-calculated), or if we should calculate it
     const storedMapVersion = await this.mapGridSolidsStorage.getGridSolidsVersion(map);
 
-    if (storedMapVersion && storedMapVersion === currentMapVersion) {
+    if (storedMapVersion === currentMapVersion) {
       const tree = await this.mapGridSolidsStorage.getGridSolids(map);
-
-      if (!tree) {
-        throw new Error("❌Could not find grid for map: " + map);
-      }
-
-      this.grids.set(map, tree);
-
+      if (!tree) throw new Error(`❌Could not find grid for map: ${map}`);
+      this.grids.set(map, new Uint8Array(tree as any));
       return;
     }
 
-    // if not, delete what we have there and regenerate
-
     await this.mapGridSolidsStorage.deleteGridSolids(map);
 
-    const tree: number[][] = []; // new Quadtree({ width: bounds.width, height: bounds.height });
+    const tree = new Uint8Array(bounds.width * bounds.height);
 
     for (let gridY = bounds.startY; gridY < bounds.height; gridY++) {
       for (let gridX = bounds.startX; gridX < bounds.width; gridX++) {
-        // isTileSolid will get the ge_collide property directly from the json file, thats why we should use "raw coordinates", in other words, we should subtract the tileset!
         const isSolid = this.mapSolids.isTileSolid(map, gridX, gridY, MapLayers.Character);
         const isPassage = this.mapSolids.isTilePassage(map, gridX, gridY, MapLayers.Character);
         const isWalkable = !isSolid || isPassage;
@@ -88,16 +72,11 @@ export class GridManager {
         const offsetX = gridX + offset.gridOffsetX;
         const offsetY = gridY + offset.gridOffsetY;
 
-        if (!tree[offsetY]) {
-          tree[offsetY] = [];
-        }
-
-        tree[offsetY][offsetX] = isWalkable ? 0 : 1;
+        tree[offsetY * bounds.width + offsetX] = isWalkable ? 0 : 1;
       }
     }
 
-    await this.mapGridSolidsStorage.setGridSolids(map, tree);
-
+    await this.mapGridSolidsStorage.setGridSolids(map, Array.from(tree as any));
     this.grids.set(map, tree);
   }
 
@@ -105,114 +84,67 @@ export class GridManager {
   public async isWalkable(map: string, gridX: number, gridY: number): Promise<boolean | undefined> {
     try {
       const grid = await this.getGrid(map);
-
-      if (!grid) {
-        throw new Error("❌Could not find grid for map: " + map);
-      }
+      if (!grid) throw new Error(`❌Could not find grid for map: ${map}`);
 
       const bounds = this.mapProperties.getMapDimensions(map);
       const offset = this.mapProperties.getMapOffset(bounds.startX, bounds.startY)!;
 
-      return grid[gridY + offset.gridOffsetY][gridX + offset.gridOffsetX] === 0;
+      return grid[(gridY + offset.gridOffsetY) * bounds.width + (gridX + offset.gridOffsetX)] === 0;
     } catch (error) {
-      console.log(`Failed to check isWalkable for gridX ${gridX}, gridY ${gridY}`);
-      console.error(error);
+      console.error(`Failed to check isWalkable for gridX ${gridX}, gridY ${gridY}:`, error);
     }
   }
 
   public async setWalkable(map: string, gridX: number, gridY: number, walkable: boolean): Promise<void> {
     try {
       const grid = await this.getGrid(map);
-
-      if (!grid) {
-        throw new Error("❌Could not find grid for map: " + map);
-      }
+      if (!grid) throw new Error(`❌Could not find grid for map: ${map}`);
 
       const bounds = this.mapProperties.getMapDimensions(map);
       const offset = this.mapProperties.getMapOffset(bounds.startX, bounds.startY)!;
 
-      grid[gridY + offset.gridOffsetY][gridX + offset.gridOffsetX] = walkable ? 0 : 1;
-      // also save this change to redis, so it can persist. Otherwise, we'll get a brand new grid everytime we call this.getGrid
+      const index = (gridY + offset.gridOffsetY) * bounds.width + (gridX + offset.gridOffsetX);
+      grid[index] = walkable ? 0 : 1;
+
+      // TODO: Implement efficient way to update Redis with the change
     } catch (error) {
-      console.log(`Failed to setWalkable=${walkable} for gridX ${gridX}, gridY ${gridY} on map ${map}`);
-      console.error(error);
+      console.error(`Failed to setWalkable=${walkable} for gridX ${gridX}, gridY ${gridY} on map ${map}:`, error);
     }
   }
 
   public generateGridBetweenPoints(map: string, gridCourse: IGridCourse): IGridBetweenPoints {
     const tree = this.getGrid(map);
-
-    if (!tree || tree.length === 0) {
-      throw new Error(`❌ The tree is empty or not defined for map: ${map}`);
-    }
+    if (!tree || tree.length === 0) throw new Error(`❌ The tree is empty or not defined for map: ${map}`);
 
     const dimens = this.mapProperties.getMapDimensions(map);
     const offset = this.mapProperties.getMapOffset(dimens.startX, dimens.startY)!;
-
-    if (!offset) {
-      throw new Error(`❌ Offset is not defined for startX: ${dimens.startX} and startY: ${dimens.startY}`);
-    }
+    if (!offset) throw new Error(`❌ Offset is not defined for startX: ${dimens.startX} and startY: ${dimens.startY}`);
 
     const bounds = this.getSubGridBounds(map, gridCourse);
 
-    const solids = new Set();
+    const matrix = this.generateMatrixBetweenPoints(bounds, (gridX, gridY) => {
+      const x = gridX + offset.gridOffsetX;
+      const y = gridY + offset.gridOffsetY;
+      return tree[y * dimens.width + x] === 1;
+    });
 
-    for (let y = bounds.startY + offset.gridOffsetY; y < bounds.startY + bounds.height + offset.gridOffsetY; y++) {
-      for (let x = bounds.startX + offset.gridOffsetX; x < bounds.startX + bounds.width + offset.gridOffsetX; x++) {
-        if (tree[y] && tree[y][x] === 1) {
-          solids.add(`${x}-${y}`);
-        }
-      }
-    }
-
-    const matrix = this.generateMatrixBetweenPoints(bounds, (gridX, gridY) =>
-      solids.has(`${gridX + offset.gridOffsetX}-${gridY + offset.gridOffsetY}`)
-    );
-
-    const pf = new PF.Grid(matrix);
-
-    return { grid: pf, startX: bounds.startX, startY: bounds.startY };
+    return { grid: new PF.Grid(matrix), startX: bounds.startX, startY: bounds.startY };
   }
 
   private getSubGridBounds(map: string, gridCourse: IGridCourse): IGridBounds {
-    const { start, end } = gridCourse;
+    const { start, end, offset = 0 } = gridCourse;
+    const mapDimens = this.mapProperties.getMapDimensions(map);
 
-    let startX = start.x < end.x ? start.x : end.x;
-    let startY = start.y < end.y ? start.y : end.y;
-
-    let width = Math.abs(end.x - start.x) + 1;
-    let height = Math.abs(end.y - start.y) + 1;
-
-    if (gridCourse.offset && gridCourse.offset > 0) {
-      const mapDimens = this.mapProperties.getMapDimensions(map);
-
-      const minGridX = mapDimens.startX;
-      const minGridY = mapDimens.startY;
-
-      const maxGridX = mapDimens.width + minGridX;
-      const maxGridY = mapDimens.height + minGridY;
-
-      const newX = startX - gridCourse.offset;
-      const newY = startY - gridCourse.offset;
-
-      startX = newX < minGridX ? minGridX : newX;
-      startY = newY < minGridY ? minGridY : newY;
-
-      const availableWidth = Math.abs(maxGridX - startX);
-      const availableHeight = Math.abs(maxGridY - startY);
-
-      const newWidth = width + gridCourse.offset * 2;
-      const newHeight = height + gridCourse.offset * 2;
-
-      width = newWidth > availableWidth ? availableWidth : newWidth;
-      height = newHeight > availableHeight ? availableHeight : newHeight;
-    }
+    const startX = Math.max(mapDimens.startX, Math.min(start.x, end.x) - offset);
+    const startY = Math.max(mapDimens.startY, Math.min(start.y, end.y) - offset);
+    const endX = Math.min(mapDimens.width + mapDimens.startX, Math.max(start.x, end.x) + offset + 1);
+    const endY = Math.min(mapDimens.height + mapDimens.startY, Math.max(start.y, end.y) + offset + 1);
 
     return {
       startX,
       startY,
-      height,
-      width,
+      width: endX - startX,
+      height: endY - startY,
     };
   }
 
@@ -220,27 +152,16 @@ export class GridManager {
     bounds: IGridBounds,
     isSolidFn: (gridX: number, gridY: number) => boolean
   ): number[][] {
-    const matrix = new Int8Array(bounds.width * bounds.height);
-    const matrixRowLength = bounds.width;
+    const matrix = new Uint8Array(bounds.width * bounds.height);
 
-    for (let gridY = 0; gridY < bounds.height; gridY++) {
-      const matrixRowIndex = gridY * matrixRowLength;
-
-      for (let gridX = 0; gridX < bounds.width; gridX++) {
-        const isWalkable = !isSolidFn(gridX + bounds.startX, gridY + bounds.startY);
-        matrix[matrixRowIndex + gridX] = isWalkable ? 0 : 1;
+    for (let y = 0; y < bounds.height; y++) {
+      for (let x = 0; x < bounds.width; x++) {
+        matrix[y * bounds.width + x] = isSolidFn(x + bounds.startX, y + bounds.startY) ? 1 : 0;
       }
     }
 
-    const result: number[][] = [];
-    for (let i = 0; i < matrix.length; i += matrixRowLength) {
-      result.push(Array.from(matrix.subarray(i, i + matrixRowLength)));
-    }
-
-    if (!result.length) {
-      throw new Error("Failed to generate pathfinding grid");
-    }
-
-    return result;
+    return Array.from({ length: bounds.height }, (_, i) =>
+      Array.from(matrix.subarray(i * bounds.width, (i + 1) * bounds.width))
+    );
   }
 }
