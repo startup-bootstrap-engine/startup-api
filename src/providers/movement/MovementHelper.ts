@@ -127,31 +127,24 @@ export class MovementHelper {
     startGridY: number,
     endGridX: number,
     endGridY: number
-  ): AnimationDirection {
+  ): AnimationDirection | undefined {
     const Xdiff = endGridX - startGridX;
     const Ydiff = endGridY - startGridY;
 
-    // Calculate absolute differences
-    const absXdiff = Math.abs(Xdiff);
-    const absYdiff = Math.abs(Ydiff);
+    if (Xdiff < 0 && Ydiff === 0) {
+      return "left";
+    }
 
-    // Determine predominant direction
-    if (absXdiff > absYdiff) {
-      // Horizontal movement is predominant
-      return Xdiff > 0 ? "right" : "left";
-    } else if (absYdiff > absXdiff) {
-      // Vertical movement is predominant
-      return Ydiff > 0 ? "down" : "up";
-    } else {
-      // Equal horizontal and vertical movement, or no movement
-      if (Xdiff === 0 && Ydiff === 0) {
-        // No movement
-        return "down"; // or any default direction you prefer
-      } else {
-        // Diagonal movement with equal horizontal and vertical components
-        // In this case, we'll prioritize vertical direction
-        return Ydiff > 0 ? "down" : "up";
-      }
+    if (Xdiff > 0 && Ydiff === 0) {
+      return "right";
+    }
+
+    if (Xdiff === 0 && Ydiff < 0) {
+      return "up";
+    }
+
+    if (Xdiff === 0 && Ydiff > 0) {
+      return "down";
     }
   }
 
