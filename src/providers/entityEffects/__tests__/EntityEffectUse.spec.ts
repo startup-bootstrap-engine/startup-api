@@ -43,22 +43,25 @@ describe("EntityEffectUse.ts", () => {
   beforeAll(() => {
     entityEffectUse = container.get<EntityEffectUse>(EntityEffectUse);
   });
+
   beforeEach(async () => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+
     testAttacker = await unitTestHelper.createMockNPC(null, {});
+    testTarget = await unitTestHelper.createMockCharacter(null, {});
+    testCharacter = await unitTestHelper.createMockCharacter(null, {
+      hasEquipment: true,
+      hasSkills: true,
+      hasInventory: true,
+    });
+    testTargetNPC = await unitTestHelper.createMockNPC(null);
 
     poisonEntityEffect = entityEffectsBlueprintsIndex[EntityEffectBlueprint.Poison];
     bleedingEntityEffect = entityEffectsBlueprintsIndex[EntityEffectBlueprint.Bleeding];
     corruptionEntityEffect = entityEffectsBlueprintsIndex[EntityEffectBlueprint.Corruption];
 
     testAttacker.entityEffects = [poisonEntityEffect.key];
-
-    testTarget = await unitTestHelper.createMockCharacter(null, {});
-
-    testCharacter = await unitTestHelper.createMockCharacter(null, {
-      hasEquipment: true,
-      hasSkills: true,
-      hasInventory: true,
-    });
 
     const poisonSword = itemsBlueprintIndex[SwordsBlueprint.PoisonSword];
     poisonSwordItem = new Item({ ...poisonSword });
@@ -77,8 +80,6 @@ describe("EntityEffectUse.ts", () => {
 
     // @ts-ignore
     entityEffectSpy = jest.spyOn(entityEffectUse, "startEntityEffectCycle");
-
-    testTargetNPC = await unitTestHelper.createMockNPC(null);
   });
 
   afterEach(() => {
@@ -153,16 +154,6 @@ describe("EntityEffectUse.ts", () => {
 
     expect(refreshedTestTarget?.appliedEntityEffects).toHaveLength(0);
   });
-
-  // it("should call applicable entity effects for a character with a weapon effect", async () => {
-  //   poisonEntityEffect.probability = 100;
-  //   // @ts-ignore
-  //   getWeaponSpy = jest.spyOn(entityEffectUse.characterWeapon, "getWeapon");
-  //   getWeaponSpy.mockResolvedValueOnce({ item: poisonSwordItem });
-
-  //   await entityEffectUse.applyEntityEffects(testAttacker, testCharacter);
-  //   expect(entityEffectSpy).toHaveBeenCalledTimes(1);
-  // });
 
   it("should not call entity effects for a character without a weapon effect", async () => {
     poisonEntityEffect.probability = 100;
@@ -241,16 +232,6 @@ describe("EntityEffectUse.ts", () => {
       jest.restoreAllMocks();
     });
 
-    //! Flaky test - temporarily suspended
-    // it("should not call applyEntityEffects when attacker attack type Melee and no entity effects", async () => {
-    //     testAttacker.entityEffects = [];
-    //     testAttacker.attackType = EntityAttackType.Melee;
-    //     await testAttacker.save();
-
-    //     await entityEffectUse.applyEntityEffects(testTarget, testAttacker);
-
-    //     expect(entityEffectSpy).not.toHaveBeenCalled();
-    //   });
     it("should not call applyEntityEffects when attacker attack type is Ranged and entity effects attack type Melee", async () => {
       testAttacker.entityEffects = [EntityEffectBlueprint.Poison];
       testAttacker.attackType = EntityAttackType.Ranged;
@@ -260,25 +241,5 @@ describe("EntityEffectUse.ts", () => {
 
       expect(entityEffectSpy).not.toHaveBeenCalled();
     });
-
-    //! Flaky test - temporarily suspended
-    // it("should call applyEntityEffects when attacker attack type is Melee and entity effects attack type Melee", async () => {
-    //   testAttacker.entityEffects = [EntityEffectBlueprint.Poison];
-    //   testAttacker.attackType = EntityAttackType.Melee;
-    //   await testAttacker.save();
-
-    //   await entityEffectUse.applyEntityEffects(testTarget, testAttacker);
-
-    //   expect(entityEffectSpy).toHaveBeenCalled();
-    // });
-    // it("should call applyEntityEffects when attacker attack type is MeleeRanged and entity effects attack type Melee", async () => {
-    //   testAttacker.entityEffects = [EntityEffectBlueprint.Poison];
-    //   testAttacker.attackType = EntityAttackType.MeleeRanged;
-    //   await testAttacker.save();
-
-    //   await entityEffectUse.applyEntityEffects(testTarget, testAttacker);
-
-    //   expect(entityEffectSpy).toHaveBeenCalled();
-    // });
   });
 });

@@ -120,11 +120,8 @@ export class NPCMovement {
       npc
     );
 
-    if (hasSolid) {
-      return true;
-    }
-
-    return false;
+    await this.gridManager.setWalkable(npc.scene, newGridX, newGridY, !hasSolid);
+    return hasSolid;
   }
 
   private async updateGridWalkability(

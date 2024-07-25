@@ -11,16 +11,16 @@ import PF from "pathfinding";
 import { GridManager, IGridCourse } from "./GridManager";
 import { MapHelper } from "./MapHelper";
 import { NPCTarget } from "@providers/npc/movement/NPCTarget";
+import { LightweightPathfinder } from "./LightweightPathfinder";
 
 @provide(Pathfinder)
 export class Pathfinder {
   constructor(
     private mapHelper: MapHelper,
-    private inMemoryHashTable: InMemoryHashTable,
     private gridManager: GridManager,
-    private mathHelper: MathHelper,
-    private movementHelper: MovementHelper,
-    private npcTarget: NPCTarget
+
+    private npcTarget: NPCTarget,
+    private lightweightPathfinder: LightweightPathfinder
   ) {}
 
   @TrackNewRelicTransaction()
@@ -51,10 +51,11 @@ export class Pathfinder {
     if (!target || !pathfindingResult || pathfindingResult.length === 0) {
       await this.npcTarget.tryToSetTarget(npc);
 
-      const nearestGridToTarget = await this.getNearestGridToTarget(npc, target?.x!, target?.y!, [
-        ToGridX(npc.x),
-        ToGridY(npc.y),
-      ]);
+      const nearestGridToTarget = await this.lightweightPathfinder.getNearestGridToTarget(
+        npc,
+        ToGridX(endGridX),
+        ToGridY(endGridY)
+      );
 
       if (nearestGridToTarget?.length) {
         return nearestGridToTarget;
@@ -63,79 +64,6 @@ export class Pathfinder {
 
     // If all else fails, return undefined or an alternative path
     return undefined;
-  }
-
-  //! Simplified pathfinding calculation
-  public async getNearestGridToTarget(
-    npc: INPC,
-    targetX: number,
-    targetY: number,
-    previousNPCPosition: number[]
-  ): Promise<number[][]> {
-    const potentialPositions = [
-      { direction: "top", x: npc.x, y: npc.y - GRID_WIDTH },
-      { direction: "bottom", x: npc.x, y: npc.y + GRID_WIDTH },
-      { direction: "left", x: npc.x - GRID_WIDTH, y: npc.y },
-      { direction: "right", x: npc.x + GRID_WIDTH, y: npc.y },
-    ];
-
-    const nonSolidPositions = (
-      await Promise.all(
-        potentialPositions.map(async (position) => ({
-          isSolid: await this.movementHelper.isSolid(
-            npc.scene,
-            ToGridX(position.x),
-            ToGridY(position.y),
-            npc.layer,
-            "CHECK_ALL_LAYERS_BELOW"
-          ),
-          position,
-        }))
-      )
-    )
-      .filter((result) => !result.isSolid)
-      .map((result) => result.position);
-
-    const dx = targetX - npc.x;
-    const dy = targetY - npc.y;
-    const targetDirection = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : dy > 0 ? "bottom" : "top";
-
-    const handleNPCStuck = async (x: number, y: number): Promise<boolean> => {
-      if (previousNPCPosition && ToGridX(x) === previousNPCPosition[0] && ToGridY(y) === previousNPCPosition[1]) {
-        await this.inMemoryHashTable.set("npc-force-pathfinding-calculation", npc._id, true);
-        return true;
-      }
-      return false;
-    };
-
-    // eslint-disable-next-line mongoose-lean/require-lean
-    const targetDirectionPosition = nonSolidPositions.find((pos) => pos.direction === targetDirection);
-
-    if (targetDirectionPosition) {
-      if (await handleNPCStuck(targetDirectionPosition.x, targetDirectionPosition.y)) {
-        return [];
-      }
-      return [[ToGridX(targetDirectionPosition.x), ToGridY(targetDirectionPosition.y)]];
-    }
-
-    type PositionWithDistance = { distance: number; direction: string; x: number; y: number };
-
-    const closestPosition = nonSolidPositions.reduce<PositionWithDistance>(
-      (closest, position) => {
-        const distance = this.mathHelper.getDistanceBetweenPoints(position.x, position.y, targetX, targetY);
-        return distance < closest.distance ? { ...position, distance } : closest;
-      },
-      { distance: Infinity, direction: "", x: 0, y: 0 }
-    );
-
-    if (closestPosition.distance < Infinity) {
-      if (await handleNPCStuck(closestPosition.x, closestPosition.y)) {
-        return [];
-      }
-      return [[ToGridX(closestPosition.x), ToGridY(closestPosition.y)]];
-    }
-
-    return [];
   }
 
   public async isTherePathBetweenPoints(
