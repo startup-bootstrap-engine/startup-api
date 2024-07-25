@@ -55,10 +55,15 @@ export class NPCMovement {
     chosenMovementDirection: NPCDirection
   ): Promise<boolean> {
     try {
+      const startTime = performance.now();
+
+      console.log(`Starting moveNPC for NPC ${npc.key}...`);
+
       const [newGridX, newGridY] = [ToGridX(newX), ToGridY(newY)];
       const [oldGridX, oldGridY] = [ToGridX(oldX), ToGridY(oldY)];
 
       if (await this.isDestinationSolid(npc, newGridX, newGridY)) {
+        console.log(`Solid object found at ${newGridX}, ${newGridY} for NPC ${npc.key}`);
         return false;
       }
 
@@ -71,6 +76,8 @@ export class NPCMovement {
         await this.updateNPCInDatabase(npc, newX, newY, chosenMovementDirection);
       }
 
+      const endTime = performance.now();
+      console.log(`Finished moveNPC for NPC ${npc.key} in ${(endTime - startTime).toFixed(2)} milliseconds`);
       return true;
     } catch (error) {
       console.error(`Error moving NPC ${npc.key}:`, error);
@@ -121,7 +128,6 @@ export class NPCMovement {
     );
 
     if (hasSolid) {
-      await this.gridManager.setWalkable(npc.scene, newGridX, newGridY, false);
       return true;
     }
 
@@ -166,7 +172,7 @@ export class NPCMovement {
     const clearTarget = await this.shouldClearTarget(npc, character);
 
     if (clearTarget) {
-      console.log(`Clearing ${npc.key} target: handling character interaction`);
+      console.log(`Clearing ${npc.key} target: handling character interaction with ${character._id}`);
 
       await this.npcTarget.clearTarget(npc);
     }
