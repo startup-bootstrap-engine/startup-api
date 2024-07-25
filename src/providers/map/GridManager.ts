@@ -12,13 +12,13 @@ interface IGridPoint {
   y: number;
 }
 
-interface IGridCourse {
+export interface IGridCourse {
   start: IGridPoint;
   end: IGridPoint;
   offset?: number;
 }
 
-interface IGridBounds {
+export interface IGridBounds {
   startX: number;
   startY: number;
   height: number;

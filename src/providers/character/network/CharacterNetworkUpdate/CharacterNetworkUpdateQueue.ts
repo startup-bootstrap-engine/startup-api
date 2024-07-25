@@ -252,14 +252,9 @@ export class CharacterNetworkUpdateQueue {
       // if character is moving, update the position
 
       // old position is now walkable
-      const setOldPositionWalkable = this.gridManager.setWalkable(
-        map,
-        ToGridX(character.x),
-        ToGridY(character.y),
-        true
-      );
+      await this.gridManager.setWalkable(map, ToGridX(character.x), ToGridY(character.y), true);
 
-      const characterUpdate = Character.updateOne(
+      await Character.updateOne(
         { _id: character._id },
         {
           $set: {
@@ -272,9 +267,7 @@ export class CharacterNetworkUpdateQueue {
       ).lean();
 
       // update our grid with solid information
-      const setNewPositionSolid = this.gridManager.setWalkable(map, ToGridX(newX), ToGridY(newY), false);
-
-      await Promise.all([setOldPositionWalkable, characterUpdate, setNewPositionSolid]);
+      await this.gridManager.setWalkable(map, ToGridX(newX), ToGridY(newY), false);
     }
   }
 }

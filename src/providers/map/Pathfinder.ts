@@ -10,6 +10,7 @@ import { provide } from "inversify-binding-decorators";
 import PF from "pathfinding";
 import { GridManager, IGridCourse } from "./GridManager";
 import { MapHelper } from "./MapHelper";
+import { NPCTarget } from "@providers/npc/movement/NPCTarget";
 
 @provide(Pathfinder)
 export class Pathfinder {
@@ -18,7 +19,8 @@ export class Pathfinder {
     private inMemoryHashTable: InMemoryHashTable,
     private gridManager: GridManager,
     private mathHelper: MathHelper,
-    private movementHelper: MovementHelper
+    private movementHelper: MovementHelper,
+    private npcTarget: NPCTarget
   ) {}
 
   @TrackNewRelicTransaction()
@@ -35,35 +37,36 @@ export class Pathfinder {
       return;
     }
 
-    if (!target) {
-      return await this.findShortestPathBetweenPoints(map, {
-        start: { x: startGridX, y: startGridY },
-        end: { x: endGridX, y: endGridY },
-      });
-    }
-
-    //! Dump pathfinding to save resources
-    // const isUnderRange = this.movementHelper.isUnderRange(npc.x, npc.y, target.x, target.y, 5);
-
-    // if (isUnderRange) {
-    //   const nearestGridToTarget = await this.getNearestGridToTarget(npc, target.x, target.y, [
-    //     ToGridX(npc.x),
-    //     ToGridY(npc.y),
-    //   ]);
-
-    //   if (nearestGridToTarget?.length) {
-    //     return nearestGridToTarget;
-    //   }
-    // }
-
-    return await this.findShortestPathBetweenPoints(map, {
+    const pathfindingResult = await this.findShortestPathBetweenPoints(map, {
       start: { x: startGridX, y: startGridY },
       end: { x: endGridX, y: endGridY },
     });
+
+    // If a path is found, return it
+    if (pathfindingResult && pathfindingResult.length > 0) {
+      return pathfindingResult;
+    }
+
+    // If no target or path is found, attempt "dumb" pathfinding
+    if (!target || !pathfindingResult || pathfindingResult.length === 0) {
+      await this.npcTarget.tryToSetTarget(npc);
+
+      const nearestGridToTarget = await this.getNearestGridToTarget(npc, target?.x!, target?.y!, [
+        ToGridX(npc.x),
+        ToGridY(npc.y),
+      ]);
+
+      if (nearestGridToTarget?.length) {
+        return nearestGridToTarget;
+      }
+    }
+
+    // If all else fails, return undefined or an alternative path
+    return undefined;
   }
 
   //! Simplified pathfinding calculation
-  private async getNearestGridToTarget(
+  public async getNearestGridToTarget(
     npc: INPC,
     targetX: number,
     targetY: number,

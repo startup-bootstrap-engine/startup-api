@@ -83,12 +83,13 @@ export class CharacterNetworkCreateQueue {
 
     const dataFromServer = await this.characterCreateInteractionManager.prepareDataForServer(character, data);
 
+    await this.gridManager.setWalkable(character.scene, ToGridX(character.x), ToGridY(character.y), false);
+
     await Promise.all([
       this.characterDailyPlayTracker.updateCharacterDailyPlay(character._id),
       this.unlockCharacterMapTransition(character),
       this.refreshBattleState(character),
       this.characterBuffValidation.removeDuplicatedBuffs(character),
-      this.gridManager.setWalkable(character.scene, ToGridX(character.x), ToGridY(character.y), false),
       this.characterCreateInteractionManager.startNPCInteractions(character),
       this.characterCreateInteractionManager.sendCharacterCreateMessages(character, dataFromServer),
       this.characterCreateInteractionManager.warnAboutWeatherStatus(character.channelId!),

@@ -305,8 +305,7 @@ export class NPCMovementMoveTowards {
             scene: ${npc.scene}
             result: ${shortestPath}
           `);
-        // try to set target to nearest character again
-        await this.npcTarget.tryToSetTarget(npc);
+
         // throw new Error("No shortest path found!");
 
         return;
