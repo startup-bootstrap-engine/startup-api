@@ -4,22 +4,26 @@ import { container, unitTestHelper } from "@providers/inversify/container";
 import { GridManager } from "../GridManager";
 import { MapProperties } from "../MapProperties";
 import { MapTiles } from "../MapTiles";
+import { MapGridSolidsStorage } from "../storage/MapGridSolidsStorage";
+import mapVersions from "../../../../public/config/map-versions.json";
+import { MapSolids } from "../MapSolids";
 
 describe("GridManager", () => {
   let gridManager: GridManager;
   let mapTiles: MapTiles;
   let testNPC: INPC;
   let mapProperties: MapProperties;
+
   beforeAll(async () => {
     gridManager = container.get<GridManager>(GridManager);
     mapProperties = container.get<MapProperties>(MapProperties);
-
     mapTiles = container.get<MapTiles>(MapTiles);
 
     await unitTestHelper.initializeMapLoader();
 
     await gridManager.generateGridSolids("unit-test-map-negative-coordinate");
     await gridManager.generateGridSolids("example");
+    await gridManager.generateGridSolids("unit-test-map");
   });
 
   beforeEach(async () => {
@@ -32,25 +36,20 @@ describe("GridManager", () => {
 
   const getMapOffset = (mapName: string): { gridOffsetX: number; gridOffsetY: number } => {
     const initialXY = mapTiles.getFirstXY(mapName)!;
-
     const offset = mapProperties.getMapOffset(initialXY[0], initialXY[1]);
-
     return offset!;
   };
 
   const checkMapSize = async (mapName: string, expectedWidth: number, expectedHeight: number): Promise<void> => {
     const hasGrid = await gridManager.hasGrid(mapName);
-
     expect(hasGrid).toBeTruthy();
 
     const grid = await gridManager.getGrid(mapName);
-
     if (!grid) {
       throw new Error("❌Could not find grid for map: " + mapName);
     }
 
     const { gridOffsetX, gridOffsetY } = getMapOffset(mapName)!;
-
     const { width, height } = mapTiles.getMapWidthHeight(mapName, gridOffsetX, gridOffsetY);
 
     expect(width).toBe(expectedWidth);
@@ -180,6 +179,203 @@ describe("GridManager", () => {
       startY: 56,
       width: 25,
       height: 26,
+    });
+  });
+
+  describe("generateGridSolids", () => {
+    it("should fetch and set grid solids from storage if map version matches", async () => {
+      const map = "unit-test-map";
+      const version = mapVersions[map];
+      const storedTree = [
+        [0, 1],
+        [1, 0],
+      ];
+
+      jest
+        .spyOn(MapGridSolidsStorage.prototype, "getGridSolidsVersion")
+        .mockResolvedValue(version as unknown as string);
+      jest.spyOn(MapGridSolidsStorage.prototype, "getGridSolids").mockResolvedValue(storedTree);
+
+      await gridManager.generateGridSolids(map);
+
+      expect(gridManager.getGrid(map)).toEqual(storedTree);
+    });
+
+    it("should throw an error if grid is not found in storage when version matches", async () => {
+      const map = "example-map";
+      const version = mapVersions[map];
+
+      jest.spyOn(MapGridSolidsStorage.prototype, "getGridSolidsVersion").mockResolvedValue(version);
+      // @ts-ignore
+      jest.spyOn(MapGridSolidsStorage.prototype, "getGridSolids").mockResolvedValue(null);
+
+      await expect(gridManager.generateGridSolids(map)).rejects.toThrow("Failed to find map example-map");
+    });
+
+    it("should delete old grid solids and regenerate if map version does not match", async () => {
+      const map = "example-map";
+      const version = mapVersions[map];
+      const bounds = { startX: 0, startY: 0, width: 2, height: 2 };
+      const offset = { gridOffsetX: 0, gridOffsetY: 0 };
+
+      jest.spyOn(MapGridSolidsStorage.prototype, "getGridSolidsVersion").mockResolvedValue("old-version");
+      jest.spyOn(MapGridSolidsStorage.prototype, "deleteGridSolids").mockResolvedValue();
+      jest.spyOn(MapProperties.prototype, "getMapDimensions").mockReturnValue(bounds);
+      jest.spyOn(MapProperties.prototype, "getMapOffset").mockReturnValue(offset);
+      jest.spyOn(MapSolids.prototype, "isTileSolid").mockReturnValue(false);
+      jest.spyOn(MapSolids.prototype, "isTilePassage").mockReturnValue(false);
+      jest.spyOn(MapGridSolidsStorage.prototype, "setGridSolids").mockResolvedValue();
+
+      await gridManager.generateGridSolids(map);
+
+      const expectedTree = [
+        [0, 0],
+        [0, 0],
+      ];
+
+      expect(gridManager.getGrid(map)).toEqual(expectedTree);
+    });
+
+    it("should properly set grid solids based on map data", async () => {
+      const map = "example-map";
+      const bounds = { startX: 0, startY: 0, width: 2, height: 2 };
+      const offset = { gridOffsetX: 0, gridOffsetY: 0 };
+
+      // @ts-ignore
+      jest.spyOn(MapGridSolidsStorage.prototype, "getGridSolidsVersion").mockResolvedValue(null);
+      jest.spyOn(MapGridSolidsStorage.prototype, "deleteGridSolids").mockResolvedValue();
+      jest.spyOn(MapProperties.prototype, "getMapDimensions").mockReturnValue(bounds);
+      jest.spyOn(MapProperties.prototype, "getMapOffset").mockReturnValue(offset);
+      jest.spyOn(MapSolids.prototype, "isTileSolid").mockImplementation((map, x, y) => x === 1 && y === 1);
+      jest.spyOn(MapSolids.prototype, "isTilePassage").mockReturnValue(false);
+      jest.spyOn(MapGridSolidsStorage.prototype, "setGridSolids").mockResolvedValue();
+
+      await gridManager.generateGridSolids(map);
+
+      const expectedTree = [
+        [0, 0],
+        [0, 1],
+      ];
+
+      expect(gridManager.getGrid(map)).toEqual(expectedTree);
+    });
+
+    it("should update grid solids if map version changes", async () => {
+      const map = "unit-test-map";
+      const initialGrid = gridManager.getGrid(map);
+
+      jest.spyOn(MapGridSolidsStorage.prototype, "getGridSolidsVersion").mockResolvedValueOnce("old-version");
+      jest.spyOn(MapGridSolidsStorage.prototype, "setGridSolids").mockResolvedValueOnce();
+
+      await gridManager.generateGridSolids(map);
+      const updatedGrid = gridManager.getGrid(map);
+
+      expect(updatedGrid).not.toEqual(initialGrid);
+    });
+  });
+
+  describe("isWalkable", () => {
+    it("should handle edge cases", async () => {
+      const map = "unit-test-map";
+
+      // Test map edges
+      expect(await gridManager.isWalkable(map, 0, 0)).toBeDefined();
+      expect(await gridManager.isWalkable(map, 31, 31)).toBeDefined();
+    });
+  });
+
+  describe("setWalkable", () => {
+    it("should update walkable status and persist changes", async () => {
+      const map = "unit-test-map-negative-coordinate";
+      const x = 5;
+      const y = 5;
+
+      const initialWalkable = await gridManager.isWalkable(map, x, y);
+      await gridManager.setWalkable(map, x, y, !initialWalkable);
+      expect(await gridManager.isWalkable(map, x, y)).toBe(!initialWalkable);
+
+      // @ts-ignore
+      await gridManager.setWalkable(map, x, y, initialWalkable);
+      expect(await gridManager.isWalkable(map, x, y)).toBe(initialWalkable);
+
+      // Verify persistence
+      // @ts-ignore
+      const persistedGrid = await gridManager.mapGridSolidsStorage.getGridSolids(map);
+      const { gridOffsetX, gridOffsetY } = getMapOffset(map);
+      // @ts-ignore
+      expect(persistedGrid[y + gridOffsetY][x + gridOffsetX]).toBe(initialWalkable ? 0 : 1);
+    });
+  });
+
+  describe("generateGridBetweenPoints", () => {
+    it("should generate a valid grid between two points", () => {
+      const map = "example";
+      const gridCourse = {
+        start: { x: 10, y: 10 },
+        end: { x: 20, y: 20 },
+        offset: 2,
+      };
+
+      const result = gridManager.generateGridBetweenPoints(map, gridCourse);
+
+      expect(result.grid).toBeDefined();
+      expect(result.startX).toBe(8);
+      expect(result.startY).toBe(8);
+      expect(result.grid.width).toBe(15);
+      expect(result.grid.height).toBe(15);
+    });
+
+    it("should handle cases where the grid extends beyond map boundaries", () => {
+      const map = "unit-test-map";
+      const gridCourse = {
+        start: { x: 0, y: 0 },
+        end: { x: 31, y: 31 },
+        offset: 5,
+      };
+
+      const result = gridManager.generateGridBetweenPoints(map, gridCourse);
+
+      expect(result.startX).toBe(0);
+      expect(result.startY).toBe(0);
+      expect(result.grid.width).toBe(32);
+      expect(result.grid.height).toBe(32);
+    });
+  });
+
+  describe("getSubGridBounds", () => {
+    it("should calculate correct bounds for various scenarios", () => {
+      const testCases = [
+        {
+          desc: "normal case",
+          map: "example",
+          input: { start: { x: 5, y: 5 }, end: { x: 10, y: 10 }, offset: 2 },
+          expected: { startX: 3, startY: 3, width: 10, height: 10 },
+        },
+        {
+          desc: "reversed coordinates",
+          map: "example",
+          input: { start: { x: 10, y: 10 }, end: { x: 5, y: 5 }, offset: 2 },
+          expected: { startX: 3, startY: 3, width: 10, height: 10 },
+        },
+        {
+          desc: "zero offset",
+          map: "unit-test-map",
+          input: { start: { x: 5, y: 5 }, end: { x: 10, y: 10 }, offset: 0 },
+          expected: { startX: 5, startY: 5, width: 6, height: 6 },
+        },
+        {
+          desc: "large offset",
+          map: "unit-test-map-negative-coordinate",
+          input: { start: { x: -10, y: 10 }, end: { x: -5, y: 15 }, offset: 5 },
+          expected: { startX: -15, startY: 5, width: 16, height: 16 },
+        },
+      ];
+
+      testCases.forEach(({ desc, map, input, expected }) => {
+        const result = (gridManager as any).getSubGridBounds(map, input);
+        // @ts-ignore
+        expect(result).toEqual(expected, `Failed case: ${desc}`);
+      });
     });
   });
 });

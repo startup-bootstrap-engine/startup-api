@@ -299,7 +299,12 @@ export class NPCMovementMoveTowards {
       );
 
       if (!shortestPath) {
-        console.log(`No shortest path found for NPC ${npc.key} to target ${target._id}`);
+        console.log(`No shortest path found for NPC ${npc.key} to target ${target._id}: 
+            startGrid: ${ToGridX(npc.x)}, ${ToGridY(npc.y)}
+            endGrid: ${ToGridX(x)}, ${ToGridY(y)}
+            scene: ${npc.scene}
+            result: ${shortestPath}
+          `);
         // try to set target to nearest character again
         await this.npcTarget.tryToSetTarget(npc);
         // throw new Error("No shortest path found!");
