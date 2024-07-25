@@ -17,6 +17,7 @@ describe("Pathfinder", () => {
 
     await gridManager.generateGridSolids("unit-test-map-negative-coordinate");
     await gridManager.generateGridSolids("example");
+    await gridManager.generateGridSolids("unit-test-map");
   });
 
   beforeEach(async () => {
@@ -276,5 +277,25 @@ describe("Pathfinder", () => {
       [30, 30],
       [31, 30],
     ]);
+  });
+
+  describe("Edge cases", () => {
+    it("should find a path under a narrow corridor", async () => {
+      // start on 13,7 end on 19,7
+
+      const path = await pathfinder.findShortestPath(testNPC, null, "unit-test-map", 13, 7, 19, 7);
+
+      expect(path).toBeDefined();
+
+      expect(path).toMatchObject([
+        [13, 7],
+        [14, 7],
+        [15, 7],
+        [16, 7],
+        [17, 7],
+        [18, 7],
+        [19, 7],
+      ]);
+    });
   });
 });
