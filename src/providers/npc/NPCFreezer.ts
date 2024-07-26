@@ -44,10 +44,9 @@ export class NPCFreezer {
 
   @TrackNewRelicTransaction()
   public async freezeNPCsWithoutCharactersAround(): Promise<void> {
-    // eslint-disable-next-line mongoose-lean/require-lean
     const activeNPCs = await NPC.find({
       isBehaviorEnabled: true,
-    });
+    }).lean<INPC[]>({ virtuals: true, defaults: true });
 
     const inactiveNPCPromises: any[] = [];
 
