@@ -217,7 +217,7 @@ export const warnAboutItemChanges = async (item: IItem, warnType: "changes" | "r
 
     for (const character of nearbyCharacters) {
       if (warnType === "changes") {
-        await itemView.warnCharacterAboutItemsInView(character, { always: true });
+        await itemView.warnCharacterAboutItemsInView(character);
       }
 
       if (warnType === "removal") {
