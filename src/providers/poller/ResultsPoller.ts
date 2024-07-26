@@ -5,6 +5,7 @@ import { provide } from "inversify-binding-decorators";
 @provide(ResultsPoller)
 export class ResultsPoller {
   private readonly parentNamespace = "results-poller";
+  private readonly maxBackoff = 1000; // Maximum backoff time in milliseconds
 
   constructor(private inMemoryHashTable: InMemoryHashTable) {}
 
@@ -19,8 +20,7 @@ export class ResultsPoller {
 
   @TrackNewRelicTransaction()
   public async pollResults(namespace: string, key: string): Promise<any> {
-    let checkInterval = 1;
-    const maxRetries = 12;
+    const maxRetries = 10;
     const fullKey = this.getFullKey(namespace, key);
 
     try {
@@ -29,11 +29,11 @@ export class ResultsPoller {
         if (result !== undefined) {
           return result;
         }
-        await new Promise((resolve) => setTimeout(resolve, checkInterval));
-        checkInterval *= 2;
+        const backoffTime = Math.min(this.maxBackoff, 2 ** i);
+        await new Promise((resolve) => setTimeout(resolve, backoffTime));
       }
 
-      console.error(`Failed to poll results for ${fullKey} - ms: ${checkInterval}`);
+      console.error(`Failed to poll results for ${fullKey} after ${maxRetries} retries`);
       return false;
     } finally {
       // Always cleanup, regardless of success or failure
