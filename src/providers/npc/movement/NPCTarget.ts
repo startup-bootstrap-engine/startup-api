@@ -18,7 +18,6 @@ import {
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { NPCView } from "../NPCView";
-import { NPCDirection } from "./NPCMovement";
 
 @provide(NPCTarget)
 export class NPCTarget {
@@ -48,12 +47,15 @@ export class NPCTarget {
     await this.locker.unlock(`npc-${npc._id}-npc-battle-cycle`);
   }
 
-  public getTargetDirection(npc: INPC, targetX: number, targetY: number): NPCDirection {
-    if (npc.y < targetY) return "down";
-    if (npc.y > targetY) return "up";
-    if (npc.x < targetX) return "right";
-    if (npc.x > targetX) return "left";
-    return "down";
+  public getTargetDirection(npc: INPC, targetX: number, targetY: number): string {
+    const dx = targetX - npc.x;
+    const dy = targetY - npc.y;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+      return dx > 0 ? "right" : "left";
+    } else {
+      return dy > 0 ? "down" : "up";
+    }
   }
 
   @TrackNewRelicTransaction()

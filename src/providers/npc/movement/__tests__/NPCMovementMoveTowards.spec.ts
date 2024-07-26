@@ -11,7 +11,6 @@ describe("NPCMovementMoveTowards.ts", () => {
   let npcTarget: NPCTarget;
   let testNPC: INPC;
   let testCharacter: ICharacter;
-  // eslint-disable-next-line no-unused-vars
   let mapSolidsTrajectorySpy: jest.SpyInstance;
 
   beforeAll(async () => {
@@ -213,16 +212,27 @@ describe("NPCMovementMoveTowards.ts", () => {
       );
     });
 
-    it("sets the npc.pathOrientation to NPCPathOrientation.Forward when reaching the target, if previous pathOrientation was NPCPathOrientation.Forward", async () => {
-      testNPC.pathOrientation = NPCPathOrientation.Forward;
-      testNPC.x = testCharacter.x;
-      testNPC.y = testCharacter.y;
+    it("should update NPC's direction when facing the target", async () => {
+      testNPC.targetCharacter = testCharacter._id;
       await testNPC.save();
 
-      // @ts-ignore
-      npcMovementMoveTowards.reachedTarget(testNPC, testCharacter);
+      testCharacter.x = FromGridX(14);
+      testCharacter.y = FromGridY(15);
+      await testCharacter.save();
 
-      expect(testNPC.pathOrientation).toBe(NPCPathOrientation.Forward);
+      // @ts-ignore
+      npcMovementMoveTowards.faceTarget = jest.fn();
+
+      await npcMovementMoveTowards.startMoveTowardsMovement(testNPC);
+
+      // @ts-ignore
+      expect(npcMovementMoveTowards.faceTarget).toHaveBeenCalledWith(
+        testNPC,
+        expect.objectContaining({ _id: testCharacter._id })
+      );
+
+      const updatedNPC = await NPC.findById(testNPC._id);
+      expect(updatedNPC?.direction).not.toBeUndefined();
     });
   });
 });

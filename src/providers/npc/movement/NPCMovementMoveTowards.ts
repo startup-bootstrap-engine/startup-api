@@ -20,7 +20,6 @@ import {
   ToGridX,
   ToGridY,
 } from "@rpg-engine/shared";
-import _, { debounce } from "lodash";
 import { NPCBattleCycleQueue } from "../NPCBattleCycleQueue";
 import { NPCView } from "../NPCView";
 import { NPCMovement } from "./NPCMovement";
@@ -28,6 +27,7 @@ import { NPCTarget } from "./NPCTarget";
 
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
+import { debounce } from "lodash";
 
 export interface ICharacterHealth {
   id: string;
@@ -36,7 +36,7 @@ export interface ICharacterHealth {
 
 @provideSingleton(NPCMovementMoveTowards)
 export class NPCMovementMoveTowards {
-  debouncedFaceTarget: _.DebouncedFunc<(npc: INPC, targetCharacter: ICharacter) => Promise<void>>;
+  private debouncedFaceTarget: (npc: INPC, targetCharacter: ICharacter) => Promise<void>;
 
   constructor(
     private movementHelper: MovementHelper,
@@ -49,7 +49,9 @@ export class NPCMovementMoveTowards {
     private locker: Locker,
     private npcBattleCycleQueue: NPCBattleCycleQueue,
     private dynamicQueue: DynamicQueue
-  ) {}
+  ) {
+    this.debouncedFaceTarget = debounce(this.faceTarget.bind(this), 300);
+  }
 
   @TrackNewRelicTransaction()
   public async startMoveTowardsMovement(npc: INPC): Promise<void> {
@@ -62,13 +64,10 @@ export class NPCMovementMoveTowards {
       "npc-move-towards-queue",
       (job) => {
         const { npc } = job.data;
-
         void this.execStartMoveTowardsMovement(npc);
       },
       { npc },
-      {
-        queueScaleBy: "active-npcs",
-      }
+      { queueScaleBy: "active-npcs" }
     );
   }
 
@@ -76,7 +75,7 @@ export class NPCMovementMoveTowards {
     const targetCharacter = await this.getTargetCharacter(npc);
 
     if (!this.isValidTarget(npc, targetCharacter)) {
-      await this.handleInvalidTarget(npc);
+      await this.npcTarget.tryToSetTarget(npc);
       return;
     }
 
@@ -110,22 +109,17 @@ export class NPCMovementMoveTowards {
   }
 
   private isValidTarget(npc: INPC, targetCharacter: ICharacter | null): boolean {
-    return (targetCharacter &&
+    return !!(
+      targetCharacter &&
       targetCharacter.isOnline &&
       targetCharacter.scene === npc.scene &&
-      npc.targetCharacter) as boolean;
-  }
-
-  @TrackNewRelicTransaction()
-  private async handleInvalidTarget(npc: INPC): Promise<void> {
-    await this.npcTarget.tryToSetTarget(npc);
+      npc.targetCharacter
+    );
   }
 
   @TrackNewRelicTransaction()
   private async handleValidTarget(npc: INPC, targetCharacter: ICharacter): Promise<void> {
-    await this.npcTarget.tryToClearOutOfRangeTargets(npc);
-
-    await this.fleeIfHealthIsLow(npc);
+    await Promise.all([this.npcTarget.tryToClearOutOfRangeTargets(npc), this.fleeIfHealthIsLow(npc)]);
 
     const attackRange = npc.attackType === EntityAttackType.Melee ? 2 : npc.maxRangeAttack;
     await this.initOrClearBattleCycle(npc, targetCharacter, attackRange!);
@@ -141,12 +135,12 @@ export class NPCMovementMoveTowards {
   private async handleReachedTarget(npc: INPC, targetCharacter: ICharacter): Promise<void> {
     if (npc.pathOrientation === NPCPathOrientation.Backward) {
       await NPC.updateOne({ _id: npc._id }, { pathOrientation: NPCPathOrientation.Forward });
+      npc.pathOrientation = NPCPathOrientation.Forward; // Ensure in-memory update
     }
 
     if (appEnv.general.IS_UNIT_TEST) {
       await this.faceTarget(npc, targetCharacter);
     } else {
-      this.debouncedFaceTarget = debounce(this.faceTarget, 300);
       await this.debouncedFaceTarget(npc, targetCharacter);
     }
   }
@@ -165,8 +159,8 @@ export class NPCMovementMoveTowards {
       if (isUnderOriginalPositionRange && npc.scene === targetCharacter.scene) {
         await this.moveTowardsPosition(npc, targetCharacter, targetCharacter.x, targetCharacter.y);
       } else {
-        npc.pathOrientation = NPCPathOrientation.Backward;
         await NPC.updateOne({ _id: npc._id }, { pathOrientation: NPCPathOrientation.Backward });
+        npc.pathOrientation = NPCPathOrientation.Backward;
       }
     } else if (npc.pathOrientation === NPCPathOrientation.Backward) {
       await this.moveTowardsPosition(npc, targetCharacter, npc.initialX, npc.initialY);
@@ -213,28 +207,22 @@ export class NPCMovementMoveTowards {
 
     const facingDirection = this.npcTarget.getTargetDirection(npc, targetCharacter.x, targetCharacter.y);
 
-    // If the NPC is already facing the target, exit the method
-    if (npc.direction === facingDirection) {
-      return;
-    }
+    if (npc.direction !== facingDirection) {
+      await NPC.updateOne({ _id: npc._id }, { direction: facingDirection });
 
-    await NPC.updateOne({ _id: npc._id }, { direction: facingDirection });
+      const nearbyCharacters = await this.npcView.getCharactersInView(npc);
+      const charactersNeedingUpdates = nearbyCharacters.filter(
+        (nearbyCharacter) => nearbyCharacter?.direction !== facingDirection
+      );
 
-    const nearbyCharacters = await this.npcView.getCharactersInView(npc);
-
-    // Filter characters needing updates based on the fetched client NPCs
-    const charactersNeedingUpdates: ICharacter[] = nearbyCharacters.filter((nearbyCharacter) => {
-      return nearbyCharacter?.direction !== facingDirection;
-    });
-
-    // Broadcast to all characters needing an update
-    for (const character of charactersNeedingUpdates) {
-      this.socketMessaging.sendEventToUser(character.channelId!, NPCSocketEvents.NPCDataUpdate, {
-        id: npc._id,
-        direction: npc.direction,
-        x: npc.x,
-        y: npc.y,
-      });
+      for (const character of charactersNeedingUpdates) {
+        this.socketMessaging.sendEventToUser(character.channelId!, NPCSocketEvents.NPCDataUpdate, {
+          id: npc._id,
+          direction: facingDirection,
+          x: npc.x,
+          y: npc.y,
+        });
+      }
     }
   }
 

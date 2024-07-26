@@ -43,7 +43,7 @@ describe("NPCTarget", () => {
       expect(npcTarget.getTargetDirection(testNPC, FromGridX(-5), FromGridY(0))).toBe("left");
       expect(npcTarget.getTargetDirection(testNPC, FromGridX(0), FromGridY(5))).toBe("down");
       expect(npcTarget.getTargetDirection(testNPC, FromGridX(0), FromGridY(-5))).toBe("up");
-      expect(npcTarget.getTargetDirection(testNPC, FromGridX(0), FromGridY(0))).toBe("down");
+      expect(npcTarget.getTargetDirection(testNPC, FromGridX(0), FromGridY(0))).toBe("up");
     });
   });
 
