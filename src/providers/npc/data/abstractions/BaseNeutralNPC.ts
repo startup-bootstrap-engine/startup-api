@@ -37,7 +37,7 @@ export const generateMoveTowardsMovement = (): INPCMovement => {
     ...generateBaseNPCProperties(),
     originalMovementType: NPCMovementType.MoveTowards,
     currentMovementType: NPCMovementType.MoveTowards,
-    maxRangeInGridCells: 20,
+    maxRangeInGridCells: 10,
     maxAntiLuringRangeInGridCells: 40,
     pathOrientation: NPCPathOrientation.Forward, // must be forward!
   } as INPCMovement;
