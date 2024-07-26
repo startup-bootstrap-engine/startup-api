@@ -88,6 +88,9 @@ export class NPCSpawn {
         this.locker.unlock(`npc-body-generation-${npc._id}`),
         this.locker.unlock(`npc-${npc._id}-release-xp`),
         this.inMemoryHashTable.delete("npc-force-pathfinding-calculation", npc._id),
+        this.inMemoryHashTable.delete("npc-positions", npc._id),
+        this.inMemoryHashTable.delete("npc-prev-position", npc._id),
+        this.inMemoryHashTable.delete("npc-stationary-count", npc._id),
       ]);
     }
   }

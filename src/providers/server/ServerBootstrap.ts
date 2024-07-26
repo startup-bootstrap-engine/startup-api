@@ -183,6 +183,11 @@ export class ServerBootstrap {
     await this.inMemoryHashTable.deleteAll("item-container-transfer-results");
     await this.inMemoryHashTable.deleteAll("npc-positions");
     await this.inMemoryHashTable.deleteAll("npc-force-pathfinding-calculation");
+
+    await this.inMemoryHashTable.deleteAll("npc-prev-position");
+    await this.inMemoryHashTable.deleteAll("npc-stationary-count");
+    await this.inMemoryHashTable.deleteAll("npc-positions");
+
     await this.raidManager.deleteAllRaids();
     await this.itemDropVerifier.clearAllItemDrops();
 
