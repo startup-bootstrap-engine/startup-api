@@ -26,12 +26,23 @@ export class PathfindingQueue {
     endGridX: number,
     endGridY: number
   ): Promise<number[][] | undefined> {
-    const job = await this.addPathfindingJob(npc, target, startGridX, startGridY, endGridX, endGridY);
-    if (!job) {
+    const canProceed = await this.locker.lock(`pathfinding-${npc._id}`);
+
+    if (!canProceed) {
       return;
     }
+    try {
+      const job = await this.addPathfindingJob(npc, target, startGridX, startGridY, endGridX, endGridY);
+      if (!job) {
+        return;
+      }
 
-    return await this.resultsPoller.pollResults("pathfinding", job.id!);
+      return await this.resultsPoller.pollResults("pathfinding", job.id!);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      await this.locker.unlock(`pathfinding-${npc._id}`);
+    }
   }
 
   private async addPathfindingJob(
@@ -43,12 +54,6 @@ export class PathfindingQueue {
     endGridY: number
   ): Promise<Job | undefined> {
     try {
-      const canProceed = await this.locker.lock(`pathfinding-${npc._id}`);
-
-      if (!canProceed) {
-        return;
-      }
-
       return await this.dynamicQueue.addJob(
         "npc-pathfinding-queue",
         async (job) => {
@@ -84,8 +89,6 @@ export class PathfindingQueue {
       );
     } catch (error) {
       console.error(error);
-    } finally {
-      await this.locker.unlock(`pathfinding-${npc._id}`);
     }
   }
 

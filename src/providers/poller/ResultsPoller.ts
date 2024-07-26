@@ -20,7 +20,7 @@ export class ResultsPoller {
 
   @TrackNewRelicTransaction()
   public async pollResults(namespace: string, key: string): Promise<any> {
-    const maxRetries = 10;
+    const maxRetries = 12;
     const fullKey = this.getFullKey(namespace, key);
 
     try {
