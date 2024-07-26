@@ -1,10 +1,8 @@
-import { container, unitTestHelper } from "@providers/inversify/container";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
-import { MathHelper } from "@providers/math/MathHelper";
+import { container, unitTestHelper } from "@providers/inversify/container";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { LightweightPathfinder } from "../LightweightPathfinder";
-import { ToGridX, ToGridY } from "@rpg-engine/shared";
 
 describe("LightweightPathfinder", () => {
   let lightweightPathfinder: LightweightPathfinder;
@@ -32,8 +30,6 @@ describe("LightweightPathfinder", () => {
 
     const result = await lightweightPathfinder.getNearestGridToTarget(testNPC, targetX, targetY);
 
-    console.log(result); // Debugging output
-
     expect(result).toBeDefined();
     expect(result.length).toBeGreaterThan(0);
   });
@@ -43,8 +39,6 @@ describe("LightweightPathfinder", () => {
     const targetY = 10;
 
     const result = await lightweightPathfinder.getNearestGridToTarget(testNPC, targetX, targetY);
-
-    console.log(result); // Debugging output
 
     expect(result).toBeDefined();
     expect(InMemoryHashTable.prototype.set).toHaveBeenCalledWith(

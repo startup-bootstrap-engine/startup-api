@@ -3,15 +3,13 @@ import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
-import { MathHelper } from "@providers/math/MathHelper";
-import { MovementHelper } from "@providers/movement/MovementHelper";
-import { GRID_WIDTH, ToGridX, ToGridY } from "@rpg-engine/shared";
+import { NPCTarget } from "@providers/npc/movement/NPCTarget";
+import { FromGridX, FromGridY } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import PF from "pathfinding";
 import { GridManager, IGridCourse } from "./GridManager";
-import { MapHelper } from "./MapHelper";
-import { NPCTarget } from "@providers/npc/movement/NPCTarget";
 import { LightweightPathfinder } from "./LightweightPathfinder";
+import { MapHelper } from "./MapHelper";
 
 @provide(Pathfinder)
 export class Pathfinder {
@@ -20,7 +18,8 @@ export class Pathfinder {
     private gridManager: GridManager,
 
     private npcTarget: NPCTarget,
-    private lightweightPathfinder: LightweightPathfinder
+    private lightweightPathfinder: LightweightPathfinder,
+    private inMemoryHashTable: InMemoryHashTable
   ) {}
 
   @TrackNewRelicTransaction()
@@ -33,37 +32,38 @@ export class Pathfinder {
     endGridX: number,
     endGridY: number
   ): Promise<number[][] | undefined> {
-    if (!this.mapHelper.areAllCoordinatesValid([startGridX, startGridY], [endGridX, endGridY])) {
-      return;
+    if (appEnv.general.IS_UNIT_TEST) {
+      return await this.findShortestPathBetweenPoints(map, {
+        start: { x: startGridX, y: startGridY },
+        end: { x: endGridX, y: endGridY },
+      });
     }
 
-    const pathfindingResult = await this.findShortestPathBetweenPoints(map, {
-      start: { x: startGridX, y: startGridY },
-      end: { x: endGridX, y: endGridY },
-    });
+    await this.npcTarget.tryToSetTarget(npc);
 
-    // If a path is found, return it
-    if (pathfindingResult && pathfindingResult.length > 0) {
-      return pathfindingResult;
-    }
+    const forcePathfinding = await this.inMemoryHashTable.get("npc-force-pathfinding-calculation", npc._id);
 
-    // If no target or path is found, attempt "dumb" pathfinding
-    if (!target || !pathfindingResult || pathfindingResult.length === 0) {
-      await this.npcTarget.tryToSetTarget(npc);
+    if (forcePathfinding) {
+      const pathfindingResult = await this.findShortestPathBetweenPoints(map, {
+        start: { x: startGridX, y: startGridY },
+        end: { x: endGridX, y: endGridY },
+      });
 
-      const nearestGridToTarget = await this.lightweightPathfinder.getNearestGridToTarget(
-        npc,
-        ToGridX(endGridX),
-        ToGridY(endGridY)
-      );
-
-      if (nearestGridToTarget?.length) {
-        return nearestGridToTarget;
+      // If a path is found, return it
+      if (pathfindingResult && pathfindingResult.length > 0) {
+        return pathfindingResult;
       }
     }
 
-    // If all else fails, return undefined or an alternative path
-    return undefined;
+    const nearestGridToTarget = await this.lightweightPathfinder.getNearestGridToTarget(
+      npc,
+      FromGridX(endGridX),
+      FromGridY(endGridY)
+    );
+
+    if (nearestGridToTarget?.length) {
+      return nearestGridToTarget;
+    }
   }
 
   public async isTherePathBetweenPoints(
