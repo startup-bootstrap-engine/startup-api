@@ -34,7 +34,7 @@ describe("ItemView.ts", () => {
   });
 
   it("should properly remove item x, y and scene after calling the method removeItemFromMap", async () => {
-    await itemView.removeItemFromMap(testItem);
+    await itemView.warnCharactersAboutItemRemovalInView(testItem);
 
     const item = await Item.findById(testItem.id);
 
@@ -79,7 +79,7 @@ describe("ItemView.ts", () => {
   it("should throw error if a we try to remove an item from a map without a scene", async () => {
     try {
       testItem.scene = undefined;
-      await itemView.removeItemFromMap(testItem);
+      await itemView.warnCharactersAboutItemRemovalInView(testItem);
     } catch (error) {
       expect(error).toBeInstanceOf(Error);
       expect(error).toHaveProperty("message", "You cannot call this method without an item x, y and scene.");
