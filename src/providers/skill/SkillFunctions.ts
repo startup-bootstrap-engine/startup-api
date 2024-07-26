@@ -6,8 +6,10 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { CharacterBuffSkill } from "@providers/character/characterBuff/CharacterBuffSkill";
 import { CharacterBaseSpeed } from "@providers/character/characterMovement/CharacterBaseSpeed";
+import { appEnv } from "@providers/config/env";
 import { SP_INCREASE_BASE, SP_MAGIC_INCREASE_TIMES_MANA } from "@providers/constants/SkillConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { NumberFormatter } from "@providers/text/NumberFormatter";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
@@ -25,7 +27,7 @@ import {
 import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
 import { clearCacheForKey } from "speedgoose";
-import { SkillBuffQueue } from "./SkillBuffQueue";
+import { SkillBuff } from "./SkillBuff";
 import { SkillCalculator } from "./SkillCalculator";
 
 @provide(SkillFunctions)
@@ -36,14 +38,35 @@ export class SkillFunctions {
     private socketMessaging: SocketMessaging,
     private characterBuffSkill: CharacterBuffSkill,
     private numberFormatter: NumberFormatter,
-    private skillBuff: SkillBuffQueue,
+    private skillBuff: SkillBuff,
     private inMemoryHashTable: InMemoryHashTable,
     private newRelic: NewRelic,
-    private characterBaseSpeed: CharacterBaseSpeed
+    private characterBaseSpeed: CharacterBaseSpeed,
+    private dynamicQueue: DynamicQueue
   ) {}
 
   @TrackNewRelicTransaction()
   public async updateSkills(skills: ISkill, character: ICharacter): Promise<void> {
+    if (appEnv.general.IS_UNIT_TEST) {
+      await this.execUpdateSkills(skills, character);
+      return;
+    }
+
+    await this.dynamicQueue.addJob(
+      "update-skills",
+      async (job) => {
+        const { skills, character } = job.data;
+
+        await this.execUpdateSkills(skills, character);
+      },
+      {
+        skills,
+        character,
+      }
+    );
+  }
+
+  private async execUpdateSkills(skills: ISkill, character: ICharacter): Promise<void> {
     try {
       //! Warning: Chaching this causes the skill not to update
       await Skill.findByIdAndUpdate(skills._id, skills).lean({ virtuals: true, defaults: true });

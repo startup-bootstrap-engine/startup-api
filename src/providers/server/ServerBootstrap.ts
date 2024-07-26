@@ -36,7 +36,7 @@ import { PatreonAPI } from "@providers/patreon/PatreonAPI";
 import { ResultsPoller } from "@providers/poller/ResultsPoller";
 import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { RaidManager } from "@providers/raid/RaidManager";
-import { SkillBuffQueue } from "@providers/skill/SkillBuffQueue";
+import { SkillBuff } from "@providers/skill/SkillBuff";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import { ManaShield } from "@providers/spells/data/logic/mage/ManaShield";
 import SpellSilence from "@providers/spells/data/logic/mage/druid/SpellSilence";
@@ -88,7 +88,7 @@ export class ServerBootstrap {
     private raidManager: RaidManager,
     private manaShield: ManaShield,
     private cooldown: Cooldown,
-    private skillBuffQueue: SkillBuffQueue,
+    private skillBuffQueue: SkillBuff,
     private itemCraftbookQueue: ItemCraftbookQueue,
     private npcCycleTracker: NPCCycleTracker,
     private resultsPoller: ResultsPoller
@@ -242,7 +242,7 @@ export class ServerBootstrap {
     await this.npcDeathQueue.clearAllJobs();
     await this.characterNetworkCreateQueue.clearAllJobs();
     await this.npcCycleQueue.clearAllJobs();
-    await this.skillBuffQueue.clearAllJobs();
+
     await this.itemCraftbookQueue.clearAllJobs();
 
     console.log("🧹 BullMQ queues cleared!");

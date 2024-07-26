@@ -6,7 +6,7 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { IUIShowMessage, SkillSocketEvents, UISocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { SkillBuffQueue } from "../SkillBuffQueue";
+import { SkillBuff } from "../SkillBuff";
 
 @provide(SkillNetworkReadInfo)
 export class SkillNetworkReadInfo {
@@ -14,7 +14,7 @@ export class SkillNetworkReadInfo {
     private socketAuth: SocketAuth,
     private socketMessaging: SocketMessaging,
     private characterBuffSkill: CharacterBuffSkill,
-    private skillBuff: SkillBuffQueue,
+    private skillBuff: SkillBuff,
     private characterBuffTracker: CharacterBuffTracker
   ) {}
 

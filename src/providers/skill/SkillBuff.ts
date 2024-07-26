@@ -4,48 +4,20 @@ import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterClassBonusOrPenalties } from "@providers/character/characterBonusPenalties/CharacterClassBonusOrPenalties";
 import { CharacterBuffTracker } from "@providers/character/characterBuff/CharacterBuffTracker";
-import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
-import { ResultsPoller } from "@providers/poller/ResultsPoller";
-import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { CharacterBuffType, CharacterTrait } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
 
-@provide(SkillBuffQueue)
-export class SkillBuffQueue {
+@provide(SkillBuff)
+export class SkillBuff {
   constructor(
     private characterBuffTracker: CharacterBuffTracker,
     private characterBonusOrPenalties: CharacterClassBonusOrPenalties,
-    private inMemoryHashTable: InMemoryHashTable,
-    private dynamicQueue: DynamicQueue,
-    private resultsPoller: ResultsPoller
+    private inMemoryHashTable: InMemoryHashTable
   ) {}
 
   public async getSkillsWithBuff(character: ICharacter): Promise<ISkill> {
-    if (appEnv.general.IS_UNIT_TEST) {
-      return await this.execGetSkillsWithBuff(character);
-    }
-
-    await this.dynamicQueue.addJob(
-      "skills-buff",
-      async (job) => {
-        const { character } = job.data;
-
-        const skills = await this.execGetSkillsWithBuff(character);
-
-        await this.resultsPoller.prepareResultToBePolled("skills-buff-results", character._id, skills);
-      },
-      { character }
-    );
-
-    const result = await this.resultsPoller.pollResults("skills-buff-results", character._id);
-
-    return result as unknown as ISkill;
-  }
-
-  @TrackNewRelicTransaction()
-  public async execGetSkillsWithBuff(character: ICharacter): Promise<ISkill> {
     const skillsWithBuff = (await this.inMemoryHashTable.get("skills-with-buff", character._id)) as ISkill;
 
     if (skillsWithBuff) {
@@ -125,9 +97,5 @@ export class SkillBuffQueue {
         delete clonedSkills[key].buffAndDebuff;
       }
     }
-  }
-
-  public async clearAllJobs(): Promise<void> {
-    await this.dynamicQueue.clearAllJobs();
   }
 }

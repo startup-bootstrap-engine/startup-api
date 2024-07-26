@@ -2,7 +2,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
-import { SkillBuffQueue } from "@providers/skill/SkillBuffQueue";
+import { SkillBuff } from "@providers/skill/SkillBuff";
 import { TraitGetter } from "@providers/skill/TraitGetter";
 import {
   BasicAttribute,
@@ -21,13 +21,13 @@ describe("CharacterBuffSkill", () => {
   let characterBuffTracker: CharacterBuffTracker;
   let testCharacter: ICharacter;
   let traitGetter: TraitGetter;
-  let skillBuff: SkillBuffQueue;
+  let skillBuff: SkillBuff;
 
   beforeAll(() => {
     characterBuffSkill = container.get<CharacterBuffSkill>(CharacterBuffSkill);
     traitGetter = container.get<TraitGetter>(TraitGetter);
     characterBuffTracker = container.get<CharacterBuffTracker>(CharacterBuffTracker);
-    skillBuff = container.get<SkillBuffQueue>(SkillBuffQueue);
+    skillBuff = container.get<SkillBuff>(SkillBuff);
   });
 
   beforeEach(async () => {

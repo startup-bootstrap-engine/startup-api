@@ -11,7 +11,7 @@ import { MODE_EXP_MULTIPLIER } from "@providers/constants/SkillConstants";
 import { DiscordBot } from "@providers/discord/DiscordBot";
 import { spellLearn } from "@providers/inversify/container";
 import { Locker } from "@providers/locks/Locker";
-import { SkillBuffQueue } from "@providers/skill/SkillBuffQueue";
+import { SkillBuff } from "@providers/skill/SkillBuff";
 import { SkillCalculator } from "@providers/skill/SkillCalculator";
 import { SkillFunctions } from "@providers/skill/SkillFunctions";
 import { SkillStatsIncrease } from "@providers/skill/SkillStatsIncrease";
@@ -62,7 +62,7 @@ export class NPCExperience {
     private socketMessaging: SocketMessaging,
     private numberFormatter: NumberFormatter,
     private characterBuffSkill: CharacterBuffSkill,
-    private skillBuff: SkillBuffQueue,
+    private skillBuff: SkillBuff,
     private characterView: CharacterView,
     private animationEffect: AnimationEffect,
     private time: Time,

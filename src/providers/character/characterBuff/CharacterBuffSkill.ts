@@ -1,7 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { SkillBuffQueue } from "@providers/skill/SkillBuffQueue";
+import { SkillBuff } from "@providers/skill/SkillBuff";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { TextFormatter } from "@providers/text/TextFormatter";
 import { ICharacterBuff, ISkillDetails, SkillSocketEvents } from "@rpg-engine/shared";
@@ -15,7 +15,7 @@ export class CharacterBuffSkill {
     private characterBuffTracker: CharacterBuffTracker,
     private socketMessaging: SocketMessaging,
     private textFormatter: TextFormatter,
-    private skillBuff: SkillBuffQueue
+    private skillBuff: SkillBuff
   ) {}
 
   @TrackNewRelicTransaction()
