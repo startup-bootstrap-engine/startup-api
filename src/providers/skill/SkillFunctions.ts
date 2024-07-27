@@ -4,13 +4,9 @@ import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
-import { CharacterBuffSkill } from "@providers/character/characterBuff/CharacterBuffSkill";
 import { CharacterBaseSpeed } from "@providers/character/characterMovement/CharacterBaseSpeed";
-import { appEnv } from "@providers/config/env";
 import { SP_INCREASE_BASE, SP_MAGIC_INCREASE_TIMES_MANA } from "@providers/constants/SkillConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
-import { ResultsPoller } from "@providers/poller/ResultsPoller";
-import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { NumberFormatter } from "@providers/text/NumberFormatter";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
@@ -28,7 +24,6 @@ import {
 import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
 import { clearCacheForKey } from "speedgoose";
-import { SkillBuff } from "./SkillBuff";
 import { SkillCalculator } from "./SkillCalculator";
 
 @provide(SkillFunctions)
@@ -37,42 +32,14 @@ export class SkillFunctions {
     private skillCalculator: SkillCalculator,
     private animationEffect: AnimationEffect,
     private socketMessaging: SocketMessaging,
-    private characterBuffSkill: CharacterBuffSkill,
     private numberFormatter: NumberFormatter,
-    private skillBuff: SkillBuff,
     private inMemoryHashTable: InMemoryHashTable,
     private newRelic: NewRelic,
-    private characterBaseSpeed: CharacterBaseSpeed,
-    private dynamicQueue: DynamicQueue,
-    private resultsPoller: ResultsPoller
+    private characterBaseSpeed: CharacterBaseSpeed
   ) {}
 
   @TrackNewRelicTransaction()
   public async updateSkills(skills: ISkill, character: ICharacter): Promise<void> {
-    if (appEnv.general.IS_UNIT_TEST) {
-      await this.execUpdateSkills(skills, character);
-      return;
-    }
-
-    await this.dynamicQueue.addJob(
-      "update-skills",
-      async (job) => {
-        const { skills, character } = job.data;
-
-        await this.execUpdateSkills(skills, character);
-
-        await this.resultsPoller.prepareResultToBePolled("update-skills", `${skills._id}-${character._id}`, skills);
-      },
-      {
-        skills,
-        character,
-      }
-    );
-
-    await this.resultsPoller.pollResults("update-skills", `${skills._id}-${character._id}`);
-  }
-
-  private async execUpdateSkills(skills: ISkill, character: ICharacter): Promise<void> {
     try {
       //! Warning: Chaching this causes the skill not to update
       await Skill.findByIdAndUpdate(skills._id, skills).lean({ virtuals: true, defaults: true });
