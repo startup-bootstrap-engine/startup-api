@@ -48,7 +48,7 @@ export class SpecialEffect {
       await this.inMemoryHashTable.delete(namespace, this.getEntityKey(target));
 
       if (namespace === SpecialEffectNamespace.Stun || namespace === SpecialEffectNamespace.Stealth) {
-        void npcManager.startNearbyNPCsBehaviorLoop(caster);
+        await npcManager.startNearbyNPCsBehaviorLoop(caster);
       }
 
       if (onEffectEnd) {
@@ -73,7 +73,7 @@ export class SpecialEffect {
     await this.inMemoryHashTable.delete(namespace, this.getEntityKey(target));
 
     if (target.type === EntityType.Character) {
-      void npcManager.startNearbyNPCsBehaviorLoop(target as ICharacter);
+      await npcManager.startNearbyNPCsBehaviorLoop(target as ICharacter);
     }
 
     return true;

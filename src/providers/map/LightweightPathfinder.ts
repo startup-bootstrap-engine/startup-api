@@ -1,4 +1,5 @@
 import { INPC } from "@entities/ModuleNPC/NPCModel";
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { MathHelper } from "@providers/math/MathHelper";
 import { MovementHelper } from "@providers/movement/MovementHelper";
@@ -15,6 +16,7 @@ export class LightweightPathfinder {
     private movementHelper: MovementHelper
   ) {}
 
+  @TrackNewRelicTransaction()
   public async getNearestGridToTarget(npc: INPC, targetX: number, targetY: number): Promise<number[][]> {
     const potentialPositions = [
       { direction: "top", x: npc.x, y: npc.y - GRID_WIDTH },
