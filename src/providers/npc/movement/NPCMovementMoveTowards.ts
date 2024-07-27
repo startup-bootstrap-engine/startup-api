@@ -288,7 +288,7 @@ export class NPCMovementMoveTowards {
 
       if (!shortestPath) {
         // throw new Error("No shortest path found!");
-
+        await this.npcTarget.tryToSetTarget(npc);
         return;
       }
       const { newGridX, newGridY, nextMovementDirection } = shortestPath;

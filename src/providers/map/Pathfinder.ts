@@ -39,8 +39,6 @@ export class Pathfinder {
       });
     }
 
-    await this.npcTarget.tryToSetTarget(npc);
-
     const forcePathfinding = await this.inMemoryHashTable.get("npc-force-pathfinding-calculation", npc._id);
 
     if (forcePathfinding) {
