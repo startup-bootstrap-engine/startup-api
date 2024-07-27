@@ -1,6 +1,7 @@
 import { User } from "@entities/ModuleSystem/UserModel";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { AppleOAuthHelper } from "@providers/auth/AppleOAuthHelper";
+import { UserAuth } from "@providers/auth/UserAuth";
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { IAuthResponse, UserAuthFlow } from "@rpg-engine/shared";
@@ -12,7 +13,8 @@ export class AppleOAuthUseCase {
   constructor(
     private userRepository: UserRepository,
     private analyticsHelper: AnalyticsHelper,
-    private appleOAuthHelper: AppleOAuthHelper
+    private appleOAuthHelper: AppleOAuthHelper,
+    private userAuth: UserAuth
   ) {}
 
   public async appleOAuthSync(appleOAuthDTO: AppleOAuthDTO): Promise<IAuthResponse> {
@@ -52,7 +54,7 @@ export class AppleOAuthUseCase {
       await this.analyticsHelper.track("UserLoginApple", newUser);
       await this.analyticsHelper.updateUserInfo(newUser);
 
-      return await newUser.generateAccessToken();
+      return await this.userAuth.generateAccessToken(newUser);
     } else {
       // Check if user already exists on database...
       // just create a new access token and refresh token and provide it
@@ -61,7 +63,7 @@ export class AppleOAuthUseCase {
       await this.analyticsHelper.track("UserLoginApple", dbUser);
       await this.analyticsHelper.updateUserInfo(dbUser);
 
-      return await dbUser.generateAccessToken();
+      return await this.userAuth.generateAccessToken(dbUser);
     }
   }
 }

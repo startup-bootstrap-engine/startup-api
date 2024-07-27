@@ -1,6 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { TimerWrapper } from "@providers/helpers/TimerWrapper";
 import { npcManager } from "@providers/inversify/container";
@@ -48,6 +49,9 @@ export class SpecialEffect {
       await this.inMemoryHashTable.delete(namespace, this.getEntityKey(target));
 
       if (namespace === SpecialEffectNamespace.Stun || namespace === SpecialEffectNamespace.Stealth) {
+        if (appEnv.general.IS_UNIT_TEST) {
+          return;
+        }
         await npcManager.startNearbyNPCsBehaviorLoop(caster);
       }
 

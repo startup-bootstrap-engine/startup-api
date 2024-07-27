@@ -8,14 +8,14 @@ import { provide } from "inversify-binding-decorators";
 export class OwnInfoUserUseCase {
   constructor(private analyticsHelper: AnalyticsHelper) {}
 
-  public async getUserInfo(user: IUser): Promise<IUser> {
+  public getUserInfo(user: IUser): IUser {
     if (!user) {
       throw new BadRequestError(TS.translate("users", "userNotFound"));
     }
 
-    await this.analyticsHelper.updateUserInfo(user);
+    void this.analyticsHelper.updateUserInfo(user);
 
-    await this.analyticsHelper.track("UserInfo", user);
+    void this.analyticsHelper.track("UserInfo", user);
 
     return user;
   }

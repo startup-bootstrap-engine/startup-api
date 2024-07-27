@@ -32,7 +32,7 @@ export class NPCMovementMoveAway {
       await this.npcTarget.tryToClearOutOfRangeTargets(npc);
 
       const targetDirection = this.npcTarget.getTargetDirection(npc, targetCharacter.x, targetCharacter.y);
-      const oppositeTargetDirection = this.movementHelper.getOppositeDirection(targetDirection);
+      const oppositeTargetDirection = this.movementHelper.getOppositeDirection(targetDirection as AnimationDirection);
 
       let { x: newX, y: newY } = this.movementHelper.calculateNewPositionXY(npc.x, npc.y, oppositeTargetDirection);
 

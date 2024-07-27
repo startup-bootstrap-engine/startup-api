@@ -66,7 +66,7 @@ export class AnalyticsHelper {
 
         // mixpanel user
         mixpanel.people.set(
-          user.id,
+          user._id,
           {
             $first_name: user.name,
             $created: user.createdAt,

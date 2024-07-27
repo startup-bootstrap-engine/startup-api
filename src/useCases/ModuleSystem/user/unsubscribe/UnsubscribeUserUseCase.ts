@@ -1,5 +1,6 @@
 import { provide } from "inversify-binding-decorators";
 
+import { User } from "@entities/ModuleSystem/UserModel";
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { TS } from "@providers/translation/TranslationHelper";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
@@ -15,8 +16,6 @@ export class UnsubscribeUserUseCase {
       throw new BadRequestError(TS.translate("users", "userAlreadyUnsubscribed"));
     }
 
-    user.unsubscribed = true;
-    // eslint-disable-next-line mongoose-lean/require-lean
-    await user.save();
+    await User.updateOne({ email }, { unsubscribed: true });
   }
 }

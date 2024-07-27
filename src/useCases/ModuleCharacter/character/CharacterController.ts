@@ -48,14 +48,14 @@ export class CharacterController implements interfaces.Controller {
     @requestBody() newCharacter: CreateCharacterDTO,
     @request() request: IAuthenticatedRequest
   ): Promise<ICharacter> {
-    const ownerId = request.user.id;
+    const ownerId = request.user._id;
 
     return await this.createCharacterUseCase.create(newCharacter, ownerId);
   }
 
   @httpGet("/", characterReadRateLimiter)
   private async readAllCharacters(@request() req): Promise<ICharacter[]> {
-    const ownerId = req.user.id;
+    const ownerId = req.user._id;
 
     return await this.readCharacterUseCase.readAll(ownerId);
   }
@@ -77,7 +77,7 @@ export class CharacterController implements interfaces.Controller {
     @requestBody() updateCharacter: UpdateCharacterDTO,
     @request() request: IAuthenticatedRequest
   ): Promise<ICharacter> {
-    const ownerId = request.user.id;
+    const ownerId = request.user._id;
 
     return await this.updateCharacterUseCase.updateCharacter(id, updateCharacter, ownerId);
   }
@@ -87,7 +87,7 @@ export class CharacterController implements interfaces.Controller {
     @requestParam("id") id: string,
     @request() request: IAuthenticatedRequest
   ): Promise<boolean> {
-    const ownerId = request.user.id;
+    const ownerId = request.user._id;
 
     return await this.deleteCharacterUseCase.delete(id, ownerId);
   }

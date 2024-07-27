@@ -1,16 +1,17 @@
-import { IUser, User } from "@entities/ModuleSystem/UserModel";
+import { IUser } from "@entities/ModuleSystem/UserModel";
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { TS } from "@providers/translation/TranslationHelper";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { provide } from "inversify-binding-decorators";
 
+import { UserAuth } from "@providers/auth/UserAuth";
+import { validate } from "email-validator";
 import { ConflictError } from "../../../../providers/errors/ConflictError";
 import { AuthSignUpDTO } from "../AuthDTO";
-import { validate } from "email-validator";
 
 @provide(SignUpUseCase)
 export class SignUpUseCase {
-  constructor(private userRepository: UserRepository) {}
+  constructor(private userRepository: UserRepository, private userAuth: UserAuth) {}
 
   public async signUp(authSignUpDTO: AuthSignUpDTO): Promise<IUser> {
     const { email, password, passwordConfirmation } = authSignUpDTO;
@@ -21,7 +22,7 @@ export class SignUpUseCase {
     }
 
     // first, check if an user with the same e-mail already exists
-    if (await User.checkIfExists(email)) {
+    if (await this.userAuth.checkIfExists(email)) {
       throw new ConflictError(TS.translate("users", "userAlreadyExists", { email }));
     }
 
