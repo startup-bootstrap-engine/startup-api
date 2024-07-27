@@ -62,39 +62,43 @@ export class CharacterWeightQueue {
 
   @TrackNewRelicTransaction()
   public async execUpdateCharacterWeight(character: ICharacter): Promise<void> {
-    await this.inMemoryHashTable.delete("character-max-weights", character._id);
+    try {
+      await this.inMemoryHashTable.delete("character-max-weights", character._id);
 
-    const weight = await this.getWeight(character);
-    const maxWeight = await this.getMaxWeight(character);
+      const weight = await this.getWeight(character);
+      const maxWeight = await this.getMaxWeight(character);
 
-    if (isNaN(weight) || isNaN(maxWeight)) {
-      throw new Error(`Invalid weight or maxWeight calculation for character ${character._id}`);
-    }
+      if (isNaN(weight) || isNaN(maxWeight)) {
+        throw new Error(`Invalid weight or maxWeight calculation for character ${character._id}`);
+      }
 
-    await Character.updateOne(
-      {
-        _id: character._id,
-      },
-      {
-        $set: {
+      await Character.updateOne(
+        {
+          _id: character._id,
+        },
+        {
+          $set: {
+            weight,
+            maxWeight,
+          },
+        }
+      );
+
+      character = (await Character.findById(character._id).lean({ virtuals: true, defaults: true })) || character;
+
+      this.socketMessaging.sendEventToUser<ICharacterAttributeChanged>(
+        character.channelId!,
+        CharacterSocketEvents.AttributeChanged,
+        {
+          speed: character.speed,
           weight,
           maxWeight,
-        },
-      }
-    );
-
-    character = (await Character.findById(character._id).lean({ virtuals: true, defaults: true })) || character;
-
-    this.socketMessaging.sendEventToUser<ICharacterAttributeChanged>(
-      character.channelId!,
-      CharacterSocketEvents.AttributeChanged,
-      {
-        speed: character.speed,
-        weight,
-        maxWeight,
-        targetId: character._id,
-      }
-    );
+          targetId: character._id,
+        }
+      );
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   @TrackNewRelicTransaction()
@@ -108,7 +112,8 @@ export class CharacterWeightQueue {
     const calculatedMaxWeight = await this.calculateMaxWeight(character);
 
     if (isNaN(calculatedMaxWeight) || calculatedMaxWeight < 0) {
-      throw new Error(`Invalid max weight calculation for character ${character._id}`);
+      console.error(`Invalid max weight calculation for character ${character._id}`);
+      return 0;
     }
 
     await this.inMemoryHashTable.set("character-max-weights", character._id, calculatedMaxWeight);

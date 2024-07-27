@@ -14,11 +14,19 @@ export class NPCRaidSeeder {
     try {
       const existingRaids = await this.raid.getAllRaidKeys();
 
-      for (const raid of raids) {
-        if (!existingRaids.includes(raid.key)) {
+      if (existingRaids.length === 0) {
+        // No existing raids, add all raids
+        for (const raid of raids) {
           await this.raid.addRaid(raid);
-        } else {
-          await this.raid.updateRaid(raid.key, raid);
+        }
+      } else {
+        // Existing raids found, check each raid
+        for (const raid of raids) {
+          if (!existingRaids.includes(raid.key)) {
+            await this.raid.addRaid(raid);
+          } else {
+            await this.raid.updateRaid(raid.key, raid);
+          }
         }
       }
     } catch (error) {
