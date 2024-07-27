@@ -30,7 +30,7 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "email": "kahilthezaurus@gmail.com",
+  "email": "szymon1994aa@tlen.pl",
   "accountType": "silver"
 }
 
