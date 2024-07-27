@@ -9,6 +9,7 @@ import { CharacterBaseSpeed } from "@providers/character/characterMovement/Chara
 import { appEnv } from "@providers/config/env";
 import { SP_INCREASE_BASE, SP_MAGIC_INCREASE_TIMES_MANA } from "@providers/constants/SkillConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
+import { ResultsPoller } from "@providers/poller/ResultsPoller";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { NumberFormatter } from "@providers/text/NumberFormatter";
@@ -42,7 +43,8 @@ export class SkillFunctions {
     private inMemoryHashTable: InMemoryHashTable,
     private newRelic: NewRelic,
     private characterBaseSpeed: CharacterBaseSpeed,
-    private dynamicQueue: DynamicQueue
+    private dynamicQueue: DynamicQueue,
+    private resultsPoller: ResultsPoller
   ) {}
 
   @TrackNewRelicTransaction()
@@ -58,12 +60,16 @@ export class SkillFunctions {
         const { skills, character } = job.data;
 
         await this.execUpdateSkills(skills, character);
+
+        await this.resultsPoller.prepareResultToBePolled("update-skills", `${skills._id}-${character._id}`, skills);
       },
       {
         skills,
         character,
       }
     );
+
+    await this.resultsPoller.pollResults("update-skills", `${skills._id}-${character._id}`);
   }
 
   private async execUpdateSkills(skills: ISkill, character: ICharacter): Promise<void> {
