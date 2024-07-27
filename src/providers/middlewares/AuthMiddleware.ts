@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-import { User } from "../../entities/ModuleSystem/UserModel";
+import { IUser, User } from "../../entities/ModuleSystem/UserModel";
 import { appEnv } from "../config/env";
 import { UnauthorizedError } from "../errors/UnauthorizedError";
 import { TS } from "../translation/TranslationHelper";
@@ -27,8 +27,7 @@ export const AuthMiddleware = (req: IAuthenticatedRequest, res, next): void => {
         next(error);
       }
 
-      // eslint-disable-next-line mongoose-lean/require-lean
-      const dbUser = await User.findOne({ email: jwtPayload.email });
+      const dbUser = await User.findOne({ email: jwtPayload.email }).lean<IUser>();
 
       if (!dbUser) {
         const error = new UnauthorizedError(TS.translate("auth", "loginAccessResource"));

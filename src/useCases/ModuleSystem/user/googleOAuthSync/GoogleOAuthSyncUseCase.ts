@@ -1,5 +1,6 @@
 import { User } from "@entities/ModuleSystem/UserModel";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
+import { UserAuth } from "@providers/auth/UserAuth";
 import { TS } from "@providers/translation/TranslationHelper";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { IAuthResponse, IGoogleOAuthUserInfoResponse, UserAuthFlow } from "@rpg-engine/shared";
@@ -8,7 +9,11 @@ import { InternalServerError } from "../../../../providers/errors/InternalServer
 
 @provide(GoogleOAuthSyncUseCase)
 export class GoogleOAuthSyncUseCase {
-  constructor(private userRepository: UserRepository, private analyticsHelper: AnalyticsHelper) {}
+  constructor(
+    private userRepository: UserRepository,
+    private analyticsHelper: AnalyticsHelper,
+    private userAuth: UserAuth
+  ) {}
 
   public async googleOAuthSync(googleUserInfo: IGoogleOAuthUserInfoResponse): Promise<IAuthResponse> {
     if (!googleUserInfo.email) {
@@ -31,7 +36,7 @@ export class GoogleOAuthSyncUseCase {
       await this.analyticsHelper.track("UserLoginGoogle", newUser);
       await this.analyticsHelper.updateUserInfo(newUser);
 
-      return await newUser.generateAccessToken();
+      return await this.userAuth.generateAccessToken(newUser);
     } else {
       // Check if user already exists on database...
       // just create a new access token and refresh token and provide it
@@ -40,7 +45,7 @@ export class GoogleOAuthSyncUseCase {
       await this.analyticsHelper.track("UserLoginGoogle", user);
       await this.analyticsHelper.updateUserInfo(user);
 
-      return await user.generateAccessToken();
+      return await this.userAuth.generateAccessToken(user);
     }
   }
 }

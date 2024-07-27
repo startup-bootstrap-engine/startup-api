@@ -63,6 +63,7 @@ describe("SpellCast.ts", () => {
     berserkerSpells = container.get(Execution);
 
     level2Spells = [spellSelfHealing, spellBlankRuneCreation, spellTeleport];
+
     // level3Spells = [spellBoltCreation, spellFoodCreation];
     // level4Spells = [
     //   spellDarkRuneCreation,

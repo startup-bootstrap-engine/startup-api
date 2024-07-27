@@ -20,16 +20,16 @@ export class UserRepository extends CRUD implements IUserRepository {
     // eslint-disable-next-line mongoose-lean/require-lean
     await newUser.save();
 
-    await this.analyticsHelper.track("UserRegister", newUser);
+    void this.analyticsHelper.track("UserRegister", newUser);
 
-    await this.analyticsHelper.updateUserInfo(newUser);
+    void this.analyticsHelper.updateUserInfo(newUser);
 
     return newUser;
   }
 
   public async findUser(params: object): Promise<IUser> {
     // eslint-disable-next-line mongoose-lean/require-lean
-    const user = await User.findOne(params);
+    const user = await User.findOne(params).lean<IUser>();
 
     if (!user) {
       throw new NotFoundError(TS.translate("users", "userNotFound"));

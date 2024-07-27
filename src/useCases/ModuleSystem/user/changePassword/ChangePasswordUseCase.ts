@@ -5,13 +5,14 @@ import { TS } from "@providers/translation/TranslationHelper";
 import bcrypt from "bcrypt";
 import { provide } from "inversify-binding-decorators";
 
+import { UserAuth } from "@providers/auth/UserAuth";
 import { TransactionalEmail } from "../../../../../emails/TransactionalEmail";
 import { appEnv } from "../../../../providers/config/env";
 import { AuthChangePasswordDTO } from "../AuthDTO";
 
 @provide(ChangePasswordUseCase)
 export class ChangePasswordUseCase {
-  constructor(private analyticsHelper: AnalyticsHelper) {}
+  constructor(private analyticsHelper: AnalyticsHelper, private userAuth: UserAuth) {}
 
   public async changePassword(user: IUser, authChangePasswordDTO: AuthChangePasswordDTO): Promise<void> {
     await this.analyticsHelper.track("ChangePassword", user);
@@ -32,8 +33,8 @@ export class ChangePasswordUseCase {
     if (currentPasswordHash === user.password) {
       // if currentPassword is correct, just change our current password to the new one provided.
       user.password = newPassword;
-      // eslint-disable-next-line mongoose-lean/require-lean
-      await user.save();
+
+      await this.userAuth.recalculatePasswordHash(user);
 
       // Send confirmation to user
       await TransactionalEmail.send(user.email, TS.translate("email", "passwordChangeTitle"), "notification", {

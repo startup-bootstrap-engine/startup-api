@@ -69,8 +69,8 @@ export class CharacterCreateInteractionManager {
     };
   }
 
-  public startNPCInteractions(character: ICharacter): void {
-    void this.npcManager.startNearbyNPCsBehaviorLoop(character);
+  public async startNPCInteractions(character: ICharacter): Promise<void> {
+    await this.npcManager.startNearbyNPCsBehaviorLoop(character);
     void this.npcWarn.warnCharacterAboutNPCsInView(character, { always: true });
     void this.itemView.warnCharacterAboutItemsInView(character, { always: true }); // Don't await to avoid blocking
   }

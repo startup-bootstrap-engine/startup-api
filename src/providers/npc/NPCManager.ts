@@ -13,7 +13,6 @@ import { Locker } from "@providers/locks/Locker";
 import { MathHelper } from "@providers/math/MathHelper";
 import { RaidManager } from "@providers/raid/RaidManager";
 import { Time } from "@providers/time/Time";
-import { random } from "lodash";
 import { NPCCycleQueue } from "./NPCCycleQueue";
 
 @provide(NPCManager)
@@ -40,7 +39,6 @@ export class NPCManager {
 
     //! Dont use Promise.all here. This will lead to some NPCs getting stuck
     for (const npc of npcsToActivate) {
-      await this.time.waitForMilliseconds(random(1, 10));
       await this.startBehaviorLoop(npc);
     }
   }
