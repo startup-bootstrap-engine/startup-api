@@ -71,21 +71,11 @@ export class SkillFunctions {
       //! Warning: Chaching this causes the skill not to update
       await Skill.findByIdAndUpdate(skills._id, skills).lean({ virtuals: true, defaults: true });
 
-      const [buffedSkills, buffs] = await Promise.all([
-        this.skillBuff.getSkillsWithBuff(character),
-        this.characterBuffSkill.calculateAllActiveBuffs(character),
-      ]);
-
       // update baseSpeed according to skill level
       const baseSpeed = await this.characterBaseSpeed.getBaseSpeed(character);
       if (baseSpeed && character.baseSpeed !== baseSpeed) {
         await Character.updateOne({ _id: character._id }, { $set: { baseSpeed } });
       }
-
-      this.socketMessaging.sendEventToUser(character.channelId!, SkillSocketEvents.ReadInfo, {
-        skill: buffedSkills,
-        buffs,
-      });
     } catch (error) {
       console.log(error);
     }

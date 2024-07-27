@@ -19,7 +19,6 @@ import {
   Modes,
   NPCAlignment,
   NPCMovementType,
-  SkillSocketEvents,
   SpellSocketEvents,
   SpellsBlueprint,
   UISocketEvents,
@@ -309,32 +308,6 @@ describe("SpellCast.ts", () => {
     );
 
     increaseSPMock.mockRestore();
-  });
-
-  it("should increase skill and send skill update event", async () => {
-    expect(await spellCast.castSpell({ magicWords: "talas faenya" }, testCharacter)).toBeTruthy();
-
-    // formulate is now:  const manaSp = Math.round((spellPower * ML_INCREASE_RATIO + power) * SP_MAGIC_INCREASE_TIMES_MANA * 100) / 100;
-
-    expect(sendEventToUser).toHaveBeenCalled();
-
-    let skillUpdateEventParams;
-    for (const call of sendEventToUser.mock.calls) {
-      if (call[1] === SkillSocketEvents.ReadInfo) {
-        skillUpdateEventParams = call;
-        break;
-      }
-    }
-
-    expect(skillUpdateEventParams).toBeDefined();
-
-    expect(skillUpdateEventParams[0]).toBe(testCharacter.channelId);
-    expect(skillUpdateEventParams[1]).toBe(SkillSocketEvents.ReadInfo);
-
-    expect(skillUpdateEventParams[2]).toBeDefined();
-    expect(skillUpdateEventParams[2].skill).toBeDefined();
-    expect(skillUpdateEventParams[2].skill.magic).toBeDefined();
-    expect(skillUpdateEventParams[2].skill.magic.skillPoints).toBeCloseTo(16.2);
   });
 
   it("should not cast spell if character does not have any skills", async () => {

@@ -5,6 +5,7 @@ import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterWeapon } from "@providers/character/CharacterWeapon";
 import { CharacterBonusPenalties } from "@providers/character/characterBonusPenalties/CharacterBonusPenalties";
+import { CharacterBuffSkill } from "@providers/character/characterBuff/CharacterBuffSkill";
 import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import {
   LOW_SKILL_LEVEL_SP_INCREASE_BONUS,
@@ -18,6 +19,7 @@ import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DiscordBot } from "@providers/discord/DiscordBot";
 import { GuildSkillsIncrease } from "@providers/guild/GuildSkillsIncrease";
 import { NPCExperience } from "@providers/npc/NPCExperience/NPCExperience";
+import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { NumberFormatter } from "@providers/text/NumberFormatter";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { CharacterClass } from "@rpg-engine/shared";
@@ -27,10 +29,12 @@ import {
   IIncreaseSPResult,
   ISkillDetails,
   SKILLS_MAP,
+  SkillSocketEvents,
   SkillType,
 } from "@rpg-engine/shared/dist/types/skills.types";
 import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
+import { SkillBuff } from "./SkillBuff";
 import { SkillCalculator } from "./SkillCalculator";
 import { SkillCraftingMapper } from "./SkillCraftingMapper";
 import { SkillFunctions } from "./SkillFunctions";
@@ -52,7 +56,10 @@ export class SkillIncrease {
     private npcExperience: NPCExperience,
     private newRelic: NewRelic,
     private discordBot: DiscordBot,
-    private guildSkillsIncrease: GuildSkillsIncrease
+    private guildSkillsIncrease: GuildSkillsIncrease,
+    private skillBuff: SkillBuff,
+    private characterBuffSkill: CharacterBuffSkill,
+    private socketMessaging: SocketMessaging
   ) {}
 
   /**
@@ -153,6 +160,16 @@ export class SkillIncrease {
           await this.discordBot.sendMessageWithColor(message, channel, title);
         }
       }
+
+      // send skill update event
+      const [buffedSkills, buffs] = await Promise.all([
+        this.skillBuff.getSkillsWithBuff(attacker),
+        this.characterBuffSkill.calculateAllActiveBuffs(attacker),
+      ]);
+      this.socketMessaging.sendEventToUser(attacker.channelId!, SkillSocketEvents.ReadInfo, {
+        skill: buffedSkills,
+        buffs,
+      });
     } catch (error) {
       console.error(error);
     }
