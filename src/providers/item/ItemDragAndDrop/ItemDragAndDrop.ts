@@ -1,9 +1,8 @@
-import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem as IModelItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
-import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { blueprintManager } from "@providers/inversify/container";
 import { Locker } from "@providers/locks/Locker";
@@ -35,82 +34,62 @@ export class ItemDragAndDrop {
         return false;
       }
 
-      if (appEnv.general.IS_UNIT_TEST) {
-        return await this.processItemMove(itemMoveData, character);
+      const lockKey = `item-move-${character._id}`;
+
+      const canProceed = await this.locker.lock(lockKey);
+
+      if (!canProceed) {
+        return false;
       }
 
-      await this.dynamicQueue.addJob(
-        "item-move",
-        async (job) => {
-          const { itemMoveData, characterId } = job.data;
-          const character = (await Character.findById(characterId).lean()) as ICharacter;
-          if (!character) {
-            throw new Error("Character not found.");
-          }
-          void this.processItemMove(itemMoveData, character);
-        },
-        { itemMoveData, characterId: character._id }
-      );
-      return true;
+      const rollbackActions: (() => Promise<void>)[] = [];
+      let success = false;
+
+      try {
+        await this.clearCharacterCache(
+          character,
+          itemMoveData.from.containerId,
+          itemMoveData.to.containerId,
+          itemMoveData.from.item
+        );
+
+        const itemToBeMoved = await this.retrieveItem(itemMoveData.from.item._id);
+        if (!itemToBeMoved) {
+          throw new Error("Item to be moved wasn't found.");
+        }
+
+        const itemToBeMovedTo = itemMoveData.to.item ? await this.retrieveItem(itemMoveData.to.item._id!) : null;
+        if (!itemToBeMovedTo && itemMoveData.to.item !== null) {
+          throw new Error("Item to be moved to wasn't found.");
+        }
+
+        if (itemMoveData.to.source !== itemMoveData.from.source) {
+          throw new Error("You can't move items between different sources.");
+        }
+
+        await this.executeItemMoveLogic(itemMoveData, character, itemToBeMoved, itemToBeMovedTo, rollbackActions);
+
+        await this.updateInventory(itemMoveData, character);
+
+        success = true;
+        return true;
+      } catch (error) {
+        console.error(error);
+        this.socketMessaging.sendErrorMessageToCharacter(
+          character,
+          `Sorry, an error occurred while moving the item: ${(error as Error).message}`
+        );
+        return false;
+      } finally {
+        if (!success) {
+          await this.performRollback(rollbackActions);
+        }
+
+        await this.locker.unlock(lockKey);
+      }
     } catch (error) {
       console.error(error);
       return false;
-    }
-  }
-
-  private async processItemMove(itemMoveData: IItemMove, character: ICharacter): Promise<boolean> {
-    const lockKey = `item-move-${character._id}`;
-
-    const canProceed = await this.locker.lock(lockKey);
-
-    if (!canProceed) {
-      return false;
-    }
-
-    const rollbackActions: (() => Promise<void>)[] = [];
-    let success = false;
-
-    try {
-      await this.clearCharacterCache(
-        character,
-        itemMoveData.from.containerId,
-        itemMoveData.to.containerId,
-        itemMoveData.from.item
-      );
-
-      const itemToBeMoved = await this.retrieveItem(itemMoveData.from.item._id);
-      if (!itemToBeMoved) {
-        throw new Error("Item to be moved wasn't found.");
-      }
-
-      const itemToBeMovedTo = itemMoveData.to.item ? await this.retrieveItem(itemMoveData.to.item._id!) : null;
-      if (!itemToBeMovedTo && itemMoveData.to.item !== null) {
-        throw new Error("Item to be moved to wasn't found.");
-      }
-
-      if (itemMoveData.to.source !== itemMoveData.from.source) {
-        throw new Error("You can't move items between different sources.");
-      }
-
-      await this.executeItemMoveLogic(itemMoveData, character, itemToBeMoved, itemToBeMovedTo, rollbackActions);
-
-      await this.updateInventory(itemMoveData, character);
-
-      success = true;
-      return true;
-    } catch (error) {
-      console.error(error);
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        `Sorry, an error occurred while moving the item: ${(error as Error).message}`
-      );
-      return false;
-    } finally {
-      if (!success) {
-        await this.performRollback(rollbackActions);
-      }
-
-      await this.locker.unlock(lockKey);
     }
   }
 

@@ -24,16 +24,7 @@ export class GuildCommon {
   }
 
   public async convertToGuildInfo(guild: IGuild): Promise<IGuildInfo> {
-    const memberDetails = (await Promise.all(
-      guild.members.map(async (memberId) => {
-        const member = await Character.findById(memberId);
-        if (!member) {
-          console.warn(`Member not found for ID: ${memberId}`);
-          return null;
-        }
-        return this.mapMemberToGuildMember(member);
-      })
-    ).then((results) => results.filter((member) => member !== null))) as IGuildMember[];
+    const memberDetails = await this.createMemberDetails(guild.members);
 
     const guildSkillsInfo: IGuildSkillsInfo[] = [];
     let guildLevel = 1;
@@ -75,6 +66,21 @@ export class GuildCommon {
     };
   }
 
+  public async createMemberDetails(memberIds: string[]): Promise<IGuildMember[]> {
+    const memberDetails = await Promise.all(
+      memberIds.map(async (memberId) => {
+        const member = (await Character.findById(memberId).lean()) as ICharacter;
+        if (!member) {
+          console.warn(`Member not found for ID: ${memberId}`);
+          return null;
+        }
+        return this.mapMemberToGuildMember(member);
+      })
+    );
+
+    return memberDetails.filter((member): member is IGuildMember => member !== null);
+  }
+
   public async sendMessageToAllMembers(
     message: string,
     guild: IGuild,
@@ -82,11 +88,11 @@ export class GuildCommon {
     members?: string[]
   ): Promise<void> {
     members = members || guild.members;
-    const characterIds = new Set<string>(members);
 
-    for (const characterId of characterIds) {
+    const onlineCharacters = (await Character.find({ isOnline: true }).lean()) as ICharacter[];
+
+    for (const character of onlineCharacters) {
       try {
-        const character = (await Character.findById(characterId).lean().select("channelId")) as ICharacter;
         if (!character || !character.channelId) continue;
 
         this.socketMessaging.sendEventToUser<IUIShowMessage>(character.channelId, UISocketEvents.ShowMessage, {
@@ -94,16 +100,22 @@ export class GuildCommon {
           type: "info",
         });
 
-        const payload = isDelete ? null : await this.convertToGuildInfo(guild);
-        this.socketMessaging.sendEventToUser<IGuildInfo | null>(
-          character.channelId,
-          GuildSocketEvents.GuildInfoOpen,
-          payload
-        );
+        if (isDelete) {
+          const deletePayload = await this.createMemberDetails(members);
+
+          this.socketMessaging.sendEventToUser(character.channelId, GuildSocketEvents.GuildInfoDelete, deletePayload);
+        } else {
+          const payload = await this.convertToGuildInfo(guild);
+          this.sendGuildEvent(character.channelId, GuildSocketEvents.GuildInfoOpen, payload);
+        }
       } catch (error) {
-        console.error(`Error sending message to character with ID ${characterId}:`, error);
+        console.error(`Error sending message to character with ID ${character._id}:`, error);
       }
     }
+  }
+
+  private sendGuildEvent<T>(channelId: string, event: GuildSocketEvents, payload: T): void {
+    this.socketMessaging.sendEventToUser<T>(channelId, event, payload);
   }
 
   public async notifyGuildMembers(members: string[], newLevel: number): Promise<void> {

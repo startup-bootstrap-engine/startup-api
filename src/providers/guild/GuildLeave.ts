@@ -39,10 +39,12 @@ export class GuildLeave {
         throw new Error("Failed to update guild");
       }
 
-      await this.guildCommon.sendMessageToAllMembers(`${member.name} has left the guild.`, updatedGuild, false, [
-        ...updatedGuild.members,
-        memberId,
-      ]);
+      await this.guildCommon.sendMessageToAllMembers(
+        `${member.name} has left the ${updatedGuild.name} guild.`,
+        updatedGuild,
+        true,
+        [memberId]
+      );
     } catch (error) {
       console.error(error);
     }

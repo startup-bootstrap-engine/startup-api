@@ -29,7 +29,11 @@ export class GuildDelete {
         await GuildSkills.deleteOne({ _id: guildSkills._id });
       }
       await Guild.deleteOne({ _id: guildId });
-      await this.guildCommon.sendMessageToAllMembers("The guild has been deleted by the leader.", guild, true);
+      await this.guildCommon.sendMessageToAllMembers(
+        "The guild " + guild.name + " has been deleted by the leader.",
+        guild,
+        true
+      );
     } catch (error) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "An error occurred while deleting the guild.");
       console.error(`Error deleting guild with ID ${guildId}:`, error);

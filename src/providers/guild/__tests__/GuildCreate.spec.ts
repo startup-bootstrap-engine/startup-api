@@ -163,12 +163,18 @@ describe("GuildCreate.ts", () => {
         .mockResolvedValue({ success: true });
       // @ts-ignore
       guildCreate.guildCommon.convertToGuildInfo = jest.fn().mockResolvedValue({});
+      // @ts-ignore
+      const sendMessageToAllMembersSpy = jest
+        // @ts-ignore
+        .spyOn(guildCreate.guildCommon, "sendMessageToAllMembers")
+        .mockResolvedValue();
 
       await guildCreate.createGuild(guildData, testCharacter);
 
-      expect(mockSocketMessaging.sendMessageToCharacter).toBeCalledWith(
-        testCharacter,
-        "Guild was Created successfully."
+      // @ts-ignore
+      expect(sendMessageToAllMembersSpy).toBeCalledWith(
+        "Guild " + testGuild.name + " was Created successfully.",
+        testGuild
       );
     });
 

@@ -89,6 +89,21 @@ describe("GuildGet.ts", () => {
     );
   });
 
+  it("should fetch guild if optional characterId is provided", async () => {
+    await guildGet.getGuilds(undefined, testCharacter2, testCharacter._id);
+
+    expect(mockSocketMessaging.sendEventToUser).toHaveBeenCalledWith(
+      testCharacter2.channelId!,
+      GuildSocketEvents.GuildInfoOpen,
+      expect.objectContaining({
+        _id: testGuild.id,
+        name: testGuild.name,
+        tag: testGuild.tag,
+        coatOfArms: testGuild.coatOfArms,
+      })
+    );
+  });
+
   it("should send undefine if character is not in a guild", async () => {
     await guildGet.getGuilds(undefined, testCharacter2);
 

@@ -44,9 +44,6 @@ export class SpellNetworkCastQueue {
       {
         character,
         data,
-      },
-      {
-        queueScaleBy: "active-characters",
       }
     );
   }
