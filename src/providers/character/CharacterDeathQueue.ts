@@ -9,7 +9,6 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { appEnv } from "@providers/config/env";
 import { DROP_EQUIPMENT_CHANCE } from "@providers/constants/DeathConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DiscordBot } from "@providers/discord/DiscordBot";
@@ -23,7 +22,6 @@ import {
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { Locker } from "@providers/locks/Locker";
 import { NPCTarget } from "@providers/npc/movement/NPCTarget";
-import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SkillDecrease } from "@providers/skill/SkillDecrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
@@ -84,29 +82,11 @@ export class CharacterDeath {
     private equipmentSlots: EquipmentSlots,
     private characterSkull: CharacterSkull,
     private discordBot: DiscordBot,
-    private characterRespawn: CharacterRespawn,
-    private dynamicQueue: DynamicQueue
+    private characterRespawn: CharacterRespawn
   ) {}
 
   @TrackNewRelicTransaction()
   public async handleCharacterDeath(killer: INPC | ICharacter | null, character: ICharacter): Promise<void> {
-    if (appEnv.general.IS_UNIT_TEST) {
-      await this.execHandleCharacterDeath(killer, character);
-      return;
-    }
-
-    await this.dynamicQueue.addJob(
-      "character-death",
-      async (job) => {
-        const { killer, character } = job.data;
-
-        await this.execHandleCharacterDeath(killer, character);
-      },
-      { killer, character }
-    );
-  }
-
-  private async execHandleCharacterDeath(killer: INPC | ICharacter | null, character: ICharacter): Promise<void> {
     try {
       const isLocked = await this.locker.lock(`character-death-${character._id}`, 3);
 

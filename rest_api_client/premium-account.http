@@ -4,9 +4,9 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "blueprintKey": "frozen-castle-dungeon-teleport",
-  "quantity": 1,
-  "characterId": "66974a3288418600350a4a15" 
+  "blueprintKey": "social-crystal",
+  "quantity": 2,
+  "characterId": "6690732dcc64ae005e924894" 
 }
 
 ###

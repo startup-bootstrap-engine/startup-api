@@ -54,6 +54,7 @@ export class SpellCast {
     private spellValidation: SpellValidation,
     private inMemoryHashTable: InMemoryHashTable,
     private movementHelper: MovementHelper,
+
     private stealth: Stealth,
     private spellCoolDown: SpellCoolDown,
     private spellSilencer: SpellSilence,

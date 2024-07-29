@@ -1,6 +1,6 @@
 export const QUEUE_BULL_MONITOR_REFRESH_INTERVAL = 60 * 1000;
 
-export const QUEUE_INACTIVITY_THRESHOLD_MS = 60 * 1 * 1000; // 1 min
+export const QUEUE_INACTIVITY_THRESHOLD_MS = 30 * 1000; // 30 seconds
 
 export const QUEUE_CLOSE_CHECK_MAX_TRIES = 10; // Set your desired maximum number of tries
 
@@ -16,7 +16,7 @@ export enum QueueDefaultScaleFactor {
 
 export const QUEUE_NPC_CYCLE_CUSTOM_SCALE = 4;
 
-export const QUEUE_CONNECTION_CHECK_INTERVAL = 30 * 1000; // 30 sec
+export const QUEUE_CONNECTION_CHECK_INTERVAL = 10 * 1000; // 1 seconds
 // Concurrency
 export const QUEUE_WORKER_MIN_CONCURRENCY = 100; // 100-300 is the standard
 export const QUEUE_WORKER_MAX_CONCURRENCY = 800; // Max concurrency the system can handle
