@@ -14,8 +14,6 @@ export enum QueueDefaultScaleFactor {
   High = 10,
 }
 
-export const QUEUE_NPC_CYCLE_CUSTOM_SCALE = 4;
-
 export const QUEUE_CONNECTION_CHECK_INTERVAL = 30 * 1000; // 30 sec
 // Concurrency
 export const QUEUE_WORKER_MIN_CONCURRENCY = 100; // 100-300 is the standard

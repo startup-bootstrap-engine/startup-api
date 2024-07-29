@@ -75,7 +75,9 @@ export class CharacterNetworkUpdateQueue {
         character,
         data,
       },
-      undefined
+      {
+        queueScaleBy: "active-characters",
+      }
     );
   }
 

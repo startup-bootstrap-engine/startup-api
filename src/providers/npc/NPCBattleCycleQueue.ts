@@ -57,7 +57,9 @@ export class NPCBattleCycleQueue {
           npc,
           npcSkills,
         },
-        undefined,
+        {
+          queueScaleBy: "active-npcs",
+        },
 
         {
           delay: NPC_BATTLE_CYCLE_INTERVAL,
