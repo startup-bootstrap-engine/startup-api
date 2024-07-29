@@ -17,7 +17,6 @@ import { DefaultJobOptions, Job, Queue, QueueBaseOptions, Worker, WorkerOptions 
 import { Redis } from "ioredis";
 import { random } from "lodash";
 import { hostname } from "os";
-import zlib from "zlib";
 import { DynamicQueueCleaner } from "./DynamicQueueCleaner";
 import { EntityQueueScalingCalculator } from "./EntityQueueScalingCalculator";
 import { QueueActivityMonitor } from "./QueueActivityMonitor";
@@ -80,13 +79,10 @@ export class DynamicQueue {
         1
       );
 
-      // Compress data
-      const compressedData = zlib.gzipSync(JSON.stringify(data)).toString("base64");
-
-      return await queue.add(queueName, compressedData, {
+      return await queue.add(queueName, data, {
         ...addQueueOptions,
-        removeOnComplete: { age: 3600, count: 1000 },
-        removeOnFail: { age: 3600, count: 1000 },
+        removeOnComplete: true,
+        removeOnFail: { age: 3600, count: 100 },
       });
     } catch (error) {
       console.error(error);
@@ -118,21 +114,7 @@ export class DynamicQueue {
 
         try {
           await this.queueActivityMonitor.updateQueueActivity(queueName);
-          await Promise.race([
-            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-            (async () => {
-              // Decompress job data
-              const decompressedData = JSON.parse(zlib.gunzipSync(Buffer.from(job.data, "base64")).toString());
-              job.data = decompressedData;
-
-              // Process job
-              await jobFn(job);
-
-              // Clear large variables
-              job.data = null;
-            })(),
-            timeoutPromise,
-          ]);
+          await Promise.race([jobFn(job), timeoutPromise]);
           if (timeoutHandle) {
             clearTimeout(timeoutHandle); // Clear the timeout if the job completes in time
           }
@@ -147,8 +129,6 @@ export class DynamicQueue {
       {
         name: `${queueName}-worker`,
         concurrency: maxWorkerConcurrency,
-        removeOnComplete: { age: 86400, count: 1000 },
-        removeOnFail: { age: 86400, count: 1000 },
         connection,
         ...workerOptions,
       }
