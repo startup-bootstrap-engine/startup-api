@@ -82,7 +82,7 @@ export class DynamicQueue {
       return await queue.add(queueName, data, {
         ...addQueueOptions,
         removeOnComplete: true,
-        removeOnFail: { age: 3600, count: 100 },
+        removeOnFail: true,
       });
     } catch (error) {
       console.error(error);
