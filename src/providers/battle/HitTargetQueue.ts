@@ -97,9 +97,7 @@ export class HitTargetQueue {
           void this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
         },
         { attacker, target, targetType, magicAttack, bonusDamage, spellHit },
-        {
-          queueScaleBy: "active-characters",
-        }
+        undefined
       );
     } else {
       await this.dynamicQueue.addJob(
@@ -120,9 +118,7 @@ export class HitTargetQueue {
           void this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
         },
         { attacker, target, targetType, magicAttack, bonusDamage, spellHit },
-        {
-          queueScaleBy: "active-npcs",
-        }
+        undefined
       );
     }
   }

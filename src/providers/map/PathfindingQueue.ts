@@ -83,9 +83,7 @@ export class PathfindingQueue {
           endGridX,
           endGridY,
         },
-        {
-          queueScaleBy: "active-npcs",
-        }
+        undefined
       );
     } catch (error) {
       console.error(error);
