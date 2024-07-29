@@ -17,6 +17,7 @@ import { DefaultJobOptions, Job, Queue, QueueBaseOptions, Worker, WorkerOptions 
 import { Redis } from "ioredis";
 import { random } from "lodash";
 import { hostname } from "os";
+import zlib from "zlib";
 import { DynamicQueueCleaner } from "./DynamicQueueCleaner";
 import { EntityQueueScalingCalculator } from "./EntityQueueScalingCalculator";
 import { QueueActivityMonitor } from "./QueueActivityMonitor";
@@ -79,14 +80,84 @@ export class DynamicQueue {
         1
       );
 
-      return await queue.add(queueName, data, {
+      // Compress data
+      const compressedData = zlib.gzipSync(JSON.stringify(data)).toString("base64");
+
+      return await queue.add(queueName, compressedData, {
         ...addQueueOptions,
-        removeOnComplete: true,
-        removeOnFail: true,
+        removeOnComplete: { age: 3600, count: 1000 },
+        removeOnFail: { age: 3600, count: 1000 },
       });
     } catch (error) {
       console.error(error);
       throw error;
+    }
+  }
+
+  private async initOrFetchWorker(
+    queueName: string,
+    jobFn: QueueJobFn,
+    connection: Redis,
+    workerOptions?: WorkerOptions,
+    queueScaleOptions?: IQueueScaleOptions
+  ): Promise<void> {
+    if (this.workers.has(queueName)) return;
+
+    const { maxWorkerConcurrency } = await this.getWorkerScalingParameters(queueScaleOptions);
+
+    const worker = new Worker(
+      queueName,
+      async (job) => {
+        const jobTimeout = 5000;
+
+        let timeoutHandle: NodeJS.Timeout | undefined;
+
+        const timeoutPromise = new Promise((_, reject) => {
+          timeoutHandle = setTimeout(() => reject(new Error("Job timeout")), jobTimeout);
+        });
+
+        try {
+          await this.queueActivityMonitor.updateQueueActivity(queueName);
+          await Promise.race([
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+            (async () => {
+              // Decompress job data
+              const decompressedData = JSON.parse(zlib.gunzipSync(Buffer.from(job.data, "base64")).toString());
+              job.data = decompressedData;
+
+              // Process job
+              await jobFn(job);
+
+              // Clear large variables
+              job.data = null;
+            })(),
+            timeoutPromise,
+          ]);
+          if (timeoutHandle) {
+            clearTimeout(timeoutHandle); // Clear the timeout if the job completes in time
+          }
+        } catch (error) {
+          console.error(`${queueName}: Error processing job ${job.id}:`, error);
+          if (timeoutHandle) {
+            clearTimeout(timeoutHandle); // Clear the timeout if the job fails
+          }
+          throw error; // Let BullMQ handle the job failure
+        }
+      },
+      {
+        name: `${queueName}-worker`,
+        concurrency: maxWorkerConcurrency,
+        removeOnComplete: { age: 86400, count: 1000 },
+        removeOnFail: { age: 86400, count: 1000 },
+        connection,
+        ...workerOptions,
+      }
+    );
+
+    this.workers.set(queueName, worker);
+
+    if (!appEnv.general.IS_UNIT_TEST) {
+      this.setupWorkerErrorHandlers(worker, queueName);
     }
   }
 
@@ -124,59 +195,6 @@ export class DynamicQueue {
     }
 
     return this.queues.get(queueName)!;
-  }
-
-  private async initOrFetchWorker(
-    queueName: string,
-    jobFn: QueueJobFn,
-    connection: Redis,
-    workerOptions?: WorkerOptions,
-    queueScaleOptions?: IQueueScaleOptions
-  ): Promise<void> {
-    if (this.workers.has(queueName)) return;
-
-    const { maxWorkerConcurrency } = await this.getWorkerScalingParameters(queueScaleOptions);
-
-    const worker = new Worker(
-      queueName,
-      async (job) => {
-        const jobTimeout = 5000;
-
-        let timeoutHandle: NodeJS.Timeout | undefined;
-
-        const timeoutPromise = new Promise((_, reject) => {
-          timeoutHandle = setTimeout(() => reject(new Error("Job timeout")), jobTimeout);
-        });
-
-        try {
-          await this.queueActivityMonitor.updateQueueActivity(queueName);
-          await Promise.race([jobFn(job), timeoutPromise]);
-          if (timeoutHandle) {
-            clearTimeout(timeoutHandle); // Clear the timeout if the job completes in time
-          }
-        } catch (error) {
-          console.error(`${queueName}: Error processing job ${job.id}:`, error);
-          if (timeoutHandle) {
-            clearTimeout(timeoutHandle); // Clear the timeout if the job fails
-          }
-          throw error; // Let BullMQ handle the job failure
-        }
-      },
-      {
-        name: `${queueName}-worker`,
-        concurrency: maxWorkerConcurrency,
-        removeOnComplete: { age: 86400, count: 1000 },
-        removeOnFail: { age: 86400, count: 1000 },
-        connection,
-        ...workerOptions,
-      }
-    );
-
-    this.workers.set(queueName, worker);
-
-    if (!appEnv.general.IS_UNIT_TEST) {
-      this.setupWorkerErrorHandlers(worker, queueName);
-    }
   }
 
   private async getWorkerScalingParameters(
