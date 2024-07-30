@@ -2,6 +2,7 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { MapSolidsTrajectory } from "@providers/map/MapSolidsTrajectory";
+import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { FromGridX, FromGridY, NPCAlignment, NPCMovementType, NPCPathOrientation } from "@rpg-engine/shared";
 import { NPCMovementMoveTowards } from "../NPCMovementMoveTowards";
 import { NPCTarget } from "../NPCTarget";
@@ -173,6 +174,10 @@ describe("NPCMovementMoveTowards.ts", () => {
   });
 
   describe("Validation", () => {
+    beforeEach(() => {
+      jest.spyOn(SkillIncrease.prototype, "increaseBasicAttributeSP").mockResolvedValue(undefined);
+    });
+
     it("should correctly call this.initBattleCycle(npc)", async () => {
       testNPC.alignment = NPCAlignment.Hostile;
       testNPC.targetCharacter = testCharacter._id;

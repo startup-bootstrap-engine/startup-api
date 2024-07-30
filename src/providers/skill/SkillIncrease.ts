@@ -160,18 +160,10 @@ export class SkillIncrease {
           await this.discordBot.sendMessageWithColor(message, channel, title);
         }
       }
-
-      // send skill update event
-      const [buffedSkills, buffs] = await Promise.all([
-        this.skillBuff.getSkillsWithBuff(attacker),
-        this.characterBuffSkill.calculateAllActiveBuffs(attacker),
-      ]);
-      this.socketMessaging.sendEventToUser(attacker.channelId!, SkillSocketEvents.ReadInfo, {
-        skill: buffedSkills,
-        buffs,
-      });
     } catch (error) {
       console.error(error);
+    } finally {
+      await this.sendSkillLevelUpEvents(attacker);
     }
   }
 
@@ -229,6 +221,8 @@ export class SkillIncrease {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      await this.sendSkillLevelUpEvents(character);
     }
   }
 
@@ -307,6 +301,8 @@ export class SkillIncrease {
       await this.characterBonusPenalties.applyRaceBonusPenalties(character, attribute);
     } catch (error) {
       console.error(error);
+    } finally {
+      await this.sendSkillLevelUpEvents(character);
     }
   }
 
@@ -349,6 +345,8 @@ export class SkillIncrease {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      await this.sendSkillLevelUpEvents(character);
     }
   }
 
@@ -367,6 +365,18 @@ export class SkillIncrease {
     } catch (error) {
       console.error(error);
     }
+  }
+
+  private async sendSkillLevelUpEvents(character: ICharacter): Promise<void> {
+    // send skill update event
+    const [buffedSkills, buffs] = await Promise.all([
+      this.skillBuff.getSkillsWithBuff(character),
+      this.characterBuffSkill.calculateAllActiveBuffs(character),
+    ]);
+    this.socketMessaging.sendEventToUser(character.channelId!, SkillSocketEvents.ReadInfo, {
+      skill: buffedSkills,
+      buffs,
+    });
   }
 
   private increaseSP(
