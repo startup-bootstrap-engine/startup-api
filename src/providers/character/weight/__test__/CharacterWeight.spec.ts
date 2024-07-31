@@ -3,6 +3,7 @@ import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
+import { CharacterDeathCalculator } from "@providers/character/CharacterDeathCalculator";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { ContainersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -28,7 +29,7 @@ describe("CharacterWeight.ts", () => {
     jest.spyOn(SocketMessaging.prototype, "sendEventToUser").mockImplementation(mockSendEventToUser);
 
     // @ts-ignore
-    jest.spyOn(characterDeath.characterDeathCalculator, "calculateInventoryDropChance").mockImplementation(() => 100);
+    jest.spyOn(CharacterDeathCalculator.prototype, "calculateInventoryDropChance").mockImplementation(() => 100);
   });
 
   beforeEach(async () => {
