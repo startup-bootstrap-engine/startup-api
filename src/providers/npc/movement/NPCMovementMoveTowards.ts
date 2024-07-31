@@ -26,6 +26,7 @@ import { NPCMovement } from "./NPCMovement";
 import { NPCTarget } from "./NPCTarget";
 
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { debounce } from "lodash";
 
 export interface ICharacterHealth {
@@ -46,13 +47,31 @@ export class NPCMovementMoveTowards {
     private mapHelper: MapHelper,
     private pathfindingCaching: PathfindingCaching,
     private locker: Locker,
-    private npcBattleCycleQueue: NPCBattleCycleQueue
+    private npcBattleCycleQueue: NPCBattleCycleQueue,
+    private dynamicQueue: DynamicQueue
   ) {
     this.debouncedFaceTarget = debounce(this.faceTarget.bind(this), 300);
   }
 
   @TrackNewRelicTransaction()
   public async startMoveTowardsMovement(npc: INPC): Promise<void> {
+    if (appEnv.general.IS_UNIT_TEST) {
+      await this.execStartMoveTowardsMovement(npc);
+      return;
+    }
+
+    await this.dynamicQueue.addJob(
+      "npc-move-towards-queue",
+      (job) => {
+        const { npc } = job.data;
+        void this.execStartMoveTowardsMovement(npc);
+      },
+      { npc },
+      { queueScaleBy: "active-npcs" }
+    );
+  }
+
+  private async execStartMoveTowardsMovement(npc: INPC): Promise<void> {
     const targetCharacter = await this.getTargetCharacter(npc);
 
     if (!this.isValidTarget(npc, targetCharacter)) {
