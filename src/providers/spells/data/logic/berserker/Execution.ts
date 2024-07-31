@@ -1,7 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { CharacterDeath } from "@providers/character/CharacterDeath";
+import { CharacterDeath } from "@providers/character/CharacterDeath/CharacterDeath";
 import { NPCDeathQueue } from "@providers/npc/NPCDeathQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { EntityType } from "@rpg-engine/shared";
