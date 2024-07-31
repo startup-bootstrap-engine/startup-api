@@ -118,7 +118,9 @@ export class HitTargetQueue {
           void this.execHit(attacker, target, magicAttack, bonusDamage, spellHit);
         },
         { attacker, target, targetType, magicAttack, bonusDamage, spellHit },
-        undefined
+        {
+          queueScaleBy: "active-npcs",
+        }
       );
     }
   }

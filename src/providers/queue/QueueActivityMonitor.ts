@@ -94,6 +94,9 @@ export class QueueActivityMonitor {
         await this.deleteQueueActivity(queueName); // Remove the queue from the centralized store
       } catch (error) {
         console.error(`Failed to remove inactive queue: ${queueName}`, error);
+      } finally {
+        await this.redisManager.releasePoolClient(this.connection);
+        this.connection = null;
       }
     }
   }
