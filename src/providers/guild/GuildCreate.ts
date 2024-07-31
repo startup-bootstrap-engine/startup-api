@@ -10,7 +10,7 @@ import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeigh
 import { GUILD_CREATE_MIN_GOLD_REQUIRED } from "@providers/constants/GuildConstants";
 import { OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { GuildSocketEvents, IGuildForm, IGuildInfo } from "@rpg-engine/shared";
+import { GuildSocketEvents, IGuildForm } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { GuildCommon } from "./GuildCommon";
 import { GuildValidation } from "./GuildValidation";
@@ -94,16 +94,8 @@ export class GuildCreate {
       newGuild.guildSkills = newSkills;
       await newGuild.save();
 
-      // send guild created message
-      this.socketMessaging.sendMessageToCharacter(character, "Guild was Created successfully.");
-
       // send guild info
-      const guildInfo = await this.guildCommon.convertToGuildInfo(newGuild);
-      this.socketMessaging.sendEventToUser<IGuildInfo>(
-        character.channelId!,
-        GuildSocketEvents.GuildInfoOpen,
-        guildInfo
-      );
+      await this.guildCommon.sendMessageToAllMembers("Guild " + newGuild.name + " was Created successfully.", newGuild);
     } catch (error) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Error creating guild.");
       console.error(error);

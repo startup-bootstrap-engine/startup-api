@@ -91,7 +91,7 @@ describe("GuildDelete.ts", () => {
 
       expect(deleteGuildSpy).toHaveBeenCalledWith({ _id: testGuild._id });
       expect(sendMessageToAllMembersSpy).toHaveBeenCalledWith(
-        "The guild has been deleted by the leader.",
+        "The guild " + testGuild.name + " has been deleted by the leader.",
         testGuild,
         true
       );

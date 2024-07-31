@@ -107,15 +107,15 @@ describe("GuildLeave.ts", () => {
     await guildLeave.leaveGuild(guildId, memberId, testCharacter as any);
 
     expect(sendMessageToAllMembersSpy).toHaveBeenCalledWith(
-      expect.stringContaining("has left the guild."),
+      expect.stringContaining("has left the " + testGuild.name + " guild."),
       expect.objectContaining({
         _id: testGuild._id,
         name: testGuild.name,
         tag: testGuild.tag,
         coatOfArms: testGuild.coatOfArms,
       }),
-      false,
-      expect.arrayContaining([testCharacter._id.toString(), testCharacter2._id.toString()])
+      true,
+      [memberId]
     );
   });
 });

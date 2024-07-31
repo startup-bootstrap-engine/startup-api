@@ -4,9 +4,9 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "blueprintKey": "social-crystal",
-  "quantity": 2,
-  "characterId": "6690732dcc64ae005e924894" 
+  "blueprintKey": "amulet-of-death",
+  "quantity": 1,
+  "characterId": "66a6bcb5ca2bb30035ada060" 
 }
 
 ###

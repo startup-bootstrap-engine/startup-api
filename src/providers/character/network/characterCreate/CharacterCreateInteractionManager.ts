@@ -6,6 +6,7 @@ import { CharacterView } from "@providers/character/CharacterView";
 import { CharacterBuffTracker } from "@providers/character/characterBuff/CharacterBuffTracker";
 import { CharacterBaseSpeed } from "@providers/character/characterMovement/CharacterBaseSpeed";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
+import { GuildCommon } from "@providers/guild/GuildCommon";
 import { ItemView } from "@providers/item/ItemView";
 import { NPCManager } from "@providers/npc/NPCManager";
 import { NPCWarn } from "@providers/npc/NPCWarn";
@@ -19,11 +20,17 @@ import {
   ICharacterCreateFromClient,
   ICharacterCreateFromServer,
   IControlTime,
+  IGuildPayload,
   PeriodOfDay,
   UserAccountTypes,
   WeatherSocketEvents,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+
+interface IGuildInfo {
+  isOnGuild: boolean;
+  guildPayload: IGuildPayload;
+}
 
 @provide(CharacterCreateInteractionManager)
 export class CharacterCreateInteractionManager {
@@ -36,7 +43,8 @@ export class CharacterCreateInteractionManager {
     private characterPremiumAccount: CharacterPremiumAccount,
     private socketMessaging: SocketMessaging,
     private characterBuffTracker: CharacterBuffTracker,
-    private characterBaseSpeed: CharacterBaseSpeed
+    private characterBaseSpeed: CharacterBaseSpeed,
+    private guildCommon: GuildCommon
   ) {}
 
   public async prepareDataForServer(
@@ -45,6 +53,8 @@ export class CharacterCreateInteractionManager {
   ): Promise<ICharacterCreateFromServer> {
     const updatedSpeed = (await this.recalculateSpeed(character)).speed;
     const accountType = await this.characterPremiumAccount.getPremiumAccountType(character);
+
+    const guildInfo = await this.getCharacterGuildInfo(character);
 
     return {
       ...clientData,
@@ -66,6 +76,8 @@ export class CharacterCreateInteractionManager {
       hasSkull: character.hasSkull,
       skullType: character.skullType as CharacterSkullType,
       owner: { accountType: accountType ?? UserAccountTypes.Free },
+      isOnGuild: guildInfo.isOnGuild,
+      guild: guildInfo.guildPayload,
     };
   }
 
@@ -73,6 +85,22 @@ export class CharacterCreateInteractionManager {
     await this.npcManager.startNearbyNPCsBehaviorLoop(character);
     void this.npcWarn.warnCharacterAboutNPCsInView(character, { always: true });
     void this.itemView.warnCharacterAboutItemsInView(character, { always: true }); // Don't await to avoid blocking
+  }
+
+  private async getCharacterGuildInfo(character: ICharacter): Promise<IGuildInfo> {
+    const guild = await this.guildCommon.getCharactersGuild(character);
+
+    const isOnGuild = !!guild?.id;
+
+    const guildPayload: IGuildPayload = guild
+      ? {
+          id: guild.id.toString(),
+          tag: guild.tag ?? "",
+          coatOfArms: guild.coatOfArms ?? "",
+        }
+      : { id: "", tag: "", coatOfArms: "" };
+
+    return { isOnGuild, guildPayload };
   }
 
   public async sendCharacterCreateMessages(
@@ -148,6 +176,8 @@ export class CharacterCreateInteractionManager {
 
         const accountType = await this.characterPremiumAccount.getPremiumAccountType(nearbyCharacter);
 
+        const guildInfo = await this.getCharacterGuildInfo(nearbyCharacter);
+
         const nearbyCharacterPayload = {
           id: nearbyCharacter.id.toString(),
           name: nearbyCharacter.name,
@@ -170,6 +200,8 @@ export class CharacterCreateInteractionManager {
           owner: {
             accountType: accountType ?? UserAccountTypes.Free,
           },
+          isOnGuild: guildInfo.isOnGuild,
+          guild: guildInfo.guildPayload,
         };
 
         // tell the emitter about these other characters too
