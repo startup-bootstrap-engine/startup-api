@@ -4,7 +4,7 @@ import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
-import { CharacterDeath } from "@providers/character/CharacterDeathQueue";
+import { CharacterDeath } from "@providers/character/CharacterDeath";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { locker } from "@providers/inversify/container";
 import { NPCDeathQueue } from "@providers/npc/NPCDeathQueue";

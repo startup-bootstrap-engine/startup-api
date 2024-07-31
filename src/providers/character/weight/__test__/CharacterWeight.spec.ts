@@ -7,7 +7,7 @@ import { container, unitTestHelper } from "@providers/inversify/container";
 import { ContainersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { CharacterSocketEvents, Modes } from "@rpg-engine/shared";
-import { CharacterDeath } from "../../CharacterDeathQueue";
+import { CharacterDeath } from "../../CharacterDeath";
 import { CharacterItemContainer } from "../../characterItems/CharacterItemContainer";
 import { CharacterWeightQueue } from "../CharacterWeightQueue";
 
