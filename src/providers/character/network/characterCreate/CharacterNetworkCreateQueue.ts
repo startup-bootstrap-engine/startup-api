@@ -61,20 +61,6 @@ export class CharacterNetworkCreateQueue {
     data: ICharacterCreateFromClient,
     channel: SocketChannel
   ): Promise<void> {
-    await this.dynamicQueue.addJob(
-      "character-create",
-      (job) => {
-        const { character, data } = job.data;
-
-        void this.execCharacterCreate(character, data);
-      },
-      { character, data }
-    );
-
-    await this.characterCreateSocketHandler.manageSocketConnections(channel, character);
-  }
-
-  private async execCharacterCreate(character: ICharacter, data: ICharacterCreateFromClient): Promise<void> {
     await this.clearCharacterCaches(character);
 
     character = await this.updateCharacterStatus(character, data.channelId);
@@ -95,6 +81,7 @@ export class CharacterNetworkCreateQueue {
       this.characterCreateInteractionManager.warnAboutWeatherStatus(character.channelId!),
       this.characterCreateRegen.handleCharacterRegen(character),
     ]);
+    await this.characterCreateSocketHandler.manageSocketConnections(channel, character);
   }
 
   public async clearAllJobs(): Promise<void> {
