@@ -240,7 +240,6 @@ export class ServerBootstrap {
     await this.chatNetworkGlobalMessaging.clearAllJobs();
     await this.spellNetworkCast.clearAllJobs();
     await this.npcDeathQueue.clearAllJobs();
-    await this.characterNetworkCreateQueue.clearAllJobs();
     await this.npcCycleQueue.clearAllJobs();
 
     await this.itemCraftbookQueue.clearAllJobs();

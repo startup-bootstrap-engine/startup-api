@@ -14,7 +14,6 @@ import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { Locker } from "@providers/locks/Locker";
 import { NPCManager } from "@providers/npc/NPCManager";
-import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterDailyPlayTracker } from "../../CharacterDailyPlayTracker";
 import { CharacterBuffValidation } from "../../characterBuff/CharacterBuffValidation";
@@ -41,7 +40,6 @@ export class CharacterNetworkCreateQueue {
     private characterCreateInteractionManager: CharacterCreateInteractionManager,
     private characterCreateRegen: CharacterCreateRegen,
     private characterRespawn: CharacterRespawn,
-    private dynamicQueue: DynamicQueue,
     private npcManager: NPCManager
   ) {}
 
@@ -82,14 +80,6 @@ export class CharacterNetworkCreateQueue {
       this.characterCreateRegen.handleCharacterRegen(character),
     ]);
     await this.characterCreateSocketHandler.manageSocketConnections(channel, character);
-  }
-
-  public async clearAllJobs(): Promise<void> {
-    await this.dynamicQueue.clearAllJobs();
-  }
-
-  public async shutdown(): Promise<void> {
-    await this.dynamicQueue.shutdown();
   }
 
   private async respawnIfNecessary(character: ICharacter): Promise<ICharacter> {
