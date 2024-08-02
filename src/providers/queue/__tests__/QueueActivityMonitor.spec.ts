@@ -1,32 +1,38 @@
 import { QUEUE_INACTIVITY_THRESHOLD_MS } from "@providers/constants/QueueConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { container } from "@providers/inversify/container";
-import { Queue } from "bullmq";
 import { QueueActivityMonitor } from "../QueueActivityMonitor";
 
 describe("QueueActivityMonitor", () => {
   let queueActivityMonitor: QueueActivityMonitor;
+  let inMemoryHashTable: InMemoryHashTable;
 
   beforeEach(() => {
-    jest.spyOn(InMemoryHashTable.prototype, "set").mockResolvedValue();
-    jest.spyOn(InMemoryHashTable.prototype, "has").mockResolvedValue(false);
-    jest.spyOn(InMemoryHashTable.prototype, "getAllKeys").mockResolvedValue([]);
-    jest.spyOn(InMemoryHashTable.prototype, "delete").mockResolvedValue();
-    jest.spyOn(InMemoryHashTable.prototype, "deleteAll").mockResolvedValue();
-    jest.spyOn(InMemoryHashTable.prototype, "getAll").mockResolvedValue({});
-
+    // Get real instance from the container
+    inMemoryHashTable = container.get(InMemoryHashTable);
     queueActivityMonitor = container.get(QueueActivityMonitor);
 
+    // Mock RedisManager methods
     // @ts-ignore
-    jest.spyOn(queueActivityMonitor.redisManager, "getPoolClient").mockResolvedValue({});
+    jest.spyOn(queueActivityMonitor.redisManager, "getPoolClient").mockResolvedValue({}); // Mock pool client
     // @ts-ignore
     jest.spyOn(queueActivityMonitor.redisManager, "releasePoolClient").mockResolvedValue();
   });
 
-  afterEach(() => {
-    jest.useRealTimers();
-    jest.clearAllTimers();
+  afterEach(async () => {
+    // Restore all mocks to their original implementation
     jest.restoreAllMocks();
+    // Ensure timers are cleared
+    jest.clearAllTimers();
+
+    // Release any active connections
+    // @ts-ignore
+    if (queueActivityMonitor.connection) {
+      // @ts-ignore
+      await queueActivityMonitor.redisManager.releasePoolClient(queueActivityMonitor.connection);
+      // @ts-ignore
+      queueActivityMonitor.connection = null;
+    }
   });
 
   describe("updateQueueActivity", () => {
@@ -34,70 +40,82 @@ describe("QueueActivityMonitor", () => {
       const queueName = "testQueue";
       await queueActivityMonitor.updateQueueActivity(queueName);
 
-      expect(InMemoryHashTable.prototype.set).toHaveBeenCalledWith("queue-activity", queueName, expect.any(String));
+      const lastActivity = await inMemoryHashTable.get("queue-activity", queueName);
+      expect(lastActivity).toBeDefined();
     });
   });
 
   describe("hasQueueActivity", () => {
     it("should check if a queue has activity", async () => {
       const queueName = "testQueue";
-      jest.spyOn(InMemoryHashTable.prototype, "has").mockResolvedValue(true);
+      await inMemoryHashTable.set("queue-activity", queueName, Date.now().toString());
 
       const result = await queueActivityMonitor.hasQueueActivity(queueName);
 
       expect(result).toBe(true);
-      expect(InMemoryHashTable.prototype.has).toHaveBeenCalledWith("queue-activity", queueName);
     });
   });
 
   describe("getAllQueues", () => {
     it("should return all queue names", async () => {
       const mockQueues = ["queue1", "queue2"];
-      jest.spyOn(InMemoryHashTable.prototype, "getAllKeys").mockResolvedValue(mockQueues);
+      await inMemoryHashTable.set("queue-activity", "queue1", Date.now().toString());
+      await inMemoryHashTable.set("queue-activity", "queue2", Date.now().toString());
 
       const result = await queueActivityMonitor.getAllQueues();
 
-      expect(result).toEqual(mockQueues);
-      expect(InMemoryHashTable.prototype.getAllKeys).toHaveBeenCalledWith("queue-activity");
+      expect(result).toEqual(expect.arrayContaining(mockQueues));
     });
   });
 
   describe("deleteQueueActivity", () => {
     it("should delete activity for a specific queue", async () => {
       const queueName = "testQueue";
+      await inMemoryHashTable.set("queue-activity", queueName, Date.now().toString());
+
       await queueActivityMonitor.deleteQueueActivity(queueName);
 
-      expect(InMemoryHashTable.prototype.delete).toHaveBeenCalledWith("queue-activity", queueName);
+      const hasActivity = await inMemoryHashTable.has("queue-activity", queueName);
+      expect(hasActivity).toBe(false);
     });
   });
 
   describe("clearAllQueues", () => {
     it("should clear all queue activities", async () => {
+      await inMemoryHashTable.set("queue-activity", "queue1", Date.now().toString());
+      await inMemoryHashTable.set("queue-activity", "queue2", Date.now().toString());
+
       await queueActivityMonitor.clearAllQueues();
 
-      expect(InMemoryHashTable.prototype.deleteAll).toHaveBeenCalledWith("queue-activity");
+      const allKeys = await inMemoryHashTable.getAllKeys("queue-activity");
+      expect(allKeys).toEqual([]);
     });
   });
 
   describe("closeInactiveQueues", () => {
     it("should close inactive queues and track metrics", async () => {
-      const mockQueues = {
-        activeQueue: Date.now().toString(),
-        inactiveQueue: (Date.now() - QUEUE_INACTIVITY_THRESHOLD_MS - 1000).toString(),
-      };
-      jest.spyOn(InMemoryHashTable.prototype, "getAll").mockResolvedValue(mockQueues);
+      const activeQueueName = "activeQueue";
+      const inactiveQueueName = "inactiveQueue";
 
-      const mockQueue = {
-        getActive: jest.fn().mockResolvedValue([]),
-        close: jest.fn().mockResolvedValue(undefined),
-      };
-      (Queue as jest.MockedClass<typeof Queue>).mockImplementation(() => mockQueue as any);
+      // Set active queue with recent activity
+      await inMemoryHashTable.set("queue-activity", activeQueueName, (Date.now() - 500).toString());
+
+      // Set inactive queue with old activity
+      await inMemoryHashTable.set(
+        "queue-activity",
+        inactiveQueueName,
+        (Date.now() - QUEUE_INACTIVITY_THRESHOLD_MS - 1000).toString()
+      );
+
+      // @ts-ignore
+      const shutdownSpy = jest.spyOn(queueActivityMonitor as any, "shutdownInactiveQueue").mockResolvedValue();
 
       await queueActivityMonitor.closeInactiveQueues();
 
-      expect(InMemoryHashTable.prototype.delete).toHaveBeenCalledWith("queue-activity", "inactiveQueue");
-      // @ts-ignore
-      expect(queueActivityMonitor.redisManager.releasePoolClient).toHaveBeenCalled();
+      expect(shutdownSpy).toHaveBeenCalledWith(inactiveQueueName);
+      expect(shutdownSpy).not.toHaveBeenCalledWith(activeQueueName);
+
+      shutdownSpy.mockRestore();
     });
   });
 });

@@ -37,6 +37,17 @@ export class DynamicQueueCleaner {
       queueConnectionInterval = setInterval(async () => {
         try {
           const hasQueueActivity = await this.queueActivityMonitor.hasQueueActivity(queueName);
+          const shouldShutdownQueue = await this.queueActivityMonitor.shouldShutdownQueue(queueName);
+
+          if (shouldShutdownQueue) {
+            await this.performResourceCleanup(queues, workers, queueConnections, queueName, connection);
+            if (queueConnectionInterval) {
+              clearInterval(queueConnectionInterval);
+            }
+            await this.locker.unlock(lockKey);
+            return;
+          }
+
           if (!hasQueueActivity) {
             await this.performResourceCleanup(queues, workers, queueConnections, queueName, connection);
             if (queueConnectionInterval) {

@@ -7,7 +7,7 @@ export class QueueCrons {
   constructor(private cronJobScheduler: CronJobScheduler, private queueActivityMonitor: QueueActivityMonitor) {}
 
   public schedule(): void {
-    this.cronJobScheduler.uniqueSchedule("queue-clean-inactive", "*/5 * * * *", async () => {
+    this.cronJobScheduler.uniqueSchedule("queue-clean-inactive", "* * * * *", async () => {
       await this.cleanupInactiveQueues();
     });
   }

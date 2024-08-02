@@ -11,6 +11,7 @@ import { Redis } from "ioredis";
 @provideSingleton(QueueActivityMonitor)
 export class QueueActivityMonitor {
   private connection: Redis | null = null;
+  private readonly queueActivityNamespace = "queue-activity";
 
   constructor(
     private inMemoryHashTable: InMemoryHashTable,
@@ -18,9 +19,6 @@ export class QueueActivityMonitor {
     private redisManager: RedisManager
   ) {}
 
-  private readonly queueActivityNamespace = "queue-activity";
-
-  // Method to update the last activity time for a queue
   public async updateQueueActivity(queueName: string): Promise<void> {
     const now = Date.now();
     await this.inMemoryHashTable.set(this.queueActivityNamespace, queueName, now.toString());
@@ -42,12 +40,23 @@ export class QueueActivityMonitor {
     await this.inMemoryHashTable.deleteAll(this.queueActivityNamespace);
   }
 
+  public async shouldShutdownQueue(queueName: string): Promise<boolean> {
+    const lastActivity = (await this.inMemoryHashTable.get(
+      this.queueActivityNamespace,
+      queueName
+    )) as unknown as string;
+    if (!lastActivity) return false;
+
+    const now = dayjs();
+    const lastActivityDate = dayjs(Number(lastActivity));
+    return now.diff(lastActivityDate, "millisecond") > QUEUE_INACTIVITY_THRESHOLD_MS;
+  }
+
   public async closeInactiveQueues(): Promise<void> {
     const queues = await this.inMemoryHashTable.getAll<string>(this.queueActivityNamespace);
     if (!queues) return;
 
     const totalActiveQueues = Object.keys(queues).length;
-
     this.newRelic.trackMetric(
       NewRelicMetricCategory.Count,
       NewRelicSubCategory.Server,
@@ -55,48 +64,40 @@ export class QueueActivityMonitor {
       totalActiveQueues
     );
 
-    for (const [queueName, lastActivity] of Object.entries(queues)) {
-      await this.shutdownInactiveQueue(queueName, lastActivity);
+    for (const queueName of Object.keys(queues)) {
+      if (await this.shouldShutdownQueue(queueName)) {
+        await this.shutdownInactiveQueue(queueName);
+      }
     }
 
-    await this.redisManager.releasePoolClient(this.connection!);
-
-    this.connection = null;
+    if (this.connection) {
+      await this.redisManager.releasePoolClient(this.connection);
+      this.connection = null;
+    }
   }
 
-  private async shutdownInactiveQueue(queueName: string, lastActivity: string): Promise<void> {
-    const now = dayjs();
-    const lastActivityDate = dayjs(Number(lastActivity));
+  private async shutdownInactiveQueue(queueName: string): Promise<void> {
+    if (!this.connection) {
+      this.connection = await this.redisManager.getPoolClient("queue-activity-monitor");
+    }
 
-    if (now.diff(lastActivityDate, "millisecond") > QUEUE_INACTIVITY_THRESHOLD_MS) {
-      if (!this.connection) {
-        this.connection = await this.redisManager.getPoolClient("queue-activity-monitor");
-      }
+    const queue = new Queue(queueName, { connection: this.connection });
 
-      const queue = new Queue(queueName, {
-        connection: this.connection,
-      });
+    try {
+      await this.waitForActiveJobs(queue);
+      await this.deleteQueueActivity(queueName);
+    } catch (error) {
+      console.error(`Failed to remove inactive queue: ${queueName}`, error);
+    }
+  }
 
-      try {
-        // Check for active jobs
-        const activeJobs = await queue.getActive();
-        if (activeJobs.length > 0) {
-          for (const job of activeJobs) {
-            let tries = 0;
-            while (tries < QUEUE_CLOSE_CHECK_MAX_TRIES && (await job.getState()) === "active") {
-              // Wait for 1 second before checking the job state again
-              await new Promise((resolve) => setTimeout(resolve, 1000));
-              tries++;
-            }
-          }
-        }
-
-        await this.deleteQueueActivity(queueName); // Remove the queue from the centralized store
-      } catch (error) {
-        console.error(`Failed to remove inactive queue: ${queueName}`, error);
-      } finally {
-        await this.redisManager.releasePoolClient(this.connection);
-        this.connection = null;
+  private async waitForActiveJobs(queue: Queue): Promise<void> {
+    const activeJobs = await queue.getActive();
+    for (const job of activeJobs) {
+      let tries = 0;
+      while (tries < QUEUE_CLOSE_CHECK_MAX_TRIES && (await job.getState()) === "active") {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        tries++;
       }
     }
   }
