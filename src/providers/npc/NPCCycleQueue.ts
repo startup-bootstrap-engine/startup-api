@@ -64,7 +64,9 @@ export class NPCCycleQueue {
         npc,
         npcSkills,
       },
-      undefined,
+      {
+        queueScaleBy: "active-npcs",
+      },
 
       {
         delay: npcCycleDelay,
