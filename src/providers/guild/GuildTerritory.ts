@@ -14,6 +14,11 @@ export class GuildTerritory {
   public async getMapControl(map: string): Promise<IGuild | null> {
     try {
       const guilds = await Guild.find().lean();
+
+      if (!guilds) {
+        return null;
+      }
+
       const guildSortbyMapPoints = this.sortGuildsByMapPoints(guilds as IGuild[], map);
       if (guildSortbyMapPoints.length > 0 && guildSortbyMapPoints[0].points > 0) {
         return Guild.findOne({ _id: guildSortbyMapPoints[0].guildId }).lean();
@@ -77,7 +82,7 @@ export class GuildTerritory {
   }
 
   private sortGuildsByMapPoints(guilds: IGuild[], mapName: string): IGuildMapPoints[] {
-    const guildPoints: IGuildMapPoints[] = guilds.map((guild) => {
+    const guildPoints: IGuildMapPoints[] = guilds?.map((guild) => {
       const mapControl = guild.controlPoints.find((cp) => cp.map === mapName);
       return {
         guildId: guild._id,
