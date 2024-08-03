@@ -221,7 +221,7 @@ export class DynamicQueue {
     queueScaleFactor?: number,
     queueScaleOptions?: IQueueScaleOptions
   ): Promise<string> {
-    const envSuffix = appEnv.general.ENV === EnvType.Development ? "dev" : process.env.pm_id || "prod";
+    const envSuffix = appEnv.general.ENV === EnvType.Development ? "dev" : "prod";
 
     if (queueScaleOptions?.stickToOrigin) {
       const machineId = this.getMachineId(); // Implement this method to get a unique machine identifier
