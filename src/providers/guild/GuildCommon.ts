@@ -23,6 +23,12 @@ export class GuildCommon {
     });
   }
 
+  public async hasGuild(character: ICharacter): Promise<boolean> {
+    return await Guild.exists({
+      $or: [{ guildLeader: character._id }, { members: character._id }],
+    });
+  }
+
   public async convertToGuildInfo(guild: IGuild): Promise<IGuildInfo> {
     const memberDetails = await this.createMemberDetails(guild.members);
 

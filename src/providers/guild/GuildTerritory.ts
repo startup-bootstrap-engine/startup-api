@@ -11,29 +11,6 @@ interface IGuildMapPoints {
 export class GuildTerritory {
   constructor() {}
 
-  public async getMapControl(map: string): Promise<IGuild | null> {
-    try {
-      const guilds = await Guild.find().lean();
-      const guildSortbyMapPoints = this.sortGuildsByMapPoints(guilds as IGuild[], map);
-      if (guildSortbyMapPoints.length > 0 && guildSortbyMapPoints[0].points > 0) {
-        return Guild.findOne({ _id: guildSortbyMapPoints[0].guildId }).lean();
-      }
-      return null;
-    } catch (error) {
-      console.error(`Error fetching map control for ${map}:`, error);
-      return null;
-    }
-  }
-
-  public async getTerritoryOwnedByMap(map: string): Promise<IGuild | null> {
-    const guild = await Guild.findOne({
-      "territoriesOwned.map": map,
-      "territoriesOwned.controlPoint": true,
-    }).lean();
-    if (guild) return guild as IGuild;
-    else return null;
-  }
-
   public async trySetMapControl(map: string): Promise<void> {
     try {
       const mapControlGuild = await this.getMapControl(map);
@@ -59,6 +36,34 @@ export class GuildTerritory {
     }
   }
 
+  public async getMapControl(map: string): Promise<IGuild | null> {
+    try {
+      const guilds = await Guild.find().lean();
+
+      if (!guilds || guilds.length === 0) {
+        return null;
+      }
+
+      const guildSortbyMapPoints = this.sortGuildsByMapPoints(guilds as IGuild[], map);
+      if (guildSortbyMapPoints.length > 0 && guildSortbyMapPoints[0].points > 0) {
+        return Guild.findOne({ _id: guildSortbyMapPoints[0].guildId }).lean();
+      }
+      return null;
+    } catch (error) {
+      console.error(`Error fetching map control for ${map}:`, error);
+      return null;
+    }
+  }
+
+  public async getTerritoryOwnedByMap(map: string): Promise<IGuild | null> {
+    const guild = await Guild.findOne({
+      "territoriesOwned.map": map,
+      "territoriesOwned.controlPoint": true,
+    }).lean();
+    if (guild) return guild as IGuild;
+    else return null;
+  }
+
   private async removeTerritoriesForMap(mapName: string): Promise<void> {
     try {
       const result: UpdateWriteOpResult = await Guild.updateMany(
@@ -77,8 +82,12 @@ export class GuildTerritory {
   }
 
   private sortGuildsByMapPoints(guilds: IGuild[], mapName: string): IGuildMapPoints[] {
-    const guildPoints: IGuildMapPoints[] = guilds.map((guild) => {
-      const mapControl = guild.controlPoints.find((cp) => cp.map === mapName);
+    if (!guilds) {
+      return [];
+    }
+
+    const guildPoints: IGuildMapPoints[] = guilds?.map((guild) => {
+      const mapControl = guild.controlPoints?.find((cp) => cp.map === mapName);
       return {
         guildId: guild._id,
         points: mapControl ? mapControl.point : 0,

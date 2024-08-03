@@ -69,6 +69,9 @@ const GuildSkillsSchema = createSchema(
   { timestamps: { createdAt: true, updatedAt: true } }
 );
 
+GuildSkillsSchema.index({ owner: 1 });
+GuildSkillsSchema.index({ level: 1 });
+
 export type IGuildSkills = ExtractDoc<typeof GuildSkillsSchema>;
 
 export const GuildSkills = typedModel("GuildSkills", GuildSkillsSchema);
