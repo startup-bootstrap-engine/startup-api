@@ -43,6 +43,8 @@ import { provide } from "inversify-binding-decorators";
 import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
 import { DynamicXPRatio } from "@providers/dynamic-xp-ratio/DynamicXPRatio";
 import { GuildExperience } from "@providers/guild/GuildExperience";
+import { GuildTerritory } from "@providers/guild/GuildTerritory";
+import { GuildTerritoryControlPoint } from "@providers/guild/GuildTerritoryControlPoint";
 import { PartyCRUD } from "@providers/party/PartyCRUD";
 import { ICharacterParty } from "@providers/party/PartyTypes";
 import { PartyValidator } from "@providers/party/PartyValidator";
@@ -75,7 +77,9 @@ export class NPCExperience {
     private partyValidator: PartyValidator,
     private partyCRUD: PartyCRUD,
     private dynamicXPRatio: DynamicXPRatio,
-    private guildExperience: GuildExperience
+    private guildExperience: GuildExperience,
+    private guildTerritoryControlPoint: GuildTerritoryControlPoint,
+    private guildTerritory: GuildTerritory
   ) {}
 
   /**
@@ -152,6 +156,15 @@ export class NPCExperience {
 
         // update guild xp
         await this.guildExperience.updateGuildExperience(recipientCharacterAndSkills.character, expPerRecipient);
+        // update guild territory control point
+        await this.guildTerritoryControlPoint.updateGuildTerritoryControlPoint(
+          target.scene,
+          recipientCharacterAndSkills.character,
+          expPerRecipient
+        );
+
+        // set guild territory
+        await this.guildTerritory.trySetMapControl(target.scene);
       }
     }
 

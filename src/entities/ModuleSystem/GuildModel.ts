@@ -15,6 +15,12 @@ const guildSchema = createSchema({
       controlPoint: Type.boolean({ required: true, default: false }),
     },
   ],
+  controlPoints: [
+    {
+      map: Type.string({ required: true }),
+      point: Type.number({ required: true, default: 0 }),
+    },
+  ],
   guildSkills: Type.objectId({
     ref: "GuildSkills",
   }),

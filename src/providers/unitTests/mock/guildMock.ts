@@ -14,5 +14,6 @@ export const guildMock: Partial<IGuild> = {
       controlPoint: true,
     },
   ],
+  controlPoints: [{ map: "example", point: 20 }],
   guildSkills: undefined,
 };

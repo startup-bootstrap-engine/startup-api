@@ -30,5 +30,9 @@ describe("GuildModel.ts", () => {
     expect(testGuild.territoriesOwned[0].lootShare).toEqual(guild.territoriesOwned[0].lootShare);
     // @ts-ignore
     expect(testGuild.territoriesOwned[0].controlPoint).toEqual(guild.territoriesOwned[0].controlPoint);
+    // @ts-ignore
+    expect(testGuild.controlPoints[0].map).toEqual(guild.controlPoints[0].map);
+    // @ts-ignore
+    expect(testGuild.controlPoints[0].point).toEqual(guild.controlPoints[0].point);
   });
 });
