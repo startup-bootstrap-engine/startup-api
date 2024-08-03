@@ -12,9 +12,9 @@ import { container } from "@providers/inversify/container";
 import { IPosition } from "@providers/movement/MovementHelper";
 import { IPlantItem } from "@providers/plant/data/blueprints/PlantItem";
 import { PlantLifeCycle } from "@providers/plant/data/types/PlantTypes";
-import { SimpleTutorial } from "@providers/simpleTutorial/SimpleTutorial";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { SimpleTutorial } from "@providers/tutorial/simpleTutorial/SimpleTutorial";
 import {
   IBaseItemBlueprint,
   IEquipmentAndInventoryUpdatePayload,
