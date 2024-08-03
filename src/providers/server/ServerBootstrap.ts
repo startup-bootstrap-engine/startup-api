@@ -140,7 +140,6 @@ export class ServerBootstrap {
       await this.spellNetworkCast.shutdown();
       await this.npcDeathQueue.shutdown();
       await this.itemContainerTransactionQueue.shutdown();
-      await this.characterNetworkCreateQueue.shutdown();
     };
 
     process.on("SIGTERM", async () => {
