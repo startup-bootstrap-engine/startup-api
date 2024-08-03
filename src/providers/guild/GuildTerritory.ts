@@ -11,6 +11,31 @@ interface IGuildMapPoints {
 export class GuildTerritory {
   constructor() {}
 
+  public async trySetMapControl(map: string): Promise<void> {
+    try {
+      const mapControlGuild = await this.getMapControl(map);
+      if (!mapControlGuild) {
+        return;
+      }
+
+      const territoriesOwned = mapControlGuild.territoriesOwned;
+      const existingIndex = territoriesOwned.findIndex((to) => to.map === map);
+
+      // If this guild already owns this map, do nothing
+      if (existingIndex !== -1) {
+        return;
+      }
+
+      await this.removeTerritoriesForMap(map);
+      await Guild.updateOne(
+        { _id: mapControlGuild._id },
+        { $push: { territoriesOwned: { map, lootShare: 15, controlPoint: true } } }
+      );
+    } catch (error) {
+      console.error("Error setting map control:", error);
+    }
+  }
+
   public async getMapControl(map: string): Promise<IGuild | null> {
     try {
       const guilds = await Guild.find().lean();
@@ -37,31 +62,6 @@ export class GuildTerritory {
     }).lean();
     if (guild) return guild as IGuild;
     else return null;
-  }
-
-  public async trySetMapControl(map: string): Promise<void> {
-    try {
-      const mapControlGuild = await this.getMapControl(map);
-      if (!mapControlGuild) {
-        return;
-      }
-
-      const territoriesOwned = mapControlGuild.territoriesOwned;
-      const existingIndex = territoriesOwned.findIndex((to) => to.map === map);
-
-      // If this guild already owns this map, do nothing
-      if (existingIndex !== -1) {
-        return;
-      }
-
-      await this.removeTerritoriesForMap(map);
-      await Guild.updateOne(
-        { _id: mapControlGuild._id },
-        { $push: { territoriesOwned: { map, lootShare: 15, controlPoint: true } } }
-      );
-    } catch (error) {
-      console.error("Error setting map control:", error);
-    }
   }
 
   private async removeTerritoriesForMap(mapName: string): Promise<void> {

@@ -42,6 +42,7 @@ import { provide } from "inversify-binding-decorators";
 
 import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
 import { DynamicXPRatio } from "@providers/dynamic-xp-ratio/DynamicXPRatio";
+import { GuildCommon } from "@providers/guild/GuildCommon";
 import { GuildExperience } from "@providers/guild/GuildExperience";
 import { GuildTerritory } from "@providers/guild/GuildTerritory";
 import { GuildTerritoryControlPoint } from "@providers/guild/GuildTerritoryControlPoint";
@@ -79,7 +80,8 @@ export class NPCExperience {
     private dynamicXPRatio: DynamicXPRatio,
     private guildExperience: GuildExperience,
     private guildTerritoryControlPoint: GuildTerritoryControlPoint,
-    private guildTerritory: GuildTerritory
+    private guildTerritory: GuildTerritory,
+    private guildCommon: GuildCommon
   ) {}
 
   /**
@@ -154,17 +156,11 @@ export class NPCExperience {
           target
         );
 
-        // update guild xp
-        await this.guildExperience.updateGuildExperience(recipientCharacterAndSkills.character, expPerRecipient);
-        // update guild territory control point
-        await this.guildTerritoryControlPoint.updateGuildTerritoryControlPoint(
-          target.scene,
-          recipientCharacterAndSkills.character,
-          expPerRecipient
-        );
+        const hasGuild = await this.guildCommon.hasGuild(recipientCharacterAndSkills.character);
 
-        // set guild territory
-        await this.guildTerritory.trySetMapControl(target.scene);
+        if (hasGuild) {
+          await this.handleGuild(recipientCharacterAndSkills.character, expPerRecipient, target.scene);
+        }
       }
     }
 
@@ -233,6 +229,16 @@ export class NPCExperience {
       console.error("Error in getValue: ", error);
       return 1;
     }
+  }
+
+  private async handleGuild(character: ICharacter, exp: number, scene: string): Promise<void> {
+    // update guild xp
+    await this.guildExperience.updateGuildExperience(character, exp);
+    // update guild territory control point
+    await this.guildTerritoryControlPoint.updateGuildTerritoryControlPoint(scene, character, exp);
+
+    // set guild territory
+    await this.guildTerritory.trySetMapControl(scene);
   }
 
   private async getXPMultiplier(character: ICharacter, target: INPC): Promise<number> {
