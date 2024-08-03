@@ -26,6 +26,13 @@ const guildSchema = createSchema({
   }),
 });
 
+guildSchema.index({ guildLeader: 1, members: 1 });
+guildSchema.index({ name: 1 });
+guildSchema.index({ tag: 1 });
+guildSchema.index({ "territoriesOwned.map": 1 });
+guildSchema.index({ "controlPoints.map": 1 });
+guildSchema.index({ guildSkills: 1 });
+
 export type IGuild = ExtractDoc<typeof guildSchema>;
 
 export const Guild = typedModel("Guild", guildSchema);
