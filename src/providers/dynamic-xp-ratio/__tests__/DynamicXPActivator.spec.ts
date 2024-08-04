@@ -102,4 +102,62 @@ describe("DynamicXPActivator", () => {
     expect(sendMessageSpy).not.toHaveBeenCalled();
     expect(sendEventToUserSpy).not.toHaveBeenCalled();
   });
+
+  it("should not activate XP bonus just before activation hour on Saturday", async () => {
+    jest.spyOn(dayjs.prototype, "day").mockReturnValue(6); // Saturday
+    jest.spyOn(dayjs.prototype, "hour").mockReturnValue(4); // Just before activation hour
+    getXpRatioSpy.mockResolvedValue(DYNAMIC_XP_RATIO_BASE_RATIO);
+
+    await dynamicXPActivator.toggleXpRatio();
+
+    expect(updateXpRatioSpy).not.toHaveBeenCalled();
+    expect(discordBotSpy).not.toHaveBeenCalled();
+    expect(socketMessagingSpy).not.toHaveBeenCalled();
+  });
+
+  it("should activate XP bonus just after activation hour on Saturday", async () => {
+    jest.spyOn(dayjs.prototype, "day").mockReturnValue(6); // Saturday
+    jest.spyOn(dayjs.prototype, "hour").mockReturnValue(6); // Just after activation hour
+    getXpRatioSpy.mockResolvedValue(DYNAMIC_XP_RATIO_BASE_RATIO);
+
+    await dynamicXPActivator.toggleXpRatio();
+
+    expect(updateXpRatioSpy).toHaveBeenCalledWith(DYNAMIC_XP_RATIO_BOOSTED_XP_RATIO);
+    expect(discordBotSpy).toHaveBeenCalled();
+    expect(socketMessagingSpy).toHaveBeenCalled();
+  });
+
+  it("should not change XP ratio on non-activation days", async () => {
+    jest.spyOn(dayjs.prototype, "day").mockReturnValue(3); // Wednesday
+    jest.spyOn(dayjs.prototype, "hour").mockReturnValue(12); // Any hour during non-activation day
+    getXpRatioSpy.mockResolvedValue(DYNAMIC_XP_RATIO_BASE_RATIO);
+
+    await dynamicXPActivator.toggleXpRatio();
+
+    expect(updateXpRatioSpy).not.toHaveBeenCalled();
+    expect(discordBotSpy).not.toHaveBeenCalled();
+    expect(socketMessagingSpy).not.toHaveBeenCalled();
+  });
+
+  it("should send messages to all online characters", async () => {
+    jest.spyOn(dayjs.prototype, "day").mockReturnValue(6); // Saturday
+    jest.spyOn(dayjs.prototype, "hour").mockReturnValue(5);
+    getXpRatioSpy.mockResolvedValue(DYNAMIC_XP_RATIO_BASE_RATIO);
+
+    // Mock multiple characters
+    findCharactersSpy.mockReturnValue({
+      lean: jest.fn().mockResolvedValue([{ channelId: "channel1" }, { channelId: "channel2" }]),
+    } as any);
+
+    await dynamicXPActivator.toggleXpRatio();
+
+    expect(socketMessagingSpy).toHaveBeenCalledWith("channel1", UISocketEvents.ShowMessage, {
+      message: "✨ Bonus XP Event Started!✨\n\n🔹 XP Multiplier: 2x",
+      type: "info",
+    });
+    expect(socketMessagingSpy).toHaveBeenCalledWith("channel2", UISocketEvents.ShowMessage, {
+      message: "✨ Bonus XP Event Started!✨\n\n🔹 XP Multiplier: 2x",
+      type: "info",
+    });
+  });
 });
