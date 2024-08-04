@@ -7,7 +7,7 @@ export class BonusXpEventCrons {
   constructor(private cronJobScheduler: CronJobScheduler, private dynamicXPActivator: DynamicXPActivator) {}
 
   public schedule(): void {
-    this.cronJobScheduler.uniqueSchedule("weekend-xp-event-crons-check", "*/30 * * * *", async () => {
+    this.cronJobScheduler.uniqueSchedule("weekend-xp-event-crons-check", "*/5 * * * *", async () => {
       await this.checkAndUpdateXpRatio();
     });
   }
