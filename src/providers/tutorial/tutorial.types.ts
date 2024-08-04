@@ -8,4 +8,7 @@ export interface IAdvancedTutorialPayload {
 
 export enum AdvancedTutorialKeys {
   Introduction = "introduction",
+  // Crafting
+  Fishing = "Fishing",
+  Blacksmithing = "Blacksmithing",
 }
