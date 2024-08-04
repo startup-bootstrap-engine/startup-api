@@ -291,11 +291,14 @@ export class NPCExperience {
 
   private async triggerAdvancedTutorialLessonByLevel(character: ICharacter, level: number): Promise<void> {
     switch (Number(level)) {
-      case 3:
+      case 2:
         await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Fishing);
         break;
-      case 5:
+      case 3:
         await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Blacksmithing);
+        break;
+      case 4:
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Lumberjacking);
         break;
     }
   }
