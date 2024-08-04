@@ -15,9 +15,9 @@ export class PartyNetworkLeave {
       PartySocketEvents.LeaveParty,
       async (data: IPartyManagementFromClient, character: ICharacter) => {
         try {
-          const targetOnEvent = (await Character.findById(data.targetId).lean()) as ICharacter;
+          const eventTarget = (await Character.findById(data.targetId).lean()) as ICharacter;
 
-          if (!targetOnEvent) {
+          if (!eventTarget) {
             throw new Error("Error on leave party, character leader not found");
           }
 
@@ -30,7 +30,7 @@ export class PartyNetworkLeave {
             throw new Error("Error on leave party, partyId not found");
           }
 
-          const success = await this.partyMembers.leaveParty(data.partyId, targetOnEvent, eventCaller);
+          const success = await this.partyMembers.leaveParty(data.partyId, eventTarget, eventCaller);
 
           if (!success) {
             return;
