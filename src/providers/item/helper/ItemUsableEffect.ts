@@ -122,7 +122,7 @@ export class ItemUsableEffect {
       throw new Error("Invalid target: target must be a valid entity");
     }
     if (isNaN(value)) {
-      throw new Error("Invalid value: value must be a number");
+      throw new Error(`Invalid value: value must be a number, received: ${value}`);
     }
   }
 
