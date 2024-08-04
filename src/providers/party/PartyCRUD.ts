@@ -195,14 +195,18 @@ export class PartyCRUD {
   }
 
   public async clearAllParties(): Promise<void> {
-    const allPartys = Object.values(
-      (await this.inMemoryHashTable.getAll("character-party")) as Record<string, ICharacterParty>
-    ) as ICharacterParty[];
+    const partiesData = await this.inMemoryHashTable.getAll("character-party");
 
-    const removeTasks = allPartys.map(async (party) => {
+    if (!partiesData) {
+      console.log("No parties found to clear.");
+      return;
+    }
+
+    const allParties = Object.values(partiesData as Record<string, ICharacterParty>) as ICharacterParty[];
+
+    const removeTasks = allParties.map(async (party) => {
       try {
         await this.partyBuff.handleAllBuffInParty(party, false);
-
         await this.inMemoryHashTable.delete("character-party", party._id);
       } catch (error) {
         console.log("Error removing party buffs", error);

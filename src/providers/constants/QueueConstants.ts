@@ -1,3 +1,5 @@
+import { PROMISE_DEFAULT_CONCURRENCY } from "./ServerConstants";
+
 export const QUEUE_BULL_MONITOR_REFRESH_INTERVAL = 60 * 1000;
 
 export const QUEUE_INACTIVITY_THRESHOLD_MS = 60 * 1 * 1000; // 1 min
@@ -16,8 +18,8 @@ export enum QueueDefaultScaleFactor {
 
 export const QUEUE_CONNECTION_CHECK_INTERVAL = 30 * 1000; // 30 sec
 // Concurrency
-export const QUEUE_WORKER_MIN_CONCURRENCY = 100; // 100-300 is the standard
-export const QUEUE_WORKER_MAX_CONCURRENCY = 800; // Max concurrency the system can handle
+export const QUEUE_WORKER_MIN_CONCURRENCY = PROMISE_DEFAULT_CONCURRENCY; // 100-300 is the standard
+export const QUEUE_WORKER_MAX_CONCURRENCY = PROMISE_DEFAULT_CONCURRENCY * 2; // Max concurrency the system can handle
 export const QUEUE_WORKER_CONCURRENCY_SCALING_FACTOR = 1;
 
 export const QUEUE_WORKER_JOB_RATE_SCALING_FACTOR = 0.5;

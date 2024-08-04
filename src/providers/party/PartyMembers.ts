@@ -36,8 +36,7 @@ export class PartyMembers {
     try {
       let message = `${character.name} has left the party!`;
 
-      // find all characters that has the caller on target, and stop targeting (avoid a bug where the attacker gets a skull if the target comes back, due to target still being set on the attacker, but they're not on the party anymore)
-
+      // Find all characters that have the caller as a target, and stop targeting
       await this.clearTargetingForCharacters(character);
 
       // Check if member is a party leader. If so, transfer leadership before removing them
@@ -52,10 +51,12 @@ export class PartyMembers {
 
       await this.handleBuffBeforeRemovingMember(party);
 
+      // Remove the character from the party
       party.members = party.members.filter((member) => member._id.toString() !== character._id.toString());
       party.size = party.members.length + 1;
 
       if (party.members.length === 0) {
+        // Disband the party if no members are left
         await this.deletePartyAndSendMessages(party, character);
         return true;
       }
@@ -71,7 +72,7 @@ export class PartyMembers {
       await this.handleBuffAfterRemovingMember(updatedParty);
       await this.partySocketMessaging.sendMessageToAllMembers(message, updatedParty);
 
-      // updated character that left the party
+      // Notify the character who left the party
       await this.partySocketMessaging.partyPayloadSend(updatedParty, [character._id]);
 
       return true;
@@ -103,7 +104,7 @@ export class PartyMembers {
 
   private updatePartyBenefits(party: ICharacterParty): void {
     party.benefits = this.partyBenefitsCalculator.calculatePartyBenefits(
-      party.size,
+      party.size, // Use the updated number of members
       this.partyClasses.getDifferentClasses(party)
     );
   }
@@ -140,6 +141,18 @@ export class PartyMembers {
 
     const isLeader = this.partyValidator.checkIfIsLeader(party, eventCaller);
 
+    // case where target is already the leader
+
+    const isLeaderSameAsTarget = party.leader._id.toString() === target._id.toString();
+
+    if (isLeaderSameAsTarget) {
+      this.socketMessaging.sendEventToUser<IUIShowMessage>(eventCaller.channelId!, UISocketEvents.ShowMessage, {
+        message: `${target.name} is already the party leader!`,
+        type: "info",
+      });
+      return false;
+    }
+
     if (!isLeader) {
       this.socketMessaging.sendEventToUser<IUIShowMessage>(eventCaller.channelId!, UISocketEvents.ShowMessage, {
         message: "You are not the party leader!",
@@ -149,20 +162,22 @@ export class PartyMembers {
       return false;
     }
 
-    const inSameParty = this.partyValidator.areBothInSameParty(party, eventCaller, target);
+    if (party.leader._id.toString() === target._id.toString()) {
+      this.socketMessaging.sendEventToUser<IUIShowMessage>(eventCaller.channelId!, UISocketEvents.ShowMessage, {
+        message: `${target.name} is already the party leader!`,
+        type: "info",
+      });
+      return false;
+    }
+
     const isTargetSameParty = this.partyValidator.checkIfInParty(party, target);
 
-    if (!isTargetSameParty || !inSameParty) {
+    if (!isTargetSameParty) {
       this.socketMessaging.sendEventToUser<IUIShowMessage>(eventCaller.channelId!, UISocketEvents.ShowMessage, {
         message: `${target.name} is not in your party!`,
         type: "info",
       });
 
-      return false;
-    }
-
-    // if target is already leader, do nothing
-    if (party.leader._id.toString() === target._id.toString()) {
       return false;
     }
 
@@ -199,7 +214,7 @@ export class PartyMembers {
     const party = await this.partyCRUD.findById(partyId);
 
     if (!party) {
-      throw new Error("Party not found!");
+      return false;
     }
 
     const isLeader = this.partyValidator.checkIfIsLeader(party, eventCaller);
