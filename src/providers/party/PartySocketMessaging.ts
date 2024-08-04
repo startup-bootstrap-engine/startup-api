@@ -19,29 +19,32 @@ export class PartySocketMessaging {
     try {
       const allCharactersId = new Set<string>(charactersId ? [...charactersId] : []);
 
-      allCharactersId.add(party.leader._id);
-      party.members.forEach((member) => allCharactersId.add(member._id));
+      allCharactersId.add(party.leader._id.toString());
+      party.members.forEach((member) => allCharactersId.add(member._id.toString()));
 
       const partyPayload = this.generateDataPayloadFromServer(party);
 
-      const fetchCharacter = async (id: string): Promise<ICharacter> => {
-        return (await Character.findById(id.toString()).lean().select("channelId")) as ICharacter;
-      };
+      const characters = await Character.find({ _id: { $in: Array.from(allCharactersId) } })
+        .lean()
+        .select("channelId");
 
-      const sendPayloadToCharacter = async (characterId: string): Promise<void> => {
-        const character = await fetchCharacter(characterId);
-        if (character && character.channelId) {
-          this.socketMessaging.sendEventToUser<ICharacterPartyShared>(
-            character.channelId,
-            PartySocketEvents.PartyInfoOpen,
-            partyPayload
-          );
+      for (const character of characters) {
+        if (character.channelId) {
+          try {
+            this.socketMessaging.sendEventToUser<ICharacterPartyShared>(
+              character.channelId,
+              PartySocketEvents.PartyInfoOpen,
+              partyPayload
+            );
+          } catch (sendError) {
+            console.error(`Failed to send PartyInfoOpen to character ${character._id}:`, sendError);
+          }
+        } else {
+          console.warn(`Character ${character._id} has no channelId`);
         }
-      };
-
-      await Promise.all(Array.from(allCharactersId).map(sendPayloadToCharacter));
+      }
     } catch (error) {
-      console.error("Error sending party payload: ", error);
+      console.error("Error in partyPayloadSend: ", error);
     }
   }
 
