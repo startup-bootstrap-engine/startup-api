@@ -1,9 +1,11 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { CharacterClass, UISocketEvents } from "@rpg-engine/shared";
 import { PartyCRUD } from "../PartyCRUD";
 import PartyInvitation from "../PartyInvitation";
 import { PartyMembers } from "../PartyMembers";
+import { PartySocketMessaging } from "../PartySocketMessaging";
 import { ICharacterParty } from "../PartyTypes";
 import { PartyValidator } from "../PartyValidator";
 
@@ -26,10 +28,10 @@ describe("PartyMembers", () => {
     partyMembers = container.get<PartyMembers>(PartyMembers);
 
     // @ts-ignore
-    sendMessageToAllMembers = jest.spyOn(partyMembers.partySocketMessaging, "sendMessageToAllMembers");
+    sendMessageToAllMembers = jest.spyOn(PartySocketMessaging.prototype, "sendMessageToAllMembers");
 
     // @ts-ignore
-    sendEventToUser = jest.spyOn(partyMembers.socketMessaging, "sendEventToUser");
+    sendEventToUser = jest.spyOn(SocketMessaging.prototype, "sendEventToUser");
   });
 
   beforeEach(async () => {
@@ -266,6 +268,81 @@ describe("PartyMembers", () => {
       expect(updatedParty?.leader._id.toString()).toStrictEqual(firstMember._id.toString());
 
       expect(updatedParty?.members).toHaveLength(1);
+    });
+
+    it("should handle empty party gracefully", async () => {
+      const emptyPartyId = "non-existent-id";
+
+      const result = await partyMembers.leaveParty(emptyPartyId, characterLeader, characterLeader);
+
+      expect(result).toBeFalsy();
+    });
+
+    it("should disband the party when the last member leaves", async () => {
+      const party = (await partyInvitation.acceptInvite(characterLeader, firstMember)) as ICharacterParty;
+      const firstLeave = await partyMembers.leaveParty(party._id, firstMember, characterLeader);
+
+      expect(firstLeave).toBeTruthy();
+
+      const updatedParty = await partyCRUD.findById(party._id);
+
+      expect(updatedParty).toBeFalsy();
+    });
+
+    it("should not allow a non-existent character to be removed", async () => {
+      const nonExistentCharacter: ICharacter = {
+        _id: "non-existent-id",
+        name: "NonExistent",
+        class: CharacterClass.Druid,
+        channelId: "non-existent-channel",
+      } as ICharacter;
+
+      const party = (await partyInvitation.acceptInvite(characterLeader, firstMember)) as ICharacterParty;
+      const success = await partyMembers.leaveParty(party._id, nonExistentCharacter, characterLeader);
+
+      expect(success).toBeFalsy();
+      expect(sendEventToUser).toHaveBeenCalledWith(characterLeader.channelId!, UISocketEvents.ShowMessage, {
+        message: `${nonExistentCharacter.name} is not in your party!`,
+        type: "info",
+      });
+    });
+
+    it("should handle leadership transfer when target is already leader", async () => {
+      const party = (await partyInvitation.acceptInvite(characterLeader, firstMember)) as ICharacterParty;
+
+      const success = await partyMembers.transferLeadership(party._id, characterLeader, characterLeader);
+
+      expect(success).toBeFalsy();
+    });
+
+    it("should prevent inviting a character already in another party", async () => {
+      const anotherPartyLeader = await unitTestHelper.createMockCharacter(
+        { class: CharacterClass.Druid, name: "Another Leader" },
+        { hasEquipment: true, hasSkills: true, hasInventory: true }
+      );
+
+      await partyCRUD.createParty(anotherPartyLeader, secondMember);
+
+      const result = await partyInvitation.acceptInvite(characterLeader, secondMember);
+
+      expect(result).toBeFalsy();
+    });
+
+    it("should handle multiple leave requests correctly", async () => {
+      const party = (await partyInvitation.acceptInvite(characterLeader, firstMember)) as ICharacterParty;
+      await partyInvitation.acceptInvite(characterLeader, secondMember);
+      await partyInvitation.acceptInvite(characterLeader, thirdMember);
+
+      const firstLeave = await partyMembers.leaveParty(party._id, firstMember, characterLeader);
+      const secondLeave = await partyMembers.leaveParty(party._id, secondMember, characterLeader);
+      const thirdLeave = await partyMembers.leaveParty(party._id, thirdMember, characterLeader);
+
+      expect(firstLeave).toBeTruthy();
+      expect(secondLeave).toBeTruthy();
+      expect(thirdLeave).toBeTruthy();
+
+      const disbandedParty = await partyCRUD.findById(party._id);
+      expect(disbandedParty).toBeFalsy();
     });
   });
 });

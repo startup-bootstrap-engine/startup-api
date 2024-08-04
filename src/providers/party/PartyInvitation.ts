@@ -63,7 +63,11 @@ export default class PartyInvitation {
       : await this.partyCRUD.createParty(leader, target);
 
     if (!party) {
-      throw new Error("Error accept invite Party!");
+      this.socketMessaging.sendEventToUser<IUIShowMessage>(leader.channelId!, UISocketEvents.ShowMessage, {
+        message: "Sorry, failed to create party!",
+        type: "error",
+      });
+      return;
     }
 
     return party;
