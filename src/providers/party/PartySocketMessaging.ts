@@ -1,3 +1,4 @@
+/* eslint-disable array-callback-return */
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
@@ -50,22 +51,31 @@ export class PartySocketMessaging {
 
   public async notifyPartyDisbanded(charactersId: string[]): Promise<void> {
     try {
-      const fetchCharacter = async (id: string): Promise<ICharacter> => {
-        return (await Character.findById(id.toString()).lean().select("channelId")) as ICharacter;
-      };
+      // Fetch all characters in a single query
+      const characters = await Character.find({
+        _id: { $in: charactersId.map((id) => id.toString()) },
+      })
+        .lean()
+        .select("channelId");
 
-      const sendDisbandNotification = async (characterId: string): Promise<void> => {
-        const character = await fetchCharacter(characterId);
-        if (character && character.channelId) {
-          this.socketMessaging.sendEventToUser<ICharacterPartyShared>(
-            character.channelId,
-            PartySocketEvents.PartyInfoOpen,
-            null as any
-          );
-        }
-      };
+      // Map to dictionary for faster access
+      const characterMap = new Map(characters.map((character) => [character._id.toString(), character]));
 
-      await Promise.all(charactersId.map(sendDisbandNotification));
+      // Send notifications in parallel
+      await Promise.all(
+        charactersId.map((characterId) => {
+          const character = characterMap.get(characterId.toString());
+          if (character && character.channelId) {
+            this.socketMessaging.sendEventToUser<ICharacterPartyShared>(
+              character.channelId,
+              PartySocketEvents.PartyInfoOpen,
+              null as any
+            );
+          } else {
+            console.warn(`No valid character or channelId found for ID: ${characterId}`);
+          }
+        })
+      );
     } catch (error) {
       console.error("Error notifying party disbanded: ", error);
     }
