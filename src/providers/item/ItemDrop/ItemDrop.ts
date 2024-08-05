@@ -216,7 +216,7 @@ export class ItemDrop {
   }
 
   private async updateItemStatus(dropItem: IItem): Promise<void> {
-    await Item.updateOne({ _id: dropItem._id }, { isEquipped: false });
+    await Item.updateOne({ _id: dropItem._id }, { isEquipped: false, updatedAt: new Date() });
   }
 
   private async removeItemOwnership(dropItem: IItem): Promise<void> {

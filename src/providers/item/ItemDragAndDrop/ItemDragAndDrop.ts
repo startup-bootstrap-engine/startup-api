@@ -150,7 +150,7 @@ export class ItemDragAndDrop {
 
     if (!(from.item as unknown as IModelItem).isInContainer) {
       // if we dont have this property, add to avoid deletion by cleaners
-      await Item.updateOne({ _id: from.item._id }, { isInContainer: true });
+      await Item.updateOne({ _id: from.item._id }, { isInContainer: true, updatedAt: new Date() });
     }
 
     const moveItem = async (): Promise<boolean> => {

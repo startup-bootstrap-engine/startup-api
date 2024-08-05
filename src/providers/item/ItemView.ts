@@ -60,6 +60,7 @@ export class ItemView {
         x,
         y,
         scene,
+        updatedAt: new Date(),
       }
     );
   }
