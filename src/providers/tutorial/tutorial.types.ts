@@ -12,4 +12,10 @@ export enum AdvancedTutorialKeys {
   Lumberjacking = "Lumberjacking",
   Fishing = "Fishing",
   Blacksmithing = "Blacksmithing",
+
+  Depot = "Depot",
+  Quest = "Quest",
+
+  Marketplace = "Marketplace",
+  Party = "Party",
 }

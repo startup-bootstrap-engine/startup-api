@@ -11,15 +11,12 @@ export class AdvancedTutorial {
   constructor(private inMemoryHashTable: InMemoryHashTable, private socketMessaging: SocketMessaging) {}
 
   public async triggerTutorialOnce(character: ICharacter, tutorialKey: AdvancedTutorialKeys): Promise<void> {
-    console.log("trying to trigger tutorial");
     const hasFinishedTutorial = await this.hasFinishedTutorialByKey(character, tutorialKey);
 
     if (hasFinishedTutorial) {
-      console.log("tutorial already finished");
       return;
     }
 
-    console.log("triggering tutorial");
     this.socketMessaging.sendEventToUser<IAdvancedTutorialPayload>(
       character.channelId!,
       AdvancedTutorialSocketEvents.TriggerTutorial,

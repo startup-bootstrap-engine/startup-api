@@ -300,6 +300,18 @@ export class NPCExperience {
       case 4:
         await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Lumberjacking);
         break;
+      case 5:
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Quest);
+        break;
+      case 6:
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Depot);
+        break;
+      case 7:
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Marketplace);
+        break;
+      case 8:
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Party);
+        break;
     }
   }
 
