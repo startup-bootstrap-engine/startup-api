@@ -4,7 +4,7 @@ import { provide } from "inversify-binding-decorators";
 // pull map versions
 
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import mapVersions from "../../../public/config/map-versions.json";
+import mapVersions from "../../../../public/config/map-versions.json";
 
 interface IGridCoordinates {
   start: {

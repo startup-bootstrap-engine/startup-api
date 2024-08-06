@@ -28,7 +28,7 @@ describe("LightweightPathfinder", () => {
     const targetX = 10;
     const targetY = 10;
 
-    const result = await lightweightPathfinder.getNearestGridToTarget(testNPC, targetX, targetY);
+    const result = await lightweightPathfinder.calculateLightPathfinding(testNPC, targetX, targetY);
 
     expect(result).toBeDefined();
     expect(result.length).toBeGreaterThan(0);
@@ -38,7 +38,7 @@ describe("LightweightPathfinder", () => {
     const targetX = 10;
     const targetY = 10;
 
-    const result = await lightweightPathfinder.getNearestGridToTarget(testNPC, targetX, targetY);
+    const result = await lightweightPathfinder.calculateLightPathfinding(testNPC, targetX, targetY);
 
     expect(result).toBeDefined();
     expect(InMemoryHashTable.prototype.set).toHaveBeenCalledWith(
@@ -52,7 +52,7 @@ describe("LightweightPathfinder", () => {
     const targetX = 10;
     const targetY = 10;
 
-    const result = await lightweightPathfinder.getNearestGridToTarget(testNPC, targetX, targetY);
+    const result = await lightweightPathfinder.calculateLightPathfinding(testNPC, targetX, targetY);
 
     expect(result).toBeDefined();
     expect(result.length).toBeGreaterThan(0);
@@ -64,7 +64,7 @@ describe("LightweightPathfinder", () => {
 
     jest.spyOn(MovementHelper.prototype, "isSolid").mockResolvedValue(true);
 
-    const result = await lightweightPathfinder.getNearestGridToTarget(testNPC, targetX, targetY);
+    const result = await lightweightPathfinder.calculateLightPathfinding(testNPC, targetX, targetY);
 
     expect(result).toEqual([]);
   });
