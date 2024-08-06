@@ -292,35 +292,40 @@ export class NPCExperience {
   private async triggerAdvancedTutorialLessonByLevel(character: ICharacter, level: number): Promise<void> {
     const tutorialDelay = 2000; // wait 2 seconds before triggering the tutorial
 
-    switch (Number(level)) {
-      case 2:
-        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Fishing, tutorialDelay);
-        break;
-      case 3:
-        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Blacksmithing, tutorialDelay);
-        break;
-      case 4:
-        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Lumberjacking, tutorialDelay);
-        break;
-      case 5:
-        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Quest, tutorialDelay);
-        break;
-      case 6:
-        await this.advancedTutorial.triggerTutorialOnce(
-          character,
-          AdvancedTutorialKeys.CraftingMechanics,
-          tutorialDelay
-        );
-        break;
-      case 7:
-        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Depot, tutorialDelay);
-        break;
-      case 8:
-        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Marketplace, tutorialDelay);
-        break;
-      case 9:
-        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Party, tutorialDelay);
-        break;
+    const isFarmingMode = character.isFarmingMode;
+
+    const tutorialKeysByLevelNonFarming = {
+      2: AdvancedTutorialKeys.Fishing,
+      3: AdvancedTutorialKeys.Blacksmithing,
+      4: AdvancedTutorialKeys.Lumberjacking,
+      5: AdvancedTutorialKeys.Farming,
+      6: AdvancedTutorialKeys.Quest,
+      7: AdvancedTutorialKeys.CraftingMechanics,
+      8: AdvancedTutorialKeys.Depot,
+      9: AdvancedTutorialKeys.Marketplace,
+      10: AdvancedTutorialKeys.Party,
+      11: AdvancedTutorialKeys.Gem,
+      12: AdvancedTutorialKeys.PremiumAccount,
+    };
+
+    const tutorialKeysByLevelFarming = {
+      2: AdvancedTutorialKeys.Introduction,
+      3: AdvancedTutorialKeys.Fishing,
+      4: AdvancedTutorialKeys.Blacksmithing,
+      5: AdvancedTutorialKeys.Lumberjacking,
+      6: AdvancedTutorialKeys.Quest,
+      7: AdvancedTutorialKeys.CraftingMechanics,
+      8: AdvancedTutorialKeys.Depot,
+      9: AdvancedTutorialKeys.Marketplace,
+      10: AdvancedTutorialKeys.Party,
+      11: AdvancedTutorialKeys.Gem,
+      12: AdvancedTutorialKeys.PremiumAccount,
+    };
+
+    const tutorialKey = isFarmingMode ? tutorialKeysByLevelFarming[level] : tutorialKeysByLevelNonFarming[level];
+
+    if (tutorialKey) {
+      await this.advancedTutorial.triggerTutorialOnce(character, tutorialKey, tutorialDelay);
     }
   }
 

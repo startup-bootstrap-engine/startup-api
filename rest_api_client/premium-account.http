@@ -4,9 +4,9 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "blueprintKey": "gold-coin",
-  "quantity": 60000,
-  "characterId": "66af73c08c7ae4004f3656da" 
+  "blueprintKey": "ruby-gem",
+  "quantity": 1,
+  "characterId": "65c8f3b6d851c0005042d5b1" 
 }
 
 ###

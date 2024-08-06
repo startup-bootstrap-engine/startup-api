@@ -92,9 +92,13 @@ export class CharacterNetworkCreateQueue {
 
   private async triggerStartingTutorial(character: ICharacter): Promise<void> {
     const isNewCharacter = character.totalDaysPlayed === 0;
+    const isFarmingMode = character.isFarmingMode;
 
     if (isNewCharacter) {
-      await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Introduction);
+      await this.advancedTutorial.triggerTutorialOnce(
+        character,
+        isFarmingMode ? AdvancedTutorialKeys.Farming : AdvancedTutorialKeys.Introduction
+      );
     }
   }
 

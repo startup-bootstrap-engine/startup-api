@@ -11,7 +11,6 @@ export enum AdvancedTutorialKeys {
 
   // Crafting
   CraftingMechanics = "CraftingMechanics",
-
   Lumberjacking = "Lumberjacking",
   Fishing = "Fishing",
   Blacksmithing = "Blacksmithing",
@@ -22,4 +21,7 @@ export enum AdvancedTutorialKeys {
 
   Marketplace = "Marketplace",
   Party = "Party",
+  Gem = "Gem",
+
+  PremiumAccount = "PremiumAccount",
 }
