@@ -15,6 +15,11 @@ export class ResultsPoller {
 
   public async prepareResultToBePolled(namespace: string, key: string, result: any): Promise<void> {
     const fullKey = this.getFullKey(namespace, key);
+
+    if (result === undefined) {
+      result = false; // this will prevent the poller from retrying indefinitely until error
+    }
+
     await this.inMemoryHashTable.set(this.parentNamespace, fullKey, result);
   }
 

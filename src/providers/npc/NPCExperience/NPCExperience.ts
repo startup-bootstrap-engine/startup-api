@@ -271,8 +271,6 @@ export class NPCExperience {
       type: "info",
     });
 
-    await this.triggerAdvancedTutorialLessonByLevel(character, expData.level);
-
     this.socketMessaging.sendEventToUser<ILevelUpFromServer>(character.channelId!, SkillSocketEvents.LevelUp, {
       previousLevel: formattedPreviousLevel,
       currentLevel: formattedCurrentLevel,
@@ -287,6 +285,8 @@ export class NPCExperience {
     await this.animationEffect.sendAnimationEventToCharacter(character, AnimationEffectKeys.LevelUp);
 
     await this.socketMessaging.sendEventToCharactersAroundCharacter(character, SkillSocketEvents.SkillGain, payload);
+
+    void this.triggerAdvancedTutorialLessonByLevel(character, expData.level);
   }
 
   private async triggerAdvancedTutorialLessonByLevel(character: ICharacter, level: number): Promise<void> {
