@@ -270,7 +270,7 @@ describe("GemAttachToEquip", () => {
       expect(result).toBe(false);
       expect(sendErrorMessageToCharacterSpy).toHaveBeenCalledWith(
         testCharacter,
-        "Sorry,  you can only attach gems to weapons, armors, and shields."
+        "Sorry, you can't attach gems to this item."
       );
     });
 
@@ -393,7 +393,7 @@ describe("GemAttachToEquip", () => {
       );
     });
 
-    it("should attach gems to a shuriken and update stats correctly", async () => {
+    it("should fail when trying to attach gems to stackable items", async () => {
       // Setup a shuriken item
       let testShurikenItem = await unitTestHelper.createMockItemFromBlueprint(RangedWeaponsBlueprint.Shuriken);
 
@@ -411,14 +411,7 @@ describe("GemAttachToEquip", () => {
 
       // Perform the gem attachment
       const result = await gemAttachToEquip.attachGemToEquip(testGemItem, testShurikenItem, testCharacter);
-      expect(result).toBe(true);
-
-      // Fetch the updated shuriken item
-      const updatedShurikenItem = await Item.findById(testShurikenItem._id).lean();
-
-      // Verify that attack and defense were increased correctly
-      expect(updatedShurikenItem?.attack).toBe(65); // Increased by gem's attack stat
-      expect(updatedShurikenItem?.defense).toBe(64); // Increased by gem's defense stat
+      expect(result).toBe(false);
     });
 
     it("should handle items with undefined attack or defense values", async () => {

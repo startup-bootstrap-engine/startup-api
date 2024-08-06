@@ -271,9 +271,16 @@ export class GemAttachToEquip {
       return false;
     }
 
+    const isStackableItem = targetItem.stackQty! > 1 || targetItem.maxStackSize > 1;
+
+    if (isStackableItem) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you can't attach gems to this item.");
+      return false;
+    }
+
     const isRangedAmmo = targetItem.subType === ItemSubType.Ranged && !targetItem.maxRange;
     if (isRangedAmmo) {
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you can't attach gems to ranged ammo.");
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you can't attach gems to this item.");
       return false;
     }
 
