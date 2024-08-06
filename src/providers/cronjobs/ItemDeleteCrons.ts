@@ -7,7 +7,7 @@ import { ItemDropVerifier } from "@providers/item/ItemDrop/ItemDropVerifier";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { MapHelper } from "@providers/map/MapHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
+import { IUIShowMessage, ItemSubType, UISocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { CronJobScheduler } from "./CronJobScheduler";
 
@@ -87,6 +87,8 @@ export class ItemDeleteCrons {
         updatedAt: { $lt: oneHourAgo }, // delete items that are older than 1 hour!
 
         isInContainer: { $ne: true },
+
+        subType: { $ne: ItemSubType.DeadBody },
       });
 
       for (const item of items) {
