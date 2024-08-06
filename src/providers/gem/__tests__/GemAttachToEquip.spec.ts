@@ -1,17 +1,17 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { IItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
+import { CharacterInventory } from "@providers/character/CharacterInventory";
+import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { blueprintManager, container, unitTestHelper } from "@providers/inversify/container";
 import {
   ArmorsBlueprint,
   CraftingResourcesBlueprint,
   GemsBlueprint,
+  RangedWeaponsBlueprint,
   ShieldsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
-
-import { IItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
-import { CharacterInventory } from "@providers/character/CharacterInventory";
-import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { AnimationEffectKeys, IItemGem, ItemSubType, ItemType } from "@rpg-engine/shared";
 import { GemAttachToEquip, IAttachedItemGem } from "../GemAttachToEquip";
 
@@ -44,8 +44,7 @@ describe("GemAttachToEquip", () => {
 
     testEquipItem = await unitTestHelper.createMockItemFromBlueprint(SwordsBlueprint.Sword);
 
-    // add test gem and equip to inventory
-
+    // Add test gem and equip to inventory
     inventoryItemContainer = (await characterInventory.getInventoryItemContainer(testCharacter)) as IItemContainer;
 
     await characterItemContainer.addItemToContainer(testGemItem, testCharacter, inventoryItemContainer._id, {
@@ -56,7 +55,7 @@ describe("GemAttachToEquip", () => {
       shouldAddOwnership: true,
     });
 
-    // update data
+    // Update data
     testGemItem = await Item.findById(testGemItem._id).lean();
     testEquipItem = await Item.findById(testEquipItem._id).lean();
 
@@ -81,9 +80,8 @@ describe("GemAttachToEquip", () => {
     expect(updatedEquipItem.attack).toBe(68);
     expect(updatedEquipItem.defense).toBe(66);
 
-    // verify the gem was consumed
+    // Verify the gem was consumed
     const gemItem = await Item.findById(testGemItem._id).lean();
-
     expect(gemItem).toBeNull();
 
     const attachedGemsMetadata = updatedEquipItem.attachedGems as IAttachedItemGem[];
@@ -360,6 +358,108 @@ describe("GemAttachToEquip", () => {
       // Verify that only defense was increased
       expect(updatedShieldItem?.attack).toBe(0); // Unchanged
       expect(updatedShieldItem?.defense).toBe(69); // Increased by gem's defense stat
+    });
+
+    it("should allow attaching gems to a bow", async () => {
+      // Setup a bow item
+      const testBowItem = await unitTestHelper.createMockItemFromBlueprint(RangedWeaponsBlueprint.Bow);
+
+      // Add the bow item to the character's inventory
+      await characterItemContainer.addItemToContainer(testBowItem, testCharacter, inventoryItemContainer._id, {
+        shouldAddOwnership: true,
+      });
+
+      let updatedBowItem = await Item.findById(testBowItem._id).lean<IItem>();
+
+      // Perform the gem attachment
+      const result = await gemAttachToEquip.attachGemToEquip(testGemItem, updatedBowItem, testCharacter);
+      expect(result).toBe(true);
+
+      // Fetch the updated bow item
+      updatedBowItem = await Item.findById(testBowItem._id).lean();
+
+      // Check that the gem was attached correctly
+      const attachedGemsMetadata = updatedBowItem?.attachedGems as IAttachedItemGem[];
+      expect(attachedGemsMetadata).toHaveLength(1);
+      expect(attachedGemsMetadata).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            key: testGemBlueprint.key,
+            name: testGemBlueprint.name,
+            gemEntityEffectsAdd: testGemBlueprint.gemEntityEffectsAdd,
+            gemStatBuff: testGemBlueprint.gemStatBuff,
+          }),
+        ])
+      );
+    });
+
+    it("should attach gems to a shuriken and update stats correctly", async () => {
+      // Setup a shuriken item
+      let testShurikenItem = await unitTestHelper.createMockItemFromBlueprint(RangedWeaponsBlueprint.Shuriken);
+
+      // Add the shuriken item to the character's inventory
+      await characterItemContainer.addItemToContainer(testShurikenItem, testCharacter, inventoryItemContainer._id, {
+        shouldAddOwnership: true,
+      });
+
+      // Ensure shuriken has initial stats set correctly
+      testShurikenItem = await Item.findByIdAndUpdate(
+        testShurikenItem._id,
+        { attack: 5, defense: 5 },
+        { new: true }
+      ).lean();
+
+      // Perform the gem attachment
+      const result = await gemAttachToEquip.attachGemToEquip(testGemItem, testShurikenItem, testCharacter);
+      expect(result).toBe(true);
+
+      // Fetch the updated shuriken item
+      const updatedShurikenItem = await Item.findById(testShurikenItem._id).lean();
+
+      // Verify that attack and defense were increased correctly
+      expect(updatedShurikenItem?.attack).toBe(65); // Increased by gem's attack stat
+      expect(updatedShurikenItem?.defense).toBe(64); // Increased by gem's defense stat
+    });
+
+    it("should handle items with undefined attack or defense values", async () => {
+      // Setup an item with undefined attack and defense
+      const testUndefinedItem = await unitTestHelper.createMockItem({
+        attack: undefined,
+        defense: undefined,
+        owner: testCharacter._id,
+      });
+
+      // Add the item to the character's inventory
+      await characterItemContainer.addItemToContainer(testUndefinedItem, testCharacter, inventoryItemContainer._id, {
+        shouldAddOwnership: true,
+      });
+
+      // Perform the gem attachment
+      const result = await gemAttachToEquip.attachGemToEquip(testGemItem, testUndefinedItem, testCharacter);
+      expect(result).toBe(true);
+
+      // Fetch the updated item
+      const updatedItem = await Item.findById(testUndefinedItem._id).lean();
+
+      // Verify that attack and defense are updated from undefined
+      expect(updatedItem?.attack).toBe(testGemBlueprint.gemStatBuff.attack);
+      expect(updatedItem?.defense).toBe(testGemBlueprint.gemStatBuff.defense);
+    });
+
+    it("should not allow attaching gems to an item that is not owned by the character", async () => {
+      // Setup an item not owned by the character
+      const unownedItem = await unitTestHelper.createMockItem({
+        owner: undefined, // Not owned by any character
+      });
+
+      // Attempt to attach the gem
+      const result = await gemAttachToEquip.attachGemToEquip(testGemItem, unownedItem, testCharacter);
+      expect(result).toBe(false);
+
+      // Verify the equipment stats remain unchanged
+      const unchangedEquipItem = await Item.findById(unownedItem._id).lean();
+      expect(unchangedEquipItem?.attack).toBe(unownedItem.attack);
+      expect(unchangedEquipItem?.defense).toBe(unownedItem.defense);
     });
   });
 });

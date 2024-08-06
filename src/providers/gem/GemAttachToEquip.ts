@@ -177,22 +177,32 @@ export class GemAttachToEquip {
     targetItem: IItem,
     isArmorOrShield: boolean
   ): Promise<void> {
-    if (isArmorOrShield) {
-      // increase defense only
-      await Item.findByIdAndUpdate(targetItem._id, {
-        $inc: {
-          defense: gemItemBlueprint.gemStatBuff?.defense,
-        },
-      });
-      return;
+    // Fetch the current item stats from the database
+    const currentItem = await Item.findById(targetItem._id).lean();
+
+    if (!currentItem) {
+      throw new Error(`Item with ID ${targetItem._id} not found`);
     }
 
-    // else, if its a weapon, increase both attack and defense
+    // Use 0 as the default value if attack or defense are undefined
+    const currentAttack = currentItem.attack ?? 0;
+    const currentDefense = currentItem.defense ?? 0;
 
+    // Calculate new stats
+    const newAttack = currentAttack + (gemItemBlueprint.gemStatBuff?.attack || 0);
+    const newDefense = currentDefense + (gemItemBlueprint.gemStatBuff?.defense || 0);
+
+    // send message to user
+    this.socketMessaging.sendMessageToCharacter(
+      targetItem.owner as ICharacter,
+      `Attached '${gemItemBlueprint.name}' to ${targetItem.name}.`
+    );
+
+    // Update the item in the database
     await Item.findByIdAndUpdate(targetItem._id, {
-      $inc: {
-        attack: gemItemBlueprint.gemStatBuff?.attack,
-        defense: gemItemBlueprint.gemStatBuff?.defense,
+      $set: {
+        attack: isArmorOrShield ? currentAttack : newAttack,
+        defense: newDefense,
       },
     });
   }
