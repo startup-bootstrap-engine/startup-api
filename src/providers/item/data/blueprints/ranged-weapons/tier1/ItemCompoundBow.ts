@@ -20,5 +20,5 @@ export const itemCompoundBow: IEquippableRangedTier1WeaponBlueprint = {
   maxRange: RangeTypes.Medium,
   requiredAmmoKeys: [RangedWeaponsBlueprint.Arrow, RangedWeaponsBlueprint.IronArrow],
   isTwoHanded: true,
-  basePrice: 75,
+  basePrice: 100,
 };

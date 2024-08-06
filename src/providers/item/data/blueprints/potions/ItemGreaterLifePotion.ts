@@ -1,4 +1,4 @@
-import { IConsumableItemBlueprint, ItemSubType, ItemType } from "@rpg-engine/shared";
+import { IConsumableItemBlueprint, ItemSubType, ItemType, UserAccountTypes } from "@rpg-engine/shared";
 import { PotionsBlueprint } from "../../types/itemsBlueprintTypes";
 import { UsableEffectsBlueprint } from "../../usableEffects/types";
 
@@ -17,4 +17,6 @@ export const itemGreaterLifePotion: IConsumableItemBlueprint = {
   canSell: false,
 
   usableEffectKey: UsableEffectsBlueprint.GreaterLifePotionUsableEffect,
+
+  canBePurchasedOnlyByPremiumPlans: [UserAccountTypes.PremiumGold, UserAccountTypes.PremiumUltimate],
 };

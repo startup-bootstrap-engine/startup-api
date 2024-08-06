@@ -1,5 +1,5 @@
 import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { ContainersBlueprint, MagicsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { ContainersBlueprint, MagicsBlueprint, PotionsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { FriendlyNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { CharacterGender } from "@rpg-engine/shared";
 import { generateRandomMovement } from "../../../abstractions/BaseNeutralNPC";
@@ -18,6 +18,19 @@ export const npcTraderTeleport = {
     {
       key: ContainersBlueprint.EmeraldBackpack,
     },
+    {
+      key: PotionsBlueprint.GreaterManaPotion,
+    },
+    {
+      key: PotionsBlueprint.GreaterLifePotion,
+    },
+    {
+      key: PotionsBlueprint.ManaPotion,
+    },
+    {
+      key: PotionsBlueprint.LifePotion,
+    },
+
     {
       key: MagicsBlueprint.Rune,
     },

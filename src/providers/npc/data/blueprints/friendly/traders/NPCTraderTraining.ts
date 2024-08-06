@@ -4,6 +4,7 @@ import {
   DaggersBlueprint,
   GemsBlueprint,
   MacesBlueprint,
+  PotionsBlueprint,
   RangedWeaponsBlueprint,
   ShieldsBlueprint,
   StaffsBlueprint,
@@ -43,6 +44,18 @@ export const npcTraderTraining = {
     },
     {
       key: RangedWeaponsBlueprint.WoodenArrow,
+    },
+    {
+      key: PotionsBlueprint.GreaterManaPotion,
+    },
+    {
+      key: PotionsBlueprint.GreaterLifePotion,
+    },
+    {
+      key: PotionsBlueprint.ManaPotion,
+    },
+    {
+      key: PotionsBlueprint.LifePotion,
     },
     {
       key: GemsBlueprint.EmeraldGem,

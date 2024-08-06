@@ -10,6 +10,7 @@ import {
   ItemSubType,
   ItemType,
   RangeTypes,
+  UserAccountTypes,
 } from "@rpg-engine/shared";
 import { GemsBlueprint } from "../../../types/itemsBlueprintTypes";
 
@@ -32,6 +33,11 @@ export const itemSapphireGem: IItemGemTier1Blueprint = {
     attack: 8,
     defense: 6,
   },
+  canBePurchasedOnlyByPremiumPlans: [
+    UserAccountTypes.PremiumSilver,
+    UserAccountTypes.PremiumGold,
+    UserAccountTypes.PremiumUltimate,
+  ],
   gemEntityEffectsAdd: [EntityEffectBlueprint.VineGrasp],
   gemEntityEffectChance: 12,
   usableEffectDescription:

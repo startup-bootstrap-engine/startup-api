@@ -2,7 +2,10 @@ import { INPC } from "@entities/ModuleNPC/NPCModel";
 import {
   ArmorsBlueprint,
   AxesBlueprint,
+  BootsBlueprint,
   DaggersBlueprint,
+  HelmetsBlueprint,
+  LegsBlueprint,
   MacesBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -27,10 +30,31 @@ export const npcBlacksmith = {
       key: ArmorsBlueprint.StuddedArmor,
     },
     {
-      key: MacesBlueprint.Club,
+      key: HelmetsBlueprint.SoldiersHelmet,
+    },
+    {
+      key: HelmetsBlueprint.BrassHelmet,
+    },
+    {
+      key: ArmorsBlueprint.BrassArmor,
+    },
+    {
+      key: LegsBlueprint.LeatherLegs,
+    },
+    {
+      key: MacesBlueprint.SpikedClub,
+    },
+    {
+      key: MacesBlueprint.Mace,
     },
     {
       key: AxesBlueprint.Axe,
+    },
+    {
+      key: AxesBlueprint.Hatchet,
+    },
+    {
+      key: BootsBlueprint.StuddedBoots,
     },
   ],
 } as Partial<INPC>;

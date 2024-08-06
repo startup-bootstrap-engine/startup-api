@@ -18,13 +18,13 @@ export const npcTraderHerbalist = {
       key: PotionsBlueprint.LightManaPotion,
     },
     {
-      key: CraftingResourcesBlueprint.Silk,
-    },
-    {
-      key: CraftingResourcesBlueprint.PolishedStone,
-    },
-    {
       key: CraftingResourcesBlueprint.Worm,
+    },
+    {
+      key: CraftingResourcesBlueprint.Herb,
+    },
+    {
+      key: CraftingResourcesBlueprint.Herb,
     },
   ],
 } as Partial<INPC>;

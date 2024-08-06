@@ -25,6 +25,12 @@ export const npcTraderTools = {
       key: ToolsBlueprint.LogSplitterAxe,
     },
     {
+      key: GemsBlueprint.EmeraldGem,
+    },
+    {
+      key: GemsBlueprint.SapphireGem,
+    },
+    {
       key: GemsBlueprint.CoralReefGem,
     },
   ],

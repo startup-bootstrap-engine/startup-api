@@ -1,4 +1,4 @@
-import { IConsumableItemBlueprint, ItemSubType, ItemType } from "@rpg-engine/shared";
+import { IConsumableItemBlueprint, ItemSubType, ItemType, UserAccountTypes } from "@rpg-engine/shared";
 import { PotionsBlueprint } from "../../types/itemsBlueprintTypes";
 import { UsableEffectsBlueprint } from "../../usableEffects/types";
 
@@ -12,8 +12,14 @@ export const itemLifePotion: IConsumableItemBlueprint = {
   name: "Life Potion",
   description: "A flask containing an elixir of life.",
   weight: 0.5,
-  basePrice: 20,
+  basePrice: 50,
   maxStackSize: 999,
   canSell: false,
   usableEffectKey: UsableEffectsBlueprint.LifePotionUsableEffect,
+
+  canBePurchasedOnlyByPremiumPlans: [
+    UserAccountTypes.PremiumSilver,
+    UserAccountTypes.PremiumGold,
+    UserAccountTypes.PremiumUltimate,
+  ],
 };

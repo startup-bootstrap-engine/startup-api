@@ -1,5 +1,5 @@
 import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { AccessoriesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { AccessoriesBlueprint, GemsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { generateRandomMovement } from "@providers/npc/data/abstractions/BaseNeutralNPC";
 import { CharacterGender } from "@rpg-engine/shared";
 
@@ -18,7 +18,22 @@ export const npcTraderJewelry = {
       key: AccessoriesBlueprint.AmazonsNecklace,
     },
     {
+      key: AccessoriesBlueprint.SoldiersRing,
+    },
+    {
+      key: AccessoriesBlueprint.SapphireRing,
+    },
+    {
       key: AccessoriesBlueprint.IronRing,
+    },
+    {
+      key: GemsBlueprint.EmeraldGem,
+    },
+    {
+      key: GemsBlueprint.SapphireGem,
+    },
+    {
+      key: GemsBlueprint.CoralReefGem,
     },
   ],
 } as Partial<INPC>;

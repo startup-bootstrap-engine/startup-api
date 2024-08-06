@@ -21,6 +21,9 @@ export const npcTraderArcher = {
       key: RangedWeaponsBlueprint.Bow,
     },
     {
+      key: RangedWeaponsBlueprint.CompoundBow,
+    },
+    {
       key: RangedWeaponsBlueprint.Crossbow,
     },
     {

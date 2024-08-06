@@ -22,6 +22,18 @@ export const npcTraderAlchemist = {
       key: PotionsBlueprint.LightManaPotion,
     },
     {
+      key: PotionsBlueprint.GreaterManaPotion,
+    },
+    {
+      key: PotionsBlueprint.GreaterLifePotion,
+    },
+    {
+      key: PotionsBlueprint.ManaPotion,
+    },
+    {
+      key: PotionsBlueprint.LifePotion,
+    },
+    {
       key: CraftingResourcesBlueprint.Bandage,
     },
     {

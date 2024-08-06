@@ -27,6 +27,7 @@ export const itemCoralReefGem: IItemGemTier3Blueprint = {
   weight: 1.5,
   tier: 3,
   basePrice: 34000,
+
   canSell: false,
   rangeType: EntityAttackType.None,
   gemStatBuff: {
@@ -34,7 +35,6 @@ export const itemCoralReefGem: IItemGemTier3Blueprint = {
     defense: 26,
   },
   canBePurchasedOnlyByPremiumPlans: [
-    UserAccountTypes.PremiumBronze,
     UserAccountTypes.PremiumSilver,
     UserAccountTypes.PremiumGold,
     UserAccountTypes.PremiumUltimate,

@@ -14,5 +14,17 @@ export const npcTraderFood = {
     {
       key: FoodsBlueprint.Cookie,
     },
+    {
+      key: FoodsBlueprint.Tuna,
+    },
+    {
+      key: FoodsBlueprint.Strawberry,
+    },
+    {
+      key: FoodsBlueprint.Bread,
+    },
+    {
+      key: FoodsBlueprint.BananaBunch,
+    },
   ],
 } as Partial<INPC>;
