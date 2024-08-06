@@ -11,6 +11,7 @@ import { CharacterView } from "../../CharacterView";
 import { BattleTargeting } from "@providers/battle/BattleTargeting";
 import { CharacterRespawn } from "@providers/character/CharacterRespawn";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { ItemView } from "@providers/item/ItemView";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { Locker } from "@providers/locks/Locker";
 import { NPCManager } from "@providers/npc/NPCManager";
@@ -43,7 +44,8 @@ export class CharacterNetworkCreateQueue {
     private characterCreateRegen: CharacterCreateRegen,
     private characterRespawn: CharacterRespawn,
     private npcManager: NPCManager,
-    private advancedTutorial: AdvancedTutorial
+    private advancedTutorial: AdvancedTutorial,
+    private itemView: ItemView
   ) {}
 
   public onCharacterCreate(channel: SocketChannel): void {
@@ -71,6 +73,8 @@ export class CharacterNetworkCreateQueue {
     const dataFromServer = await this.characterCreateInteractionManager.prepareDataForServer(character, data);
 
     await this.gridManager.setWalkable(character.scene, ToGridX(character.x), ToGridY(character.y), false);
+
+    void this.itemView.warnCharacterAboutItemsInView(character, { always: true }); // Don't await to avoid blocking
 
     await Promise.all([
       this.triggerStartingTutorial(character),

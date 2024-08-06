@@ -4,9 +4,9 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "blueprintKey": "social-crystal",
-  "quantity": 50,
-  "characterId": "668450dd9476f6004f74cf55" 
+  "blueprintKey": "gold-coin",
+  "quantity": 60000,
+  "characterId": "66af73c08c7ae4004f3656da" 
 }
 
 ###
