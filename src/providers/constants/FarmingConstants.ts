@@ -1,6 +1,6 @@
 // Harvesting yields
-export const FARMING_BASE_YIELD = 1;
-export const FARMING_SKILL_FACTOR = 0.5;
+export const FARMING_BASE_YIELD = 1.5;
+export const FARMING_SKILL_FACTOR = 0.6;
 export const FARMING_LOW_YIELD_FACTOR = 1;
 export const FARMING_MEDIUM_YIELD_FACTOR = 2;
 export const FARMING_HIGH_YIELD_FACTOR = 3;
@@ -10,11 +10,11 @@ export const FARMING_SUPER_YIELD_FACTOR = 4;
 export const FARMING_HARVEST_PRICE_RATIO = 2;
 export const FARMING_SEED_PRICE_RATIO = 1;
 
-export const FARMING_RANDOM_REWARD_QTY_CAP = 3;
+export const FARMING_RANDOM_REWARD_QTY_CAP = 5;
 
 // Cycle timing
-export const MAXIMUM_MINUTES_FOR_GROW: number = 40; // Its a growth BETWEEN Cycles. Careful... its not the total time it takes! The total would be the sum of all cycles.
-export const MINIMUM_MINUTES_FOR_WATERING: number = 5; // You'll need to water a plant based on this interval
+export const MAXIMUM_MINUTES_FOR_GROW: number = 25; // Its a growth BETWEEN Cycles. Careful... its not the total time it takes! The total would be the sum of all cycles.
+export const MINIMUM_MINUTES_FOR_WATERING: number = 3; // You'll need to water a plant based on this interval
 
 // Cleanup
 export const MAX_HOURS_NO_WATER_DEAD = 2;
@@ -43,8 +43,8 @@ export const SLOW_PLANT_CYCLE = {
 };
 
 export const FAST_PLANT_CYCLE = {
-  Seed: 4,
-  Sprout: 8,
-  Young: 12,
-  Mature: 15,
+  Seed: 3,
+  Sprout: 6,
+  Young: 9,
+  Mature: 12,
 };
