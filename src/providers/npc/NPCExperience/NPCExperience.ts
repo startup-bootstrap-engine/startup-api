@@ -49,6 +49,8 @@ import { GuildTerritoryControlPoint } from "@providers/guild/GuildTerritoryContr
 import { PartyCRUD } from "@providers/party/PartyCRUD";
 import { ICharacterParty } from "@providers/party/PartyTypes";
 import { PartyValidator } from "@providers/party/PartyValidator";
+import { AdvancedTutorial } from "@providers/tutorial/advancedTutorial/AdvancedTutorial";
+import { AdvancedTutorialKeys } from "@providers/tutorial/tutorial.types";
 import dayjs from "dayjs";
 import random from "lodash/random";
 import uniqBy from "lodash/uniqBy";
@@ -81,7 +83,8 @@ export class NPCExperience {
     private guildExperience: GuildExperience,
     private guildTerritoryControlPoint: GuildTerritoryControlPoint,
     private guildTerritory: GuildTerritory,
-    private guildCommon: GuildCommon
+    private guildCommon: GuildCommon,
+    private advancedTutorial: AdvancedTutorial
   ) {}
 
   /**
@@ -268,6 +271,8 @@ export class NPCExperience {
       type: "info",
     });
 
+    await this.triggerAdvancedTutorialLessonByLevel(character, expData.level);
+
     this.socketMessaging.sendEventToUser<ILevelUpFromServer>(character.channelId!, SkillSocketEvents.LevelUp, {
       previousLevel: formattedPreviousLevel,
       currentLevel: formattedCurrentLevel,
@@ -282,6 +287,32 @@ export class NPCExperience {
     await this.animationEffect.sendAnimationEventToCharacter(character, AnimationEffectKeys.LevelUp);
 
     await this.socketMessaging.sendEventToCharactersAroundCharacter(character, SkillSocketEvents.SkillGain, payload);
+  }
+
+  private async triggerAdvancedTutorialLessonByLevel(character: ICharacter, level: number): Promise<void> {
+    switch (Number(level)) {
+      case 2:
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Fishing);
+        break;
+      case 3:
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Blacksmithing);
+        break;
+      case 4:
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Lumberjacking);
+        break;
+      case 5:
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Quest);
+        break;
+      case 6:
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Depot);
+        break;
+      case 7:
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Marketplace);
+        break;
+      case 8:
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Party);
+        break;
+    }
   }
 
   private async bootHPAndManaOnLevelUp(character: ICharacter): Promise<void> {

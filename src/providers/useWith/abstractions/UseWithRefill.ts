@@ -9,7 +9,7 @@ import { BlueprintManager } from "@providers/blueprint/BlueprintManager";
 import { container } from "@providers/inversify/container";
 import { ItemView } from "@providers/item/ItemView";
 import { PlantGrowth } from "@providers/plant/PlantGrowth";
-import { SimpleTutorial } from "@providers/simpleTutorial/SimpleTutorial";
+import { SimpleTutorial } from "@providers/tutorial/simpleTutorial/SimpleTutorial";
 import {
   AnimationEffectKeys,
   IRefillableItem,

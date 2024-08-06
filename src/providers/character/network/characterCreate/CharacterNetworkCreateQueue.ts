@@ -14,6 +14,8 @@ import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { Locker } from "@providers/locks/Locker";
 import { NPCManager } from "@providers/npc/NPCManager";
+import { AdvancedTutorial } from "@providers/tutorial/advancedTutorial/AdvancedTutorial";
+import { AdvancedTutorialKeys } from "@providers/tutorial/tutorial.types";
 import { clearCacheForKey } from "speedgoose";
 import { CharacterDailyPlayTracker } from "../../CharacterDailyPlayTracker";
 import { CharacterBuffValidation } from "../../characterBuff/CharacterBuffValidation";
@@ -40,7 +42,8 @@ export class CharacterNetworkCreateQueue {
     private characterCreateInteractionManager: CharacterCreateInteractionManager,
     private characterCreateRegen: CharacterCreateRegen,
     private characterRespawn: CharacterRespawn,
-    private npcManager: NPCManager
+    private npcManager: NPCManager,
+    private advancedTutorial: AdvancedTutorial
   ) {}
 
   public onCharacterCreate(channel: SocketChannel): void {
@@ -70,6 +73,7 @@ export class CharacterNetworkCreateQueue {
     await this.gridManager.setWalkable(character.scene, ToGridX(character.x), ToGridY(character.y), false);
 
     await Promise.all([
+      this.triggerStartingTutorial(character),
       this.characterDailyPlayTracker.updateCharacterDailyPlay(character._id),
       this.unlockCharacterMapTransition(character),
       this.refreshBattleState(character),
@@ -80,6 +84,14 @@ export class CharacterNetworkCreateQueue {
       this.characterCreateRegen.handleCharacterRegen(character),
     ]);
     await this.characterCreateSocketHandler.manageSocketConnections(channel, character);
+  }
+
+  private async triggerStartingTutorial(character: ICharacter): Promise<void> {
+    const isNewCharacter = character.totalDaysPlayed === 0;
+
+    if (isNewCharacter) {
+      await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Introduction);
+    }
   }
 
   private async respawnIfNecessary(character: ICharacter): Promise<ICharacter> {

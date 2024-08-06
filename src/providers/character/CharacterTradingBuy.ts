@@ -8,8 +8,8 @@ import { TRADER_BUY_PRICE_MULTIPLIER } from "@providers/constants/ItemConstants"
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { blueprintManager } from "@providers/inversify/container";
 import { AvailableBlueprints, OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
-import { SimpleTutorial } from "@providers/simpleTutorial/SimpleTutorial";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { SimpleTutorial } from "@providers/tutorial/simpleTutorial/SimpleTutorial";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import {
   IEquipmentAndInventoryUpdatePayload,
