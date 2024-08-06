@@ -69,12 +69,16 @@ export class EquipmentUnequip {
 
           const result = await this.execUnequip(character, item, inventoryContainerId);
 
-          await this.resultsPoller.prepareResultToBePolled("unequip-results", `${character._id}-${item._id}`, result);
+          await this.resultsPoller.prepareResultToBePolled(
+            "unequip-results",
+            `unequip-${character._id}-${item._id}`,
+            !!result
+          );
         },
         { character, item, inventoryContainerId }
       );
 
-      return await this.resultsPoller.pollResults("unequip-results", `${character._id}-${item._id}`);
+      return await this.resultsPoller.pollResults("unequip-results", `unequip-${character._id}-${item._id}`);
     } catch (error) {
       console.error(error);
       return false;

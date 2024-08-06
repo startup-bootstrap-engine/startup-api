@@ -92,7 +92,10 @@ export class PathfindingQueue {
         return;
       }
 
-      const result = await this.resultsPoller.pollResults("pathfinding", job.id!);
+      const result = await this.resultsPoller.pollResults(
+        "pathfinding",
+        `pathfinding-${npc._id}-${startGridX}-${startGridY}-${endGridX}-${endGridY}`
+      );
 
       return result;
     } catch (error) {
@@ -137,7 +140,11 @@ export class PathfindingQueue {
             end: { x: endGridX, y: endGridY },
           });
 
-          await this.resultsPoller.prepareResultToBePolled("pathfinding", job.id!, path ?? false);
+          await this.resultsPoller.prepareResultToBePolled(
+            "pathfinding",
+            `pathfinding-${npc._id}-${startGridX}-${startGridY}-${endGridX}-${endGridY}`,
+            path ?? false
+          );
         },
         {
           npc,

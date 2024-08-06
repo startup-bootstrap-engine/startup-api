@@ -47,7 +47,7 @@ export class ItemDragAndDrop {
         await this.resultsPoller.prepareResultToBePolled(
           "item-drag-and-drop",
           `item-drag-and-drop-${itemMoveData.from.item._id}-${itemMoveData.to.item?._id ?? "null"}`,
-          result
+          !!result
         );
       },
       {

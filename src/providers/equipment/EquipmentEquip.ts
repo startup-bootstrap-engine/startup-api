@@ -113,15 +113,15 @@ export class EquipmentEquip {
           const result = await this.execEquip(character, itemId, fromItemContainerId);
 
           await this.resultsPoller.prepareResultToBePolled(
-            "equip-unequip-results",
-            `${character._id}-${itemId}`,
-            result
+            "equip-results",
+            `equip-${character._id}-${itemId}`,
+            !!result
           );
         },
         { character, itemId, fromItemContainerId }
       );
 
-      return await this.resultsPoller.pollResults("equip-unequip-results", `${character._id}-${itemId}`);
+      return await this.resultsPoller.pollResults("equip-results", `equip-${character._id}-${itemId}`);
     } catch (error) {
       console.error(error);
       return false;

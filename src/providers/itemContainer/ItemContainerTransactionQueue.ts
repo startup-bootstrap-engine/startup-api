@@ -83,8 +83,8 @@ export class ItemContainerTransactionQueue {
 
           await this.resultsPoller.prepareResultToBePolled(
             "item-container-transfer-results",
-            `${originContainer._id}-to-${targetContainer._id}`,
-            result
+            `item-container-transfer-${originContainer._id}-to-${targetContainer._id}`,
+            !!result
           );
 
           return result;
@@ -100,7 +100,7 @@ export class ItemContainerTransactionQueue {
 
       const result = await this.resultsPoller.pollResults(
         "item-container-transfer-results",
-        `${originContainer._id}-to-${targetContainer._id}`
+        `item-container-transfer-${originContainer._id}-to-${targetContainer._id}`
       );
 
       return result;
