@@ -2,7 +2,7 @@ import { CharacterConnection } from "@providers/character/CharacterConnection";
 
 import { CharacterTextureChange } from "@providers/character/CharacterTextureChange";
 import { CharacterBuffActivator } from "@providers/character/characterBuff/CharacterBuffActivator";
-import { PathfindingQueue } from "@providers/map/PathfindingQueue";
+
 import { NPCManager } from "@providers/npc/NPCManager";
 import { PushNotificationHelper } from "@providers/pushNotification/PushNotificationHelper";
 import { Seeder } from "@providers/seeds/Seeder";
@@ -26,6 +26,7 @@ import { ItemDropVerifier } from "@providers/item/ItemDrop/ItemDropVerifier";
 import { ItemUseCycleQueue } from "@providers/item/ItemUseCycleQueue";
 import { ItemContainerTransactionQueue } from "@providers/itemContainer/ItemContainerTransactionQueue";
 import { Locker } from "@providers/locks/Locker";
+import { PathfindingQueue } from "@providers/map/pathfinding/PathfindingQueue";
 import { NPCBattleCycleQueue } from "@providers/npc/NPCBattleCycleQueue";
 import { NPCCycleQueue } from "@providers/npc/NPCCycleQueue";
 import { NPCCycleTracker } from "@providers/npc/NPCCycleTracker";

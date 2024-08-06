@@ -5,8 +5,7 @@ import { CharacterView } from "@providers/character/CharacterView";
 import { NPC_CAN_ATTACK_IN_NON_PVP_ZONE } from "@providers/constants/NPCConstants";
 import { GridManager } from "@providers/map/GridManager";
 import { MapNonPVPZone } from "@providers/map/MapNonPVPZone";
-import { Pathfinder } from "@providers/map/Pathfinder";
-import { PathfindingQueue } from "@providers/map/PathfindingQueue";
+import { PathfindingQueue } from "@providers/map/pathfinding/PathfindingQueue";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
@@ -36,8 +35,7 @@ export class NPCMovement {
     private characterView: CharacterView,
     private npcWarn: NPCWarn,
     private stealth: Stealth,
-    private pathfindingQueue: PathfindingQueue,
-    private pathfinder: Pathfinder
+    private pathfindingQueue: PathfindingQueue
   ) {}
 
   public isNPCAtPathPosition(npc: INPC, gridX: number, gridY: number): boolean {
@@ -225,6 +223,14 @@ export class NPCMovement {
     endGridX: number,
     endGridY: number
   ): Promise<number[][] | undefined> {
-    return await this.pathfinder.findShortestPath(npc, target, npc.scene, startGridX, startGridY, endGridX, endGridY);
+    return await this.pathfindingQueue.findShortestPath(
+      npc,
+      target,
+      npc.scene,
+      startGridX,
+      startGridY,
+      endGridX,
+      endGridY
+    );
   }
 }

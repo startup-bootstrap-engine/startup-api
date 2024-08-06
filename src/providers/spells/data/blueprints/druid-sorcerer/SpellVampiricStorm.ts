@@ -1,7 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { SPELL_AREA_MEDIUM_BLAST_RADIUS } from "@providers/constants/SpellConstants";
-import { entityEffectBleeding } from "@providers/entityEffects/data/blueprints/entityEffectBleeding";
 import { container } from "@providers/inversify/container";
 import { SpellArea } from "@providers/spells/area-spells/SpellArea";
 import {
@@ -41,7 +40,6 @@ export const spellVampiricStorm: Partial<ISpell> = {
 
     await spellArea.cast(caster, target, MagicPower.Medium, {
       effectAnimationKey: AnimationEffectKeys.Lifedrain,
-      entityEffect: entityEffectBleeding,
       spellAreaGrid: SPELL_AREA_MEDIUM_BLAST_RADIUS,
       customFn: async (target: ICharacter | INPC) => {
         await spellLifeSteal.performLifeSteal(caster, target);

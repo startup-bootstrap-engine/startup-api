@@ -26,24 +26,14 @@ export class PartySocketMessaging {
       const partyPayload = this.generateDataPayloadFromServer(party);
 
       const characters = await Character.find({ _id: { $in: Array.from(allCharactersId) } })
-        .lean()
+        .lean<ICharacter[]>()
         .select("channelId");
 
-      for (const character of characters) {
-        if (character.channelId) {
-          try {
-            this.socketMessaging.sendEventToUser<ICharacterPartyShared>(
-              character.channelId,
-              PartySocketEvents.PartyInfoOpen,
-              partyPayload
-            );
-          } catch (sendError) {
-            console.error(`Failed to send PartyInfoOpen to character ${character._id}:`, sendError);
-          }
-        } else {
-          console.warn(`Character ${character._id} has no channelId`);
-        }
-      }
+      this.socketMessaging.sendEventToMultipleCharacters<ICharacterPartyShared>(
+        characters,
+        PartySocketEvents.PartyInfoOpen,
+        partyPayload
+      );
     } catch (error) {
       console.error("Error in partyPayloadSend: ", error);
     }

@@ -12,14 +12,18 @@ export class NPCSpellLifeSteal {
 
   @TrackNewRelicTransaction()
   public async performLifeSteal(caster: INPC, target: ICharacter): Promise<void> {
-    // make sure we have an updated caster to avoid maxHealth overflow!
-    caster = (await NPC.findById(caster._id).lean()) as INPC;
+    try {
+      // make sure we have an updated caster to avoid maxHealth overflow!
+      caster = (await NPC.findById(caster._id).lean()) as INPC;
 
-    const potentialLifeSteal = this.calculatePotentialLifeSteal(target);
+      const potentialLifeSteal = this.calculatePotentialLifeSteal(target);
 
-    await this.performCasterLifeSteal(caster, target, potentialLifeSteal);
+      await this.performCasterLifeSteal(caster, target, potentialLifeSteal);
 
-    await this.performTargetLifeSteal(target, potentialLifeSteal);
+      await this.performTargetLifeSteal(target, potentialLifeSteal);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   private async performCasterLifeSteal(caster: INPC, target: ICharacter, potentialLifeSteal: number): Promise<void> {

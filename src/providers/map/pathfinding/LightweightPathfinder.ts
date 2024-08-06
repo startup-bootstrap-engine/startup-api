@@ -17,7 +17,7 @@ export class LightweightPathfinder {
   ) {}
 
   @TrackNewRelicTransaction()
-  public async getNearestGridToTarget(npc: INPC, targetX: number, targetY: number): Promise<number[][]> {
+  public async calculateLightPathfinding(npc: INPC, targetX: number, targetY: number): Promise<number[][]> {
     const potentialPositions = [
       { direction: "top", x: npc.x, y: npc.y - GRID_WIDTH },
       { direction: "bottom", x: npc.x, y: npc.y + GRID_WIDTH },

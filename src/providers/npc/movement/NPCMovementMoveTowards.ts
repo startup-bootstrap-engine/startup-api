@@ -5,7 +5,6 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { appEnv } from "@providers/config/env";
 import { Locker } from "@providers/locks/Locker";
 import { MapHelper } from "@providers/map/MapHelper";
-import { PathfindingCaching } from "@providers/map/PathfindingCaching";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
@@ -26,6 +25,7 @@ import { NPCMovement } from "./NPCMovement";
 import { NPCTarget } from "./NPCTarget";
 
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { PathfindingCaching } from "@providers/map/pathfinding/PathfindingCaching";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { debounce } from "lodash";
 

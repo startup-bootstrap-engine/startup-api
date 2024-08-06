@@ -105,4 +105,10 @@ export class SocketMessaging {
 
     await this.sendEventToCharactersAroundCharacter(character, CharacterSocketEvents.AttributeChanged, payload);
   }
+
+  public sendEventToMultipleCharacters<T>(characters: ICharacter[], eventName: string, data?: any): void {
+    for (const character of characters) {
+      this.sendEventToUser<T>(character.channelId!, eventName, data);
+    }
+  }
 }

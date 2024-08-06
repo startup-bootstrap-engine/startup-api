@@ -27,7 +27,7 @@ export const npcElderGolem: INPCTierBlueprint<18> = {
   subType: NPCSubtype.Elemental,
   textureKey: HostileNPCsBlueprint.StoneGolem,
   alignment: NPCAlignment.Hostile,
-  attackType: EntityAttackType.Ranged,
+  attackType: EntityAttackType.MeleeRanged,
   ammoKey: RangedWeaponsBlueprint.Stone,
   maxRangeAttack: RangeTypes.High,
   isGiantForm: true,
@@ -35,8 +35,8 @@ export const npcElderGolem: INPCTierBlueprint<18> = {
   // @ts-ignore
   baseHealth: 30000,
   canSwitchToRandomTarget: true,
-  healthRandomizerDice: Dice.D6,
-  skillRandomizerDice: Dice.D4,
+  healthRandomizerDice: Dice.D20,
+  skillRandomizerDice: Dice.D20,
   skillsToBeRandomized: ["level", "strength", "dexterity"],
   canSwitchToLowHealthTarget: true,
   skills: {
@@ -136,11 +136,11 @@ export const npcElderGolem: INPCTierBlueprint<18> = {
     {
       spellKey: SpellsBlueprint.CleavingStomp,
       probability: 50,
-      power: MagicPower.High,
+      power: MagicPower.UltraHigh,
     },
     {
       spellKey: SpellsBlueprint.NaturesRevenge,
-      probability: 5,
+      probability: 25,
       power: MagicPower.Low,
     },
   ],
