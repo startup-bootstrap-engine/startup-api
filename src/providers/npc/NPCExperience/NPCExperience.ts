@@ -306,12 +306,19 @@ export class NPCExperience {
         await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Quest, tutorialDelay);
         break;
       case 6:
-        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Depot, tutorialDelay);
+        await this.advancedTutorial.triggerTutorialOnce(
+          character,
+          AdvancedTutorialKeys.CraftingMechanics,
+          tutorialDelay
+        );
         break;
       case 7:
-        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Marketplace, tutorialDelay);
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Depot, tutorialDelay);
         break;
       case 8:
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Marketplace, tutorialDelay);
+        break;
+      case 9:
         await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Party, tutorialDelay);
         break;
     }
