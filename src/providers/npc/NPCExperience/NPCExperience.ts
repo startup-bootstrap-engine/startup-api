@@ -290,27 +290,29 @@ export class NPCExperience {
   }
 
   private async triggerAdvancedTutorialLessonByLevel(character: ICharacter, level: number): Promise<void> {
+    const tutorialDelay = 2000; // wait 2 seconds before triggering the tutorial
+
     switch (Number(level)) {
       case 2:
-        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Fishing);
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Fishing, tutorialDelay);
         break;
       case 3:
-        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Blacksmithing);
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Blacksmithing, tutorialDelay);
         break;
       case 4:
-        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Lumberjacking);
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Lumberjacking, tutorialDelay);
         break;
       case 5:
-        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Quest);
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Quest, tutorialDelay);
         break;
       case 6:
-        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Depot);
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Depot, tutorialDelay);
         break;
       case 7:
-        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Marketplace);
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Marketplace, tutorialDelay);
         break;
       case 8:
-        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Party);
+        await this.advancedTutorial.triggerTutorialOnce(character, AdvancedTutorialKeys.Party, tutorialDelay);
         break;
     }
   }

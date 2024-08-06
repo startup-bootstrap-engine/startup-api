@@ -1,6 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { Time } from "@providers/time/Time";
 import { provide } from "inversify-binding-decorators";
 import { AdvancedTutorialKeys, AdvancedTutorialSocketEvents, IAdvancedTutorialPayload } from "../tutorial.types";
 
@@ -8,13 +9,25 @@ import { AdvancedTutorialKeys, AdvancedTutorialSocketEvents, IAdvancedTutorialPa
 export class AdvancedTutorial {
   private readonly prefix = "advanced-tutorial";
 
-  constructor(private inMemoryHashTable: InMemoryHashTable, private socketMessaging: SocketMessaging) {}
+  constructor(
+    private inMemoryHashTable: InMemoryHashTable,
+    private socketMessaging: SocketMessaging,
+    private time: Time
+  ) {}
 
-  public async triggerTutorialOnce(character: ICharacter, tutorialKey: AdvancedTutorialKeys): Promise<void> {
+  public async triggerTutorialOnce(
+    character: ICharacter,
+    tutorialKey: AdvancedTutorialKeys,
+    delayMs?: number
+  ): Promise<void> {
     const hasFinishedTutorial = await this.hasFinishedTutorialByKey(character, tutorialKey);
 
     if (hasFinishedTutorial) {
       return;
+    }
+
+    if (delayMs) {
+      await this.time.waitForMilliseconds(delayMs);
     }
 
     this.socketMessaging.sendEventToUser<IAdvancedTutorialPayload>(
