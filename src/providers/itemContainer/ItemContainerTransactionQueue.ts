@@ -204,7 +204,7 @@ export class ItemContainerTransactionQueue {
     );
 
     if (!addItemSuccessful) {
-      console.error("Failed to add item to target container.");
+      console.error(`Failed to add item ${item._id} to target container ${targetContainer._id}.`);
       return false;
     }
 

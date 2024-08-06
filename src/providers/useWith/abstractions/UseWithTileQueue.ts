@@ -5,6 +5,7 @@ import { blueprintManager } from "@providers/inversify/container";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { ItemCraftableQueue } from "@providers/item/ItemCraftableQueue";
 import { itemsBlueprintIndex } from "@providers/item/data/index";
+import { Locker } from "@providers/locks/Locker";
 import { MapTiles } from "@providers/map/MapTiles";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
@@ -35,7 +36,8 @@ export class UseWithTileQueue {
     private movementHelper: MovementHelper,
     private itemCraftable: ItemCraftableQueue,
     private skillIncrease: SkillIncrease,
-    private dynamicQueue: DynamicQueue
+    private dynamicQueue: DynamicQueue,
+    private locker: Locker
   ) {}
 
   public onUseWithTile(channel: SocketChannel): void {
@@ -44,9 +46,17 @@ export class UseWithTileQueue {
       UseWithSocketEvents.UseWithTile,
       async (useWithTileData: IUseWithTile, character) => {
         try {
+          const canProceed = await this.locker.lock(`useWithTile-${character.id}`);
+
+          if (!canProceed) {
+            return;
+          }
+
           await this.addToQueue(useWithTileData, character);
         } catch (error) {
           console.error(error);
+        } finally {
+          await this.locker.unlock(`useWithTile-${character.id}`);
         }
       }
     );
@@ -61,8 +71,8 @@ export class UseWithTileQueue {
         void this.onExecuteUseWithTile(character, useWithTileData);
       },
       {
-        character,
         useWithTileData,
+        character,
       }
     );
   }
@@ -120,7 +130,7 @@ export class UseWithTileQueue {
     }
 
     // Check if the character has the originItem
-    const originItem = await this.useWithHelper.getItem(character, data.originItemId);
+    const originItem = await this.useWithHelper.getItem(character, data.originItemId.toString());
 
     const itemBlueprint = itemsBlueprintIndex[originItem.baseKey] as Partial<IItemUseWith>;
 

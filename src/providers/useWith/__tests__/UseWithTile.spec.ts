@@ -159,9 +159,7 @@ describe("UseWithTileQueue", () => {
       await useWithTile.validateData(testCharacter, useWithTileData);
       throw new Error("This test should fail!");
     } catch (error: any) {
-      expect(error.message).toEqual(
-        `UseWith > Item with id ${testItem._id} does not belong to the character or does not exist!`
-      );
+      expect(error.message).toEqual(`UseWith > Item with id ${testItem._id} does not belong to the character!`);
     }
   });
 

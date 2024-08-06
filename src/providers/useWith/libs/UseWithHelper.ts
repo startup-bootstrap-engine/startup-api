@@ -26,13 +26,17 @@ export class UseWithHelper {
   }
 
   public async getItem(character: ICharacter, itemId: string): Promise<IItem> {
-    const item = (await Item.findOne({ _id: itemId, owner: character._id }).lean({
+    const item = (await Item.findOne({ _id: itemId }).lean({
       virtuals: true,
       defaults: true,
     })) as IItem;
 
     if (!item) {
-      throw new Error(`UseWith > Item with id ${itemId} does not belong to the character or does not exist!`);
+      throw new Error(`UseWith > Item with id ${itemId} does not exist!`);
+    }
+
+    if (item.owner?.toString() !== character._id.toString()) {
+      throw new Error(`UseWith > Item with id ${itemId} does not belong to the character!`);
     }
 
     return item;

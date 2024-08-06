@@ -87,7 +87,7 @@ export class ReferralBonusAwarder {
 
   private async addItemToContainer(item: IItem, character: ICharacter, containerId: string): Promise<boolean> {
     const wasAdded = await this.characterItemContainer.addItemToContainer(item, character, containerId);
-    if (!wasAdded) throw new Error("Failed to add item to container");
+    if (!wasAdded) throw new Error("Referral: Failed to add item to container");
 
     return wasAdded;
   }

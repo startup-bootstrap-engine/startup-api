@@ -33,7 +33,6 @@ export const EXHAUSTABLE_EVENTS = [
   UseWithSocketEvents.UseWithTile,
   ItemSocketEvents.Use,
   ItemSocketEvents.CraftItem,
-  UseWithSocketEvents.UseWithTile,
 ] as string[];
 
 export const LOGGABLE_EVENTS = [

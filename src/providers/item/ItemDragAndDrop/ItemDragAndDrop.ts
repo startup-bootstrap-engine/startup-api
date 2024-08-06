@@ -3,9 +3,11 @@ import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemCon
 import { IItem as IModelItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
+import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { blueprintManager } from "@providers/inversify/container";
 import { Locker } from "@providers/locks/Locker";
+import { ResultsPoller } from "@providers/poller/ResultsPoller";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IEquipmentAndInventoryUpdatePayload, IItem, IItemMove, ItemSocketEvents, ItemType } from "@rpg-engine/shared";
@@ -14,6 +16,7 @@ import { clearCacheForKey } from "speedgoose";
 import { ItemBaseKey } from "../ItemBaseKey";
 import { AvailableBlueprints } from "../data/types/itemsBlueprintTypes";
 import { ItemDragAndDropValidator } from "./ItemDragAndDropValidator";
+// uuid
 
 @provide(ItemDragAndDrop)
 export class ItemDragAndDrop {
@@ -24,11 +27,44 @@ export class ItemDragAndDrop {
     private dynamicQueue: DynamicQueue,
     private itemDragAndDropValidator: ItemDragAndDropValidator,
     private itemBaseKey: ItemBaseKey,
-    private locker: Locker
+    private locker: Locker,
+    private resultsPoller: ResultsPoller
   ) {}
 
   @TrackNewRelicTransaction()
   public async performItemMove(itemMoveData: IItemMove, character: ICharacter): Promise<boolean> {
+    if (appEnv.general.IS_UNIT_TEST) {
+      return await this.execPerformItemMove(itemMoveData, character);
+    }
+
+    await this.dynamicQueue.addJob(
+      "item-drag-and-drop",
+      async (job) => {
+        const { itemMoveData, character } = job.data;
+
+        const result = await this.execPerformItemMove(itemMoveData, character);
+
+        await this.resultsPoller.prepareResultToBePolled(
+          "item-drag-and-drop",
+          `item-drag-and-drop-${itemMoveData.from.item._id}-${itemMoveData.to.item?._id ?? "null"}`,
+          result
+        );
+      },
+      {
+        itemMoveData,
+        character,
+      }
+    );
+
+    const result = await this.resultsPoller.pollResults(
+      "item-drag-and-drop",
+      `item-drag-and-drop-${itemMoveData.from.item._id}-${itemMoveData.to.item?._id ?? "null"}`
+    );
+
+    return result;
+  }
+
+  private async execPerformItemMove(itemMoveData: IItemMove, character: ICharacter): Promise<boolean> {
     try {
       if (!(await this.itemDragAndDropValidator.isItemMoveValid(itemMoveData, character, itemMoveData))) {
         return false;
@@ -177,7 +213,7 @@ export class ItemDragAndDrop {
       );
 
       if (!hasAddedItemOnSlot) {
-        throw new Error("Failed to add item on slot.");
+        throw new Error(`Failed to add item ${from.item._id} on slot ${to.slotIndex} from character ${character._id}.`);
       }
 
       rollbackActions.push(async () => {
@@ -222,7 +258,7 @@ export class ItemDragAndDrop {
     );
 
     if (!hasAddedNewItem) {
-      throw new Error("Failed to add new item.");
+      throw new Error(`Failed to add new item (${from.item.key}) for character ${character._id} - ${character.name}`);
     }
 
     return true;

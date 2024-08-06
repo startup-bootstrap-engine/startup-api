@@ -239,7 +239,6 @@ export class UseWithItemToTile {
 
     if (resource) {
       const skills = (await Skill.findOne({ owner: character._id })
-        .select([resource.type])
         .lean()
         .cacheQuery({
           cacheKey: `${character._id}-skills`,
