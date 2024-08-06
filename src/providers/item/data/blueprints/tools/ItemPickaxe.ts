@@ -56,7 +56,7 @@ export const itemPickaxe: IToolItemBlueprint = {
         "Hmm... Nothing here.",
         "You effort is in vain.",
         "You can't find anything.",
-        "Maybe you should try somewhere else.",
+        "You tried, but you found nothing this time.",
         "Mining is hard work! Nothing here!",
       ],
       successMessages: [

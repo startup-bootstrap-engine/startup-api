@@ -50,7 +50,11 @@ export const itemCarpentersAxe: IToolItemBlueprint = {
       {
         targetTile,
         targetTileAnimationEffectKey: "cutting-wood",
-        errorMessages: ["Hmm... Nothing here.", "Maybe you should try somewhere else.", "You can't find anything."],
+        errorMessages: [
+          "Hmm... Nothing here.",
+          "You tried, but you found nothing this time.",
+          "You can't find anything.",
+        ],
         successMessages: ["You found some wood!", "You're getting good at this!"],
         rewards: [
           {

@@ -75,7 +75,7 @@ export const itemButchersKnife: IToolItemBlueprint = {
         "Hmm... Nothing here.",
         "You effort is in vain.",
         "Hmm... You didn't find anything.",
-        "Maybe you should try somewhere else.",
+        "You tried, but you found nothing this time.",
         "Butchering is a hard work! Nothing here!",
       ],
       successMessages: [

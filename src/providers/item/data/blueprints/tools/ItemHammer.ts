@@ -138,10 +138,9 @@ export const itemHammer: IToolItemBlueprint = {
       },
       targetTileAnimationEffectKey: "block",
       errorMessages: [
-        "Hmm... Nothing here.",
+        "Hmm... you failed!",
         "You effort is in vain.",
         "You can't do anything here with that.",
-        "Maybe you should try somewhere else.",
         "The business of a blacksmith is hard work! Nothing here!",
       ],
       successMessages: ["You forged some ingots!", "Wow! You got some ingots!"],
