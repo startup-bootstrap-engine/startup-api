@@ -21,10 +21,15 @@ import { INPCLoot, ItemSubType, ItemType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { random, round } from "lodash";
 import { calculateGold } from "./NPCGold";
+import { SimpleTutorial } from "@providers/simpleTutorial/SimpleTutorial";
 
 @provide(NPCLoot)
 export class NPCLoot {
-  constructor(private itemRarity: ItemRarity, private characterPremiumAccount: CharacterPremiumAccount) {}
+  constructor(
+    private itemRarity: ItemRarity,
+    private characterPremiumAccount: CharacterPremiumAccount,
+    private simpleTutorial: SimpleTutorial
+  ) {}
 
   public getGoldLoot(npc: INPC): INPCLoot {
     if (!npc.skills) {
@@ -93,6 +98,9 @@ export class NPCLoot {
           if (!isDeadBodyLootable) {
             npcBody.isDeadBodyLootable = true;
             isDeadBodyLootable = true;
+          }
+          if (lootItem.subType === ItemSubType.CraftingResource) {
+            await this.simpleTutorial.sendSimpleTutorialActionToCharacter(killer, "first-crafting-material");
           }
         }
       }
