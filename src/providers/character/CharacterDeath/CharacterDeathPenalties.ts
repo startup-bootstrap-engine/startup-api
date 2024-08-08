@@ -80,7 +80,6 @@ export class CharacterDeathPenalties {
         console.error("Failed to remove Amulet of Death:", error);
       }
     } else {
-      // Apply full penalties
       await this.dropCharacterItemsOnBody(character, characterBody, character.equipment, forceDropAll);
       const deathPenalty = await this.skillDecrease.deathPenalty(character);
 

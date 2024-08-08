@@ -7,6 +7,7 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DiscordBot } from "@providers/discord/DiscordBot";
 import { EquipmentSlots } from "@providers/equipment/EquipmentSlots";
@@ -14,6 +15,7 @@ import { blueprintManager, entityEffectUse } from "@providers/inversify/containe
 import { BodiesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { Locker } from "@providers/locks/Locker";
 import { NPCTarget } from "@providers/npc/movement/NPCTarget";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import {
@@ -62,18 +64,38 @@ export class CharacterDeath {
     private characterSkull: CharacterSkull,
     private discordBot: DiscordBot,
     private characterRespawn: CharacterRespawn,
-    private characterDeathPenalties: CharacterDeathPenalties
+    private characterDeathPenalties: CharacterDeathPenalties,
+    private dynamicQueue: DynamicQueue
   ) {}
 
   @TrackNewRelicTransaction()
   public async handleCharacterDeath(killer: INPC | ICharacter | null, character: ICharacter): Promise<void> {
-    try {
-      const isLocked = await this.locker.lock(`character-death-${character._id}`, 3);
+    const canProceed = await this.locker.lock(`character-death-${character._id}`, 2);
 
-      if (!isLocked) {
-        return;
+    if (!canProceed) {
+      return;
+    }
+
+    if (appEnv.general.IS_UNIT_TEST) {
+      return this.execHandleCharacterDeath(killer, character);
+    }
+
+    await this.dynamicQueue.addJob(
+      "character-death",
+      async (job) => {
+        const { character, killer } = job.data;
+
+        await this.execHandleCharacterDeath(killer, character);
+      },
+      {
+        character,
+        killer,
       }
+    );
+  }
 
+  public async execHandleCharacterDeath(killer: INPC | ICharacter | null, character: ICharacter): Promise<void> {
+    try {
       const characterBody = await this.generateCharacterBody(character);
 
       await this.sendBattleDeathEvents(character);
