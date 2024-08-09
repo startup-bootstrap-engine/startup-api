@@ -37,7 +37,7 @@ export const spellWildfireVolley: Partial<ISpell> = {
   usableEffect: async (character: ICharacter, target: ICharacter | INPC) => {
     const spellArea = container.get(SpellArea);
 
-    await spellArea.cast(character, target, MagicPower.UltraHigh, {
+    await spellArea.cast(character, target, MagicPower.Fatal, {
       effectAnimationKey: AnimationEffectKeys.HitFire,
       entityEffect: entityEffectBurning,
       spellAreaGrid: SPELL_AREA_DIAMOND_BLAST_RADIUS,

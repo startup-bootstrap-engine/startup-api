@@ -19,7 +19,7 @@ export const spellBombCreation: Partial<ISpell> = {
   minMagicLevelRequired: 6,
   cooldown: 5,
   castingAnimationKey: AnimationEffectKeys.LevelUp,
-  characterClass: [CharacterClass.Rogue],
+  characterClass: [CharacterClass.Rogue, CharacterClass.Hunter],
 
   usableEffect: async (character: ICharacter) => {
     const spellRuneCreation = container.get(SpellItemCreation);
