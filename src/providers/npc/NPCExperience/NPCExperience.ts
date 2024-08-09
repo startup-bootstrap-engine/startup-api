@@ -41,6 +41,7 @@ import { Colors } from "discord.js";
 import { provide } from "inversify-binding-decorators";
 
 import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DynamicXPRatio } from "@providers/dynamic-xp-ratio/DynamicXPRatio";
 import { GuildCommon } from "@providers/guild/GuildCommon";
 import { GuildExperience } from "@providers/guild/GuildExperience";
@@ -84,7 +85,8 @@ export class NPCExperience {
     private guildTerritoryControlPoint: GuildTerritoryControlPoint,
     private guildTerritory: GuildTerritory,
     private guildCommon: GuildCommon,
-    private advancedTutorial: AdvancedTutorial
+    private advancedTutorial: AdvancedTutorial,
+    private inMemoryHashTable: InMemoryHashTable
   ) {}
 
   /**
@@ -392,6 +394,12 @@ export class NPCExperience {
       DisplayTextSocketEvents.DisplayText,
       levelUpEventPayload
     );
+
+    await this.refreshSkillsInfo(character);
+  }
+
+  private async refreshSkillsInfo(character: ICharacter): Promise<void> {
+    await this.inMemoryHashTable.delete("skills-with-buff", character._id);
 
     const skill = await this.skillBuff.getSkillsWithBuff(character);
     const buffs = await this.characterBuffSkill.calculateAllActiveBuffs(character);

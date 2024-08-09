@@ -4,9 +4,9 @@ Authorization: Bearer {{authToken}}
 content-type: application/json
 
 {
-  "blueprintKey": "ruby-gem",
+  "blueprintKey": "wooden-sword",
   "quantity": 1,
-  "characterId": "65c8f3b6d851c0005042d5b1" 
+  "characterId": "66b56a010fcbba00654d011c" 
 }
 
 ###
