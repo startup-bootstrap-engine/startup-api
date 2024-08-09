@@ -9,8 +9,8 @@ import { BasicAttribute, CharacterClass, CharacterSocketEvents, ICharacterAttrib
 import { provide } from "inversify-binding-decorators";
 import { CharacterMonitorInterval } from "../CharacterMonitorInterval/CharacterMonitorInterval";
 
-@provide(WarriorPassiveHabilities)
-export class WarriorPassiveHabilities {
+@provide(HealthRegen)
+export class HealthRegen {
   constructor(
     private socketMessaging: SocketMessaging,
     private characterMonitorInterval: CharacterMonitorInterval,
@@ -19,15 +19,15 @@ export class WarriorPassiveHabilities {
     private spellCalculator: SpellCalculator
   ) {}
 
-  public async warriorAutoRegenHealthHandler(character: ICharacter): Promise<void> {
+  public async startAutoRegenHealthHandler(character: ICharacter): Promise<void> {
     if (!character) {
       return;
     }
 
     const { _id, skills } = character;
 
-    if (character.class !== CharacterClass.Warrior) {
-      await this.characterMonitorInterval.unwatch("health-regen", character, "Not a warrior");
+    if (character.class !== CharacterClass.Warrior && character.class !== CharacterClass.Hunter) {
+      await this.characterMonitorInterval.unwatch("health-regen", character, "Invalid health regen class");
       return;
     }
 
@@ -39,7 +39,7 @@ export class WarriorPassiveHabilities {
         })) as unknown as ISkill;
 
       const strengthLvl = await this.traitGetter.getSkillLevelWithBuffs(charSkills as ISkill, BasicAttribute.Strength);
-      const healthRegenAmount = Math.max(Math.floor(strengthLvl / 3), 4);
+      const healthRegenAmount = this.getHealthRegenAmount(character.class, strengthLvl);
 
       const intervalMs = await this.spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Strength, {
         min: 7000,
@@ -109,6 +109,19 @@ export class WarriorPassiveHabilities {
       );
     } catch (err) {
       console.error(err);
+    }
+  }
+
+  private getHealthRegenAmount(characterClass: CharacterClass, strengthLvl: number): number {
+    const baseRegenAmount = Math.max(Math.floor(strengthLvl / 3), 4);
+
+    switch (characterClass) {
+      case CharacterClass.Warrior:
+        return baseRegenAmount;
+      case CharacterClass.Hunter:
+        return Math.floor(baseRegenAmount * 0.5);
+      default:
+        return 0;
     }
   }
 }
