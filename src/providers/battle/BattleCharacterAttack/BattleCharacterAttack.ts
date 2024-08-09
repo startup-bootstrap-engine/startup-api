@@ -14,6 +14,7 @@ import { BattleAttackTarget } from "../BattleAttackTarget/BattleAttackTarget";
 import { BattleCycle } from "../BattleCycle";
 import { BattleTargeting } from "../BattleTargeting";
 import { BattleNetworkStopTargeting } from "../network/BattleNetworkStopTargetting";
+import { BattleCharacterAttackIntervalSpeed } from "./BattleCharacterAttackIntervalSpeed";
 import { BattleCharacterAttackValidation } from "./BattleCharacterAttackValidation";
 
 @provide(BattleCharacterAttack)
@@ -27,6 +28,7 @@ export class BattleCharacterAttack {
     private characterValidation: CharacterValidation,
     private battleCycle: BattleCycle,
     private socketMessaging: SocketMessaging,
+    private battleCharacterAttackIntervalSpeed: BattleCharacterAttackIntervalSpeed,
 
     private characterSkull: CharacterSkull
   ) {}
@@ -36,7 +38,9 @@ export class BattleCharacterAttack {
       return;
     }
 
-    await this.battleCycle.init(character, target._id, character.attackIntervalSpeed, async () => {
+    const attackIntervalSpeed = await this.battleCharacterAttackIntervalSpeed.tryReducingAttackIntervalSpeed(character);
+
+    await this.battleCycle.init(character, target._id, attackIntervalSpeed, async () => {
       await this.execCharacterBattleCycleLoop(character, target);
     });
   }

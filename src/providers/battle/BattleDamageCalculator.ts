@@ -139,7 +139,7 @@ export class BattleDamageCalculator {
       case CharacterClass.Sorcerer:
         return 0.25;
       case CharacterClass.Hunter:
-        return 0.5;
+        return 0.75;
       default:
         return 1;
     }
