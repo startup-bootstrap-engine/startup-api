@@ -22,7 +22,7 @@ export const itemDragonBow: IEquippableRangedTier5WeaponBlueprint = {
   texturePath: "ranged-weapons/dragon-bow.png",
   name: "Dragon Bow",
   description: "A powerful bow made from dragon bones.",
-  attack: 43,
+  attack: 50,
   tier: 5,
   weight: 1.5,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

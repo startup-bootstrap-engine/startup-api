@@ -12,7 +12,7 @@ export const itemYggdrasilBow: IEquippableRangedTier5WeaponBlueprint = {
   description: "The Yggdrasil Bow is a weapon of legendary power, crafted from the branches of the World Tree itself.",
   weight: 3,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
-  attack: 40,
+  attack: 44,
   maxRange: RangeTypes.High,
   tier: 5,
   requiredAmmoKeys: [

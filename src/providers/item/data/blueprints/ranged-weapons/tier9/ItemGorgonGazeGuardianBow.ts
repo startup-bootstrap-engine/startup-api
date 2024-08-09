@@ -1,3 +1,4 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   BasicAttribute,
   CharacterAttributes,
@@ -11,7 +12,6 @@ import {
 } from "@rpg-engine/shared";
 import { IEquippableRangedTier9WeaponBlueprint } from "../../../types/TierBlueprintTypes";
 import { RangedWeaponsBlueprint } from "../../../types/itemsBlueprintTypes";
-import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 
 export const itemGorgonGazeGuardianBow: IEquippableRangedTier9WeaponBlueprint = {
   key: RangedWeaponsBlueprint.GorgonGazeGuardianBow,
@@ -23,7 +23,7 @@ export const itemGorgonGazeGuardianBow: IEquippableRangedTier9WeaponBlueprint = 
   name: "Gorgon Gaze Guardian Bow",
   description:
     "Carved from the petrified remains of Medusa, arrows shot from this bow can momentarily stun foes with a phantom gaze.",
-  attack: 68,
+  attack: 78,
   weight: 1.4,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   maxRange: RangeTypes.High,

@@ -23,7 +23,7 @@ export const itemStarsHooterBow: IEquippableRangedTier11WeaponBlueprint = {
   name: "Stars Hooter Bow",
   description:
     "Forged from meteoric iron, this bow shoots arrows that explode like mini supernovas. Ideal for area denial.",
-  attack: 85,
+  attack: 92,
   weight: 1.2,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   maxRange: RangeTypes.High,

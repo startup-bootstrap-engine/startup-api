@@ -13,7 +13,7 @@ export const itemCrossbow: IEquippableRangedTier1WeaponBlueprint = {
   name: "Crossbow",
   description:
     "A weapon used for shooting bolts and usually made of a strip of wood bent by a cord connecting the two end.",
-  attack: 15,
+  attack: 22,
   tier: 1,
   weight: 3,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

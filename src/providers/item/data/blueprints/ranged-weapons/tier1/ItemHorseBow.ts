@@ -13,7 +13,7 @@ export const itemHorseBow: IEquippableRangedTier1WeaponBlueprint = {
   name: "Horse Bow",
   description:
     "A small, lightweight bow designed for use on horseback. It is typically used for hunting and skirmishing, and is known for its speed and accuracy.",
-  attack: 12,
+  attack: 17,
   tier: 1,
   weight: 2,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

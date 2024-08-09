@@ -13,7 +13,7 @@ export const itemSlingshot: IEquippableRangedTier0WeaponBlueprint = {
   name: "Wooden Slingshot",
   description:
     "A weapon used for shooting stones and usually made of a strip of wood bent by a cord connecting the two end.",
-  attack: 6,
+  attack: 9,
   tier: 0,
   weight: 1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

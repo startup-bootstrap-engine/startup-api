@@ -11,7 +11,7 @@ export const itemRuneBow: IEquippableRangedTier3WeaponBlueprint = {
   texturePath: "ranged-weapons/rune-bow.png",
   name: "Rune Bow",
   description: "A bow with rune inscriptions.",
-  attack: 24,
+  attack: 34,
   tier: 3,
   weight: 1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

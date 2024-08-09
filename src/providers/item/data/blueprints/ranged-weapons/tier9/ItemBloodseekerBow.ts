@@ -23,7 +23,7 @@ export const itemBloodseekerBow: IEquippableRangedTier9WeaponBlueprint = {
   name: "Bloodseeker Bow",
   description:
     "Crafted from the bone of a fallen demon. Drains the life force of enemies hit, partially healing the archer.",
-  attack: 70,
+  attack: 74,
   weight: 1.2,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   maxRange: RangeTypes.High,

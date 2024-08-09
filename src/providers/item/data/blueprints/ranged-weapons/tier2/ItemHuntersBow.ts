@@ -13,7 +13,7 @@ export const itemHuntersBow: IEquippableRangedTier2WeaponBlueprint = {
   name: "Hunters Bow",
   description:
     "A bow designed for hunting. It is typically shorter and more compact than other bows, making it easier to carry and use in confined spaces.",
-  attack: 16,
+  attack: 25,
   tier: 2,
   weight: 1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

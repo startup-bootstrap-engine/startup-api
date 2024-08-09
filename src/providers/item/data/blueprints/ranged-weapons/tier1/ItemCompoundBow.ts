@@ -13,7 +13,7 @@ export const itemCompoundBow: IEquippableRangedTier1WeaponBlueprint = {
   name: "Compound Bow",
   description:
     "A bow that uses a system of pulleys and cables to reduce the effort needed to draw the string back, allowing for greater accuracy and speed when shooting arrows.",
-  attack: 13,
+  attack: 16,
   tier: 1,
   weight: 1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

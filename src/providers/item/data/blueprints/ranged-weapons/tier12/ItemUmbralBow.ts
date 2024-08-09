@@ -23,7 +23,7 @@ export const itemUmbralBow: IEquippableRangedTier12WeaponBlueprint = {
   name: "Umbral Bow",
   description:
     "Crafted during a lunar eclipse, this bow exudes a shadowy aura. Its arrows phase through darkness, making them nearly impossible to dodge.",
-  attack: 92,
+  attack: 99,
   weight: 1.5,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   maxRange: RangeTypes.High,

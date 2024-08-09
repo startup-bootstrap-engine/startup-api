@@ -11,7 +11,7 @@ export const itemRedwoodLongbow: IEquippableRangedTier3WeaponBlueprint = {
   texturePath: "ranged-weapons/redwood-longbow.png",
   name: "redwood-longbow",
   description: "A massive, imposing bow made from the giant, majestic wood of the redwood tree.",
-  attack: 24,
+  attack: 35,
   tier: 3,
   weight: 1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

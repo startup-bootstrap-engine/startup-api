@@ -13,7 +13,7 @@ export const itemScythianGoldenBow: IEquippableRangedTier4WeaponBlueprint = {
     "The Scythian Golden Bow is a ranged weapon that excels at dealing precise and deadly attacks from a distance.",
   weight: 2,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
-  attack: 35,
+  attack: 42,
   tier: 4,
   maxRange: RangeTypes.High,
   requiredAmmoKeys: [

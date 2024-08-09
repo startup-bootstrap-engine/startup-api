@@ -1,3 +1,4 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   BasicAttribute,
   CharacterAttributes,
@@ -11,7 +12,6 @@ import {
 } from "@rpg-engine/shared";
 import { IEquippableRangedTier8WeaponBlueprint } from "../../../types/TierBlueprintTypes";
 import { RangedWeaponsBlueprint } from "../../../types/itemsBlueprintTypes";
-import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 
 export const itemTempestTalonTautBow: IEquippableRangedTier8WeaponBlueprint = {
   key: RangedWeaponsBlueprint.TempestTalonTautBow,
@@ -23,7 +23,7 @@ export const itemTempestTalonTautBow: IEquippableRangedTier8WeaponBlueprint = {
   name: "Tempest Talon Taut Bow",
   description:
     "Molded by the relentless winds of the highest peaks, it summons gusts that alter arrow trajectories, confounding enemies.",
-  attack: 60,
+  attack: 71,
   weight: 1.3,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   maxRange: RangeTypes.High,

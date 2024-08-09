@@ -11,7 +11,7 @@ export const itemRuneCrossbow: IEquippableRangedTier3WeaponBlueprint = {
   texturePath: "ranged-weapons/rune-crossbow.png",
   name: "Rune Crossbow",
   description: "A crossbow with rune inscriptions that increases attack speed and accuracy.",
-  attack: 27,
+  attack: 36,
   tier: 3,
   weight: 7,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

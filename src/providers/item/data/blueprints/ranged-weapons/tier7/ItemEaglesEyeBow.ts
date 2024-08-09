@@ -1,3 +1,4 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableRangedTier7WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   BasicAttribute,
@@ -11,7 +12,6 @@ import {
   RangeTypes,
 } from "@rpg-engine/shared";
 import { RangedWeaponsBlueprint } from "../../../types/itemsBlueprintTypes";
-import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 
 export const itemEaglesEyeBow: IEquippableRangedTier7WeaponBlueprint = {
   key: RangedWeaponsBlueprint.EaglesEyeBow,
@@ -23,7 +23,7 @@ export const itemEaglesEyeBow: IEquippableRangedTier7WeaponBlueprint = {
   name: "Eagles Eye Bow",
   description:
     "Made from eagle feathers and talons. Grants enhanced vision and aim, allowing for precise, long-range shots.",
-  attack: 57,
+  attack: 64,
   weight: 1.2,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   maxRange: RangeTypes.High,

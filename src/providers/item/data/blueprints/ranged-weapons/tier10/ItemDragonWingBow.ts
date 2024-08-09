@@ -23,7 +23,7 @@ export const itemDragonWingBow: IEquippableRangedTier10WeaponBlueprint = {
   name: "Dragon Wing Bow",
   description:
     "Made from the scales and wing membrane of a dragon. Shoots arrows that cause small, fiery explosions on impact.",
-  attack: 78,
+  attack: 85,
   weight: 1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   maxRange: RangeTypes.High,

@@ -12,7 +12,7 @@ export const itemValkyriesBow: IEquippableRangedTier5WeaponBlueprint = {
   texturePath: "ranged-weapons/valkyries-bow.png",
   name: "Valkyries Bow",
   description: "A bow that fires arrows that seek out enemies and deal heavy damage on impact.",
-  attack: 38,
+  attack: 45,
   weight: 1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   maxRange: RangeTypes.High,

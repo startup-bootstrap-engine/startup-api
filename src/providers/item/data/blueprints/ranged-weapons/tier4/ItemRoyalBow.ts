@@ -22,7 +22,7 @@ export const itemRoyalBow: IEquippableRangedTier4WeaponBlueprint = {
   name: "Royal Bow",
   description:
     " powerful, ornate bow often given as a symbol of royal power. It is often made of gold or other precious materials and may be intricately decorated with engravings or gemstones.",
-  attack: 30,
+  attack: 39,
   tier: 4,
   weight: 1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

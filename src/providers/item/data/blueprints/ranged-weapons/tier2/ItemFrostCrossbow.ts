@@ -15,7 +15,7 @@ export const itemFrostCrossbow: IEquippableRangedTier2WeaponBlueprint = {
   name: "Frost Crossbow",
   description: "The Ice Crossbow is a two-handed crossbow-type ranged weapon.",
   weight: 3,
-  attack: 20,
+  attack: 29,
   tier: 2,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   maxRange: RangeTypes.High,

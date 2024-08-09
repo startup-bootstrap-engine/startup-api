@@ -13,7 +13,7 @@ export const itemElvenBow: IEquippableRangedTier1WeaponBlueprint = {
   name: "Elven Bow",
   description:
     "A bow crafted by the elves, known for their skill in archery. It is said to be incredibly accurate and able to shoot arrows with great speed and distance.",
-  attack: 12,
+  attack: 18,
   tier: 1,
   weight: 1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

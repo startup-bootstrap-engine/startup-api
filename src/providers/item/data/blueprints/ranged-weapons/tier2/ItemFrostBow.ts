@@ -14,7 +14,7 @@ export const itemFrostBow: IEquippableRangedTier2WeaponBlueprint = {
   name: "Frost Bow",
   description: "Ice cristal made bow, formed by the reflection of sunlight from ice crystals floating in the air.",
   weight: 2,
-  attack: 18,
+  attack: 25,
   tier: 2,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   maxRange: RangeTypes.Medium,

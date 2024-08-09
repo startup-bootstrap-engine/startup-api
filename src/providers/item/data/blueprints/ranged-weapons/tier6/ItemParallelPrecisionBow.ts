@@ -1,3 +1,4 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   BasicAttribute,
   CharacterAttributes,
@@ -11,7 +12,6 @@ import {
 } from "@rpg-engine/shared";
 import { IEquippableRangedTier6WeaponBlueprint } from "../../../types/TierBlueprintTypes";
 import { RangedWeaponsBlueprint } from "../../../types/itemsBlueprintTypes";
-import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 
 export const itemParallelPrecisionBow: IEquippableRangedTier6WeaponBlueprint = {
   key: RangedWeaponsBlueprint.ParallelPrecisionBow,
@@ -23,7 +23,7 @@ export const itemParallelPrecisionBow: IEquippableRangedTier6WeaponBlueprint = {
   name: "Parallel Precision Bow",
   description:
     "Crafted for marksmen who value accuracy above all, its twin strings guarantee a straight path for every arrow.",
-  attack: 45,
+  attack: 54,
   weight: 1.2,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   maxRange: RangeTypes.Medium,

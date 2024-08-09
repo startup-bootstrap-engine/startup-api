@@ -11,7 +11,7 @@ export const itemEbonyLongbow: IEquippableRangedTier2WeaponBlueprint = {
   texturePath: "ranged-weapons/ebony-longbow.png",
   name: "Ebony Longbow",
   description: "A powerful, intimidating bow made from the dark, heavy wood of the ebony tree.",
-  attack: 16,
+  attack: 26,
   tier: 2,
   weight: 0.75,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

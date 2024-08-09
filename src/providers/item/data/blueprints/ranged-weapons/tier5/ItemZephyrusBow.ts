@@ -11,7 +11,7 @@ export const itemZephyrusBow: IEquippableRangedTier5WeaponBlueprint = {
   texturePath: "ranged-weapons/zephyrus-bow.png",
   name: "Zephyrus Bow",
   description: "A bow that shoots arrows infused with wind.",
-  attack: 38,
+  attack: 43,
   tier: 5,
   weight: 0.5,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

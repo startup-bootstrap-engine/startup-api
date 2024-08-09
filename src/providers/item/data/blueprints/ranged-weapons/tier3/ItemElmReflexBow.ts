@@ -11,7 +11,7 @@ export const itemElmReflexBow: IEquippableRangedTier3WeaponBlueprint = {
   texturePath: "ranged-weapons/elm-reflex-bow.png",
   name: "Elm Reflex Bow",
   description: "A responsive, flexible bow made from the supple, elastic wood of the elm tree.",
-  attack: 24,
+  attack: 34,
   tier: 3,
   weight: 1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

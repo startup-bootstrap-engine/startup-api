@@ -11,7 +11,7 @@ export const itemSunstoneBow: IEquippableRangedTier5WeaponBlueprint = {
   texturePath: "ranged-weapons/sunstone-bow.png",
   name: "Sunstone Bow",
   description: "A bow that shoots arrows infused with light, dealing extra damage to undead enemies.",
-  attack: 37,
+  attack: 46,
   tier: 5,
   weight: 1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

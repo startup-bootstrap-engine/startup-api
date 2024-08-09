@@ -13,7 +13,7 @@ export const itemShortBow: IEquippableRangedTier1WeaponBlueprint = {
   name: "Short Bow",
   description:
     "A small, lightweight bow with a short limb and a short string. It is easy to handle and use, making it popular among beginners and skilled archers alike.",
-  attack: 11,
+  attack: 15,
   tier: 1,
   weight: 1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

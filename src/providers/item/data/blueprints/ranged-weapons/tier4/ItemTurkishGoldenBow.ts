@@ -12,7 +12,7 @@ export const itemTurkishGoldenBow: IEquippableRangedTier4WeaponBlueprint = {
   description: "The Turkish Golden Bow is a magnificent weapon, crafted by master bowyers from the finest materials.",
   weight: 2.5,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
-  attack: 36,
+  attack: 40,
   tier: 4,
   maxRange: RangeTypes.High,
   requiredAmmoKeys: [

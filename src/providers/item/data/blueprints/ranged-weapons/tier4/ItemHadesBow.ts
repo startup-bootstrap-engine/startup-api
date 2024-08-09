@@ -12,7 +12,7 @@ export const itemHadesBow: IEquippableRangedTier4WeaponBlueprint = {
   texturePath: "ranged-weapons/hades-bow.png",
   name: "Hades Bow",
   description: "A bow infused with dark energy.",
-  attack: 30,
+  attack: 43,
   tier: 4,
   weight: 2,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

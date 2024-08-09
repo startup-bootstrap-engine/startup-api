@@ -11,7 +11,7 @@ export const itemStormBow: IEquippableRangedTier5WeaponBlueprint = {
   texturePath: "ranged-weapons/storm-bow.png",
   name: "Storm Bow",
   description: "A bow that shoots arrows infused with electricity, dealing heavy damage to enemies.",
-  attack: 37,
+  attack: 48,
   tier: 5,
   weight: 1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

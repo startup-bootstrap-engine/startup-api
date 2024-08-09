@@ -785,77 +785,77 @@ type Tier12AmmoKeys =
 
 export interface IEquippableRangedTier0WeaponBlueprint extends IEquippableRangedWeaponTwoHandedBlueprint {
   tier: 0;
-  attack: WeaponTier0Attack;
+  attack: WeaponTier1Attack;
   requiredAmmoKeys: Tier0AmmoKeys;
 }
 
 export interface IEquippableRangedTier1WeaponBlueprint extends IEquippableRangedWeaponTwoHandedBlueprint {
   tier: 1;
-  attack: WeaponTier1Attack;
+  attack: WeaponTier2Attack;
   requiredAmmoKeys: Tier1AmmoKeys;
 }
 
 export interface IEquippableRangedTier2WeaponBlueprint extends IEquippableRangedWeaponTwoHandedBlueprint {
   tier: 2;
-  attack: WeaponTier2Attack;
+  attack: WeaponTier3Attack;
   requiredAmmoKeys: Tier2AmmoKeys;
 }
 
 export interface IEquippableRangedTier3WeaponBlueprint extends IEquippableRangedWeaponTwoHandedBlueprint {
   tier: 3;
-  attack: WeaponTier3Attack;
+  attack: WeaponTier4Attack;
   requiredAmmoKeys: Tier3AmmoKeys;
 }
 
 export interface IEquippableRangedTier4WeaponBlueprint extends IEquippableRangedWeaponTwoHandedBlueprint {
   tier: 4;
-  attack: WeaponTier4Attack;
+  attack: WeaponTier5Attack;
   requiredAmmoKeys: Tier4AmmoKeys;
 }
 
 export interface IEquippableRangedTier5WeaponBlueprint extends IEquippableRangedWeaponTwoHandedBlueprint {
   tier: 5;
-  attack: WeaponTier5Attack;
+  attack: WeaponTier6Attack;
   requiredAmmoKeys: Tier5AmmoKeys;
 }
 export interface IEquippableRangedTier6WeaponBlueprint extends IEquippableRangedWeaponTwoHandedBlueprint {
   tier: 6;
-  attack: WeaponTier6Attack;
+  attack: WeaponTier7Attack;
   requiredAmmoKeys: Tier6AmmoKeys;
 }
 export interface IEquippableRangedTier7WeaponBlueprint extends IEquippableRangedWeaponTwoHandedBlueprint {
   tier: 7;
-  attack: WeaponTier7Attack;
+  attack: WeaponTier8Attack;
   requiredAmmoKeys: Tier7AmmoKeys;
 }
 
 export interface IEquippableRangedTier8WeaponBlueprint extends IEquippableRangedWeaponTwoHandedBlueprint {
   tier: 8;
-  attack: WeaponTier8Attack;
+  attack: WeaponTier9Attack;
   requiredAmmoKeys: Tier8AmmoKeys;
 }
 
 export interface IEquippableRangedTier9WeaponBlueprint extends IEquippableRangedWeaponTwoHandedBlueprint {
   tier: 9;
-  attack: WeaponTier9Attack;
+  attack: WeaponTier10Attack;
   requiredAmmoKeys: Tier9AmmoKeys;
 }
 
 export interface IEquippableRangedTier10WeaponBlueprint extends IEquippableRangedWeaponTwoHandedBlueprint {
   tier: 10;
-  attack: WeaponTier10Attack;
+  attack: WeaponTier11Attack;
   requiredAmmoKeys: Tier10AmmoKeys;
 }
 
 export interface IEquippableRangedTier11WeaponBlueprint extends IEquippableRangedWeaponTwoHandedBlueprint {
   tier: 11;
-  attack: WeaponTier11Attack;
+  attack: WeaponTier12Attack;
   requiredAmmoKeys: Tier11AmmoKeys;
 }
 
 export interface IEquippableRangedTier12WeaponBlueprint extends IEquippableRangedWeaponTwoHandedBlueprint {
   tier: 12;
-  attack: WeaponTier12Attack;
+  attack: WeaponTier13Attack;
   requiredAmmoKeys: Tier12AmmoKeys;
 }
 

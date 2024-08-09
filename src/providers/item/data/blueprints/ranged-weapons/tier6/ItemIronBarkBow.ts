@@ -1,3 +1,4 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableRangedTier6WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   BasicAttribute,
@@ -11,7 +12,6 @@ import {
   RangeTypes,
 } from "@rpg-engine/shared";
 import { RangedWeaponsBlueprint } from "../../../types/itemsBlueprintTypes";
-import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 
 export const itemIronBarkBow: IEquippableRangedTier6WeaponBlueprint = {
   key: RangedWeaponsBlueprint.IronBarkBow,
@@ -22,7 +22,7 @@ export const itemIronBarkBow: IEquippableRangedTier6WeaponBlueprint = {
   texturePath: "ranged-weapons/iron-bark-bow.png",
   name: "Iron Bark Bow",
   description: "Crafted from the wood of an ancient, iron-dense tree. Fires arrows with significant armor penetration.",
-  attack: 48,
+  attack: 53,
   weight: 1.5,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   maxRange: RangeTypes.High,

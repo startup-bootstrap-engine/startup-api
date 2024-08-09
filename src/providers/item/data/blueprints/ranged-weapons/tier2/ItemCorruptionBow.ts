@@ -14,7 +14,7 @@ export const itemCorruptionBow: IEquippableRangedTier2WeaponBlueprint = {
   name: "Corruption Bow",
   description:
     "A bow imbued with dark, otherworldly energy. It is said to be able to ignite the air around it and to be capable of shooting corruption bolts with great force and accuracy.",
-  attack: 14,
+  attack: 24,
   weight: 1,
   tier: 2,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

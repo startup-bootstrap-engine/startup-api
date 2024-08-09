@@ -23,7 +23,7 @@ export const itemRoyalCrossbow: IEquippableRangedTier4WeaponBlueprint = {
   description:
     "A powerful, ornate crossbow often given as a symbol of royal power. It is often made of gold or other precious materials and may be intricately decorated with engravings or gemstones. It has a horizontal limb assembly mounted on a stock that fires projectiles using a horizontal bow-like string.",
   weight: 4,
-  attack: 33,
+  attack: 43,
   tier: 4,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   maxRange: RangeTypes.High,

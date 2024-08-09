@@ -13,7 +13,7 @@ export const itemLongBow: IEquippableRangedTier2WeaponBlueprint = {
   name: "Long Bow",
   description:
     "A tall, traditional bow with a long, narrow limb and a long string. It is known for its ability to shoot arrows with great speed and distance.",
-  attack: 17,
+  attack: 27,
   tier: 2,
   weight: 1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

@@ -1,3 +1,4 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableRangedTier8WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   BasicAttribute,
@@ -11,7 +12,6 @@ import {
   RangeTypes,
 } from "@rpg-engine/shared";
 import { RangedWeaponsBlueprint } from "../../../types/itemsBlueprintTypes";
-import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 
 export const itemStoneBreakerBow: IEquippableRangedTier8WeaponBlueprint = {
   key: RangedWeaponsBlueprint.StoneBreakerBow,
@@ -22,7 +22,7 @@ export const itemStoneBreakerBow: IEquippableRangedTier8WeaponBlueprint = {
   texturePath: "ranged-weapons/stone-breaker-bow.png",
   name: "Stone Breaker Bow",
   description: "Crafted from hardened lava. Arrows shatter upon impact, sending razor-sharp shards in all directions.",
-  attack: 64,
+  attack: 68,
   weight: 1.3,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   maxRange: RangeTypes.High,

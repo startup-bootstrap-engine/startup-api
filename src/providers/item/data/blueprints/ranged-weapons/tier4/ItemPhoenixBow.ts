@@ -11,7 +11,7 @@ export const itemPhoenixBow: IEquippableRangedTier4WeaponBlueprint = {
   texturePath: "ranged-weapons/phoenix-bow.png",
   name: "Phoenix Bow",
   description: "A bow that shoots arrows infused with fire, causing damage over time to enemies.",
-  attack: 22,
+  attack: 38,
   tier: 4,
   weight: 1.5,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

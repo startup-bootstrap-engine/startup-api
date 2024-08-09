@@ -13,7 +13,7 @@ export const itemEldensBow: IEquippableRangedTier3WeaponBlueprint = {
   name: "Elden's Bow",
   description:
     "A powerful, enchanted bow said to have belonged to a great hero of legend. It is said to be capable of shooting arrows with incredible speed and accuracy.",
-  attack: 25,
+  attack: 33,
   tier: 3,
   weight: 1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

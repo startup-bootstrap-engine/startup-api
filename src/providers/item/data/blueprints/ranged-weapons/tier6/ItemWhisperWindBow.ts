@@ -1,3 +1,4 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import { IEquippableRangedTier6WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
 import {
   BasicAttribute,
@@ -11,7 +12,6 @@ import {
   RangeTypes,
 } from "@rpg-engine/shared";
 import { RangedWeaponsBlueprint } from "../../../types/itemsBlueprintTypes";
-import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 
 export const itemWhisperWindBow: IEquippableRangedTier6WeaponBlueprint = {
   key: RangedWeaponsBlueprint.WhisperWindBow,
@@ -23,7 +23,7 @@ export const itemWhisperWindBow: IEquippableRangedTier6WeaponBlueprint = {
   name: "Whisper Wind Bow",
   description:
     "Crafted from ghostwood, this bow is nearly silent. Ideal for assassins, it allows for stealthy eliminations.",
-  attack: 50,
+  attack: 57,
   weight: 1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   maxRange: RangeTypes.Medium,

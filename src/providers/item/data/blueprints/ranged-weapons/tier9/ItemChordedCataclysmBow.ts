@@ -13,7 +13,7 @@ export const itemChordedCataclysmBow: Partial<IItem> = {
   name: "Chorded Cataclysm Bow",
   description:
     "A weapon of legends, its dual strings rumble with the force of a calamity, promising devastation in its wake.",
-  attack: 65,
+  attack: 78,
   weight: 1.2,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   maxRange: RangeTypes.High,

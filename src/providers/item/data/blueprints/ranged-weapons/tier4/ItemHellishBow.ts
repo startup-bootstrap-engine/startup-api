@@ -22,7 +22,7 @@ export const itemHellishBow: IEquippableRangedTier4WeaponBlueprint = {
   name: "Hellish Bow",
   description:
     "A bow imbued with dark, otherworldly energy. It is said to be able to ignite the air around it and to be capable of shooting hellish bolts with great force and accuracy.",
-  attack: 32,
+  attack: 38,
   tier: 4,
   weight: 1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

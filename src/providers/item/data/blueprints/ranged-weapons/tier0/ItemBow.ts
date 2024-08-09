@@ -13,7 +13,7 @@ export const itemBow: IEquippableRangedTier0WeaponBlueprint = {
   name: "Bow",
   description:
     "A weapon used for shooting arrows and usually made of a strip of wood bent by a cord connecting the two end.",
-  attack: 8,
+  attack: 12,
   tier: 0,
   weight: 1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

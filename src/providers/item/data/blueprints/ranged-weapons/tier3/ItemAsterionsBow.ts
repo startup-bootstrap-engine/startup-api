@@ -22,7 +22,7 @@ export const itemAsterionsBow: IEquippableRangedTier3WeaponBlueprint = {
   name: "Asterion's Bow",
   description:
     "A weapon used for shooting arrows and usually made of a strip of wood bent by a cord connecting the two end.",
-  attack: 29,
+  attack: 36,
   tier: 3,
   weight: 1,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],

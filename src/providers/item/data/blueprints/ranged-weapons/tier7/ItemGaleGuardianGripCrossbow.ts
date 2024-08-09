@@ -1,3 +1,4 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   BasicAttribute,
   CharacterAttributes,
@@ -11,7 +12,6 @@ import {
 } from "@rpg-engine/shared";
 import { IEquippableRangedTier7WeaponBlueprint } from "../../../types/TierBlueprintTypes";
 import { RangedWeaponsBlueprint } from "../../../types/itemsBlueprintTypes";
-import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 
 export const itemGaleGuardianGripCrossbow: IEquippableRangedTier7WeaponBlueprint = {
   key: RangedWeaponsBlueprint.GaleGuardianGripCrossbow,
@@ -23,7 +23,7 @@ export const itemGaleGuardianGripCrossbow: IEquippableRangedTier7WeaponBlueprint
   name: "Gale Guardian Grip Crossbow",
   description:
     "Blessed by wind deities, the bolts from this crossbow create mini whirlwinds, disrupting enemy formations",
-  attack: 55,
+  attack: 64,
   weight: 1.3,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   maxRange: RangeTypes.High,

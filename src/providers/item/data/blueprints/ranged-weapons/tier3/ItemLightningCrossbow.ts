@@ -11,7 +11,7 @@ export const itemLightningCrossbow: IEquippableRangedTier3WeaponBlueprint = {
   texturePath: "ranged-weapons/lightning-crossbow.png",
   name: "Lightning Crossbow",
   description: "A crossbow that fires bolts of lightning, dealing heavy damage to enemies weak to lightning.",
-  attack: 25,
+  attack: 35,
   tier: 3,
   weight: 3,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
