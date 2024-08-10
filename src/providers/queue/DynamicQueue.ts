@@ -128,7 +128,7 @@ export class DynamicQueue {
       },
       {
         name: `${queueName}-worker`,
-        concurrency: maxWorkerConcurrency,
+        // concurrency: maxWorkerConcurrency, //! Testing without concurrency
         connection,
         ...workerOptions,
       }
