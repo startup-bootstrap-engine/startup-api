@@ -22,7 +22,7 @@ export const NPC_GIANT_FORM_STATS_MULTIPLIER = 2;
 export const NPC_GIANT_FORM_LOOT_MULTIPLIER = 1.5;
 export const NPC_GIANT_FORM_EXPERIENCE_MULTIPLIER = 2.5;
 
-export const NPC_CYCLE_INTERVAL_RATIO = 0.95; // higher means faster cycles
+export const NPC_CYCLE_INTERVAL_RATIO = 1; // higher means faster cycles
 
 export const NPC_FREEZE_CHECK_INTERVAL = 7000;
 

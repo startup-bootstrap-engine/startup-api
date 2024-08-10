@@ -87,7 +87,9 @@ export class NPCMovement {
     try {
       const npcPath = await this.findPath(npc, target, startGridX, startGridY, endGridX, endGridY);
 
-      if (!npcPath?.length) return;
+      if (!npcPath?.length) {
+        return;
+      }
 
       const [newGridX, newGridY] = npcPath[1] ?? npcPath[0];
       if (!newGridX || !newGridY) return;
