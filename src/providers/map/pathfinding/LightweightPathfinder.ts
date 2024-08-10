@@ -8,9 +8,7 @@ import { provide } from "inversify-binding-decorators";
 
 @provide(LightweightPathfinder)
 export class LightweightPathfinder {
-  private static readonly MAX_STATIONARY_COUNT = 5;
-  private static readonly MAX_OSCILLATION_COUNT = 2;
-  private static readonly FORCE_ADVANCED_PATHFINDING_INTERVAL = 10;
+  private static readonly MAX_STATIONARY_COUNT = 5; // Maximum number of consecutive stationary checks
 
   constructor(
     private inMemoryHashTable: InMemoryHashTable,
@@ -29,8 +27,9 @@ export class LightweightPathfinder {
 
     const nonSolidPositions = await this.getNonSolidPositions(npc, potentialPositions);
 
+    // If all positions are solid, return an empty array
     if (nonSolidPositions.length === 0) {
-      return this.handleAdvancedPathfinding(npc);
+      return [];
     }
 
     const dx = targetX - npc.x;
@@ -40,21 +39,19 @@ export class LightweightPathfinder {
     const bestPosition = this.getBestPosition(nonSolidPositions, targetDirection, targetX, targetY);
 
     if (bestPosition) {
-      if (await this.shouldTryAlternativePath(npc, bestPosition.x, bestPosition.y)) {
-        const alternativePath = await this.findAlternativePath(npc, nonSolidPositions, targetX, targetY);
-        if (alternativePath.length > 0) {
-          return alternativePath;
-        }
-      }
-
-      if (await this.shouldForceAdvancedPathfinding(npc, bestPosition.x, bestPosition.y)) {
+      if (await this.isOscillating(npc, bestPosition.x, bestPosition.y)) {
         return this.handleAdvancedPathfinding(npc);
       }
-
+      if (await this.isStationary(npc, bestPosition.x, bestPosition.y)) {
+        return this.handleAdvancedPathfinding(npc);
+      }
+      if (await this.handleNPCStuck(npc, bestPosition.x, bestPosition.y)) {
+        return this.findAlternativePath(npc, nonSolidPositions, targetX, targetY);
+      }
       return [[ToGridX(bestPosition.x), ToGridY(bestPosition.y)]];
     }
 
-    return this.handleAdvancedPathfinding(npc);
+    return [];
   }
 
   private async getNonSolidPositions(npc: INPC, potentialPositions: any[]): Promise<any[]> {
@@ -96,13 +93,18 @@ export class LightweightPathfinder {
     );
   }
 
-  private async shouldTryAlternativePath(npc: INPC, x: number, y: number): Promise<boolean> {
+  private async handleNPCStuck(npc: INPC, x: number, y: number): Promise<boolean> {
     const npcId = npc._id.toString();
-    const isOscillating = await this.isOscillating(npc, x, y);
-    const isStationary = await this.isStationary(npc, x, y);
-    const isStuck = await this.handleNPCStuck(npc, x, y);
+    const prevPositions = (await this.inMemoryHashTable.get("npc-positions", npcId)) || [];
+    const isStuck = prevPositions.some(([prevX, prevY]) => prevX === ToGridX(x) && prevY === ToGridY(y));
 
-    return isOscillating || isStationary || isStuck;
+    prevPositions.push([ToGridX(x), ToGridY(y)]);
+    if (prevPositions.length > 5) {
+      prevPositions.shift();
+    }
+    await this.inMemoryHashTable.set("npc-positions", npcId, prevPositions);
+
+    return isStuck;
   }
 
   private async findAlternativePath(
@@ -125,62 +127,22 @@ export class LightweightPathfinder {
       return [[ToGridX(bestAlternative.x), ToGridY(bestAlternative.y)]];
     }
 
-    return [];
-  }
-
-  private async shouldForceAdvancedPathfinding(npc: INPC, x: number, y: number): Promise<boolean> {
-    const npcId = npc._id.toString();
-    const moveCount = ((await this.inMemoryHashTable.get("npc-move-count", npcId)) || 0) as number;
-    await this.inMemoryHashTable.set("npc-move-count", npcId, moveCount + 1);
-
-    if (moveCount % LightweightPathfinder.FORCE_ADVANCED_PATHFINDING_INTERVAL === 0) {
-      await this.inMemoryHashTable.set("npc-move-count", npcId, 0);
-      return true;
-    }
-
-    return false;
-  }
-
-  private async handleNPCStuck(npc: INPC, x: number, y: number): Promise<boolean> {
-    const npcId = npc._id.toString();
-    const prevPositions = (await this.inMemoryHashTable.get("npc-positions", npcId)) || [];
-    const isStuck = prevPositions.some(([prevX, prevY]) => prevX === ToGridX(x) && prevY === ToGridY(y));
-
-    prevPositions.push([ToGridX(x), ToGridY(y)]);
-    if (prevPositions.length > 5) {
-      prevPositions.shift();
-    }
-    await this.inMemoryHashTable.set("npc-positions", npcId, prevPositions);
-
-    return isStuck;
+    return this.handleAdvancedPathfinding(npc);
   }
 
   private async isOscillating(npc: INPC, x: number, y: number): Promise<boolean> {
     const npcId = npc._id.toString();
     const prevPositions = (await this.inMemoryHashTable.get("npc-positions", npcId)) || [];
-    const oscillationCount = ((await this.inMemoryHashTable.get("npc-oscillation-count", npcId)) || 0) as number;
-
-    const currentPos = [ToGridX(x), ToGridY(y)];
-    prevPositions.push(currentPos);
-    if (prevPositions.length > 4) {
-      prevPositions.shift();
-    }
-    await this.inMemoryHashTable.set("npc-positions", npcId, prevPositions);
 
     if (prevPositions.length < 4) return false;
 
+    const currentPos = [ToGridX(x), ToGridY(y)];
     const lastFourPositions = prevPositions.slice(-4);
-    const isOscillating =
-      this.arePositionsEqual(currentPos, lastFourPositions[1]) &&
-      this.arePositionsEqual(lastFourPositions[0], lastFourPositions[2]);
 
-    if (isOscillating) {
-      await this.inMemoryHashTable.set("npc-oscillation-count", npcId, oscillationCount + 1);
-      return oscillationCount + 1 >= LightweightPathfinder.MAX_OSCILLATION_COUNT;
-    } else {
-      await this.inMemoryHashTable.set("npc-oscillation-count", npcId, 0);
-      return false;
-    }
+    return (
+      this.arePositionsEqual(currentPos, lastFourPositions[1]) &&
+      this.arePositionsEqual(lastFourPositions[0], lastFourPositions[2])
+    );
   }
 
   private async isStationary(npc: INPC, x: number, y: number): Promise<boolean> {
@@ -201,12 +163,12 @@ export class LightweightPathfinder {
     }
   }
 
+  private arePositionsEqual(pos1: number[], pos2: number[]): boolean {
+    return pos1[0] === pos2[0] && pos1[1] === pos2[1];
+  }
+
   private async handleAdvancedPathfinding(npc: INPC): Promise<number[][]> {
     await this.inMemoryHashTable.set("npc-force-pathfinding-calculation", npc._id, true);
     return [];
-  }
-
-  private arePositionsEqual(pos1: number[], pos2: number[]): boolean {
-    return pos1[0] === pos2[0] && pos1[1] === pos2[1];
   }
 }
