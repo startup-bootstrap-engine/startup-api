@@ -167,7 +167,7 @@ export class ChatNetworkGlobalMessagingQueue {
         },
       },
       { $sort: { createdAt: -1 } },
-      { $limit: limit },
+      { $limit: limit ?? 20 },
       {
         $lookup: {
           from: "characters",
