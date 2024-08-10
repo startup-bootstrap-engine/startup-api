@@ -127,12 +127,6 @@ export class DynamicQueue {
       this.workers.size
     );
 
-    if (appEnv.general.ENV === EnvType.Development) {
-      console.log(
-        `Metrics: maxWorkerConcurrency: ${maxWorkerConcurrency}, maxWorkerLimiter: ${maxWorkerLimiter}, workersSize: ${this.workers.size} queueName: ${queueName}`
-      );
-    }
-
     const worker = new Worker(
       queueName,
       async (job) => {

@@ -39,7 +39,7 @@ export class ChatNetworkTradeMessaging {
           const tradeChatLogs = await TradeChatLog.find({})
             .sort({ createdAt: -1 })
             .populate("emitter", "name")
-            .limit(data.limit);
+            .limit(data.limit ?? 10);
 
           tradeChatLogs.reverse();
 
