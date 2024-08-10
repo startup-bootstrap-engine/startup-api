@@ -35,6 +35,7 @@ export class ChatNetworkGlobalMessagingQueue {
     private dynamicQueue: DynamicQueue
   ) {}
 
+  @TrackNewRelicTransaction()
   public async addToQueue(data: IChatMessageCreatePayload, character: ICharacter): Promise<void> {
     await this.dynamicQueue.addJob(
       "chat-global-messaging",

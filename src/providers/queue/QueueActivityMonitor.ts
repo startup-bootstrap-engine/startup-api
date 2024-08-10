@@ -81,7 +81,7 @@ export class QueueActivityMonitor {
       this.connection = await this.redisManager.getPoolClient("queue-activity-monitor");
     }
 
-    const queue = new Queue(queueName, { connection: this.connection });
+    const queue = new Queue(queueName, { connection: this.connection as unknown as any });
 
     try {
       await this.waitForActiveJobs(queue);

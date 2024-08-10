@@ -68,7 +68,6 @@ export class CharacterDeath {
     private dynamicQueue: DynamicQueue
   ) {}
 
-  @TrackNewRelicTransaction()
   public async handleCharacterDeath(killer: INPC | ICharacter | null, character: ICharacter): Promise<void> {
     const canProceed = await this.locker.lock(`character-death-${character._id}`, 2);
 
@@ -94,6 +93,7 @@ export class CharacterDeath {
     );
   }
 
+  @TrackNewRelicTransaction()
   public async execHandleCharacterDeath(killer: INPC | ICharacter | null, character: ICharacter): Promise<void> {
     try {
       const characterBody = await this.generateCharacterBody(character);

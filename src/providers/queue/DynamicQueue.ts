@@ -11,6 +11,7 @@ import {
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { Locker } from "@providers/locks/Locker";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { EnvType } from "@rpg-engine/shared";
 import { DefaultJobOptions, Job, Queue, QueueBaseOptions, Worker, WorkerOptions } from "bullmq";
@@ -47,7 +48,8 @@ export class DynamicQueue {
     private inMemoryHashTable: InMemoryHashTable,
     private newRelic: NewRelic,
     private entityQueueScalingCalculator: EntityQueueScalingCalculator,
-    private dynamicQueueCleaner: DynamicQueueCleaner
+    private dynamicQueueCleaner: DynamicQueueCleaner,
+    private locker: Locker
   ) {}
 
   public async addJob(
@@ -59,10 +61,13 @@ export class DynamicQueue {
     queueOptions?: QueueBaseOptions,
     workerOptions?: WorkerOptions
   ): Promise<Job | undefined> {
+    let queueName;
+
     try {
       const { queueScaleFactor, queueScaleBy } = queueScaleOptions;
-      const queueName = await this.generateQueueName(prefix, queueScaleBy, queueScaleFactor, queueScaleOptions);
-      const connection = await this.getQueueConnection(queueName);
+      queueName = await this.generateQueueName(prefix, queueScaleBy, queueScaleFactor, queueScaleOptions);
+
+      const connection = (await this.getQueueConnection(queueName)) as any;
       const queue = await this.initOrFetchQueue(
         queueName,
         jobFn,
@@ -93,20 +98,50 @@ export class DynamicQueue {
   private async initOrFetchWorker(
     queueName: string,
     jobFn: QueueJobFn,
-    connection: Redis,
+    connection: any,
     workerOptions?: WorkerOptions,
     queueScaleOptions?: IQueueScaleOptions
   ): Promise<void> {
     if (this.workers.has(queueName)) return;
 
-    const { maxWorkerConcurrency } = await this.getWorkerScalingParameters(queueScaleOptions);
+    const { maxWorkerConcurrency, maxWorkerLimiter } = await this.getWorkerScalingParameters(queueScaleOptions);
+
+    this.newRelic.trackMetric(
+      NewRelicMetricCategory.Count,
+      NewRelicSubCategory.Server,
+      `WorkerConcurrency/${queueName}`,
+      maxWorkerConcurrency
+    );
+
+    this.newRelic.trackMetric(
+      NewRelicMetricCategory.Count,
+      NewRelicSubCategory.Server,
+      `WorkerLimiter/${queueName}`,
+      maxWorkerLimiter
+    );
+
+    this.newRelic.trackMetric(
+      NewRelicMetricCategory.Count,
+      NewRelicSubCategory.Server,
+      `WorkerPoolSize/${queueName}`,
+      this.workers.size
+    );
+
+    if (appEnv.general.ENV === EnvType.Development) {
+      console.log(
+        `Metrics: maxWorkerConcurrency: ${maxWorkerConcurrency}, maxWorkerLimiter: ${maxWorkerLimiter}, workersSize: ${this.workers.size} queueName: ${queueName}`
+      );
+    }
 
     const worker = new Worker(
       queueName,
       async (job) => {
         try {
           await this.queueActivityMonitor.updateQueueActivity(queueName);
-          await jobFn(job);
+
+          const result = await this.processJobWithTimeout(job, jobFn, 7500);
+
+          return result;
         } catch (error) {
           console.error(`${queueName}: Error processing job ${job.id}:`, error);
           throw error; // Let BullMQ handle the job failure
@@ -115,6 +150,11 @@ export class DynamicQueue {
       {
         name: `${queueName}-worker`,
         concurrency: maxWorkerConcurrency, //! Testing without concurrency
+        limiter: {
+          max: maxWorkerLimiter,
+          duration: 1000,
+        },
+        maxStalledCount: 1,
         connection,
         ...workerOptions,
       }
@@ -126,6 +166,28 @@ export class DynamicQueue {
       this.setupWorkerErrorHandlers(worker, queueName);
     }
   }
+
+  private processJobWithTimeout = (job: Job, jobFn: Function, timeoutDuration: number): Promise<any> => {
+    // eslint-disable-next-line no-async-promise-executor
+    return new Promise(async (resolve, reject) => {
+      try {
+        // Set a timeout to reject the promise if the job takes too long
+        const timeout = setTimeout(() => reject(new Error("TimeoutError")), timeoutDuration);
+
+        // Execute the job function
+        const result = await jobFn(job);
+
+        // Clear the timeout if the job completes within the specified duration
+        clearTimeout(timeout);
+
+        // Resolve the promise with the job result
+        resolve(result);
+      } catch (error) {
+        // Reject the promise if an error occurs
+        reject(error);
+      }
+    });
+  };
 
   private async getQueueConnection(queueName: string): Promise<Redis> {
     if (!this.queueConnections.has(queueName)) {
