@@ -104,31 +104,17 @@ export class DynamicQueue {
     const worker = new Worker(
       queueName,
       async (job) => {
-        const jobTimeout = 5000;
-
-        let timeoutHandle: NodeJS.Timeout | undefined;
-
-        const timeoutPromise = new Promise((_, reject) => {
-          timeoutHandle = setTimeout(() => reject(new Error("Job timeout")), jobTimeout);
-        });
-
         try {
           await this.queueActivityMonitor.updateQueueActivity(queueName);
-          await Promise.race([jobFn(job), timeoutPromise]);
-          if (timeoutHandle) {
-            clearTimeout(timeoutHandle); // Clear the timeout if the job completes in time
-          }
+          await jobFn(job);
         } catch (error) {
           console.error(`${queueName}: Error processing job ${job.id}:`, error);
-          if (timeoutHandle) {
-            clearTimeout(timeoutHandle); // Clear the timeout if the job fails
-          }
           throw error; // Let BullMQ handle the job failure
         }
       },
       {
         name: `${queueName}-worker`,
-        // concurrency: maxWorkerConcurrency, //! Testing without concurrency
+        concurrency: maxWorkerConcurrency, //! Testing without concurrency
         connection,
         ...workerOptions,
       }
