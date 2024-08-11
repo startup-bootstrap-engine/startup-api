@@ -12,6 +12,7 @@ import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { Stun } from "@providers/spells/data/logic/warrior/Stun";
+import { Time } from "@providers/time/Time";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { NPCAlignment, NPCMovementType, NPCPathOrientation, ToGridX, ToGridY } from "@rpg-engine/shared";
 import { random } from "lodash";
@@ -40,36 +41,34 @@ export class NPCCycleQueue {
     private newRelic: NewRelic,
     private locker: Locker,
     private dynamicQueue: DynamicQueue,
-    private npcCycleTracker: NPCCycleTracker
+    private npcCycleTracker: NPCCycleTracker,
+    private time: Time
   ) {}
 
   @TrackNewRelicTransaction()
   public async addToQueue(npc: INPC, npcSkills: ISkill): Promise<void> {
+    const npcCycleDelay = (1600 + random(0, 200)) / (npc.speed * 1.6) / NPC_CYCLE_INTERVAL_RATIO;
+
     if (appEnv.general.IS_UNIT_TEST) {
-      await this.execNpcCycle(npc, npcSkills);
+      await this.execNpcCycle(npc, npcSkills, npcCycleDelay);
       return;
     }
-
-    const npcCycleDelay = (1600 + random(0, 200)) / (npc.speed * 1.6) / NPC_CYCLE_INTERVAL_RATIO;
 
     await this.dynamicQueue.addJob(
       "npc-cycle-queue",
 
       (job) => {
-        const { npc, npcSkills } = job.data;
+        const { npc, npcSkills, npcCycleDelay } = job.data;
 
-        void this.execNpcCycle(npc, npcSkills);
+        void this.execNpcCycle(npc, npcSkills, npcCycleDelay);
       },
       {
         npc,
         npcSkills,
+        npcCycleDelay,
       },
       {
         queueScaleBy: "active-npcs",
-      },
-
-      {
-        delay: npcCycleDelay,
       }
     );
   }
@@ -83,7 +82,7 @@ export class NPCCycleQueue {
   }
 
   @TrackNewRelicTransaction()
-  private async execNpcCycle(npc: INPC, npcSkills: ISkill): Promise<void> {
+  private async execNpcCycle(npc: INPC, npcSkills: ISkill, npcCycleDelay: number): Promise<void> {
     try {
       if (!npc) return;
 
@@ -116,6 +115,9 @@ export class NPCCycleQueue {
       }
 
       await this.startCoreNPCBehavior(npc);
+
+      await this.time.waitForMilliseconds(npcCycleDelay);
+
       await this.addToQueue(npc, npcSkills);
     } catch (error) {
       console.error(error);

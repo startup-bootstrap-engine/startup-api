@@ -32,7 +32,6 @@ interface IQueueScaleOptions {
   data?: {
     scene?: string;
   };
-  forceCustomScale?: number;
   stickToOrigin?: boolean;
 }
 
@@ -143,11 +142,8 @@ export class DynamicQueue {
       },
       {
         name: `${queueName}-worker`,
-        concurrency: maxWorkerConcurrency, //! Testing without concurrency
-        limiter: {
-          max: maxWorkerLimiter,
-          duration: 1000,
-        },
+        // concurrency: maxWorkerConcurrency, //! Testing without concurrency
+
         maxStalledCount: 1,
         connection,
         ...workerOptions,
@@ -281,17 +277,10 @@ export class DynamicQueue {
           prefix,
           envSuffix,
           "character-count",
-          queueScaleOptions,
           QUEUE_CHARACTER_MAX_SCALE_FACTOR
         );
       case "active-npcs":
-        return await this.generateDynamicQueueName(
-          prefix,
-          envSuffix,
-          "npc-count",
-          queueScaleOptions,
-          QUEUE_NPC_MAX_SCALE_FACTOR
-        );
+        return await this.generateDynamicQueueName(prefix, envSuffix, "npc-count", QUEUE_NPC_MAX_SCALE_FACTOR);
       default:
         throw new Error("Invalid queueScaleBy value");
     }
@@ -301,13 +290,22 @@ export class DynamicQueue {
     prefix: string,
     envSuffix: string,
     entityKey: string,
-    queueScaleOptions?: IQueueScaleOptions,
     defaultScaleFactor?: number
   ): Promise<string> {
-    const entityCount = Number((await this.inMemoryHashTable.get("activity-tracker", entityKey)) || 1);
-    const maxQueues = Math.ceil(entityCount / 35) || 1;
-    const scaleFactor = Math.min(maxQueues, queueScaleOptions?.forceCustomScale! || defaultScaleFactor!);
-    return this.buildQueueName(prefix, envSuffix, random(0, scaleFactor - 1));
+    // Combine fetching and default assignment
+    const entityCount = Number(await this.inMemoryHashTable.get("activity-tracker", entityKey)) || 1;
+    const maxQueues = Math.max(1, Math.ceil(entityCount / 10)); // Use Math.max to ensure at least one queue
+
+    // Simplified scale factor calculation
+    const scaleFactor = Math.min(maxQueues, defaultScaleFactor ?? 1);
+
+    if (scaleFactor < 0) {
+      throw new Error("Invalid scale factor calculated. Ensure entity count and scale factors are correct.");
+    }
+
+    const factor = random(0, scaleFactor);
+
+    return this.buildQueueName(prefix, envSuffix, factor);
   }
 
   private buildQueueName(prefix: string, envSuffix: string, factor?: number): string {
