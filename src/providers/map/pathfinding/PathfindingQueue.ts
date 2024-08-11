@@ -50,10 +50,7 @@ export class PathfindingQueue {
         });
       }
 
-      const forceAdvancedPathfinding = !(await this.inMemoryHashTable.get(
-        "npc-force-pathfinding-calculation",
-        npc._id
-      ));
+      const forceAdvancedPathfinding = await this.inMemoryHashTable.get("npc-force-pathfinding-calculation", npc._id);
 
       if (forceAdvancedPathfinding) {
         const pathfindingResult = await this.startPathfindingQueue(
@@ -155,9 +152,6 @@ export class PathfindingQueue {
           startGridY,
           endGridX,
           endGridY,
-        },
-        {
-          queueScaleBy: "active-npcs",
         }
       );
     } catch (error) {

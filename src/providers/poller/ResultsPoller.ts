@@ -38,7 +38,6 @@ export class ResultsPoller {
         retries++;
       }
 
-      console.error(`Failed to poll results for ${fullKey} after ${this.maxRetries} retries`);
       return false;
     } finally {
       // Always cleanup, regardless of success or failure

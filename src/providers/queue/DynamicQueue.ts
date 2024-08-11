@@ -2,8 +2,8 @@
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { appEnv } from "@providers/config/env";
 import {
-  QUEUE_CHARACTER_MAX_SCALE_FACTOR,
-  QUEUE_NPC_MAX_SCALE_FACTOR,
+  QUEUE_CHARACTER_DEFAULT_SCALE_FACTOR,
+  QUEUE_NPC_DEFAULT_SCALE_FACTOR,
   QUEUE_WORKER_MIN_CONCURRENCY,
   QUEUE_WORKER_MIN_JOB_RATE,
   QueueDefaultScaleFactor,
@@ -11,7 +11,6 @@ import {
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { Locker } from "@providers/locks/Locker";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import { EnvType } from "@rpg-engine/shared";
 import { DefaultJobOptions, Job, Queue, QueueBaseOptions, Worker, WorkerOptions } from "bullmq";
@@ -29,6 +28,7 @@ type AvailableScaleFactors = "single" | "custom" | "active-characters" | "active
 interface IQueueScaleOptions {
   queueScaleBy: AvailableScaleFactors;
   queueScaleFactor?: QueueDefaultScaleFactor;
+  hasConcurrency?: boolean;
   data?: {
     scene?: string;
   };
@@ -47,8 +47,7 @@ export class DynamicQueue {
     private inMemoryHashTable: InMemoryHashTable,
     private newRelic: NewRelic,
     private entityQueueScalingCalculator: EntityQueueScalingCalculator,
-    private dynamicQueueCleaner: DynamicQueueCleaner,
-    private locker: Locker
+    private dynamicQueueCleaner: DynamicQueueCleaner
   ) {}
 
   public async addJob(
@@ -142,8 +141,7 @@ export class DynamicQueue {
       },
       {
         name: `${queueName}-worker`,
-        concurrency: maxWorkerConcurrency, //! Testing without concurrency
-
+        concurrency: queueScaleOptions?.hasConcurrency ? maxWorkerConcurrency : 1,
         connection,
         ...workerOptions,
       }
@@ -276,10 +274,10 @@ export class DynamicQueue {
           prefix,
           envSuffix,
           "character-count",
-          QUEUE_CHARACTER_MAX_SCALE_FACTOR
+          QUEUE_CHARACTER_DEFAULT_SCALE_FACTOR
         );
       case "active-npcs":
-        return await this.generateDynamicQueueName(prefix, envSuffix, "npc-count", QUEUE_NPC_MAX_SCALE_FACTOR);
+        return await this.generateDynamicQueueName(prefix, envSuffix, "npc-count", QUEUE_NPC_DEFAULT_SCALE_FACTOR);
       default:
         throw new Error("Invalid queueScaleBy value");
     }

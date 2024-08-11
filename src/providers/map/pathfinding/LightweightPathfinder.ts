@@ -1,8 +1,11 @@
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { MathHelper } from "@providers/math/MathHelper";
 import { MovementHelper } from "@providers/movement/MovementHelper";
+import { ResultsPoller } from "@providers/poller/ResultsPoller";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { GRID_WIDTH, ToGridX, ToGridY } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
@@ -21,11 +24,36 @@ export class LightweightPathfinder {
   constructor(
     private inMemoryHashTable: InMemoryHashTable,
     private mathHelper: MathHelper,
-    private movementHelper: MovementHelper
+    private movementHelper: MovementHelper,
+    private dynamicQueue: DynamicQueue,
+    private resultsPoller: ResultsPoller
   ) {}
 
   @TrackNewRelicTransaction()
   public async calculateLightPathfinding(npc: INPC, targetX: number, targetY: number): Promise<number[][]> {
+    if (appEnv.general.IS_UNIT_TEST) {
+      return await this.executePathfindingQueue(npc, targetX, targetY);
+    }
+
+    const job = await this.dynamicQueue.addJob(
+      "lightweight-pathfinding",
+      async (job) => {
+        const { npc, targetX, targetY } = job.data;
+
+        const result = await this.executePathfindingQueue(npc, targetX, targetY);
+
+        await this.resultsPoller.prepareResultToBePolled("lightweight-pathfinding", job.id!, result);
+      },
+      { npc, targetX, targetY },
+      {
+        queueScaleBy: "active-npcs",
+      }
+    );
+
+    return this.resultsPoller.pollResults("lightweight-pathfinding", job?.id!);
+  }
+
+  private async executePathfindingQueue(npc: INPC, targetX: number, targetY: number): Promise<number[][]> {
     const potentialPositions = this.getPotentialPositions(npc);
     const nonSolidPositions = await this.getNonSolidPositions(npc, potentialPositions);
 
