@@ -156,7 +156,7 @@ export class MarketplaceGetItems {
 
     pipeline.push({
       $facet: {
-        paginatedResults: [{ $skip: skip }, { $limit: limit }],
+        paginatedResults: [{ $skip: skip }, { $limit: limit ?? 10 }],
         totalCount: [{ $count: "totalItems" }],
       },
     });

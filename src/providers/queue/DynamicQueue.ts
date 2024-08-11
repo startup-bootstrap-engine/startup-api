@@ -142,9 +142,8 @@ export class DynamicQueue {
       },
       {
         name: `${queueName}-worker`,
-        // concurrency: maxWorkerConcurrency, //! Testing without concurrency
+        concurrency: maxWorkerConcurrency, //! Testing without concurrency
 
-        maxStalledCount: 1,
         connection,
         ...workerOptions,
       }
