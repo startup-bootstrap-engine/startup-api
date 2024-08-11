@@ -5,7 +5,7 @@ import { provide } from "inversify-binding-decorators";
 @provide(ResultsPoller)
 export class ResultsPoller {
   private readonly parentNamespace = "results-poller";
-  private readonly maxRetries = 650;
+  private readonly maxRetries = 300;
 
   constructor(private inMemoryHashTable: InMemoryHashTable) {}
 
