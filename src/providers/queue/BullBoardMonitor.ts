@@ -91,7 +91,7 @@ export class BullBoardMonitor {
     }
 
     const queue = new QueueMQ(queueName, {
-      connection: connection as any,
+      connection: connection,
     });
     const adapter = new BullMQAdapter(queue);
     this.monitoredQueues.set(queueName, adapter);
