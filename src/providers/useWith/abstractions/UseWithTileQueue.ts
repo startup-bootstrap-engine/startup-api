@@ -62,7 +62,6 @@ export class UseWithTileQueue {
     );
   }
 
-  @TrackNewRelicTransaction()
   public async addToQueue(useWithTileData: IUseWithTile, character: ICharacter): Promise<void> {
     await this.dynamicQueue.addJob(
       "use-with-tile",

@@ -1,5 +1,4 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
@@ -34,7 +33,6 @@ export class SpellNetworkCastQueue {
     );
   }
 
-  @TrackNewRelicTransaction()
   public async addToQueue(data: ISpellCast, character: ICharacter): Promise<void> {
     await this.dynamicQueue.addJob(
       "spell-cast",

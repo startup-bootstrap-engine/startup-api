@@ -69,7 +69,7 @@ export class ChatNetworkPrivateMessaging {
 
             await this.saveChatLog(data.message, character._id, receiverCharacter._id);
 
-            const chatLogs = await this.getPreviousChatLogs(character, receiverCharacter, data.limit);
+            const chatLogs = await this.getPreviousChatLogs(character, receiverCharacter);
 
             this.chatUtils.sendMessagesToCharacter(chatLogs, character, ChatSocketEvents.PrivateChatMessageRead);
             this.chatUtils.sendMessagesToCharacter(
@@ -145,8 +145,7 @@ export class ChatNetworkPrivateMessaging {
   @TrackNewRelicTransaction()
   private async getPreviousChatLogs(
     sender: ICharacter,
-    receiver: ICharacter,
-    limit: number = 20
+    receiver: ICharacter
   ): Promise<IPrivateChatMessageReadResponse> {
     const privatePreviousChatLogs = await PrivateChatLog.find({
       $or: [
@@ -162,7 +161,7 @@ export class ChatNetworkPrivateMessaging {
     })
       .sort({ createdAt: -1 })
       .populate("emitter", "name")
-      .limit(limit);
+      .limit(20);
 
     privatePreviousChatLogs.reverse();
 
