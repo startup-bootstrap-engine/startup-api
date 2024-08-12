@@ -2,6 +2,7 @@ import { Character } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { NPC_FREEZE_CHECK_INTERVAL } from "@providers/constants/NPCConstants";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MathHelper } from "@providers/math/MathHelper";
@@ -9,7 +10,12 @@ import { NPCView } from "./NPCView";
 
 @provideSingleton(NPCFreezer)
 export class NPCFreezer {
-  constructor(private mathHelper: MathHelper, private npcView: NPCView, private locker: Locker) {}
+  constructor(
+    private mathHelper: MathHelper,
+    private npcView: NPCView,
+    private locker: Locker,
+    private inMemoryHashTable: InMemoryHashTable
+  ) {}
 
   public init(): void {
     this.monitorNPCsAndFreezeIfNeeded();
@@ -37,6 +43,7 @@ export class NPCFreezer {
 
       await this.locker.unlock(`npc-${npc._id}-npc-cycle`);
       await this.locker.unlock(`npc-${npc._id}-npc-battle-cycle`);
+      await this.inMemoryHashTable.delete("npc-force-pathfinding-calculation", npc._id);
     } catch (error) {
       console.error(error);
     }

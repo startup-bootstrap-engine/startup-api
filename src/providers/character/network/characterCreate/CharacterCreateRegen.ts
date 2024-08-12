@@ -1,20 +1,24 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { HealthRegen } from "@providers/character/characterPassiveHabilities/HealthRegen";
 import { ManaRegen } from "@providers/character/characterPassiveHabilities/ManaRegen";
-import { WarriorPassiveHabilities } from "@providers/character/characterPassiveHabilities/WarriorPassiveHabilities";
 import { CharacterClass } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
 @provide(CharacterCreateRegen)
 export class CharacterCreateRegen {
-  constructor(private warriorPassiveHabilities: WarriorPassiveHabilities, private manaRegen: ManaRegen) {}
+  constructor(private warriorPassiveHabilities: HealthRegen, private manaRegen: ManaRegen) {}
 
   public async handleCharacterRegen(character: ICharacter): Promise<void> {
     if (!character) {
       return;
     }
     try {
-      if (character.class === CharacterClass.Warrior) {
-        await this.warriorPassiveHabilities.warriorAutoRegenHealthHandler(character);
+      if (
+        character.class === CharacterClass.Warrior ||
+        character.class === CharacterClass.Berserker ||
+        character.class === CharacterClass.Hunter
+      ) {
+        await this.warriorPassiveHabilities.startAutoRegenHealthHandler(character);
       }
       await this.manaRegen.autoRegenManaHandler(character);
     } catch (error) {

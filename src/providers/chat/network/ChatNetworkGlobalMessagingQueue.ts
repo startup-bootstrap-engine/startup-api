@@ -35,6 +35,7 @@ export class ChatNetworkGlobalMessagingQueue {
     private dynamicQueue: DynamicQueue
   ) {}
 
+  @TrackNewRelicTransaction()
   public async addToQueue(data: IChatMessageCreatePayload, character: ICharacter): Promise<void> {
     await this.dynamicQueue.addJob(
       "chat-global-messaging",
@@ -166,7 +167,7 @@ export class ChatNetworkGlobalMessagingQueue {
         },
       },
       { $sort: { createdAt: -1 } },
-      { $limit: limit },
+      { $limit: limit ?? 20 },
       {
         $lookup: {
           from: "characters",

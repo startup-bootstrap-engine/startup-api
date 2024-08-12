@@ -2,8 +2,8 @@
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { appEnv } from "@providers/config/env";
 import {
-  QUEUE_CHARACTER_MAX_SCALE_FACTOR,
-  QUEUE_NPC_MAX_SCALE_FACTOR,
+  QUEUE_CHARACTER_DEFAULT_SCALE_FACTOR,
+  QUEUE_NPC_DEFAULT_SCALE_FACTOR,
   QUEUE_WORKER_MIN_CONCURRENCY,
   QUEUE_WORKER_MIN_JOB_RATE,
   QueueDefaultScaleFactor,
@@ -28,10 +28,10 @@ type AvailableScaleFactors = "single" | "custom" | "active-characters" | "active
 interface IQueueScaleOptions {
   queueScaleBy: AvailableScaleFactors;
   queueScaleFactor?: QueueDefaultScaleFactor;
+  hasConcurrency?: boolean;
   data?: {
     scene?: string;
   };
-  forceCustomScale?: number;
   stickToOrigin?: boolean;
 }
 
@@ -59,10 +59,13 @@ export class DynamicQueue {
     queueOptions?: QueueBaseOptions,
     workerOptions?: WorkerOptions
   ): Promise<Job | undefined> {
+    let queueName;
+
     try {
       const { queueScaleFactor, queueScaleBy } = queueScaleOptions;
-      const queueName = await this.generateQueueName(prefix, queueScaleBy, queueScaleFactor, queueScaleOptions);
-      const connection = await this.getQueueConnection(queueName);
+      queueName = await this.generateQueueName(prefix, queueScaleBy, queueScaleFactor, queueScaleOptions);
+
+      const connection = (await this.getQueueConnection(queueName)) as any;
       const queue = await this.initOrFetchQueue(
         queueName,
         jobFn,
@@ -93,42 +96,52 @@ export class DynamicQueue {
   private async initOrFetchWorker(
     queueName: string,
     jobFn: QueueJobFn,
-    connection: Redis,
+    connection: any,
     workerOptions?: WorkerOptions,
     queueScaleOptions?: IQueueScaleOptions
   ): Promise<void> {
     if (this.workers.has(queueName)) return;
 
-    const { maxWorkerConcurrency } = await this.getWorkerScalingParameters(queueScaleOptions);
+    const { maxWorkerConcurrency, maxWorkerLimiter } = await this.getWorkerScalingParameters(queueScaleOptions);
+
+    this.newRelic.trackMetric(
+      NewRelicMetricCategory.Count,
+      NewRelicSubCategory.Server,
+      `WorkerConcurrency/${queueName}`,
+      maxWorkerConcurrency
+    );
+
+    this.newRelic.trackMetric(
+      NewRelicMetricCategory.Count,
+      NewRelicSubCategory.Server,
+      `WorkerLimiter/${queueName}`,
+      maxWorkerLimiter
+    );
+
+    this.newRelic.trackMetric(
+      NewRelicMetricCategory.Count,
+      NewRelicSubCategory.Server,
+      `WorkerPoolSize/${queueName}`,
+      this.workers.size
+    );
 
     const worker = new Worker(
       queueName,
       async (job) => {
-        const jobTimeout = 5000;
-
-        let timeoutHandle: NodeJS.Timeout | undefined;
-
-        const timeoutPromise = new Promise((_, reject) => {
-          timeoutHandle = setTimeout(() => reject(new Error("Job timeout")), jobTimeout);
-        });
-
         try {
           await this.queueActivityMonitor.updateQueueActivity(queueName);
-          await Promise.race([jobFn(job), timeoutPromise]);
-          if (timeoutHandle) {
-            clearTimeout(timeoutHandle); // Clear the timeout if the job completes in time
-          }
+
+          const result = await this.processJobWithTimeout(job, jobFn, 7500);
+
+          return result;
         } catch (error) {
           console.error(`${queueName}: Error processing job ${job.id}:`, error);
-          if (timeoutHandle) {
-            clearTimeout(timeoutHandle); // Clear the timeout if the job fails
-          }
           throw error; // Let BullMQ handle the job failure
         }
       },
       {
         name: `${queueName}-worker`,
-        concurrency: maxWorkerConcurrency,
+        concurrency: queueScaleOptions?.hasConcurrency ? maxWorkerConcurrency : 1,
         connection,
         ...workerOptions,
       }
@@ -140,6 +153,28 @@ export class DynamicQueue {
       this.setupWorkerErrorHandlers(worker, queueName);
     }
   }
+
+  private processJobWithTimeout = (job: Job, jobFn: Function, timeoutDuration: number): Promise<any> => {
+    // eslint-disable-next-line no-async-promise-executor
+    return new Promise(async (resolve, reject) => {
+      try {
+        // Set a timeout to reject the promise if the job takes too long
+        const timeout = setTimeout(() => reject(new Error("TimeoutError")), timeoutDuration);
+
+        // Execute the job function
+        const result = await jobFn(job);
+
+        // Clear the timeout if the job completes within the specified duration
+        clearTimeout(timeout);
+
+        // Resolve the promise with the job result
+        resolve(result);
+      } catch (error) {
+        // Reject the promise if an error occurs
+        reject(error);
+      }
+    });
+  };
 
   private async getQueueConnection(queueName: string): Promise<Redis> {
     if (!this.queueConnections.has(queueName)) {
@@ -239,17 +274,10 @@ export class DynamicQueue {
           prefix,
           envSuffix,
           "character-count",
-          queueScaleOptions,
-          QUEUE_CHARACTER_MAX_SCALE_FACTOR
+          QUEUE_CHARACTER_DEFAULT_SCALE_FACTOR
         );
       case "active-npcs":
-        return await this.generateDynamicQueueName(
-          prefix,
-          envSuffix,
-          "npc-count",
-          queueScaleOptions,
-          QUEUE_NPC_MAX_SCALE_FACTOR
-        );
+        return await this.generateDynamicQueueName(prefix, envSuffix, "npc-count", QUEUE_NPC_DEFAULT_SCALE_FACTOR);
       default:
         throw new Error("Invalid queueScaleBy value");
     }
@@ -259,13 +287,22 @@ export class DynamicQueue {
     prefix: string,
     envSuffix: string,
     entityKey: string,
-    queueScaleOptions?: IQueueScaleOptions,
     defaultScaleFactor?: number
   ): Promise<string> {
-    const entityCount = Number((await this.inMemoryHashTable.get("activity-tracker", entityKey)) || 1);
-    const maxQueues = Math.ceil(entityCount / 35) || 1;
-    const scaleFactor = Math.min(maxQueues, queueScaleOptions?.forceCustomScale! || defaultScaleFactor!);
-    return this.buildQueueName(prefix, envSuffix, random(0, scaleFactor - 1));
+    // Combine fetching and default assignment
+    const entityCount = Number(await this.inMemoryHashTable.get("activity-tracker", entityKey)) || 1;
+    const maxQueues = Math.max(1, Math.ceil(entityCount / 10)); // Use Math.max to ensure at least one queue
+
+    // Simplified scale factor calculation
+    const scaleFactor = Math.min(maxQueues, defaultScaleFactor ?? 1);
+
+    if (scaleFactor < 0) {
+      throw new Error("Invalid scale factor calculated. Ensure entity count and scale factors are correct.");
+    }
+
+    const factor = random(0, scaleFactor);
+
+    return this.buildQueueName(prefix, envSuffix, factor);
   }
 
   private buildQueueName(prefix: string, envSuffix: string, factor?: number): string {
