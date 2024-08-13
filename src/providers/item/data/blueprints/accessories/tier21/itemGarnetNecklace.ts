@@ -50,5 +50,5 @@ export const itemGarnetNecklace: IEquippableAccessoryTier21Blueprint = {
       },
     },
   ],
-  equippedBuffDescription: "Increases resistance by 8% and max health by 12% respectively",
+  equippedBuffDescription: "Grants +8% resistance and +12% speed.",
 };

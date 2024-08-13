@@ -10,11 +10,13 @@ import { CharacterView } from "../../CharacterView";
 
 import { BattleTargeting } from "@providers/battle/BattleTargeting";
 import { CharacterRespawn } from "@providers/character/CharacterRespawn";
+import { appEnv } from "@providers/config/env";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { ItemView } from "@providers/item/ItemView";
 import { ItemMissingReferenceCleaner } from "@providers/item/cleaner/ItemMissingReferenceCleaner";
 import { Locker } from "@providers/locks/Locker";
 import { NPCManager } from "@providers/npc/NPCManager";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { AdvancedTutorial } from "@providers/tutorial/advancedTutorial/AdvancedTutorial";
 import { AdvancedTutorialKeys } from "@providers/tutorial/tutorial.types";
 import { clearCacheForKey } from "speedgoose";
@@ -45,7 +47,8 @@ export class CharacterNetworkCreateQueue {
     private characterRespawn: CharacterRespawn,
     private npcManager: NPCManager,
     private advancedTutorial: AdvancedTutorial,
-    private itemView: ItemView
+    private itemView: ItemView,
+    private dynamicQueue: DynamicQueue
   ) {}
 
   public onCharacterCreate(channel: SocketChannel): void {
@@ -64,6 +67,25 @@ export class CharacterNetworkCreateQueue {
     data: ICharacterCreateFromClient,
     channel: SocketChannel
   ): Promise<void> {
+    if (appEnv.general.IS_UNIT_TEST) {
+      await this.execCharacterCreate(character, data);
+      return;
+    }
+
+    await this.dynamicQueue.addJob(
+      "character-create",
+      (job) => {
+        const { character, data } = job.data;
+
+        void this.execCharacterCreate(character, data);
+      },
+      { character, data }
+    );
+
+    await this.characterCreateSocketHandler.manageSocketConnections(channel, character);
+  }
+
+  private async execCharacterCreate(character: ICharacter, data: ICharacterCreateFromClient): Promise<void> {
     await this.clearCharacterCaches(character);
 
     character = await this.updateCharacterStatus(character, data.channelId);
@@ -87,7 +109,6 @@ export class CharacterNetworkCreateQueue {
       this.characterCreateInteractionManager.warnAboutWeatherStatus(character.channelId!),
       this.characterCreateRegen.handleCharacterRegen(character),
     ]);
-    await this.characterCreateSocketHandler.manageSocketConnections(channel, character);
   }
 
   private async triggerStartingTutorial(character: ICharacter): Promise<void> {
