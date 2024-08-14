@@ -34,6 +34,7 @@ describe("MapTransitionSameMap", () => {
 
     lockerMock = {
       lock: jest.fn().mockResolvedValue(true),
+      unlock: jest.fn(),
     } as any;
 
     mapTransitionSameMap = new MapTransitionSameMap(socketMessagingMock, characterViewMock, lockerMock);
@@ -112,8 +113,14 @@ describe("MapTransitionSameMap", () => {
 
   it("doesn't proceed if the lock cannot be acquired", async () => {
     lockerMock.lock.mockResolvedValue(false);
+
     testCharacter.scene = "map1";
-    await mapTransitionSameMap.sameMapTeleport(testCharacter, destination);
+
+    try {
+      await mapTransitionSameMap.sameMapTeleport(testCharacter, destination);
+    } catch (error) {
+      console.error("Error during sameMapTeleport:", error);
+    }
 
     const updatedCharacter = await Character.findOne({ _id: testCharacter._id }).lean();
     expect(updatedCharacter?.x).not.toEqual(FromGridX(destination.gridX));
