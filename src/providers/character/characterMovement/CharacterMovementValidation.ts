@@ -40,13 +40,14 @@ export class CharacterMovementValidation {
     const hasBasicValidation = this.characterValidation.hasBasicValidation(character);
 
     if (!hasBasicValidation) {
+      console.log(`🚫 ${character.name} has no basic validation!`);
       return false;
     }
 
     const isLocked = await this.locker.hasLock(`character-changing-scene-${character._id}`);
 
     if (isLocked) {
-      console.log(`🚫 ${character.name} is trying to move while changing the scene`);
+      console.error(`🚫 ${character.name} is trying to move while changing the scene`);
       return false;
     }
 
@@ -59,27 +60,21 @@ export class CharacterMovementValidation {
     }
 
     if (!this.movementHelper.isSnappedToGrid(newX, newY)) {
-      console.log(`🚫 ${character.name} lost snapping to grid!`);
+      console.error(`🚫 ${character.name} lost snapping to grid!`);
       return false;
     }
-
-    //! Reconsider this in the future. For now, its causing too many problems (scene transitions).
-    // const isUnderRange = this.movementHelper.isUnderRange(character.x, character.y, newX, newY, 11);
-
-    // if (!isUnderRange) {
-    //   console.log(`🚫 ${character.name} is trying to move too far away!`);
-    //   return false;
-    // }
 
     const isTooHeavy = this.isCharacterTooHeavy(character);
 
     if (isTooHeavy) {
+      console.log(`🚫 ${character.name} is too heavy to move!`);
       return false;
     }
 
     const isMovingTooFast = this.isCharacterMovingTooFast(character);
 
     if (isMovingTooFast) {
+      console.log(`🚫 ${character.name} is moving too fast!`);
       return false;
     }
 

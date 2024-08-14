@@ -57,6 +57,8 @@ export class MapTransitionSameMap {
       );
     } catch (error) {
       console.error(error);
+    } finally {
+      await this.locker.unlock(`character-changing-scene-${character._id}`);
     }
   }
 }

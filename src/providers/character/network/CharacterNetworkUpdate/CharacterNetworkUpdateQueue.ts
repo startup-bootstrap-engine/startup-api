@@ -171,7 +171,7 @@ export class CharacterNetworkUpdateQueue {
       character.channelId!,
       CharacterSocketEvents.CharacterPositionUpdateConfirm,
       {
-        id: character.id,
+        id: character._id,
         isValid: isPositionUpdateValid,
         position: {
           originX: character.x,
