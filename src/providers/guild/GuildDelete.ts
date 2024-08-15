@@ -1,4 +1,5 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { Guild } from "@entities/ModuleSystem/GuildModel";
 import { GuildSkills } from "@entities/ModuleSystem/GuildSkillsModel";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -34,6 +35,9 @@ export class GuildDelete {
         await GuildSkills.deleteOne({ _id: guildSkills._id });
       }
       await Guild.deleteOne({ _id: guildId });
+
+      // delete guild inventory
+      await ItemContainer.deleteOne({ owner: guild._id });
       await this.guildCommon.sendMessageToAllMembers(
         "The guild " + guild.name + " has been deleted by the leader.",
         guild,

@@ -3,6 +3,7 @@ import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemCon
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
+import { GuildPayingTribute } from "@providers/guild/GuildPayingTribute";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
@@ -21,7 +22,8 @@ export class CharacterAutoLootQueue {
     private characterInventory: CharacterInventory,
     private characterView: CharacterView,
     private animationEffect: AnimationEffect,
-    private dynamicQueue: DynamicQueue
+    private dynamicQueue: DynamicQueue,
+    private guildPayingTribute: GuildPayingTribute
   ) {}
 
   public async autoLoot(character: ICharacter, itemIdsToLoot: string[]): Promise<void> {
@@ -88,6 +90,13 @@ export class CharacterAutoLootQueue {
           if (!item) {
             console.log(`Item with id ${slot._id} not found`);
             continue;
+          }
+
+          // check if guild controlled territory and pay tributes
+          const qtyLooted: number = await this.guildPayingTribute.payTribute(character, item);
+
+          if (qtyLooted > 0 && item.stackQty !== undefined) {
+            item.stackQty -= qtyLooted;
           }
 
           const successfullyAddedItem = await this.characterItemContainer.addItemToContainer(

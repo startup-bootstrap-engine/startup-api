@@ -9,6 +9,7 @@ import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterInventory } from "@providers/character/CharacterInventory";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
+import { GuildPayingTribute } from "@providers/guild/GuildPayingTribute";
 import { Locker } from "@providers/locks/Locker";
 import { MapHelper } from "@providers/map/MapHelper";
 import { clearCacheForKey } from "speedgoose";
@@ -32,7 +33,8 @@ export class ItemPickup {
     private inMemoryHashTable: InMemoryHashTable,
     private locker: Locker,
     private itemOwnership: ItemOwnership,
-    private itemBaseKey: ItemBaseKey
+    private itemBaseKey: ItemBaseKey,
+    private guildPayingTribute: GuildPayingTribute
   ) {}
 
   @TrackNewRelicTransaction()
@@ -66,6 +68,13 @@ export class ItemPickup {
 
       if (isPickupFromMap && !(await this.handlePickupFromMap(itemToBePicked, character))) {
         return false;
+      }
+
+      // check if guild controlled territory and pay tributes
+      const qtyLooted: number = await this.guildPayingTribute.payTribute(character, itemToBePicked);
+
+      if (qtyLooted > 0 && itemToBePicked.stackQty !== undefined) {
+        itemToBePicked.stackQty -= qtyLooted;
       }
 
       if (!(await this.handleAddToContainer(itemToBePicked, character, itemPickupData, isInventoryItem))) {
