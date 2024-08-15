@@ -1,3 +1,4 @@
+import { BadRequestError } from "@providers/errors/BadRequestError";
 import { AuthMiddleware } from "@providers/middlewares/AuthMiddleware";
 import { IChatMessage } from "@rpg-engine/shared";
 import { Response } from "express";
@@ -15,6 +16,12 @@ export class ReadChatLogController implements interfaces.Controller {
     req: IAuthenticatedRequest,
     res: Response
   ): Promise<IChatMessage[]> {
+    const { x, y, scene } = chatLogZone;
+
+    if (!x || !y || !scene) {
+      throw new BadRequestError("Missing required parameters");
+    }
+
     return await this.readChatLogUseCase.getChatLogInZone(chatLogZone);
   }
 }

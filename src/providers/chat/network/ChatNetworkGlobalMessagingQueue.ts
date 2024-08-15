@@ -35,7 +35,6 @@ export class ChatNetworkGlobalMessagingQueue {
     private dynamicQueue: DynamicQueue
   ) {}
 
-  @TrackNewRelicTransaction()
   public async addToQueue(data: IChatMessageCreatePayload, character: ICharacter): Promise<void> {
     await this.dynamicQueue.addJob(
       "chat-global-messaging",
@@ -122,7 +121,7 @@ export class ChatNetworkGlobalMessagingQueue {
         // eslint-disable-next-line mongoose-lean/require-lean
         await chatLog.save();
 
-        const chatLogs = await this.getChatLogsInZone(character, data.limit);
+        const chatLogs = await this.getChatLogsInZone(character);
 
         this.sendMessagesToNearbyCharacters(chatLogs, nearbyCharacters);
         this.chatUtils.sendMessagesToCharacter(chatLogs, character, ChatSocketEvents.GlobalChatMessageRead);
@@ -148,7 +147,7 @@ export class ChatNetworkGlobalMessagingQueue {
   }
 
   @TrackNewRelicTransaction()
-  public async getChatLogsInZone(character: ICharacter, limit: number = 20): Promise<IChatMessageReadPayload> {
+  public async getChatLogsInZone(character: ICharacter): Promise<IChatMessageReadPayload> {
     const socketTransmissionZone = this.socketTransmissionZone.calculateSocketTransmissionZone(
       character.x,
       character.y,
@@ -167,7 +166,7 @@ export class ChatNetworkGlobalMessagingQueue {
         },
       },
       { $sort: { createdAt: -1 } },
-      { $limit: limit ?? 20 },
+      { $limit: 20 },
       {
         $lookup: {
           from: "characters",

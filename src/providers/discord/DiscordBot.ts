@@ -117,7 +117,12 @@ export class DiscordBot {
     }
 
     const channel = (await this.client?.channels?.fetch(channelId)) as TextChannel;
-    await channel.send({ embeds: [embed] });
+
+    if (!channel) {
+      return;
+    }
+
+    await channel?.send({ embeds: [embed] });
   }
 
   public getRandomLevelUpMessage(characterName: string, skillLevel: number, skillName: string): string {

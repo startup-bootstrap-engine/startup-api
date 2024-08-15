@@ -32,7 +32,6 @@ export class NPCBattleCycleQueue {
     private npcFreezer: NPCFreezer
   ) {}
 
-  @TrackNewRelicTransaction()
   public async addToQueue(npc: INPC, npcSkills: ISkill): Promise<void> {
     const canProceed = await this.locker.lock(`npc-${npc._id}-npc-add-battle-queue`);
 
@@ -49,18 +48,16 @@ export class NPCBattleCycleQueue {
       await this.dynamicQueue.addJob(
         "npc-battle-queue",
 
-        async (job) => {
+        (job) => {
           const { npc, npcSkills } = job.data;
 
-          await this.execBattleCycle(npc, npcSkills);
+          void this.execBattleCycle(npc, npcSkills);
         },
         {
           npc,
           npcSkills,
         },
-        {
-          queueScaleBy: "active-npcs",
-        },
+        undefined,
 
         {
           delay: NPC_BATTLE_CYCLE_INTERVAL,

@@ -145,7 +145,7 @@ export class CRUD {
         records = Model.find({
           ...parsedFilter.parsedQuery,
           ...parsedFilter.parsedOptions,
-        }).limit(limit);
+        }).limit(limit <= 0 ? 10 : limit);
       } else {
         records = Model.find({
           ...parsedFilter.parsedQuery,

@@ -43,7 +43,7 @@ export class ReadChatLogUseCase {
       })
       .sort({ createdAt: -1 })
       .populate("emitter", "name")
-      .limit(Number(chatLogZone.limit))
+      .limit(20)
       .lean();
 
     chatLogsInView.reverse();

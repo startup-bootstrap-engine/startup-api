@@ -5,7 +5,7 @@ import { provide } from "inversify-binding-decorators";
 @provide(ResultsPoller)
 export class ResultsPoller {
   private readonly parentNamespace = "results-poller";
-  private readonly maxRetries = 650;
+  private readonly maxRetries = 300;
 
   constructor(private inMemoryHashTable: InMemoryHashTable) {}
 
@@ -38,7 +38,6 @@ export class ResultsPoller {
         retries++;
       }
 
-      console.error(`Failed to poll results for ${fullKey} after ${this.maxRetries} retries`);
       return false;
     } finally {
       // Always cleanup, regardless of success or failure

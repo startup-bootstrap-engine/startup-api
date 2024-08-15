@@ -1,6 +1,9 @@
 import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
+import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { UpdateWriteOpResult } from "mongoose";
+import { GuildCommon } from "./GuildCommon";
 
 interface IGuildMapPoints {
   guildId: string;
@@ -9,7 +12,7 @@ interface IGuildMapPoints {
 
 @provide(GuildTerritory)
 export class GuildTerritory {
-  constructor() {}
+  constructor(private guildCommon: GuildCommon, private socketMessaging: SocketMessaging) {}
 
   public async trySetMapControl(map: string): Promise<void> {
     try {
@@ -25,6 +28,11 @@ export class GuildTerritory {
       if (existingIndex !== -1) {
         return;
       }
+
+      this.socketMessaging.sendEventToAllUsers<IUIShowMessage>(UISocketEvents.ShowMessage, {
+        message: `${map} is now controlled by ${mapControlGuild.name}.`,
+        type: "info",
+      });
 
       await this.removeTerritoriesForMap(map);
       await Guild.updateOne(

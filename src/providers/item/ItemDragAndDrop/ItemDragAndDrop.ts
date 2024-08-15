@@ -64,7 +64,6 @@ export class ItemDragAndDrop {
     return result;
   }
 
-  @TrackNewRelicTransaction()
   private async execPerformItemMove(itemMoveData: IItemMove, character: ICharacter): Promise<boolean> {
     try {
       if (!(await this.itemDragAndDropValidator.isItemMoveValid(itemMoveData, character, itemMoveData))) {

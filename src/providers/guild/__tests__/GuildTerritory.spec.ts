@@ -1,5 +1,6 @@
 import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import { UISocketEvents } from "@rpg-engine/shared";
 import { GuildTerritory } from "../GuildTerritory";
 
 describe("GuildTerritory.ts", () => {
@@ -134,6 +135,8 @@ describe("GuildTerritory.ts", () => {
       // @ts-ignore
       const removeTerritoriesSpy = jest.spyOn(guildTerritory, "removeTerritoriesForMap").mockResolvedValue(undefined);
       const updateOneSpy = jest.spyOn(Guild, "updateOne").mockResolvedValue({} as any);
+      // @ts-ignore
+      const spySendEventToAllUsers = jest.spyOn(guildTerritory.socketMessaging, "sendEventToAllUsers");
 
       await guildTerritory.trySetMapControl(map);
 
@@ -142,6 +145,10 @@ describe("GuildTerritory.ts", () => {
         { _id: testGuild._id },
         { $push: { territoriesOwned: { map, lootShare: 15, controlPoint: true } } }
       );
+      expect(spySendEventToAllUsers).toHaveBeenCalledWith(UISocketEvents.ShowMessage, {
+        message: `${map} is now controlled by ${testGuild.name}.`,
+        type: "info",
+      });
     });
 
     it("should do nothing if the guild already owns the map", async () => {

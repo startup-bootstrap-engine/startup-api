@@ -40,7 +40,6 @@ export class ItemUseCycleQueue {
     }
   }
 
-  @TrackNewRelicTransaction()
   private async add(
     scene: string,
     characterId: string,

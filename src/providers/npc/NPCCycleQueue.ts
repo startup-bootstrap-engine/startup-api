@@ -55,10 +55,10 @@ export class NPCCycleQueue {
     await this.dynamicQueue.addJob(
       "npc-cycle-queue",
 
-      (job) => {
+      async (job) => {
         const { npc, npcSkills } = job.data;
 
-        void this.execNpcCycle(npc, npcSkills);
+        await this.execNpcCycle(npc, npcSkills);
       },
       {
         npc,

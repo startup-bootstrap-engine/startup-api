@@ -81,10 +81,10 @@ export class CharacterDeath {
 
     await this.dynamicQueue.addJob(
       "character-death",
-      async (job) => {
+      (job) => {
         const { character, killer } = job.data;
 
-        await this.execHandleCharacterDeath(killer, character);
+        void this.execHandleCharacterDeath(killer, character);
       },
       {
         character,
