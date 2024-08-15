@@ -1,4 +1,4 @@
-import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Guild } from "@entities/ModuleSystem/GuildModel";
 import { GuildSkills, IGuildSkills } from "@entities/ModuleSystem/GuildSkillsModel";
 import { SkillCalculator } from "@providers/skill/SkillCalculator";
@@ -7,13 +7,15 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { GUILD_XP_GAIN_DIFFICULTY } from "@providers/constants/GuildConstants";
 import { provide } from "inversify-binding-decorators";
 import { GuildCommon } from "./GuildCommon";
+import { GuildLevelBonus } from "./GuildLevelBonus";
 
 @provide(GuildExperience)
 export class GuildExperience {
   constructor(
     private skillCalculator: SkillCalculator,
     private socketMessaging: SocketMessaging,
-    private guildCommon: GuildCommon
+    private guildCommon: GuildCommon,
+    private guildLevelBonus: GuildLevelBonus
   ) {}
 
   public async updateGuildExperience(character: ICharacter, exp: number): Promise<void> {
@@ -32,6 +34,19 @@ export class GuildExperience {
       const { levelUp, newLevel } = await this.updateGuildSkills(guildSkills, exp);
       if (levelUp) {
         await this.guildCommon.notifyGuildMembers(guild.members, newLevel);
+
+        await Promise.all(
+          guild.members.map(async (member) => {
+            try {
+              const character = await Character.findById(member).lean();
+              if (character) {
+                await this.guildLevelBonus.applyCharacterBuff(character as ICharacter, newLevel);
+              }
+            } catch (error) {
+              console.error(`Failed to process member ${member}:`, error);
+            }
+          })
+        );
       }
     } catch (error) {
       console.error("Error updating guild experience:", error);

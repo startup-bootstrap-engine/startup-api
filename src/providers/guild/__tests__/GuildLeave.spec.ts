@@ -104,6 +104,11 @@ describe("GuildLeave.ts", () => {
       .spyOn<any, any>(guildLeave.guildCommon, "sendMessageToAllMembers")
       .mockResolvedValueOnce(null);
 
+    const removeCharacterBuffsSpy = jest
+      // @ts-ignore
+      .spyOn<any, any>(guildLeave.guildLevelBonus, "removeCharacterBuff")
+      .mockResolvedValueOnce(null);
+
     await guildLeave.leaveGuild(guildId, memberId, testCharacter as any);
 
     expect(sendMessageToAllMembersSpy).toHaveBeenCalledWith(
@@ -117,5 +122,6 @@ describe("GuildLeave.ts", () => {
       true,
       [memberId]
     );
+    expect(removeCharacterBuffsSpy).toBeCalled();
   });
 });

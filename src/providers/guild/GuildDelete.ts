@@ -1,13 +1,18 @@
-import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Guild } from "@entities/ModuleSystem/GuildModel";
 import { GuildSkills } from "@entities/ModuleSystem/GuildSkillsModel";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { provide } from "inversify-binding-decorators";
 import { GuildCommon } from "./GuildCommon";
+import { GuildLevelBonus } from "./GuildLevelBonus";
 
 @provide(GuildDelete)
 export class GuildDelete {
-  constructor(private socketMessaging: SocketMessaging, private guildCommon: GuildCommon) {}
+  constructor(
+    private socketMessaging: SocketMessaging,
+    private guildCommon: GuildCommon,
+    private guildLevelBonus: GuildLevelBonus
+  ) {}
 
   public async deleteGuild(guildId: string, character: ICharacter): Promise<void> {
     try {
@@ -33,6 +38,19 @@ export class GuildDelete {
         "The guild " + guild.name + " has been deleted by the leader.",
         guild,
         true
+      );
+
+      await Promise.all(
+        guild.members.map(async (member) => {
+          try {
+            const character = await Character.findById(member).lean();
+            if (character) {
+              await this.guildLevelBonus.removeCharacterBuff(character as ICharacter);
+            }
+          } catch (error) {
+            console.error(`Failed to process member ${member}:`, error);
+          }
+        })
       );
     } catch (error) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "An error occurred while deleting the guild.");

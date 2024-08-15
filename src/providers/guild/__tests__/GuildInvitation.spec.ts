@@ -158,6 +158,11 @@ describe("GuildInvitation.ts", () => {
         "sendMessageToAllMembers"
       );
 
+      const applyCharacterBuffSpy = jest
+        // @ts-ignore
+        .spyOn<any, any>(guildInvitation.guildLevelBonus, "applyCharacterBuff")
+        .mockResolvedValueOnce(null);
+
       await guildInvitation.acceptInviteGuild(
         testTargetCharacter,
         testGuild.guildLeader?.toString(),
@@ -173,6 +178,7 @@ describe("GuildInvitation.ts", () => {
           _id: updatedGuild._id,
         })
       );
+      expect(applyCharacterBuffSpy).toHaveBeenCalled();
     });
   });
 });

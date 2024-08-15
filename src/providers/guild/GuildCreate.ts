@@ -13,6 +13,7 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { GuildSocketEvents, IGuildForm } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { GuildCommon } from "./GuildCommon";
+import { GuildLevelBonus } from "./GuildLevelBonus";
 import { GuildValidation } from "./GuildValidation";
 
 @provide(GuildCreate)
@@ -25,7 +26,8 @@ export class GuildCreate {
     private characterItemInventory: CharacterItemInventory,
     private characterWeight: CharacterWeightQueue,
     private guildCommon: GuildCommon,
-    private guildValidation: GuildValidation
+    private guildValidation: GuildValidation,
+    private guildLevelBonus: GuildLevelBonus
   ) {}
 
   public async createGuild(guildData: IGuildForm, character: ICharacter): Promise<any> {
@@ -96,6 +98,9 @@ export class GuildCreate {
 
       // send guild info
       await this.guildCommon.sendMessageToAllMembers("Guild " + newGuild.name + " was Created successfully.", newGuild);
+
+      // add guild bonus
+      await this.guildLevelBonus.applyCharacterBuff(character, 1);
     } catch (error) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Error creating guild.");
       console.error(error);

@@ -3,10 +3,16 @@ import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { provide } from "inversify-binding-decorators";
 import { GuildCommon } from "./GuildCommon";
+import { GuildLevelBonus } from "./GuildLevelBonus";
 
 @provide(GuildLeave)
 export class GuildLeave {
-  constructor(private socketMessaging: SocketMessaging, private guildCommon: GuildCommon) {}
+  constructor(
+    private socketMessaging: SocketMessaging,
+    private guildCommon: GuildCommon,
+    private guildLevelBonus: GuildLevelBonus
+  ) {}
+
   public async leaveGuild(guildId: string, memberId: string, character: ICharacter): Promise<void> {
     try {
       const member = (await Character.findById(memberId).lean()) as ICharacter;
@@ -45,6 +51,7 @@ export class GuildLeave {
         true,
         [memberId]
       );
+      await this.guildLevelBonus.removeCharacterBuff(member);
     } catch (error) {
       console.error(error);
     }

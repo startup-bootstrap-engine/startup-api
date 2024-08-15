@@ -157,6 +157,11 @@ describe("GuildCreate.ts", () => {
       jest.spyOn(Guild, "findOne").mockResolvedValue(null);
       // @ts-ignore
       jest.spyOn(Guild, "create").mockResolvedValue(testGuild as any);
+
+      const guildLevelBonusSpy = jest
+        // @ts-ignore
+        .spyOn(guildCreate.guildLevelBonus, "applyCharacterBuff")
+        .mockReturnValue({} as any);
       // @ts-ignore
       guildCreate.characterItemInventory.decrementItemFromNestedInventoryByKey = jest
         .fn()
@@ -176,6 +181,8 @@ describe("GuildCreate.ts", () => {
         "Guild " + testGuild.name + " was Created successfully.",
         testGuild
       );
+
+      expect(guildLevelBonusSpy).toBeCalledWith(testCharacter, 1);
     });
 
     it("should send error if guild creation fails", async () => {

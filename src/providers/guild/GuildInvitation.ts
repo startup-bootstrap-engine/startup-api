@@ -1,14 +1,20 @@
 /* eslint-disable mongoose-lean/require-lean */
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
+import { GuildSkills } from "@entities/ModuleSystem/GuildSkillsModel";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { GuildSocketEvents, IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { GuildCommon } from "./GuildCommon";
+import { GuildLevelBonus } from "./GuildLevelBonus";
 
 @provide(GuildInvitation)
 export class GuildInvitation {
-  constructor(private socketMessaging: SocketMessaging, private guildCommon: GuildCommon) {}
+  constructor(
+    private socketMessaging: SocketMessaging,
+    private guildCommon: GuildCommon,
+    private guildLevelBonus: GuildLevelBonus
+  ) {}
 
   public async inviteToGuild(
     character: ICharacter,
@@ -85,5 +91,14 @@ export class GuildInvitation {
 
     const message = `${character.name} joined the guild!`;
     await this.guildCommon.sendMessageToAllMembers(message, guild);
+
+    try {
+      const guildSkills = await GuildSkills.findOne({ owner: guild._id }).lean();
+      if (guildSkills) {
+        await this.guildLevelBonus.applyCharacterBuff(character, guildSkills.level);
+      }
+    } catch (error) {
+      console.error("Failed to apply character buff:", error);
+    }
   }
 }

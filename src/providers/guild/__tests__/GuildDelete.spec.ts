@@ -1,4 +1,4 @@
-import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
 import { GuildSkills } from "@entities/ModuleSystem/GuildSkillsModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
@@ -82,6 +82,16 @@ describe("GuildDelete.ts", () => {
         lean: jest.fn().mockResolvedValueOnce(null),
       });
       const deleteGuildSpy = jest.spyOn(Guild, "deleteOne").mockResolvedValueOnce({ deletedCount: 1 });
+      // @ts-ignore
+      jest.spyOn(Character, "findById").mockReturnValue({
+        lean: jest.fn().mockResolvedValue(testCharacter),
+      });
+
+      const removeCharacterBuffsSpy = jest
+        // @ts-ignore
+        .spyOn<any, any>(guildDelete.guildLevelBonus, "removeCharacterBuff")
+        .mockResolvedValueOnce(null);
+
       const sendMessageToAllMembersSpy = jest
         // @ts-ignore
         .spyOn<any, any>(guildDelete.guildCommon, "sendMessageToAllMembers")
@@ -95,6 +105,7 @@ describe("GuildDelete.ts", () => {
         testGuild,
         true
       );
+      expect(removeCharacterBuffsSpy).toHaveBeenCalledWith(testCharacter);
     });
   });
 });

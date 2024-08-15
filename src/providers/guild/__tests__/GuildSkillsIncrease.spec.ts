@@ -66,6 +66,11 @@ describe("GuildSkillsIncrease.ts", () => {
       // @ts-ignore
       const notifyGuildMembersSpy = jest.spyOn(guildSkillsIncrease.guildCommon, "notifyGuildMembers");
 
+      const applyCharacterBuffSpy = jest
+        // @ts-ignore
+        .spyOn<any, any>(guildSkillsIncrease.guildLevelBonus, "applyCharacterBuff")
+        .mockResolvedValueOnce(null);
+
       await guildSkillsIncrease.increaseGuildSkills(guildSkills, skillPoints);
 
       const newGuildSkills = await GuildSkills.findOne({ _id: guildSkills._id });
@@ -77,10 +82,16 @@ describe("GuildSkillsIncrease.ts", () => {
       const callArgs = notifyGuildMembersSpy.mock.calls[0];
       expect(callArgs[0]).toEqual(expect.arrayContaining(testGuild.members));
       expect(callArgs[0].length).toBe(testGuild.members.length);
+
+      expect(applyCharacterBuffSpy).toHaveBeenCalled();
     });
 
     it("should not send level up message if guild is not found", async () => {
-      jest.spyOn(Guild, "findOne").mockResolvedValueOnce(null);
+      // @ts-ignore
+      jest.spyOn(Guild, "findOne").mockResolvedValueOnce({
+        lean: jest.fn().mockResolvedValueOnce(null),
+      });
+
       const updateOneSpy = jest.spyOn(GuildSkills, "updateOne").mockImplementation();
 
       await guildSkillsIncrease.increaseGuildSkills(guildSkills, 150);
