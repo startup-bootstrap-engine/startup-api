@@ -6,6 +6,7 @@ export const GUILD_SKILL_GAIN_DIFFICULTY = 500;
 
 export const GUILD_XP_GAIN_DIFFICULTY = 100;
 
+export const GUILD_XP_BONUS = 0.2;
 export const GUILD_LEVEL_BONUS = 0.2;
 
 export const GUILD_BUFFS = [

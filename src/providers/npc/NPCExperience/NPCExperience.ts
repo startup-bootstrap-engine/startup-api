@@ -157,8 +157,7 @@ export class NPCExperience {
         await this.updateSkillsAndSendEvents(
           recipientCharacterAndSkills.character,
           recipientCharacterAndSkills.skills,
-          expPerRecipient,
-          target
+          expPerRecipient
         );
 
         const hasGuild = await this.guildCommon.hasGuild(recipientCharacterAndSkills.character);
@@ -429,12 +428,7 @@ export class NPCExperience {
     return { character, skills };
   }
 
-  private async updateSkillsAndSendEvents(
-    character: ICharacter,
-    skills: ISkill,
-    exp: number,
-    target: INPC
-  ): Promise<void> {
+  public async updateSkillsAndSendEvents(character: ICharacter, skills: ISkill, exp: number): Promise<void> {
     let levelUp = false;
     let previousLevel = 0;
 

@@ -8,6 +8,7 @@ import { GUILD_XP_GAIN_DIFFICULTY } from "@providers/constants/GuildConstants";
 import { provide } from "inversify-binding-decorators";
 import { GuildCommon } from "./GuildCommon";
 import { GuildLevelBonus } from "./GuildLevelBonus";
+import { GuildLevelBonusXP } from "./GuildLevelBonusXP";
 
 @provide(GuildExperience)
 export class GuildExperience {
@@ -15,6 +16,7 @@ export class GuildExperience {
     private skillCalculator: SkillCalculator,
     private socketMessaging: SocketMessaging,
     private guildCommon: GuildCommon,
+    private guildLevelBonusXP: GuildLevelBonusXP,
     private guildLevelBonus: GuildLevelBonus
   ) {}
 
@@ -40,6 +42,7 @@ export class GuildExperience {
             try {
               const character = await Character.findById(member).lean();
               if (character) {
+                await this.guildLevelBonusXP.applyXPBonusForGuildLevel(character as ICharacter, newLevel);
                 await this.guildLevelBonus.applyCharacterBuff(character as ICharacter, newLevel);
               }
             } catch (error) {

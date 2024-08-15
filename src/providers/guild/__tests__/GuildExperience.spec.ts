@@ -51,6 +51,30 @@ describe("GuildExperience.ts", () => {
     expect(mockSocketMessaging.sendEventToUser).not.toHaveBeenCalled();
   });
 
+  it("should update guild experience with leveling up", async () => {
+    // @ts-ignore
+    const notifyGuildMembersSpy = jest.spyOn(guildExperience.guildCommon, "notifyGuildMembers");
+
+    const xp = guildSkills.xpToNextLevel * 20 + 10;
+
+    const applyXPBonusForGuildLevelSpy = jest
+      // @ts-ignore
+      .spyOn<any, any>(guildExperience.guildLevelBonusXP, "applyXPBonusForGuildLevel")
+      .mockResolvedValueOnce(null);
+
+    await guildExperience.updateGuildExperience(testCharacter, xp);
+
+    const newGuildSkills = await GuildSkills.findOne({ _id: guildSkills._id });
+    expect(newGuildSkills?.experience).toEqual(Math.round(guildSkills.experience + xp / 10));
+    expect(notifyGuildMembersSpy).toHaveBeenCalled();
+
+    const callArgs = notifyGuildMembersSpy.mock.calls[0];
+    expect(callArgs[0]).toEqual(expect.arrayContaining(testGuild.members));
+    expect(callArgs[0].length).toBe(testGuild.members.length);
+    expect(callArgs[1]).toBe(newGuildSkills?.level);
+    expect(applyXPBonusForGuildLevelSpy).toHaveBeenCalled();
+  });
+
   it("should do nothing if guild is not found", async () => {
     // @ts-ignore
     jest.spyOn(Guild, "findOne").mockReturnValueOnce(null);

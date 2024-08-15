@@ -77,6 +77,7 @@ jest.mock("@providers/constants/GuildConstants", () => ({
   GUILD_CREATE_MIN_GOLD_REQUIRED: 100000,
   GUILD_XP_GAIN_DIFFICULTY: 1,
   GUILD_SKILL_GAIN_DIFFICULTY: 1,
+  GUILD_XP_BONUS: 0.2,
   GUILD_BUFFS: ["strength", "magic", "magicResistance", "resistance"],
   GUILD_LEVEL_BONUS: 0.2,
   GUILD_LEVEL_BONUS_MAX: 50,

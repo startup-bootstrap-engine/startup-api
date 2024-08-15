@@ -66,6 +66,9 @@ describe("GuildSkillsIncrease.ts", () => {
       // @ts-ignore
       const notifyGuildMembersSpy = jest.spyOn(guildSkillsIncrease.guildCommon, "notifyGuildMembers");
 
+      const applyXPBonusForGuildLevelSpy = jest
+        // @ts-ignore
+        .spyOn<any, any>(guildSkillsIncrease.guildLevelBonusXP, "applyXPBonusForGuildLevel");
       const applyCharacterBuffSpy = jest
         // @ts-ignore
         .spyOn<any, any>(guildSkillsIncrease.guildLevelBonus, "applyCharacterBuff")
@@ -82,7 +85,7 @@ describe("GuildSkillsIncrease.ts", () => {
       const callArgs = notifyGuildMembersSpy.mock.calls[0];
       expect(callArgs[0]).toEqual(expect.arrayContaining(testGuild.members));
       expect(callArgs[0].length).toBe(testGuild.members.length);
-
+      expect(applyXPBonusForGuildLevelSpy).toHaveBeenCalled();
       expect(applyCharacterBuffSpy).toHaveBeenCalled();
     });
 

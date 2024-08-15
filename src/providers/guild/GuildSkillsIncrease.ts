@@ -8,6 +8,7 @@ import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
 import { GuildCommon } from "./GuildCommon";
 import { GuildLevelBonus } from "./GuildLevelBonus";
+import { GuildLevelBonusXP } from "./GuildLevelBonusXP";
 
 @provide(GuildSkillsIncrease)
 export class GuildSkillsIncrease {
@@ -15,6 +16,7 @@ export class GuildSkillsIncrease {
     private socketMessaging: SocketMessaging,
     private skillCalculator: SkillCalculator,
     private guildCommon: GuildCommon,
+    private guildLevelBonusXP: GuildLevelBonusXP,
     private guildLevelBonus: GuildLevelBonus
   ) {}
 
@@ -67,6 +69,7 @@ export class GuildSkillsIncrease {
             try {
               const character = await Character.findById(member).lean();
               if (character) {
+                await this.guildLevelBonusXP.applyXPBonusForGuildLevel(character as ICharacter, newLevel);
                 await this.guildLevelBonus.applyCharacterBuff(character as ICharacter, newLevel);
               }
             } catch (error) {
