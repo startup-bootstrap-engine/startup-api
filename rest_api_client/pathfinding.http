@@ -1,0 +1,84 @@
+### Test the pathfinding endpoint with a simple grid
+
+POST http://localhost:5004/path
+Content-Type: application/json
+
+{
+  "startX": 0,
+  "startY": 0,
+  "endX": 3,
+  "endY": 1,
+  "grid": {
+    "width": 4,
+    "height": 4,
+    "nodes": [
+      [{"x": 0, "y": 0, "walkable": true}, {"x": 1, "y": 0, "walkable": true}, {"x": 2, "y": 0, "walkable": true}, {"x": 3, "y": 0, "walkable": true}],
+      [{"x": 0, "y": 1, "walkable": true}, {"x": 1, "y": 1, "walkable": true}, {"x": 2, "y": 1, "walkable": true}, {"x": 3, "y": 1, "walkable": true}],
+      [{"x": 0, "y": 2, "walkable": true}, {"x": 1, "y": 2, "walkable": true}, {"x": 2, "y": 2, "walkable": true}, {"x": 3, "y": 2, "walkable": true}],
+      [{"x": 0, "y": 3, "walkable": true}, {"x": 1, "y": 3, "walkable": true}, {"x": 2, "y": 3, "walkable": true}, {"x": 3, "y": 3, "walkable": true}]
+    ]
+  }
+}
+
+### Another test case with a different grid
+
+POST http://localhost:5004/path
+Content-Type: application/json
+
+{
+  "startX": 0,
+  "startY": 0,
+  "endX": 2,
+  "endY": 2,
+  "grid": {
+    "width": 3,
+    "height": 3,
+    "nodes": [
+      [{"x": 0, "y": 0, "walkable": true}, {"x": 1, "y": 0, "walkable": true}, {"x": 2, "y": 0, "walkable": true}],
+      [{"x": 0, "y": 1, "walkable": true}, {"x": 1, "y": 1, "walkable": false}, {"x": 2, "y": 1, "walkable": true}],
+      [{"x": 0, "y": 2, "walkable": true}, {"x": 1, "y": 2, "walkable": true}, {"x": 2, "y": 2, "walkable": true}]
+    ]
+  }
+}
+
+### Test case where no path exists
+
+POST http://localhost:5004/path
+Content-Type: application/json
+
+{
+  "startX": 0,
+  "startY": 0,
+  "endX": 2,
+  "endY": 2,
+  "grid": {
+    "width": 3,
+    "height": 3,
+    "nodes": [
+      [{"x": 0, "y": 0, "walkable": true}, {"x": 1, "y": 0, "walkable": false}, {"x": 2, "y": 0, "walkable": true}],
+      [{"x": 0, "y": 1, "walkable": true}, {"x": 1, "y": 1, "walkable": false}, {"x": 2, "y": 1, "walkable": true}],
+      [{"x": 0, "y": 2, "walkable": true}, {"x": 1, "y": 2, "walkable": false}, {"x": 2, "y": 2, "walkable": true}]
+    ]
+  }
+}
+
+### Test a more complex grid with obstacles
+
+POST http://localhost:5004/path
+Content-Type: application/json
+
+{
+  "startX": 0,
+  "startY": 0,
+  "endX": 6,
+  "endY": 0,
+  "grid": {
+    "width": 7,
+    "height": 3,
+    "nodes": [
+      [{"x": 0, "y": 0, "walkable": true}, {"x": 1, "y": 0, "walkable": true}, {"x": 2, "y": 0, "walkable": true}, {"x": 3, "y": 0, "walkable": true}, {"x": 4, "y": 0, "walkable": true}, {"x": 5, "y": 0, "walkable": false}, {"x": 6, "y": 0, "walkable": true}],
+      [{"x": 0, "y": 1, "walkable": true}, {"x": 1, "y": 1, "walkable": false}, {"x": 2, "y": 1, "walkable": false}, {"x": 3, "y": 1, "walkable": false}, {"x": 4, "y": 1, "walkable": false}, {"x": 5, "y": 1, "walkable": false}, {"x": 6, "y": 1, "walkable": false}],
+      [{"x": 0, "y": 2, "walkable": true}, {"x": 1, "y": 2, "walkable": false}, {"x": 2, "y": 2, "walkable": false}, {"x": 3, "y": 2, "walkable": false}, {"x": 4, "y": 2, "walkable": false}, {"x": 5, "y": 2, "walkable": false}, {"x": 6, "y": 2, "walkable": false}]
+    ]
+  }
+}
