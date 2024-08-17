@@ -5,6 +5,7 @@ import { appEnv } from "@providers/config/env";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
+import { AvailableMicroservices, MicroserviceRequest } from "@providers/microservice/MicroserviceRequest";
 import { NPCTarget } from "@providers/npc/movement/NPCTarget";
 import { ResultsPoller } from "@providers/poller/ResultsPoller";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
@@ -13,6 +14,10 @@ import { Job } from "bullmq";
 import PF from "pathfinding";
 import { GridManager, IGridCourse } from "../GridManager";
 import { LightweightPathfinder } from "./LightweightPathfinder";
+
+interface IRPGPathfinderResponse {
+  path: number[][];
+}
 
 @provideSingleton(PathfindingQueue)
 export class PathfindingQueue {
@@ -23,7 +28,8 @@ export class PathfindingQueue {
     private gridManager: GridManager,
     private lightweightPathfinder: LightweightPathfinder,
     private inMemoryHashTable: InMemoryHashTable,
-    private npcTarget: NPCTarget
+    private npcTarget: NPCTarget,
+    private microserviceRequest: MicroserviceRequest
   ) {}
 
   @TrackNewRelicTransaction()
@@ -50,24 +56,20 @@ export class PathfindingQueue {
         });
       }
 
-      const forceAdvancedPathfinding = await this.inMemoryHashTable.get("npc-force-pathfinding-calculation", npc._id);
+      const pathfindingResult = await this.startPathfindingQueue(
+        npc,
+        target,
+        startGridX,
+        startGridY,
+        endGridX,
+        endGridY
+      );
 
-      if (forceAdvancedPathfinding) {
-        const pathfindingResult = await this.startPathfindingQueue(
-          npc,
-          target,
-          startGridX,
-          startGridY,
-          endGridX,
-          endGridY
-        );
-
-        if (pathfindingResult && pathfindingResult?.length > 0) {
-          return pathfindingResult;
-        }
-
-        await this.npcTarget.tryToSetTarget(npc);
+      if (pathfindingResult && pathfindingResult?.length > 0) {
+        return pathfindingResult;
       }
+
+      await this.npcTarget.tryToSetTarget(npc);
 
       return await this.triggerLightweightPathfinding(npc, endGridX, endGridY);
     } catch (error) {
@@ -176,9 +178,29 @@ export class PathfindingQueue {
     grid.setWalkableAt(firstNode.x, firstNode.y, true);
     grid.setWalkableAt(lastNode.x, lastNode.y, true);
 
-    const finder = appEnv.general.IS_UNIT_TEST ? new PF.BestFirstFinder() : new PF.BreadthFirstFinder();
+    let finder, path;
 
-    const path = finder.findPath(firstNode.x, firstNode.y, lastNode.x, lastNode.y, grid);
+    if (appEnv.general.IS_UNIT_TEST) {
+      finder = new PF.BestFirstFinder();
+      path = finder.findPath(firstNode.x, firstNode.y, lastNode.x, lastNode.y, grid);
+    } else {
+      console.time("pathfinding");
+      const result = await this.microserviceRequest.requestMicroservice<IRPGPathfinderResponse>(
+        AvailableMicroservices.RpgPathfinding,
+        "/path",
+        {
+          startX: firstNode.x,
+          startY: firstNode.y,
+          endX: lastNode.x,
+          endY: lastNode.y,
+          grid,
+        }
+      );
+
+      console.timeEnd("pathfinding");
+      path = result.path;
+    }
+
     const pathWithoutOffset = path.map(([x, y]) => [x + data.startX, y + data.startY]);
 
     if (pathWithoutOffset.length < 1 && retries < 3) {
