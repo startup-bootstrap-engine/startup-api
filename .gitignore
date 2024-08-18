@@ -18,6 +18,8 @@ environment/backups/**
 docker-compose.yml
 Dockerfile
 
+!./microservices/rpg-pathfinder/Dockerfile
+
 globalConfig.json
 
 coverage
