@@ -17,3 +17,5 @@ export const GUILD_BUFFS = [
 ];
 
 export const GUILD_LEVEL_BONUS_MAX = 50;
+
+export const LEVEL_GROUP_SIZE = 10;

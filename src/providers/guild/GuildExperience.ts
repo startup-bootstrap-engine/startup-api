@@ -2,7 +2,6 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { Guild } from "@entities/ModuleSystem/GuildModel";
 import { GuildSkills, IGuildSkills } from "@entities/ModuleSystem/GuildSkillsModel";
 import { SkillCalculator } from "@providers/skill/SkillCalculator";
-import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 
 import { GUILD_XP_GAIN_DIFFICULTY } from "@providers/constants/GuildConstants";
 import { provide } from "inversify-binding-decorators";
@@ -14,7 +13,6 @@ import { GuildLevelBonusXP } from "./GuildLevelBonusXP";
 export class GuildExperience {
   constructor(
     private skillCalculator: SkillCalculator,
-    private socketMessaging: SocketMessaging,
     private guildCommon: GuildCommon,
     private guildLevelBonusXP: GuildLevelBonusXP,
     private guildLevelBonus: GuildLevelBonus

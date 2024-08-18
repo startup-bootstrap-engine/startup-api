@@ -89,7 +89,58 @@ describe("GuildInvitation.ts", () => {
       );
     });
 
+    it("should send error if guild skills not found", async () => {
+      jest.spyOn(GuildSkills, "findOne").mockReturnValueOnce({ lean: jest.fn().mockResolvedValue(null) } as any);
+
+      await guildInvitation.inviteToGuild(
+        testCharacter,
+        testGuild.guildLeader?.toString(),
+        testTargetCharacter._id.toString(),
+        testGuild._id.toString()
+      );
+
+      expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
+        testCharacter,
+        "Sorry, guild skills not found."
+      );
+    });
+
+    it("should send error if guild is full", async () => {
+      testGuild.members = [
+        testCharacter._id,
+        new mongoose.Types.ObjectId().toString(),
+        new mongoose.Types.ObjectId().toString(),
+        new mongoose.Types.ObjectId().toString(),
+        new mongoose.Types.ObjectId().toString(),
+        new mongoose.Types.ObjectId().toString(),
+        new mongoose.Types.ObjectId().toString(),
+        new mongoose.Types.ObjectId().toString(),
+        new mongoose.Types.ObjectId().toString(),
+        new mongoose.Types.ObjectId().toString(),
+      ];
+
+      await testGuild.save();
+
+      await guildInvitation.inviteToGuild(
+        testCharacter,
+        testGuild.guildLeader?.toString(),
+        testTargetCharacter._id.toString(),
+        testGuild._id.toString()
+      );
+
+      // @ts-ignore
+      const nextLevel = guildInvitation.nextUpgradeLevel(guildSkills.level, testGuild.members.length);
+
+      expect(mockSocketMessaging.sendErrorMessageToCharacter).toBeCalledWith(
+        testCharacter,
+        `Sorry, guild is full. Please upgrade your guild level to ${nextLevel} to get more members.`
+      );
+    });
+
     it("should send guild invite and confirmation message if all conditions are met", async () => {
+      testGuild.members = [testCharacter._id];
+      await testGuild.save();
+
       await guildInvitation.inviteToGuild(
         testCharacter,
         testGuild.guildLeader?.toString(),
@@ -179,6 +230,63 @@ describe("GuildInvitation.ts", () => {
         })
       );
       expect(applyCharacterBuffSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe("maxGuildMembers", () => {
+    const testCases = [
+      { level: 1, expected: 10 },
+      { level: 5, expected: 10 },
+      { level: 10, expected: 10 },
+      { level: 11, expected: 20 },
+      { level: 20, expected: 20 },
+      { level: 21, expected: 30 },
+      { level: 50, expected: 50 },
+      { level: 100, expected: 100 },
+    ];
+
+    test.each(testCases)("should return $expected for level $level", ({ level, expected }) => {
+      // @ts-ignore
+      expect(guildInvitation.maxGuildMembers(level)).toBe(expected);
+    });
+
+    it("should throw an error for invalid guild level", () => {
+      // @ts-ignore
+      expect(() => guildInvitation.maxGuildMembers(0)).toThrow("Guild level must be at least 1");
+    });
+  });
+
+  describe("nextUpgradeLevel", () => {
+    const testCases = [
+      {
+        currentLevel: 1,
+        currentMembers: 5,
+        expected: 1,
+        description: "return current level when members are below max",
+      },
+      { currentLevel: 10, currentMembers: 10, expected: 11, description: "return next level when members are at max" },
+      { currentLevel: 20, currentMembers: 21, expected: 21, description: "return next level when members exceed max" },
+      {
+        currentLevel: 50,
+        currentMembers: 40,
+        expected: 50,
+        description: "return current level for high level with low members",
+      },
+    ];
+
+    test.each(testCases)("should $description", ({ currentLevel, currentMembers, expected }) => {
+      // @ts-ignore
+      expect(guildInvitation.nextUpgradeLevel(currentLevel, currentMembers)).toBe(expected);
+    });
+
+    it("should throw an error for invalid current level", () => {
+      // @ts-ignore
+      expect(() => guildInvitation.nextUpgradeLevel(0, 5)).toThrow("Current level must be at least 1");
+    });
+
+    it("should throw an error for negative current members", () => {
+      // @ts-ignore
+      expect(() => guildInvitation.nextUpgradeLevel(1, -1)).toThrow("Current members must be a non-negative number");
     });
   });
 });

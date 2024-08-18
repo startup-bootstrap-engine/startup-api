@@ -3,7 +3,6 @@ import { Guild } from "@entities/ModuleSystem/GuildModel";
 import { GuildSkills, IGuildSkills } from "@entities/ModuleSystem/GuildSkillsModel";
 import { GUILD_SKILL_GAIN_DIFFICULTY } from "@providers/constants/GuildConstants";
 import { SkillCalculator } from "@providers/skill/SkillCalculator";
-import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
 import { GuildCommon } from "./GuildCommon";
@@ -13,7 +12,6 @@ import { GuildLevelBonusXP } from "./GuildLevelBonusXP";
 @provide(GuildSkillsIncrease)
 export class GuildSkillsIncrease {
   constructor(
-    private socketMessaging: SocketMessaging,
     private skillCalculator: SkillCalculator,
     private guildCommon: GuildCommon,
     private guildLevelBonusXP: GuildLevelBonusXP,
