@@ -58,6 +58,44 @@ services:
     networks:
       - rpg-network
 
+  rpg-pathfinder:
+    image: definya/definya-team:rpg-pathfinder-latest
+    build:
+      context: ./microservices/rpg-pathfinder
+      dockerfile: Dockerfile
+    ports:
+      - "5004:5004"
+    volumes:
+      - ./microservices/rpg-pathfinder:/app
+    environment:
+      GO111MODULE: on
+    command: air
+    deploy:
+      replicas: 4
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.labels.api == true
+        preferences:
+          - spread: node.id
+        max_replicas_per_node: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+        failure_action: rollback
+      rollback_config:
+        parallelism: 2
+        delay: 10s
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5004/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - rpg-network
+
   rpg-client:
     image: definya/definya-team:client-latest
     healthcheck:

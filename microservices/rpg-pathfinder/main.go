@@ -19,6 +19,10 @@ type PathResponse struct {
 	Error string  `json:"error,omitempty"`
 }
 
+type HealthCheckResponse struct {
+	Status string `json:"status"`
+}
+
 func pathHandler(w http.ResponseWriter, r *http.Request) {
 	responseChan := make(chan PathResponse)
 
@@ -49,8 +53,15 @@ func pathHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
+func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(HealthCheckResponse{Status: "OK"})
+}
+
 func main() {
 	http.HandleFunc("/path", pathHandler)
+	http.HandleFunc("/health", healthCheckHandler) // Health check endpoint
 
 	port := ":5004"
 	fmt.Printf("Starting server on port %s\n", port)
