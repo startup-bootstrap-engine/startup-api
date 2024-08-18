@@ -63,7 +63,7 @@ export class LightweightPathfinder {
 
     if (bestPosition) {
       if (await this.isOscillatingOrStationary(npc, bestPosition.x, bestPosition.y)) {
-        return this.handleAdvancedPathfinding(npc, targetX, targetY);
+        return this.findAlternativePath(npc, nonSolidPositions, targetX, targetY);
       }
       if (await this.handleNPCStuck(npc, bestPosition.x, bestPosition.y)) {
         return this.findAlternativePath(npc, nonSolidPositions, targetX, targetY);
@@ -84,7 +84,6 @@ export class LightweightPathfinder {
   }
 
   private async getNonSolidPositions(npc: INPC, potentialPositions: IPathPosition[]): Promise<IPathPosition[]> {
-    // Batch processing of positions to reduce asynchronous overhead
     const results = await Promise.all(
       potentialPositions.map(async (position) => ({
         isSolid: await this.movementHelper.isSolid(
@@ -109,6 +108,7 @@ export class LightweightPathfinder {
       targetY
     );
 
+    // @ts-ignore
     // eslint-disable-next-line mongoose-lean/require-lean
     const targetDirectionPosition = nonSolidPositions.find((pos) => pos.direction === targetDirection);
     if (targetDirectionPosition) return targetDirectionPosition;
@@ -164,7 +164,7 @@ export class LightweightPathfinder {
       return [[ToGridX(bestAlternative.x), ToGridY(bestAlternative.y)]];
     }
 
-    return this.handleAdvancedPathfinding(npc, targetX, targetY);
+    return [];
   }
 
   private async isOscillatingOrStationary(npc: INPC, x: number, y: number): Promise<boolean> {
@@ -195,16 +195,5 @@ export class LightweightPathfinder {
 
   private arePositionsEqual(pos1: number[], pos2: number[]): boolean {
     return pos1[0] === pos2[0] && pos1[1] === pos2[1];
-  }
-
-  private async handleAdvancedPathfinding(npc: INPC, targetX: number, targetY: number): Promise<number[][]> {
-    const distanceToTarget = this.mathHelper.getDistanceInGridCells(npc.x, npc.y, targetX, targetY);
-
-    if (distanceToTarget > 7) {
-      return [];
-    }
-
-    await this.inMemoryHashTable.set("npc-force-pathfinding-calculation", npc._id, true);
-    return [];
   }
 }
