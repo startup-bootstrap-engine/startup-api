@@ -1,3 +1,4 @@
+# Ignore node_modules, dist, .env, etc.
 node_modules
 dist
 .env 
@@ -9,20 +10,21 @@ yarn-error.log
 .DS_Store
 
 newrelic_agent.log
- 
- 
 
+# Ignore everything in environment/backups except the folder itself
 !environment/backups
 environment/backups/**
 
+# Ignore docker-compose.yml and Dockerfiles globally
 docker-compose.yml
 Dockerfile
+
+# Do not ignore the Dockerfile in microservices/rpg-pathfinder/
+!microservices/rpg-pathfinder/Dockerfile
 
 globalConfig.json
 
 coverage
-
- 
 
 pulbic/maps/unit-test-map.json
 
