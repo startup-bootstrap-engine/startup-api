@@ -64,7 +64,6 @@ services:
       - "5004:5004"
     environment:
       GO111MODULE: "on"
-    command: air
     deploy:
       replicas: 4
       restart_policy:
@@ -75,13 +74,6 @@ services:
         preferences:
           - spread: node.id
         max_replicas_per_node: 1
-      update_config:
-        parallelism: 2
-        delay: 10s
-        failure_action: rollback
-      rollback_config:
-        parallelism: 2
-        delay: 10s
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:5004/health || exit 1"]
       interval: 30s

@@ -37,13 +37,11 @@ services:
     build:
       context: ./microservices/rpg-pathfinder
       dockerfile: Dockerfile
+    command: ["/app/myapp"]
     ports:
       - "5004:5004"
-    volumes:
-      - ./microservices/rpg-pathfinder:/app
     environment:
       - GO111MODULE=on
-    command: air
     networks:
       - rpg-network
   rpg-db:
