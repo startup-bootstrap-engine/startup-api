@@ -184,7 +184,6 @@ export class PathfindingQueue {
       finder = new PF.BestFirstFinder();
       path = finder.findPath(firstNode.x, firstNode.y, lastNode.x, lastNode.y, grid);
     } else {
-      console.time("pathfinding");
       const result = await this.microserviceRequest.requestMicroservice<IRPGPathfinderResponse>(
         AvailableMicroservices.RpgPathfinding,
         "/path",
@@ -197,7 +196,6 @@ export class PathfindingQueue {
         }
       );
 
-      console.timeEnd("pathfinding");
       path = result.path;
     }
 
