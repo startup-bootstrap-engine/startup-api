@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 )
 
 type Node struct {
@@ -21,6 +20,10 @@ func isValidNode(x, y int, grid Grid) bool {
 	return x >= 0 && y >= 0 && x < grid.Width && y < grid.Height
 }
 
+type Point struct {
+	X, Y int
+}
+
 func BreadthFirstFinder(startX, startY, endX, endY int, grid Grid) ([][]int, error) {
 	// Validate start and end nodes
 	if !isValidNode(startX, startY, grid) || !isValidNode(endX, endY, grid) {
@@ -35,12 +38,12 @@ func BreadthFirstFinder(startX, startY, endX, endY int, grid Grid) ([][]int, err
 	directions := []Node{{X: 1, Y: 0}, {X: 0, Y: 1}, {X: -1, Y: 0}, {X: 0, Y: -1}}
 
 	// Initialize queue and visited map
-	queue := []Node{{X: startX, Y: startY, Walkable: true}}
-	visited := make(map[string]bool)
-	visited[fmt.Sprintf("%d,%d", startX, startY)] = true
+	queue := []Point{{X: startX, Y: startY}}
+	visited := make(map[Point]bool)
+	visited[Point{X: startX, Y: startY}] = true
 
 	// To track the path
-	parent := make(map[string]Node)
+	parent := make(map[Point]Point)
 
 	// BFS Loop
 	for len(queue) > 0 {
@@ -51,9 +54,9 @@ func BreadthFirstFinder(startX, startY, endX, endY int, grid Grid) ([][]int, err
 		if current.X == endX && current.Y == endY {
 			// Reconstruct the path
 			path := [][]int{}
-			for currentKey := fmt.Sprintf("%d,%d", current.X, current.Y); currentKey != fmt.Sprintf("%d,%d", startX, startY); currentKey = fmt.Sprintf("%d,%d", parent[currentKey].X, parent[currentKey].Y) {
+			for current != (Point{X: startX, Y: startY}) {
 				path = append([][]int{{current.X, current.Y}}, path...)
-				current = parent[currentKey]
+				current = parent[current]
 			}
 			path = append([][]int{{startX, startY}}, path...)
 			return path, nil
@@ -62,12 +65,12 @@ func BreadthFirstFinder(startX, startY, endX, endY int, grid Grid) ([][]int, err
 		// Explore neighbors
 		for _, dir := range directions {
 			newX, newY := current.X+dir.X, current.Y+dir.Y
-			newKey := fmt.Sprintf("%d,%d", newX, newY)
+			newPoint := Point{X: newX, Y: newY}
 
-			if isValidNode(newX, newY, grid) && grid.Nodes[newY][newX].Walkable && !visited[newKey] {
-				queue = append(queue, Node{X: newX, Y: newY, Walkable: true})
-				visited[newKey] = true
-				parent[newKey] = current
+			if isValidNode(newX, newY, grid) && grid.Nodes[newY][newX].Walkable && !visited[newPoint] {
+				queue = append(queue, newPoint)
+				visited[newPoint] = true
+				parent[newPoint] = current
 			}
 		}
 	}

@@ -154,6 +154,9 @@ export class PathfindingQueue {
           startGridY,
           endGridX,
           endGridY,
+        },
+        {
+          queueScaleBy: "active-npcs",
         }
       );
     } catch (error) {

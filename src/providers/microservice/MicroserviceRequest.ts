@@ -1,3 +1,4 @@
+import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import { provide } from "inversify-binding-decorators";
 
@@ -19,6 +20,7 @@ export class MicroserviceRequest {
     this.axiosInstance = axios.create();
   }
 
+  @TrackNewRelicTransaction()
   public async requestMicroservice<T>(
     microservice: AvailableMicroservices,
     endpoint: string,

@@ -29,3 +29,5 @@ coverage
 pulbic/maps/unit-test-map.json
 
 .jest-cache
+
+build-errors.log
