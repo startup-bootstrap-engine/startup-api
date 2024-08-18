@@ -58,6 +58,29 @@ services:
     networks:
       - rpg-network
 
+  rpg-pathfinder:
+    image: definya/definya-team:rpg-pathfinder-latest
+    environment:
+      GO111MODULE: "on"
+    deploy:
+      replicas: 4
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.labels.api == true
+        preferences:
+          - spread: node.id
+        max_replicas_per_node: 1
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:5004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - rpg-network
+
   rpg-client:
     image: definya/definya-team:client-latest
     healthcheck:

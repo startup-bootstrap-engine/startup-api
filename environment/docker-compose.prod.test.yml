@@ -33,7 +33,20 @@ services:
       NEW_RELIC_APP_NAME: "Definya API"
     networks:
       - rpg-network
-
+  rpg-pathfinder:
+    container_name: rpg-pathfinder
+    build:
+      context: ./microservices/rpg-pathfinder
+      dockerfile: Dockerfile
+    ports:
+      - "5004:5004"
+    volumes:
+      - ./microservices/rpg-pathfinder:/app
+    environment:
+      - GO111MODULE=on
+    command: air
+    networks:
+      - rpg-network
   rpg-db:
     container_name: rpg-db
     image: mongo

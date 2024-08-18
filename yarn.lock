@@ -4538,7 +4538,7 @@ bullmq@5.7.4:
   integrity sha512-LjPXGyDZ3c5Tbbq8ccwQEXBHrOKljHfrJ5DQMXUXyKDxxwqKxXLX8Vr69BviDOu6RmPzokh3rPziqf7Y5JylKw==
   dependencies:
     cron-parser "^4.6.0"
-    ioredis "^5.4.1"
+    ioredis "^5.3.2"
     msgpackr "^1.10.1"
     node-abort-controller "^3.1.1"
     semver "^7.5.4"
