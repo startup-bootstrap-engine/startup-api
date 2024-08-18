@@ -60,15 +60,10 @@ services:
 
   rpg-pathfinder:
     image: definya/definya-team:rpg-pathfinder-latest
-    build:
-      context: ./microservices/rpg-pathfinder
-      dockerfile: Dockerfile
     ports:
       - "5004:5004"
-    volumes:
-      - ./microservices/rpg-pathfinder:/app
     environment:
-      GO111MODULE: on
+      GO111MODULE: "on"
     command: air
     deploy:
       replicas: 4
