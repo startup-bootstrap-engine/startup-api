@@ -2,6 +2,8 @@ package main
 
 import (
 	"errors"
+	"fmt"
+	"time"
 )
 
 type Node struct {
@@ -25,11 +27,19 @@ type Point struct {
 }
 
 func BreadthFirstFinder(startX, startY, endX, endY int, grid Grid) ([][]int, error) {
+	startTime := time.Now() // Start timer
+
+	// Validate grid dimensions
+	if len(grid.Nodes) == 0 || len(grid.Nodes[0]) == 0 {
+		return nil, errors.New("grid is not properly initialized")
+	}
+
 	// Validate start and end nodes
 	if !isValidNode(startX, startY, grid) || !isValidNode(endX, endY, grid) {
 		return nil, errors.New("invalid start or end node")
 	}
 
+	// Check if start and end nodes are walkable
 	if !grid.Nodes[startY][startX].Walkable || !grid.Nodes[endY][endX].Walkable {
 		return [][]int{}, nil // No path if start or end is not walkable
 	}
@@ -59,6 +69,8 @@ func BreadthFirstFinder(startX, startY, endX, endY int, grid Grid) ([][]int, err
 				current = parent[current]
 			}
 			path = append([][]int{{startX, startY}}, path...)
+			endTime := time.Now()                                                        // End timer
+			fmt.Printf("Execution time: %v ms\n", endTime.Sub(startTime).Milliseconds()) // Log the execution time
 			return path, nil
 		}
 
@@ -75,5 +87,7 @@ func BreadthFirstFinder(startX, startY, endX, endY int, grid Grid) ([][]int, err
 		}
 	}
 
-	return [][]int{}, nil // Return empty path if no path is found
+	endTime := time.Now()                                                        // End timer
+	fmt.Printf("Execution time: %v ms\n", endTime.Sub(startTime).Milliseconds()) // Log the execution time
+	return [][]int{}, nil                                                        // Return empty path if no path is found
 }
