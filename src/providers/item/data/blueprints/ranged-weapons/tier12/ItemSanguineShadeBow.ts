@@ -1,0 +1,80 @@
+import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
+import { IEquippableRangedTier12WeaponBlueprint } from "@providers/item/data/types/TierBlueprintTypes";
+import {
+  BasicAttribute,
+  CharacterAttributes,
+  CharacterBuffDurationType,
+  CharacterBuffType,
+  EntityAttackType,
+  ItemSlotType,
+  ItemSubType,
+  ItemType,
+  RangeTypes,
+} from "@rpg-engine/shared";
+import { RangedWeaponsBlueprint } from "../../../types/itemsBlueprintTypes";
+
+export const itemSanguineShadeBow: IEquippableRangedTier12WeaponBlueprint = {
+  key: RangedWeaponsBlueprint.SanguineShadeBow,
+  type: ItemType.Weapon,
+  rangeType: EntityAttackType.Ranged,
+  subType: ItemSubType.Ranged,
+  textureAtlas: "items",
+  texturePath: "ranged-weapons/sanguine-shade-bow.png",
+  name: "Sanguine Shade Bow",
+  description:
+    "Embodying the darkness of blood, this bow's arrows carry a haunting aura that saps the vitality of its targets.",
+  attack: 97,
+  weight: 1.6,
+  allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
+  maxRange: RangeTypes.High,
+  requiredAmmoKeys: [
+    RangedWeaponsBlueprint.Arrow,
+    RangedWeaponsBlueprint.IronArrow,
+    RangedWeaponsBlueprint.PoisonArrow,
+    RangedWeaponsBlueprint.ShockArrow,
+    RangedWeaponsBlueprint.GoldenArrow,
+    RangedWeaponsBlueprint.EmeraldArrow,
+    RangedWeaponsBlueprint.CrimsonArrow,
+    RangedWeaponsBlueprint.WardenArrow,
+    RangedWeaponsBlueprint.SunflareArrow,
+    RangedWeaponsBlueprint.EarthArrow,
+    RangedWeaponsBlueprint.SilvermoonArrow,
+    RangedWeaponsBlueprint.HeartseekerArrow,
+    RangedWeaponsBlueprint.SeekerArrow,
+    RangedWeaponsBlueprint.CrystallineArrow,
+    RangedWeaponsBlueprint.MysticMeadowArrow,
+    RangedWeaponsBlueprint.PlasmaPierceArrow,
+  ],
+  tier: 12,
+  isTwoHanded: true,
+  basePrice: 225,
+  entityEffects: [EntityEffectBlueprint.Corruption],
+  entityEffectChance: 90,
+  equippedBuff: [
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxHealth,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.CharacterAttribute,
+      trait: CharacterAttributes.MaxMana,
+      buffPercentage: 15,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Resistance,
+      buffPercentage: 14,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+    {
+      type: CharacterBuffType.Skill,
+      trait: BasicAttribute.Strength,
+      buffPercentage: 14,
+      durationType: CharacterBuffDurationType.Permanent,
+    },
+  ],
+  equippedBuffDescription: "Increases Max Health by 15%, Max Mana by 15%, Resistance by 14%, and Strength by 14%.",
+};

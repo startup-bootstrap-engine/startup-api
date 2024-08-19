@@ -33,8 +33,17 @@ import { itemElvenBow } from "./tier1/ItemElvenBow";
 import { itemHorseBow } from "./tier1/ItemHorseBow";
 import { itemShortBow } from "./tier1/ItemShortBow";
 import { itemShuriken } from "./tier1/ItemShuriken";
+import { itemBloodthirstBow } from "./tier10/ItemBloodthirstBow";
 import { itemDragonWingBow } from "./tier10/ItemDragonWingBow";
+import { itemFalconWingBow } from "./tier10/ItemFalconWingBow";
+import { itemTalonStrikeBow } from "./tier10/ItemTalonStrikeBow";
+import { itemBloodMoonBow } from "./tier11/ItemBloodMoonBow";
+import { itemDarkVeinBow } from "./tier11/ItemDarkVeinBow";
+import { itemHorizonPiercerBow } from "./tier11/ItemHorizonPiercerBow";
 import { itemStarsHooterBow } from "./tier11/ItemStarsHooterBow";
+import { itemAerialStrikeBow } from "./tier12/ItemAerialStrikeBow";
+import { itemSanguineShadeBow } from "./tier12/ItemSanguineShadeBow";
+import { itemSkyHunterBow } from "./tier12/ItemSkyHunterBow";
 import { itemUmbralBow } from "./tier12/ItemUmbralBow";
 import { itemCorruptionBow } from "./tier2/ItemCorruptionBow";
 import { itemEbonyLongbow } from "./tier2/ItemEbonyLongbow";
@@ -63,16 +72,25 @@ import { itemSunstoneBow } from "./tier5/ItemSunstoneBow";
 import { itemValkyriesBow } from "./tier5/ItemValkyriesBow";
 import { itemYggdrasilBow } from "./tier5/ItemYggdrasilBow";
 import { itemZephyrusBow } from "./tier5/ItemZephyrusBow";
+import { itemFalconEyeBow } from "./tier6/ItemFalconEyeBow";
 import { itemIronBarkBow } from "./tier6/ItemIronBarkBow";
 import { itemParallelPrecisionBow } from "./tier6/ItemParallelPrecisionBow";
+import { itemRubyTalonBow } from "./tier6/ItemRubyTalonBow";
 import { itemWhisperWindBow } from "./tier6/ItemWhisperWindBow";
+import { itemCrimsonFangBow } from "./tier7/ItemCrimsonFangBow";
 import { itemEaglesEyeBow } from "./tier7/ItemEaglesEyeBow";
+import { itemFalconFeatherBow } from "./tier7/ItemFalconFeatherBow";
 import { itemGaleGuardianGripCrossbow } from "./tier7/ItemGaleGuardianGripCrossbow";
+import { itemLifebloodBow } from "./tier7/ItemLifebloodBow";
+import { itemGaleWingBow } from "./tier8/ItemGaleWingBow";
 import { itemStoneBreakerBow } from "./tier8/ItemStoneBreakerBow";
 import { itemTempestTalonTautBow } from "./tier8/ItemTempestTalonTautBow";
+import { itemVampiricBow } from "./tier8/ItemVampiricBow";
 import { itemBloodseekerBow } from "./tier9/ItemBloodseekerBow";
 import { itemChordedCataclysmBow } from "./tier9/ItemChordedCataclysmBow";
 import { itemGorgonGazeGuardianBow } from "./tier9/ItemGorgonGazeGuardianBow";
+import { itemNightshadeBow } from "./tier9/ItemNightshadeBow";
+import { itemWindriderBow } from "./tier9/ItemWindriderBow";
 
 export const rangedWeaponsBlueprintIndex = {
   [RangedWeaponsBlueprint.Slingshot]: itemSlingshot,
@@ -149,4 +167,22 @@ export const rangedWeaponsBlueprintIndex = {
   [RangedWeaponsBlueprint.GaleGuardianGripCrossbow]: itemGaleGuardianGripCrossbow,
   [RangedWeaponsBlueprint.MysticMeadowArrow]: itemMysticMeadowArrow,
   [RangedWeaponsBlueprint.PlasmaPierceArrow]: itemPlasmaPierceArrow,
+  [RangedWeaponsBlueprint.FalconFeatherBow]: itemFalconFeatherBow,
+  [RangedWeaponsBlueprint.FalconWingBow]: itemFalconWingBow,
+  [RangedWeaponsBlueprint.SkyHunterBow]: itemSkyHunterBow,
+  [RangedWeaponsBlueprint.AerialStrikeBow]: itemAerialStrikeBow,
+  [RangedWeaponsBlueprint.WindriderBow]: itemWindriderBow,
+  [RangedWeaponsBlueprint.FalconEyeBow]: itemFalconEyeBow,
+  [RangedWeaponsBlueprint.TalonStrikeBow]: itemTalonStrikeBow,
+  [RangedWeaponsBlueprint.HorizonPiercerBow]: itemHorizonPiercerBow,
+  [RangedWeaponsBlueprint.GaleWingBow]: itemGaleWingBow,
+  [RangedWeaponsBlueprint.BloodMoonBow]: itemBloodMoonBow,
+  [RangedWeaponsBlueprint.VampiricBow]: itemVampiricBow,
+  [RangedWeaponsBlueprint.CrimsonFangBow]: itemCrimsonFangBow,
+  [RangedWeaponsBlueprint.SanguineShadeBow]: itemSanguineShadeBow,
+  [RangedWeaponsBlueprint.LifebloodBow]: itemLifebloodBow,
+  [RangedWeaponsBlueprint.BloodthirstBow]: itemBloodthirstBow,
+  [RangedWeaponsBlueprint.NightshadeBow]: itemNightshadeBow,
+  [RangedWeaponsBlueprint.DarkVeinBow]: itemDarkVeinBow,
+  [RangedWeaponsBlueprint.RubyTalonBow]: itemRubyTalonBow,
 };
