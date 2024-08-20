@@ -74,6 +74,11 @@ services:
         preferences:
           - spread: node.id
         max_replicas_per_node: 2
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080"]
+      interval: 120s
+      timeout: 10s
+      retries: 3
     networks:
       - rpg-network
 
