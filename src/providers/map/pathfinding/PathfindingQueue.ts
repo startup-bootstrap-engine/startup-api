@@ -187,6 +187,17 @@ export class PathfindingQueue {
       finder = new PF.BestFirstFinder();
       path = finder.findPath(firstNode.x, firstNode.y, lastNode.x, lastNode.y, grid);
     } else {
+      // Check if the surrounding area is clear
+      const isClear = this.isAreaClearOfSolids(grid, firstNode.x, firstNode.y);
+
+      if (isClear) {
+        const result = await this.triggerLightweightPathfinding(npc, gridCourse.end.x, gridCourse.end.y);
+
+        if (result) {
+          return result;
+        }
+      }
+
       const result = await this.microserviceRequest.requestMicroservice<IRPGPathfinderResponse>(
         AvailableMicroservices.RpgPathfinding,
         "/path",

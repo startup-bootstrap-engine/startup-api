@@ -1,5 +1,6 @@
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+import http2 from "http2-wrapper";
 import { provide } from "inversify-binding-decorators";
 
 export enum AvailableMicroservices {
@@ -8,7 +9,7 @@ export enum AvailableMicroservices {
 
 const MICROSERVICE_METADATA = {
   [AvailableMicroservices.RpgPathfinding]: {
-    baseUrl: "http://rpg-pathfinder:5004",
+    baseUrl: "<http://rpg-pathfinder:5004>",
   },
 };
 
@@ -17,7 +18,9 @@ export class MicroserviceRequest {
   private axiosInstance: AxiosInstance;
 
   constructor() {
-    this.axiosInstance = axios.create();
+    this.axiosInstance = axios.create({
+      httpAgent: new http2.Agent(),
+    });
   }
 
   @TrackNewRelicTransaction()
