@@ -63,7 +63,8 @@ services:
     environment:
       GO111MODULE: "on"
     deploy:
-      replicas: 4
+      endpoint_mode: dnsrr
+      replicas: 8
       restart_policy:
         condition: on-failure
       placement:
@@ -71,7 +72,7 @@ services:
           - node.labels.api == true
         preferences:
           - spread: node.id
-        max_replicas_per_node: 1
+        max_replicas_per_node: 2
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:5004/health"]
       interval: 30s
