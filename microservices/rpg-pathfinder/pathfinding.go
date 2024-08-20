@@ -2,8 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
-	"time"
 )
 
 type Node struct {
@@ -85,7 +83,5 @@ func BreadthFirstFinder(startX, startY, endX, endY int, grid Grid) ([][]int, err
 		}
 	}
 
-	endTime := time.Now()                                                        // End timer
-	fmt.Printf("Execution time: %v ms\n", endTime.Sub(startTime).Milliseconds()) // Log the execution time
-	return [][]int{}, nil                                                        // Return empty path if no path is found
+	return [][]int{}, nil // Return empty path if no path is found
 }
