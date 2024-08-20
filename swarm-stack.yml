@@ -75,7 +75,7 @@ services:
           - spread: node.id
         max_replicas_per_node: 2
     healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:8080"]
+      test: ["CMD", "curl", "--fail", "http://localhost:5004"]
       interval: 120s
       timeout: 10s
       retries: 3
