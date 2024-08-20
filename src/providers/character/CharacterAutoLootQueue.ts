@@ -28,10 +28,10 @@ export class CharacterAutoLootQueue {
     await this.dynamicQueue.addJob(
       "character-auto-loot",
 
-      (job) => {
+      async (job) => {
         const { character, itemIdsToLoot } = job.data;
 
-        void this.execAutoLoot(character, itemIdsToLoot);
+        await this.execAutoLoot(character, itemIdsToLoot);
       },
       { character, itemIdsToLoot }
     );

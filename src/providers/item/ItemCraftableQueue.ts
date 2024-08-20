@@ -78,10 +78,10 @@ export class ItemCraftableQueue {
 
     await this.dynamicQueue.addJob(
       "craft-item",
-      (job) => {
+      async (job) => {
         const { itemToCraft, character } = job.data;
 
-        void this.execCraftItem(itemToCraft, character);
+        await this.execCraftItem(itemToCraft, character);
       },
       {
         itemToCraft,
@@ -223,6 +223,7 @@ export class ItemCraftableQueue {
     const skillLevel = await this.getSkillLevel(character, baseSkill);
     const rarityChance = this.getRarityPercent(rarityOfTool);
 
+    // @ts-ignore
     return this.isCraftSuccessful.bind(null, skillLevel, (baseChance + rarityChance ?? 0) * TOOLS_BASE_CHANCE_RATIO);
   }
 

@@ -65,10 +65,10 @@ export class UseWithTileQueue {
   public async addToQueue(useWithTileData: IUseWithTile, character: ICharacter): Promise<void> {
     await this.dynamicQueue.addJob(
       "use-with-tile",
-      (job) => {
+      async (job) => {
         const { useWithTileData, character } = job.data;
 
-        void this.onExecuteUseWithTile(character, useWithTileData);
+        await this.onExecuteUseWithTile(character, useWithTileData);
       },
       {
         useWithTileData,

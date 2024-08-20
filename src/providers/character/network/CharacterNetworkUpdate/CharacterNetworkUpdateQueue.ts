@@ -66,10 +66,10 @@ export class CharacterNetworkUpdateQueue {
   public async addToQueue(data: ICharacterPositionUpdateFromClient, character: ICharacter): Promise<void> {
     await this.dynamicQueue.addJob(
       "character-network-update",
-      (job) => {
+      async (job) => {
         const { character, data } = job.data;
 
-        void this.execPositionUpdate(data, character);
+        await this.execPositionUpdate(data, character);
       },
       {
         character,

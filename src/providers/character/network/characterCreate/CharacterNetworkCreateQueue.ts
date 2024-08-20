@@ -74,10 +74,10 @@ export class CharacterNetworkCreateQueue {
 
     await this.dynamicQueue.addJob(
       "character-create",
-      (job) => {
+      async (job) => {
         const { character, data } = job.data;
 
-        void this.execCharacterCreate(character, data);
+        await this.execCharacterCreate(character, data);
       },
       { character, data }
     );

@@ -42,9 +42,9 @@ export class CharacterWeightQueue {
 
     await this.dynamicQueue.addJob(
       "character-weight",
-      (job) => {
+      async (job) => {
         const data = job.data as { character: ICharacter };
-        void this.execUpdateCharacterWeight(data.character);
+        await this.execUpdateCharacterWeight(data.character);
       },
       {
         character,
