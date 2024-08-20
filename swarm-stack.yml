@@ -63,7 +63,7 @@ services:
     environment:
       GO111MODULE: "on"
     deploy:
-      replicas: 8
+      replicas: 4
       restart_policy:
         condition: on-failure
       placement:
@@ -71,13 +71,7 @@ services:
           - node.labels.api == true
         preferences:
           - spread: node.id
-        max_replicas_per_node: 2
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:5004/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+        max_replicas_per_node: 1
     networks:
       - rpg-network
 

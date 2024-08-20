@@ -10,11 +10,8 @@ COPY . .
 # Build the Go application
 RUN go build -o app .
 
-# Use an Alpine base image for production
-FROM alpine:3.18
-
-# Install curl (and any other utilities you might need)
-RUN apk --no-cache add curl
+# Use a more complete Debian-based image for production
+FROM debian:bookworm-slim
 
 # Set up working directory
 WORKDIR /app
