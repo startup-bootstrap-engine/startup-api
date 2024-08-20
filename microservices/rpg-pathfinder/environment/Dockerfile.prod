@@ -1,6 +1,9 @@
 # Start with a Go base image
 FROM golang:1.20-alpine as builder
 
+# Install curl
+RUN apk update && apk add --no-cache curl
+
 # Set up working directory
 WORKDIR /app
 
