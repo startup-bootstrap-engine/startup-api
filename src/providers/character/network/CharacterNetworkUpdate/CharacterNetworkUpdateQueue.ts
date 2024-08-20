@@ -66,10 +66,11 @@ export class CharacterNetworkUpdateQueue {
   public async addToQueue(data: ICharacterPositionUpdateFromClient, character: ICharacter): Promise<void> {
     await this.dynamicQueue.addJob(
       "character-network-update",
-      async (job) => {
+      (job) => {
         const { character, data } = job.data;
 
-        await this.execPositionUpdate(data, character);
+        //! Using await here is related with the "Teleport bug"
+        void this.execPositionUpdate(data, character);
       },
       {
         character,

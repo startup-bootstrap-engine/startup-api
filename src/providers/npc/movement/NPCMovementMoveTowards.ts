@@ -64,6 +64,7 @@ export class NPCMovementMoveTowards {
       "npc-move-towards-queue",
       (job) => {
         const { npc } = job.data;
+        //! Using await here will cause mobs to freeze when there're a lot of them active.
         void this.execStartMoveTowardsMovement(npc);
       },
       { npc },

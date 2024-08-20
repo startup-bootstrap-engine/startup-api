@@ -15,7 +15,7 @@ export class MapTransitionSameMap {
   @TrackNewRelicTransaction()
   public async sameMapTeleport(character: ICharacter, destination: IDestination): Promise<void> {
     try {
-      const canProceed = await this.locker.lock(`character-changing-scene-${character._id}`, 2);
+      const canProceed = await this.locker.lock(`character-changing-scene-${character._id}`);
 
       if (!canProceed) {
         return;
@@ -57,8 +57,6 @@ export class MapTransitionSameMap {
       );
     } catch (error) {
       console.error(error);
-    } finally {
-      await this.locker.unlock(`character-changing-scene-${character._id}`);
     }
   }
 }
