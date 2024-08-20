@@ -27,7 +27,6 @@ type Point struct {
 }
 
 func BreadthFirstFinder(startX, startY, endX, endY int, grid Grid) ([][]int, error) {
-	startTime := time.Now() // Start timer
 
 	// Validate grid dimensions
 	if len(grid.Nodes) == 0 || len(grid.Nodes[0]) == 0 {
@@ -69,8 +68,7 @@ func BreadthFirstFinder(startX, startY, endX, endY int, grid Grid) ([][]int, err
 				current = parent[current]
 			}
 			path = append([][]int{{startX, startY}}, path...)
-			endTime := time.Now()                                                        // End timer
-			fmt.Printf("Execution time: %v ms\n", endTime.Sub(startTime).Milliseconds()) // Log the execution time
+
 			return path, nil
 		}
 
