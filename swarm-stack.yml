@@ -60,10 +60,12 @@ services:
 
   rpg-pathfinder:
     image: definya/definya-team:rpg-pathfinder-latest
+    ports:
+      - "5004:5004"
     environment:
       GO111MODULE: "on"
     deploy:
-      replicas: 4
+      replicas: 8
       restart_policy:
         condition: on-failure
       placement:
@@ -71,7 +73,7 @@ services:
           - node.labels.api == true
         preferences:
           - spread: node.id
-        max_replicas_per_node: 1
+        max_replicas_per_node: 2
     networks:
       - rpg-network
 
