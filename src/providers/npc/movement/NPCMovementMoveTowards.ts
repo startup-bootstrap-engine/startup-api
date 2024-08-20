@@ -62,9 +62,9 @@ export class NPCMovementMoveTowards {
 
     await this.dynamicQueue.addJob(
       "npc-move-towards-queue",
-      async (job) => {
+      (job) => {
         const { npc } = job.data;
-        await this.execStartMoveTowardsMovement(npc);
+        void this.execStartMoveTowardsMovement(npc);
       },
       { npc },
       { queueScaleBy: "active-npcs" }
