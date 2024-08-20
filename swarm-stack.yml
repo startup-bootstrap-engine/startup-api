@@ -76,7 +76,7 @@ services:
         max_replicas_per_node: 2
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:5004/health"]
-      interval: 30s
+      interval: 10s
       timeout: 10s
       retries: 5
     networks:
