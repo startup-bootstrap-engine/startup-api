@@ -62,9 +62,9 @@ services:
     image: definya/definya-team:rpg-pathfinder-latest
     environment:
       GO111MODULE: "on"
-    endpoint_mode: dnsrr
     deploy:
-      replicas: 6
+      endpoint_mode: dnsrr
+      replicas: 4
       restart_policy:
         condition: on-failure
       placement:
