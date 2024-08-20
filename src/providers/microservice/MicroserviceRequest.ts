@@ -19,7 +19,12 @@ export class MicroserviceRequest {
 
   constructor() {
     this.axiosInstance = axios.create({
-      httpAgent: new http2.Agent(),
+      httpAgent: new http2.Agent({
+        timeout: 60000, // Timeout for idle connections
+        maxSessions: 100, // Maximum number of sessions
+        maxEmptySessions: 10, // Maximum number of empty sessions to keep alive
+        maxCachedTlsSessions: 100, // Maximum number of cached TLS sessions
+      }),
     });
   }
 

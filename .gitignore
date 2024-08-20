@@ -33,4 +33,4 @@ pulbic/maps/unit-test-map.json
 build-errors.log
 
 
-microservices/rpg-pathfinder/tmp/**
+microservices/rpg-pathfinder/tmp/
