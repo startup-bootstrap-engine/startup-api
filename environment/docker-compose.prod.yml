@@ -37,7 +37,6 @@ services:
     build:
       context: ./microservices/rpg-pathfinder
       dockerfile: Dockerfile
-    command: ["/app/myapp"]
     ports:
       - "5004:5004"
     environment:

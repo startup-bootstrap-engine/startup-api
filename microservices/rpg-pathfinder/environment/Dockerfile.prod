@@ -1,5 +1,5 @@
-# Start with a Go base image for building
-FROM golang:1.20 as builder
+# Use a Go base image that includes essential tools for both building and running
+FROM golang:1.20
 
 # Set up working directory
 WORKDIR /app
@@ -9,15 +9,6 @@ COPY . .
 
 # Build the Go application
 RUN go build -o app .
-
-# Use a more complete Debian-based image for production
-FROM debian:bookworm-slim
-
-# Set up working directory
-WORKDIR /app
-
-# Copy the built binary from the builder stage
-COPY --from=builder /app/app /app/app
 
 # Expose the necessary port
 EXPOSE 5004
