@@ -2,11 +2,9 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
-import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { ITiledObject, MapLayers } from "@rpg-engine/shared";
+import { ITiledObject } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { MapNonPVPZone } from "../MapNonPVPZone";
-import { MapSolids } from "../MapSolids";
 import { MapTiles } from "../MapTiles";
 import { MapTransitionDifferentMap } from "./MapTransitionDifferentMap";
 import { MapTransitionInfo } from "./MapTransitionInfo";
@@ -29,9 +27,7 @@ export class MapTransitionQueue {
     private mapTransitionDifferentMap: MapTransitionDifferentMap,
     private mapTransitionValidator: MapTransitionValidator,
     private dynamicQueue: DynamicQueue,
-    private mapTiles: MapTiles,
-    private mapSolids: MapSolids,
-    private socketMessaging: SocketMessaging
+    private mapTiles: MapTiles
   ) {}
 
   @TrackNewRelicTransaction()
@@ -41,10 +37,6 @@ export class MapTransitionQueue {
 
     const destination = this.getDestinationFromTransition(transition);
     if (!destination) return;
-
-    const isTeleportValid = this.isTeleportValid(character, destination);
-
-    if (!isTeleportValid) return;
 
     const isDestinationCoordinateValid = this.mapTiles.isCoordinateValid(
       destination.map,
@@ -91,23 +83,6 @@ export class MapTransitionQueue {
         destination,
       }
     );
-  }
-
-  private isTeleportValid(character: ICharacter, destination: IDestination): boolean {
-    const hasSolidOnDestination = this.mapSolids.isTileSolid(
-      destination.map,
-      destination.gridX,
-      destination.gridY,
-      MapLayers.Character
-    );
-
-    if (hasSolidOnDestination) {
-      console.error(`🚫 ${character.name} tried to teleport to a solid tile. ${JSON.stringify(destination)}`);
-      this.socketMessaging.sendErrorMessageToCharacter(character, "Something went wrong, please try again.");
-      return false;
-    }
-
-    return true;
   }
 
   public async execTeleportCharacter(character: ICharacter, destination: IDestination): Promise<void> {
