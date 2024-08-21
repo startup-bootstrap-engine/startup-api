@@ -19,6 +19,12 @@ describe("UseWithHelper", () => {
     testItem = await unitTestHelper.createMockItem(testCharacter._id);
   });
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const mockLeanMethod = (returnValue: any) => {
+    const mockLean = jest.fn().mockResolvedValue(returnValue);
+    jest.spyOn(Item, "findOne").mockReturnValue({ lean: mockLean } as any);
+  };
+
   describe("basicValidations", () => {
     it("should return false if basic validation fails", () => {
       jest.spyOn(CharacterValidation.prototype, "hasBasicValidation").mockReturnValue(false);
@@ -33,8 +39,10 @@ describe("UseWithHelper", () => {
       const result = useWithHelper.basicValidations(testCharacter, { originItemId: "" });
       expect(result).toBe(false);
     });
+
     it("should return true if all validations pass", () => {
       jest.spyOn(CharacterValidation.prototype, "hasBasicValidation").mockReturnValue(true);
+      // @ts-ignore
       const result = useWithHelper.basicValidations(testCharacter, { originItemId: "itemId" });
       expect(result).toBe(true);
     });
@@ -42,8 +50,7 @@ describe("UseWithHelper", () => {
 
   describe("getItem", () => {
     it("should throw an error if item does not exist", async () => {
-      const mockLean = jest.fn().mockResolvedValue(null);
-      jest.spyOn(Item, "findOne").mockReturnValue({ lean: mockLean } as any);
+      mockLeanMethod(null);
 
       await expect(useWithHelper.getItem(testCharacter, "nonexistentItemId")).rejects.toThrow(
         "UseWith > Item with id nonexistentItemId does not exist!"
@@ -52,8 +59,7 @@ describe("UseWithHelper", () => {
 
     it("should throw an error if item does not belong to the character", async () => {
       const anotherCharacter = await unitTestHelper.createMockCharacter();
-      const mockLean = jest.fn().mockResolvedValue({ ...testItem, owner: anotherCharacter._id } as IItem);
-      jest.spyOn(Item, "findOne").mockReturnValue({ lean: mockLean } as any);
+      mockLeanMethod({ ...testItem, owner: anotherCharacter._id });
 
       await expect(useWithHelper.getItem(testCharacter, testItem._id)).rejects.toThrow(
         `UseWith > Item with id ${testItem._id} does not belong to the character!`
@@ -61,8 +67,7 @@ describe("UseWithHelper", () => {
     });
 
     it("should return the item if it exists and belongs to the character", async () => {
-      const mockLean = jest.fn().mockResolvedValue({ ...testItem, owner: testCharacter._id });
-      jest.spyOn(Item, "findOne").mockReturnValue({ lean: mockLean } as any);
+      mockLeanMethod({ ...testItem, owner: testCharacter._id });
 
       const result = await useWithHelper.getItem(testCharacter, testItem._id);
       expect(result).toEqual({ ...testItem, owner: testCharacter._id });
