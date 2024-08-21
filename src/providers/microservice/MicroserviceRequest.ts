@@ -14,11 +14,12 @@ const MICROSERVICE_METADATA = {
   },
 };
 
+// Agent configuration to manage HTTP/HTTPS connections efficiently and handle high throughput
 const agentConfig = {
-  keepAlive: true,
-  maxSockets: 500, // Adjust based on your load
-  maxFreeSockets: 50, // Keep some idle sockets alive
-  timeout: 60000, // Idle session timeout of 60 seconds
+  keepAlive: true, // Reuse TCP connections for multiple requests
+  maxSockets: 500, // Maximum number of sockets to allow per host
+  maxFreeSockets: 50, // Maximum number of idle sockets to keep open
+  timeout: 60000, // Time to keep idle sockets alive (60 seconds)
 };
 
 const httpAgent = new http.Agent(agentConfig);
