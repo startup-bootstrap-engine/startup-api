@@ -1,6 +1,10 @@
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { ResultsPoller } from "@providers/poller/ResultsPoller";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+import http from "http";
+import https from "https";
 
 export enum AvailableMicroservices {
   RpgPathfinding = "rpg-pathfinding",
@@ -12,12 +16,26 @@ const MICROSERVICE_METADATA = {
   },
 };
 
+const agentConfig = {
+  keepAlive: true,
+  maxSockets: 500, // Adjust based on your load
+  maxFreeSockets: 50, // Keep some idle sockets alive
+  timeout: 60000, // Idle session timeout of 60 seconds
+};
+
+const httpAgent = new http.Agent(agentConfig);
+const httpsAgent = new https.Agent(agentConfig);
+
 @provideSingleton(MicroserviceRequest)
 export class MicroserviceRequest {
   private axiosInstance: AxiosInstance;
 
-  constructor() {
-    this.axiosInstance = axios.create();
+  constructor(private dynamicQueue: DynamicQueue, private resultsPoller: ResultsPoller) {
+    this.axiosInstance = axios.create({
+      httpAgent,
+      httpsAgent,
+      timeout: 5000, // Request timeout of 5 seconds
+    });
   }
 
   @TrackNewRelicTransaction()
@@ -37,12 +55,14 @@ export class MicroserviceRequest {
     const url = `${microserviceConfig.baseUrl}${endpoint}`;
 
     try {
+      console.time("microservice-request");
       const response = await this.axiosInstance.request<T>({
         url,
         method,
         data,
         ...config,
       });
+      console.timeEnd("microservice-request");
 
       return response.data;
     } catch (error) {
