@@ -1,7 +1,11 @@
 #!/bin/bash
 
-# Load the list of servers  
-servers=($(<swarm-api-nodes.txt))
+#! This script is useful to refresh DNS issues on Docker Swarm nodes. However, probably you'll need to pull the images again.
+# ! Remember that to access the nodes, you must have your SSH keys on their authorized_keys file.
+
+
+# Load the list of servers from both files
+servers=($(<swarm-api-nodes.txt) $(<swarm-accessory-nodes.txt))
 
 # Command to restart Docker on each server
 command="sudo systemctl restart docker"

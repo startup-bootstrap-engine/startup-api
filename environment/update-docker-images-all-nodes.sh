@@ -1,9 +1,11 @@
 #!/bin/bash
 
+# ! This script is useful to pull the latest images on all Docker Swarm nodes.
+# ! Remember that to access the nodes, you must have your SSH keys on their authorized_keys file.
   
 # API NODES (api, pathfinder, etc)
 
-# Load the list of servers  
+# Load the list of servers
 servers=($(<swarm-api-nodes.txt))
 
 # Command to run on each server
