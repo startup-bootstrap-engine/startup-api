@@ -57,12 +57,13 @@ services:
       NEW_RELIC_APP_NAME: "Definya API"
     networks:
       - rpg-network
-      - rpg-api-pathfinder-network
 
   rpg-pathfinder:
     image: definya/definya-team:rpg-pathfinder-latest
     environment:
       GO111MODULE: "on"
+    ports:
+      - "5004:5004"
     deploy:
       replicas: 8
       restart_policy:
@@ -80,12 +81,12 @@ services:
         monitor: 10s
         max_failure_ratio: 0.3
     healthcheck:
-      test: ["CMD", "curl", "--fail", "http://rpg-pathfinder:5004/health"]
+      test: ["CMD", "curl", "--fail", "http://localhost:5004/health"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - rpg-api-pathfinder-network
+      - rpg-network
 
   rpg-client:
     image: definya/definya-team:client-latest
@@ -192,8 +193,6 @@ services:
 networks:
   rpg-network:
     external: true
-  rpg-api-pathfinder-network: # Dedicated network to avoid congestion of rpg-network
-    driver: overlay
 
 volumes:
   rpg-db-data:
