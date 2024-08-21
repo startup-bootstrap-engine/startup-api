@@ -1,7 +1,5 @@
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { ResultsPoller } from "@providers/poller/ResultsPoller";
-import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import http from "http";
 import https from "https";
@@ -30,7 +28,7 @@ const httpsAgent = new https.Agent(agentConfig);
 export class MicroserviceRequest {
   private axiosInstance: AxiosInstance;
 
-  constructor(private dynamicQueue: DynamicQueue, private resultsPoller: ResultsPoller) {
+  constructor() {
     this.axiosInstance = axios.create({
       httpAgent,
       httpsAgent,
@@ -55,14 +53,12 @@ export class MicroserviceRequest {
     const url = `${microserviceConfig.baseUrl}${endpoint}`;
 
     try {
-      console.time("microservice-request");
       const response = await this.axiosInstance.request<T>({
         url,
         method,
         data,
         ...config,
       });
-      console.timeEnd("microservice-request");
 
       return response.data;
     } catch (error) {

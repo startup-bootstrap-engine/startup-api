@@ -165,7 +165,6 @@ export class PathfindingQueue {
     return undefined;
   }
 
-  @TrackNewRelicTransaction()
   private async getResultsFromPathfindingAlgorithm(
     npc: INPC,
     map: string,
