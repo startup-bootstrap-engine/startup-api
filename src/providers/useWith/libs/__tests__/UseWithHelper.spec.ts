@@ -1,7 +1,6 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
-import { ITEM_USE_WITH_BASE_SCALING_FACTOR } from "@providers/constants/ItemConstants";
 import { blueprintManager, container, unitTestHelper } from "@providers/inversify/container";
 import { UseWithHelper, calculateItemUseEffectPoints } from "../UseWithHelper";
 
@@ -97,6 +96,6 @@ describe("calculateItemUseEffectPoints", () => {
 
     const result = await calculateItemUseEffectPoints("validItemKey", testCharacter);
     expect(result).toBeGreaterThanOrEqual(mockItemData.power);
-    expect(result).toBeLessThanOrEqual(mockItemData.power + 7 * ITEM_USE_WITH_BASE_SCALING_FACTOR);
+    expect(result).toBeLessThanOrEqual(12);
   });
 });
