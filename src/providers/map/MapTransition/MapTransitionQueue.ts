@@ -73,10 +73,10 @@ export class MapTransitionQueue {
 
     await this.dynamicQueue.addJob(
       "map-transition",
-      async (job) => {
+      (job) => {
         const { character, destination } = job.data;
 
-        await this.execTeleportCharacter(character, destination);
+        void this.execTeleportCharacter(character, destination);
       },
       {
         character,

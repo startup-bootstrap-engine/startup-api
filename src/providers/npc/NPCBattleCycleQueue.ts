@@ -48,10 +48,10 @@ export class NPCBattleCycleQueue {
       await this.dynamicQueue.addJob(
         "npc-battle-queue",
 
-        async (job) => {
+        (job) => {
           const { npc, npcSkills } = job.data;
 
-          await this.execBattleCycle(npc, npcSkills);
+          void this.execBattleCycle(npc, npcSkills);
         },
         {
           npc,

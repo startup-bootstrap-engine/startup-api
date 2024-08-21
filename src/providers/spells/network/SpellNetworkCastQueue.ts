@@ -36,10 +36,10 @@ export class SpellNetworkCastQueue {
   public async addToQueue(data: ISpellCast, character: ICharacter): Promise<void> {
     await this.dynamicQueue.addJob(
       "spell-cast",
-      async (job) => {
+      (job) => {
         const { data, character } = job.data;
 
-        await this.spellCast.castSpell(data, character);
+        void this.spellCast.castSpell(data, character);
       },
       {
         character,

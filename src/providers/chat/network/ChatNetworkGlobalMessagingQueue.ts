@@ -38,10 +38,10 @@ export class ChatNetworkGlobalMessagingQueue {
   public async addToQueue(data: IChatMessageCreatePayload, character: ICharacter): Promise<void> {
     await this.dynamicQueue.addJob(
       "chat-global-messaging",
-      async (job) => {
+      (job) => {
         const { data, character } = job.data;
 
-        await this.execGlobalMessaging(data, character);
+        void this.execGlobalMessaging(data, character);
       },
       {
         character,
