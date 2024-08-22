@@ -1,5 +1,5 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { IGuild } from "@entities/ModuleSystem/GuildModel";
+import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { Types } from "mongoose";
 import { GuildLeave } from "../GuildLeave";
@@ -121,6 +121,79 @@ describe("GuildLeave.ts", () => {
       }),
       true,
       [memberId]
+    );
+    expect(removeCharacterBuffsSpy).toBeCalled();
+  });
+
+  it("should remove leader from guild and make another member the new leader", async () => {
+    const guildId = testGuild._id.toString();
+    const leaderId = testGuild.guildLeader!.toString();
+
+    const sendMessageToAllMembersSpy = jest
+      // @ts-ignore
+      .spyOn<any, any>(guildLeave.guildCommon, "sendMessageToAllMembers")
+      .mockResolvedValueOnce(null);
+
+    const removeCharacterBuffsSpy = jest
+      // @ts-ignore
+      .spyOn<any, any>(guildLeave.guildLevelBonus, "removeCharacterBuff")
+      .mockResolvedValueOnce(null);
+
+    await guildLeave.leaveGuild(guildId, leaderId, testCharacter as any);
+
+    const updatedGuild = (await Guild.findById(guildId).lean()) as IGuild;
+    expect(updatedGuild?.guildLeader?.toString()).toEqual(testCharacter2._id.toString());
+
+    expect(sendMessageToAllMembersSpy).toHaveBeenCalledWith(
+      expect.stringContaining("has left the " + testGuild.name + " guild."),
+      expect.objectContaining({
+        _id: testGuild._id,
+        name: testGuild.name,
+        tag: testGuild.tag,
+        coatOfArms: testGuild.coatOfArms,
+      }),
+      true,
+      [leaderId]
+    );
+    expect(removeCharacterBuffsSpy).toBeCalled();
+  });
+
+  it("should remove leader and delete guild if leader is the only member", async () => {
+    const guildId = testGuild._id.toString();
+    const leaderId = testGuild.guildLeader!.toString();
+
+    testGuild.members = [testCharacter._id];
+    await testGuild.save();
+
+    const sendMessageToAllMembersSpy = jest
+      // @ts-ignore
+      .spyOn<any, any>(guildLeave.guildCommon, "sendMessageToAllMembers")
+      .mockResolvedValueOnce(null);
+
+    const removeCharacterBuffsSpy = jest
+      // @ts-ignore
+      .spyOn<any, any>(guildLeave.guildLevelBonus, "removeCharacterBuff")
+      .mockResolvedValueOnce(null);
+
+    const deleteGuildSpy = jest
+      // @ts-ignore
+      .spyOn<any, any>(guildLeave.guildDelete, "deleteGuild")
+      .mockResolvedValueOnce(null);
+
+    await guildLeave.leaveGuild(guildId, leaderId, testCharacter as any);
+
+    expect(deleteGuildSpy).toBeCalled();
+
+    expect(sendMessageToAllMembersSpy).toHaveBeenCalledWith(
+      expect.stringContaining("has left the " + testGuild.name + " guild."),
+      expect.objectContaining({
+        _id: testGuild._id,
+        name: testGuild.name,
+        tag: testGuild.tag,
+        coatOfArms: testGuild.coatOfArms,
+      }),
+      true,
+      [leaderId]
     );
     expect(removeCharacterBuffsSpy).toBeCalled();
   });
