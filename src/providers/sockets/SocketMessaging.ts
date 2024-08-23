@@ -4,6 +4,7 @@ import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterView } from "@providers/character/CharacterView";
 import { appEnv } from "@providers/config/env";
+import { AvailableMicroservices, MicroserviceRequest } from "@providers/microservice/MicroserviceRequest";
 import { NPCView } from "@providers/npc/NPCView";
 import { SocketAdapter } from "@providers/sockets/SocketAdapter";
 import {
@@ -20,7 +21,12 @@ import { Types } from "mongoose";
 
 @provide(SocketMessaging)
 export class SocketMessaging {
-  constructor(private characterView: CharacterView, private npcView: NPCView, private socketAdapter: SocketAdapter) {}
+  constructor(
+    private characterView: CharacterView,
+    private npcView: NPCView,
+    private socketAdapter: SocketAdapter,
+    private microservice: MicroserviceRequest
+  ) {}
 
   public sendErrorMessageToCharacter(character: ICharacter, message?: string, type: UIMessageType = "error"): void {
     if ((appEnv.general.ENV === EnvType.Development && !appEnv.general.IS_UNIT_TEST) || appEnv.general.DEBUG_MODE) {
@@ -41,6 +47,19 @@ export class SocketMessaging {
   }
 
   public sendEventToUser<T>(userChannel: string, eventName: string, data?: T): void {
+    if (appEnv.general.MICROSERVICE_NAME === "rpg-npc") {
+      void this.microservice.request(
+        AvailableMicroservices.RpgAPI,
+        "/sockets/send-event",
+        {
+          userChannel,
+          eventName,
+          data,
+        },
+        "POST"
+      );
+    }
+
     void this.socketAdapter.emitToUser(userChannel, eventName, data || {});
   }
 

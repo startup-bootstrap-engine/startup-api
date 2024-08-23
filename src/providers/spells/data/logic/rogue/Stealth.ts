@@ -43,7 +43,7 @@ export class Stealth {
 
     await this.sendOpacityChange(target);
 
-    await npcManager.startNearbyNPCsBehaviorLoop(target);
+    await npcManager.startBehaviorLoopUsingMicroservice(target);
 
     return applied;
   }

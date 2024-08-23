@@ -82,7 +82,7 @@ export class DynamicQueue {
         1
       );
 
-      return await queue.add(queueName, data, {
+      return await queue?.add(queueName, data, {
         ...addQueueOptions,
         removeOnComplete: true,
         removeOnFail: true,

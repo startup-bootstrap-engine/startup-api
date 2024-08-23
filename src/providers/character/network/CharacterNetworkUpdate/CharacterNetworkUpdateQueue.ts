@@ -140,7 +140,7 @@ export class CharacterNetworkUpdateQueue {
     await this.syncIfPositionMismatch(character, { x: character.x, y: character.y }, data.originX, data.originY);
 
     this.characterMovementWarn.warn(character, data);
-    await this.npcManager.startNearbyNPCsBehaviorLoop(character);
+    await this.npcManager.startBehaviorLoopUsingMicroservice(character);
     await this.updateServerSideEmitterInfo(character, data.newX, data.newY, isMoving, data.direction);
     void this.mapTransitionNonPVPZone.handleNonPVPZone(character, data.newX, data.newY);
     await this.mapTransition.handleMapTransition(character, data.newX, data.newY);

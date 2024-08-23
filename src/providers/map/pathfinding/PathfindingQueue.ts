@@ -197,7 +197,7 @@ export class PathfindingQueue {
         }
       }
 
-      const result = await this.microserviceRequest.requestMicroservice<IRPGPathfinderResponse>(
+      const result = await this.microserviceRequest.request<IRPGPathfinderResponse>(
         AvailableMicroservices.RpgPathfinding,
         "/path",
         {

@@ -6,11 +6,19 @@ import https from "https";
 
 export enum AvailableMicroservices {
   RpgPathfinding = "rpg-pathfinding",
+  RpgNPC = "rpg-npc",
+  RpgAPI = "rpg-api",
 }
 
 const MICROSERVICE_METADATA = {
   [AvailableMicroservices.RpgPathfinding]: {
     baseUrl: "http://rpg-pathfinder:5004",
+  },
+  [AvailableMicroservices.RpgNPC]: {
+    baseUrl: "http://rpg-npc:5005",
+  },
+  [AvailableMicroservices.RpgAPI]: {
+    baseUrl: "http://rpg-api:5002",
   },
 };
 
@@ -38,7 +46,7 @@ export class MicroserviceRequest {
   }
 
   @TrackNewRelicTransaction()
-  public async requestMicroservice<T>(
+  public async request<T>(
     microservice: AvailableMicroservices,
     endpoint: string,
     data: any,

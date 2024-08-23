@@ -1,15 +1,26 @@
-import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { cache } from "@providers/constants/CacheConstants";
-import { AuthMiddleware } from "@providers/middlewares/AuthMiddleware";
-import { controller, httpGet, interfaces, requestParam } from "inversify-express-utils";
-import { ReadNPCUseCase } from "./read/ReadNPCUseCase";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { InternalRequestMiddleware } from "@providers/middlewares/InternalRequestMiddleware";
+import { NPCManager } from "@providers/npc/NPCManager";
+import { controller, httpPost, interfaces, requestBody } from "inversify-express-utils";
 
-@controller("/npcs", AuthMiddleware)
+interface IRequest {
+  characterId: string;
+}
+
+@controller("/npcs", InternalRequestMiddleware)
 export class NPCController implements interfaces.Controller {
-  constructor(private readNPCUseCase: ReadNPCUseCase) {}
+  constructor(private npcManager: NPCManager) {}
 
-  @httpGet("/:id", cache("24 hours"))
-  private async readNPC(@requestParam("id") npcId): Promise<INPC> {
-    return await this.readNPCUseCase.readOne(npcId);
+  @httpPost("/start-behavior-loop")
+  private async startNearbyNPCsBehaviorLoop(@requestBody() body: IRequest): Promise<void> {
+    const { characterId } = body;
+
+    if (!characterId) {
+      return;
+    }
+
+    const character = await Character.findById(characterId).lean<ICharacter>();
+
+    await this.npcManager.startNearbyNPCsBehaviorLoop(character);
   }
 }

@@ -25,6 +25,7 @@ export class SocketIO implements ISocket {
       case EnvType.Development:
         this.socket.use(SocketIOAuthMiddleware);
         this.socket.listen(appEnv.socket.port.SOCKET);
+        console.log(`🔌 TCP socket initialized on ${appEnv.socket.port.SOCKET}`);
         break;
       case EnvType.Production:
         const redisOptions: RedisClientOptions = {
