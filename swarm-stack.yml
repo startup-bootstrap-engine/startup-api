@@ -20,7 +20,7 @@ services:
         max_replicas_per_node: 1
       update_config:
         parallelism: 2
-        delay: 10s
+        delay: 3s
         failure_action: rollback
       rollback_config:
         parallelism: 2
@@ -57,7 +57,37 @@ services:
       NEW_RELIC_APP_NAME: "Definya API"
     networks:
       - rpg-network
-
+  rpg-npc:
+    image: definya/definya-team:api-latest
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:5005"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+    environment:
+      MICROSERVICE_NAME: "rpg-npc"
+      FORCE_COLOR: "true"
+      CHOKIDAR_USEPOLLING: "true"
+      NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
+      NEW_RELIC_APP_NAME: "Definya API Dev"
+    deploy:
+      replicas: 4
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.labels.api == true
+        preferences:
+          - spread: node.id
+        max_replicas_per_node: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+        failure_action: rollback
+        monitor: 10s
+        max_failure_ratio: 0.3
+    networks:
+      - rpg-network
   rpg-pathfinder:
     image: definya/definya-team:rpg-pathfinder-latest
     environment:

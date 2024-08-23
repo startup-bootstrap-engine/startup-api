@@ -32,6 +32,31 @@ services:
       VIRTUAL_PORT: ${SERVER_PORT}
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
       NEW_RELIC_APP_NAME: "Definya API"
+
+  rpg-npc:
+    container_name: rpg-npc
+    restart: always
+    build: .
+    env_file: .env
+    ports:
+      - "5005:5005"
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      MICROSERVICE_NAME: "rpg-npc"
+      FORCE_COLOR: "true"
+      CHOKIDAR_USEPOLLING: "true" # enables hot-reloading on windows host
+      NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
+      NEW_RELIC_APP_NAME: "Definya API Dev"
+    links:
+      - rpg-db
+    depends_on:
+      - rpg-api
+      - rpg-db
+      - rpg-redis
+    networks:
+      - rpg-network
   rpg-pathfinder:
     container_name: rpg-pathfinder
     build:
