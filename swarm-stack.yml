@@ -92,8 +92,6 @@ services:
     image: definya/definya-team:rpg-pathfinder-latest
     environment:
       GO111MODULE: "on"
-    ports:
-      - "5004:5004"
     deploy:
       replicas: 8
       restart_policy:
