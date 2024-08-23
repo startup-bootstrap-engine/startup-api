@@ -25,6 +25,7 @@ import { NPCMovementMoveAway } from "./movement/NPCMovementMoveAway";
 import { NPCMovementMoveTowards } from "./movement/NPCMovementMoveTowards";
 import { NPCMovementRandomPath } from "./movement/NPCMovementRandomPath";
 import { NPCMovementStopped } from "./movement/NPCMovementStopped";
+
 @provideSingleton(NPCCycleQueue)
 export class NPCCycleQueue {
   constructor(
@@ -70,6 +71,7 @@ export class NPCCycleQueue {
 
       {
         delay: npcCycleDelay,
+        priority: npc.alignment === NPCAlignment.Hostile ? 1 : undefined,
       }
     );
   }
@@ -84,6 +86,8 @@ export class NPCCycleQueue {
 
   @TrackNewRelicTransaction()
   private async execNpcCycle(npc: INPC, npcSkills: ISkill): Promise<void> {
+    const startTime = process.hrtime();
+
     try {
       if (!npc) return;
 
@@ -93,7 +97,7 @@ export class NPCCycleQueue {
         await this.npcCycleTracker.trackCycle(npc._id);
       }
 
-      npc = await NPC.findById(npc?._id).lean({
+      npc = await NPC.findById(npc._id).lean({
         virtuals: true,
         defaults: true,
       });
@@ -116,13 +120,24 @@ export class NPCCycleQueue {
       }
 
       await this.startCoreNPCBehavior(npc);
+
       await this.addToQueue(npc, npcSkills);
     } catch (error) {
-      console.error(error);
+      console.error(`Error during NPC cycle for ${npc._id}:`, error);
 
       await clearCacheForKey(`${npc._id}-skills`);
 
       throw error;
+    } finally {
+      const endTime = process.hrtime(startTime);
+      const executionTimeMs = endTime[0] * 1000 + endTime[1] / 1e6;
+
+      this.newRelic.trackMetric(
+        NewRelicMetricCategory.Count,
+        NewRelicSubCategory.Server,
+        "NPCCycleExecutionTime",
+        executionTimeMs
+      );
     }
   }
 
