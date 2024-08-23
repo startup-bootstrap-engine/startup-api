@@ -25,23 +25,21 @@ export class RedisIOClient {
 
   public async connect(): Promise<Redis> {
     if (!this.pool) {
+      const poolSize = Math.min(
+        Math.round(500 / SERVER_API_NODES_QTY / SERVER_API_NODES_PM2_PROCESSES_QTY),
+        100 // Upper limit on the pool size for safety
+      );
       this.pool = createPool<Redis>(
         {
-          create: async () => {
-            return await new IORedis(this.redisConnectionURL, this.getIOClientConfig());
-          },
-          destroy: async (client) => {
-            return await client.disconnect();
-          },
-          validate: async (client) => {
-            const result = await client.ping();
-            return result === "PONG";
-          },
+          create: async () => await new IORedis(this.redisConnectionURL, this.getIOClientConfig()),
+          destroy: async (client) => await client.disconnect(),
+          validate: async (client) => (await client.ping()) === "PONG",
         },
         {
-          max: Math.round(500 / SERVER_API_NODES_QTY / SERVER_API_NODES_PM2_PROCESSES_QTY),
-          min: Math.round(170 / SERVER_API_NODES_QTY / SERVER_API_NODES_PM2_PROCESSES_QTY),
+          max: poolSize,
+          min: Math.max(Math.round(170 / SERVER_API_NODES_QTY / SERVER_API_NODES_PM2_PROCESSES_QTY), 10),
           testOnBorrow: true,
+          idleTimeoutMillis: 30000, // Close idle connections after 30 seconds
         }
       );
 
@@ -67,8 +65,16 @@ export class RedisIOClient {
     if (!this.pool) {
       throw new Error("Redis pool has not been initialized. Call connect() first.");
     }
-    const client = await this.pool.acquire();
-    await client.client("SETNAME", connectionName);
+    let client: Redis | null = null;
+    try {
+      client = await this.pool.acquire();
+      await client.client("SETNAME", connectionName);
+    } catch (error) {
+      if (client) {
+        await this.pool.release(client);
+      }
+      throw error; // Re-throw after releasing the client
+    }
     return client;
   }
 
@@ -88,7 +94,9 @@ export class RedisIOClient {
   private getIOClientConfig(): RedisOptions {
     return {
       retryStrategy: (times): number => {
-        return Math.min(times * 100, 3000);
+        const delay = Math.min(50 * Math.pow(2, times), 30000); // Exponential backoff up to 30 seconds
+        const jitter = Math.random() * 100; // Add jitter to prevent thundering herd
+        return delay + jitter;
       },
       enableAutoPipelining: true,
       keepAlive: 10000,
