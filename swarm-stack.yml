@@ -9,7 +9,7 @@ services:
       timeout: 30s
       retries: 3
     deploy:
-      replicas: 4
+      replicas: 3
       restart_policy:
         condition: on-failure
       placement:
@@ -20,7 +20,7 @@ services:
         max_replicas_per_node: 1
       update_config:
         parallelism: 2
-        delay: 3s
+        delay: 10s
         failure_action: rollback
       rollback_config:
         parallelism: 2
@@ -71,12 +71,12 @@ services:
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
       NEW_RELIC_APP_NAME: "Definya API Dev"
     deploy:
-      replicas: 4
+      replicas: 2
       restart_policy:
         condition: on-failure
       placement:
         constraints:
-          - node.labels.api == true
+          - node.labels.npc == true
         preferences:
           - spread: node.id
         max_replicas_per_node: 1

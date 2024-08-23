@@ -1,6 +1,7 @@
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+import axiosRetry from "axios-retry";
 import http from "http";
 import https from "https";
 
@@ -24,10 +25,11 @@ const MICROSERVICE_METADATA = {
 
 // Agent configuration to manage HTTP/HTTPS connections efficiently and handle high throughput
 const agentConfig = {
-  keepAlive: true, // Reuse TCP connections for multiple requests
-  maxSockets: 500, // Maximum number of sockets to allow per host
-  maxFreeSockets: 50, // Maximum number of idle sockets to keep open
-  timeout: 60000, // Time to keep idle sockets alive (60 seconds)
+  keepAlive: true,
+  maxSockets: 1000, // Consider increasing this if you have a high load
+  maxFreeSockets: 100,
+  timeout: 60000, // Keep idle sockets for 60 seconds
+  freeSocketTimeout: 30000, // Close free sockets after 30 seconds
 };
 
 const httpAgent = new http.Agent(agentConfig);
@@ -41,7 +43,13 @@ export class MicroserviceRequest {
     this.axiosInstance = axios.create({
       httpAgent,
       httpsAgent,
-      timeout: 5000, // Request timeout of 5 seconds
+      timeout: 10000, // Request timeout of 5 seconds
+    });
+    axiosRetry(this.axiosInstance, {
+      retries: 3,
+      retryCondition: (error) => {
+        return error.code === "ECONNABORTED" || error.response?.status! >= 500;
+      },
     });
   }
 
