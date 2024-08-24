@@ -43,12 +43,13 @@ export class MicroserviceRequest {
     this.axiosInstance = axios.create({
       httpAgent,
       httpsAgent,
-      timeout: 10000, // Request timeout of 5 seconds
+      timeout: 15000, // Request timeout of 5 seconds
     });
     axiosRetry(this.axiosInstance, {
-      retries: 3,
+      retries: 5, // Increase the number of retries
+      retryDelay: (retryCount) => retryCount * 1000, // Exponential backoff
       retryCondition: (error) => {
-        return error.code === "ECONNABORTED" || error.response?.status! >= 500;
+        return error.code === "ECONNABORTED" || error.response?.status! >= 500 || error.code === "ECONNRESET";
       },
     });
   }

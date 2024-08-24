@@ -55,8 +55,7 @@ services:
       - rpg-api
       - rpg-db
       - rpg-redis
-    networks:
-      - rpg-network
+    network_mode: bridge
   rpg-pathfinder:
     container_name: rpg-pathfinder
     build:
@@ -66,8 +65,7 @@ services:
       - "5004:5004"
     environment:
       - GO111MODULE=on
-    networks:
-      - rpg-network
+    network_mode: bridge
   rpg-db:
     container_name: rpg-db
     image: mongo

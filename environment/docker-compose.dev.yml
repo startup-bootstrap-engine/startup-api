@@ -25,6 +25,8 @@ services:
       - rpg-redis
     networks:
       - rpg-network
+      - rpg-api-rpg-npc
+
   rpg-npc:
     container_name: rpg-npc
     restart: always
@@ -48,7 +50,9 @@ services:
       - rpg-db
       - rpg-redis
     networks:
+      - rpg-api-rpg-npc
       - rpg-network
+
   rpg-pathfinder:
     container_name: rpg-pathfinder
     build:
@@ -63,6 +67,7 @@ services:
     command: air
     networks:
       - rpg-network
+
   rpg-db:
     container_name: rpg-db
     image: mongo
@@ -111,3 +116,6 @@ services:
 
 networks:
   rpg-network:
+  rpg-api-rpg-npc:
+    driver: overlay
+    internal: true

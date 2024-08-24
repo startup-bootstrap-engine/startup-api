@@ -57,6 +57,7 @@ services:
       NEW_RELIC_APP_NAME: "Definya API"
     networks:
       - rpg-network
+      - rpg-api-rpg-npc
   rpg-npc:
     image: definya/definya-team:api-latest
     healthcheck:
@@ -87,7 +88,9 @@ services:
         monitor: 10s
         max_failure_ratio: 0.3
     networks:
+      - rpg-api-rpg-npc
       - rpg-network
+
   rpg-pathfinder:
     image: definya/definya-team:rpg-pathfinder-latest
     environment:
@@ -219,6 +222,9 @@ services:
 networks:
   rpg-network:
     external: true
+  rpg-api-rpg-npc:
+    driver: overlay
+    internal: true
 
 volumes:
   rpg-db-data:

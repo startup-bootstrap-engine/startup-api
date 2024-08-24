@@ -58,6 +58,7 @@ export class SocketMessaging {
         },
         "POST"
       );
+      return;
     }
 
     void this.socketAdapter.emitToUser(userChannel, eventName, data || {});
