@@ -62,19 +62,14 @@ export class GuildPayingTribute {
   }
 
   private calculateLootAmount(item: IItem, maxLootShare: number): number {
+    const calculateAmount = (): number =>
+      Math.max(MIN_LOOT_AMOUNT, _.random(MIN_LOOT_AMOUNT, Math.min(maxLootShare, item.stackQty || MIN_LOOT_AMOUNT)));
+
     if (item.key === OthersBlueprint.GoldCoin) {
-      return Math.max(
-        MIN_LOOT_AMOUNT,
-        _.random(MIN_LOOT_AMOUNT, Math.min(maxLootShare, item.stackQty || MIN_LOOT_AMOUNT))
-      );
+      return calculateAmount();
     } else {
       const random = _.random(0, 100);
-      return random > LOOT_CHANCE_THRESHOLD
-        ? 0
-        : Math.max(
-            MIN_LOOT_AMOUNT,
-            _.random(MIN_LOOT_AMOUNT, Math.min(maxLootShare, item.stackQty || MIN_LOOT_AMOUNT))
-          );
+      return random > LOOT_CHANCE_THRESHOLD ? 0 : calculateAmount();
     }
   }
 
