@@ -1,3 +1,9 @@
+/* eslint-disable import/first */
+// Load New Relic if not running unit tests
+if (!appEnv.general.IS_UNIT_TEST) {
+  require("newrelic");
+}
+
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import "express-async-errors";
@@ -24,11 +30,6 @@ import { NewRelicTransactionCategory } from "@providers/types/NewRelicTypes";
 import { EnvType } from "@rpg-engine/shared/dist";
 
 dayjs.extend(duration);
-
-// Load New Relic if not running unit tests
-if (!appEnv.general.IS_UNIT_TEST) {
-  require("newrelic");
-}
 
 // Determine the port to use
 const port = getPort();
