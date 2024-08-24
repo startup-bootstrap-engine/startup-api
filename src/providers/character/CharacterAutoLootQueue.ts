@@ -3,6 +3,7 @@ import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemCon
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { AnimationEffect } from "@providers/animation/AnimationEffect";
+import { appEnv } from "@providers/config/env";
 import { GuildPayingTribute } from "@providers/guild/GuildPayingTribute";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
@@ -27,14 +28,14 @@ export class CharacterAutoLootQueue {
   ) {}
 
   public async autoLoot(character: ICharacter, itemIdsToLoot: string[]): Promise<void> {
+    if (appEnv.general.IS_UNIT_TEST) {
+      await this.execAutoLoot(character, itemIdsToLoot);
+      return;
+    }
+
     await this.dynamicQueue.addJob(
       "character-auto-loot",
-
-      (job) => {
-        const { character, itemIdsToLoot } = job.data;
-
-        void this.execAutoLoot(character, itemIdsToLoot);
-      },
+      (job) => void this.execAutoLoot(job.data.character, job.data.itemIdsToLoot),
       { character, itemIdsToLoot }
     );
   }
@@ -46,9 +47,7 @@ export class CharacterAutoLootQueue {
         return;
       }
 
-      const inventoryItemContainer = (await this.characterItemContainer.getInventoryItemContainer(
-        character
-      )) as IItemContainer;
+      const inventoryItemContainer = await this.characterItemContainer.getInventoryItemContainer(character);
       if (!inventoryItemContainer) {
         this.socketMessaging.sendErrorMessageToCharacter(
           character,
@@ -79,33 +78,33 @@ export class CharacterAutoLootQueue {
         }
 
         for (const slot of Object.values(itemContainer.slots as Record<string, IItem>)) {
-          if (!slot) {
-            continue;
-          }
+          if (!slot) continue;
 
-          const item = (await Item.findOne({ _id: slot._id }).lean({
+          const item = await Item.findOne({ _id: slot._id }).lean<IItem>({
             virtuals: true,
             defaults: true,
-          })) as IItem;
+          });
           if (!item) {
             console.log(`Item with id ${slot._id} not found`);
             continue;
           }
 
-          // check if guild controlled territory and pay tributes
-          const qtyLooted: number = await this.guildPayingTribute.payTribute(character, item);
+          // Calculate the actual quantity received by the player after tribute
+          const remainingQty = await this.guildPayingTribute.payTribute(character, item);
 
-          if (qtyLooted > 0 && item.stackQty !== undefined) {
-            item.stackQty -= qtyLooted;
+          // If no quantity is left, skip adding it to the inventory
+          if (remainingQty <= 0) {
+            console.log(`Item ${item.name} fully deducted as tribute. Skipping...`);
+            continue;
           }
+
+          item.stackQty = remainingQty;
 
           const successfullyAddedItem = await this.characterItemContainer.addItemToContainer(
             item,
             character,
             inventoryItemContainer._id,
-            {
-              shouldAddOwnership: true,
-            }
+            { shouldAddOwnership: true }
           );
 
           if (!successfullyAddedItem) {
@@ -124,9 +123,10 @@ export class CharacterAutoLootQueue {
             continue;
           }
 
-          lootedItemNamesAndQty.push(
-            `${item.name}${item.maxStackSize > 1 && item.stackQty! > 1 ? ` (x${item.stackQty})` : ""}`
-          );
+          // Improve messaging: Always show quantity, even if it's 1
+          const quantityText = item.stackQty === 1 ? "1x" : `x${item.stackQty}`;
+
+          lootedItemNamesAndQty.push(`${quantityText} ${item.name}`);
           disableLootingPromises.push(this.disableLooting(character, bodyItem));
         }
       }
@@ -143,7 +143,7 @@ export class CharacterAutoLootQueue {
   }
 
   private async disableLooting(character: ICharacter, bodyItem: IItem): Promise<void> {
-    // only proceed if there are no lootable items
+    // Only proceed if there are no lootable items
     const updatedBodyItem = await ItemContainer.findOne({ parentItem: bodyItem._id })
       .lean<IItemContainer>({
         virtuals: true,
@@ -151,23 +151,17 @@ export class CharacterAutoLootQueue {
       })
       .select("slots");
 
-    if (!updatedBodyItem?.slots) {
-      return;
-    }
+    if (!updatedBodyItem?.slots) return;
 
     const areAllSlotsEmpty = Object.values(updatedBodyItem.slots as Record<string, IItem>).every((x) => !x);
 
-    if (!areAllSlotsEmpty) {
-      return;
-    }
+    if (!areAllSlotsEmpty) return;
 
     await Promise.all([
       Item.updateOne(
         { _id: bodyItem._id },
         {
-          $set: {
-            isDeadBodyLootable: false,
-          },
+          $set: { isDeadBodyLootable: false },
         }
       ),
       this.characterView.addToCharacterView(character._id, bodyItem._id, "items"),

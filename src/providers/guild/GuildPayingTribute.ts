@@ -13,6 +13,7 @@ import { GuildTerritory } from "./GuildTerritory";
 
 const LOOT_CHANCE_THRESHOLD = 70;
 const MIN_LOOT_AMOUNT = 1;
+
 @provide(GuildPayingTribute)
 export class GuildPayingTribute {
   constructor(
@@ -27,17 +28,17 @@ export class GuildPayingTribute {
       const mapName = character.scene;
       const guild = await this.guildTerritory.getTerritoryOwnedByMap(mapName);
       if (!guild) {
-        return 0;
+        return item.stackQty!;
       }
 
       const characterGuild = await this.guildCommon.getCharactersGuild(character);
       if (characterGuild && characterGuild._id.toString() === guild._id.toString()) {
-        return 0;
+        return item.stackQty!;
       }
 
       const territory = guild.territoriesOwned.find((t) => t.map && t.map === mapName);
       if (!territory || !item.stackQty) {
-        return 0;
+        return item.stackQty!;
       }
 
       const lootShare = territory.lootShare;
@@ -46,13 +47,13 @@ export class GuildPayingTribute {
 
       if (lootAmount > 0 && lootAmount <= item.stackQty) {
         await this.processTributePayment(character, item, guild, lootAmount);
-        return lootAmount;
+        return item.stackQty! - lootAmount;
       }
 
-      return 0;
+      return item.stackQty!;
     } catch (error) {
       console.error("Error paying tribute:", error);
-      return 0;
+      return item.stackQty!;
     }
   }
 
@@ -62,10 +63,18 @@ export class GuildPayingTribute {
 
   private calculateLootAmount(item: IItem, maxLootShare: number): number {
     if (item.key === OthersBlueprint.GoldCoin) {
-      return Math.max(MIN_LOOT_AMOUNT, _.random(MIN_LOOT_AMOUNT, maxLootShare));
+      return Math.max(
+        MIN_LOOT_AMOUNT,
+        _.random(MIN_LOOT_AMOUNT, Math.min(maxLootShare, item.stackQty || MIN_LOOT_AMOUNT))
+      );
     } else {
       const random = _.random(0, 100);
-      return random > LOOT_CHANCE_THRESHOLD ? 0 : Math.max(MIN_LOOT_AMOUNT, _.random(MIN_LOOT_AMOUNT, maxLootShare));
+      return random > LOOT_CHANCE_THRESHOLD
+        ? 0
+        : Math.max(
+            MIN_LOOT_AMOUNT,
+            _.random(MIN_LOOT_AMOUNT, Math.min(maxLootShare, item.stackQty || MIN_LOOT_AMOUNT))
+          );
     }
   }
 
@@ -90,9 +99,12 @@ export class GuildPayingTribute {
     }
 
     const itemName = item.key === OthersBlueprint.GoldCoin ? "gold" : item.name;
-    this.socketMessaging.sendMessageToCharacter(
-      character,
-      `You have paid ${lootAmount} ${itemName} to ${guild.name} guild as territory tribute from ${item.stackQty}`
-    );
+
+    setTimeout(() => {
+      this.socketMessaging.sendMessageToCharacter(
+        character,
+        `Tribute(s) paid to ${guild.name}: ${lootAmount}x ${itemName}`
+      );
+    }, 3000);
   }
 }
