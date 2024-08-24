@@ -70,8 +70,8 @@ export class ItemPickup {
         return false;
       }
 
-      // if item to be pickup is a body
-      if (itemToBePicked.subType === ItemSubType.DeadBody) {
+      // Pay tributes on loot from container pickup
+      if (itemToBePicked.subType === ItemSubType.DeadBody && isPickupFromContainer) {
         // check if guild controlled territory and pay tributes
         const qtyLooted: number = await this.guildPayingTribute.payTribute(character, itemToBePicked);
 
