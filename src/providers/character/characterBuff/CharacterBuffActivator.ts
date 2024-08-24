@@ -28,10 +28,21 @@ export class CharacterBuffActivator {
   ): Promise<ICharacterBuff | undefined> {
     let noMessage;
 
+    // Maybe a better way to handle this would be through a new field buff.key, so same non stackable buffs would never accumulate.However we can try this later, originateFrom is good enough for now.
     if (!buff.isStackable && buff.originateFrom) {
-      const existingBuff = await this.findExistingBuff(character, buff);
-      if (existingBuff) {
-        await this.disableBuff(character, existingBuff._id!, existingBuff.type, true);
+      const existingBuffs = await this.findExistingBuff(character, buff);
+
+      const sameOriginBuffs = existingBuffs?.filter(
+        (existingBuff) => existingBuff.originateFrom === buff.originateFrom
+      );
+
+      if (sameOriginBuffs && sameOriginBuffs.length > 0) {
+        await Promise.all(
+          sameOriginBuffs.map(async (buff) => {
+            await this.disableBuff(character, buff._id!, buff.type, true);
+          })
+        );
+
         noMessage = true;
       }
     }
@@ -97,8 +108,11 @@ export class CharacterBuffActivator {
     return enabledBuff;
   }
 
-  private async findExistingBuff(character: ICharacter, buff: ICharacterTemporaryBuff): Promise<ICharacterBuff | null> {
-    return await CharacterBuff.findOne({
+  private async findExistingBuff(
+    character: ICharacter,
+    buff: ICharacterTemporaryBuff
+  ): Promise<ICharacterBuff[] | null> {
+    return await CharacterBuff.find({
       owner: character.id,
       originateFrom: buff.originateFrom,
     }).lean();
