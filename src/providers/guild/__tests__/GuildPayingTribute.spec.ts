@@ -46,7 +46,7 @@ describe("GuildPayingTribute.ts", () => {
 
     jest
       // @ts-ignore
-      .spyOn(guildPayingTribute.guildTerritory, "getTerritoryOwnedByMap")
+      .spyOn(guildPayingTribute.guildTerritory, "getGuildByTerritoryMap")
       .mockResolvedValue(testGuild);
 
     // @ts-ignore
@@ -76,7 +76,7 @@ describe("GuildPayingTribute.ts", () => {
   it("should not pay tribute if there is no guild for the character's scene", async () => {
     const mockGuildTerritorySpy = jest
       // @ts-ignore
-      .spyOn(guildPayingTribute.guildTerritory, "getTerritoryOwnedByMap")
+      .spyOn(guildPayingTribute.guildTerritory, "getGuildByTerritoryMap")
       .mockResolvedValue(null);
 
     const result = await guildPayingTribute.payTribute(
@@ -93,7 +93,7 @@ describe("GuildPayingTribute.ts", () => {
   it("should not pay tribute if the character is in the guild that owns the territory", async () => {
     const mockGuildTerritorySpy = jest
       // @ts-ignore
-      .spyOn(guildPayingTribute.guildTerritory, "getTerritoryOwnedByMap")
+      .spyOn(guildPayingTribute.guildTerritory, "getGuildByTerritoryMap")
       .mockResolvedValue(testGuild);
 
     const mockGuildCommonSpy = jest
@@ -116,7 +116,7 @@ describe("GuildPayingTribute.ts", () => {
   it("should not pay tribute if there is no territory for the character's scene", async () => {
     const mockGuildTerritorySpy = jest
       // @ts-ignore
-      .spyOn(guildPayingTribute.guildTerritory, "getTerritoryOwnedByMap")
+      .spyOn(guildPayingTribute.guildTerritory, "getGuildByTerritoryMap")
       .mockResolvedValue(testGuild);
 
     // @ts-ignore
@@ -186,7 +186,7 @@ describe("GuildPayingTribute.ts", () => {
 
     jest
       // @ts-ignore
-      .spyOn(guildPayingTribute.guildTerritory, "getTerritoryOwnedByMap")
+      .spyOn(guildPayingTribute.guildTerritory, "getGuildByTerritoryMap")
       .mockResolvedValue(testGuild);
 
     // @ts-ignore

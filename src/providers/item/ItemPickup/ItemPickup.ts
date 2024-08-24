@@ -2,7 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { IEquipmentAndInventoryUpdatePayload, IItemPickup } from "@rpg-engine/shared";
+import { IEquipmentAndInventoryUpdatePayload, IItemPickup, ItemSubType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
 import { IItem } from "@entities/ModuleInventory/ItemModel";
@@ -70,11 +70,14 @@ export class ItemPickup {
         return false;
       }
 
-      // check if guild controlled territory and pay tributes
-      const qtyLooted: number = await this.guildPayingTribute.payTribute(character, itemToBePicked);
+      // if item to be pickup is a body
+      if (itemToBePicked.subType === ItemSubType.DeadBody) {
+        // check if guild controlled territory and pay tributes
+        const qtyLooted: number = await this.guildPayingTribute.payTribute(character, itemToBePicked);
 
-      if (qtyLooted > 0 && itemToBePicked.stackQty !== undefined) {
-        itemToBePicked.stackQty -= qtyLooted;
+        if (qtyLooted > 0 && itemToBePicked.stackQty !== undefined) {
+          itemToBePicked.stackQty -= qtyLooted;
+        }
       }
 
       if (!(await this.handleAddToContainer(itemToBePicked, character, itemPickupData, isInventoryItem))) {

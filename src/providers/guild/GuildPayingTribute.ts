@@ -26,7 +26,7 @@ export class GuildPayingTribute {
   public async payTribute(character: ICharacter, item: IItem): Promise<number> {
     try {
       const mapName = character.scene;
-      const guild = await this.guildTerritory.getTerritoryOwnedByMap(mapName);
+      const guild = await this.guildTerritory.getGuildByTerritoryMap(mapName);
       if (!guild) {
         return item.stackQty!;
       }

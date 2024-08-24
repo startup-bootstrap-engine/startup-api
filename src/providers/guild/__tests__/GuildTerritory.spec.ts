@@ -41,8 +41,6 @@ describe("GuildTerritory.ts", () => {
       // @ts-ignore
       const result = guildTerritory.sortGuildsByMapPoints(guilds, map);
 
-      console.log(result);
-
       expect(result).toEqual([
         { guildId: "2", points: 200 },
         { guildId: "1", points: 100 },
@@ -112,7 +110,7 @@ describe("GuildTerritory.ts", () => {
 
       jest.spyOn(Guild, "findOne").mockReturnValue({ lean: jest.fn().mockResolvedValue(testGuild) } as any);
 
-      const result = await guildTerritory.getTerritoryOwnedByMap(map);
+      const result = await guildTerritory.getGuildByTerritoryMap(map);
 
       expect(result).toEqual(testGuild);
     });
@@ -121,7 +119,7 @@ describe("GuildTerritory.ts", () => {
       const map = "TestMap";
       jest.spyOn(Guild, "findOne").mockReturnValue({ lean: jest.fn().mockResolvedValue(null) } as any);
 
-      const result = await guildTerritory.getTerritoryOwnedByMap(map);
+      const result = await guildTerritory.getGuildByTerritoryMap(map);
 
       expect(result).toBeNull();
     });

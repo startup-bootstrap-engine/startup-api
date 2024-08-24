@@ -63,7 +63,7 @@ export class GuildTerritory {
     }
   }
 
-  public async getTerritoryOwnedByMap(map: string): Promise<IGuild | null> {
+  public async getGuildByTerritoryMap(map: string): Promise<IGuild | null> {
     const guild = await Guild.findOne({
       "territoriesOwned.map": map,
       "territoriesOwned.controlPoint": true,

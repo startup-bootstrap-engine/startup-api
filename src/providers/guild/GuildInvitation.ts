@@ -2,7 +2,6 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
 import { GuildSkills } from "@entities/ModuleSystem/GuildSkillsModel";
-import { LEVEL_GROUP_SIZE } from "@providers/constants/GuildConstants";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { GuildSocketEvents, IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -127,13 +126,22 @@ export class GuildInvitation {
       throw new Error("Guild level must be at least 1");
     }
 
-    // Determine the range in which the guild level falls
-    const rangeStart = Math.floor((guildLevel - 1) / LEVEL_GROUP_SIZE) + 1;
+    if (guildLevel <= 10) {
+      return 10;
+    } else if (guildLevel <= 20) {
+      return 20;
+    } else if (guildLevel <= 30) {
+      return 30;
+    } else if (guildLevel <= 40) {
+      return 40;
+    } else if (guildLevel <= 50) {
+      return 50;
+    } else if (guildLevel <= 100) {
+      return 100;
+    }
 
-    // Maximum members for the guild level
-    const maxMembers = rangeStart * LEVEL_GROUP_SIZE;
-
-    return maxMembers;
+    // Handle levels beyond the specified ranges
+    return Math.floor(guildLevel / 10) * 10;
   }
 
   private nextUpgradeLevel(currentLevel: number, currentMembers: number): number {
@@ -146,14 +154,11 @@ export class GuildInvitation {
     }
 
     // Calculate the current range and maximum members for that range
-    const currentRangeStart = Math.floor((currentLevel - 1) / LEVEL_GROUP_SIZE) + 1;
-    const maxMembersInCurrentRange = currentRangeStart * LEVEL_GROUP_SIZE;
+    const maxMembersInCurrentLevel = this.maxGuildMembers(currentLevel);
 
-    // If current members are already at the maximum for the current level, determine the next upgrade level
-    if (currentMembers >= maxMembersInCurrentRange) {
-      const nextRangeStart = currentRangeStart + 1;
-      const nextLevel = (nextRangeStart - 1) * LEVEL_GROUP_SIZE + 1;
-      return nextLevel;
+    // If current members are already at or exceed the maximum for the current level, determine the next upgrade level
+    if (currentMembers >= maxMembersInCurrentLevel) {
+      return currentLevel + 1;
     }
 
     // If the current members do not require an upgrade, return the current level

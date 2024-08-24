@@ -254,6 +254,11 @@ describe("GuildInvitation.ts", () => {
       // @ts-ignore
       expect(() => guildInvitation.maxGuildMembers(0)).toThrow("Guild level must be at least 1");
     });
+
+    it("should return correct max members for a high guild level", () => {
+      // @ts-ignore
+      expect(guildInvitation.maxGuildMembers(150)).toBe(150);
+    });
   });
 
   describe("nextUpgradeLevel", () => {
@@ -264,8 +269,18 @@ describe("GuildInvitation.ts", () => {
         expected: 1,
         description: "return current level when members are below max",
       },
-      { currentLevel: 10, currentMembers: 10, expected: 11, description: "return next level when members are at max" },
-      { currentLevel: 20, currentMembers: 21, expected: 21, description: "return next level when members exceed max" },
+      {
+        currentLevel: 10,
+        currentMembers: 10,
+        expected: 11,
+        description: "return next level when members are at max",
+      },
+      {
+        currentLevel: 20,
+        currentMembers: 21,
+        expected: 21,
+        description: "return next level when members exceed max",
+      },
       {
         currentLevel: 50,
         currentMembers: 40,

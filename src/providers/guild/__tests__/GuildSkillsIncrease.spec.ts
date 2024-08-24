@@ -20,7 +20,7 @@ describe("GuildSkillsIncrease.ts", () => {
 
   beforeEach(async () => {
     testGuild = await unitTestHelper.createMockGuild();
-    testCharacter = await unitTestHelper.createMockCharacter();
+    testCharacter = await unitTestHelper.createMockCharacter(null, { hasSkills: true });
 
     guildSkills = new GuildSkills({
       owner: testGuild._id,
