@@ -172,7 +172,7 @@ describe("CharacterBuffActivator", () => {
     };
 
     // Set up CharacterBuff.findOne to return no buffs with the same origin
-    jest.spyOn(CharacterBuff, "findOne").mockReturnValueOnce({
+    jest.spyOn(CharacterBuff, "find").mockReturnValueOnce({
       lean: jest.fn().mockResolvedValueOnce([existingBuff]),
     } as any);
 
@@ -185,7 +185,7 @@ describe("CharacterBuffActivator", () => {
 
     // Assert
     expect(result).toBe(mockBuff);
-    expect(CharacterBuff.findOne).toHaveBeenCalledWith({
+    expect(CharacterBuff.find).toHaveBeenCalledWith({
       owner: testCharacter.id,
       originateFrom: mockBuff.originateFrom,
     });
@@ -203,7 +203,7 @@ describe("CharacterBuffActivator", () => {
     };
 
     // Set up CharacterBuff.findOne to return no buff with the same origin
-    jest.spyOn(CharacterBuff, "findOne").mockReturnValueOnce({
+    jest.spyOn(CharacterBuff, "find").mockReturnValueOnce({
       lean: jest.fn().mockResolvedValueOnce(undefined),
     } as any);
 
@@ -215,7 +215,7 @@ describe("CharacterBuffActivator", () => {
 
     // Assert
     expect(result).toBe(mockBuff);
-    expect(CharacterBuff.findOne).toHaveBeenCalledWith({
+    expect(CharacterBuff.find).toHaveBeenCalledWith({
       owner: testCharacter.id,
       originateFrom: mockBuff.originateFrom,
     });

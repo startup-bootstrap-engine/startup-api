@@ -29,9 +29,15 @@ export class CharacterBuffActivator {
     let noMessage;
 
     if (!buff.isStackable && buff.originateFrom) {
-      const existingBuff = await this.findExistingBuff(character, buff);
-      if (existingBuff) {
-        await this.disableBuff(character, existingBuff._id!, existingBuff.type, true);
+      const existingBuffs = await this.findExistingBuff(character, buff);
+
+      if (existingBuffs && existingBuffs.length > 0) {
+        await Promise.all(
+          existingBuffs.map(async (existingBuff) => {
+            await this.disableBuff(character, existingBuff._id!, existingBuff.type, true);
+          })
+        );
+
         noMessage = true;
       }
     }
@@ -97,8 +103,11 @@ export class CharacterBuffActivator {
     return enabledBuff;
   }
 
-  private async findExistingBuff(character: ICharacter, buff: ICharacterTemporaryBuff): Promise<ICharacterBuff | null> {
-    return await CharacterBuff.findOne({
+  private async findExistingBuff(
+    character: ICharacter,
+    buff: ICharacterTemporaryBuff
+  ): Promise<ICharacterBuff[] | null> {
+    return await CharacterBuff.find({
       owner: character.id,
       originateFrom: buff.originateFrom,
     }).lean();
