@@ -21,13 +21,13 @@ export const AuthMiddleware = (req: IAuthenticatedRequest, res, next): void => {
     const token = authHeader.split(" ")[1];
 
     jwt.verify(token, appEnv.authentication.JWT_SECRET!, async (err, jwtPayload: any) => {
-      if (err) {
+      if (err || !jwtPayload) {
         // here we associate the error to a variable because just throwing then inside this async block won't allow them to achieve the outside scope and be caught by errorHandler.middleware. That's why we're passing then to next...
         const error = new UnauthorizedError(TS.translate("auth", "loginAccessResource"));
         next(error);
       }
 
-      const dbUser = await User.findOne({ email: jwtPayload.email }).lean<IUser>();
+      const dbUser = await User.findOne({ email: jwtPayload?.email }).lean<IUser>();
 
       if (!dbUser) {
         const error = new UnauthorizedError(TS.translate("auth", "loginAccessResource"));
