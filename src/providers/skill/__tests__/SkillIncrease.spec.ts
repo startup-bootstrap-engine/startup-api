@@ -19,10 +19,10 @@ import {
   calculateSPToNextLevel,
   calculateXPToNextLevel,
 } from "@rpg-engine/shared";
+import { v4 as uuidv4 } from "uuid";
 import { SkillFunctions } from "../SkillFunctions";
 import { SkillIncrease } from "../SkillIncrease";
 import { CraftingSkillsMap } from "../constants";
-import { v4 as uuidv4 } from "uuid";
 
 type TestCase = {
   item: string;
@@ -80,24 +80,33 @@ describe("SkillIncrease.spec.ts | increaseSP test cases", () => {
   let testCharacter: ICharacter;
 
   beforeAll(() => {
+    // Initialize the SkillIncrease service
     skillIncrease = container.get<SkillIncrease>(SkillIncrease);
 
+    // Set the initial level for the test character
     initialLevel = 1;
+
+    // Calculate the skill points required to level up from level 1 to level 2
     spToLvl2 = calculateSPToNextLevel(0, initialLevel + 1);
 
+    // Ensure that the calculated skill points to level up are valid
     expect(spToLvl2).toBeGreaterThan(0);
   });
 
   beforeEach(async () => {
+    // Create a mock character for testing
     testCharacter = await unitTestHelper.createMockCharacter();
 
+    // Initialize skills for the character
     skills = new Skill({
       ownerType: "Character",
     }) as ISkill;
 
+    // Associate the skills with the test character
     testCharacter.skills = skills._id;
     await testCharacter.save();
 
+    // Save the skills to the database
     skills.owner = testCharacter._id;
     await skills.save();
   });
@@ -111,17 +120,20 @@ describe("SkillIncrease.spec.ts | increaseSP test cases", () => {
     }
   });
 
-  function performSkillIncreaseTest(test: TestCase, initialLevel: number, spToLvl2: number) {
+  function performSkillIncreaseTest(test: TestCase) {
     return (): void => {
+      // Validate initial skill level and points
       expect(skills[test.skill].level).toBe(initialLevel);
       expect(skills[test.skill].skillPoints).toBe(0);
 
+      // Perform skill point increase operation
       let increasedSkills;
       for (let i = 0; i < spToLvl2 * 5; i++) {
         // @ts-ignore
         increasedSkills = skillIncrease.increaseSP(skills, test.item);
       }
 
+      // Validate the results after increasing skill points
       expect(increasedSkills.skillLevelUp).toBe(true);
       expect(increasedSkills.skillName).toBe(test.skill);
       expect(increasedSkills.skillLevelBefore).toBe(initialLevel);
@@ -130,15 +142,14 @@ describe("SkillIncrease.spec.ts | increaseSP test cases", () => {
       expect(skills[test.skill].level).toBe(initialLevel + 1);
       expect(skills[test.skill].skillPoints).toBe(spToLvl2);
 
+      // Ensure that the skill points to the next level are calculated correctly
       expect(skills[test.skill].skillPointsToNextLevel).toBe(calculateSPToNextLevel(spToLvl2, initialLevel + 2));
     };
   }
 
-  for (const test of simpleTestCases) {
-    it(`should increase '${test.skill}' skill points | Item: ${test.item}`, () => {
-      performSkillIncreaseTest(test, initialLevel, spToLvl2);
-    });
-  }
+  simpleTestCases.forEach((test) => {
+    it(`should increase '${test.skill}' skill points | Item: ${test.item}`, performSkillIncreaseTest(test));
+  });
 });
 
 describe("SkillIncrease x Buffs edge case", () => {

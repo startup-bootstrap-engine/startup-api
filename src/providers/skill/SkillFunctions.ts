@@ -39,18 +39,30 @@ export class SkillFunctions {
   ) {}
 
   @TrackNewRelicTransaction()
-  public async updateSkills(skills: ISkill, character: ICharacter): Promise<void> {
+  public async updateSkills(skills: ISkill, character: ICharacter): Promise<ISkill | undefined> {
     try {
       //! Warning: Chaching this causes the skill not to update
-      await Skill.findByIdAndUpdate(skills._id, skills).lean({ virtuals: true, defaults: true });
+      const updatedSkills = await Skill.findByIdAndUpdate(skills._id, skills, {
+        new: true, // Return the updated document
+        lean: true, // Return a plain JavaScript object
+        virtuals: true,
+        defaults: true,
+      });
 
-      // update baseSpeed according to skill level
+      if (!updatedSkills) {
+        throw new Error(`Failed to update skills for character ${character._id}`);
+      }
+
+      // Update baseSpeed according to skill level
       const baseSpeed = await this.characterBaseSpeed.getBaseSpeed(character);
       if (baseSpeed && character.baseSpeed !== baseSpeed) {
         await Character.updateOne({ _id: character._id }, { $set: { baseSpeed } });
       }
+
+      return updatedSkills;
     } catch (error) {
-      console.log(error);
+      console.error("Error in updateSkills:", error);
+      return undefined;
     }
   }
 

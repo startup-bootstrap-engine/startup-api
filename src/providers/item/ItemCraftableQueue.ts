@@ -223,6 +223,7 @@ export class ItemCraftableQueue {
     const skillLevel = await this.getSkillLevel(character, baseSkill);
     const rarityChance = this.getRarityPercent(rarityOfTool);
 
+    // @ts-ignore
     return this.isCraftSuccessful.bind(null, skillLevel, (baseChance + rarityChance ?? 0) * TOOLS_BASE_CHANCE_RATIO);
   }
 

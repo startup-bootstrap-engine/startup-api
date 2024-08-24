@@ -82,7 +82,7 @@ export class CharacterCreateInteractionManager {
   }
 
   public async startNPCInteractions(character: ICharacter): Promise<void> {
-    await this.npcManager.startNearbyNPCsBehaviorLoop(character);
+    await this.npcManager.startBehaviorLoopUsingMicroservice(character);
     void this.npcWarn.warnCharacterAboutNPCsInView(character, { always: true });
   }
 

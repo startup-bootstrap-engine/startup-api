@@ -82,7 +82,7 @@ export class DynamicQueue {
         1
       );
 
-      return await queue.add(queueName, data, {
+      return await queue?.add(queueName, data, {
         ...addQueueOptions,
         removeOnComplete: true,
         removeOnFail: true,
@@ -154,24 +154,36 @@ export class DynamicQueue {
     }
   }
 
-  private processJobWithTimeout = (job: Job, jobFn: Function, timeoutDuration: number): Promise<any> => {
+  private processJobWithTimeout = (job: Job, jobFn: Function, timeoutDuration: number = 7500): Promise<any> => {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
-      try {
-        // Set a timeout to reject the promise if the job takes too long
-        const timeout = setTimeout(() => reject(new Error("TimeoutError")), timeoutDuration);
+      let timeoutReached = false;
 
-        // Execute the job function
+      // Set a timeout to reject the promise if the job takes too long
+      const timeout = setTimeout(() => {
+        timeoutReached = true;
+        console.error(`Job ${job.id} timed out after ${timeoutDuration}ms`);
+        // Optionally, attempt to kill or stop the job function here if possible
+        reject(new Error("TimeoutError"));
+      }, timeoutDuration);
+
+      try {
+        // Execute the job function and monitor the execution
         const result = await jobFn(job);
 
         // Clear the timeout if the job completes within the specified duration
-        clearTimeout(timeout);
-
-        // Resolve the promise with the job result
-        resolve(result);
+        if (!timeoutReached) {
+          clearTimeout(timeout);
+          resolve(result);
+        }
       } catch (error) {
-        // Reject the promise if an error occurs
-        reject(error);
+        // Ensure timeout is cleared in case of error
+        if (!timeoutReached) {
+          clearTimeout(timeout);
+          reject(error);
+        } else {
+          console.error(`Job ${job.id} failed after timing out: ${error.message}`);
+        }
       }
     });
   };

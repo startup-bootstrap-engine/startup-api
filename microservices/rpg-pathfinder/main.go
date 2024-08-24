@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 )
 
 type PathRequest struct {
@@ -23,8 +25,31 @@ type HealthCheckResponse struct {
 	Status string `json:"status"`
 }
 
+const workerPoolSize = 1000
+
+var pathRequestChan = make(chan PathRequest, workerPoolSize)
+var pathResponseChan = make(chan PathResponse, workerPoolSize)
+
+func init() {
+	for i := 0; i < workerPoolSize; i++ {
+		go worker()
+	}
+}
+
+func worker() {
+	for req := range pathRequestChan {
+		path, err := BreadthFirstFinder(req.StartX, req.StartY, req.EndX, req.EndY, req.Grid)
+		if err != nil {
+			pathResponseChan <- PathResponse{Error: err.Error()}
+		} else {
+			pathResponseChan <- PathResponse{Path: path}
+		}
+	}
+}
+
 func pathHandler(w http.ResponseWriter, r *http.Request) {
-	responseChan := make(chan PathResponse)
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
 
 	var req PathRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -32,31 +57,27 @@ func pathHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go func() {
-		// Perform the pathfinding
-		path, err := BreadthFirstFinder(req.StartX, req.StartY, req.EndX, req.EndY, req.Grid)
-		if err != nil {
-			responseChan <- PathResponse{Error: err.Error()}
-			return
+	select {
+	case pathRequestChan <- req:
+		select {
+		case <-ctx.Done():
+			http.Error(w, "Request timed out", http.StatusGatewayTimeout)
+		case resp := <-pathResponseChan:
+			w.Header().Set("Content-Type", "application/json")
+			if resp.Error != "" {
+				w.WriteHeader(http.StatusNotFound)
+			}
+			_ = json.NewEncoder(w).Encode(resp)
 		}
-		responseChan <- PathResponse{Path: path}
-	}()
-
-	// Wait for the response from the goroutine
-	resp := <-responseChan
-
-	// Respond to the client
-	w.Header().Set("Content-Type", "application/json")
-	if resp.Error != "" {
-		w.WriteHeader(http.StatusNotFound)
+	case <-ctx.Done():
+		http.Error(w, "Request timed out", http.StatusGatewayTimeout)
 	}
-	json.NewEncoder(w).Encode(resp)
 }
 
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(HealthCheckResponse{Status: "OK"})
+	_ = json.NewEncoder(w).Encode(HealthCheckResponse{Status: "OK"})
 }
 
 func main() {

@@ -11,7 +11,6 @@ import { NPCDeathQueue } from "@providers/npc/NPCDeathQueue";
 import { NPCExperience } from "@providers/npc/NPCExperience/NPCExperience";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { Time } from "@providers/time/Time";
-import { NewRelicTransactionCategory } from "@providers/types/NewRelicTypes";
 import { AnimationEffectKeys, CharacterSocketEvents, EntityType, ICharacterAttributeChanged } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { EntityEffectDurationControl } from "./EntityEffectDurationControl";
@@ -60,38 +59,30 @@ export class EntityEffectCycle {
     );
   }
 
-  @TrackNewRelicTransaction()
   private async execute(
     entityEffect: IEntityEffect,
-
     targetId: string,
     targetType: string,
     attackerId: string,
     attackerType: string
   ): Promise<void> {
     try {
-      await this.newRelic.trackTransaction(
-        NewRelicTransactionCategory.Operation,
-        "EntityEffectCycle.execute",
-        async () => {
-          const target = await this.getTarget(targetId, targetType);
-          if (!target) return await this.stopEffect(entityEffect, attackerId, targetId);
+      const target = await this.getTarget(targetId, targetType);
+      if (!target) return await this.stopEffect(entityEffect, attackerId, targetId);
 
-          if (!(await this.validateAndFilterEffects(target, entityEffect, attackerId))) return;
+      if (!(await this.validateAndFilterEffects(target, entityEffect, attackerId))) return;
 
-          if (!(await this.validateTargetCharacter(target, entityEffect, attackerId))) return;
+      if (!(await this.validateTargetCharacter(target, entityEffect, attackerId))) return;
 
-          const attacker = await this.getTarget(attackerId, attackerType, true);
-          const damage = await this.calculateDamage(entityEffect, target, attacker!);
+      const attacker = await this.getTarget(attackerId, attackerType, true);
+      const damage = await this.calculateDamage(entityEffect, target, attacker!);
 
-          // this must happen right after the damage calculation, because if we record the XP here, it can cause a mismatch between state
-          await this.updateEffectsAndState(attacker!, target, entityEffect, attackerId);
+      // this must happen right after the damage calculation, because if we record the XP here, it can cause a mismatch between state
+      await this.updateEffectsAndState(attacker!, target, entityEffect, attackerId);
 
-          if (target.type === EntityType.NPC && attacker) {
-            await this.recordNPCExperience(attacker, target, damage);
-          }
-        }
-      );
+      if (target.type === EntityType.NPC && attacker) {
+        await this.recordNPCExperience(attacker, target, damage);
+      }
     } catch (error) {
       console.error(error);
       await this.stop(entityEffect.key, attackerId, targetId);

@@ -9,35 +9,33 @@ import { IServerBootstrapVars } from "../types/ServerTypes";
 export class ServerHelper {
   constructor(private redisManager: RedisManager, private characterConnection: CharacterConnection) {}
 
-  public showBootstrapMessage(config: IServerBootstrapVars): void {
-    const {
-      port,
-      // appName,
-      language,
-      timezone,
-      adminEmail,
-      startupTime,
-      // phoneLocale,
-    } = config;
+  public showBootstrapMessage(config: IServerBootstrapVars, microserviceName?: string): void {
+    const { port, language, timezone, adminEmail, startupTime } = config;
 
     const consoleHelper = new ConsoleHelper();
 
-    let terminalColor;
-    switch (appEnv.general.ENV) {
-      case "Development":
-        terminalColor = "YELLOW";
-        break;
-      case "Production":
-        terminalColor = "RED";
-        break;
-      default:
-        terminalColor = "BLUE";
-        break;
-    }
+    const terminalColor = this.getTerminalColor(appEnv.general.ENV!, microserviceName);
 
     consoleHelper.coloredLog(
-      `🤖: Server is running on ${appEnv.general.ENV} | Port: ${port} | Language: ${language} | Timezone: ${timezone} | Admin: ${adminEmail} | Startup time: ${startupTime}ms`,
-      terminalColor
+      `🤖: ${microserviceName || "Server"} is running on ${
+        appEnv.general.ENV
+      } | Port: ${port} | Language: ${language} | Timezone: ${timezone} | Admin: ${adminEmail} | Startup time: ${startupTime}ms`,
+      terminalColor as any
     );
+  }
+
+  private getTerminalColor(environment: string, microserviceName?: string): string {
+    if (microserviceName === "rpg-npc") {
+      return "GREEN";
+    }
+
+    switch (environment) {
+      case "Development":
+        return "YELLOW";
+      case "Production":
+        return "RED";
+      default:
+        return "BLUE";
+    }
   }
 }

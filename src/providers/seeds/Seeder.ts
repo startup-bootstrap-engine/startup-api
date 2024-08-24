@@ -1,6 +1,7 @@
 import { ItemSeeder } from "@providers/item/ItemSeeder";
 import { QuestSeeder } from "@providers/quest/QuestSeeder";
 
+import { appEnv } from "@providers/config/env";
 import { NPCRaidSeeder } from "@providers/raid/NPCRaidSeeder";
 import { provide } from "inversify-binding-decorators";
 import { NPCSeeder } from "../npc/NPCSeeder";
@@ -19,14 +20,16 @@ export class Seeder {
   public async start(): Promise<void> {
     console.time("🌱 Total Seeding");
 
+    const { IS_MICROSERVICE } = appEnv.general;
+
     await Promise.all([
-      this.timeSeeder(this.npcSeeder, "NPC Seeding"),
-      this.timeSeeder(this.itemSeeder, "Item Seeding"),
-      this.timeSeeder(this.npcRaidSeeder, "NPC Raid Seeding"),
+      !IS_MICROSERVICE && this.timeSeeder(this.npcSeeder, "NPC Seeding"),
+      !IS_MICROSERVICE && this.timeSeeder(this.itemSeeder, "Item Seeding"),
+      !IS_MICROSERVICE && this.timeSeeder(this.npcRaidSeeder, "NPC Raid Seeding"),
       this.timeSeeder(this.redisCleanup, "Redis Cleanup"),
     ]);
 
-    await this.timeSeeder(this.questSeeder, "Quest Seeding"); // quest needs to be here because it depends on npcs
+    !IS_MICROSERVICE && (await this.timeSeeder(this.questSeeder, "Quest Seeding")); // quest needs to be here because it depends on npcs
 
     console.timeEnd("🌱 Total Seeding");
   }

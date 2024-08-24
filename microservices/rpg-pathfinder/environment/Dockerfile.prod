@@ -1,5 +1,5 @@
-# Start with a Go base image
-FROM golang:1.20-alpine as builder
+# Use a Go base image that includes essential tools for both building and running
+FROM golang:1.20
 
 # Set up working directory
 WORKDIR /app
@@ -10,14 +10,8 @@ COPY . .
 # Build the Go application
 RUN go build -o app .
 
-# Use a minimal base image for production
-FROM alpine:3.18
-
-# Set up working directory
-WORKDIR /app
-
-# Copy the built binary from the builder stage
-COPY --from=builder /app/app /app/app
+# Expose the necessary port
+EXPOSE 5004
 
 # Run the application binary
 CMD ["/app/app"]

@@ -23,21 +23,25 @@ done
 echo "Refreshing source code..."
 GIT_WORK_TREE=$DEPLOY_DIR git checkout -f
 
-# Build and push rpg-pathfinder Docker image
-echo "🐳 Building and pushing rpg-pathfinder Docker image..."
-cd ~/definya/api/microservices/rpg-pathfinder
+cd ~/definya/api
 
 # Build based on production Dockerfile
-cp ./environment/Dockerfile.prod ./Dockerfile
+cp ./environment/Dockerfile.prod ./Dockerfile    
 
-docker build -t definya/definya-team:rpg-pathfinder-latest .
-docker push definya/definya-team:rpg-pathfinder-latest
-
-cd ~/definya/api
 # Build and push rpg-api Docker image
 echo "🐳 Building and pushing rpg-api Docker image..."
 docker build -t definya/definya-team:api-latest .
 docker push definya/definya-team:api-latest
+
+
+cp ~/definya/api/microservices/rpg-pathfinder/environment/Dockerfile.prod ~/definya/api/microservices/rpg-pathfinder/Dockerfile
+
+# Build and push rpg-pathfinder Docker image
+echo "🐳 Building and pushing rpg-pathfinder Docker image..."
+cd ~/definya/api/microservices/rpg-pathfinder
+
+docker build -t definya/definya-team:rpg-pathfinder-latest .
+docker push definya/definya-team:rpg-pathfinder-latest
 
 # Update the Docker Swarm stack
 echo "🐳 Updating swarm..."

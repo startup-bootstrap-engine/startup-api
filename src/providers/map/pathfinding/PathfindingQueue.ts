@@ -2,7 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
-import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
+import { PATHFINDING_LIGHTWEIGHT_WALKABLE_THRESHOLD } from "@providers/constants/PathfindingConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { AvailableMicroservices, MicroserviceRequest } from "@providers/microservice/MicroserviceRequest";
@@ -27,7 +27,6 @@ export class PathfindingQueue {
     private resultsPoller: ResultsPoller,
     private gridManager: GridManager,
     private lightweightPathfinder: LightweightPathfinder,
-    private inMemoryHashTable: InMemoryHashTable,
     private npcTarget: NPCTarget,
     private microserviceRequest: MicroserviceRequest
   ) {}
@@ -50,7 +49,7 @@ export class PathfindingQueue {
 
     try {
       if (appEnv.general.IS_UNIT_TEST) {
-        return this.getResultsFromPathfindingAlgorithm(map, {
+        return this.getResultsFromPathfindingAlgorithm(npc, map, {
           start: { x: startGridX, y: startGridY },
           end: { x: endGridX, y: endGridY },
         });
@@ -137,7 +136,7 @@ export class PathfindingQueue {
         async (job) => {
           const { npc, startGridX, startGridY, endGridX, endGridY } = job.data;
 
-          const path = await this.getResultsFromPathfindingAlgorithm(npc.scene, {
+          const path = await this.getResultsFromPathfindingAlgorithm(npc, npc.scene, {
             start: { x: startGridX, y: startGridY },
             end: { x: endGridX, y: endGridY },
           });
@@ -154,6 +153,9 @@ export class PathfindingQueue {
           startGridY,
           endGridX,
           endGridY,
+        },
+        {
+          queueScaleBy: "active-npcs",
         }
       );
     } catch (error) {
@@ -163,8 +165,8 @@ export class PathfindingQueue {
     return undefined;
   }
 
-  @TrackNewRelicTransaction()
   private async getResultsFromPathfindingAlgorithm(
+    npc: INPC,
     map: string,
     gridCourse: IGridCourse,
     retries = 0
@@ -184,7 +186,18 @@ export class PathfindingQueue {
       finder = new PF.BestFirstFinder();
       path = finder.findPath(firstNode.x, firstNode.y, lastNode.x, lastNode.y, grid);
     } else {
-      const result = await this.microserviceRequest.requestMicroservice<IRPGPathfinderResponse>(
+      // Check if the surrounding area is clear
+      const isClear = this.isAreaClearOfSolids(grid, firstNode.x, firstNode.y);
+
+      if (isClear) {
+        const result = await this.triggerLightweightPathfinding(npc, gridCourse.end.x, gridCourse.end.y);
+
+        if (result) {
+          return result;
+        }
+      }
+
+      const result = await this.microserviceRequest.request<IRPGPathfinderResponse>(
         AvailableMicroservices.RpgPathfinding,
         "/path",
         {
@@ -203,10 +216,35 @@ export class PathfindingQueue {
 
     if (pathWithoutOffset.length < 1 && retries < 3) {
       gridCourse.offset = Math.pow(10, retries + 1);
-      return await this.getResultsFromPathfindingAlgorithm(map, gridCourse, retries + 1);
+      return await this.getResultsFromPathfindingAlgorithm(npc, map, gridCourse, retries + 1);
     }
 
     return pathWithoutOffset;
+  }
+
+  private isAreaClearOfSolids(grid: PF.Grid, x: number, y: number, radius: number = 1): boolean {
+    let walkableTiles = 0;
+    let totalTiles = 0;
+
+    for (let i = -radius; i <= radius; i++) {
+      for (let j = -radius; j <= radius; j++) {
+        const tileX = x + i;
+        const tileY = y + j;
+
+        // Check if within grid bounds
+        if (tileX >= 0 && tileX < grid.width && tileY >= 0 && tileY < grid.height) {
+          totalTiles++;
+          if (grid.isWalkableAt(tileX, tileY)) {
+            walkableTiles++;
+          }
+        }
+      }
+    }
+
+    // Calculate the percentage of walkable tiles
+    const walkablePercentage = (walkableTiles / totalTiles) * 100;
+
+    return walkablePercentage >= PATHFINDING_LIGHTWEIGHT_WALKABLE_THRESHOLD;
   }
 
   public async clearAllJobs(): Promise<void> {

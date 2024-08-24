@@ -9,10 +9,11 @@ import { provide } from "inversify-binding-decorators";
 import { NPCView } from "./NPCView";
 
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { appEnv } from "@providers/config/env";
 import { Locker } from "@providers/locks/Locker";
 import { MathHelper } from "@providers/math/MathHelper";
+import { AvailableMicroservices, MicroserviceRequest } from "@providers/microservice/MicroserviceRequest";
 import { RaidManager } from "@providers/raid/RaidManager";
-import { Time } from "@providers/time/Time";
 import { NPCCycleQueue } from "./NPCCycleQueue";
 
 @provide(NPCManager)
@@ -25,7 +26,7 @@ export class NPCManager {
     private raidManager: RaidManager,
     private npcCycleQueue: NPCCycleQueue,
     private locker: Locker,
-    private time: Time
+    private microservice: MicroserviceRequest
   ) {}
 
   @TrackNewRelicTransaction()
@@ -41,6 +42,21 @@ export class NPCManager {
     for (const npc of npcsToActivate) {
       await this.startBehaviorLoop(npc);
     }
+  }
+
+  public async startBehaviorLoopUsingMicroservice(character: ICharacter): Promise<void> {
+    if (appEnv.general.IS_UNIT_TEST) {
+      return await this.startNearbyNPCsBehaviorLoop(character);
+    }
+
+    await this.microservice.request(
+      AvailableMicroservices.RpgNPC,
+      "/npcs/start-behavior-loop",
+      {
+        characterId: character._id,
+      },
+      "POST"
+    );
   }
 
   @TrackNewRelicTransaction()

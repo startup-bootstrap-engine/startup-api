@@ -25,6 +25,34 @@ services:
       - rpg-redis
     networks:
       - rpg-network
+      - rpg-api-rpg-npc
+
+  rpg-npc:
+    container_name: rpg-npc
+    restart: always
+    build: .
+    env_file: .env
+    ports:
+      - "5005:5005"
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      MICROSERVICE_NAME: "rpg-npc"
+      FORCE_COLOR: "true"
+      CHOKIDAR_USEPOLLING: "true" # enables hot-reloading on windows host
+      NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
+      NEW_RELIC_APP_NAME: "Definya API Dev"
+    links:
+      - rpg-db
+    depends_on:
+      - rpg-api
+      - rpg-db
+      - rpg-redis
+    networks:
+      - rpg-api-rpg-npc
+      - rpg-network
+
   rpg-pathfinder:
     container_name: rpg-pathfinder
     build:
@@ -39,6 +67,7 @@ services:
     command: air
     networks:
       - rpg-network
+
   rpg-db:
     container_name: rpg-db
     image: mongo
@@ -87,3 +116,6 @@ services:
 
 networks:
   rpg-network:
+  rpg-api-rpg-npc:
+    driver: overlay
+    internal: true

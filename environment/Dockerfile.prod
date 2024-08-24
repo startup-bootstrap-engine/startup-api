@@ -1,8 +1,11 @@
-FROM node:18
+# Use the official Node.js 20 image
+FROM node:20
 
-RUN apt-get update
+# Install system dependencies including Git (which might not be included by default)
+RUN apt-get update && \
+    apt-get install -y git && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN apt-get install g++ -y && apt-get install cmake -y 
 
 # Where our app will live in the container
 WORKDIR /usr/src/app
@@ -23,8 +26,10 @@ EXPOSE 5101
 
 ENV NEW_RELIC_NO_CONFIG_FILE=true
 
+# Set environment variables for New Relic logging
 ENV NEW_RELIC_DISTRIBUTED_TRACING_ENABLED=true \
-NEW_RELIC_LOG=stdout
+    NEW_RELIC_LOG=stdout \
+    NEW_RELIC_LOG_LEVEL=debug
 
 RUN npm install -g pm2
  

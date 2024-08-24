@@ -9,7 +9,7 @@ services:
       timeout: 30s
       retries: 3
     deploy:
-      replicas: 4
+      replicas: 3
       restart_policy:
         condition: on-failure
       placement:
@@ -58,26 +58,63 @@ services:
     networks:
       - rpg-network
 
-  rpg-pathfinder:
-    image: definya/definya-team:rpg-pathfinder-latest
+  rpg-npc:
+    image: definya/definya-team:api-latest
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:5005"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
     environment:
-      GO111MODULE: "on"
+      MICROSERVICE_NAME: "rpg-npc"
+      FORCE_COLOR: "true"
+      CHOKIDAR_USEPOLLING: "true"
+      NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
+      NEW_RELIC_APP_NAME: "Definya NPC"
     deploy:
-      replicas: 4
+      replicas: 2
       restart_policy:
         condition: on-failure
       placement:
         constraints:
-          - node.labels.api == true
+          - node.labels.npc == true
         preferences:
           - spread: node.id
         max_replicas_per_node: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+        failure_action: rollback
+        monitor: 10s
+        max_failure_ratio: 0.3
+    networks:
+      - rpg-network
+
+  rpg-pathfinder:
+    image: definya/definya-team:rpg-pathfinder-latest
+    environment:
+      GO111MODULE: "on"
+      NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
+      NEW_RELIC_APP_NAME: "Definya Pathfinder"
+    deploy:
+      replicas: 6
+      restart_policy:
+        condition: on-failure
+      placement:
+        preferences:
+          - spread: node.id
+        max_replicas_per_node: 1
+      update_config:
+        parallelism: 3
+        delay: 2s
+        failure_action: rollback
+        monitor: 10s
+        max_failure_ratio: 0.3
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:5004/health"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 30s
+      retries: 5
     networks:
       - rpg-network
 
@@ -105,8 +142,12 @@ services:
       placement:
         constraints:
           - node.labels.accessory == true
+    environment:
+      NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
+      NEW_RELIC_APP_NAME: "Definya Client"
     networks:
       - rpg-network
+
   rpg-docs:
     image: definya/definya-team:docs-latest
     healthcheck:
@@ -131,6 +172,9 @@ services:
       placement:
         constraints:
           - node.labels.accessory == true
+    environment:
+      NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
+      NEW_RELIC_APP_NAME: "Definya Docs"
     networks:
       - rpg-network
 
@@ -151,7 +195,9 @@ services:
       MONGO_PORT: ${MONGO_PORT}
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    deploy: # db should be only on the manager node
+      NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
+      NEW_RELIC_APP_NAME: "Definya DB"
+    deploy:
       placement:
         constraints:
           - node.role == manager
@@ -171,6 +217,9 @@ services:
       - rpg-redis-data:/data
       - ./config/redis.conf:/usr/local/etc/redis/redis.conf
     command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--port", "${REDIS_PORT}"]
+    environment:
+      NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
+      NEW_RELIC_APP_NAME: "Definya Redis"
     networks:
       - rpg-network
     deploy:
@@ -182,6 +231,19 @@ services:
       interval: 30s
       timeout: 15s
       retries: 3
+
+  newrelic-infra:
+    image: newrelic/infrastructure:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /:/host:ro
+    environment:
+      NRIA_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
+      NRIA_DISPLAY_NAME: "Definya Swarm Node"
+    deploy:
+      mode: global
+    networks:
+      - rpg-network
 
 networks:
   rpg-network:

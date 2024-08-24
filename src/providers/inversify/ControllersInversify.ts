@@ -3,6 +3,7 @@ import { CharacterController } from "@useCases/ModuleCharacter/character/Charact
 import { FactionController } from "@useCases/ModuleCharacter/faction/FactionController";
 import { NPCController } from "@useCases/ModuleNPC/NPCController";
 import { ReferralRewardController } from "@useCases/ModuleReferral/ReferralRewardController";
+import { SocketsController } from "@useCases/ModuleSockets/SocketsController";
 import { ABTestController } from "@useCases/ModuleSystem/abTests/ABTestController";
 import { BlueprintController } from "@useCases/ModuleSystem/blueprint/BlueprintController";
 import { CacheController } from "@useCases/ModuleSystem/cache/CacheController";
@@ -68,6 +69,7 @@ export const useCasesControllers = new ContainerModule((bind: interfaces.Bind, u
   bind<ITSDecorator>("ITSDecorator").to(TsDefaultDecorator);
   bind<CharacterController>(CharacterController).toSelf();
   bind<NPCController>(NPCController).toSelf();
+  bind<SocketsController>(SocketsController).toSelf();
   bind<ReferralRewardController>(ReferralRewardController).toSelf();
   bind<ReadChatLogController>(ReadChatLogController).toSelf();
   bind<MapController>(MapController).toSelf();

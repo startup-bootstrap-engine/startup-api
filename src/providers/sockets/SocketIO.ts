@@ -25,38 +25,33 @@ export class SocketIO implements ISocket {
       case EnvType.Development:
         this.socket.use(SocketIOAuthMiddleware);
         this.socket.listen(appEnv.socket.port.SOCKET);
+        console.log(`🔌 TCP socket initialized on ${appEnv.socket.port.SOCKET}`);
         break;
       case EnvType.Production:
         const redisOptions: RedisClientOptions = {
           socket: {
             host: appEnv.database.REDIS_CONTAINER,
             port: appEnv.database.REDIS_PORT,
-            connectTimeout: 10000,
+            connectTimeout: 30000,
             // keep connection alive for a mmorpg
-            keepAlive: 1000,
+            keepAlive: 10000,
             noDelay: true,
-            reconnectStrategy: (retries) => Math.min(50 * 2 ** retries, 30000), // Exponential backoff
+            reconnectStrategy: (retries) => Math.min(100 * 2 ** retries, 30000), // Increase the base retry time
           },
-          pingInterval: 2000,
+          pingInterval: 10000, // 10 seconds
         };
 
         const pubClient = createClient(redisOptions);
         const subClient = pubClient.duplicate();
 
-        const handleRedisError = (client: string) => (error: Error) => {
-          console.error(`${client} Redis error:`, error);
-        };
-
-        pubClient.on("error", handleRedisError("Publisher"));
-        subClient.on("error", handleRedisError("Subscriber"));
-
         try {
-          await Promise.all([pubClient.connect(), subClient.connect()]);
+          await pubClient.connect();
+          await subClient.connect();
           this.socket.adapter(createAdapter(pubClient, subClient));
           this.socket.use(SocketIOAuthMiddleware);
           this.socket.listen(appEnv.socket.port.SOCKET);
         } catch (error) {
-          console.error("Failed to initialize Redis clients:", error);
+          console.error("Redis connection error:", error);
           this.newRelic.noticeError(error);
         }
         break;

@@ -39,6 +39,24 @@ import { recipeSunstoneBow } from "./tier5/recipeSunstoneBow";
 import { recipeUmbralBow } from "./tier12/recipeUmbralBow";
 import { recipeValkyriesBow } from "./tier5/recipeValkyriesBow";
 import { recipeZephyrusBow } from "./tier5/recipeZephyrusBow";
+import { recipeBloodthirstBow } from "./tier10/recipeBloodthirstBow";
+import { recipeFalconWingBow } from "./tier10/recipeFalconWingBow";
+import { recipeTalonStrikeBow } from "./tier10/recipeTalonStrikeBow";
+import { recipeBloodMoonBow } from "./tier11/recipeBloodMoonBow";
+import { recipeDarkVeinBow } from "./tier11/recipeDarkVeinBow";
+import { recipeHorizonPiercerBow } from "./tier11/recipeHorizonPiercerBow";
+import { recipeAerialStrikeBow } from "./tier12/recipeAerialStrikeBow";
+import { recipeSanguineShadeBow } from "./tier12/recipeSanguineShadeBow";
+import { recipeSkyHunterBow } from "./tier12/recipeSkyHunterBow";
+import { recipeFalconEyeBow } from "./tier6/recipeFalconEyeBow";
+import { recipeRubyTalonBow } from "./tier6/recipeRubyTalonBow";
+import { recipeCrimsonFangBow } from "./tier7/recipeCrimsonFangBow";
+import { recipeFalconFeatherBow } from "./tier7/recipeFalconFeatherBow";
+import { recipeLifebloodBow } from "./tier7/recipeLifebloodBow";
+import { recipeGaleWingBow } from "./tier8/recipeGaleWingBow";
+import { recipeVampiricBow } from "./tier8/recipeVampiricBow";
+import { recipeNightshadeBow } from "./tier9/recipeNightshadeBow";
+import { recipeWindriderBow } from "./tier9/recipeWindriderBow";
 
 export const recipeRangedIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [RangedWeaponsBlueprint.Arrow]: [recipeArrow],
@@ -80,4 +98,22 @@ export const recipeRangedIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [RangedWeaponsBlueprint.ParallelPrecisionBow]: [recipeParallelPrecisionBow],
   [RangedWeaponsBlueprint.MysticMeadowArrow]: [recipeMysticMeadowArrow],
   [RangedWeaponsBlueprint.PlasmaPierceArrow]: [recipePlasmaPierceArrow],
+  [RangedWeaponsBlueprint.FalconFeatherBow]: [recipeFalconFeatherBow],
+  [RangedWeaponsBlueprint.FalconWingBow]: [recipeFalconWingBow],
+  [RangedWeaponsBlueprint.SkyHunterBow]: [recipeSkyHunterBow],
+  [RangedWeaponsBlueprint.AerialStrikeBow]: [recipeAerialStrikeBow],
+  [RangedWeaponsBlueprint.WindriderBow]: [recipeWindriderBow],
+  [RangedWeaponsBlueprint.FalconEyeBow]: [recipeFalconEyeBow],
+  [RangedWeaponsBlueprint.TalonStrikeBow]: [recipeTalonStrikeBow],
+  [RangedWeaponsBlueprint.HorizonPiercerBow]: [recipeHorizonPiercerBow],
+  [RangedWeaponsBlueprint.GaleWingBow]: [recipeGaleWingBow],
+  [RangedWeaponsBlueprint.BloodMoonBow]: [recipeBloodMoonBow],
+  [RangedWeaponsBlueprint.VampiricBow]: [recipeVampiricBow],
+  [RangedWeaponsBlueprint.CrimsonFangBow]: [recipeCrimsonFangBow],
+  [RangedWeaponsBlueprint.SanguineShadeBow]: [recipeSanguineShadeBow],
+  [RangedWeaponsBlueprint.LifebloodBow]: [recipeLifebloodBow],
+  [RangedWeaponsBlueprint.BloodthirstBow]: [recipeBloodthirstBow],
+  [RangedWeaponsBlueprint.NightshadeBow]: [recipeNightshadeBow],
+  [RangedWeaponsBlueprint.DarkVeinBow]: [recipeDarkVeinBow],
+  [RangedWeaponsBlueprint.RubyTalonBow]: [recipeRubyTalonBow],
 };

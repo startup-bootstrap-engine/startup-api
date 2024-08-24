@@ -34,6 +34,7 @@ import {
 } from "@rpg-engine/shared/dist/types/skills.types";
 import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
+import { clearCacheForKey } from "speedgoose";
 import { SkillBuff } from "./SkillBuff";
 import { SkillCalculator } from "./SkillCalculator";
 import { SkillCraftingMapper } from "./SkillCraftingMapper";
@@ -80,6 +81,9 @@ export class SkillIncrease {
       if (!skills) {
         throw new Error(`skills not found for character ${attacker.id}`);
       }
+
+      // Ensure SP is not below minimum for any skill
+      this.ensureMinimumSP(skills);
 
       const weapon = await this.characterWeapon.getWeapon(attacker);
       const weaponSubType = weapon?.item ? weapon?.item.subType || "None" : "None";
@@ -128,7 +132,12 @@ export class SkillIncrease {
         }
       }
 
-      await this.skillFunctions.updateSkills(skills, attacker);
+      await clearCacheForKey(`${attacker._id}-skills`);
+
+      const updatedSkills = await this.skillFunctions.updateSkills(skills, attacker);
+
+      attacker.skills = updatedSkills;
+
       await this.characterBonusPenalties.applyRaceBonusPenalties(attacker, weaponSubType);
 
       if (weaponSubType !== ItemSubType.Magic && weaponSubType !== ItemSubType.Staff) {
@@ -448,6 +457,26 @@ export class SkillIncrease {
     } catch (error) {
       console.error(`Error in increaseSP for skillKey ${skillKey}:`, error);
     }
+  }
+
+  private ensureMinimumSP(skills: ISkill): void {
+    Object.keys(skills).forEach((skillKey) => {
+      const skillDetails = skills[skillKey] as ISkillDetails;
+
+      // Skip the check for level 0
+      if (skillDetails.level === 0 || skillDetails.level === 1) {
+        return;
+      }
+
+      const minimumSP = this.skillCalculator.getSPForLevel(skillDetails.level);
+
+      if (skillDetails.skillPoints < minimumSP) {
+        console.error(
+          `Skill ${skillKey} for character ${skills.owner} has SP ${skillDetails.skillPoints} which is less than the minimum ${minimumSP} for level ${skillDetails.level}. Adjusting...`
+        );
+        skillDetails.skillPoints = minimumSP;
+      }
+    });
   }
 
   private calculateNewSP(skillDetails: ISkillDetails, bonus?: number): number | undefined {

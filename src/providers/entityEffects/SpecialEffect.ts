@@ -52,7 +52,7 @@ export class SpecialEffect {
         if (appEnv.general.IS_UNIT_TEST) {
           return;
         }
-        await npcManager.startNearbyNPCsBehaviorLoop(caster);
+        await npcManager.startBehaviorLoopUsingMicroservice(caster);
       }
 
       if (onEffectEnd) {
@@ -77,7 +77,7 @@ export class SpecialEffect {
     await this.inMemoryHashTable.delete(namespace, this.getEntityKey(target));
 
     if (target.type === EntityType.Character) {
-      await npcManager.startNearbyNPCsBehaviorLoop(target as ICharacter);
+      await npcManager.startBehaviorLoopUsingMicroservice(target as ICharacter);
     }
 
     return true;

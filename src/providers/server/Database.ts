@@ -1,8 +1,8 @@
 import { provide } from "inversify-binding-decorators";
 import mongoose from "mongoose";
 
-import { DB_POOL_SIZE } from "@providers/constants/DatabaseConstants";
 import { appEnv } from "@providers/config/env";
+import { DB_POOL_SIZE } from "@providers/constants/DatabaseConstants";
 
 @provide(Database)
 export class Database {
@@ -16,6 +16,8 @@ export class Database {
           useUnifiedTopology: true,
           dbName: process.env.MONGO_INITDB_DATABASE,
           poolSize: DB_POOL_SIZE,
+          minPoolSize: 50,
+          maxPoolSize: DB_POOL_SIZE * 3,
         }
       );
       console.log(
