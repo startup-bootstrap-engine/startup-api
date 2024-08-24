@@ -57,7 +57,7 @@ services:
       NEW_RELIC_APP_NAME: "Definya API"
     networks:
       - rpg-network
-      - rpg-api-rpg-npc
+
   rpg-npc:
     image: definya/definya-team:api-latest
     healthcheck:
@@ -88,7 +88,6 @@ services:
         monitor: 10s
         max_failure_ratio: 0.3
     networks:
-      - rpg-api-rpg-npc
       - rpg-network
 
   rpg-pathfinder:
@@ -219,12 +218,22 @@ services:
       timeout: 15s
       retries: 3
 
+  newrelic-infra:
+    image: newrelic/infrastructure:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /:/host:ro
+    environment:
+      NRIA_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
+      NRIA_DISPLAY_NAME: "Definya Swarm Node"
+    deploy:
+      mode: global
+    networks:
+      - rpg-network
+
 networks:
   rpg-network:
     external: true
-  rpg-api-rpg-npc:
-    driver: overlay
-    internal: true
 
 volumes:
   rpg-db-data:

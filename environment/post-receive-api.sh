@@ -33,6 +33,9 @@ echo "🐳 Building and pushing rpg-api Docker image..."
 docker build -t definya/definya-team:api-latest .
 docker push definya/definya-team:api-latest
 
+
+cp ~/definya/api/microservices/rpg-pathfinder/environment/Dockerfile.prod ~/definya/api/microservices/rpg-pathfinder/Dockerfile
+
 # Build and push rpg-pathfinder Docker image
 echo "🐳 Building and pushing rpg-pathfinder Docker image..."
 cd ~/definya/api/microservices/rpg-pathfinder
