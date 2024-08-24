@@ -22,6 +22,8 @@ Dockerfile
 # Do not ignore the Dockerfile in microservices/rpg-pathfinder/
 !microservices/rpg-pathfinder/Dockerfile
 
+microservices/rpg-pathfinder/tmp
+
 globalConfig.json
 
 coverage
