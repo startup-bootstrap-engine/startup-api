@@ -98,7 +98,7 @@ export class EquipmentSlots {
           const difference = Math.abs(targetSlotItem?.maxStackSize - futureStackSize);
 
           await Item.findByIdAndUpdate(targetSlotItem._id, { stackQty: targetSlotItem?.maxStackSize }).lean();
-          await Item.findByIdAndUpdate(item._id, { stackQty: difference }).lean();
+          const updatedItem = await Item.findByIdAndUpdate(item._id, { stackQty: difference }, { new: true }).lean();
 
           const inventory = await this.characterInventory.getInventory(character);
           const inventoryContainer = await ItemContainer.findById(inventory?.itemContainer).lean();
@@ -108,7 +108,7 @@ export class EquipmentSlots {
           }
 
           const addDiffToContainer = await this.characterItemContainer.addItemToContainer(
-            item,
+            updatedItem as IItem,
             character,
             inventoryContainer._id
           );

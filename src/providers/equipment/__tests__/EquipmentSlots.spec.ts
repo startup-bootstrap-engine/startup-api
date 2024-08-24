@@ -116,6 +116,37 @@ describe("EquipmentSlots.ts", () => {
     expect(updatedInventoryContainer?.slots[0].stackQty).toEqual(10);
   });
 
+  it("should properly add a STACKABLE item to an equipment slot, where new stackQty is greater than maxStackSize", async () => {
+    const stackableItem = await unitTestHelper.createMockItemFromBlueprint(RangedWeaponsBlueprint.Arrow, {
+      stackQty: 8,
+      maxStackSize: 10,
+    });
+
+    // add to inventory and refresh inventory
+    await characterItemContainer.addItemToContainer(stackableItem, testCharacter, inventoryContainer._id);
+    inventoryContainer = (await ItemContainer.findById(inventory.itemContainer)) as unknown as IItemContainer;
+
+    const inventoryContainerStack = inventoryContainer?.slots[0].stackQty;
+
+    equipment.accessory = stackableItem._id;
+    await equipment.save();
+
+    const result = await equipmentSlots.addItemToEquipmentSlot(
+      testCharacter,
+      stackableItem,
+      equipment,
+      inventoryContainer
+    );
+
+    expect(result).toBeTruthy();
+
+    const updatedInventoryContainer = await ItemContainer.findById(inventory.itemContainer);
+
+    const updatedStack = inventoryContainerStack + stackableItem.stackQty - stackableItem.maxStackSize;
+
+    expect(updatedInventoryContainer?.slots[0].stackQty).toEqual(updatedStack);
+  });
+
   it("should properly add a STACKABLE item to an EMPTY equipment slot", async () => {
     const stackableItem = await unitTestHelper.createMockItemFromBlueprint(RangedWeaponsBlueprint.Arrow, {
       stackQty: 10,
