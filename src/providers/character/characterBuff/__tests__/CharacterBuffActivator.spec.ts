@@ -236,5 +236,81 @@ describe("CharacterBuffActivator", () => {
       expect(buffId).toBeDefined();
       expect(characterBuffCharacterAttributeSpy).toHaveBeenCalledWith(testCharacter, inverseBuff, undefined);
     });
+
+    it("should disable all buffs with the same origin when adding a non-stackable temporary buff", async () => {
+      const mockBuff: ICharacterTemporaryBuff = {
+        trait: CharacterAttributes.MaxHealth,
+        isStackable: false,
+        originateFrom: "some origin",
+        type: CharacterBuffType.CharacterAttribute,
+        buffPercentage: 10,
+        durationSeconds: 1000,
+        durationType: CharacterBuffDurationType.Temporary,
+      };
+
+      const existingBuff1: ICharacterBuff = {
+        trait: CharacterAttributes.Defense, // Different trait but same origin
+        originateFrom: mockBuff.originateFrom,
+        type: CharacterBuffType.CharacterAttribute,
+        owner: testCharacter.id,
+      } as ICharacterBuff;
+
+      const existingBuff2: ICharacterBuff = {
+        trait: CharacterAttributes.MaxHealth, // Same trait and origin
+        originateFrom: mockBuff.originateFrom,
+        type: CharacterBuffType.CharacterAttribute,
+        owner: testCharacter.id,
+      } as ICharacterBuff;
+
+      jest.spyOn(CharacterBuff, "find").mockReturnValueOnce({
+        lean: jest.fn().mockResolvedValueOnce([existingBuff1, existingBuff2]),
+      } as any);
+
+      const disableBuffSpy = jest.spyOn(characterBuffActivator, "disableBuff").mockResolvedValueOnce(true);
+      // @ts-ignore
+      const enableBuffSpy = jest.spyOn(characterBuffActivator, "enableBuff").mockResolvedValueOnce(mockBuff as any);
+
+      const result = await characterBuffActivator.enableTemporaryBuff(testCharacter, mockBuff);
+
+      expect(disableBuffSpy).toHaveBeenCalledTimes(2);
+      expect(disableBuffSpy).toHaveBeenCalledWith(testCharacter, existingBuff1._id!, existingBuff1.type, true);
+      expect(disableBuffSpy).toHaveBeenCalledWith(testCharacter, existingBuff2._id!, existingBuff2.type, true);
+      expect(enableBuffSpy).toHaveBeenCalledWith(testCharacter, mockBuff, true);
+      expect(result).toBe(mockBuff);
+    });
+
+    it("should not disable buffs with different origins when adding a non-stackable temporary buff", async () => {
+      const mockBuff: ICharacterTemporaryBuff = {
+        trait: CharacterAttributes.MaxHealth,
+        isStackable: false,
+        originateFrom: "some origin",
+        type: CharacterBuffType.CharacterAttribute,
+        buffPercentage: 10,
+        durationSeconds: 1000,
+        durationType: CharacterBuffDurationType.Temporary,
+      };
+
+      const existingBuff: ICharacterBuff = {
+        trait: CharacterAttributes.MaxHealth,
+        originateFrom: "different origin",
+        type: CharacterBuffType.CharacterAttribute,
+        owner: testCharacter.id,
+        _id: "existingBuffId",
+      } as ICharacterBuff;
+
+      jest.spyOn(CharacterBuff, "find").mockReturnValueOnce({
+        lean: jest.fn().mockResolvedValueOnce([existingBuff]),
+      } as any);
+
+      const disableBuffSpy = jest.spyOn(characterBuffActivator, "disableBuff").mockResolvedValueOnce(true);
+      // @ts-ignore
+      const enableBuffSpy = jest.spyOn(characterBuffActivator, "enableBuff").mockResolvedValueOnce(mockBuff as any);
+
+      const result = await characterBuffActivator.enableTemporaryBuff(testCharacter, mockBuff);
+
+      expect(disableBuffSpy).not.toHaveBeenCalled();
+      expect(enableBuffSpy).toHaveBeenCalledWith(testCharacter, mockBuff, undefined);
+      expect(result).toBe(mockBuff);
+    });
   });
 });

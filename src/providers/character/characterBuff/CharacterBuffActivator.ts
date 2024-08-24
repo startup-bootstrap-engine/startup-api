@@ -31,10 +31,14 @@ export class CharacterBuffActivator {
     if (!buff.isStackable && buff.originateFrom) {
       const existingBuffs = await this.findExistingBuff(character, buff);
 
-      if (existingBuffs && existingBuffs.length > 0) {
+      const sameOriginBuffs = existingBuffs?.filter(
+        (existingBuff) => existingBuff.originateFrom === buff.originateFrom
+      );
+
+      if (sameOriginBuffs && sameOriginBuffs.length > 0) {
         await Promise.all(
-          existingBuffs.map(async (existingBuff) => {
-            await this.disableBuff(character, existingBuff._id!, existingBuff.type, true);
+          sameOriginBuffs.map(async (buff) => {
+            await this.disableBuff(character, buff._id!, buff.type, true);
           })
         );
 
