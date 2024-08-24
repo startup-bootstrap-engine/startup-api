@@ -70,7 +70,7 @@ services:
       FORCE_COLOR: "true"
       CHOKIDAR_USEPOLLING: "true"
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
-      NEW_RELIC_APP_NAME: "Definya API Dev"
+      NEW_RELIC_APP_NAME: "Definya NPC"
     deploy:
       replicas: 2
       restart_policy:
@@ -94,6 +94,8 @@ services:
     image: definya/definya-team:rpg-pathfinder-latest
     environment:
       GO111MODULE: "on"
+      NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
+      NEW_RELIC_APP_NAME: "Definya Pathfinder"
     deploy:
       replicas: 6
       restart_policy:
@@ -140,8 +142,12 @@ services:
       placement:
         constraints:
           - node.labels.accessory == true
+    environment:
+      NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
+      NEW_RELIC_APP_NAME: "Definya Client"
     networks:
       - rpg-network
+
   rpg-docs:
     image: definya/definya-team:docs-latest
     healthcheck:
@@ -166,6 +172,9 @@ services:
       placement:
         constraints:
           - node.labels.accessory == true
+    environment:
+      NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
+      NEW_RELIC_APP_NAME: "Definya Docs"
     networks:
       - rpg-network
 
@@ -186,7 +195,9 @@ services:
       MONGO_PORT: ${MONGO_PORT}
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    deploy: # db should be only on the manager node
+      NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
+      NEW_RELIC_APP_NAME: "Definya DB"
+    deploy:
       placement:
         constraints:
           - node.role == manager
@@ -206,6 +217,9 @@ services:
       - rpg-redis-data:/data
       - ./config/redis.conf:/usr/local/etc/redis/redis.conf
     command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--port", "${REDIS_PORT}"]
+    environment:
+      NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
+      NEW_RELIC_APP_NAME: "Definya Redis"
     networks:
       - rpg-network
     deploy:
