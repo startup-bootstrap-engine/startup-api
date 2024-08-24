@@ -28,6 +28,7 @@ export class CharacterBuffActivator {
   ): Promise<ICharacterBuff | undefined> {
     let noMessage;
 
+    // Maybe a better way to handle this would be through a new field buff.key, so same non stackable buffs would never accumulate.However we can try this later, originateFrom is good enough for now.
     if (!buff.isStackable && buff.originateFrom) {
       const existingBuffs = await this.findExistingBuff(character, buff);
 
