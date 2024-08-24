@@ -1,14 +1,16 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
+import { IItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { IGuild } from "@entities/ModuleSystem/GuildModel";
 import { CharacterItemContainer } from "@providers/character/characterItems/CharacterItemContainer";
+import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
 import { blueprintManager } from "@providers/inversify/container";
 import { OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
 import { GuildCommon } from "./GuildCommon";
+import { GuildLeader } from "./GuildLeader";
 import { GuildTerritory } from "./GuildTerritory";
 
 const LOOT_CHANCE_THRESHOLD = 70;
@@ -20,7 +22,9 @@ export class GuildPayingTribute {
     private guildTerritory: GuildTerritory,
     private socketMessaging: SocketMessaging,
     private guildCommon: GuildCommon,
-    private characterItemContainer: CharacterItemContainer
+    private characterItemContainer: CharacterItemContainer,
+    private guildLeader: GuildLeader,
+    private characterItemSlots: CharacterItemSlots
   ) {}
 
   public async payTribute(character: ICharacter, item: IItem): Promise<number> {
@@ -82,18 +86,39 @@ export class GuildPayingTribute {
     const updatedStackQty = item.stackQty! - lootAmount;
     await Item.updateOne({ _id: item._id }, { stackQty: updatedStackQty });
 
-    const container = await ItemContainer.findOne({ owner: guild._id }).lean();
+    if (!guild?._id) {
+      throw new Error("Guild not found");
+    }
+
+    const guildLeaderItemContainer = await this.tryToFetchGuildLeaderInventoryOrDepot(guild, item);
+
+    const guildLeader = await this.guildLeader.getGuildLeaderById(guild._id);
+
+    if (!guildLeaderItemContainer) {
+      this.socketMessaging.sendErrorMessageToCharacter(
+        guildLeader,
+        "Sorry, your tribute can't be paid because you have no space on your inventory or depot."
+      );
+      return;
+    }
+
     const blueprint = await blueprintManager.getBlueprint<IItem>("items", item.key);
     const newItem = (await Item.create({
       ...blueprint,
       stackQty: lootAmount,
     })) as IItem;
 
-    if (container) {
-      await this.characterItemContainer.addItemToContainer(newItem, character, container._id);
+    if (guildLeaderItemContainer) {
+      await this.characterItemContainer.addItemToContainer(newItem, guildLeader, guildLeaderItemContainer._id);
     }
 
-    const itemName = item.key === OthersBlueprint.GoldCoin ? "gold" : item.name;
+    const itemName = item.key === OthersBlueprint.GoldCoin ? "Gold Coin" : item.name;
+
+    // inform guild leader a tribute was paid
+    this.socketMessaging.sendMessageToCharacter(
+      guildLeader,
+      `Tribute(s) paid by ${character.name}: ${lootAmount}x ${itemName} (Territory: ${character.scene})`
+    );
 
     setTimeout(() => {
       this.socketMessaging.sendMessageToCharacter(
@@ -101,5 +126,25 @@ export class GuildPayingTribute {
         `Tribute(s) paid to ${guild.name}: ${lootAmount}x ${itemName}`
       );
     }, 3000);
+  }
+
+  private async tryToFetchGuildLeaderInventoryOrDepot(guild: IGuild, item: IItem): Promise<IItemContainer | null> {
+    const inventoryContainer = await this.guildLeader.getGuildLeaderInventoryItemContainer(guild._id);
+
+    const hasSlotsOnInventory = await this.characterItemSlots.hasAvailableSlot(inventoryContainer?._id, item);
+
+    if (hasSlotsOnInventory) {
+      return inventoryContainer;
+    }
+
+    const depotContainer = await this.guildLeader.getGuildLeaderDepotItemContainer(guild._id);
+
+    const hasSlotsOnDepot = await this.characterItemSlots.hasAvailableSlot(depotContainer?._id, item);
+
+    if (hasSlotsOnDepot) {
+      return depotContainer;
+    }
+
+    return null;
   }
 }

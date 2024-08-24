@@ -12,6 +12,7 @@ import { GuildPayingTribute } from "../GuildPayingTribute";
 describe("GuildPayingTribute.ts", () => {
   let guildPayingTribute: GuildPayingTribute;
   let testCharacter: ICharacter;
+  let testGuildLeaderCharacter: ICharacter;
   let testGuild: IGuild;
 
   const mockSocketMessaging = {
@@ -23,8 +24,15 @@ describe("GuildPayingTribute.ts", () => {
   });
 
   beforeEach(async () => {
-    testCharacter = await unitTestHelper.createMockCharacter();
-    testGuild = await unitTestHelper.createMockGuild();
+    testGuildLeaderCharacter = await unitTestHelper.createMockCharacter(null, {
+      hasInventory: true,
+      hasEquipment: true,
+    });
+
+    testCharacter = await unitTestHelper.createMockCharacter(null, { hasInventory: true, hasEquipment: true });
+    testGuild = await unitTestHelper.createMockGuild({
+      guildLeader: testGuildLeaderCharacter._id,
+    });
 
     // @ts-ignore
     guildPayingTribute.socketMessaging = mockSocketMessaging;
@@ -142,16 +150,8 @@ describe("GuildPayingTribute.ts", () => {
       stackQty: 10,
     });
 
-    const { mockAddItemToContainerSpy, ObjectId } = setupMocks(testItem, testItem.scene!);
-
-    const expectedMessage = `Tribute(s) paid to ${testGuild.name}: 1x gold`;
+    const expectedMessage = `Tribute(s) paid to ${testGuild.name}: 1x Gold Coin`;
     await runTributeTest(testItem, expectedMessage, 9);
-
-    expect(mockAddItemToContainerSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ stackQty: 1 }),
-      testCharacter,
-      ObjectId
-    );
   });
 
   it("should pay tribute for a non-gold coin item, with lower random number", async () => {

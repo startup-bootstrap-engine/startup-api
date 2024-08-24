@@ -1,6 +1,5 @@
 /* eslint-disable mongoose-lean/require-lean */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { Guild } from "@entities/ModuleSystem/GuildModel";
 import { GuildSkills } from "@entities/ModuleSystem/GuildSkillsModel";
 import { CharacterPremiumAccount } from "@providers/character/CharacterPremiumAccount";
@@ -9,8 +8,7 @@ import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterItemInventory } from "@providers/character/characterItems/CharacterItemInventory";
 import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { GUILD_CREATE_MIN_GOLD_REQUIRED } from "@providers/constants/GuildConstants";
-import { blueprintManager } from "@providers/inversify/container";
-import { ContainersBlueprint, OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { GuildSocketEvents, IGuildForm } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -97,17 +95,6 @@ export class GuildCreate {
       const newSkills = await GuildSkills.create({ owner: newGuild._id });
       newGuild.guildSkills = newSkills;
       await newGuild.save();
-
-      // create a guild inventory
-      const containerBlueprint = await blueprintManager.getBlueprint<IItem>("items", ContainersBlueprint.Backpack);
-
-      const backpack = new Item({
-        ...containerBlueprint,
-        owner: newGuild._id,
-        carrier: newGuild._id,
-        isEquipped: true,
-      });
-      await backpack.save();
 
       // send guild info
       await this.guildCommon.sendMessageToAllMembers("Guild " + newGuild.name + " was Created successfully.", newGuild);
