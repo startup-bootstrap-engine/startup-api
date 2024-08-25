@@ -47,7 +47,9 @@ export class PartyNetworkInviteToParty {
           const leader = (await Character.findById(data.leaderId).lean()) as ICharacter;
 
           if (!leader) {
-            throw new Error("Error on joining party, character leader not found");
+            throw new Error(
+              `Error on joining party, character leader id ${data.leaderId} not found. data: ${JSON.stringify(data)}`
+            );
           }
 
           const target = (await Character.findById(data.targetId).lean()) as ICharacter;

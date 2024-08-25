@@ -240,5 +240,16 @@ describe("CharacterAutoLootQueue", () => {
       const lootedItem = await setupLootWithTribute(10, 5);
       expect(lootedItem).toBeUndefined(); // No item should be added due to full inventory
     });
+
+    it("should not perform looting if itemIdsToLoot is empty", async () => {
+      await characterAutoLoot.execAutoLoot(testCharacter, []);
+      const items = await characterInventory.getAllItemsFromContainer(inventoryContainer!._id);
+      expect(items.length).toBe(0); // No items should be added
+    });
+
+    it("should handle invalid tribute deduction (negative quantity)", async () => {
+      const lootedItem = await setupLootWithTribute(10, -5); // Invalid negative quantity
+      expect(lootedItem).toBeUndefined(); // No item should be looted
+    });
   });
 });

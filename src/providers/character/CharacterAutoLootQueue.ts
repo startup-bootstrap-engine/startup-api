@@ -49,24 +49,12 @@ export class CharacterAutoLootQueue {
 
       const inventoryItemContainer = await this.characterItemContainer.getInventoryItemContainer(character);
       if (!inventoryItemContainer) {
-        this.socketMessaging.sendErrorMessageToCharacter(
-          character,
-          "Sorry, you cannot loot items without an inventory."
-        );
+        this.sendErrorMessage(character, "Sorry, you cannot loot items without an inventory.");
         return;
       }
 
-      const bodies = await Item.find({ _id: { $in: itemIdsToLoot } }).lean<IItem[]>({
-        virtuals: true,
-        defaults: true,
-      });
-      const itemContainerIds = bodies.map((body) => body.itemContainer);
-      const itemContainers = await ItemContainer.find({ _id: { $in: itemContainerIds } }).lean<IItemContainer[]>({
-        virtuals: true,
-        defaults: true,
-      });
+      const [bodies, itemContainerMap] = await this.getBodiesAndContainers(itemIdsToLoot);
 
-      const itemContainerMap = new Map(itemContainers.map((ic) => [String(ic._id), ic]));
       const lootedItemNamesAndQty: string[] = [];
       const disableLootingPromises: Promise<any>[] = [];
 
@@ -80,54 +68,26 @@ export class CharacterAutoLootQueue {
         for (const slot of Object.values(itemContainer.slots as Record<string, IItem>)) {
           if (!slot) continue;
 
-          const item = await Item.findOne({ _id: slot._id }).lean<IItem>({
-            virtuals: true,
-            defaults: true,
-          });
-          if (!item) {
-            console.log(`Item with id ${slot._id} not found`);
-            continue;
-          }
+          const item = await this.findItem(slot._id);
+          if (!item) continue;
 
-          // Calculate the actual quantity received by the player after tribute
           const remainingQty = await this.guildPayingTribute.payTribute(character, item);
 
-          // If no quantity is left, skip adding it to the inventory
           if (remainingQty <= 0) {
-            console.log(`Item ${item.name} fully deducted as tribute. Skipping...`);
+            await this.handleFullDeduction(character, item, itemContainer, bodyItem);
             continue;
           }
 
-          item.stackQty = remainingQty;
-
-          const successfullyAddedItem = await this.characterItemContainer.addItemToContainer(
-            item,
+          await this.handleItemLooting(
             character,
-            inventoryItemContainer._id,
-            { shouldAddOwnership: true }
-          );
-
-          if (!successfullyAddedItem) {
-            console.log(`Failed to add ${item.name} to inventory. Skipping...`);
-            continue;
-          }
-
-          const removedFromBody = await this.characterItemContainer.removeItemFromContainer(
             item,
-            character,
-            itemContainer
+            remainingQty,
+            inventoryItemContainer,
+            lootedItemNamesAndQty,
+            itemContainer,
+            bodyItem,
+            disableLootingPromises
           );
-
-          if (!removedFromBody) {
-            console.log(`Failed to remove ${item.name} from body. Skipping...`);
-            continue;
-          }
-
-          // Improve messaging: Always show quantity, even if it's 1
-          const quantityText = item.stackQty === 1 ? "1x" : `x${item.stackQty}`;
-
-          lootedItemNamesAndQty.push(`${quantityText} ${item.name}`);
-          disableLootingPromises.push(this.disableLooting(character, bodyItem));
         }
       }
 
@@ -142,28 +102,92 @@ export class CharacterAutoLootQueue {
     }
   }
 
+  private async getBodiesAndContainers(itemIdsToLoot: string[]): Promise<[IItem[], Map<string, IItemContainer>]> {
+    const bodies = await Item.find({ _id: { $in: itemIdsToLoot } }).lean<IItem[]>({
+      virtuals: true,
+      defaults: true,
+    });
+    const itemContainerIds = bodies.map((body) => body.itemContainer);
+    const itemContainers = await ItemContainer.find({ _id: { $in: itemContainerIds } }).lean<IItemContainer[]>({
+      virtuals: true,
+      defaults: true,
+    });
+
+    const itemContainerMap = new Map(itemContainers.map((ic) => [String(ic._id), ic]));
+    return [bodies, itemContainerMap] as const;
+  }
+
+  private async findItem(itemId: string): Promise<IItem | null> {
+    const item = await Item.findOne({ _id: itemId }).lean<IItem>({
+      virtuals: true,
+      defaults: true,
+    });
+    if (!item) {
+      console.log(`Item with id ${itemId} not found`);
+    }
+    return item;
+  }
+
+  private sendErrorMessage(character: ICharacter, message: string): void {
+    this.socketMessaging.sendErrorMessageToCharacter(character, message);
+  }
+
+  private async handleFullDeduction(
+    character: ICharacter,
+    item: IItem,
+    itemContainer: IItemContainer,
+    bodyItem: IItem
+  ): Promise<void> {
+    console.log(`Item ${item.name} fully deducted as tribute. Skipping...`);
+    this.sendErrorMessage(character, `Auto-loot: You had to pay the item ${item.name} as tribute.`);
+    if (!(await this.characterItemContainer.removeItemFromContainer(item, character, itemContainer))) {
+      console.log(`Failed to remove ${item.name} from body. Skipping...`);
+      return;
+    }
+    await this.disableLooting(character, bodyItem);
+  }
+
+  private async handleItemLooting(
+    character: ICharacter,
+    item: IItem,
+    remainingQty: number,
+    inventoryItemContainer: IItemContainer,
+    lootedItemNamesAndQty: string[],
+    itemContainer: IItemContainer,
+    bodyItem: IItem,
+    disableLootingPromises: Promise<any>[]
+  ): Promise<void> {
+    item.stackQty = remainingQty;
+    if (
+      !(await this.characterItemContainer.addItemToContainer(item, character, inventoryItemContainer._id, {
+        shouldAddOwnership: true,
+      }))
+    ) {
+      console.log(`Failed to add ${item.name} to inventory. Skipping...`);
+      return;
+    }
+
+    if (!(await this.characterItemContainer.removeItemFromContainer(item, character, itemContainer))) {
+      console.log(`Failed to remove ${item.name} from body. Skipping...`);
+      return;
+    }
+
+    const quantityText = item.stackQty === 1 ? "1x" : `x${item.stackQty}`;
+    lootedItemNamesAndQty.push(`${quantityText} ${item.name}`);
+    disableLootingPromises.push(this.disableLooting(character, bodyItem));
+  }
+
   private async disableLooting(character: ICharacter, bodyItem: IItem): Promise<void> {
-    // Only proceed if there are no lootable items
     const updatedBodyItem = await ItemContainer.findOne({ parentItem: bodyItem._id })
-      .lean<IItemContainer>({
-        virtuals: true,
-        defaults: true,
-      })
+      .lean<IItemContainer>({ virtuals: true, defaults: true })
       .select("slots");
 
-    if (!updatedBodyItem?.slots) return;
-
-    const areAllSlotsEmpty = Object.values(updatedBodyItem.slots as Record<string, IItem>).every((x) => !x);
-
-    if (!areAllSlotsEmpty) return;
+    if (!updatedBodyItem?.slots || Object.values(updatedBodyItem.slots as Record<string, IItem>).some((x) => !!x)) {
+      return;
+    }
 
     await Promise.all([
-      Item.updateOne(
-        { _id: bodyItem._id },
-        {
-          $set: { isDeadBodyLootable: false },
-        }
-      ),
+      Item.updateOne({ _id: bodyItem._id }, { $set: { isDeadBodyLootable: false } }),
       this.characterView.addToCharacterView(character._id, bodyItem._id, "items"),
       this.animationEffect.sendAnimationEventToCharacter(character, AnimationEffectKeys.LevelUp),
     ]);
