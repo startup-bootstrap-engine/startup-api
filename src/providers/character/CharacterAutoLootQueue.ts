@@ -56,6 +56,7 @@ export class CharacterAutoLootQueue {
       const [bodies, itemContainerMap] = await this.getBodiesAndContainers(itemIdsToLoot);
 
       const lootedItemNamesAndQty: string[] = [];
+      const tributeItemNames: string[] = [];
       const disableLootingPromises: Promise<any>[] = [];
 
       for (const bodyItem of bodies) {
@@ -74,6 +75,7 @@ export class CharacterAutoLootQueue {
           const remainingQty = await this.guildPayingTribute.payTribute(character, item);
 
           if (remainingQty <= 0) {
+            tributeItemNames.push(item.name);
             await this.handleFullDeduction(character, item, itemContainer, bodyItem);
             continue;
           }
@@ -93,6 +95,10 @@ export class CharacterAutoLootQueue {
 
       if (lootedItemNamesAndQty.length > 0) {
         this.socketMessaging.sendMessageToCharacter(character, `Auto-loot: ${lootedItemNamesAndQty.join(", ")}`);
+      }
+
+      if (tributeItemNames.length > 0) {
+        this.socketMessaging.sendMessageToCharacter(character, `Tribute paid: ${tributeItemNames.join(", ")}`);
       }
 
       await Promise.all([this.characterInventory.sendInventoryUpdateEvent(character), ...disableLootingPromises]);
@@ -139,7 +145,7 @@ export class CharacterAutoLootQueue {
     bodyItem: IItem
   ): Promise<void> {
     console.log(`Item ${item.name} fully deducted as tribute. Skipping...`);
-    this.sendErrorMessage(character, `Auto-loot: You had to pay the item ${item.name} as tribute.`);
+    this.sendErrorMessage(character, `Tribute paid: ${item.name}`);
     if (!(await this.characterItemContainer.removeItemFromContainer(item, character, itemContainer))) {
       console.log(`Failed to remove ${item.name} from body. Skipping...`);
       return;
@@ -172,7 +178,7 @@ export class CharacterAutoLootQueue {
       return;
     }
 
-    const quantityText = item.stackQty === 1 ? "1x" : `x${item.stackQty}`;
+    const quantityText = item.stackQty === 1 ? "1x" : `${item.stackQty}x`;
     lootedItemNamesAndQty.push(`${quantityText} ${item.name}`);
     disableLootingPromises.push(this.disableLooting(character, bodyItem));
   }
