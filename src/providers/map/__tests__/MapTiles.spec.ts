@@ -192,9 +192,9 @@ describe("MapTiles.ts", () => {
   });
 
   it("should validate coordinates within the map boundaries", () => {
-    const validCoord1 = mapTiles.isCoordinateValid(mapName, 0, 0);
-    const validCoord2 = mapTiles.isCoordinateValid(mapName, 10, 10);
-    const validCoord3 = mapTiles.isCoordinateValid(mapName, 31, 31);
+    const validCoord1 = mapTiles.isMapCoordinateWithinBounds(mapName, 0, 0);
+    const validCoord2 = mapTiles.isMapCoordinateWithinBounds(mapName, 10, 10);
+    const validCoord3 = mapTiles.isMapCoordinateWithinBounds(mapName, 31, 31);
 
     expect(validCoord1).toBeTruthy();
     expect(validCoord2).toBeTruthy();
@@ -202,9 +202,9 @@ describe("MapTiles.ts", () => {
   });
 
   it("should invalidate coordinates outside the map boundaries", () => {
-    const invalidCoord1 = mapTiles.isCoordinateValid(mapName, -1, -1);
-    const invalidCoord2 = mapTiles.isCoordinateValid(mapName, 48, 32);
-    const invalidCoord3 = mapTiles.isCoordinateValid(mapName, 100, 100);
+    const invalidCoord1 = mapTiles.isMapCoordinateWithinBounds(mapName, -1, -1);
+    const invalidCoord2 = mapTiles.isMapCoordinateWithinBounds(mapName, 48, 32);
+    const invalidCoord3 = mapTiles.isMapCoordinateWithinBounds(mapName, 100, 100);
 
     expect(invalidCoord1).toBeFalsy();
     expect(invalidCoord2).toBeFalsy();

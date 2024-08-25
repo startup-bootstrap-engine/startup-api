@@ -97,7 +97,7 @@ export class MapTiles {
     };
   }
 
-  public isCoordinateValid(map: string, gridX: number, gridY: number): boolean {
+  public isMapCoordinateWithinBounds(map: string, gridX: number, gridY: number): boolean {
     const mapData = MapLoader.maps.get(map);
 
     if (!mapData) {

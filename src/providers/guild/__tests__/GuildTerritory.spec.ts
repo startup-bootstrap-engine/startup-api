@@ -163,4 +163,34 @@ describe("GuildTerritory.ts", () => {
       expect(updateOneSpy).not.toHaveBeenCalled();
     });
   });
+
+  describe("getTerritoryLootShare", () => {
+    it("should return the correct loot share for a guild that owns the territory", () => {
+      const map = "TestMap";
+      testGuild.territoriesOwned = [{ map, lootShare: 20, controlPoint: true }];
+
+      const result = guildTerritory.getTerritoryLootShare(testGuild, map);
+
+      expect(result).toEqual(20);
+    });
+
+    it("should return 0 if the guild does not own the territory", () => {
+      const map = "TestMap";
+      testGuild.territoriesOwned = [{ map: "OtherMap", lootShare: 15, controlPoint: true }];
+
+      const result = guildTerritory.getTerritoryLootShare(testGuild, map);
+
+      expect(result).toEqual(0);
+    });
+
+    it("should return 0 if lootShare is not defined for the territory", () => {
+      const map = "TestMap";
+      // @ts-ignore
+      testGuild.territoriesOwned = [{ map, controlPoint: true }];
+
+      const result = guildTerritory.getTerritoryLootShare(testGuild, map);
+
+      expect(result).toEqual(0);
+    });
+  });
 });
