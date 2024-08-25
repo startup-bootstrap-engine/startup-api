@@ -76,9 +76,9 @@ export class MapTransitionQueue {
 
       this.socketMessaging.sendMessageToCharacter(
         character,
-        `🏰 You have entered a guild controlled map: ${this.guildTerritory.getFormattedTerritoryName(
-          destination.map
-        )}.${lootShareMessage} 🏰`
+        `🏰 You have entered ${this.guildTerritory.getFormattedTerritoryName(destination.map)}, controlled by guild ${
+          guild.name
+        }.${lootShareMessage} 🏰`
       );
     }
   }
