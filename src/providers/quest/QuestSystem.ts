@@ -179,7 +179,7 @@ export class QuestSystem {
       const obj = data.objectives[i] as IQuestObjectiveInteraction;
 
       // get the quest record for the character
-      const record = data.records.filter((r) => r.objective.toString() === obj._id.toString());
+      const record = data.records.filter((r) => r?.objective?.toString() === obj?._id?.toString());
       if (!record.length) {
         throw new Error("Character hasn't started this quest");
       }
@@ -273,7 +273,14 @@ export class QuestSystem {
       );
     }
     const backpack = equipment.inventory as unknown as IItem;
+
+    if (!backpack) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "You don't have a backpack to store the rewards");
+      return;
+    }
+
     const backpackContainer = await ItemContainer.findById(backpack.itemContainer);
+
     if (!backpackContainer) {
       throw new Error(
         `Character item container not found. Character id ${character.id}, ItemContainer id ${backpack.itemContainer}`
