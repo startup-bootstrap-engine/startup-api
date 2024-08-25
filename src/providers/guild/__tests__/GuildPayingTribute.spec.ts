@@ -78,79 +78,19 @@ describe("GuildPayingTribute.ts", () => {
     jest.advanceTimersByTime(3000);
 
     expect(result).toBe(expectedResult);
-    expect(mockSocketMessaging.sendMessageToCharacter).toHaveBeenCalledWith(testCharacter, expectedMessage);
+    expect(mockSocketMessaging.sendMessageToCharacter).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ _id: testCharacter._id }),
+      expectedMessage
+    );
   };
-
-  it("should not pay tribute if there is no guild for the character's scene", async () => {
-    const mockGuildTerritorySpy = jest
-      // @ts-ignore
-      .spyOn(guildPayingTribute.guildTerritory, "getGuildByTerritoryMap")
-      .mockResolvedValue(null);
-
-    const result = await guildPayingTribute.payTribute(
-      testCharacter,
-      await unitTestHelper.createMockItemFromBlueprint(OthersBlueprint.GoldCoin, {
-        stackQty: 10,
-      })
-    );
-
-    expect(result).toBe(10);
-    expect(mockGuildTerritorySpy).toHaveBeenCalledWith(testCharacter.scene);
-  });
-
-  it("should not pay tribute if the character is in the guild that owns the territory", async () => {
-    const mockGuildTerritorySpy = jest
-      // @ts-ignore
-      .spyOn(guildPayingTribute.guildTerritory, "getGuildByTerritoryMap")
-      .mockResolvedValue(testGuild);
-
-    const mockGuildCommonSpy = jest
-      // @ts-ignore
-      .spyOn(guildPayingTribute.guildCommon, "getCharactersGuild")
-      .mockResolvedValue(testGuild);
-
-    const result = await guildPayingTribute.payTribute(
-      testCharacter,
-      await unitTestHelper.createMockItemFromBlueprint(OthersBlueprint.GoldCoin, {
-        stackQty: 10,
-      })
-    );
-
-    expect(result).toBe(10);
-    expect(mockGuildTerritorySpy).toHaveBeenCalledWith(testCharacter.scene);
-    expect(mockGuildCommonSpy).toHaveBeenCalledWith(testCharacter);
-  });
-
-  it("should not pay tribute if there is no territory for the character's scene", async () => {
-    const mockGuildTerritorySpy = jest
-      // @ts-ignore
-      .spyOn(guildPayingTribute.guildTerritory, "getGuildByTerritoryMap")
-      .mockResolvedValue(testGuild);
-
-    // @ts-ignore
-    const mockGuildCommonSpy = jest.spyOn(guildPayingTribute.guildCommon, "getCharactersGuild").mockResolvedValue(null);
-
-    const mockGetTerritoriesSpy = jest.spyOn(testGuild, "territoriesOwned", "get").mockReturnValue([]);
-
-    const result = await guildPayingTribute.payTribute(
-      testCharacter,
-      await unitTestHelper.createMockItemFromBlueprint(OthersBlueprint.GoldCoin, {
-        stackQty: 10,
-      })
-    );
-
-    expect(result).toBe(10);
-    expect(mockGuildTerritorySpy).toHaveBeenCalledWith(testCharacter.scene);
-    expect(mockGuildCommonSpy).toHaveBeenCalledWith(testCharacter);
-    expect(mockGetTerritoriesSpy).toHaveBeenCalled();
-  });
 
   it("should pay tribute for a gold coin item", async () => {
     const testItem = await unitTestHelper.createMockItemFromBlueprint(OthersBlueprint.GoldCoin, {
       stackQty: 10,
     });
 
-    const expectedMessage = `Tribute(s) paid to ${testGuild.name}: 1x Gold Coin`;
+    const expectedMessage = `Tribute(s) paid to guild ${testGuild.name}: 1x Gold Coin`;
     await runTributeTest(testItem, expectedMessage, 9);
   });
 
@@ -161,7 +101,7 @@ describe("GuildPayingTribute.ts", () => {
       stackQty: 10,
     });
 
-    const expectedMessage = `Tribute(s) paid to ${testGuild.name}: 2x ${testItem2.name}`;
+    const expectedMessage = `Tribute(s) paid to guild ${testGuild.name}: 2x ${testItem2.name}`;
     await runTributeTest(testItem2, expectedMessage, 8);
   });
 
@@ -179,25 +119,93 @@ describe("GuildPayingTribute.ts", () => {
     expect(mockSocketMessaging.sendMessageToCharacter).not.toHaveBeenCalled();
   });
 
-  it("should return 0 if the item stack quantity is 0", async () => {
-    const testItem = await unitTestHelper.createMockItemFromBlueprint(OthersBlueprint.GoldCoin, {
-      stackQty: 0,
+  describe("Edge cases", () => {
+    it("should not pay tribute if there is no guild for the character's scene", async () => {
+      const mockGuildTerritorySpy = jest
+        // @ts-ignore
+        .spyOn(guildPayingTribute.guildTerritory, "getGuildByTerritoryMap")
+        .mockResolvedValue(null);
+
+      const result = await guildPayingTribute.payTribute(
+        testCharacter,
+        await unitTestHelper.createMockItemFromBlueprint(OthersBlueprint.GoldCoin, {
+          stackQty: 10,
+        })
+      );
+
+      expect(result).toBe(10);
+      expect(mockGuildTerritorySpy).toHaveBeenCalledWith(testCharacter.scene);
     });
 
-    jest
+    it("should not pay tribute if the character is in the guild that owns the territory", async () => {
+      const mockGuildTerritorySpy = jest
+        // @ts-ignore
+        .spyOn(guildPayingTribute.guildTerritory, "getGuildByTerritoryMap")
+        .mockResolvedValue(testGuild);
+
+      const mockGuildCommonSpy = jest
+        // @ts-ignore
+        .spyOn(guildPayingTribute.guildCommon, "getCharactersGuild")
+        .mockResolvedValue(testGuild);
+
+      const result = await guildPayingTribute.payTribute(
+        testCharacter,
+        await unitTestHelper.createMockItemFromBlueprint(OthersBlueprint.GoldCoin, {
+          stackQty: 10,
+        })
+      );
+
+      expect(result).toBe(10);
+      expect(mockGuildTerritorySpy).toHaveBeenCalledWith(testCharacter.scene);
+      expect(mockGuildCommonSpy).toHaveBeenCalledWith(testCharacter);
+    });
+
+    it("should not pay tribute if there is no territory for the character's scene", async () => {
+      const mockGuildTerritorySpy = jest
+        // @ts-ignore
+        .spyOn(guildPayingTribute.guildTerritory, "getGuildByTerritoryMap")
+        .mockResolvedValue(testGuild);
+
+      const mockGuildCommonSpy = jest
+        // @ts-ignore
+        .spyOn(guildPayingTribute.guildCommon, "getCharactersGuild")
+        .mockResolvedValue(null);
+
+      const mockGetTerritoriesSpy = jest.spyOn(testGuild, "territoriesOwned", "get").mockReturnValue([]);
+
+      const result = await guildPayingTribute.payTribute(
+        testCharacter,
+        await unitTestHelper.createMockItemFromBlueprint(OthersBlueprint.GoldCoin, {
+          stackQty: 10,
+        })
+      );
+
+      expect(result).toBe(10);
+      expect(mockGuildTerritorySpy).toHaveBeenCalledWith(testCharacter.scene);
+      expect(mockGuildCommonSpy).toHaveBeenCalledWith(testCharacter);
+      expect(mockGetTerritoriesSpy).toHaveBeenCalled();
+    });
+
+    it("should return 0 if the item stack quantity is 0", async () => {
+      const testItem = await unitTestHelper.createMockItemFromBlueprint(OthersBlueprint.GoldCoin, {
+        stackQty: 0,
+      });
+
+      jest
+        // @ts-ignore
+        .spyOn(guildPayingTribute.guildTerritory, "getGuildByTerritoryMap")
+        .mockResolvedValue(testGuild);
+
       // @ts-ignore
-      .spyOn(guildPayingTribute.guildTerritory, "getGuildByTerritoryMap")
-      .mockResolvedValue(testGuild);
+      jest.spyOn(guildPayingTribute.guildCommon, "getCharactersGuild").mockResolvedValue(null);
 
-    // @ts-ignore
-    jest.spyOn(guildPayingTribute.guildCommon, "getCharactersGuild").mockResolvedValue(null);
+      const testGuildTerritory = { map: testItem.scene, lootShare: 20 } as any;
 
-    const testGuildTerritory = { map: testItem.scene, lootShare: 20 } as any;
+      testGuild.territoriesOwned.push(testGuildTerritory);
 
-    testGuild.territoriesOwned.push(testGuildTerritory);
+      const result = await guildPayingTribute.payTribute(testCharacter, testItem);
 
-    const result = await guildPayingTribute.payTribute(testCharacter, testItem);
-
-    expect(result).toBe(0);
+      expect(result).toBe(0);
+    });
   });
 });
