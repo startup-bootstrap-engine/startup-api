@@ -1,4 +1,3 @@
-/* eslint-disable mongoose-lean/require-lean */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
@@ -87,6 +86,7 @@ export class UseWithItemToSeed {
       };
 
       const newPlant = new Item(plantData);
+      // eslint-disable-next-line mongoose-lean/require-lean
       await newPlant.save();
 
       await this.characterItemInventory.decrementItemFromInventoryByKey(originItemKey, character, 1);
@@ -132,7 +132,9 @@ export class UseWithItemToSeed {
 
   private async refreshInventory(character: ICharacter): Promise<void> {
     const inventory = await this.characterInventory.getInventory(character);
-    const inventoryContainer = (await ItemContainer.findById(inventory?.itemContainer)) as unknown as IItemContainer;
+    const inventoryContainer = (await ItemContainer.findById(
+      inventory?.itemContainer
+    ).lean()) as unknown as IItemContainer;
 
     const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {
       inventory: inventoryContainer,
