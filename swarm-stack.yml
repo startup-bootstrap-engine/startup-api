@@ -82,7 +82,7 @@ services:
           - spread: node.id
         max_replicas_per_node: 1
       update_config:
-        parallelism: 2
+        parallelism: 1
         delay: 10s
         failure_action: rollback
         monitor: 10s
