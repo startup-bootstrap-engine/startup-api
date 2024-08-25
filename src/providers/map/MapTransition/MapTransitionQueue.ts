@@ -96,7 +96,7 @@ export class MapTransitionQueue {
 
         if (!isOnCooldown) {
           const lootShare = this.guildTerritory.getTerritoryLootShare(guild, destination.map);
-          const lootShareMessage = lootShare ? ` Tributes may be charged on some loots (${lootShare}).` : "";
+          const lootShareMessage = lootShare ? ` Tributes may be charged on some loots (${lootShare}%).` : "";
 
           console.log(lootShare, lootShareMessage);
 

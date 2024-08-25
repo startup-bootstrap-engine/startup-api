@@ -178,7 +178,7 @@ export class CharacterAutoLootQueue {
       return;
     }
 
-    const quantityText = item.stackQty === 1 ? "1x" : `${item.stackQty}x`;
+    const quantityText = item.stackQty ? (item.stackQty === 1 ? "1x" : `${item.stackQty}x`) : "1x";
     lootedItemNamesAndQty.push(`${quantityText} ${item.name}`);
     disableLootingPromises.push(this.disableLooting(character, bodyItem));
   }
