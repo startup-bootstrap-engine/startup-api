@@ -1,9 +1,9 @@
 import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
+import { MapName } from "@providers/map/MapName";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { UpdateWriteOpResult } from "mongoose";
-import { GuildCommon } from "./GuildCommon";
 
 interface IGuildMapPoints {
   guildId: string;
@@ -12,7 +12,7 @@ interface IGuildMapPoints {
 
 @provide(GuildTerritory)
 export class GuildTerritory {
-  constructor(private guildCommon: GuildCommon, private socketMessaging: SocketMessaging) {}
+  constructor(private socketMessaging: SocketMessaging, private mapName: MapName) {}
 
   public async trySetMapControl(map: string): Promise<void> {
     try {
@@ -70,6 +70,16 @@ export class GuildTerritory {
     }).lean();
     if (guild) return guild as IGuild;
     else return null;
+  }
+
+  public getFormattedTerritoryName(map: string): string {
+    return this.mapName.getFormattedMapName(map);
+  }
+
+  public getTerritoryLootShare(guild: IGuild, map: string): number {
+    const ownedTerritory = guild?.territoriesOwned?.find((t) => t.map === map);
+
+    return ownedTerritory?.lootShare || 0;
   }
 
   private async removeTerritoriesForMap(mapName: string): Promise<void> {
