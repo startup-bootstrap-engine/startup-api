@@ -2,7 +2,6 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterView } from "@providers/character/CharacterView";
 import { battleAttackTarget } from "@providers/inversify/container";
-import { Locker } from "@providers/locks/Locker";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
   FromGridX,
@@ -16,17 +15,11 @@ import { IDestination } from "./MapTransitionQueue";
 
 @provide(MapTransitionDifferentMap)
 export class MapTransitionDifferentMap {
-  constructor(private socketMessaging: SocketMessaging, private characterView: CharacterView, private locker: Locker) {}
+  constructor(private socketMessaging: SocketMessaging, private characterView: CharacterView) {}
 
   @TrackNewRelicTransaction()
   public async changeCharacterScene(character: ICharacter, destination: IDestination): Promise<void> {
     try {
-      const canProceed = await this.locker.lock(`character-changing-scene-${character._id}`);
-
-      if (!canProceed) {
-        return;
-      }
-
       // fetch destination properties
       // change character map
       await Character.updateOne(

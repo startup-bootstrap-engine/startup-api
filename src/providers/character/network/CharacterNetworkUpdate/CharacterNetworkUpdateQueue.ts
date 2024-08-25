@@ -137,13 +137,19 @@ export class CharacterNetworkUpdateQueue {
     data: ICharacterPositionUpdateFromClient,
     isMoving: boolean
   ): Promise<void> {
+    const hasTransition = await this.mapTransition.handleMapTransition(character, data.newX, data.newY);
+
+    if (hasTransition) {
+      // if we have a transition, we don't need to do anything else, just let it teleport
+      return;
+    }
+
     await this.syncIfPositionMismatch(character, { x: character.x, y: character.y }, data.originX, data.originY);
 
     this.characterMovementWarn.warn(character, data);
     await this.npcManager.startBehaviorLoopUsingMicroservice(character);
     await this.updateServerSideEmitterInfo(character, data.newX, data.newY, isMoving, data.direction);
     void this.mapTransitionNonPVPZone.handleNonPVPZone(character, data.newX, data.newY);
-    await this.mapTransition.handleMapTransition(character, data.newX, data.newY);
     this.sendConfirmation(character, data.direction, true);
   }
 

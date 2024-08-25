@@ -2,7 +2,6 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { BattleAttackTarget } from "@providers/battle/BattleAttackTarget/BattleAttackTarget";
 import { CharacterView } from "@providers/character/CharacterView";
 import { battleAttackTarget, container, unitTestHelper } from "@providers/inversify/container";
-import { Locker } from "@providers/locks/Locker";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { EntityType, FromGridX, MapSocketEvents, ViewSocketEvents } from "@rpg-engine/shared";
 import { MapTransitionDifferentMap } from "../MapTransitionDifferentMap";
@@ -119,7 +118,6 @@ describe("MapTransitionDifferentMap", () => {
 
   describe("Edge cases", () => {
     let clearCharacterBattleTargetSpy: jest.SpyInstance;
-    let lockerSpy: jest.SpyInstance;
     let consoleErrorSpy: jest.SpyInstance;
     let characterUpdateOneMock: jest.SpyInstance;
 
@@ -127,7 +125,6 @@ describe("MapTransitionDifferentMap", () => {
       clearCharacterBattleTargetSpy = jest
         .spyOn(BattleAttackTarget.prototype, "clearCharacterBattleTarget")
         .mockResolvedValue();
-      lockerSpy = jest.spyOn(Locker.prototype, "lock").mockResolvedValue(true);
       consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
       // @ts-ignore
@@ -144,15 +141,6 @@ describe("MapTransitionDifferentMap", () => {
 
       await expect(mapTransitionDifferentMap.changeCharacterScene(testCharacter, destination)).resolves.not.toThrow();
       expect(console.error).toHaveBeenCalled();
-    });
-
-    it("should not proceed if locker is not acquired", async () => {
-      lockerSpy.mockResolvedValue(false);
-      const destination = { map: "map2", gridX: 0, gridY: 0 };
-
-      await mapTransitionDifferentMap.changeCharacterScene(testCharacter, destination);
-
-      expect(Character.updateOne).not.toHaveBeenCalled();
     });
 
     it("should clear character's view after changing scene", async () => {

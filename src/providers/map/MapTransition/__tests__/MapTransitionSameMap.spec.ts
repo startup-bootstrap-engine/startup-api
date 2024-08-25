@@ -32,12 +32,7 @@ describe("MapTransitionSameMap", () => {
       clearCharacterView: jest.fn(),
     } as any;
 
-    lockerMock = {
-      lock: jest.fn().mockResolvedValue(true),
-      unlock: jest.fn(),
-    } as any;
-
-    mapTransitionSameMap = new MapTransitionSameMap(socketMessagingMock, characterViewMock, lockerMock);
+    mapTransitionSameMap = new MapTransitionSameMap(socketMessagingMock, characterViewMock);
 
     await unitTestHelper.initializeMapLoader();
 
@@ -109,21 +104,5 @@ describe("MapTransitionSameMap", () => {
         id: testCharacter._id,
       }
     );
-  });
-
-  it("doesn't proceed if the lock cannot be acquired", async () => {
-    lockerMock.lock.mockResolvedValue(false);
-
-    testCharacter.scene = "map1";
-
-    try {
-      await mapTransitionSameMap.sameMapTeleport(testCharacter, destination);
-    } catch (error) {
-      console.error("Error during sameMapTeleport:", error);
-    }
-
-    const updatedCharacter = await Character.findOne({ _id: testCharacter._id }).lean();
-    expect(updatedCharacter?.x).not.toEqual(FromGridX(destination.gridX));
-    expect(updatedCharacter?.y).not.toEqual(FromGridX(destination.gridY));
   });
 });

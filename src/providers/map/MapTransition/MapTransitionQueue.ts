@@ -1,8 +1,8 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
-import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { GuildTerritory } from "@providers/guild/GuildTerritory";
+import { Locker } from "@providers/locks/Locker";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { Cooldown } from "@providers/time/Cooldown";
@@ -34,70 +34,99 @@ export class MapTransitionQueue {
     private mapTiles: MapTiles,
     private guildTerritory: GuildTerritory,
     private socketMessaging: SocketMessaging,
-    private inMemoryHashTable: InMemoryHashTable,
-    private cooldown: Cooldown
+    private cooldown: Cooldown,
+    private locker: Locker
   ) {}
 
   @TrackNewRelicTransaction()
-  public async handleMapTransition(character: ICharacter, newX: number, newY: number): Promise<void> {
-    const transition = this.getTransition(character, newX, newY);
-    if (!transition) return;
-
-    const destination = this.getDestinationFromTransition(transition);
-    if (!destination) return;
-
-    const isDestinationCoordinateValid = this.mapTiles.isCoordinateValid(
-      destination.map,
-      destination.gridX,
-      destination.gridY
-    );
-
-    if (!isDestinationCoordinateValid) return;
-
-    const isMapTemporarilyBlocked = this.mapTransitionValidator.isMapTemporarilyBlocked(destination, character);
-
-    if (isMapTemporarilyBlocked) return;
-
-    const checkHasEnoughSocialCrystalsIfRequired =
-      await this.mapTransitionValidator.checkHasEnoughSocialCrystalsIfRequired(character, destination);
-
-    if (!checkHasEnoughSocialCrystalsIfRequired) return;
-
-    const verifyPremiumAccountAccess = await this.mapTransitionValidator.verifyPremiumAccountAccess(
-      character,
-      transition
-    );
-
-    if (!verifyPremiumAccountAccess) return;
-
-    await this.teleportCharacter(character, destination);
-
-    const guild = await this.guildTerritory.getGuildByTerritoryMap(destination.map);
-
-    if (guild) {
-      const guildWarningKey = `${character._id}-${destination.map}`;
-      const isOnCooldown = await this.cooldown.isOnCooldown(guildWarningKey);
-
-      if (isOnCooldown) {
-        return;
+  public async handleMapTransition(character: ICharacter, newX: number, newY: number): Promise<boolean> {
+    try {
+      const transition = this.getTransition(character, newX, newY);
+      if (!transition) {
+        return false;
       }
 
-      const lootShare = this.guildTerritory.getTerritoryLootShare(guild._id, destination.map);
-      const lootShareMessage = lootShare ? ` Tributes may be charged on some loots (${lootShare}).` : "";
+      const destination = this.getDestinationFromTransition(transition);
+      if (!destination) {
+        return false;
+      }
 
-      this.socketMessaging.sendMessageToCharacter(
-        character,
-        `🏰 You have entered ${this.guildTerritory.getFormattedTerritoryName(destination.map)}, controlled by guild ${
-          guild.name
-        }.${lootShareMessage} 🏰`
+      const isDestinationCoordinateValid = this.mapTiles.isMapCoordinateWithinBounds(
+        destination.map,
+        destination.gridX,
+        destination.gridY
       );
 
-      // Set a cooldown of 5 minutes (300 seconds)
-      await this.cooldown.setCooldown(guildWarningKey, 300);
+      if (!isDestinationCoordinateValid) {
+        console.error(
+          `Invalid destination coordinate - out of bounds: ${destination.map} ${destination.gridX} ${destination.gridY}`
+        );
+        return false;
+      }
+
+      const isMapTemporarilyBlocked = this.mapTransitionValidator.isMapTemporarilyBlocked(destination, character);
+
+      if (isMapTemporarilyBlocked) {
+        return false;
+      }
+
+      const checkHasEnoughSocialCrystalsIfRequired =
+        await this.mapTransitionValidator.checkHasEnoughSocialCrystalsIfRequired(character, destination);
+
+      if (!checkHasEnoughSocialCrystalsIfRequired) {
+        return false;
+      }
+
+      const verifyPremiumAccountAccess = await this.mapTransitionValidator.verifyPremiumAccountAccess(
+        character,
+        transition
+      );
+
+      if (!verifyPremiumAccountAccess) {
+        return false;
+      }
+
+      await this.teleportCharacter(character, destination);
+
+      const guild = await this.guildTerritory.getGuildByTerritoryMap(destination.map);
+
+      if (guild) {
+        const guildWarningKey = `${character._id}-${destination.map}`;
+        const isOnCooldown = await this.cooldown.isOnCooldown(guildWarningKey);
+
+        if (!isOnCooldown) {
+          const lootShare = this.guildTerritory.getTerritoryLootShare(guild, destination.map);
+          const lootShareMessage = lootShare ? ` Tributes may be charged on some loots (${lootShare}).` : "";
+
+          console.log(lootShare, lootShareMessage);
+
+          this.socketMessaging.sendMessageToCharacter(
+            character,
+            `🏰 You have entered ${this.guildTerritory.getFormattedTerritoryName(
+              destination.map
+            )}, controlled by guild ${guild.name}.${lootShareMessage} 🏰`
+          );
+
+          // Set a cooldown of 5 minutes (300 seconds)
+          await this.cooldown.setCooldown(guildWarningKey, 300);
+        }
+      }
+
+      return true;
+    } catch (error) {
+      console.error(error);
+
+      return false;
     }
   }
 
   public async teleportCharacter(character: ICharacter, destination: IDestination): Promise<void> {
+    const canProceed = await this.locker.lock(`character-changing-scene-${character._id}`);
+
+    if (!canProceed) {
+      return;
+    }
+
     if (appEnv.general.IS_UNIT_TEST) {
       await this.execTeleportCharacter(character, destination);
       return;
