@@ -478,23 +478,6 @@ describe("EquipmentEquip.spec.ts", () => {
       expect(totalEquippedDefense).toEqual(0);
     });
 
-    it("makes sure ownership is added after equipping and item, and coordinates are wiped out", async () => {
-      inventoryContainer.slots[0] = swordItem;
-      inventoryContainer.markModified("slots");
-      await inventoryContainer.save();
-
-      const equip = await equipmentEquip.equip(testCharacter, swordItem._id, inventoryContainer.id);
-
-      expect(equip).toBeTruthy();
-
-      swordItem = (await Item.findById(swordItem._id)) as IItem;
-
-      expect(swordItem.owner).toEqual(testCharacter._id);
-      expect(swordItem.x).toBeUndefined();
-      expect(swordItem.y).toBeUndefined();
-      expect(swordItem.scene).toBeUndefined();
-    });
-
     describe("Classes", () => {
       it("A berserker should be allowed to equip 2 one handed swords", async () => {
         testCharacter.class = CharacterClass.Berserker;
@@ -547,6 +530,111 @@ describe("EquipmentEquip.spec.ts", () => {
         await equipmentEquip.isEquipValid(testCharacter, testItem, inventoryContainer);
 
         expect(isItemAllowed).toHaveBeenCalledTimes(3);
+      });
+    });
+
+    it("should remove item from inventory when equipped", async () => {
+      inventoryContainer.slots[0] = swordItem;
+      inventoryContainer.markModified("slots");
+      await inventoryContainer.save();
+
+      // Equip the item with the test character
+      const equip = await equipmentEquip.equip(testCharacter, swordItem._id, inventoryContainer.id);
+
+      expect(equip).toBeTruthy();
+
+      // Verify that the item is no longer in the inventory
+      const updatedInventory = await ItemContainer.findById(inventory.itemContainer);
+      expect(updatedInventory?.slots[0]).toBeNull();
+    });
+
+    describe("Ownership", () => {
+      it("makes sure ownership is added after equipping and item, and coordinates are wiped out", async () => {
+        inventoryContainer.slots[0] = swordItem;
+        inventoryContainer.markModified("slots");
+        await inventoryContainer.save();
+
+        const equip = await equipmentEquip.equip(testCharacter, swordItem._id, inventoryContainer.id);
+
+        expect(equip).toBeTruthy();
+
+        swordItem = (await Item.findById(swordItem._id)) as IItem;
+
+        expect(swordItem.owner).toEqual(testCharacter._id);
+        expect(swordItem.x).toBeUndefined();
+        expect(swordItem.y).toBeUndefined();
+        expect(swordItem.scene).toBeUndefined();
+      });
+
+      it("should update item ownership when equipping an item with a different owner", async () => {
+        // Assign initial ownership to a different character
+        const anotherCharacter = await unitTestHelper.createMockCharacter();
+        swordItem.owner = anotherCharacter._id;
+        await swordItem.save();
+
+        inventoryContainer.slots[0] = swordItem;
+        inventoryContainer.markModified("slots");
+        await inventoryContainer.save();
+
+        // Equip the item with the test character
+        const equip = await equipmentEquip.equip(testCharacter, swordItem._id, inventoryContainer.id);
+
+        expect(equip).toBeTruthy();
+
+        // Verify that the item's ownership has been updated to the test character
+        const updatedItem = await Item.findById(swordItem._id);
+        expect(updatedItem?.owner?.toString()).toEqual(testCharacter._id.toString());
+      });
+
+      it("should not update item ownership if the item already belongs to the character", async () => {
+        // Assign ownership to the test character
+        swordItem.owner = testCharacter._id;
+        await swordItem.save();
+
+        inventoryContainer.slots[0] = swordItem;
+        inventoryContainer.markModified("slots");
+        await inventoryContainer.save();
+
+        // Spy on the addItemOwnership method to ensure it's not called unnecessarily
+        // @ts-ignore
+        const addItemOwnershipSpy = jest.spyOn(equipmentEquip.itemOwnership, "addItemOwnership");
+
+        // Equip the item with the test character
+        const equip = await equipmentEquip.equip(testCharacter, swordItem._id, inventoryContainer.id);
+
+        expect(equip).toBeTruthy();
+
+        // Ensure addItemOwnership is not called, as the ownership does not need to change
+        expect(addItemOwnershipSpy).not.toHaveBeenCalled();
+
+        addItemOwnershipSpy.mockRestore();
+      });
+
+      it("should not modify item if already owned and coordinates are undefined", async () => {
+        // Assign ownership to the test character and ensure coordinates are undefined
+        swordItem.owner = testCharacter._id;
+        swordItem.x = undefined;
+        swordItem.y = undefined;
+        swordItem.scene = undefined;
+        await swordItem.save();
+
+        inventoryContainer.slots[0] = swordItem;
+        inventoryContainer.markModified("slots");
+        await inventoryContainer.save();
+
+        // Spy on the addItemOwnership method to ensure it's not called unnecessarily
+        // @ts-ignore
+        const addItemOwnershipSpy = jest.spyOn(equipmentEquip.itemOwnership, "addItemOwnership");
+
+        // Equip the item with the test character
+        const equip = await equipmentEquip.equip(testCharacter, swordItem._id, inventoryContainer.id);
+
+        expect(equip).toBeTruthy();
+
+        // Ensure addItemOwnership is not called, as the ownership does not need to change
+        expect(addItemOwnershipSpy).not.toHaveBeenCalled();
+
+        addItemOwnershipSpy.mockRestore();
       });
     });
   });

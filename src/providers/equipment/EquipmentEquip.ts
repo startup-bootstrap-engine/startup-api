@@ -212,11 +212,35 @@ export class EquipmentEquip {
       );
     } catch (error) {
       console.error(error);
+      // Optionally, handle specific error cases here if needed
     } finally {
-      if (!item.owner || item.owner.toString() !== character._id.toString()) {
-        await this.itemOwnership.addItemOwnership(item, character);
+      // Ownership update is now unconditional and happens no matter what
+      try {
+        if (!item.owner || item.owner.toString() !== character._id.toString()) {
+          const result = await this.itemOwnership.addItemOwnership(item, character);
+
+          if (!result) {
+            console.error("Failed to update item ownership");
+            // Optionally, retry the ownership update or log it for further inspection
+            await this.forceOwnershipUpdate(item, character);
+          }
+        }
+      } catch (ownershipError) {
+        console.error("Failed to update item ownership:", ownershipError);
+        // Optionally, retry the ownership update or log it for further inspection
+        await this.forceOwnershipUpdate(item, character);
       }
     }
+  }
+
+  private async forceOwnershipUpdate(item: IItem, character: ICharacter): Promise<void> {
+    await Item.findByIdAndUpdate(
+      item._id,
+      {
+        $set: { isEquipped: false, owner: character._id },
+      },
+      { new: true }
+    ).lean();
   }
 
   private async checkContainerType(itemContainer: IItemContainer): Promise<SourceEquipContainerType> {

@@ -39,6 +39,16 @@ export class EquipmentUnequip {
   @TrackNewRelicTransaction()
   public async unequip(character: ICharacter, inventory: IItem, item: IItem): Promise<boolean> {
     try {
+      if (!item) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry! Item not found.");
+        return false;
+      }
+
+      if (!character) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry! Character not found.");
+        return false;
+      }
+
       if (!inventory) {
         this.socketMessaging.sendErrorMessageToCharacter(
           character,
@@ -78,7 +88,7 @@ export class EquipmentUnequip {
         { character, item, inventoryContainerId }
       );
 
-      return await this.resultsPoller.pollResults("unequip-results", `unequip-${character._id}-${item._id}`);
+      return await this.resultsPoller.pollResults("unequip-results", `unequip-${character?._id}-${item?._id}`);
     } catch (error) {
       console.error(error);
       return false;
