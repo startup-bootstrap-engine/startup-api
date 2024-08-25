@@ -216,7 +216,7 @@ export class EquipmentEquip {
     } finally {
       // Ownership update is now unconditional and happens no matter what
       try {
-        if (!item.owner || item.owner.toString() !== character._id.toString()) {
+        if (!item.owner || !item.owner.toString() || item.owner.toString() !== character._id.toString()) {
           const result = await this.itemOwnership.addItemOwnership(item, character);
 
           if (!result) {
@@ -241,6 +241,10 @@ export class EquipmentEquip {
       },
       { new: true }
     ).lean();
+
+    if (item?.itemContainer) {
+      await ItemContainer.updateOne({ _id: item.itemContainer }, { $set: { owner: character._id } });
+    }
   }
 
   private async checkContainerType(itemContainer: IItemContainer): Promise<SourceEquipContainerType> {
