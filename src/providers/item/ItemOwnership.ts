@@ -4,27 +4,47 @@ import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterItemSlots } from "@providers/character/characterItems/CharacterItemSlots";
 import { ItemContainerHelper } from "@providers/itemContainer/ItemContainerHelper";
+import { Locker } from "@providers/locks/Locker";
 import { provide } from "inversify-binding-decorators";
 
 @provide(ItemOwnership)
 export class ItemOwnership {
-  constructor(private characterItemSlot: CharacterItemSlots, private itemContainerHelper: ItemContainerHelper) {}
+  constructor(
+    private characterItemSlot: CharacterItemSlots,
+    private itemContainerHelper: ItemContainerHelper,
+    private locker: Locker
+  ) {}
 
   @TrackNewRelicTransaction()
   public async addItemOwnership(item: IItem, character: ICharacter): Promise<boolean> {
+    const lockKey = `item-ownership-add-${item._id}`;
+    const canProceed = await this.locker.lock(lockKey);
+
+    if (!canProceed) {
+      console.error(`Unable to acquire lock for item: ${item._id}`);
+      return false;
+    }
+
     try {
-      if (item.owner?.toString() === character._id.toString()) {
+      const isAlreadyOwnedByCharacter = await this.isAlreadyOwnedByCharacter(item, character);
+      if (isAlreadyOwnedByCharacter) {
         return false;
       }
 
-      const updatePromises: any[] = [Item.updateOne({ _id: item._id }, { owner: character._id })];
+      const updatePromises: any[] = [
+        this.retryOperation(() => Item.updateOne({ _id: item._id }, { owner: character._id }).exec()),
+      ];
 
       if (item?.itemContainer) {
         updatePromises.push(
-          ItemContainer.updateOne({ _id: item.itemContainer }, { owner: character._id }),
-          this.addOwnershipToAllItemsInContainer(
-            item.itemContainer as unknown as string,
-            character._id as unknown as string
+          this.retryOperation(() =>
+            ItemContainer.updateOne({ _id: item.itemContainer }, { owner: character._id }).exec()
+          ),
+          this.retryOperation(() =>
+            this.addOwnershipToAllItemsInContainer(
+              item.itemContainer as unknown as string,
+              character._id as unknown as string
+            )
           )
         );
       }
@@ -33,24 +53,42 @@ export class ItemOwnership {
       return true;
     } catch (error) {
       console.error("Error in addItemOwnership:", error);
-      return false;
+      return false; // Ensure the method returns false on error
+    } finally {
+      await this.locker.unlock(lockKey);
     }
   }
 
   @TrackNewRelicTransaction()
   public async removeItemOwnership(item: IItem): Promise<boolean> {
+    const lockKey = `item-ownership-remove-${item._id}`;
+    const canProceed = await this.locker.lock(lockKey);
+
+    if (!canProceed) {
+      console.error(`Unable to acquire lock for item: ${item._id}`);
+      return false;
+    }
+
     try {
-      const updatePromises: any[] = [Item.updateOne({ _id: item._id }, { $unset: { owner: "" } })];
+      const updatePromises: any[] = [
+        this.retryOperation(() => Item.updateOne({ _id: item._id }, { $unset: { owner: "" } }).exec()),
+      ];
 
       if (item?.itemContainer) {
-        const itemContainer = await ItemContainer.findById(item.itemContainer).lean<IItemContainer>();
+        const itemContainer = await this.retryOperation(() =>
+          ItemContainer.findById(item.itemContainer).lean<IItemContainer>().exec()
+        );
         if (!itemContainer) {
           throw new Error("ItemOwnership: Item container not found");
         }
 
         updatePromises.push(
-          ItemContainer.updateOne({ _id: item.itemContainer }, { $unset: { owner: "" } }),
-          this.removeOwnershipFromAllItemsInContainer(itemContainer as unknown as IItemContainer)
+          this.retryOperation(() =>
+            ItemContainer.updateOne({ _id: item.itemContainer }, { $unset: { owner: "" } }).exec()
+          ),
+          this.retryOperation(() =>
+            this.removeOwnershipFromAllItemsInContainer(itemContainer as unknown as IItemContainer)
+          )
         );
       }
 
@@ -59,6 +97,8 @@ export class ItemOwnership {
     } catch (error) {
       console.error("Error in removeItemOwnership:", error);
       return false;
+    } finally {
+      await this.locker.unlock(lockKey);
     }
   }
 
@@ -73,7 +113,9 @@ export class ItemOwnership {
     }
     visited.add(itemContainerId);
 
-    const itemContainer = await ItemContainer.findById(itemContainerId).lean<IItemContainer>();
+    const itemContainer = await this.retryOperation(() =>
+      ItemContainer.findById(itemContainerId).lean<IItemContainer>().exec()
+    );
     if (!itemContainer) {
       throw new Error("ItemOwnership: Item container not found");
     }
@@ -88,7 +130,9 @@ export class ItemOwnership {
 
       const success = await this.addItemOwnership(item, { _id: owner } as unknown as ICharacter);
       if (success) {
-        await this.characterItemSlot.updateItemOnSlot(slotIndex, itemContainer as any, { owner });
+        await this.retryOperation(() =>
+          this.characterItemSlot.updateItemOnSlot(slotIndex, itemContainer as any, { owner })
+        );
       }
     });
   }
@@ -112,7 +156,41 @@ export class ItemOwnership {
       }
       processedItems.add(item._id.toString());
 
-      await this.characterItemSlot.updateItemOnSlot(slotIndex, itemContainer, { owner: undefined });
+      await this.retryOperation(() =>
+        this.characterItemSlot.updateItemOnSlot(slotIndex, itemContainer, { owner: undefined })
+      );
     });
+  }
+
+  private async isAlreadyOwnedByCharacter(item: IItem, character: ICharacter): Promise<boolean> {
+    const characterId = character._id.toString();
+
+    // Determine owner ID correctly
+    const ownerId = (item.owner as ICharacter)?._id?.toString() || item.owner?.toString();
+
+    if (item.itemContainer) {
+      const itemContainer = await ItemContainer.findById(item.itemContainer).lean();
+      if (itemContainer && itemContainer.owner?.toString() === characterId) {
+        return true;
+      }
+    }
+
+    return ownerId === characterId;
+  }
+
+  private async retryOperation<T>(operation: () => Promise<T>, retries = 3): Promise<T> {
+    for (let i = 0; i < retries; i++) {
+      try {
+        return await operation();
+      } catch (error) {
+        if (i === retries - 1) {
+          console.error("Operation failed after retries:", error);
+          throw error;
+        }
+        await new Promise<void>((resolve) => setTimeout(resolve, Math.pow(2, i) * 100)); // exponential backoff
+      }
+    }
+
+    throw new Error("Unreachable code");
   }
 }
