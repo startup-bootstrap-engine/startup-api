@@ -3,6 +3,8 @@ version: "3.8"
 services:
   rpg-api:
     image: definya/definya-team:api-latest
+    depends_on:
+      - rpg-npc
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:5002"]
       interval: 60s
