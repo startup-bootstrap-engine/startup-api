@@ -10,14 +10,13 @@ export const itemjavelin: IEquippableTwoHandedTier1WeaponBlueprint = {
   textureAtlas: "items",
   texturePath: "spears/javelin.png",
   name: "javelin",
-  description:
-    "A type of spear designed for throwing, used in ancient Greek and Roman warfare. It has a slender, streamlined design that allows it to be thrown with great accuracy and force.",
+  description: "A type of spear used in ancient Greek and Roman warfare.",
   weight: 2,
   allowedEquipSlotType: [ItemSlotType.LeftHand, ItemSlotType.RightHand],
   attack: 20,
   defense: 8,
   tier: 1,
   isTwoHanded: true,
-  rangeType: EntityAttackType.Ranged,
+  rangeType: EntityAttackType.Melee,
   basePrice: 75,
 };
