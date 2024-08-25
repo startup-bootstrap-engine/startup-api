@@ -32,6 +32,11 @@ export class ItemUsableEffect {
         return;
       }
 
+      // Early check: Validate that the value is a number and not NaN
+      if (typeof value !== "number" || isNaN(value) || !attr) {
+        return;
+      }
+
       await this.time.waitForMilliseconds(random(10, 20)); // add artificial delay to avoid concurrency
 
       const canProceed = await this.locker.lock(`${target._id}-applying-usable-effect`);
@@ -132,6 +137,13 @@ export class ItemUsableEffect {
     value: number
   ): any {
     const updateObj: any = {};
+
+    if (typeof target[effectableAttribute] !== "number" || isNaN(target[effectableAttribute])) {
+      console.error(`Invalid target attribute value: ${target[effectableAttribute]} for ${effectableAttribute}`);
+      // You can either throw an error or set it to a default value
+      target[effectableAttribute] = 0; // Set to a default value if needed
+    }
+
     target[effectableAttribute] += value;
 
     switch (effectableAttribute) {
