@@ -114,7 +114,7 @@ export class CharacterAutoLootQueue {
     });
 
     const itemContainerMap = new Map(itemContainers.map((ic) => [String(ic._id), ic]));
-    return [bodies, itemContainerMap] as const;
+    return [bodies, itemContainerMap];
   }
 
   private async findItem(itemId: string): Promise<IItem | null> {
