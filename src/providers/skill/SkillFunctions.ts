@@ -48,6 +48,7 @@ export class SkillFunctions {
         virtuals: true,
         defaults: true,
       });
+      await clearCacheForKey(`${skills._id}-skills`);
 
       if (!updatedSkills) {
         throw new Error(`Failed to update skills for character ${character._id}`);
@@ -161,6 +162,9 @@ export class SkillFunctions {
     });
 
     await this.inMemoryHashTable.delete(`${character._id}-skill-level-with-buff`, skillData.skillName);
+
+    // Skill level up happened, ensure cache is cleared
+    await clearCacheForKey(`${character._id}-skills`);
   }
 
   private sendSkillGainEvent(skillData: IIncreaseSPResult, character: ICharacter, target?: INPC | ICharacter): void {

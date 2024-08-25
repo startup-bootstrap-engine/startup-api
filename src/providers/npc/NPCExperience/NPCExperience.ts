@@ -288,6 +288,9 @@ export class NPCExperience {
     await this.socketMessaging.sendEventToCharactersAroundCharacter(character, SkillSocketEvents.SkillGain, payload);
 
     void this.triggerAdvancedTutorialLessonByLevel(character, expData.level);
+
+    // Skill level up happened, ensure cache is cleared
+    await clearCacheForKey(`${character._id}-skills`);
   }
 
   private async triggerAdvancedTutorialLessonByLevel(character: ICharacter, level: number): Promise<void> {
