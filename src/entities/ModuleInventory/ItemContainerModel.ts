@@ -96,7 +96,7 @@ itemContainerSchema.virtual("firstAvailableSlot").get(function (this: IItemConta
   }
 
   const slots = Object.values(this.slots);
-  const emptySlots = slots.filter((x) => x === null) as IItem[];
+  const emptySlots = slots.filter((x) => x === null) as unknown as IItem[];
   if (emptySlots.length === 0) {
     return null;
   }
