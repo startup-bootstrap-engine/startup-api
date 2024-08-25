@@ -1,12 +1,10 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { IGuild } from "@entities/ModuleSystem/GuildModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { FoodsBlueprint, OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import _ from "lodash";
-import mongoose from "mongoose";
 import { GuildPayingTribute } from "../GuildPayingTribute";
 
 describe("GuildPayingTribute.ts", () => {
@@ -48,41 +46,18 @@ describe("GuildPayingTribute.ts", () => {
     jest.useRealTimers();
   });
 
-  const setupMocks = (item: IItem, map: string, lootShare = 20) => {
-    const testGuildTerritory = { map, lootShare } as any;
-    testGuild.territoriesOwned.push(testGuildTerritory);
-
-    jest
-      // @ts-ignore
-      .spyOn(guildPayingTribute.guildTerritory, "getGuildByTerritoryMap")
-      .mockResolvedValue(testGuild);
-
-    // @ts-ignore
-    jest.spyOn(guildPayingTribute.guildCommon, "getCharactersGuild").mockResolvedValue(null);
-
-    const ObjectId = new mongoose.Types.ObjectId();
-    const mockLeanFn = jest.fn().mockResolvedValue({ _id: ObjectId } as any);
-    jest.spyOn(ItemContainer, "findOne").mockReturnValue({ lean: mockLeanFn } as any);
-
-    const mockAddItemToContainerSpy = jest
-      // @ts-ignore
-      .spyOn(guildPayingTribute.characterItemContainer, "addItemToContainer")
-      .mockResolvedValue(true);
-
-    return { mockAddItemToContainerSpy, ObjectId };
-  };
-
   const runTributeTest = async (item: IItem, expectedMessage: string, expectedResult: number) => {
     const result = await guildPayingTribute.payTribute(testCharacter, item);
 
     jest.advanceTimersByTime(3000);
 
     expect(result).toBe(expectedResult);
-    expect(mockSocketMessaging.sendMessageToCharacter).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({ _id: testCharacter._id }),
-      expectedMessage
-    );
+    // Disabled because message is now commented out GuildPayingTribute.ts:125
+    // expect(mockSocketMessaging.sendMessageToCharacter).toHaveBeenNthCalledWith(
+    //   2,
+    //   expect.objectContaining({ _id: testCharacter._id }),
+    //   expectedMessage
+    // );
   };
 
   it("should pay tribute for a gold coin item", async () => {

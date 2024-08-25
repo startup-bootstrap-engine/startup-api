@@ -122,12 +122,13 @@ export class GuildPayingTribute {
       `Tribute(s) paid by ${character.name}: ${lootAmount}x ${itemName} (Territory: ${formattedMapName})`
     );
 
-    setTimeout(() => {
-      this.socketMessaging.sendMessageToCharacter(
-        character,
-        `Tribute(s) paid to guild ${guild.name}: ${lootAmount}x ${itemName}`
-      );
-    }, 3000);
+    //! Players get pissed off when they know they're paying tributes
+    // setTimeout(() => {
+    //   this.socketMessaging.sendMessageToCharacter(
+    //     character,
+    //     `Tribute(s) paid to guild ${guild.name}: ${lootAmount}x ${itemName}`
+    //   );
+    // }, 3000);
   }
 
   private async tryToFetchGuildLeaderInventoryOrDepot(guild: IGuild, item: IItem): Promise<IItemContainer | null> {
