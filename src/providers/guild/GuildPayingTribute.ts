@@ -108,6 +108,8 @@ export class GuildPayingTribute {
       stackQty: lootAmount,
     })) as IItem;
 
+    const formattedMapName = this.guildTerritory.getFormattedTerritoryName(character.scene);
+
     if (guildLeaderItemContainer) {
       await this.characterItemContainer.addItemToContainer(newItem, guildLeader, guildLeaderItemContainer._id);
     }
@@ -117,13 +119,13 @@ export class GuildPayingTribute {
     // inform guild leader a tribute was paid
     this.socketMessaging.sendMessageToCharacter(
       guildLeader,
-      `Tribute(s) paid by ${character.name}: ${lootAmount}x ${itemName} (Territory: ${character.scene})`
+      `Tribute(s) paid by ${character.name}: ${lootAmount}x ${itemName} (Territory: ${formattedMapName})`
     );
 
     setTimeout(() => {
       this.socketMessaging.sendMessageToCharacter(
         character,
-        `Tribute(s) paid to ${guild.name}: ${lootAmount}x ${itemName}`
+        `Tribute(s) paid to guild ${guild.name}: ${lootAmount}x ${itemName}`
       );
     }, 3000);
   }
