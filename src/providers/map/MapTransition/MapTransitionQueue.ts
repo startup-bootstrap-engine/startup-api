@@ -1,9 +1,11 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { GuildTerritory } from "@providers/guild/GuildTerritory";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { Cooldown } from "@providers/time/Cooldown";
 import { ITiledObject } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { MapNonPVPZone } from "../MapNonPVPZone";
@@ -31,7 +33,9 @@ export class MapTransitionQueue {
     private dynamicQueue: DynamicQueue,
     private mapTiles: MapTiles,
     private guildTerritory: GuildTerritory,
-    private socketMessaging: SocketMessaging
+    private socketMessaging: SocketMessaging,
+    private inMemoryHashTable: InMemoryHashTable,
+    private cooldown: Cooldown
   ) {}
 
   @TrackNewRelicTransaction()
@@ -71,6 +75,13 @@ export class MapTransitionQueue {
     const guild = await this.guildTerritory.getGuildByTerritoryMap(destination.map);
 
     if (guild) {
+      const guildWarningKey = `${character._id}-${destination.map}`;
+      const isOnCooldown = await this.cooldown.isOnCooldown(guildWarningKey);
+
+      if (isOnCooldown) {
+        return;
+      }
+
       const lootShare = this.guildTerritory.getTerritoryLootShare(guild._id, destination.map);
       const lootShareMessage = lootShare ? ` Tributes may be charged on some loots (${lootShare}).` : "";
 
@@ -80,6 +91,9 @@ export class MapTransitionQueue {
           guild.name
         }.${lootShareMessage} 🏰`
       );
+
+      // Set a cooldown of 5 minutes (300 seconds)
+      await this.cooldown.setCooldown(guildWarningKey, 300);
     }
   }
 
