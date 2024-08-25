@@ -94,7 +94,7 @@ async function initializeServerComponents(): Promise<void> {
 
 /**
  * Logs a message indicating the server's successful startup.
- * @param {dayjs.Dayjs} startTime - The start time of the server bootstrap process.
+ * @param {dayjs.Dayjs} startTime - The start time of the server bootstrap process
  */
 function logStartupMessage(startTime: dayjs.Dayjs, port: number): void {
   const endTime = dayjs();
