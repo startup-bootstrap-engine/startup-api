@@ -81,6 +81,7 @@ jest.mock("@providers/constants/GuildConstants", () => ({
   GUILD_BUFFS: ["strength", "magic", "magicResistance", "resistance"],
   GUILD_LEVEL_BONUS: 0.2,
   GUILD_LEVEL_BONUS_MAX: 50,
+  GUILD_INACTIVITY_THRESHOLD_DAYS: 15,
 }));
 
 jest.mock("@providers/constants/PartyConstants", () => ({
