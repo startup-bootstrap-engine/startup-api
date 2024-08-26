@@ -1,21 +1,18 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItem } from "@entities/ModuleInventory/ItemModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import { ItemOwnership } from "@providers/item/ItemOwnership";
 import { ItemView } from "@providers/item/ItemView";
-import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { ItemPickupFromMap } from "../ItemPickupFromMap";
 
 describe("ItemPickupFromMap", () => {
   let itemPickupFromMap: ItemPickupFromMap;
-  let itemView: ItemView;
-  let socketMessaging: SocketMessaging;
+
   let character: ICharacter;
   let item: IItem;
 
   beforeAll(() => {
-    itemView = container.get(ItemView);
-    socketMessaging = container.get(SocketMessaging);
-    itemPickupFromMap = new ItemPickupFromMap(itemView, socketMessaging);
+    itemPickupFromMap = container.get(ItemPickupFromMap);
   });
 
   beforeEach(async () => {
@@ -24,25 +21,25 @@ describe("ItemPickupFromMap", () => {
   });
 
   describe("pickupFromMapContainer", () => {
-    it("should successfully remove item from the map and return true", async () => {
-      itemView.removeItemFromMap = jest.fn().mockResolvedValue(true);
+    it("should successfully remove item from the map, add ownership, and return true", async () => {
+      jest.spyOn(ItemView.prototype, "removeItemFromMap").mockResolvedValue(true);
+      jest.spyOn(ItemOwnership.prototype, "addItemOwnership").mockResolvedValue(true);
 
       const result = await itemPickupFromMap.pickupFromMapContainer(item, character);
       expect(result).toBe(true);
-      expect(itemView.removeItemFromMap).toHaveBeenCalledWith(item);
+      expect(ItemView.prototype.removeItemFromMap).toHaveBeenCalledWith(item);
+      expect(ItemOwnership.prototype.addItemOwnership).toHaveBeenCalledWith(item, character);
     });
 
     it("should fail to remove item from the map and return false", async () => {
-      itemView.removeItemFromMap = jest.fn().mockResolvedValue(false);
-      socketMessaging.sendErrorMessageToCharacter = jest.fn();
+      jest.spyOn(ItemView.prototype, "removeItemFromMap").mockResolvedValue(false);
+      // @ts-ignore
+      const sendErrorMessageSpy = jest.spyOn(itemPickupFromMap.socketMessaging, "sendErrorMessageToCharacter");
 
       const result = await itemPickupFromMap.pickupFromMapContainer(item, character);
       expect(result).toBe(false);
-      expect(itemView.removeItemFromMap).toHaveBeenCalledWith(item);
-      expect(socketMessaging.sendErrorMessageToCharacter).toHaveBeenCalledWith(
-        character,
-        "Sorry, failed to remove item from map."
-      );
+      expect(ItemView.prototype.removeItemFromMap).toHaveBeenCalledWith(item);
+      expect(sendErrorMessageSpy).toHaveBeenCalledWith(character, "Sorry, failed to remove item from map.");
     });
   });
 });

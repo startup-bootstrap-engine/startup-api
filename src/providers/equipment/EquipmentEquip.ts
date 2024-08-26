@@ -20,7 +20,6 @@ import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTy
 import { ResultsPoller } from "@providers/poller/ResultsPoller";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { Time } from "@providers/time/Time";
 import {
   IBaseItemBlueprint,
   IEquipmentAndInventoryUpdatePayload,
@@ -55,48 +54,8 @@ export class EquipmentEquip {
     private equipmentCharacterClass: EquipmentCharacterClass,
     private characterBuffValidation: CharacterBuffValidation,
     private dynamicQueue: DynamicQueue,
-    private time: Time,
     private resultsPoller: ResultsPoller
   ) {}
-
-  @TrackNewRelicTransaction()
-  public async equipInventory(character: ICharacter, itemId: string): Promise<boolean> {
-    const item = await Item.findById(itemId).lean<IItem>();
-    if (!item) {
-      return this.sendError(character, "Item not found.");
-    }
-
-    if (!item.isItemContainer) {
-      return this.sendError(character, "Cannot equip this as an inventory.");
-    }
-
-    const equipment = await Equipment.findById(character.equipment).lean<IEquipment>();
-    if (!equipment) {
-      return this.sendError(character, "Equipment not found.");
-    }
-
-    await Equipment.findByIdAndUpdate(equipment._id, { $set: { inventory: item._id } }).lean();
-
-    const inventory = await this.characterInventory.getInventory(character);
-    if (!inventory) {
-      return this.sendError(character, "Inventory not found.");
-    }
-
-    const inventoryContainer = await ItemContainer.findById(inventory.itemContainer).lean<IItemContainer>();
-    if (!inventoryContainer) {
-      return this.sendError(character, "Inventory container not found.");
-    }
-
-    await this.itemView.removeItemFromMap(item);
-
-    await this.finalizeEquipItem(inventoryContainer, equipment, item, character);
-
-    await this.clearCaches(character);
-
-    await this.characterWeight.updateCharacterWeight(character);
-
-    return true;
-  }
 
   @TrackNewRelicTransaction()
   public async equip(character: ICharacter, itemId: string, fromItemContainerId: string): Promise<boolean> {
@@ -146,6 +105,10 @@ export class EquipmentEquip {
         return false;
       }
 
+      // clear cache for fetching the new inventory next
+      await clearCacheForKey(`${character._id}-equipment`);
+      await clearCacheForKey(`${character._id}-inventory`);
+
       const equipment = await Equipment.findById(character.equipment).lean<IEquipment>();
       if (!equipment) {
         this.sendError(character, "Equipment not found.");
@@ -177,6 +140,49 @@ export class EquipmentEquip {
     }
   }
 
+  @TrackNewRelicTransaction()
+  public async equipInventory(character: ICharacter, itemId: string): Promise<boolean> {
+    const item = await Item.findById(itemId).lean<IItem>();
+    if (!item) {
+      return this.sendError(character, "Item not found.");
+    }
+
+    if (!item.isItemContainer) {
+      return this.sendError(character, "Cannot equip this as an inventory.");
+    }
+
+    const equipment = await Equipment.findById(character.equipment).lean<IEquipment>();
+    if (!equipment) {
+      return this.sendError(character, "Equipment not found.");
+    }
+
+    await Equipment.updateOne({ _id: equipment._id }, { $set: { inventory: item._id } });
+
+    // clear cache for fetching the new inventory next
+    await clearCacheForKey(`${character._id}-equipment`);
+    await clearCacheForKey(`${character._id}-inventory`);
+
+    const inventory = await this.characterInventory.getInventory(character);
+    if (!inventory) {
+      return this.sendError(character, "Inventory not found.");
+    }
+
+    const inventoryContainer = await ItemContainer.findById(inventory.itemContainer).lean<IItemContainer>();
+    if (!inventoryContainer) {
+      return this.sendError(character, "Inventory container not found.");
+    }
+
+    await this.itemView.removeItemFromMap(item);
+
+    await this.finalizeEquipItem(inventoryContainer, equipment, item, character);
+
+    await this.clearCaches(character);
+
+    await this.characterWeight.updateCharacterWeight(character);
+
+    return true;
+  }
+
   private async finalizeEquipItem(
     inventoryContainer: IItemContainer,
     equipment: IEquipment,
@@ -184,14 +190,6 @@ export class EquipmentEquip {
     character: ICharacter
   ): Promise<void> {
     try {
-      const equipmentSlots = await this.equipmentSlots.getEquipmentSlots(character._id, equipment._id);
-      const payloadUpdate: IEquipmentAndInventoryUpdatePayload = {
-        equipment: equipmentSlots,
-        inventory: inventoryContainer as any,
-      };
-
-      this.updateItemInventoryCharacter(payloadUpdate, character);
-
       await Item.findByIdAndUpdate(
         item._id,
         {
@@ -204,32 +202,35 @@ export class EquipmentEquip {
       await this.clearCaches(character);
       await this.characterWeight.updateCharacterWeight(character);
       await this.characterItemBuff.enableItemBuff(character, item);
+    } catch (error) {
+      console.error(error);
+      // Optionally, handle specific error cases here if needed
+    } finally {
+      await this.updateOwnership(item, character);
 
       const newEquipmentSlots = await this.equipmentSlots.getEquipmentSlots(character._id, equipment._id);
       this.updateItemInventoryCharacter(
         { equipment: newEquipmentSlots, inventory: inventoryContainer as any },
         character
       );
-    } catch (error) {
-      console.error(error);
-      // Optionally, handle specific error cases here if needed
-    } finally {
-      // Ownership update is now unconditional and happens no matter what
-      try {
-        if (!item.owner || !item.owner.toString() || item.owner.toString() !== character._id.toString()) {
-          const result = await this.itemOwnership.addItemOwnership(item, character);
+    }
+  }
 
-          if (!result) {
-            console.error("Failed to update item ownership");
-            // Optionally, retry the ownership update or log it for further inspection
-            await this.forceOwnershipUpdate(item, character);
-          }
+  private async updateOwnership(item: IItem, character: ICharacter): Promise<void> {
+    try {
+      if (!item.owner || !item.owner.toString() || item.owner.toString() !== character._id.toString()) {
+        const result = await this.itemOwnership.addItemOwnership(item, character);
+
+        if (!result) {
+          console.error("Failed to update item ownership");
+          // Optionally, retry the ownership update or log it for further inspection
+          await this.forceOwnershipUpdate(item, character);
         }
-      } catch (ownershipError) {
-        console.error("Failed to update item ownership:", ownershipError);
-        // Optionally, retry the ownership update or log it for further inspection
-        await this.forceOwnershipUpdate(item, character);
       }
+    } catch (ownershipError) {
+      console.error("Failed to update item ownership:", ownershipError);
+      // Optionally, retry the ownership update or log it for further inspection
+      await this.forceOwnershipUpdate(item, character);
     }
   }
 
@@ -255,8 +256,11 @@ export class EquipmentEquip {
   }
 
   private async clearCaches(character: ICharacter): Promise<void> {
+    await this.inMemoryHashTable.delete("equipment-slots", character._id.toString());
+
     const cacheKeys = [
       `${character._id}-inventory`,
+
       `${character._id}-equipment`,
       `characterBuffs_${character._id}`,
       `${character._id}-skills`,

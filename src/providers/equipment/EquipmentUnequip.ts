@@ -39,33 +39,13 @@ export class EquipmentUnequip {
   @TrackNewRelicTransaction()
   public async unequip(character: ICharacter, inventory: IItem, item: IItem): Promise<boolean> {
     try {
-      if (!item) {
-        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry! Item not found.");
+      if (!this.validateInputs(character, inventory, item)) {
         return false;
       }
 
-      if (!character) {
-        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry! Character not found.");
-        return false;
-      }
-
-      if (!inventory) {
-        this.socketMessaging.sendErrorMessageToCharacter(
-          character,
-          "Sorry! You cannot unequip an item without an inventory. Drop it, instead."
-        );
-        return false;
-      }
-
-      const inventoryContainerId = inventory?.itemContainer as unknown as string;
-
+      const inventoryContainerId = inventory.itemContainer as unknown as string;
       if (!inventoryContainerId) {
         throw new Error("Inventory container id is not defined.");
-      }
-
-      if (!character.equipment) {
-        this.socketMessaging.sendErrorMessageToCharacter(character);
-        return false;
       }
 
       if (appEnv.general.IS_UNIT_TEST) {
@@ -76,7 +56,6 @@ export class EquipmentUnequip {
         "unequip-item",
         async (job) => {
           const { character, item, inventoryContainerId } = job.data;
-
           const result = await this.execUnequip(character, item, inventoryContainerId);
 
           await this.resultsPoller.prepareResultToBePolled(
@@ -95,39 +74,78 @@ export class EquipmentUnequip {
     }
   }
 
+  private validateInputs(character: ICharacter, inventory: IItem, item: IItem): boolean {
+    if (!item) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry! Item not found.");
+      return false;
+    }
+
+    if (!character) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry! Character not found.");
+      return false;
+    }
+
+    if (!inventory) {
+      this.socketMessaging.sendErrorMessageToCharacter(
+        character,
+        "Sorry! You cannot unequip an item without an inventory. Drop it, instead."
+      );
+      return false;
+    }
+
+    if (!character.equipment) {
+      this.socketMessaging.sendErrorMessageToCharacter(character);
+      return false;
+    }
+
+    return true;
+  }
+
   private async execUnequip(character: ICharacter, item: IItem, inventoryContainerId: string): Promise<boolean> {
-    const canUnequip = await this.isUnequipValid(character, item, inventoryContainerId);
-
-    if (!canUnequip) {
+    if (!(await this.isUnequipValid(character, item, inventoryContainerId))) {
       return false;
     }
 
-    const equipmentSlots = await this.equipmentSlots.getEquipmentSlots(
-      character._id,
-      character.equipment as unknown as string
-    );
+    await this.clearPreTransactionCaches(character);
 
-    const updatedItem = (await Item.findById(item._id).lean<IItem>({ virtuals: true, defaults: true })) || item;
+    const updatedItem = await this.getUpdatedItem(item);
 
-    const hasItemOnEquipment = await this.characterItems.hasItem(item._id, character, "equipment");
-
-    if (!hasItemOnEquipment) {
+    if (!(await this.hasItemOnEquipment(character, updatedItem))) {
       return false;
     }
 
-    const hasUnequipped = await this.performUnequipTransaction(character, updatedItem, inventoryContainerId);
-
-    if (!hasUnequipped) {
+    if (!(await this.performUnequipTransaction(character, updatedItem, inventoryContainerId))) {
       return false;
     }
 
-    const inventoryContainer = await ItemContainer.findById(inventoryContainerId).lean();
+    await this.updateOwnership(updatedItem, character);
 
-    this.socketMessaging.sendEventToUser(character.channelId!, ItemSocketEvents.EquipmentAndInventoryUpdate, {
-      equipment: equipmentSlots,
-      inventory: inventoryContainer,
-    });
+    await this.clearPostTransactionCaches(character, item);
 
+    await this.updateCharacterStateAfterUnequip(character, item, inventoryContainerId);
+
+    return true;
+  }
+
+  private async clearPreTransactionCaches(character: ICharacter): Promise<void> {
+    await this.inMemoryHashTable.delete("equipment-slots", character._id.toString());
+    await clearCacheForKey(`${character._id}-equipment`);
+    await clearCacheForKey(`${character._id}-inventory`);
+  }
+
+  private async getUpdatedItem(item: IItem): Promise<IItem> {
+    return (await Item.findById(item._id).lean<IItem>({ virtuals: true, defaults: true })) || item;
+  }
+
+  private async hasItemOnEquipment(character: ICharacter, item: IItem): Promise<boolean> {
+    return await this.characterItems.hasItem(item._id, character, "equipment");
+  }
+
+  private async updateCharacterStateAfterUnequip(
+    character: ICharacter,
+    item: IItem,
+    inventoryContainerId: string
+  ): Promise<void> {
     await Item.findByIdAndUpdate(item._id, { isEquipped: false }).lean();
 
     const newEquipmentSlots = await this.equipmentSlots.getEquipmentSlots(
@@ -141,7 +159,9 @@ export class EquipmentUnequip {
       equipment: newEquipmentSlots,
       inventory: newInventoryContainer,
     });
+  }
 
+  private async clearPostTransactionCaches(character: ICharacter, item: IItem): Promise<void> {
     const buffs = await this.characterBuffTracker.getBuffsByItemId(character._id, item._id);
 
     for (const buff of buffs) {
@@ -149,12 +169,10 @@ export class EquipmentUnequip {
     }
 
     await this.clearCache(character);
+  }
 
-    if (!item.owner || item.owner.toString() !== character._id.toString()) {
-      await this.itemOwnership.addItemOwnership(item, character);
-    }
-
-    return true;
+  private async updateOwnership(item: IItem, character: ICharacter): Promise<void> {
+    await this.itemOwnership.addItemOwnership(item, character);
   }
 
   private async performUnequipTransaction(
@@ -200,15 +218,11 @@ export class EquipmentUnequip {
   }
 
   private async isUnequipValid(character: ICharacter, item: IItem, inventoryContainerId: string): Promise<boolean> {
-    const baseValidation = await this.characterValidation.hasBasicValidation(character);
-
-    if (!baseValidation) {
+    if (!(await this.characterValidation.hasBasicValidation(character))) {
       return false;
     }
 
-    const hasItemToBeUnequipped = await this.characterItems.hasItem(item._id, character, "equipment");
-
-    if (!hasItemToBeUnequipped) {
+    if (!(await this.characterItems.hasItem(item._id, character, "equipment"))) {
       this.socketMessaging.sendErrorMessageToCharacter(
         character,
         "Sorry, you cannot unequip an item that you don't have."
@@ -216,9 +230,7 @@ export class EquipmentUnequip {
       return false;
     }
 
-    const hasSlotsAvailable = await this.characterItemSlots.hasAvailableSlot(inventoryContainerId, item);
-
-    if (!hasSlotsAvailable) {
+    if (!(await this.characterItemSlots.hasAvailableSlot(inventoryContainerId, item))) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, your inventory is full.");
       return false;
     }

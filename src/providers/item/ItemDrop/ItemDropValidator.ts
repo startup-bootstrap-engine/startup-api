@@ -24,7 +24,7 @@ export class ItemDropValidator {
       return false;
     }
 
-    if (item.owner?.toString() !== character._id.toString()) {
+    if (item.owner && item.owner?.toString() !== character._id.toString()) {
       this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, you don't own this item.");
       return false;
     }

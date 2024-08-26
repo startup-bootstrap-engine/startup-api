@@ -7,6 +7,7 @@ import { CharacterItemSlots } from "@providers/character/characterItems/Characte
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { IItemContainer, IItemPickup } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import { ItemOwnership } from "../ItemOwnership";
 import { ItemPickupUpdater } from "./ItemPickupUpdater";
 
 @provide(ItemPickupFromContainer)
@@ -14,7 +15,8 @@ export class ItemPickupFromContainer {
   constructor(
     private socketMessaging: SocketMessaging,
     private characterItemSlots: CharacterItemSlots,
-    private itemPickupUpdater: ItemPickupUpdater
+    private itemPickupUpdater: ItemPickupUpdater,
+    private itemOwnership: ItemOwnership
   ) {}
 
   @TrackNewRelicTransaction()
@@ -41,6 +43,8 @@ export class ItemPickupFromContainer {
     }
 
     await this.itemPickupUpdater.sendContainerRead(fromContainer, character);
+
+    await this.itemOwnership.addItemOwnership(itemToBePicked, character);
 
     return true;
   }

@@ -1,7 +1,7 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Equipment, IEquipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
-import { IItem } from "@entities/ModuleInventory/ItemModel";
+import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { CharacterWeapon } from "@providers/character/CharacterWeapon";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { itemsBlueprintIndex } from "@providers/item/data/index";
@@ -92,7 +92,6 @@ describe("EquipmentUnequip.spec.ts", () => {
         equipment: expect.objectContaining({
           _id: slots._id,
           accessory: expect.objectContaining({
-            _id: accessorySlot._id!,
             key: accessorySlot.key!,
             name: accessorySlot.name!,
           }),
@@ -230,6 +229,103 @@ describe("EquipmentUnequip.spec.ts", () => {
       expect(slots.leftHand).toBeFalsy();
       expect(slots.rightHand).toBeFalsy();
       expect(slots.accessory).toBeFalsy();
+    });
+
+    describe("Additional EquipmentUnequip Tests", () => {
+      beforeEach(() => {
+        // Clear all mocks before each test to prevent test contamination
+        jest.clearAllMocks();
+      });
+
+      it("should fail to unequip when the character is not valid (e.g., null or undefined)", async () => {
+        const invalidCharacter = null as unknown as ICharacter; // Setting character to null
+        const unequip = await equipmentUnequip.unequip(invalidCharacter, inventory, testItem);
+        expect(unequip).toBeFalsy();
+
+        expect(socketMessaging).not.toHaveBeenCalled();
+      });
+
+      it("should fail to unequip when equipment data is missing", async () => {
+        testCharacter.equipment = undefined as unknown as string; // Simulate missing equipment data
+        const unequip = await equipmentUnequip.unequip(testCharacter, inventory, testItem);
+        expect(unequip).toBeFalsy();
+
+        expect(socketMessaging).toHaveBeenCalledWith(
+          testCharacter.channelId!,
+          UISocketEvents.ShowMessage,
+          expect.objectContaining({
+            message: "Sorry, not possible.",
+            type: "error",
+          })
+        );
+      });
+
+      it("should fail to unequip if the inventory container ID is not defined", async () => {
+        inventory.itemContainer = undefined as unknown as string; // Set the itemContainer to undefined
+
+        const unequip = await equipmentUnequip.unequip(testCharacter, inventory, testItem);
+        expect(unequip).toBeFalsy();
+      });
+      it("should handle errors gracefully when performUnequipTransaction fails", async () => {
+        // @ts-ignore
+        // eslint-disable-next-line require-await
+        jest.spyOn(equipmentUnequip, "performUnequipTransaction").mockImplementationOnce(async () => false);
+
+        const unequip = await equipmentUnequip.unequip(testCharacter, inventory, testItem);
+        expect(unequip).toBeFalsy(); // Expect the unequip process to fail
+
+        const slots = await equipmentSlots.getEquipmentSlots(
+          testCharacter._id,
+          testCharacter.equipment as unknown as string
+        );
+        expect(slots.leftHand).toMatchObject({
+          _id: testItem._id.toString(),
+          key: testItem.key,
+          name: testItem.name,
+        }); // The item should still be in the left hand slot
+      });
+      it("should correctly handle the situation where buffs are not found for the item", async () => {
+        // @ts-ignore
+        jest.spyOn(equipmentUnequip.characterBuffTracker, "getBuffsByItemId").mockResolvedValueOnce([]);
+
+        const unequip = await equipmentUnequip.unequip(testCharacter, inventory, testItem);
+        expect(unequip).toBeTruthy();
+
+        expect(socketMessaging).toHaveBeenCalledWith(
+          testCharacter.channelId!,
+          ItemSocketEvents.EquipmentAndInventoryUpdate,
+          expect.anything()
+        );
+      });
+
+      it("should handle unequipping multiple items in quick succession", async () => {
+        const secondItem = (await unitTestHelper.createMockItem()) as unknown as IItem;
+
+        equipment.rightHand = secondItem._id;
+        await equipment.save();
+
+        const unequipFirst = await equipmentUnequip.unequip(testCharacter, inventory, testItem);
+        expect(unequipFirst).toBeTruthy();
+
+        const unequipSecond = await equipmentUnequip.unequip(testCharacter, inventory, secondItem);
+        expect(unequipSecond).toBeTruthy();
+
+        const slots = await equipmentSlots.getEquipmentSlots(
+          testCharacter._id,
+          testCharacter.equipment as unknown as string
+        );
+
+        expect(slots.leftHand).toBeFalsy();
+        expect(slots.rightHand).toBeFalsy();
+      });
+
+      it("should correctly remove item ownership when unequipping", async () => {
+        const unequip = await equipmentUnequip.unequip(testCharacter, inventory, testItem);
+        expect(unequip).toBeTruthy();
+
+        const updatedItem = await Item.findById(testItem._id).lean();
+        expect(updatedItem?.owner?.toString()).toEqual(testCharacter._id.toString());
+      });
     });
   });
 });

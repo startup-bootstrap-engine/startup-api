@@ -57,6 +57,10 @@ describe("ItemPickupFromContainer.ts ", () => {
     const result = await itemPickupFromContainer.pickupFromContainer(itemPickupData, testItem1, testCharacter);
 
     expect(result).toBe(true);
+
+    const updatedItem = await ItemContainer.findById(itemContainer.id);
+
+    expect(updatedItem?.owner).toStrictEqual(testCharacter._id);
   });
 
   it("returns true if the item was successfully removed from the container", async () => {
