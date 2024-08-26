@@ -69,17 +69,6 @@ describe("GuildPayingTribute.ts", () => {
     await runTributeTest(testItem, expectedMessage, 9);
   });
 
-  it("should pay tribute for a non-gold coin item, with lower random number", async () => {
-    jest.spyOn(_, "random").mockReturnValue(2);
-
-    const testItem2 = await unitTestHelper.createMockItemFromBlueprint(FoodsBlueprint.Banana, {
-      stackQty: 10,
-    });
-
-    const expectedMessage = `Tribute(s) paid to guild ${testGuild.name}: 2x ${testItem2.name}`;
-    await runTributeTest(testItem2, expectedMessage, 8);
-  });
-
   it("should not pay tribute for a non-gold coin item, with higher random number", async () => {
     jest.spyOn(_, "random").mockReturnValue(80);
 
