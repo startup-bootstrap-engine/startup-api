@@ -12,8 +12,7 @@ export class GuildCrons {
   ) {}
 
   public schedule(): void {
-    this.cronJobScheduler.uniqueSchedule("guild-tribute-distribution", "* * * * *", async () => {
-      // this.cronJobScheduler.uniqueSchedule("guild-tribute-distribution",       "0 */6 * * *", async () => {
+    this.cronJobScheduler.uniqueSchedule("guild-tribute-distribution", "0 */6 * * *", async () => {
       await this.guildTributeTracker.distributeTributeToAllGuilds();
     });
 

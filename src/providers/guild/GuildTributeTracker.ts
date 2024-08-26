@@ -63,6 +63,10 @@ export class GuildTributeTracker {
         memberShare += leaderBonus;
       }
 
+      if (memberShare <= 0) {
+        continue;
+      }
+
       const memberCharacter = await Character.findById(memberId).lean<ICharacter>();
       if (memberCharacter) {
         memberShare = Math.min(memberShare, totalTribute); // Ensure member doesn't get more than total tribute
