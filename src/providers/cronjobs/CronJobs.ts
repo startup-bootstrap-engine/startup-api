@@ -2,6 +2,7 @@ import { appEnv } from "@providers/config/env";
 import { PM2Helper } from "@providers/server/PM2Helper";
 import { EnvType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import { BonusXpEventCrons } from "./BonusXpEventCrons";
 import { CharacterCrons } from "./CharacterCrons";
 import { ChatLogCrons } from "./ChatLogCrons";
 import { CleanupBloodCrons } from "./CleanupBloodCrons";
@@ -15,9 +16,9 @@ import { ItemDeleteCrons } from "./ItemDeleteCrons";
 import { MacroCaptchaCrons } from "./MacroCaptchaCrons";
 import { MarketplaceCrons } from "./MarketplaceCrons";
 import { NPCCrons } from "./NPCCrons";
-import { BonusXpEventCrons } from "./BonusXpEventCrons";
 
 import { CharacterTradingCrons } from "./CharacterTradingCrons";
+import { GuildCrons } from "./GuildCrons";
 import { PlantCrons } from "./PlantCrons";
 import { PremiumAccountCrons } from "./PremiumAccountCrons";
 import { QueueCrons } from "./QueueCrons";
@@ -55,7 +56,8 @@ export class Cronjob {
     private plantCrons: PlantCrons,
     private queueCrons: QueueCrons,
     private characterTradingCrons: CharacterTradingCrons,
-    private bonusXpEventCrons: BonusXpEventCrons
+    private bonusXpEventCrons: BonusXpEventCrons,
+    private guildCrons: GuildCrons
   ) {}
 
   public start(): void {
@@ -90,6 +92,7 @@ export class Cronjob {
         this.queueCrons.schedule();
         this.characterTradingCrons.schedule();
         this.bonusXpEventCrons.schedule();
+        this.guildCrons.schedule();
         break;
       case EnvType.Staging:
       case EnvType.Production:
@@ -119,6 +122,7 @@ export class Cronjob {
           this.queueCrons.schedule();
           this.characterTradingCrons.schedule();
           this.bonusXpEventCrons.schedule();
+          this.guildCrons.schedule();
         }
         break;
     }
