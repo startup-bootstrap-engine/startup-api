@@ -20,6 +20,8 @@ export class CharacterGold {
       return false;
     }
 
+    amount = Math.round(amount); // Round to integer to avoid fractional gold
+
     const inventoryContainer = await this.characterInventory.getInventoryItemContainer(character);
 
     if (!inventoryContainer) {
