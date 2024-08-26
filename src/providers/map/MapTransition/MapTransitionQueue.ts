@@ -1,10 +1,12 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
+import { GuildLeader } from "@providers/guild/GuildLeader";
 import { GuildTerritory } from "@providers/guild/GuildTerritory";
 import { Locker } from "@providers/locks/Locker";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
+import { TextFormatter } from "@providers/text/TextFormatter";
 import { Cooldown } from "@providers/time/Cooldown";
 import { ITiledObject } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -35,7 +37,9 @@ export class MapTransitionQueue {
     private guildTerritory: GuildTerritory,
     private socketMessaging: SocketMessaging,
     private cooldown: Cooldown,
-    private locker: Locker
+    private locker: Locker,
+    private guildLeader: GuildLeader,
+    private textFormatter: TextFormatter
   ) {}
 
   @TrackNewRelicTransaction()
@@ -88,35 +92,40 @@ export class MapTransitionQueue {
 
       await this.teleportCharacter(character, destination);
 
-      const guild = await this.guildTerritory.getGuildByTerritoryMap(destination.map);
-
-      if (guild) {
-        const guildWarningKey = `${character._id}-${destination.map}`;
-        const isOnCooldown = await this.cooldown.isOnCooldown(guildWarningKey);
-
-        if (!isOnCooldown) {
-          const lootShare = this.guildTerritory.getTerritoryLootShare(guild, destination.map);
-          const lootShareMessage = lootShare ? ` Tributes may be charged on some loots (${lootShare}%).` : "";
-
-          console.log(lootShare, lootShareMessage);
-
-          this.socketMessaging.sendMessageToCharacter(
-            character,
-            `🏰 You have entered ${this.guildTerritory.getFormattedTerritoryName(
-              destination.map
-            )}, controlled by guild ${guild.name}.${lootShareMessage} 🏰`
-          );
-
-          // Set a cooldown of 5 minutes (300 seconds)
-          await this.cooldown.setCooldown(guildWarningKey, 300);
-        }
-      }
+      await this.handleGuildTerritoryEntry(character, destination);
 
       return true;
     } catch (error) {
       console.error(error);
 
       return false;
+    }
+  }
+
+  private async handleGuildTerritoryEntry(character: ICharacter, destination: IDestination): Promise<void> {
+    const guild = await this.guildTerritory.getGuildByTerritoryMap(destination.map);
+
+    if (guild) {
+      const guildWarningKey = `${character._id}-${destination.map}`;
+      const isOnCooldown = await this.cooldown.isOnCooldown(guildWarningKey);
+
+      if (!isOnCooldown) {
+        const lootShare = this.guildTerritory.getTerritoryLootShare(guild, destination.map);
+        const lootShareMessage = lootShare ? `Gold tax: ${lootShare}%` : "";
+
+        const guildLeader = await this.guildLeader.getGuildLeaderById(guild._id);
+        const truncatedGuildLeaderName = this.textFormatter.truncateWithEllipsis(guildLeader.name, 15);
+
+        this.socketMessaging.sendMessageToCharacter(
+          character,
+          `🏰 You have entered ${this.guildTerritory.getFormattedTerritoryName(destination.map)}, controlled by guild ${
+            guild.name
+          }. Leader: ${truncatedGuildLeaderName}, ${lootShareMessage} 🏰`
+        );
+
+        // Set a cooldown of 5 minutes (300 seconds)
+        await this.cooldown.setCooldown(guildWarningKey, 300);
+      }
     }
   }
 
