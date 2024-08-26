@@ -47,6 +47,11 @@ export class GuildLeader {
 
   public async getGuildLeaderDepot(guildId: Types.ObjectId): Promise<IDepot | null> {
     const guildLeader = await this.getGuildLeaderById(guildId);
+
+    if (!guildLeader) {
+      throw new Error(`Guild leader not found for guildId: ${guildId}`);
+    }
+
     const depot = await this.depotFinder.findDepotWithSlots(guildLeader);
     if (!depot) {
       throw new Error(`Depot not found for guild leader: ${guildLeader._id}`);

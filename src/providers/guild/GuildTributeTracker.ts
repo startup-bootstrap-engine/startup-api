@@ -67,17 +67,22 @@ export class GuildTributeTracker {
         continue;
       }
 
-      const memberCharacter = await Character.findById(memberId).lean<ICharacter>();
-      if (memberCharacter) {
-        memberShare = Math.min(memberShare, totalTribute); // Ensure member doesn't get more than total tribute
+      try {
+        const memberCharacter = await Character.findById(memberId).lean<ICharacter>();
+        if (memberCharacter) {
+          memberShare = Math.min(memberShare, totalTribute); // Ensure member doesn't get more than total tribute
 
-        console.log(`Distributing ${memberShare} gold to ${memberCharacter.name}`);
-        this.socketMessaging.sendMessageToCharacter(
-          memberCharacter,
-          `💰 You received ${Math.round(memberShare)} gold coin(s) as your share of the guild tribute.`
-        );
+          console.log(`Distributing ${memberShare} gold to ${memberCharacter.name}`);
+          this.socketMessaging.sendMessageToCharacter(
+            memberCharacter,
+            `💰 You received ${Math.round(memberShare)} gold coin(s) as your share of the guild tribute.`
+          );
 
-        await this.characterGold.addGoldToCharacterInventory(memberCharacter, memberShare);
+          await this.characterGold.addGoldToCharacterInventory(memberCharacter, memberShare);
+        }
+      } catch (error) {
+        console.error(`Failed to distribute gold to member ${memberId}:`, error);
+        continue; // Avoid getting stuck if something fails
       }
     }
 
