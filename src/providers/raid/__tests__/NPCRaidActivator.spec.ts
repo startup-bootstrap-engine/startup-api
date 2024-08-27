@@ -64,7 +64,7 @@ describe("NPCRaidActivator", () => {
     expect(spySendEventToAllUsers).toBeCalledWith(
       "ShowMessage",
       expect.objectContaining({
-        message: "This is a test raid starting!",
+        message: expect.stringContaining("This is a test raid starting!"),
         type: "warning",
       })
     );

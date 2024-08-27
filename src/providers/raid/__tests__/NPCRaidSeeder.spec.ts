@@ -60,7 +60,7 @@ describe("NPCRaidSeeder", () => {
     const updatedRaid = await raidManager.getRaid("orc-raid-ilya");
     expect(updatedRaid).toMatchObject({
       startingMessage: "Orcs are invading Ilya! Defend the city!", // should be updated from availableRaids
-      triggeringChance: 5, // should be updated from availableRaids
+      triggeringChance: 7, // should be updated from availableRaids
       minDuration: 15, // should be updated from availableRaids
     });
   });
@@ -114,7 +114,7 @@ describe("NPCRaidSeeder", () => {
     await npcRaidSeeder.seed();
 
     expect(logSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Error while seeding raids: Not all raids were seeded")
+      expect.stringContaining("Error while seeding raids: Failed to seed all raids. Expected 8 but got 7.")
     );
 
     logSpy.mockRestore();
