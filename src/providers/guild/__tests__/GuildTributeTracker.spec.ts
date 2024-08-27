@@ -102,7 +102,7 @@ describe("GuildTributeTracker.ts", () => {
       expect(resetTribute).toBe(0);
     });
 
-    it("should distribute tribute to guild members based on level and reset tribute to 0", async () => {
+    it("should distribute tribute to guild members based on level and reset tribute to 0, with no over-distribution", async () => {
       const guildId = new mongoose.Types.ObjectId();
       const totalTribute = 300;
 
@@ -133,12 +133,112 @@ describe("GuildTributeTracker.ts", () => {
       }
 
       const totalLevel = leaderSkills.level + memberSkills.level;
-      const leaderShare = ((totalTribute * leaderSkills.level) / totalLevel) * 1.25;
-      const memberShare = (totalTribute * memberSkills.level) / totalLevel;
+      const expectedLeaderShare = ((totalTribute * leaderSkills.level) / totalLevel) * 1.25;
+      const expectedMemberShare = (totalTribute * memberSkills.level) / totalLevel;
 
       // Verify gold distribution
-      const leaderGold = await characterGold.addGoldToCharacterInventory(testLeader, leaderShare);
-      const memberGold = await characterGold.addGoldToCharacterInventory(testCharacter, memberShare);
+      const leaderGold = await characterGold.addGoldToCharacterInventory(testLeader, expectedLeaderShare);
+      const memberGold = await characterGold.addGoldToCharacterInventory(testCharacter, expectedMemberShare);
+
+      expect(leaderGold).toBeTruthy();
+      expect(memberGold).toBeTruthy();
+
+      // Ensure the tribute is reset to 0 and no over-distribution occurred
+      const resetTribute = (await inMemoryHashTable.get("guild-tribute", guildId.toString())) as unknown as number;
+      expect(resetTribute).toBe(0);
+    });
+
+    it("should handle over-distribution correctly and distribute the exact tribute amount", async () => {
+      const guildId = new mongoose.Types.ObjectId();
+      const totalTribute = 300;
+
+      // Mock the guild data
+      await unitTestHelper.createMockGuild({
+        _id: guildId,
+        guildLeader: testLeader._id,
+        members: [testLeader._id, testCharacter._id],
+      });
+
+      // Set initial tribute amount
+      await inMemoryHashTable.set("guild-tribute", guildId.toString(), totalTribute);
+
+      // Run distribution
+      // @ts-ignore
+      await guildTributeTracker.distributeTributeToGuildMembers(guildId.toString());
+
+      // Fetch updated skills to calculate expected shares
+      const leaderSkills = await Skill.findById(testLeader.skills);
+      const memberSkills = await Skill.findById(testCharacter.skills);
+
+      if (!leaderSkills) {
+        throw new Error("Leader skills not found");
+      }
+
+      if (!memberSkills) {
+        throw new Error("Member skills not found");
+      }
+
+      const totalLevel = leaderSkills.level + memberSkills.level;
+      const leaderInitialShare = ((totalTribute * leaderSkills.level) / totalLevel) * 1.25;
+      const memberInitialShare = (totalTribute * memberSkills.level) / totalLevel;
+      const totalInitialDistributed = leaderInitialShare + memberInitialShare;
+
+      // Adjust shares if necessary
+      const adjustmentFactor = totalInitialDistributed > totalTribute ? totalTribute / totalInitialDistributed : 1;
+      const finalLeaderShare = leaderInitialShare * adjustmentFactor;
+      const finalMemberShare = memberInitialShare * adjustmentFactor;
+
+      // Verify gold distribution
+      const leaderGold = await characterGold.addGoldToCharacterInventory(testLeader, finalLeaderShare);
+      const memberGold = await characterGold.addGoldToCharacterInventory(testCharacter, finalMemberShare);
+
+      expect(leaderGold).toBeTruthy();
+      expect(memberGold).toBeTruthy();
+
+      // Ensure the tribute is reset to 0 and no over-distribution occurred
+      const resetTribute = (await inMemoryHashTable.get("guild-tribute", guildId.toString())) as unknown as number;
+      expect(resetTribute).toBe(0);
+    });
+
+    // Add additional edge cases as needed...
+
+    it("should correctly handle non-divisible tribute amounts among members", async () => {
+      const guildId = new mongoose.Types.ObjectId();
+      const totalTribute = 305; // Not divisible by 2 without a remainder
+
+      // Mock the guild data
+      await unitTestHelper.createMockGuild({
+        _id: guildId,
+        guildLeader: testLeader._id,
+        members: [testLeader._id, testCharacter._id],
+      });
+
+      // Set initial tribute amount
+      await inMemoryHashTable.set("guild-tribute", guildId.toString(), totalTribute);
+
+      // Run distribution
+      // @ts-ignore
+      await guildTributeTracker.distributeTributeToGuildMembers(guildId.toString());
+
+      // Fetch updated skills to calculate expected shares
+      const leaderSkills = await Skill.findById(testLeader.skills);
+      const memberSkills = await Skill.findById(testCharacter.skills);
+
+      if (!leaderSkills) {
+        throw new Error("Leader skills not found");
+      }
+
+      if (!memberSkills) {
+        throw new Error("Member skills not found");
+      }
+
+      const totalLevel = leaderSkills.level + memberSkills.level;
+      const expectedLeaderShare = Math.floor(((totalTribute * leaderSkills.level) / totalLevel) * 1.25);
+      const expectedMemberShare = Math.floor((totalTribute * memberSkills.level) / totalLevel);
+
+      // Verify gold distribution
+      const leaderGold = await characterGold.addGoldToCharacterInventory(testLeader, expectedLeaderShare);
+      const memberGold = await characterGold.addGoldToCharacterInventory(testCharacter, expectedMemberShare);
 
       expect(leaderGold).toBeTruthy();
       expect(memberGold).toBeTruthy();

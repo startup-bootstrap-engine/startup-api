@@ -40,7 +40,7 @@ export class GuildTributeTracker {
       throw new Error(`Guild with ID ${guildId} not found.`);
     }
 
-    let totalTribute = (await this.inMemoryHashTable.get(this.namespace, guildId)) as unknown as number;
+    const totalTribute = (await this.inMemoryHashTable.get(this.namespace, guildId)) as unknown as number;
 
     console.log(`Distributing tribute to guild ${guild.name} (${guildId}): ${totalTribute}`);
 
@@ -58,6 +58,7 @@ export class GuildTributeTracker {
 
     let totalLevel = 0;
     const memberSkillsMap: Map<string, ISkill> = new Map();
+    const memberShares: Map<string, number> = new Map();
 
     // Fetch skills for each member and calculate the total level
     for (const member of members) {
@@ -79,7 +80,9 @@ export class GuildTributeTracker {
 
     const leaderBonusMultiplier = 1.25;
     const leaderBonus = guild.guildLeader ? leaderBonusMultiplier : 1;
+    let totalDistributed = 0;
 
+    // Calculate the share for each member and accumulate the total distributed
     for (const member of members) {
       const skills = memberSkillsMap.get(member._id.toString());
       if (!skills) {
@@ -94,21 +97,37 @@ export class GuildTributeTracker {
         memberShare *= leaderBonus;
       }
 
-      memberShare = Math.min(memberShare, totalTribute); // Ensure member doesn't get more than total tribute
+      memberShares.set(member._id.toString(), memberShare);
+      totalDistributed += memberShare;
+    }
+
+    // Adjust shares if totalDistributed exceeds totalTribute due to rounding or bonuses
+    if (totalDistributed > totalTribute) {
+      const adjustmentFactor = totalTribute / totalDistributed;
+      totalDistributed = 0;
+
+      for (const [memberId, share] of memberShares) {
+        const adjustedShare = share * adjustmentFactor;
+        memberShares.set(memberId, adjustedShare);
+        totalDistributed += adjustedShare;
+      }
+    }
+
+    // Distribute the calculated shares to each member
+    for (const member of members) {
+      const memberShare = memberShares.get(member._id.toString()) || 0;
 
       if (memberShare <= 0) {
         continue;
       }
 
       try {
-        console.log(`Distributing ${memberShare} gold to ${member.name}`);
         this.socketMessaging.sendMessageToCharacter(
           member,
           `💰 You received ${Math.round(memberShare)} gold coin(s) as your share of the guild tribute.`
         );
 
         await this.characterGold.addGoldToCharacterInventory(member, memberShare);
-        totalTribute -= memberShare;
       } catch (error) {
         console.error(`Failed to distribute gold to member ${member._id}:`, error);
         continue; // Avoid getting stuck if something fails
