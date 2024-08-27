@@ -2,6 +2,7 @@ import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { RAID_TRIGGERING_CHANCE_RATIO } from "@providers/constants/RaidConstants";
 import { DiscordBot } from "@providers/discord/DiscordBot";
+import { Locker } from "@providers/locks/Locker";
 import { NPCSpawn } from "@providers/npc/NPCSpawn";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { Time } from "@providers/time/Time";
@@ -16,14 +17,20 @@ export class NPCRaidActivator {
   constructor(
     private socketMessaging: SocketMessaging,
     private npcSpawn: NPCSpawn,
-    private raid: RaidManager,
     private raidManager: RaidManager,
     private time: Time,
-    private discordBot: DiscordBot
+    private discordBot: DiscordBot,
+    private locker: Locker
   ) {}
 
   @TrackNewRelicTransaction()
   public async activateRaids(): Promise<void> {
+    const canProceed = await this.locker.lock("raid-activator");
+
+    if (!canProceed) {
+      return;
+    }
+
     try {
       const selectedRaid = await this.getRandomInactiveRaid();
 
@@ -53,6 +60,8 @@ export class NPCRaidActivator {
       await this.spawnNPCs(npcsFromRaid);
     } catch (error) {
       console.error("Error while processing the raid task:", error);
+    } finally {
+      await this.locker.unlock("raid-activator");
     }
   }
 
@@ -62,13 +71,13 @@ export class NPCRaidActivator {
     }
 
     this.socketMessaging.sendEventToAllUsers<IUIShowMessage>(UISocketEvents.ShowMessage, {
-      message: raid.startingMessage,
+      message: `💀 ${raid.startingMessage} 💀`,
       type: "warning",
     });
   }
 
   private async enableRaid(raid: IRaid): Promise<void> {
-    await this.raid.updateRaid(raid.key, { ...raid, status: true, lastActivationTime: new Date() });
+    await this.raidManager.updateRaid(raid.key, { ...raid, status: true, lastActivationTime: new Date() });
   }
 
   private async spawnNPCs(npcs: INPC[]): Promise<void> {
@@ -90,7 +99,7 @@ export class NPCRaidActivator {
   }
 
   private async shutdownAllActiveRaids(): Promise<void> {
-    const activeRaids = await this.raid.queryRaids({ status: true });
+    const activeRaids = await this.raidManager.queryRaids({ status: true });
 
     if (activeRaids.length === 0) return;
 
@@ -117,7 +126,7 @@ export class NPCRaidActivator {
   }
 
   private async disableRaid(raid: IRaid): Promise<void> {
-    await this.raid.updateRaid(raid.key, { ...raid, status: false });
+    await this.raidManager.updateRaid(raid.key, { ...raid, status: false });
 
     // Notify all users that the raid is over
     this.socketMessaging.sendEventToAllUsers<IUIShowMessage>(UISocketEvents.ShowMessage, {
@@ -127,7 +136,12 @@ export class NPCRaidActivator {
   }
 
   private async getRandomInactiveRaid(): Promise<IRaid | null> {
-    const raids = await this.raid.queryRaids({ status: false });
+    const raids = await this.raidManager.queryRaids({ status: false });
+
+    if (raids.length === 0) {
+      console.warn("No inactive raids available for activation.");
+      return null;
+    }
 
     const eligibleRaids = raids.filter((raid) => {
       const randomValue = random(0, 100); // Get a random number between 1 and 100

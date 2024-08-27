@@ -33,7 +33,8 @@ export class RaidManager {
   }
 
   public async getAllRaids(): Promise<IRaid[]> {
-    return Object.values((await this.inMemoryHashTable.getAll("raids")) as unknown as IRaid[]);
+    const raids = await this.inMemoryHashTable.getAll("raids");
+    return Object.values((raids || {}) as unknown as IRaid[]);
   }
 
   public async isRaidActive(key: string): Promise<boolean> {
@@ -79,6 +80,10 @@ export class RaidManager {
 
   public async updateRaid(key: string, updatedFields: Partial<IRaid>): Promise<void> {
     const currentRaid = await this.getRaid(key);
+
+    if (!currentRaid) {
+      throw new Error(`Raid with key ${key} not found`);
+    }
 
     await this.inMemoryHashTable.set("raids", key, {
       ...currentRaid,

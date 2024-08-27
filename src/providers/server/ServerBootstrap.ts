@@ -175,7 +175,6 @@ export class ServerBootstrap {
     await this.inMemoryHashTable.deleteAll("craftable-item-ingredients");
     await this.inMemoryHashTable.deleteAll("load-craftable-items");
     await this.inMemoryHashTable.deleteAll("channel-bound-events");
-    await this.inMemoryHashTable.deleteAll("raids");
     await this.inMemoryHashTable.deleteAll("npc-target-check-count");
     await this.inMemoryHashTable.deleteAll("use-item-to-tile");
     await this.inMemoryHashTable.deleteAll("character-bonus-penalties");

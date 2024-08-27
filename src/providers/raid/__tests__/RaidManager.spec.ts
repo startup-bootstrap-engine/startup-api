@@ -149,4 +149,210 @@ describe("RaidManager", () => {
 
     expect(queriedRaidsTriggerChance).toEqual([raid3]);
   });
+
+  // New tests
+
+  it("should throw an error when trying to update a non-existent raid", async () => {
+    await expect(raidManager.updateRaid("nonExistentKey", { status: true })).rejects.toThrow(
+      "Raid with key nonExistentKey not found"
+    );
+  });
+
+  it("should delete all raids and confirm their absence", async () => {
+    const raid1: IRaid = {
+      name: "test raid",
+      key: "raid1",
+      startingMessage: "warning1",
+      status: true,
+      triggeringChance: 10,
+      minDuration: 10,
+    };
+
+    const raid2: IRaid = {
+      name: "test raid",
+      key: "raid2",
+      startingMessage: "warning2",
+      status: false,
+      triggeringChance: 20,
+      minDuration: 10,
+    };
+
+    await raidManager.addRaid(raid1);
+    await raidManager.addRaid(raid2);
+
+    await raidManager.deleteAllRaids();
+    const allRaids = await raidManager.getAllRaids();
+    expect(allRaids).toEqual([]);
+  });
+
+  it("should return true if the raid is active and false otherwise", async () => {
+    const raid: IRaid = {
+      name: "test raid",
+      key: "raid1",
+      startingMessage: "warning1",
+      status: true,
+      triggeringChance: 10,
+      minDuration: 10,
+    };
+
+    await raidManager.addRaid(raid);
+
+    const isActive = await raidManager.isRaidActive("raid1");
+    expect(isActive).toBe(true);
+
+    await raidManager.updateRaid("raid1", { status: false });
+    const isInactive = await raidManager.isRaidActive("raid1");
+    expect(isInactive).toBe(false);
+  });
+
+  it("should return an empty array when no raids match the query criteria", async () => {
+    const raids = await raidManager.queryRaids({ status: true, triggeringChance: 100 });
+    expect(raids).toEqual([]);
+  });
+
+  it("should handle querying with multiple criteria", async () => {
+    const raid1: IRaid = {
+      name: "test raid",
+      key: "raid1",
+      startingMessage: "warning1",
+      status: true,
+      triggeringChance: 10,
+      minDuration: 10,
+    };
+
+    const raid2: IRaid = {
+      name: "test raid",
+      key: "raid2",
+      startingMessage: "warning2",
+      status: true,
+      triggeringChance: 20,
+      minDuration: 10,
+    };
+
+    await raidManager.addRaid(raid1);
+    await raidManager.addRaid(raid2);
+
+    const queriedRaids = await raidManager.queryRaids({ status: true, triggeringChance: 20 });
+    expect(queriedRaids).toEqual([raid2]);
+  });
+
+  it("should handle a large number of raids efficiently", async () => {
+    const raids: IRaid[] = [];
+
+    for (let i = 0; i < 1000; i++) {
+      raids.push({
+        name: `raid ${i}`,
+        key: `raid${i}`,
+        startingMessage: `message ${i}`,
+        status: i % 2 === 0,
+        triggeringChance: i,
+        minDuration: 10,
+      });
+    }
+
+    for (const raid of raids) {
+      await raidManager.addRaid(raid);
+    }
+
+    const allRaids = await raidManager.getAllRaids();
+    expect(allRaids.length).toBe(1000);
+  });
+
+  it("should throw an error when trying to update a non-existent raid", async () => {
+    await expect(raidManager.updateRaid("nonExistentKey", { status: true })).rejects.toThrow(
+      "Raid with key nonExistentKey not found"
+    );
+  });
+
+  it("should delete all raids and confirm their absence", async () => {
+    const raid1: IRaid = {
+      name: "test raid",
+      key: "raid1",
+      startingMessage: "warning1",
+      status: true,
+      triggeringChance: 10,
+      minDuration: 10,
+    };
+
+    const raid2: IRaid = {
+      name: "test raid",
+      key: "raid2",
+      startingMessage: "warning2",
+      status: false,
+      triggeringChance: 20,
+      minDuration: 10,
+    };
+
+    await raidManager.addRaid(raid1);
+    await raidManager.addRaid(raid2);
+
+    await raidManager.deleteAllRaids();
+    const allRaids = await raidManager.getAllRaids();
+    expect(allRaids).toEqual([]);
+
+    // Additional check to ensure that no raids exist after deletion
+    const allKeys = await raidManager.getAllRaidKeys();
+    expect(allKeys).toEqual([]);
+  });
+
+  it("should update a raid and merge fields correctly", async () => {
+    const raid: IRaid = {
+      name: "test raid",
+      key: "raid1",
+      startingMessage: "warning",
+      status: true,
+      triggeringChance: 10,
+      minDuration: 10,
+    };
+
+    await raidManager.addRaid(raid);
+
+    const raidUpdated: Partial<IRaid> = {
+      startingMessage: "updated warning",
+      status: false,
+    };
+
+    await raidManager.updateRaid("raid1", raidUpdated);
+    const raidQuery = await raidManager.getRaid("raid1");
+
+    expect(raidQuery).toEqual({
+      name: "test raid",
+      key: "raid1",
+      startingMessage: "updated warning",
+      status: false,
+      triggeringChance: 10, // This field should remain unchanged
+      minDuration: 10, // This field should remain unchanged
+    });
+  });
+
+  it("should return an empty array when no raids match the query criteria", async () => {
+    const raids = await raidManager.queryRaids({ status: true, triggeringChance: 100 });
+    expect(raids).toEqual([]);
+  });
+
+  it("should handle a large number of raids efficiently", async () => {
+    const raids: IRaid[] = [];
+
+    for (let i = 0; i < 1000; i++) {
+      raids.push({
+        name: `raid ${i}`,
+        key: `raid${i}`,
+        startingMessage: `message ${i}`,
+        status: i % 2 === 0,
+        triggeringChance: i,
+        minDuration: 10,
+      });
+    }
+
+    for (const raid of raids) {
+      await raidManager.addRaid(raid);
+    }
+
+    const allRaids = await raidManager.getAllRaids();
+    expect(allRaids.length).toBe(1000);
+  });
+
+  afterAll(async () => {
+    await raidManager.deleteAllRaids();
+  });
 });

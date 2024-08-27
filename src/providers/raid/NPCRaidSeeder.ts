@@ -29,16 +29,17 @@ export class NPCRaidSeeder {
           }
         }
       }
-    } catch (error) {
-      this.log(`Error while seeding raids: ${error.message}`, "error");
-    }
-  }
 
-  private log(message: string, level: "info" | "error" = "info"): void {
-    if (level === "error") {
-      console.error(message);
-    } else {
-      console.log(message);
+      // confirm all raids are seeded
+      const allRaids = await this.raid.getAllRaids();
+
+      if (allRaids.length === raids.length) {
+        console.log(`✅ All ${allRaids.length} raids seeded successfully`);
+      } else {
+        throw new Error(`Failed to seed all raids. Expected ${raids.length} but got ${allRaids.length}.`);
+      }
+    } catch (error) {
+      console.error(`Error while seeding raids: ${error.message}`);
     }
   }
 }
