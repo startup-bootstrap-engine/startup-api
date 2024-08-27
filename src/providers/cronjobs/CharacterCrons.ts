@@ -3,6 +3,7 @@ import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel"
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { CharacterLastAction } from "@providers/character/CharacterLastAction";
 import { CharacterRetentionTracker } from "@providers/character/CharacterRetentionTracker";
+import { CharacterTextureChange, ITextureRevert } from "@providers/character/CharacterTextureChange";
 import { SERVER_DISCONNECT_IDLE_TIMEOUT } from "@providers/constants/ServerConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SocketAdapter } from "@providers/sockets/SocketAdapter";
@@ -24,7 +25,8 @@ export class CharacterCrons {
     private socketSessionControl: SocketSessionControl,
     private cronJobScheduler: CronJobScheduler,
     private characterRetentionTracker: CharacterRetentionTracker,
-    private inMemoryHashTable: InMemoryHashTable
+    private inMemoryHashTable: InMemoryHashTable,
+    private characterTextureChange: CharacterTextureChange
   ) {}
 
   public schedule(): void {
@@ -62,6 +64,32 @@ export class CharacterCrons {
     this.cronJobScheduler.uniqueSchedule("character-cron-count-active-characters", "* * * * *", async () => {
       await this.countActiveCharacters();
     });
+
+    this.cronJobScheduler.uniqueSchedule("character-cron-revert-expired-textures", "* * * * *", async () => {
+      await this.revertExpiredTextures();
+    });
+  }
+
+  private async revertExpiredTextures(): Promise<void> {
+    const textures = await this.inMemoryHashTable.getAll("character-texture-revert");
+
+    if (!textures) {
+      console.log("No textures found for reversion.");
+      return;
+    }
+
+    for (const characterId of Object.keys(textures)) {
+      const characterTextures = textures[characterId] as Record<string, ITextureRevert>;
+
+      for (const namespace of Object.keys(characterTextures)) {
+        const { expiresAt } = characterTextures[namespace];
+
+        if (expiresAt && Date.now() > expiresAt) {
+          console.log(`Reverting texture for character ${characterId}, namespace: ${namespace}`);
+          await this.characterTextureChange.revertTexture(characterId, namespace);
+        }
+      }
+    }
   }
 
   private async unbanCharacters(): Promise<void> {

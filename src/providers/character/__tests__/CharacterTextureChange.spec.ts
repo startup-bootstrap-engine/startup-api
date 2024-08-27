@@ -5,11 +5,6 @@ import { CharacterTextureChange } from "../CharacterTextureChange";
 
 jest.useFakeTimers({ advanceTimers: true });
 
-jest.mock("@entities/ModuleCharacter/CharacterModel", () => ({
-  Character: {
-    findByIdAndUpdate: jest.fn(),
-  },
-}));
 describe("CharacterTextureChange.ts", () => {
   let characterTextureChange: CharacterTextureChange;
   let testCharacter: ICharacter;
@@ -147,7 +142,7 @@ describe("CharacterTextureChange.ts", () => {
 
     // Spy on updateCharacterTexture method and mock its implementation
     const spyUpdateCharacterTexture = jest
-      // @ts-expect-error
+      // @ts-ignore
       .spyOn(characterTextureChange, "updateCharacterTexture")
       // @ts-expect-error
       .mockImplementation(() => Promise.resolve());
@@ -171,5 +166,44 @@ describe("CharacterTextureChange.ts", () => {
     // Check if updateCharacterTexture is called with each spellKey and texture from the stored spells
     expect(spyUpdateCharacterTexture).toHaveBeenNthCalledWith(1, "spellKey1", "textureKey1");
     expect(spyUpdateCharacterTexture).toHaveBeenNthCalledWith(2, "spellKey2", "textureKey2");
+  });
+
+  // Updated test for revertTexture method
+  it("should revert the texture of a character and clean up Redis entries", async () => {
+    const namespace = "spell";
+    const originalTextureKey = "original-texture";
+    const mockTextures = {
+      [namespace]: { originalTextureKey, expiresAt: Date.now() - 1000 },
+    };
+
+    mockInMemoryHashTable.get.mockResolvedValue(mockTextures);
+    mockInMemoryHashTable.delete.mockResolvedValue(undefined);
+
+    await characterTextureChange.revertTexture(testCharacter._id.toString(), namespace);
+
+    expect(mockSocketMessaging.sendEventToCharactersAroundCharacter).toHaveBeenCalledWith(
+      expect.objectContaining({ _id: testCharacter._id }),
+      CharacterSocketEvents.AttributeChanged,
+      expect.objectContaining({ textureKey: originalTextureKey }),
+      true
+    );
+    expect(mockInMemoryHashTable.delete).toHaveBeenCalledWith("character-texture-revert", testCharacter._id.toString());
+  });
+
+  // Test for not overwriting existing spell type in changeTexture
+  it("should not overwrite existing spell type in changeTexture", async () => {
+    const namespace = "spell";
+    const textureKey = "rat";
+    const timeInterval = 1;
+    const normalTextureKey = "normal";
+    const spellType = "SpellType";
+
+    testCharacter.textureKey = normalTextureKey;
+    mockInMemoryHashTable.getAll.mockResolvedValue({ [namespace]: true });
+    mockInMemoryHashTable.has.mockResolvedValue(true);
+
+    await characterTextureChange.changeTexture(testCharacter, textureKey, timeInterval, namespace);
+
+    expect(mockInMemoryHashTable.set).not.toHaveBeenCalledWith(spellType, namespace, true);
   });
 });

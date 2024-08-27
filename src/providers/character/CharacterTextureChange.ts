@@ -4,14 +4,55 @@ import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { CharacterSocketEvents, ICharacterAttributeChanged } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
+export interface ITextureRevert {
+  originalTextureKey: string;
+  expiresAt: number;
+}
+
 @provide(CharacterTextureChange)
 export class CharacterTextureChange {
   constructor(private inMemoryHashTable: InMemoryHashTable, private socketMessaging: SocketMessaging) {}
 
-  private async updateCharacterTexture(id: string, textureKey: string): Promise<ICharacter> {
+  public async updateCharacterTexture(id: string, textureKey: string): Promise<ICharacter> {
     return await Character.findByIdAndUpdate(id, { textureKey }, { new: true })
       .select("_id textureKey channelId")
       .lean();
+  }
+
+  public async revertTexture(characterId: string, namespace: string): Promise<void> {
+    const textures = await this.inMemoryHashTable.get("character-texture-revert", characterId);
+
+    if (!textures || !textures[namespace]) {
+      return;
+    }
+
+    const { originalTextureKey } = textures[namespace];
+    const character = await Character.findById(characterId).lean<ICharacter>();
+
+    if (!character) {
+      return;
+    }
+
+    await this.updateCharacterTexture(characterId, originalTextureKey);
+    const payload: ICharacterAttributeChanged = this.createPayload(character, originalTextureKey);
+
+    await this.socketMessaging.sendEventToCharactersAroundCharacter(
+      character,
+      CharacterSocketEvents.AttributeChanged,
+      payload,
+      true
+    );
+
+    // Clean up the namespace entry atomically
+    delete textures[namespace];
+
+    if (Object.keys(textures).length === 0) {
+      // If no more textures remain, remove the entire entry
+      await this.inMemoryHashTable.delete("character-texture-revert", characterId);
+    } else {
+      // Otherwise, update the entry with the remaining textures
+      await this.inMemoryHashTable.set("character-texture-revert", characterId, textures);
+    }
   }
 
   public async changeTexture(
@@ -27,7 +68,7 @@ export class CharacterTextureChange {
 
     try {
       const updatedCharacter = await this.updateCharacterTexture(character._id, textureKey);
-      const payload: ICharacterAttributeChanged = this.createPayload(updatedCharacter);
+      const payload: ICharacterAttributeChanged = this.createPayload(updatedCharacter, textureKey);
 
       await this.socketMessaging.sendEventToCharactersAroundCharacter(
         character,
@@ -55,35 +96,41 @@ export class CharacterTextureChange {
 
       if (!hasSpell) {
         await this.inMemoryHashTable.set(namespace, key, normalTextureKey);
-        // add all spell types.if it's already exists it will overwrite.
         await this.inMemoryHashTable.set(spellType, namespace, true);
       }
 
-      setTimeout(async () => {
-        const normalTextureKeyStored: unknown = await this.inMemoryHashTable.get(namespace, key);
+      const currentTexturesToRevert =
+        (await this.inMemoryHashTable.get("character-texture-revert", character._id)) || {};
 
-        if (typeof normalTextureKeyStored === "string") {
-          const refreshedCharacter = await this.updateCharacterTexture(updatedCharacter._id, normalTextureKeyStored);
-          const refreshedPayload: ICharacterAttributeChanged = this.createPayload(refreshedCharacter);
+      const textureRevert: ITextureRevert = {
+        originalTextureKey: normalTextureKey,
+        expiresAt: Date.now() + intervalInSecs * 1000,
+      };
 
-          await this.inMemoryHashTable.delete(namespace, key);
-          await this.socketMessaging.sendEventToCharactersAroundCharacter(
-            character,
-            CharacterSocketEvents.AttributeChanged,
-            refreshedPayload,
-            true
-          );
-        }
-      }, intervalInSecs * 1000);
+      // we store it on redis so we can revert it later on the cron job as well (fallback mechanism in case the server crashes/restart and setTimeout is wiped out)
+
+      const redisPayload = {
+        ...currentTexturesToRevert,
+        [namespace]: textureRevert,
+      };
+
+      await this.inMemoryHashTable.set("character-texture-revert", character._id, redisPayload);
+
+      // Set a timeout for immediate reversion
+      setTimeout(() => this.revertTexture(character._id, namespace), intervalInSecs * 1000);
     } catch (error) {
       console.error(`Error in texture change: ${character._id} `, error);
     }
   }
 
-  private createPayload(character: ICharacter): ICharacterAttributeChanged {
+  public createPayload(character: ICharacter, textureKey: string): ICharacterAttributeChanged {
     return {
       targetId: character._id,
-      textureKey: character.textureKey,
+      textureKey,
+      health: character.health,
+      maxHealth: character.maxHealth,
+      mana: character.mana,
+      maxMana: character.maxMana,
     };
   }
 
@@ -94,14 +141,12 @@ export class CharacterTextureChange {
 
       if (!spellTypeStored) return;
 
-      // Iterate over properties in spellTypeStored
       for (const key of Object.keys(spellTypeStored)) {
         const spellData = await this.inMemoryHashTable.getAll(key);
         await this.inMemoryHashTable.deleteAll(key);
 
         if (!spellData) continue;
 
-        // Iterating over spell data and updating character textures
         for (const spellKey of Object.keys(spellData)) {
           await this.updateCharacterTexture(spellKey, spellData[spellKey] as string);
         }
