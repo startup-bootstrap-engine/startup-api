@@ -65,13 +65,13 @@ export class PremiumAccountController implements interfaces.Controller {
     const user = (await User.findOne({ email: email }).lean()) as IUser;
 
     if (!user) {
-      new BadRequestError("User not found!");
+      throw new BadRequestError("User not found!");
     }
 
     const result = await this.premiumAccountActivator.deactivateUserPremiumAccount(user);
 
     if (!result) {
-      new BadRequestError("Error deactivating premium account!");
+      throw new BadRequestError("Error deactivating premium account!");
     }
 
     return res.status(200).send({

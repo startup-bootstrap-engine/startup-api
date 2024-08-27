@@ -42,7 +42,11 @@ export class PremiumAccountActivator {
 
   public async deactivateUserPremiumAccount(user: IUser): Promise<boolean> {
     try {
-      console.log("😔 Deactivating premium account for user", user.email);
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      console.log("😔 Deactivating premium account for user", user?.email);
 
       await User.findByIdAndUpdate(user._id, {
         $set: {
