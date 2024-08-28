@@ -32,11 +32,13 @@ export class NPCCrons {
       await this.npcSpawnCron();
     });
 
-    this.cronJobScheduler.uniqueSchedule("npc-raid-shutdown", "* * * * *", async () => {
+    this.cronJobScheduler.uniqueSchedule("npc-raid-shutdown", "*/15 * * * *", async () => {
+      console.log("Trying to shutdown raids...");
       await this.npcRaidActivator.shutdownRaids();
     });
 
     this.cronJobScheduler.uniqueSchedule("npc-raid-activator", "0 * * * *", async () => {
+      console.log("Trying to activate raids...");
       await this.npcRaidActivator.activateRaids();
     });
 
