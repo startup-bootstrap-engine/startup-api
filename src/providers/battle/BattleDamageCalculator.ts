@@ -37,6 +37,10 @@ export class BattleDamageCalculator {
     target: BattleParticipant,
     isMagicAttack: boolean = false
   ): Promise<number> {
+    if (target.health <= 0 || attacker.health <= 0) {
+      return 0;
+    }
+
     const attackerSkills = await this.getOrFetchSkills(attacker);
     const defenderSkills = await this.getOrFetchSkills(target);
 
