@@ -133,25 +133,25 @@ describe("NPCGiantForm", () => {
     expect(NPC.updateOne).toHaveBeenCalledWith(
       { _id: npc._id },
       {
-        maxHealth: 200,
-        health: 200,
-        mana: 200,
-        maxMana: 200,
+        maxHealth: 300,
+        health: 300,
+        mana: 300,
+        maxMana: 300,
       }
     );
 
     expect(Skill.updateOne).toHaveBeenCalledWith(
       { _id: npc.skills },
       {
-        level: 20,
+        level: 30,
         strength: {
-          level: 20,
+          level: 30,
         },
         dexterity: {
-          level: 20,
+          level: 30,
         },
         resistance: {
-          level: 20,
+          level: 30,
         },
       }
     );
