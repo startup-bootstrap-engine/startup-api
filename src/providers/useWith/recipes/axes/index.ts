@@ -51,6 +51,16 @@ import { recipeGrandSanguineBattleaxe } from "./tier8/recipeGrandSanguineBattlea
 import { recipeRustBreakerAxe } from "./tier8/recipeRustBreakerAxe";
 import { recipeGloriousAxe } from "./tier9/recipeGloriousAxe";
 import { recipeHydraSlayerAxe } from "./tier9/recipeHydraSlayerAxe";
+import { recipeEmberstrikeAxe } from "./tier14/recipeEmberstrikeAxe";
+import { recipeShadowfangAxe } from "./tier14/recipeShadowfangAxe";
+import { recipeCrystalEdgeAxe } from "./tier15/recipeCrystalEdgeAxe";
+import { recipeNightshadeAxe } from "./tier15/recipeNightshadeAxe";
+import { recipeBloodthirstAxe } from "./tier16/recipeBloodthirstAxe";
+import { recipeIronstormAxe } from "./tier16/recipeIronstormAxe";
+import { recipeBlightReaver } from "./tier17/recipeBlightReaver";
+import { recipeDragonfireAxe } from "./tier17/recipeDragonfireAxe";
+import { recipeAbyssalCleave } from "./tier18/recipeAbyssalCleave";
+import { recipeFrostbiteAxe } from "./tier18/recipeFrostbiteAxe";
 
 export const recipeAxesIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [AxesBlueprint.Axe]: [recipeAxe],
@@ -104,4 +114,14 @@ export const recipeAxesIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [AxesBlueprint.StormforgeReaver]: [recipeStormforgeReaver],
   [AxesBlueprint.BlazingExecutioner]: [recipeBlazingExecutioner],
   [AxesBlueprint.NightfallSplitter]: [recipeNightfallSplitter],
+  [AxesBlueprint.ShadowfangAxe]: [recipeShadowfangAxe],
+  [AxesBlueprint.EmberstrikeAxe]: [recipeEmberstrikeAxe],
+  [AxesBlueprint.CrystalEdgeAxe]: [recipeCrystalEdgeAxe],
+  [AxesBlueprint.NightshadeAxe]: [recipeNightshadeAxe],
+  [AxesBlueprint.BloodthirstAxe]: [recipeBloodthirstAxe],
+  [AxesBlueprint.IronstormAxe]: [recipeIronstormAxe],
+  [AxesBlueprint.BlightReaver]: [recipeBlightReaver],
+  [AxesBlueprint.DragonfireAxe]: [recipeDragonfireAxe],
+  [AxesBlueprint.FrostbiteAxe]: [recipeFrostbiteAxe],
+  [AxesBlueprint.AbyssalCleave]: [recipeAbyssalCleave],
 };

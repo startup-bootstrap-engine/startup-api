@@ -77,6 +77,16 @@ import { itemSeraphicAxe } from "./tier17/itemSeraphicAxe";
 import { itemVoidCleaver } from "./tier17/itemVoidCleaver";
 import { itemArcaneSunderer } from "./tier18/itemArcaneSunderer";
 import { itemStormforgeReaver } from "./tier18/itemStormforgeReaver";
+import { itemEmberstrikeAxe } from "./tier14/itemEmberstrikeAxe";
+import { itemShadowfangAxe } from "./tier14/itemShadowfangAxe";
+import { itemCrystalEdgeAxe } from "./tier15/itemCrystalEdgeAxe";
+import { itemNightshadeAxe } from "./tier15/itemNightshadeAxe";
+import { itemBloodthirstAxe } from "./tier16/itemBloodthirstAxe";
+import { itemIronstormAxe } from "./tier16/itemIronstormAxe";
+import { itemBlightReaver } from "./tier17/itemBlightReaver";
+import { itemDragonfireAxe } from "./tier17/itemDragonfireAxe";
+import { itemAbyssalCleave } from "./tier18/itemAbyssalCleave";
+import { itemFrostbiteAxe } from "./tier18/itemFrostbiteAxe";
 
 export const axesBlueprintIndex = {
   [AxesBlueprint.Axe]: itemAxe,
@@ -157,4 +167,14 @@ export const axesBlueprintIndex = {
   [AxesBlueprint.VoidCleaver]: itemVoidCleaver,
   [AxesBlueprint.SeraphicAxe]: itemSeraphicAxe,
   [AxesBlueprint.StormforgeReaver]: itemStormforgeReaver,
+  [AxesBlueprint.ShadowfangAxe]: itemShadowfangAxe,
+  [AxesBlueprint.EmberstrikeAxe]: itemEmberstrikeAxe,
+  [AxesBlueprint.CrystalEdgeAxe]: itemCrystalEdgeAxe,
+  [AxesBlueprint.NightshadeAxe]: itemNightshadeAxe,
+  [AxesBlueprint.BloodthirstAxe]: itemBloodthirstAxe,
+  [AxesBlueprint.IronstormAxe]: itemIronstormAxe,
+  [AxesBlueprint.BlightReaver]: itemBlightReaver,
+  [AxesBlueprint.DragonfireAxe]: itemDragonfireAxe,
+  [AxesBlueprint.FrostbiteAxe]: itemFrostbiteAxe,
+  [AxesBlueprint.AbyssalCleave]: itemAbyssalCleave,
 };
