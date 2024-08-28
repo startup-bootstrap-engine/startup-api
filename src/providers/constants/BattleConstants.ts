@@ -9,7 +9,7 @@ export const BONUS_DAMAGE_MULTIPLIER = 4;
 
 // Damage Reduction
 export const DAMAGE_REDUCTION_MIN_DAMAGE = 1;
-export const DAMAGE_REDUCTION_MAX_REDUCTION_PERCENTAGE = 0.6;
+export const DAMAGE_REDUCTION_MAX_REDUCTION_PERCENTAGE = 0.4;
 export const DAMAGE_REDUCTION_MIN_LEVEL_FOR_NPC = 30; // min level for NPC to have damage reduction
 
 // Total potential damage

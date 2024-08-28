@@ -2,6 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import { SwordsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { CharacterClass, EntityType } from "@rpg-engine/shared";
 import _ from "lodash";
 import { BattleDamageCalculator } from "../BattleDamageCalculator";
@@ -142,7 +143,7 @@ describe("BattleDamageCalculator.spec.ts", () => {
 
       spyCalculateShieldingDefense = jest.spyOn(battleDamageCalculator as any, "calculateCharacterShieldingDefense");
 
-      spyCalculateRegularDefense = jest.spyOn(battleDamageCalculator as any, "calculateCharacterRegularDefense");
+      spyCalculateRegularDefense = jest.spyOn(battleDamageCalculator as any, "calculateRegularDefense");
 
       spyDamageReduction = jest.spyOn(battleDamageCalculator as any, "calculateDamageReduction");
 
@@ -478,6 +479,57 @@ describe("BattleDamageCalculator.spec.ts", () => {
           expect(damage).toBeCloseTo(85);
         });
       });
+    });
+  });
+
+  describe("NPC damage reduction edge cases", () => {
+    it("should skip damage reduction if attacker is using a training weapon", async () => {
+      // Mock the weapon to be a training weapon
+      const mockWeapon = { item: { isTraining: true } };
+      // @ts-ignore
+      jest.spyOn(battleDamageCalculator.characterWeapon, "getWeapon").mockResolvedValue(mockWeapon);
+
+      const defenderSkills = await Skill.findById(testNPC.skills);
+      expect(defenderSkills).toBeDefined();
+      defenderSkills!.level = 50;
+      defenderSkills!.resistance.level = 50;
+      await defenderSkills!.save();
+
+      const initialDamage = 100;
+      // @ts-ignore
+      const reducedDamage = await battleDamageCalculator.handleNPCDamageReduction(
+        defenderSkills!,
+        initialDamage,
+        false,
+        mockWeapon.item as any
+      );
+
+      expect(reducedDamage).toBe(initialDamage); // Damage reduction should be skipped, so damage remains the same
+    });
+
+    it("should apply damage reduction if attacker is not using a training weapon", async () => {
+      const testSword = await unitTestHelper.createMockItemFromBlueprint(SwordsBlueprint.ShortSword);
+
+      // @ts-ignore
+      jest.spyOn(battleDamageCalculator.characterWeapon, "getWeapon").mockResolvedValue(testSword);
+
+      const defenderSkills = await Skill.findById(testNPC.skills);
+      expect(defenderSkills).toBeDefined();
+      defenderSkills!.level = 50;
+      defenderSkills!.resistance.level = 50;
+      await defenderSkills!.save();
+
+      const initialDamage = 100;
+      //! @ts-ignore
+      // @ts-ignore
+      const reducedDamage = await battleDamageCalculator.handleNPCDamageReduction(
+        defenderSkills!,
+        initialDamage,
+        false,
+        testSword
+      );
+
+      expect(reducedDamage).toBeLessThan(initialDamage); // Damage reduction should be applied, so reduced damage is less
     });
   });
 });

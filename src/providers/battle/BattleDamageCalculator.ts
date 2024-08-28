@@ -53,7 +53,13 @@ export class BattleDamageCalculator {
     let adjustedDamage = this.adjustForClassAndPvP(attacker, target, totalPotentialAttackerDamage);
     adjustedDamage = this.calculateDamageWithDeviation(adjustedDamage);
 
-    const reducedDamage = await this.implementDamageReduction(defenderSkills, target, adjustedDamage, isMagicAttack);
+    const reducedDamage = await this.implementDamageReduction(
+      defenderSkills,
+      target,
+      adjustedDamage,
+      isMagicAttack,
+      weapon?.item
+    );
 
     return Math.max(0, Math.min(reducedDamage, target.health));
   }
@@ -64,14 +70,19 @@ export class BattleDamageCalculator {
   }
 
   private async getOrFetchSkills(participant: BattleParticipant): Promise<ISkill> {
-    let skills = participant.skills as unknown as ISkill;
-    if (!skills?.level) {
-      skills = (await this.getSkills(participant._id)) as unknown as ISkill;
+    try {
+      let skills = participant.skills as unknown as ISkill;
+      if (!skills?.level) {
+        skills = (await this.getSkills(participant._id)) as unknown as ISkill;
+      }
+      if (!skills) {
+        throw new Error(`Skills not found for participant ${participant._id}`);
+      }
+      return skills;
+    } catch (error) {
+      console.error("Failed to fetch skills:", error);
+      throw error;
     }
-    if (!skills) {
-      throw new Error(`Skills not found for participant ${participant._id}`);
-    }
-    return skills;
   }
 
   private async getSkills(entityId: string): Promise<ISkill> {
@@ -104,13 +115,14 @@ export class BattleDamageCalculator {
     defenderSkills: ISkill,
     target: ICharacter | INPC,
     damage: number,
-    isMagicAttack: boolean
+    isMagicAttack: boolean,
+    weapon: IItem | undefined
   ): Promise<number> {
     switch (target.type) {
       case EntityType.Character:
         return await this.handleCharacterDamageReduction(defenderSkills, target as ICharacter, damage, isMagicAttack);
       case EntityType.NPC:
-        return this.handleNPCDamageReduction(defenderSkills, damage, isMagicAttack);
+        return this.handleNPCDamageReduction(defenderSkills, damage, isMagicAttack, weapon);
       default:
         return damage;
     }
@@ -143,11 +155,21 @@ export class BattleDamageCalculator {
       );
     } else {
       const defenseAttribute = isMagicAttack ? defenderMagicResistanceLevel : defenderResistanceLevel;
-      return this.calculateDamageReduction(damage, this.calculateCharacterRegularDefense(level, defenseAttribute));
+      return this.calculateDamageReduction(damage, this.calculateRegularDefense(level, defenseAttribute));
     }
   }
 
-  private handleNPCDamageReduction(defenderSkills: ISkill, damage: number, isMagicAttack: boolean): number {
+  private handleNPCDamageReduction(
+    defenderSkills: ISkill,
+    damage: number,
+    isMagicAttack: boolean,
+    weapon: IItem | undefined
+  ): number {
+    // Skip damage reduction if the attacker is using a training weapon
+    if (weapon?.isTraining) {
+      return damage;
+    }
+
     if (defenderSkills.level >= DAMAGE_REDUCTION_MIN_LEVEL_FOR_NPC) {
       const npcDefenseReductionRatio =
         this.linearInterpolation.calculateLinearInterpolation(
@@ -156,8 +178,15 @@ export class BattleDamageCalculator {
           DAMAGE_REDUCTION_MAX_REDUCTION_PERCENTAGE * 100
         ) / 100;
 
-      const defenseAttribute = isMagicAttack ? defenderSkills.magicResistance : defenderSkills.resistance;
-      return this.calculateDamageReduction(damage, defenderSkills.level + defenseAttribute) * npcDefenseReductionRatio;
+      // Access the .level property of the specific attribute
+      const defenseAttributeLevel = isMagicAttack
+        ? defenderSkills.magicResistance.level
+        : defenderSkills.resistance.level;
+
+      const result =
+        this.calculateDamageReduction(damage, defenderSkills.level + defenseAttributeLevel) * npcDefenseReductionRatio;
+
+      return result;
     }
 
     return damage;
@@ -176,6 +205,10 @@ export class BattleDamageCalculator {
   }
 
   private async calculateMagicTotalPotentialDamage(attackerSkills: ISkill, defenderSkills: ISkill): Promise<number> {
+    if (!attackerSkills || !defenderSkills) {
+      throw new Error("Invalid skills data");
+    }
+
     const [attackerTotalAttack, defenderTotalDefense] = await Promise.all([
       this.skillStatsCalculator.getMagicAttack(attackerSkills),
       this.skillStatsCalculator.getMagicDefense(defenderSkills),
@@ -217,15 +250,15 @@ export class BattleDamageCalculator {
   }
 
   private calculateCharacterShieldingDefense(level: number, resistanceLevel: number, shieldingLevel: number): number {
-    return this.calculateCharacterRegularDefense(level, resistanceLevel) + Math.floor(shieldingLevel / 2);
+    return this.calculateRegularDefense(level, resistanceLevel) + Math.floor(shieldingLevel / 2);
   }
 
-  private calculateCharacterRegularDefense(level: number, resistanceLevel: number): number {
+  private calculateRegularDefense(level: number, resistanceLevel: number): number {
     return resistanceLevel + level;
   }
 
-  private calculateDamageReduction(damage: number, characterDefense: number): number {
-    const reduction = Math.min(characterDefense / 100, DAMAGE_REDUCTION_MAX_REDUCTION_PERCENTAGE);
+  private calculateDamageReduction(damage: number, defense: number): number {
+    const reduction = Math.min(defense / 100, DAMAGE_REDUCTION_MAX_REDUCTION_PERCENTAGE);
     return Math.max(DAMAGE_REDUCTION_MIN_DAMAGE, damage * (1 - reduction));
   }
 
