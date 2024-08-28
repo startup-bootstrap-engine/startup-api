@@ -1,60 +1,68 @@
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
-import { CraftingResourcesBlueprint, PotionsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import {
+  CraftingResourcesBlueprint,
+  FoodsBlueprint,
+  SwordsBlueprint,
+} from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
-export const npcSnake: INPCTierBlueprint<2> = {
+export const npcRaccoon: INPCTierBlueprint<1> = {
   ...generateMoveTowardsMovement(),
-  name: "Snake",
-  key: HostileNPCsBlueprint.Snake,
+  name: "Raccoon",
+  key: HostileNPCsBlueprint.Raccoon,
   subType: NPCSubtype.Animal,
-  textureKey: HostileNPCsBlueprint.Snake,
+  textureKey: HostileNPCsBlueprint.Raccoon,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
-  speed: MovementSpeed.Fast,
-  baseHealth: 100,
-  tier: 2,
+  speed: MovementSpeed.Standard,
+  baseHealth: 70,
+  tier: 1,
   healthRandomizerDice: Dice.D6,
   canSwitchToRandomTarget: true,
   skills: {
-    level: 5,
+    level: 4,
     strength: {
-      level: 5,
+      level: 4,
     },
     dexterity: {
-      level: 5,
+      level: 4,
     },
     resistance: {
-      level: 6,
+      level: 4,
     },
   },
   fleeOnLowHealth: true,
   loots: [
     {
-      itemBlueprintKey: PotionsBlueprint.LightAntidote,
+      itemBlueprintKey: FoodsBlueprint.WildSalmon,
       chance: LootProbability.Uncommon,
+      quantityRange: [1, 3],
     },
     {
-      itemBlueprintKey: CraftingResourcesBlueprint.BlueLeather,
+      itemBlueprintKey: FoodsBlueprint.Egg,
       chance: LootProbability.Uncommon,
-      quantityRange: [1, 5],
+      quantityRange: [1, 3],
     },
     {
-      itemBlueprintKey: CraftingResourcesBlueprint.Jade,
-      chance: LootProbability.Uncommon,
-      quantityRange: [1, 5],
-    },
-    {
-      itemBlueprintKey: CraftingResourcesBlueprint.Herb,
+      itemBlueprintKey: FoodsBlueprint.Blueberry,
       chance: LootProbability.SemiCommon,
-      quantityRange: [5, 10],
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.ShortSword,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: CraftingResourcesBlueprint.Leather,
+      chance: LootProbability.VeryCommon,
+      quantityRange: [1, 3],
     },
   ],
-  entityEffects: [EntityEffectBlueprint.Poison],
+  entityEffects: [EntityEffectBlueprint.Bleeding],
 };

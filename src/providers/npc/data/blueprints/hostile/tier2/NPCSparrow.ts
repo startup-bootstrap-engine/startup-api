@@ -1,14 +1,14 @@
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { CraftingResourcesBlueprint, FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { NPCAlignment, NPCSubtype } from "@rpg-engine/shared";
 import { EntityAttackType } from "@rpg-engine/shared/dist/types/entity.types";
 import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNPC";
-import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 
-export const npcSparrow: INPCTierBlueprint<3> = {
+export const npcSparrow: INPCTierBlueprint<2> = {
   ...generateMoveTowardsMovement(),
   name: "Sparrow",
   key: HostileNPCsBlueprint.Sparrow,
@@ -17,24 +17,24 @@ export const npcSparrow: INPCTierBlueprint<3> = {
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.Melee,
   speed: MovementSpeed.Fast,
-  baseHealth: 140,
-  tier: 3,
+  baseHealth: 100,
+  tier: 2,
   healthRandomizerDice: Dice.D12,
   canSwitchToRandomTarget: true,
   canSwitchToLowHealthTarget: true,
   skills: {
-    level: 7,
+    level: 5,
     strength: {
-      level: 7,
+      level: 5,
     },
     dexterity: {
-      level: 8,
+      level: 6,
     },
     resistance: {
-      level: 8,
+      level: 5,
     },
     magicResistance: {
-      level: 8,
+      level: 5,
     },
   },
   fleeOnLowHealth: true,
