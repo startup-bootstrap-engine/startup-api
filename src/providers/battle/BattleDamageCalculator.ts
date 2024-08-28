@@ -108,54 +108,56 @@ export class BattleDamageCalculator {
   ): Promise<number> {
     switch (target.type) {
       case EntityType.Character:
-        if (target.type === EntityType.Character) {
-          const character = target as ICharacter;
-          if (!defenderSkills.owner) {
-            defenderSkills.owner = target._id;
-          }
-
-          const [hasShield, defenderShieldingLevel, defenderResistanceLevel, defenderMagicResistanceLevel] =
-            await Promise.all([
-              this.characterWeapon.hasShield(character),
-              this.traitGetter.getSkillLevelWithBuffs(defenderSkills, CombatSkill.Shielding),
-              this.traitGetter.getSkillLevelWithBuffs(defenderSkills, BasicAttribute.Resistance),
-              this.traitGetter.getSkillLevelWithBuffs(defenderSkills, BasicAttribute.MagicResistance),
-            ]);
-
-          const level = defenderSkills.level * this.getDefenderLevelModifier(target.class as CharacterClass);
-
-          if (hasShield && defenderShieldingLevel > 1) {
-            return this.calculateDamageReduction(
-              damage,
-              this.calculateCharacterShieldingDefense(level, defenderResistanceLevel, defenderShieldingLevel)
-            );
-          } else {
-            const defenseAttribute = isMagicAttack ? defenderMagicResistanceLevel : defenderResistanceLevel;
-
-            return this.calculateDamageReduction(
-              damage,
-              this.calculateCharacterRegularDefense(level, defenseAttribute)
-            );
-          }
-        }
-        break;
+        return await this.handleCharacterDamageReduction(defenderSkills, target as ICharacter, damage, isMagicAttack);
       case EntityType.NPC:
-        if (target.type === EntityType.NPC) {
-          const npcSkills = defenderSkills as ISkill;
+        return this.handleNPCDamageReduction(defenderSkills, damage, isMagicAttack);
+      default:
+        return damage;
+    }
+  }
 
-          if (npcSkills.level >= DAMAGE_REDUCTION_MIN_LEVEL_FOR_NPC) {
-            const npcDefenseReductionRatio =
-              this.linearInterpolation.calculateLinearInterpolation(
-                npcSkills.level,
-                5,
-                DAMAGE_REDUCTION_MAX_REDUCTION_PERCENTAGE * 100
-              ) / 100;
+  private async handleCharacterDamageReduction(
+    defenderSkills: ISkill,
+    character: ICharacter,
+    damage: number,
+    isMagicAttack: boolean
+  ): Promise<number> {
+    if (!defenderSkills.owner) {
+      defenderSkills.owner = character._id;
+    }
 
-            const defenseAttribute = isMagicAttack ? npcSkills.magicResistance : npcSkills.resistance;
-            return this.calculateDamageReduction(damage, npcSkills.level + defenseAttribute) * npcDefenseReductionRatio;
-          }
-        }
-        break;
+    const [hasShield, defenderShieldingLevel, defenderResistanceLevel, defenderMagicResistanceLevel] =
+      await Promise.all([
+        this.characterWeapon.hasShield(character),
+        this.traitGetter.getSkillLevelWithBuffs(defenderSkills, CombatSkill.Shielding),
+        this.traitGetter.getSkillLevelWithBuffs(defenderSkills, BasicAttribute.Resistance),
+        this.traitGetter.getSkillLevelWithBuffs(defenderSkills, BasicAttribute.MagicResistance),
+      ]);
+
+    const level = defenderSkills.level * this.getDefenderLevelModifier(character.class as CharacterClass);
+
+    if (hasShield && defenderShieldingLevel > 1) {
+      return this.calculateDamageReduction(
+        damage,
+        this.calculateCharacterShieldingDefense(level, defenderResistanceLevel, defenderShieldingLevel)
+      );
+    } else {
+      const defenseAttribute = isMagicAttack ? defenderMagicResistanceLevel : defenderResistanceLevel;
+      return this.calculateDamageReduction(damage, this.calculateCharacterRegularDefense(level, defenseAttribute));
+    }
+  }
+
+  private handleNPCDamageReduction(defenderSkills: ISkill, damage: number, isMagicAttack: boolean): number {
+    if (defenderSkills.level >= DAMAGE_REDUCTION_MIN_LEVEL_FOR_NPC) {
+      const npcDefenseReductionRatio =
+        this.linearInterpolation.calculateLinearInterpolation(
+          defenderSkills.level,
+          5,
+          DAMAGE_REDUCTION_MAX_REDUCTION_PERCENTAGE * 100
+        ) / 100;
+
+      const defenseAttribute = isMagicAttack ? defenderSkills.magicResistance : defenderSkills.resistance;
+      return this.calculateDamageReduction(damage, defenderSkills.level + defenseAttribute) * npcDefenseReductionRatio;
     }
 
     return damage;
