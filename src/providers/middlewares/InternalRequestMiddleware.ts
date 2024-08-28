@@ -1,17 +1,19 @@
+import { ForbiddenError } from "@providers/errors/ForbiddenError";
 import { container } from "@providers/inversify/container";
 import { ServerRequest } from "@providers/server/ServerRequest";
 import { NextFunction, Request, Response } from "express";
-import { ForbiddenError } from "../errors/ForbiddenError"; // You can create a custom error class if needed
+import newrelic from "newrelic";
 
 export const InternalRequestMiddleware = (req: Request, res: Response, next: NextFunction): void => {
   const serverRequest = container.get(ServerRequest);
-
   const ip = req.ip;
 
   if (serverRequest.isInternalRequest(ip)) {
-    next(); // Proceed if the request is internal
+    const transaction = newrelic.getTransaction(); // Get the current transaction
+    transaction.ignore(); // Ignore the transaction
+    next(); // Proceed with the request
   } else {
-    const error = new ForbiddenError(`Forbidden: External requests are not allowed. IP: ${req.ip}`);
+    const error = new ForbiddenError(`Forbidden: External requests are not allowed for this route. IP: ${req.ip}`);
     next(error);
   }
 };
