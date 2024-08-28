@@ -373,7 +373,12 @@ export class HitTargetQueue {
 
     if (isNaN(damage)) {
       damage = 0;
-      console.error(`Damage is NaN for attacker: ${attacker._id} and target: ${target._id} - ${target.type}`);
+      console.error(`Damage is NaN for attacker: ${attacker._id} and target: ${target._id} - ${target.type}. Calculation details:
+          baseDamage: ${baseDamage}, 
+          bonusDamage: ${bonusDamage},
+          magicAttack: ${magicAttack},
+          lastestHealth: ${lastestHealth}
+        `);
     }
 
     return { damage, baseDamage, lastestHealth };
