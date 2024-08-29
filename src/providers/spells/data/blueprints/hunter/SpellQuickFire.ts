@@ -22,7 +22,7 @@ export const spellQuickFire: Partial<ISpell> = {
   texturePath: "spell-icons/hunter-quick-fire.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "ieiunium iecit",
-  manaCost: 80,
+  manaCost: 60,
   minLevelRequired: 10,
   minMagicLevelRequired: 8,
   cooldown: 120,

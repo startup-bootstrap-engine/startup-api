@@ -15,7 +15,7 @@ export const itemCrimsonArrow: IEquippableAmmoTier4Blueprint = {
   tier: 4,
   weight: 0.1,
   allowedEquipSlotType: [ItemSlotType.Accessory],
-  maxStackSize: 999,
+  maxStackSize: 9999,
   basePrice: 12,
   entityEffects: [EntityEffectBlueprint.Burning],
   entityEffectChance: 80,

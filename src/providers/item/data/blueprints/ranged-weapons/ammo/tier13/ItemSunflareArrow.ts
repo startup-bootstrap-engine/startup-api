@@ -13,7 +13,7 @@ export const itemSunflareArrow: IEquippableAmmoTier13Blueprint = {
   description:
     "Infused with the essence of the sun, these arrows burn brightly. Excellent for blinding foes or illuminating dark areas.",
   weight: 0.1,
-  maxStackSize: 999,
+  maxStackSize: 9999,
   allowedEquipSlotType: [ItemSlotType.Accessory],
   basePrice: 6,
   attack: 93,

@@ -14,7 +14,7 @@ export const itemWoodenArrow: IEquippableAmmoTier0Blueprint = {
   tier: 0,
   weight: 0.01,
   allowedEquipSlotType: [ItemSlotType.Accessory],
-  maxStackSize: 999,
+  maxStackSize: 99999,
   basePrice: 0.05,
   isTraining: true,
   canSell: false,

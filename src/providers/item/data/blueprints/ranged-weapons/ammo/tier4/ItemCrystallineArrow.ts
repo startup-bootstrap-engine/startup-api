@@ -13,7 +13,7 @@ export const itemCrystallineArrow: IEquippableAmmoTier4Blueprint = {
   description:
     "Forged from magical crystals, this arrow shimmers in multiple colors. It releases a burst of arcane energy upon impact, dealing bonus magical damage.",
   weight: 0.1,
-  maxStackSize: 999,
+  maxStackSize: 9999,
   allowedEquipSlotType: [ItemSlotType.Accessory],
   basePrice: 6,
   attack: 35,

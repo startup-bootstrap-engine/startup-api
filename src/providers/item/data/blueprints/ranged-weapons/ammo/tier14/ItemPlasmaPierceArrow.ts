@@ -15,7 +15,7 @@ export const itemPlasmaPierceArrow: IEquippableAmmoTier14Blueprint = {
   tier: 14,
   weight: 0.1,
   allowedEquipSlotType: [ItemSlotType.Accessory],
-  maxStackSize: 999,
+  maxStackSize: 9999,
   basePrice: 27,
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding],
   entityEffectChance: 100,

@@ -15,7 +15,7 @@ export const itemFrostArrow: IEquippableAmmoTier2Blueprint = {
   tier: 2,
   weight: 0.1,
   allowedEquipSlotType: [ItemSlotType.Accessory],
-  maxStackSize: 999,
+  maxStackSize: 9999,
   basePrice: 10,
   entityEffects: [EntityEffectBlueprint.Freezing],
   entityEffectChance: 80,

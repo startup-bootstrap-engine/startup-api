@@ -12,7 +12,7 @@ export const itemSeekerArrow: IEquippableAmmoTier7Blueprint = {
   name: "Seeker Arrow",
   description: "An arrow that seeks out the target's weak spots. Highly effective for delivering critical hits.",
   weight: 0.1,
-  maxStackSize: 999,
+  maxStackSize: 9999,
   allowedEquipSlotType: [ItemSlotType.Accessory],
   entityEffects: [EntityEffectBlueprint.Bleeding],
   entityEffectChance: 90,

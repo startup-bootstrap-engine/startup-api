@@ -24,7 +24,7 @@ export const spellWildfireVolley: Partial<ISpell> = {
   texturePath: "spell-icons/wildfire-volley.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "nára vilya lócalahtie",
-  manaCost: 80,
+  manaCost: 60,
   minLevelRequired: 15,
   minMagicLevelRequired: 9,
   cooldown: 15,

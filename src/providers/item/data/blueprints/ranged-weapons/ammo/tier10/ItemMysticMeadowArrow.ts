@@ -15,7 +15,7 @@ export const itemMysticMeadowArrow: IEquippableAmmoTier10Blueprint = {
   tier: 10,
   weight: 0.1,
   allowedEquipSlotType: [ItemSlotType.Accessory],
-  maxStackSize: 999,
+  maxStackSize: 9999,
   basePrice: 20,
   entityEffects: [EntityEffectBlueprint.VineGrasp],
   entityEffectChance: 70,

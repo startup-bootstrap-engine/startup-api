@@ -15,7 +15,7 @@ export const itemEmeraldArrow: IEquippableAmmoTier5Blueprint = {
   weight: 0.1,
   tier: 5,
   allowedEquipSlotType: [ItemSlotType.Accessory],
-  maxStackSize: 999,
+  maxStackSize: 9999,
   basePrice: 8,
   entityEffects: [EntityEffectBlueprint.Burning],
   entityEffectChance: 80,

@@ -12,7 +12,7 @@ export const itemStone: IEquippableRangedAmmoBlueprint = {
   attack: 4,
   weight: 0.01,
   allowedEquipSlotType: [ItemSlotType.Accessory],
-  maxStackSize: 999,
+  maxStackSize: 9999,
   basePrice: 3,
   canSell: true,
 };

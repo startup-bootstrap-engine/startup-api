@@ -12,7 +12,7 @@ export const itemHeartseekerArrow: IEquippableAmmoTier7Blueprint = {
   name: "Heartseeker Arrow",
   description: "Enchanted to always find the heart of the target. Highly effective for delivering critical hits.",
   weight: 0.1,
-  maxStackSize: 999,
+  maxStackSize: 9999,
   tier: 7,
   attack: 52,
   allowedEquipSlotType: [ItemSlotType.Accessory],

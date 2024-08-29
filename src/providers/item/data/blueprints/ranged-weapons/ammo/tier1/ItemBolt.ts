@@ -14,7 +14,7 @@ export const itemBolt: IEquippableAmmoTier1Blueprint = {
   tier: 1,
   weight: 0.04,
   allowedEquipSlotType: [ItemSlotType.Accessory],
-  maxStackSize: 999,
+  maxStackSize: 9999,
   basePrice: 2,
   canSell: false,
 };

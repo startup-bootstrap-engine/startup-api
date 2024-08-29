@@ -41,7 +41,7 @@ export const spellEagleEyes: Partial<ISpell> = {
 
     const buffPercentage = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
       min: 10,
-      max: 60,
+      max: 80,
     });
 
     await characterBuffActivator.enableTemporaryBuff(character, {

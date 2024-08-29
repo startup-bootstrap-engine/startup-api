@@ -15,7 +15,7 @@ export const itemShockArrow: IEquippableAmmoTier11Blueprint = {
   tier: 11,
   weight: 0.05,
   allowedEquipSlotType: [ItemSlotType.Accessory],
-  maxStackSize: 999,
+  maxStackSize: 9999,
   basePrice: 2,
   entityEffects: [EntityEffectBlueprint.Bleeding],
   entityEffectChance: 100,
