@@ -208,7 +208,8 @@ export class DiscordCronJobs {
         - **[Definya Guide - Mining](https://docs.definya.com/docs/guides/english/Mining)**: Mining spots
       - **[Definya Patreon](https://patreon.com/DefinyaMMORPG)**: Support the game and unlock exclusive perks.
       - **[Definya Steam](https://store.steampowered.com/app/2630100/Definya_2D_MMORPG/?beta=0)**: Download the game on Steam.
-      - **[Definya Google Play](https://play.google.com/store/apps/details?id=com.definya.app)**: Get the game on Google Play.`;
+      - **[Definya Google Play](https://play.google.com/store/apps/details?id=com.definya.app)**: Get the game on Google Play.
+      - **[WhatsApp Group](https://chat.whatsapp.com/H8U1Jt7hJNdIWO19atAnRu)**: Join our WhatsApp group for updates and discussions.`;
 
       await this.discordBot.sendMessageWithColor(
         message,
