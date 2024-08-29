@@ -137,10 +137,17 @@ export class CharacterNetworkUpdateQueue {
     data: ICharacterPositionUpdateFromClient,
     isMoving: boolean
   ): Promise<void> {
-    const hasTransition = await this.mapTransition.handleMapTransition(character, data.newX, data.newY);
+    const hasTransition = this.mapTransition.getTransition(character, data.newX, data.newY);
 
     if (hasTransition) {
       // if we have a transition, we don't need to do anything else, just let it teleport
+
+      const destination = this.mapTransition.getDestinationFromTransition(hasTransition);
+      if (!destination) {
+        return;
+      }
+
+      await this.mapTransition.handleMapTransition(character, data.newX, data.newY);
       return;
     }
 
