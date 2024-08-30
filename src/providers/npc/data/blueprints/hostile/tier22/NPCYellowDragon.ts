@@ -38,7 +38,7 @@ export const npcYellowDragon: INPCTierBlueprint<22> = {
   ...generateMoveTowardsMovement(),
   name: "Yellow Dragon",
   key: HostileNPCsBlueprint.YellowDragon,
-  subType: NPCSubtype.Animal,
+  subType: NPCSubtype.Dragon,
   textureKey: HostileNPCsBlueprint.YellowDragon,
   alignment: NPCAlignment.Hostile,
   attackType: EntityAttackType.MeleeRanged,

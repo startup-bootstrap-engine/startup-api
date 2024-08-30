@@ -57,6 +57,7 @@ describe("ItemOwnership.ts", () => {
 
     await itemOwnership.addItemOwnership(backpack, testCharacter);
 
+    // @ts-ignore
     await itemOwnership.removeOwnershipFromAllItemsInContainer(backpackContainer);
 
     const updatedShortSword = await Item.findById(shortSword._id);
@@ -141,6 +142,7 @@ describe("ItemOwnership.ts", () => {
     await itemOwnership.addItemOwnership(backpack, testCharacter);
     const visited = new Set<string>([backpackContainer._id.toString()]);
 
+    // @ts-ignore
     await itemOwnership.removeOwnershipFromAllItemsInContainer(backpackContainer, visited);
     const updatedPouch = await Item.findById(smallPouch._id);
     expect(updatedPouch?.owner).toEqual(testCharacter._id);
