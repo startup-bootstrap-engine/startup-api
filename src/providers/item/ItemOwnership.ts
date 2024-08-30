@@ -138,7 +138,7 @@ export class ItemOwnership {
   }
 
   @TrackNewRelicTransaction()
-  public async removeOwnershipFromAllItemsInContainer(
+  private async removeOwnershipFromAllItemsInContainer(
     itemContainer: IItemContainer,
     visited = new Set<string>()
   ): Promise<void> {
