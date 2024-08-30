@@ -125,6 +125,19 @@ export class UseWithEntity {
         return;
       }
 
+      if (blueprint.key === ToolsBlueprint.ButchersKnife) {
+        const toolsBlueprint = blueprint as unknown as IToolItemBlueprint;
+        // Here's the change: we're passing the correct parameters
+        await toolsBlueprint.usableEffect!(
+          character,
+          target as IItem, // This is the dead body (target)
+          null, // itemCraftable (not used in this case)
+          this.skillIncrease,
+          item! // This is the butcher's knife (origin item)
+        );
+        return;
+      }
+
       if (blueprint.key === ToolsBlueprint.Scythe) {
         const toolsBlueprint = blueprint as unknown as IToolItemBlueprint;
         await toolsBlueprint.usableEffect!(character, target!, null, this.skillIncrease, item!);

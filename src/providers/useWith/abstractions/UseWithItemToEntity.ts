@@ -57,7 +57,7 @@ export class UseWithItemToEntity {
   public async execute(
     character: ICharacter,
     options: IUseWithItemToEntityOptions,
-    skillIncrease: SkillIncrease
+    skillIncrease?: SkillIncrease
   ): Promise<void> {
     const {
       targetEntity,
@@ -131,7 +131,7 @@ export class UseWithItemToEntity {
 
     // update crafting skills if corresponds
     for (const r of rewards) {
-      await skillIncrease.increaseCraftingSP(character, r.key, true);
+      await skillIncrease?.increaseCraftingSP(character, r.key, true);
     }
 
     if (successMessages) {

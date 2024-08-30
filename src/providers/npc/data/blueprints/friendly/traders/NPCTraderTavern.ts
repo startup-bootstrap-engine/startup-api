@@ -1,5 +1,5 @@
 import { INPC } from "@entities/ModuleNPC/NPCModel";
-import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { FoodsBlueprint, ToolsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { generateRandomMovement } from "@providers/npc/data/abstractions/BaseNeutralNPC";
 import { CharacterGender } from "@rpg-engine/shared";
 
@@ -16,6 +16,9 @@ export const npcTraderTavern = {
     },
     {
       key: FoodsBlueprint.Salmon,
+    },
+    {
+      key: ToolsBlueprint.ButchersKnife,
     },
 
     {
