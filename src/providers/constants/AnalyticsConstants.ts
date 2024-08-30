@@ -9,7 +9,7 @@ export const mixpanel = Mixpanel.init(appEnv.analytics.mixpanelToken!, {
 
 export const amplitudeClient: Amplitude.NodeClient = Amplitude.init(appEnv.analytics.amplitudeApiKey!);
 
-export const NEW_RELIC_SAMPLE_RATE = 0.015;
+export const NEW_RELIC_SAMPLE_RATE = 0.01;
 
 //! Disabled for now. Use it together with NewRelic.ts to filter events
 export const NEW_RELIC_ALLOWED_TRANSACTIONS: string[] = [

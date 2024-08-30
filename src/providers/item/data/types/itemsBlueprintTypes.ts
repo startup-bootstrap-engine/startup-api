@@ -358,6 +358,16 @@ export enum AxesBlueprint {
   VoidCleaver = "void-cleaver",
   StormforgeReaver = "stormforge-reaver",
   SeraphicAxe = "seraphic-axe",
+  ShadowfangAxe = "shadowfang-axe",
+  EmberstrikeAxe = "emberstrike-axe",
+  CrystalEdgeAxe = "crystaledge-axe",
+  NightshadeAxe = "nightshade-axe",
+  BloodthirstAxe = "bloodthirst-axe",
+  IronstormAxe = "ironstorm-axe",
+  BlightReaver = "blight-reaver",
+  DragonfireAxe = "dragonfire-axe",
+  FrostbiteAxe = "frostbite-axe",
+  AbyssalCleave = "abyssal-cleave",
 }
 
 export enum BootsBlueprint {

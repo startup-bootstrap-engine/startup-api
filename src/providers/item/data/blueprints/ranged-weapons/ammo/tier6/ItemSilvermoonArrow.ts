@@ -11,7 +11,7 @@ export const itemSilvermoonArrow: IEquippableAmmoTier6Blueprint = {
   name: "Silvermoon Arrow",
   description: "Soaked in lunar energy, these arrows can change shape according to the moon phase. Highly versatile.",
   weight: 0.2,
-  maxStackSize: 999,
+  maxStackSize: 9999,
   allowedEquipSlotType: [ItemSlotType.Accessory],
   basePrice: 10,
   attack: 44,

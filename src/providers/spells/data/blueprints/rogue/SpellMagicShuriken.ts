@@ -43,7 +43,7 @@ export const spellMagicShuriken: Partial<ISpell> = {
     const skillDamage = await spellCalculator.spellDamageCalculator(character, BasicAttribute.Dexterity, {
       level: true,
       minLevelMultiplier: 0.2,
-      maxLevelMultiplier: 1.2,
+      maxLevelMultiplier: 1.8,
     });
 
     await hitTarget.hit(character, target, true, skillDamage, true);

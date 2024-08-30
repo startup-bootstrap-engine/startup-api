@@ -22,7 +22,7 @@ export const spellArrowStorm: Partial<ISpell> = {
   texturePath: "spell-icons/arrowstorm.png",
   castingType: SpellCastingType.RangedCasting,
   magicWords: "vanya lóte náren",
-  manaCost: 70,
+  manaCost: 40,
   minLevelRequired: 11,
   minMagicLevelRequired: 7,
   cooldown: 10,

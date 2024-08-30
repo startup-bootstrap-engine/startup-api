@@ -38,8 +38,8 @@ export const spellFocus: Partial<ISpell> = {
     });
 
     const buffPercentage = await spellCalculator.calculateBasedOnSkillLevel(character, BasicAttribute.Magic, {
-      max: 60,
       min: 10,
+      max: 60,
     });
 
     await characterBuffActivator.enableTemporaryBuff(character, {

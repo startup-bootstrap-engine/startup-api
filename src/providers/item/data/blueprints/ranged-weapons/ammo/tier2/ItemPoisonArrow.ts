@@ -15,7 +15,7 @@ export const itemPoisonArrow: IEquippableAmmoTier2Blueprint = {
   tier: 2,
   weight: 0.025,
   allowedEquipSlotType: [ItemSlotType.Accessory],
-  maxStackSize: 999,
+  maxStackSize: 9999,
   basePrice: 1.5,
   entityEffects: [EntityEffectBlueprint.Poison],
   entityEffectChance: 90,

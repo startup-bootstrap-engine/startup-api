@@ -16,7 +16,7 @@ export const itemElvenBolt: IEquippableAmmoTier2Blueprint = {
   tier: 2,
   weight: 0.03,
   allowedEquipSlotType: [ItemSlotType.Accessory],
-  maxStackSize: 999,
+  maxStackSize: 9999,
   basePrice: 7,
   canSell: false,
   entityEffects: [EntityEffectBlueprint.Poison],

@@ -11,7 +11,7 @@ export const itemIronArrow: IEquippableAmmoTier1Blueprint = {
   name: "Iron Arrow",
   description: "Description",
   weight: 0.06,
-  maxStackSize: 999,
+  maxStackSize: 9999,
   tier: 1,
   allowedEquipSlotType: [ItemSlotType.Accessory],
   basePrice: 3,

@@ -15,7 +15,7 @@ export const itemGoldenArrow: IEquippableAmmoTier12Blueprint = {
   tier: 12,
   weight: 0.1,
   allowedEquipSlotType: [ItemSlotType.Accessory],
-  maxStackSize: 999,
+  maxStackSize: 9999,
   basePrice: 3,
   canSell: false,
   entityEffects: [EntityEffectBlueprint.Bleeding],

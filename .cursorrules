@@ -1,0 +1,7 @@
+- Always look for pattern samples on the codebase involving what you want to generate. Please follow codebase patterns!
+- Mongoose queries: always favor .lean and also atomic updates
+- Note that models already generate types on the schema, so no need to generate twice
+- no need to try catch on controllers
+- you can find good example for models on ./src/entities
+- you can find 
+

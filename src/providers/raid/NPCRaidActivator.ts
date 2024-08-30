@@ -25,18 +25,25 @@ export class NPCRaidActivator {
 
   @TrackNewRelicTransaction()
   public async activateRaids(): Promise<void> {
+    console.log("Attempting to activate raids...");
+
     const canProceed = await this.locker.lock("raid-activator");
 
     if (!canProceed) {
+      console.log("Raid activator is currently locked. Exiting...");
       return;
     }
 
     try {
+      console.log("Raid activator lock acquired. Selecting a random inactive raid...");
       const selectedRaid = await this.getRandomInactiveRaid();
 
       if (!selectedRaid) {
+        console.log("No inactive raids available. Exiting...");
         return;
       }
+
+      console.log("Selected raid:", selectedRaid.key);
 
       const isRaidAlreadyActive = await this.raidManager.isRaidActive(selectedRaid.key);
 
@@ -50,17 +57,24 @@ export class NPCRaidActivator {
       const messageDiscord = `**Raid ${selectedRaid.name} is starting** ${selectedRaid.startingMessage}`;
       await this.discordBot.sendMessage(messageDiscord, "raids");
 
+      console.log("Broadcasting raid warning...");
       this.broadcastRaidWarning(selectedRaid);
 
+      console.log("Enabling raid...");
       await this.enableRaid(selectedRaid);
 
+      console.log("Fetching NPCs for the raid...");
       // eslint-disable-next-line mongoose-lean/require-lean
       const npcsFromRaid = await NPC.find({ raidKey: selectedRaid.key });
 
+      console.log(`Spawning ${npcsFromRaid.length} NPCs for the raid...`);
       await this.spawnNPCs(npcsFromRaid);
+
+      console.log("Raid activation process completed.");
     } catch (error) {
       console.error("Error while processing the raid task:", error);
     } finally {
+      console.log("Releasing raid activator lock...");
       await this.locker.unlock("raid-activator");
     }
   }
@@ -101,7 +115,10 @@ export class NPCRaidActivator {
   private async shutdownAllActiveRaids(): Promise<void> {
     const activeRaids = await this.raidManager.queryRaids({ status: true });
 
-    if (activeRaids.length === 0) return;
+    if (activeRaids.length === 0) {
+      console.log("No active raids to shut down.");
+      return;
+    }
 
     for (const activeRaid of activeRaids) {
       if (!activeRaid.lastActivationTime) {

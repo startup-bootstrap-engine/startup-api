@@ -13,7 +13,7 @@ export const itemEarthArrow: IEquippableAmmoTier2Blueprint = {
   description:
     "Infused with the elemental power of Earth, this arrow creates a mini-tremor upon impact. Effective for disrupting enemy formations and unbalancing foes.",
   weight: 0.1,
-  maxStackSize: 999,
+  maxStackSize: 9999,
   allowedEquipSlotType: [ItemSlotType.Accessory],
   basePrice: 8,
   attack: 22,

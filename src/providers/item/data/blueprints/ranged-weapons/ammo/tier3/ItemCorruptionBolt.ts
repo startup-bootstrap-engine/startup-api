@@ -16,7 +16,7 @@ export const itemCorruptionBolt: IEquippableAmmoTier2Blueprint = {
   tier: 2,
   weight: 0.013,
   allowedEquipSlotType: [ItemSlotType.Accessory],
-  maxStackSize: 999,
+  maxStackSize: 9999,
   basePrice: 3,
   canSell: false,
   entityEffects: [EntityEffectBlueprint.Corruption],

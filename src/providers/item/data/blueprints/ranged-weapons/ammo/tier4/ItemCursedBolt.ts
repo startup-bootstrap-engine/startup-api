@@ -12,7 +12,7 @@ export const itemCursedBolt: IEquippableAmmoTier4Blueprint = {
   name: "Cursed Bolt",
   description: "Imbued with a dark hex that curses enemies upon impact. The curse reduces enemy stats temporarily.",
   weight: 0.1,
-  maxStackSize: 999,
+  maxStackSize: 9999,
   tier: 4,
   allowedEquipSlotType: [ItemSlotType.Accessory],
   basePrice: 8,

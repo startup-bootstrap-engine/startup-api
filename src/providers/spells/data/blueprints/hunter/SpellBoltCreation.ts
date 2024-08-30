@@ -30,7 +30,7 @@ export const spellBoltCreation: Partial<ISpell> = {
   usableEffect: async (character: ICharacter) => {
     const spellCalculator = container.get(SpellCalculator);
     let minMax = {
-      max: 100,
+      max: 200,
       min: 1,
     };
 

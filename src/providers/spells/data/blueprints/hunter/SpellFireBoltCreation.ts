@@ -29,7 +29,7 @@ export const spellFireBoltCreation: Partial<ISpell> = {
   usableEffect: async (character: ICharacter) => {
     const spellCalculator = container.get(SpellCalculator);
     const createQty = await spellCalculator.getQuantityBasedOnSkillLevel(character, BasicAttribute.Magic, {
-      max: 100,
+      max: 200,
       min: 1,
       difficulty: 5,
     });

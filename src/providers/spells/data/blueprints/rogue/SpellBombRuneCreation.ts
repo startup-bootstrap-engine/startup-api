@@ -14,7 +14,7 @@ export const spellBombCreation: Partial<ISpell> = {
   texturePath: "spell-icons/bomb-creation.png",
   castingType: SpellCastingType.SelfCasting,
   magicWords: "ignitus boomis dynamo",
-  manaCost: 40,
+  manaCost: 25,
   minLevelRequired: 10,
   minMagicLevelRequired: 6,
   cooldown: 5,

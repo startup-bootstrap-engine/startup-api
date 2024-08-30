@@ -13,7 +13,7 @@ export const itemGossamerBolt: IEquippableAmmoTier9Blueprint = {
   description:
     "Made from spider silk and lightweight materials and poison, these bolts are silent but deadly, perfect for assassinations.",
   weight: 0.1,
-  maxStackSize: 999,
+  maxStackSize: 9999,
   allowedEquipSlotType: [ItemSlotType.Accessory],
   basePrice: 8,
   tier: 9,

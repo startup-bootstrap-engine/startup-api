@@ -161,7 +161,7 @@ export class HitTargetQueue {
         attacker,
         target,
         bonusDamage!,
-        magicAttack!
+        magicAttack ?? false
       );
 
       const damageRelatedPromises: any[] = [];
@@ -359,21 +359,39 @@ export class HitTargetQueue {
     baseDamage: number;
     lastestHealth: number;
   }> {
+    // do basic validation
+    if (attacker.health <= 0 || target.health <= 0) {
+      return { damage: 0, baseDamage: 0, lastestHealth: 0 };
+    }
+
     let baseDamage = await this.battleDamageCalculator.calculateHitDamage(attacker, target, magicAttack);
 
-    if (bonusDamage) {
-      baseDamage += bonusDamage * BONUS_DAMAGE_MULTIPLIER;
-    }
+    // Ensure bonusDamage is a valid number
+    bonusDamage = isNaN(bonusDamage) || bonusDamage === undefined ? 0 : bonusDamage;
+    baseDamage += bonusDamage * BONUS_DAMAGE_MULTIPLIER;
 
     let damage = this.battleDamageCalculator.getCriticalHitDamageIfSucceed(baseDamage);
     const lastestHealth = await this.fetchLatestHealth(target);
+
+    // Ensure lastestHealth is a valid number
+    if (isNaN(lastestHealth) || lastestHealth === undefined) {
+      console.error(`Invalid health value for target: ${target._id}. Defaulting to 0.`);
+      damage = 0;
+      return { damage: 0, baseDamage, lastestHealth: 0 };
+    }
+
     target.health = lastestHealth;
     const maxDamage = lastestHealth;
     damage = Math.min(damage, maxDamage);
 
     if (isNaN(damage)) {
       damage = 0;
-      console.error(`Damage is NaN for attacker: ${attacker._id} and target: ${target._id} - ${target.type}`);
+      console.error(`Damage is NaN for attacker: ${attacker._id} and target: ${target._id} - ${target.type}. Calculation details:
+      baseDamage: ${baseDamage}, 
+      bonusDamage: ${bonusDamage},
+      magicAttack: ${magicAttack},
+      lastestHealth: ${lastestHealth}
+    `);
     }
 
     return { damage, baseDamage, lastestHealth };

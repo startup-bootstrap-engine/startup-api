@@ -5,6 +5,7 @@ import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { HitTargetQueue } from "@providers/battle/HitTargetQueue";
+import { BONUS_DAMAGE_MULTIPLIER } from "@providers/constants/BattleConstants";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { itemsBlueprintIndex } from "@providers/item/data";
 import {
@@ -61,6 +62,8 @@ describe("HitTarget", () => {
     bowItem = new Item({ ...bow });
 
     fireSwordItem = new Item({ ...fireSword });
+
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
@@ -372,5 +375,139 @@ describe("HitTarget", () => {
 
       expect(increaseSkillsOnBattle).toHaveBeenCalledWith(targetCharacter, 24);
     });
+  });
+
+  it("should correctly apply critical hit multiplier", async () => {
+    const baseDamage = 50;
+    const criticalHitMultiplier = 1.8;
+    const expectedDamage = baseDamage * criticalHitMultiplier;
+
+    jest
+      // @ts-ignore
+      .spyOn(hitTarget.battleEvent, "calculateEvent" as any)
+      .mockImplementation(() => BattleEventType.Hit);
+    // @ts-ignore
+    jest.spyOn(hitTarget.battleDamageCalculator, "calculateHitDamage" as any).mockImplementation(() => baseDamage);
+    jest
+      // @ts-ignore
+      .spyOn(hitTarget.battleDamageCalculator, "getCriticalHitDamageIfSucceed" as any)
+      .mockImplementation((damage) => expectedDamage);
+
+    await hitTarget.hit(attackerCharacter, targetCharacter);
+
+    expect(targetCharacter.health).toBeLessThan(targetCharacter.maxHealth);
+    expect(targetCharacter.health).toBe(targetCharacter.maxHealth - expectedDamage);
+  });
+
+  it("should handle NaN damage by setting damage to 0", async () => {
+    jest
+      // @ts-ignore
+      .spyOn(hitTarget.battleEvent, "calculateEvent" as any)
+      .mockImplementation(() => BattleEventType.Hit);
+    // @ts-ignore
+    jest.spyOn(hitTarget.battleDamageCalculator, "calculateHitDamage" as any).mockImplementation(() => NaN);
+
+    // Mock generateBloodOnGround
+    const generateBloodOnGroundMock = jest
+      // @ts-ignore
+      .spyOn(hitTarget.battleEffects, "generateBloodOnGround")
+      // @ts-ignore
+      .mockImplementation(() => {});
+
+    await hitTarget.hit(attackerCharacter, targetCharacter);
+
+    expect(targetCharacter.health).toBe(targetCharacter.maxHealth);
+    expect(generateBloodOnGroundMock).not.toHaveBeenCalled();
+  });
+
+  it("should correctly apply bonus damage", async () => {
+    const baseDamage = 50;
+    const bonusDamage = 10;
+    const expectedDamage = baseDamage + bonusDamage * BONUS_DAMAGE_MULTIPLIER;
+
+    jest
+      // @ts-ignore
+      .spyOn(hitTarget.battleEvent, "calculateEvent" as any)
+      .mockImplementation(() => BattleEventType.Hit);
+    // @ts-ignore
+    jest.spyOn(hitTarget.battleDamageCalculator, "calculateHitDamage" as any).mockImplementation(() => baseDamage);
+
+    await hitTarget.hit(attackerCharacter, targetCharacter, false, bonusDamage);
+
+    expect(targetCharacter.health).toBe(targetCharacter.maxHealth - expectedDamage);
+  });
+
+  it("should correctly handle mana shield absorbing damage", async () => {
+    const baseDamage = 50;
+
+    jest
+      // @ts-ignore
+      .spyOn(hitTarget.battleEvent, "calculateEvent" as any)
+      .mockImplementation(() => BattleEventType.Hit);
+    // @ts-ignore
+    jest.spyOn(hitTarget.battleDamageCalculator, "calculateHitDamage" as any).mockImplementation(() => baseDamage);
+    jest
+      // @ts-ignore
+      .spyOn(hitTarget.manaShield, "hasManaShield" as any)
+      .mockResolvedValueOnce(true);
+    jest
+      // @ts-ignore
+      .spyOn(hitTarget.manaShield, "handleManaShield" as any)
+      .mockResolvedValueOnce(true); // Shield absorbs full damage
+
+    // Mock generateBloodOnGround
+    const generateBloodOnGroundMock = jest
+      // @ts-ignore
+      .spyOn(hitTarget.battleEffects, "generateBloodOnGround")
+      // @ts-ignore
+      .mockImplementation(() => {});
+
+    await hitTarget.hit(attackerCharacter, targetCharacter);
+
+    expect(targetCharacter.health).toBe(targetCharacter.maxHealth);
+    expect(generateBloodOnGroundMock).not.toHaveBeenCalled();
+  });
+
+  it("should handle edge cases with target health", async () => {
+    const baseDamage = 50;
+
+    // Test when health is at maximum
+    targetCharacter.health = targetCharacter.maxHealth;
+
+    jest
+      // @ts-ignore
+      .spyOn(hitTarget.battleEvent, "calculateEvent" as any)
+      .mockImplementation(() => BattleEventType.Hit);
+    // @ts-ignore
+    jest.spyOn(hitTarget.battleDamageCalculator, "calculateHitDamage" as any).mockImplementation(() => baseDamage);
+
+    await hitTarget.hit(attackerCharacter, targetCharacter);
+
+    expect(targetCharacter.health).toBe(targetCharacter.maxHealth - baseDamage);
+
+    // Test when health is at minimum
+    targetCharacter.health = 1;
+
+    await hitTarget.hit(attackerCharacter, targetCharacter);
+
+    expect(targetCharacter.health).toBe(0);
+  });
+
+  it("should emit battle events correctly", async () => {
+    const baseDamage = 50;
+
+    jest
+      // @ts-ignore
+      .spyOn(hitTarget.battleEvent, "calculateEvent" as any)
+      .mockImplementation(() => BattleEventType.Hit);
+    // @ts-ignore
+    jest.spyOn(hitTarget.battleDamageCalculator, "calculateHitDamage" as any).mockImplementation(() => baseDamage);
+
+    // @ts-ignore
+    const sendEventSpy = jest.spyOn(hitTarget.socketMessaging, "sendEventToCharactersAroundCharacter");
+
+    await hitTarget.hit(attackerCharacter, targetCharacter);
+
+    expect(sendEventSpy).toHaveBeenCalled();
   });
 });

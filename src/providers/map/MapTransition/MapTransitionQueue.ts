@@ -102,6 +102,59 @@ export class MapTransitionQueue {
     }
   }
 
+  public async teleportCharacter(character: ICharacter, destination: IDestination): Promise<void> {
+    const canProceed = await this.locker.lock(`character-changing-scene-${character._id}`);
+
+    if (!canProceed) {
+      return;
+    }
+
+    if (appEnv.general.IS_UNIT_TEST) {
+      await this.execTeleportCharacter(character, destination);
+      return;
+    }
+
+    await this.dynamicQueue.addJob(
+      "map-transition",
+      (job) => {
+        const { character, destination } = job.data;
+
+        console.log("MapTransitionQueue: Executing job for character", character._id, "destination:", destination);
+        void this.execTeleportCharacter(character, destination);
+      },
+      {
+        character,
+        destination,
+      }
+    );
+  }
+
+  public async execTeleportCharacter(character: ICharacter, destination: IDestination): Promise<void> {
+    if (destination.map === character.scene) {
+      await this.mapTransitionSameMap.sameMapTeleport(character, destination);
+    } else {
+      await this.mapTransitionDifferentMap.changeCharacterScene(character, destination);
+    }
+  }
+
+  public getTransition(character: ICharacter, newX: number, newY: number): ITiledObject | undefined {
+    const transition = this.mapTransitionInfo.getTransitionAtXY(character.scene, newX, newY);
+
+    if (!transition) {
+      return;
+    }
+
+    return transition;
+  }
+
+  public getDestinationFromTransition(transitionTiledObject: ITiledObject): IDestination | null {
+    const map = this.mapTransitionInfo.getTransitionProperty(transitionTiledObject, "map");
+    const gridX = Number(this.mapTransitionInfo.getTransitionProperty(transitionTiledObject, "gridX"));
+    const gridY = Number(this.mapTransitionInfo.getTransitionProperty(transitionTiledObject, "gridY"));
+
+    return map && gridX && gridY ? { map, gridX, gridY } : null;
+  }
+
   private async handleGuildTerritoryEntry(character: ICharacter, destination: IDestination): Promise<void> {
     const guild = await this.guildTerritory.getGuildByTerritoryMap(destination.map);
 
@@ -127,57 +180,5 @@ export class MapTransitionQueue {
         await this.cooldown.setCooldown(guildWarningKey, 300);
       }
     }
-  }
-
-  public async teleportCharacter(character: ICharacter, destination: IDestination): Promise<void> {
-    const canProceed = await this.locker.lock(`character-changing-scene-${character._id}`);
-
-    if (!canProceed) {
-      return;
-    }
-
-    if (appEnv.general.IS_UNIT_TEST) {
-      await this.execTeleportCharacter(character, destination);
-      return;
-    }
-
-    await this.dynamicQueue.addJob(
-      "map-transition",
-      (job) => {
-        const { character, destination } = job.data;
-
-        void this.execTeleportCharacter(character, destination);
-      },
-      {
-        character,
-        destination,
-      }
-    );
-  }
-
-  public async execTeleportCharacter(character: ICharacter, destination: IDestination): Promise<void> {
-    if (destination.map === character.scene) {
-      await this.mapTransitionSameMap.sameMapTeleport(character, destination);
-    } else {
-      await this.mapTransitionDifferentMap.changeCharacterScene(character, destination);
-    }
-  }
-
-  private getTransition(character: ICharacter, newX: number, newY: number): ITiledObject | undefined {
-    const transition = this.mapTransitionInfo.getTransitionAtXY(character.scene, newX, newY);
-
-    if (!transition) {
-      return;
-    }
-
-    return transition;
-  }
-
-  private getDestinationFromTransition(transitionTiledObject: ITiledObject): IDestination | null {
-    const map = this.mapTransitionInfo.getTransitionProperty(transitionTiledObject, "map");
-    const gridX = Number(this.mapTransitionInfo.getTransitionProperty(transitionTiledObject, "gridX"));
-    const gridY = Number(this.mapTransitionInfo.getTransitionProperty(transitionTiledObject, "gridY"));
-
-    return map && gridX && gridY ? { map, gridX, gridY } : null;
   }
 }
