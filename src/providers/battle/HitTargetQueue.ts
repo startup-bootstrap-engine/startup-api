@@ -366,6 +366,16 @@ export class HitTargetQueue {
 
     let baseDamage = await this.battleDamageCalculator.calculateHitDamage(attacker, target, magicAttack);
 
+    if (isNaN(baseDamage)) {
+      console.error("baseDamage is NaN. Inputs:", {
+        attacker: attacker._id,
+        target: target._id,
+        magicAttack,
+        bonusDamage,
+      });
+      baseDamage = 0; // Set a default value
+    }
+
     // Ensure bonusDamage is a valid number
     bonusDamage = isNaN(bonusDamage) || bonusDamage === undefined ? 0 : bonusDamage;
     baseDamage += bonusDamage * BONUS_DAMAGE_MULTIPLIER;
