@@ -1,5 +1,5 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { container } from "@providers/inversify/container";
+import { container, unitTestHelper } from "@providers/inversify/container";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { Stun } from "@providers/spells/data/logic/warrior/Stun";
 import { UISocketEvents } from "@rpg-engine/shared";
@@ -25,8 +25,10 @@ describe("CharacterMovementValidation", () => {
     sendEventToUser.mockRestore();
   });
 
-  beforeAll(() => {
+  beforeAll(async () => {
     characterMovementValidation = container.get(CharacterMovementValidation);
+
+    await unitTestHelper.initializeMapLoader();
   });
 
   describe("isValid", () => {
@@ -101,6 +103,7 @@ describe("CharacterMovementValidation", () => {
         isOnline: true,
         isAlive: true,
         isBanned: false,
+        scene: "unit-test-map",
         x: 0,
         y: 0,
       } as ICharacter;

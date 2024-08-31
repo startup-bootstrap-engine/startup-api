@@ -2,6 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { Locker } from "@providers/locks/Locker";
+import { MapTiles } from "@providers/map/MapTiles";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { Stun } from "@providers/spells/data/logic/warrior/Stun";
@@ -28,7 +29,8 @@ export class CharacterMovementValidation {
     private socketMessaging: SocketMessaging,
     private locker: Locker,
     private newRelic: NewRelic,
-    private stun: Stun
+    private stun: Stun,
+    private mapTiles: MapTiles
   ) {}
 
   @TrackNewRelicTransaction()
@@ -132,6 +134,17 @@ export class CharacterMovementValidation {
         }
       }
 
+      return false;
+    }
+
+    const isDestinationCoordinateValid = this.mapTiles.isMapCoordinateWithinBounds(
+      character.scene,
+      ToGridX(newX),
+      ToGridY(newY)
+    );
+
+    if (!isDestinationCoordinateValid) {
+      console.error(`🚫 ${character.name} is trying to move to an invalid destination coordinate!`);
       return false;
     }
 
