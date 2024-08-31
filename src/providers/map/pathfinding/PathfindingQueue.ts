@@ -41,12 +41,6 @@ export class PathfindingQueue {
     endGridX: number,
     endGridY: number
   ): Promise<number[][] | undefined> {
-    const canProceed = await this.locker.lock(`pathfinding-${npc._id}`);
-
-    if (!canProceed) {
-      return;
-    }
-
     try {
       if (appEnv.general.IS_UNIT_TEST) {
         return this.getResultsFromPathfindingAlgorithm(npc, map, {
@@ -73,8 +67,6 @@ export class PathfindingQueue {
       return await this.triggerLightweightPathfinding(npc, endGridX, endGridY);
     } catch (error) {
       console.error(error);
-    } finally {
-      await this.locker.unlock(`pathfinding-${npc._id}`);
     }
   }
 

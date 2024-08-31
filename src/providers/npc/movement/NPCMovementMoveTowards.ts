@@ -88,18 +88,10 @@ export class NPCMovementMoveTowards {
     }
 
     try {
-      const canProceed = await this.locker.lock(`movement-move-towards-${npc._id}`);
-
-      if (!canProceed) {
-        return;
-      }
-
       await this.handleValidTarget(npc, targetCharacter);
     } catch (error) {
       console.error(error);
       throw error;
-    } finally {
-      await this.locker.unlock(`movement-move-towards-${npc._id}`);
     }
   }
 
