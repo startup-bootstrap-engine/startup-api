@@ -2,6 +2,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import axiosRetry from "axios-retry";
+import Bottleneck from "bottleneck"; // Rate limiting library
 import http from "http";
 import https from "https";
 
@@ -38,12 +39,13 @@ const httpsAgent = new https.Agent(agentConfig);
 @provideSingleton(MicroserviceRequest)
 export class MicroserviceRequest {
   private axiosInstance: AxiosInstance;
+  private limiter: Bottleneck;
 
   constructor() {
     this.axiosInstance = axios.create({
       httpAgent,
       httpsAgent,
-      timeout: 15000, // Request timeout of 5 seconds
+      timeout: 15000, // Request timeout of 15 seconds
     });
     axiosRetry(this.axiosInstance, {
       retries: 5, // Increase the number of retries
@@ -51,6 +53,12 @@ export class MicroserviceRequest {
       retryCondition: (error) => {
         return error.code === "ECONNABORTED" || error.response?.status! >= 500 || error.code === "ECONNRESET";
       },
+    });
+
+    // Initialize rate limiter
+    this.limiter = new Bottleneck({
+      maxConcurrent: 200, // Maximum number of concurrent requests
+      minTime: 5, // Minimum time between requests
     });
   }
 
@@ -71,12 +79,14 @@ export class MicroserviceRequest {
     const url = `${microserviceConfig.baseUrl}${endpoint}`;
 
     try {
-      const response = await this.axiosInstance.request<T>({
-        url,
-        method,
-        data,
-        ...config,
-      });
+      const response = await this.limiter.schedule(() =>
+        this.axiosInstance.request<T>({
+          url,
+          method,
+          data,
+          ...config,
+        })
+      );
 
       return response.data;
     } catch (error) {
