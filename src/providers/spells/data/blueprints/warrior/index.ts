@@ -1,10 +1,11 @@
 import { SpellsBlueprint } from "@rpg-engine/shared";
 import { spellBleedingEdge } from "./SpellBleedingEdge";
+import { warriorSpellExecution } from "./SpellExecution";
 import { spellFortifyDefense } from "./SpellFortifyDefense";
 import { spellPhysicalShield } from "./SpellPhysicalShield";
 import { spellPowerStrike } from "./SpellPowerStrike";
-import { spellStunTarget } from "./SpellStunTarget";
 import { spellShieldBash } from "./SpellShieldBash";
+import { spellStunTarget } from "./SpellStunTarget";
 
 export const warriorSpellsIndex = {
   [SpellsBlueprint.SpellPhysicalShield]: spellPhysicalShield,
@@ -13,4 +14,5 @@ export const warriorSpellsIndex = {
   [SpellsBlueprint.PowerStrike]: spellPowerStrike,
   [SpellsBlueprint.BleedingEdge]: spellBleedingEdge,
   [SpellsBlueprint.ShieldBash]: spellShieldBash,
+  [SpellsBlueprint.WarriorExecution]: warriorSpellExecution,
 };

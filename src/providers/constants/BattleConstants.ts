@@ -16,6 +16,12 @@ export const DAMAGE_REDUCTION_MIN_LEVEL_FOR_NPC = 30; // min level for NPC to ha
 
 export const BATTLE_TOTAL_POTENTIAL_DAMAGE_MODIFIER = 1.5;
 
+// Execution
+
+export const EXECUTION_DEFAULT_HEALTH_THRESHOLD = 25; // 25% health threshold for execution
+
+//= =============== CLASSES =================== ==//
+
 // Rogue
 
 export const STEALTH_DETECTION_THRESHOLD = 0.025;
@@ -33,3 +39,7 @@ export const MAGE_MANA_SHIELD_DAMAGE_REDUCTION = 1; // 100% damage reduction
 export const GENERATE_BLOOD_GROUND_ON_HIT = 5; // 5% chance to generate blood on the ground
 
 export const GENERATE_BLOOD_ON_DEATH = 100; // 100% chance to generate blood on death
+
+// Warrior
+
+export const WARRIOR_EXECUTION_HEALTH_THRESHOLD = 15; // 15% health threshold for execution
