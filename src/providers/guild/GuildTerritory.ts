@@ -1,9 +1,8 @@
 import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
 import { MapName } from "@providers/map/MapName";
-import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import { IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { UpdateWriteOpResult } from "mongoose";
+import { GuildCommon } from "./GuildCommon";
 
 interface IGuildMapPoints {
   guildId: string;
@@ -12,7 +11,7 @@ interface IGuildMapPoints {
 
 @provide(GuildTerritory)
 export class GuildTerritory {
-  constructor(private socketMessaging: SocketMessaging, private mapName: MapName) {}
+  constructor(private mapName: MapName, private guildCommon: GuildCommon) {}
 
   public async trySetMapControl(map: string): Promise<void> {
     try {
@@ -21,27 +20,46 @@ export class GuildTerritory {
         return;
       }
 
-      const territoriesOwned = mapControlGuild.territoriesOwned;
-      const existingIndex = territoriesOwned.findIndex((to) => to.map === map);
+      const oldMapControl = await this.getGuildByTerritoryMap(map);
 
-      // If this guild already owns this map, do nothing
-      if (existingIndex !== -1) {
+      if (this.isMapAlreadyControlled(mapControlGuild, map)) {
         return;
       }
 
-      this.socketMessaging.sendEventToAllUsers<IUIShowMessage>(UISocketEvents.ShowMessage, {
-        message: `${map} is now controlled by ${mapControlGuild.name}.`,
-        type: "info",
-      });
-
-      await this.removeTerritoriesForMap(map);
-      await Guild.updateOne(
-        { _id: mapControlGuild._id },
-        { $push: { territoriesOwned: { map, lootShare: 15, controlPoint: true } } }
-      );
+      await this.notifyMembersOfControlChange(map, mapControlGuild, oldMapControl);
+      await this.updateMapControl(map, mapControlGuild);
     } catch (error) {
       console.error("Error setting map control:", error);
+      throw new Error("Failed to set map control");
     }
+  }
+
+  private isMapAlreadyControlled(guild: IGuild, map: string): boolean {
+    const territoriesOwned = guild.territoriesOwned || [];
+    return territoriesOwned.some((territory) => territory.map === map);
+  }
+
+  private async notifyMembersOfControlChange(
+    map: string,
+    newControl: IGuild,
+    oldControl: IGuild | null
+  ): Promise<void> {
+    if (!oldControl) {
+      await this.guildCommon.sendMessageToAllMembers(`${map} is now controlled by ${newControl.name}.`, newControl);
+    } else if (oldControl._id.toString() !== newControl._id.toString()) {
+      await this.guildCommon.sendMessageToAllMembers(
+        `${newControl.name} has stolen the control of ${map}.`,
+        newControl
+      );
+    }
+  }
+
+  private async updateMapControl(map: string, guild: IGuild): Promise<void> {
+    await this.removeTerritoriesForMap(map);
+    await Guild.updateOne(
+      { _id: guild._id },
+      { $push: { territoriesOwned: { map, lootShare: 15, controlPoint: true } } }
+    );
   }
 
   public async getMapControl(map: string): Promise<IGuild | null> {
