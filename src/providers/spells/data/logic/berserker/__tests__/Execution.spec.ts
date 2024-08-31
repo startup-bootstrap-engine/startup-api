@@ -1,14 +1,15 @@
-/* eslint-disable no-unused-vars */
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
+import { CharacterDeath } from "@providers/character/CharacterDeath/CharacterDeath";
 import { TimerWrapper } from "@providers/helpers/TimerWrapper";
 import { container, unitTestHelper } from "@providers/inversify/container";
+import { NPCDeathQueue } from "@providers/npc/NPCDeathQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { spellGreaterHealing } from "@providers/spells/data/blueprints/all/SpellGreaterHealing";
 import { spellSelfHealing } from "@providers/spells/data/blueprints/all/SpellSelfHealing";
 import { berserkerSpellExecution } from "@providers/spells/data/blueprints/berserker/SpellExecution";
-import { CharacterClass } from "@rpg-engine/shared";
+import { CharacterClass, EntityType } from "@rpg-engine/shared";
 import { Execution } from "../Execution";
 
 describe("Execution", () => {
@@ -52,21 +53,27 @@ describe("Execution", () => {
     const timerMock = jest.spyOn(TimerWrapper.prototype, "setTimeout");
     timerMock.mockImplementation();
 
-    targetCharacter.health = 100;
-    await Character.findByIdAndUpdate(targetCharacter._id, targetCharacter);
+    targetNPC = await NPC.findByIdAndUpdate(targetNPC._id, { health: 40 }, { new: true }).lean();
 
-    await executionSpell.handleExecution(testCharacter, targetCharacter);
+    const result = await executionSpell.handleExecution(testCharacter, targetNPC);
+
+    expect(result).toBe(false);
+
+    const updatedTargetCharacter = await Character.findById(targetCharacter._id).lean();
+
+    expect(updatedTargetCharacter?.health).toBe(100);
 
     const characterBody = await Item.findOne({
       name: `${targetCharacter.name}'s body`,
       scene: targetCharacter.scene,
-    })
-      .populate("itemContainer")
-      .exec();
+    }).lean();
 
     expect(characterBody).toBeNull();
-    expect(targetCharacter.health).toBe(100);
-    expect(targetCharacter.isAlive).toBe(true);
+
+    expect(sendEventToUser).toHaveBeenCalledWith(testCharacter.channelId!, "ShowMessage", {
+      message: "The target's health is above 30%, you can't execute it.",
+      type: "error",
+    });
   });
 
   it("should execute spell successfully for an NPC target", async () => {
@@ -90,5 +97,64 @@ describe("Execution", () => {
     expect(npcBody).not.toBeNull();
 
     expect(updateNPC.health).toBe(0);
+  });
+
+  it("should not execute spell if attacker or target is missing", async () => {
+    const result = await executionSpell.handleExecution(null as any, null as any);
+    expect(result).toBe(false);
+  });
+
+  it("should not execute spell if attacker targets themselves", async () => {
+    const result = await executionSpell.handleExecution(testCharacter, testCharacter);
+    expect(result).toBe(false);
+  });
+
+  it("should execute spell successfully for a Character target", async () => {
+    targetCharacter = (await Character.findByIdAndUpdate(
+      targetCharacter._id,
+      { health: 5, maxHealth: 100 },
+
+      { new: true }
+    ).lean()) as ICharacter;
+
+    const characterDeathSpy = jest.spyOn(CharacterDeath.prototype, "handleCharacterDeath").mockResolvedValue();
+
+    await executionSpell.handleExecution(testCharacter, targetCharacter);
+
+    expect(characterDeathSpy).toHaveBeenCalledWith(testCharacter, targetCharacter);
+  });
+
+  it("should use custom health threshold if provided", async () => {
+    targetNPC = (await NPC.findByIdAndUpdate(
+      targetNPC._id,
+      { health: 45, maxHealth: 100 },
+      { new: true }
+    ).lean()) as INPC;
+
+    const result = await executionSpell.handleExecution(testCharacter, targetNPC, 50);
+
+    expect(result).toBe(true);
+  });
+
+  it("should handle missing type and set it for NPC", async () => {
+    // @ts-ignore
+    delete targetNPC.type;
+
+    const npcDeathSpy = jest.spyOn(NPCDeathQueue.prototype, "handleNPCDeath").mockResolvedValue();
+
+    await executionSpell.handleExecution(testCharacter, targetNPC as any);
+
+    expect(npcDeathSpy).toHaveBeenCalled();
+  });
+
+  it("should handle missing type and set it for Character", async () => {
+    const targetWithoutType = { ...targetCharacter };
+    // @ts-ignore
+    delete targetWithoutType.type;
+
+    const result = await executionSpell.handleExecution(testCharacter, targetWithoutType as any);
+
+    expect(result).toBe(false); // Assuming the execution should fail for health > 30%
+    expect(targetWithoutType.type).toBe(EntityType.Character);
   });
 });

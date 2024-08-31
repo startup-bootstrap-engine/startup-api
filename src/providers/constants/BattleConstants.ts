@@ -43,3 +43,7 @@ export const GENERATE_BLOOD_ON_DEATH = 100; // 100% chance to generate blood on 
 // Warrior
 
 export const WARRIOR_EXECUTION_HEALTH_THRESHOLD = 15; // 15% health threshold for execution
+
+// Hunter
+
+export const HUNTER_EXECUTION_HEALTH_THRESHOLD = 20; // 20% health threshold for execution
