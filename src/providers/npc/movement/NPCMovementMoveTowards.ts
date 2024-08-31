@@ -60,16 +60,18 @@ export class NPCMovementMoveTowards {
       return;
     }
 
-    await this.dynamicQueue.addJob(
-      "npc-move-towards-queue",
-      (job) => {
-        const { npc } = job.data;
-        //! Using await here will cause mobs to freeze when there're a lot of them active.
-        void this.execStartMoveTowardsMovement(npc);
-      },
-      { npc },
-      { queueScaleBy: "active-npcs" }
-    );
+    return await this.execStartMoveTowardsMovement(npc);
+
+    // await this.dynamicQueue.addJob(
+    //   "npc-move-towarwds-queue",
+    //   (job) => {
+    //     const { npc } = job.data;
+    //     //! Using await here will cause mobs to freeze when there're a lot of them active.
+    //     void this.execStartMoveTowardsMovement(npc);
+    //   },
+    //   { npc },
+    //   { queueScaleBy: "active-npcs" }
+    // );
   }
 
   private async execStartMoveTowardsMovement(npc: INPC): Promise<void> {

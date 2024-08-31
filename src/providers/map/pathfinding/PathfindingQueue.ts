@@ -1,8 +1,10 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
+import { TrackClassExecutionTime } from "@jonit-dev/decorators-utils";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
 import { PATHFINDING_LIGHTWEIGHT_WALKABLE_THRESHOLD } from "@providers/constants/PathfindingConstants";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { AvailableMicroservices, MicroserviceRequest } from "@providers/microservice/MicroserviceRequest";
@@ -19,6 +21,7 @@ interface IRPGPathfinderResponse {
   path: number[][];
 }
 
+@TrackClassExecutionTime()
 @provideSingleton(PathfindingQueue)
 export class PathfindingQueue {
   constructor(
@@ -28,7 +31,8 @@ export class PathfindingQueue {
     private gridManager: GridManager,
     private lightweightPathfinder: LightweightPathfinder,
     private npcTarget: NPCTarget,
-    private microserviceRequest: MicroserviceRequest
+    private microserviceRequest: MicroserviceRequest,
+    private inMemoryHashTable: InMemoryHashTable
   ) {}
 
   @TrackNewRelicTransaction()
@@ -41,6 +45,12 @@ export class PathfindingQueue {
     endGridX: number,
     endGridY: number
   ): Promise<number[][] | undefined> {
+    const canProceed = await this.locker.lock(`pathfinding-${npc._id}`);
+
+    if (!canProceed) {
+      return;
+    }
+
     try {
       if (appEnv.general.IS_UNIT_TEST) {
         return this.getResultsFromPathfindingAlgorithm(npc, map, {
@@ -49,24 +59,55 @@ export class PathfindingQueue {
         });
       }
 
-      const pathfindingResult = await this.startPathfindingQueue(
-        npc,
-        target,
-        startGridX,
-        startGridY,
-        endGridX,
-        endGridY
-      );
+      // return without queueing
+
+      const hasCache = (await this.inMemoryHashTable.get(
+        "pathfinding-cache",
+        `${npc._id}-${startGridX}-${startGridY}-${endGridX}-${endGridY}`
+      )) as number[][];
+
+      if (hasCache) {
+        return hasCache;
+      }
+
+      const pathfindingResult = await this.getResultsFromPathfindingAlgorithm(npc, npc.scene, {
+        start: { x: startGridX, y: startGridY },
+        end: { x: endGridX, y: endGridY },
+      });
 
       if (pathfindingResult && pathfindingResult?.length > 0) {
+        await this.inMemoryHashTable.set(
+          "pathfinding-cache",
+          `${npc._id}-${startGridX}-${startGridY}-${endGridX}-${endGridY}`,
+          pathfindingResult
+        );
         return pathfindingResult;
       }
 
       await this.npcTarget.tryToSetTarget(npc);
 
       return await this.triggerLightweightPathfinding(npc, endGridX, endGridY);
+
+      // const pathfindingResult = await this.startPathfindingQueue(
+      //   npc,
+      //   target,
+      //   startGridX,
+      //   startGridY,
+      //   endGridX,
+      //   endGridY
+      // );
+
+      // if (pathfindingResult && pathfindingResult?.length > 0) {
+      //   return pathfindingResult;
+      // }
+
+      // await this.npcTarget.tryToSetTarget(npc);
+
+      // return await this.triggerLightweightPathfinding(npc, endGridX, endGridY);
     } catch (error) {
       console.error(error);
+    } finally {
+      await this.locker.unlock(`pathfinding-${npc._id}`);
     }
   }
 
@@ -145,9 +186,6 @@ export class PathfindingQueue {
           startGridY,
           endGridX,
           endGridY,
-        },
-        {
-          queueScaleBy: "active-npcs",
         }
       );
     } catch (error) {
