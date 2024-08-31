@@ -61,11 +61,6 @@ export class CharacterMovementValidation {
       return false;
     }
 
-    if (!this.movementHelper.isSnappedToGrid(newX, newY)) {
-      console.error(`🚫 ${character.name} lost snapping to grid!`);
-      return false;
-    }
-
     const isTooHeavy = this.isCharacterTooHeavy(character);
 
     if (isTooHeavy) {
