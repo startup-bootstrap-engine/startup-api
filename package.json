@@ -52,6 +52,7 @@
     "axios": "^0.21.0",
     "axios-cache-adapter": "^2.7.3",
     "axios-retry": "^4.5.0",
+    "bottleneck": "^2.19.5",
     "cachegoose": "^8.0.0",
     "compression": "^1.7.4",
     "countries-cities": "^0.0.11",

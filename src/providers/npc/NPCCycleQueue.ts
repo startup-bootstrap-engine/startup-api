@@ -67,6 +67,7 @@ export class NPCCycleQueue {
       },
       {
         queueScaleBy: "active-npcs",
+        hasConcurrency: true,
       },
 
       {

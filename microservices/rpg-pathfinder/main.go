@@ -2,11 +2,15 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
+
+	jsoniter "github.com/json-iterator/go"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type PathRequest struct {
 	StartX int  `json:"startX"`
@@ -48,6 +52,8 @@ func worker() {
 }
 
 func pathHandler(w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
@@ -57,21 +63,26 @@ func pathHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	pathfinderStartTime := time.Now()
 	select {
 	case pathRequestChan <- req:
 		select {
 		case <-ctx.Done():
 			http.Error(w, "Request timed out", http.StatusGatewayTimeout)
 		case resp := <-pathResponseChan:
+			pathfinderDuration := time.Since(pathfinderStartTime)
 			w.Header().Set("Content-Type", "application/json")
 			if resp.Error != "" {
 				w.WriteHeader(http.StatusNotFound)
 			}
-			_ = json.NewEncoder(w).Encode(resp)
+			json.NewEncoder(w).Encode(resp)
+			totalDuration := time.Since(startTime)
+			log.Printf("Total: %s, Pathfinder: %s", totalDuration, pathfinderDuration)
 		}
 	case <-ctx.Done():
 		http.Error(w, "Request timed out", http.StatusGatewayTimeout)
 	}
+
 }
 
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
