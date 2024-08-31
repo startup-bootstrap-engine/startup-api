@@ -1,8 +1,11 @@
 #!/bin/bash
 
+# Exit immediately if a command exits with a non-zero status
+set -e
+
 # avoid npm not found error
-   export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
 # Set the deployment directory
 DEPLOY_DIR="/home/jonit/definya/client"
@@ -25,20 +28,18 @@ done
 echo "Deploying project..."
 git --work-tree=$DEPLOY_DIR --git-dir=$REPO_DIR checkout -f $BRANCH
 
-
 # Build React and Docker image
 cd ~/definya/client
 
 echo "🐳 Building React..."
 npm run build
 
-echo "🐳Building Docker image..."
+echo "🐳 Building Docker image..."
 docker build -t definya/definya-team:client-latest .
 docker push definya/definya-team:client-latest
 
 # Update the service to restart containers and force image update
-echo "🐳Restarting swarm service..."
-
+echo "🐳 Restarting swarm service..."
 docker service update --force --image definya/definya-team:client-latest --with-registry-auth swarm-stack_rpg-client
 
 docker container prune -f
