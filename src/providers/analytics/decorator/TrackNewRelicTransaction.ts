@@ -17,11 +17,17 @@ export function TrackNewRelicTransaction(): MethodDecorator {
       const className = target.constructor.name;
       const methodName = propertyKey;
 
-      return await newRelic.trackPromiseTransaction(
-        NewRelicTransactionCategory.Operation,
-        `${className}.${methodName}`,
-        originalFunction.apply(this, args)
-      );
+      try {
+        return await newRelic.trackPromiseTransaction(
+          NewRelicTransactionCategory.Operation,
+          `${className}.${methodName}`,
+          originalFunction.apply(this, args)
+        );
+      } catch (error) {
+        console.error("Error tracking New Relic transaction:", error);
+        // Fall back to executing the original function without New Relic tracking
+        return originalFunction.apply(this, args);
+      }
     };
   };
 }
