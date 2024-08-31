@@ -18,7 +18,7 @@ export class GuildTerritoryControlPoint {
       if (!guild) return;
 
       // steal guild control points
-      const stealXp = await this.StealGuildControlPoints(map, guild as IGuild);
+      const stealXp = await this.stealGuildControlPoints(map, guild as IGuild);
       const newXp = xp + stealXp;
 
       const controlPoints = guild.controlPoints || [];
@@ -36,7 +36,7 @@ export class GuildTerritoryControlPoint {
     }
   }
 
-  private async StealGuildControlPoints(map: string, myGuild: IGuild): Promise<number> {
+  private async stealGuildControlPoints(map: string, myGuild: IGuild): Promise<number> {
     try {
       const mapControlGuild = await this.guildTerritory.getGuildByTerritoryMap(map);
       if (!mapControlGuild || mapControlGuild._id.toString() === myGuild._id.toString()) {
