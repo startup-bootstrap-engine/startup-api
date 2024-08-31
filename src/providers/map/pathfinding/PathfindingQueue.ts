@@ -4,6 +4,7 @@ import { TrackClassExecutionTime } from "@jonit-dev/decorators-utils";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
 import { PATHFINDING_LIGHTWEIGHT_WALKABLE_THRESHOLD } from "@providers/constants/PathfindingConstants";
+import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MathHelper } from "@providers/math/MathHelper";
@@ -13,6 +14,7 @@ import { ResultsPoller } from "@providers/poller/ResultsPoller";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { FromGridX, FromGridY } from "@rpg-engine/shared";
 import { Job } from "bullmq";
+import dayjs from "dayjs";
 import PF from "pathfinding";
 import { GridManager, IGridCourse } from "../GridManager";
 import { LightweightPathfinder } from "./LightweightPathfinder";
@@ -32,6 +34,8 @@ export class PathfindingQueue {
     private lightweightPathfinder: LightweightPathfinder,
     private npcTarget: NPCTarget,
     private microserviceRequest: MicroserviceRequest,
+    private inMemoryHashTable: InMemoryHashTable,
+
     private mathHelper: MathHelper
   ) {}
 
@@ -59,7 +63,20 @@ export class PathfindingQueue {
         });
       }
 
-      // return without queueing
+      const cacheKey = `${npc._id}-${startGridX}-${startGridY}-${endGridX}-${endGridY}`;
+      const cachedData = (await this.inMemoryHashTable.get("pathfinding-cache", cacheKey)) as {
+        path: number[][];
+        expiration: string;
+      } | null;
+
+      if (cachedData) {
+        if (dayjs().isBefore(dayjs(cachedData.expiration))) {
+          return cachedData.path;
+        } else {
+          // Clear expired cache entry
+          await this.inMemoryHashTable.delete("pathfinding-cache", cacheKey);
+        }
+      }
 
       const pathfindingResult = await this.getResultsFromPathfindingAlgorithm(npc, npc.scene, {
         start: { x: startGridX, y: startGridY },
@@ -67,6 +84,11 @@ export class PathfindingQueue {
       });
 
       if (pathfindingResult && pathfindingResult?.length > 0) {
+        const expirationDate = dayjs().add(1, "day").toISOString();
+        await this.inMemoryHashTable.set("pathfinding-cache", cacheKey, {
+          path: pathfindingResult,
+          expiration: expirationDate,
+        });
         return pathfindingResult;
       }
 
