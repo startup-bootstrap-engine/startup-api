@@ -156,6 +156,9 @@ export class NPCRaidActivator {
     const raids = await this.raidManager.queryRaids({ status: false });
 
     if (raids.length === 0) {
+      const allRaids = await this.raidManager.getAllRaids();
+      console.log(allRaids);
+
       console.warn("No inactive raids available for activation.");
       return null;
     }

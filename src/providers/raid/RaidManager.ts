@@ -57,12 +57,12 @@ export class RaidManager {
 
   @TrackNewRelicTransaction()
   public async queryRaids(query: Partial<IRaid>): Promise<IRaid[]> {
-    const raids = Object.values(await this.getAllRaids());
+    const raids = await this.getAllRaids();
 
     return raids.filter((raid) => {
-      return Object.keys(query).every((key) => {
-        return raid[key] === query[key];
-      });
+      return Object.keys(query)
+        .filter((key) => query[key] !== undefined) // Filter out undefined keys
+        .every((key) => raid[key] === query[key]);
     });
   }
 
