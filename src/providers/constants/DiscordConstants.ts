@@ -8,6 +8,7 @@ export const DISCORD_CHANNEL_IDS = {
   rankings: "1162809636341153904",
   announcements: "1064126085480067132",
   general: "1063552162459820073",
+  guilds: "1113835255246372935",
 };
 
 export type DiscordChannelName = keyof typeof DISCORD_CHANNEL_IDS;
