@@ -32,16 +32,14 @@ export class NPCCrons {
       await this.npcSpawnCron();
     });
 
-    this.cronJobScheduler.uniqueSchedule("npc-raid-activator", "0 * * * *", async () => {
+    this.cronJobScheduler.uniqueSchedule("npc-raid-activator", "*/10 * * * *", async () => {
       console.log("Trying to activate raids...");
       await this.npcRaidActivator.activateRaids();
     });
 
-    this.cronJobScheduler.uniqueSchedule("npc-raid-shutdown", "*/15 * * * *", async () => {
-      console.log("Trying to shutdown raids...");
+    this.cronJobScheduler.uniqueSchedule("npc-raid-shutdown", "* * * * *", async () => {
       await this.npcRaidActivator.shutdownRaids();
     });
-
     this.cronJobScheduler.uniqueSchedule("npc-freezer", "* * * * *", async () => {
       await this.npcFreezer.freezeNPCsWithoutCharactersAround();
     });
