@@ -15,6 +15,7 @@ import { IndustriesController } from "@useCases/ModuleSystem/industries/Industri
 import { MapController } from "@useCases/ModuleSystem/map/MapController";
 import { PushNotificationController } from "@useCases/ModuleSystem/operation/pushNotification/PushNotificationController";
 import { PatreonController } from "@useCases/ModuleSystem/patreon/PatreonController";
+import { PingController } from "@useCases/ModuleSystem/ping/PingController";
 import { PlacesController } from "@useCases/ModuleSystem/places/PlacesController";
 import { PremiumAccountController } from "@useCases/ModuleSystem/premiumAccount/PremiumAccountController";
 import { ScriptsController } from "@useCases/ModuleSystem/scripts/ScriptsController";
@@ -48,6 +49,7 @@ export const userControllerContainer = new ContainerModule((bind: interfaces.Bin
   bind<GoogleOAuthSyncController>(GoogleOAuthSyncController).toSelf();
   bind<AppleOAuthController>(AppleOAuthController).toSelf();
   bind<PushNotificationController>(PushNotificationController).toSelf();
+  bind<PingController>(PingController).toSelf();
 });
 
 export const blueprintControllerContainer = new ContainerModule((bind: interfaces.Bind, unbind: interfaces.Unbind) => {
