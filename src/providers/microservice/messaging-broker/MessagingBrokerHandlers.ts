@@ -1,12 +1,12 @@
+import { Pathfinding } from "@providers/map/pathfinding/Pathfinding";
 import { provide } from "inversify-binding-decorators";
-import { NPCMovementMessagingHandler } from "./subscribers/NPCMovementSubscriber";
 
 @provide(MessagingBrokerHandlers)
 export class MessagingBrokerHandlers {
-  constructor(private npcMovementMessagingHandler: NPCMovementMessagingHandler) {}
+  constructor(private pathfinding: Pathfinding) {}
 
   public async onAddHandlers(): Promise<void> {
     console.log("💌 Adding messaging broker handlers...");
-    await this.npcMovementMessagingHandler.handle();
+    await this.pathfinding.addListener();
   }
 }

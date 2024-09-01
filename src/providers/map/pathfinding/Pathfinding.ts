@@ -34,9 +34,12 @@ export class Pathfinding {
     private npcTarget: NPCTarget,
     private microserviceMessaging: MicroserviceMessaging,
     private inMemoryHashTable: InMemoryHashTable,
-
     private mathHelper: MathHelper
   ) {}
+
+  public async addListener(): Promise<void> {
+    await this.microserviceMessaging.listenForMessages("rpg_pathfinding", "path_result", async (data) => {});
+  }
 
   @TrackNewRelicTransaction()
   public async findShortestPath(
@@ -62,21 +65,6 @@ export class Pathfinding {
         });
       }
 
-      const cacheKey = `${npc._id}-${startGridX}-${startGridY}-${endGridX}-${endGridY}`;
-      const cachedData = (await this.inMemoryHashTable.get("pathfinding-cache", cacheKey)) as {
-        path: number[][];
-        expiration: string;
-      } | null;
-
-      if (cachedData) {
-        if (dayjs().isBefore(dayjs(cachedData.expiration))) {
-          return cachedData.path;
-        } else {
-          // Clear expired cache entry
-          await this.inMemoryHashTable.delete("pathfinding-cache", cacheKey);
-        }
-      }
-
       const pathfindingResult = await this.getResultsFromPathfindingAlgorithm(npc, npc.scene, {
         start: { x: startGridX, y: startGridY },
         end: { x: endGridX, y: endGridY },
@@ -84,10 +72,7 @@ export class Pathfinding {
 
       if (pathfindingResult && pathfindingResult?.length > 0) {
         const expirationDate = dayjs().add(1, "day").toISOString();
-        await this.inMemoryHashTable.set("pathfinding-cache", cacheKey, {
-          path: pathfindingResult,
-          expiration: expirationDate,
-        });
+
         return pathfindingResult;
       }
 
