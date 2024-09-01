@@ -2,13 +2,10 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
-import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { MathHelper } from "@providers/math/MathHelper";
 import { MessagingBrokerMessaging } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
 import { NPCTarget } from "@providers/npc/movement/NPCTarget";
-import { ResultsPoller } from "@providers/poller/ResultsPoller";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { FromGridX, FromGridY } from "@rpg-engine/shared";
 import PF from "pathfinding";
@@ -25,13 +22,10 @@ export class Pathfinding {
   constructor(
     private locker: Locker,
     private dynamicQueue: DynamicQueue,
-    private resultsPoller: ResultsPoller,
     private gridManager: GridManager,
     private lightweightPathfinder: LightweightPathfinder,
     private npcTarget: NPCTarget,
-    private messagingBrokerMessaging: MessagingBrokerMessaging,
-    private inMemoryHashTable: InMemoryHashTable,
-    private mathHelper: MathHelper
+    private messagingBrokerMessaging: MessagingBrokerMessaging
   ) {}
 
   public async addListener(): Promise<void> {
