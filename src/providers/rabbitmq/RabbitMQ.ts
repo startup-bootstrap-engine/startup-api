@@ -7,6 +7,19 @@ export class RabbitMQ {
   public connection: Connection | null = null;
   public channel: Channel | null = null;
 
+  private async retryOperation<T>(operation: () => Promise<T>, retries = 3, delay = 1000): Promise<T> {
+    for (let i = 0; i < retries; i++) {
+      try {
+        return await operation();
+      } catch (error) {
+        if (i === retries - 1) throw error;
+        console.warn(`Operation failed, retrying in ${delay}ms...`, error);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+    throw new Error("Operation failed after multiple retries");
+  }
+
   isConnected(): boolean {
     return this.connection !== null && this.channel !== null;
   }
@@ -21,54 +34,57 @@ export class RabbitMQ {
       return;
     }
 
-    try {
+    await this.retryOperation(async () => {
       const { host, port, username, password } = appEnv.rabbitmq;
       const url = `amqp://${username}:${password}@${host}:${port}`;
       this.connection = await amqp.connect(url);
       this.channel = await this.connection.createChannel();
       console.log(`✅ Successfully connected to RabbitMQ at ${url}`);
-    } catch (error) {
-      console.error("❌ Error connecting to RabbitMQ:", error);
-      throw error;
-    }
+    });
   }
 
   async createQueue(queue: string): Promise<void> {
-    if (!this.channel) {
-      throw new Error("RabbitMQ channel not initialized");
-    }
-    await this.channel.assertQueue(queue, { durable: true });
-
-    console.log(`✅ Created queue: ${queue}`);
+    await this.retryOperation(async () => {
+      if (!this.channel) {
+        throw new Error("RabbitMQ channel not initialized");
+      }
+      await this.channel.assertQueue(queue, { durable: true });
+      console.log(`✅ Created queue: ${queue}`);
+    });
   }
 
   async sendMessage(queue: string, message: string): Promise<void> {
-    if (!this.channel) {
-      throw new Error("RabbitMQ channel not initialized");
-    }
-    console.log(`📩 Sending message to queue ${queue}:`, message);
-    await this.channel.sendToQueue(queue, Buffer.from(message));
+    await this.retryOperation(async () => {
+      if (!this.channel) {
+        throw new Error("RabbitMQ channel not initialized");
+      }
+
+      await this.channel.sendToQueue(queue, Buffer.from(message));
+    });
   }
 
   async assertExchange(exchange: string, type: string): Promise<void> {
-    if (!this.channel) {
-      throw new Error("RabbitMQ channel not initialized");
-    }
-    await this.channel.assertExchange(exchange, type, { durable: true });
-    console.log(`✅ Exchange ${exchange} asserted`);
+    await this.retryOperation(async () => {
+      if (!this.channel) {
+        throw new Error("RabbitMQ channel not initialized");
+      }
+      await this.channel.assertExchange(exchange, type, { durable: true });
+      console.log(`✅ Exchange ${exchange} asserted`);
+    });
   }
 
   async publishMessage(exchange: string, routingKey: string, data: any): Promise<void> {
-    if (!this.channel) {
-      throw new Error("RabbitMQ channel not initialized");
-    }
-    const message = Buffer.from(JSON.stringify(data));
-    const options = {
-      persistent: true,
-      contentType: "application/json",
-    };
-    const result = await this.channel.publish(exchange, routingKey, message, options);
-    console.log(`Message published to ${exchange} with routing key ${routingKey}. Result: ${result}`);
+    await this.retryOperation(async () => {
+      if (!this.channel) {
+        throw new Error("RabbitMQ channel not initialized");
+      }
+      const message = Buffer.from(JSON.stringify(data));
+      const options = {
+        persistent: true,
+        contentType: "application/json",
+      };
+      await this.channel.publish(exchange, routingKey, message, options);
+    });
   }
 
   async consumeMessages(
@@ -80,7 +96,7 @@ export class RabbitMQ {
     if (!this.channel) {
       throw new Error("RabbitMQ channel not initialized");
     }
-    console.log(`Setting up consumer for queue: ${queue}, exchange: ${exchange}, routingKey: ${routingKey}`);
+
     await this.channel.assertQueue(queue, { durable: true });
     await this.channel.bindQueue(queue, exchange, routingKey);
     await this.channel.consume(queue, async (msg) => {
@@ -102,7 +118,6 @@ export class RabbitMQ {
         }
       }
     });
-    console.log(`Consumer set up for ${queue} with routing key ${routingKey}`);
   }
 
   async closeConnection(): Promise<void> {
@@ -124,18 +139,25 @@ export class RabbitMQ {
   }
 
   async assertQueue(queue: string): Promise<void> {
-    if (!this.channel) {
-      throw new Error("RabbitMQ channel not initialized");
-    }
-    await this.channel.assertQueue(queue, { durable: true });
-    console.log(`Queue ${queue} asserted`);
+    await this.retryOperation(async () => {
+      if (!this.channel) {
+        throw new Error("RabbitMQ channel not initialized");
+      }
+      await this.channel.assertQueue(queue, { durable: true });
+    });
   }
 
   async bindQueue(queue: string, exchange: string, routingKey: string): Promise<void> {
-    if (!this.channel) {
-      throw new Error("RabbitMQ channel not initialized");
-    }
-    await this.channel.bindQueue(queue, exchange, routingKey);
-    console.log(`Queue ${queue} bound to exchange ${exchange} with routing key ${routingKey}`);
+    await this.retryOperation(async () => {
+      if (!this.channel) {
+        throw new Error("RabbitMQ channel not initialized");
+      }
+      await this.channel.bindQueue(queue, exchange, routingKey);
+      console.log(`Queue ${queue} bound to exchange ${exchange} with routing key ${routingKey}`);
+    });
+  }
+
+  async deleteQueue(queue: string): Promise<void> {
+    await this.channel.deleteQueue(queue);
   }
 }

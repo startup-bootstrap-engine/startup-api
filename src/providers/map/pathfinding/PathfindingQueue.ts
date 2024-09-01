@@ -7,7 +7,7 @@ import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MathHelper } from "@providers/math/MathHelper";
-import { AvailableMicroservices, MicroserviceRequest } from "@providers/microservice/MicroserviceRequest";
+import { MicroserviceMessaging } from "@providers/microservice/MicroserviceMessaging";
 import { NPCTarget } from "@providers/npc/movement/NPCTarget";
 import { ResultsPoller } from "@providers/poller/ResultsPoller";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
@@ -20,6 +20,7 @@ import { LightweightPathfinder } from "./LightweightPathfinder";
 
 interface IRPGPathfinderResponse {
   path: number[][];
+  error?: string;
 }
 
 @provideSingleton(PathfindingQueue)
@@ -31,7 +32,7 @@ export class PathfindingQueue {
     private gridManager: GridManager,
     private lightweightPathfinder: LightweightPathfinder,
     private npcTarget: NPCTarget,
-    private microserviceRequest: MicroserviceRequest,
+    private microserviceMessaging: MicroserviceMessaging,
     private inMemoryHashTable: InMemoryHashTable,
 
     private mathHelper: MathHelper
@@ -235,19 +236,28 @@ export class PathfindingQueue {
         }
       }
 
-      const result = await this.microserviceRequest.request<IRPGPathfinderResponse>(
-        AvailableMicroservices.RpgPathfinding,
-        "/path",
-        {
-          startX: firstNode.x,
-          startY: firstNode.y,
-          endX: lastNode.x,
-          endY: lastNode.y,
-          grid,
-        }
-      );
+      const requestData = {
+        startX: firstNode.x,
+        startY: firstNode.y,
+        endX: lastNode.x,
+        endY: lastNode.y,
+        grid,
+      };
 
-      path = result.path;
+      try {
+        const result = await this.microserviceMessaging.sendAndWaitForResponse<
+          typeof requestData,
+          IRPGPathfinderResponse
+        >("rpg_pathfinding", "find_path", "rpg_pathfinding", "path_result", requestData);
+
+        if ("error" in result && result.error) {
+          throw new Error(result.error);
+        }
+        return result.path;
+      } catch (error) {
+        console.error("Error in pathfinding:", error);
+        throw error;
+      }
     }
 
     const pathWithoutOffset = path.map(([x, y]) => [x + data.startX, y + data.startY]);
