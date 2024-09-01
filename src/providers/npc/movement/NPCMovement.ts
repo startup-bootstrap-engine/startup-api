@@ -86,7 +86,15 @@ export class NPCMovement {
     endGridY: number
   ): Promise<IShortestPathPositionResult | undefined> {
     try {
-      const npcPath = await this.findPath(npc, target, startGridX, startGridY, endGridX, endGridY);
+      const npcPath = await this.pathfindingQueue.findShortestPath(
+        npc,
+        target,
+        npc.scene,
+        startGridX,
+        startGridY,
+        endGridX,
+        endGridY
+      );
 
       if (!npcPath?.length) return;
 
@@ -214,24 +222,5 @@ export class NPCMovement {
     chosenMovementDirection: NPCDirection
   ): Promise<void> {
     await NPC.updateOne({ _id: npc._id }, { x: newX, y: newY, direction: chosenMovementDirection });
-  }
-
-  private async findPath(
-    npc: INPC,
-    target: ICharacter | null,
-    startGridX: number,
-    startGridY: number,
-    endGridX: number,
-    endGridY: number
-  ): Promise<number[][] | undefined> {
-    return await this.pathfindingQueue.findShortestPath(
-      npc,
-      target,
-      npc.scene,
-      startGridX,
-      startGridY,
-      endGridX,
-      endGridY
-    );
   }
 }

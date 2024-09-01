@@ -4,7 +4,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { appEnv } from "@providers/config/env";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { MessagingBrokerMessaging } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
+import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
 import { NPCTarget } from "@providers/npc/movement/NPCTarget";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { FromGridX, FromGridY } from "@rpg-engine/shared";
@@ -25,7 +25,7 @@ export class Pathfinding {
     private gridManager: GridManager,
     private lightweightPathfinder: LightweightPathfinder,
     private npcTarget: NPCTarget,
-    private messagingBrokerMessaging: MessagingBrokerMessaging
+    private messagingBrokerMessaging: MessagingBroker
   ) {}
 
   public async addListener(): Promise<void> {

@@ -3,8 +3,8 @@ import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { RabbitMQ } from "@providers/rabbitmq/RabbitMQ";
 import { Time } from "@providers/time/Time";
 
-@provideSingleton(MessagingBrokerMessaging)
-export class MessagingBrokerMessaging {
+@provideSingleton(MessagingBroker)
+export class MessagingBroker {
   private static EXCHANGE = "rpg_microservices";
   private initialized = false;
 
@@ -17,9 +17,9 @@ export class MessagingBrokerMessaging {
     while (retries > 0) {
       try {
         await this.rabbitMQ.connect();
-        await this.rabbitMQ.assertExchange(MessagingBrokerMessaging.EXCHANGE, "topic");
+        await this.rabbitMQ.assertExchange(MessagingBroker.EXCHANGE, "topic");
         this.initialized = true;
-        console.log("✅ MicroserviceMessaging: Connected to RabbitMQ and asserted exchange");
+        console.log("✅ MessagingBroker: Connected to RabbitMQ and asserted exchange");
         return;
       } catch (error) {
         console.error(`❌ Failed to initialize RabbitMQ connection. Retries left: ${retries}`);
@@ -42,7 +42,7 @@ export class MessagingBrokerMessaging {
   async sendMessage(service: string, action: string, data: any): Promise<void> {
     await this.ensureInitialized();
     const routingKey = `${service}.${action}`;
-    await this.rabbitMQ.publishMessage(MessagingBrokerMessaging.EXCHANGE, routingKey, data);
+    await this.rabbitMQ.publishMessage(MessagingBroker.EXCHANGE, routingKey, data);
   }
 
   async listenForMessages(service: string, action: string, callback: (data: any) => Promise<void>): Promise<void> {
@@ -51,8 +51,8 @@ export class MessagingBrokerMessaging {
     const queue = `${service}_${action}_queue`;
 
     await this.rabbitMQ.assertQueue(queue);
-    await this.rabbitMQ.bindQueue(queue, MessagingBrokerMessaging.EXCHANGE, routingKey);
-    await this.rabbitMQ.consumeMessages(MessagingBrokerMessaging.EXCHANGE, queue, routingKey, async (data) => {
+    await this.rabbitMQ.bindQueue(queue, MessagingBroker.EXCHANGE, routingKey);
+    await this.rabbitMQ.consumeMessages(MessagingBroker.EXCHANGE, queue, routingKey, async (data) => {
       console.log(`📩 Received message on ${routingKey}:`, data);
       await callback(data);
     });
@@ -84,7 +84,7 @@ export class MessagingBrokerMessaging {
       }, timeout);
 
       await this.rabbitMQ.consumeMessages(
-        MessagingBrokerMessaging.EXCHANGE,
+        MessagingBroker.EXCHANGE,
         replyQueue,
         `${receiveService}.${receiveAction}`,
         async (response: R) => {

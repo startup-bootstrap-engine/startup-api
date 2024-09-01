@@ -16,7 +16,8 @@ import { ItemCraftableQueue } from "@providers/item/ItemCraftableQueue";
 import { Locker } from "@providers/locks/Locker";
 import { MapLoader } from "@providers/map/MapLoader";
 import { MapTransitionDifferentMap } from "@providers/map/MapTransition/MapTransitionDifferentMap";
-import { MicroserviceMessaging } from "@providers/microservice/MicroserviceMessaging";
+import { MessagingBrokerHandlers } from "@providers/microservice/messaging-broker/MessagingBrokerHandlers";
+import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
 import { NPCExperience } from "@providers/npc/NPCExperience/NPCExperience";
 import { NPCLoader } from "@providers/npc/NPCLoader";
 import { NPCManager } from "@providers/npc/NPCManager";
@@ -61,7 +62,8 @@ container.load(
 autoProvide(container);
 
 export const rabbitMQ = container.get<RabbitMQ>(RabbitMQ);
-export const microserviceMessaging = container.get<MicroserviceMessaging>(MicroserviceMessaging);
+export const messagingBroker = container.get<MessagingBroker>(MessagingBroker);
+export const messagingBrokerHandlers = container.get<MessagingBrokerHandlers>(MessagingBrokerHandlers);
 
 export const database = container.get<Database>(Database);
 export const cronJobs = container.get<Cronjob>(Cronjob);
