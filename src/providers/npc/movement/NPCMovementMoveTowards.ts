@@ -261,25 +261,23 @@ export class NPCMovementMoveTowards {
   @TrackNewRelicTransaction()
   private async moveTowardsPosition(npc: INPC, target: ICharacter, x: number, y: number): Promise<void> {
     try {
-      if (appEnv.general.IS_UNIT_TEST) {
-        const shortestPath = await this.npcMovement.getShortestPathNextPosition(
-          npc,
-          target,
-          ToGridX(npc.x),
-          ToGridY(npc.y),
-          ToGridX(x),
-          ToGridY(y)
-        );
+      const shortestPath = await this.npcMovement.getShortestPathNextPosition(
+        npc,
+        target,
+        ToGridX(npc.x),
+        ToGridY(npc.y),
+        ToGridX(x),
+        ToGridY(y)
+      );
 
-        if (!shortestPath) {
-          // throw new Error("No shortest path found!");
-          await this.npcTarget.tryToSetTarget(npc);
-          return;
-        }
-
-        await this.handleMovement(npc, x, y, shortestPath);
+      if (!shortestPath) {
+        // throw new Error("No shortest path found!");
+        await this.npcTarget.tryToSetTarget(npc);
         return;
       }
+
+      await this.handleMovement(npc, x, y, shortestPath);
+      return;
 
       // if not test, we use a messaging broker system
     } catch (error) {

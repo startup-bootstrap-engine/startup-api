@@ -101,15 +101,11 @@ export class RabbitMQ {
     await this.channel.bindQueue(queue, exchange, routingKey);
     await this.channel.consume(queue, async (msg) => {
       if (msg) {
-        console.log(`Received message on ${queue} with routing key ${msg.fields.routingKey}`);
         const content = msg.content.toString();
-        console.log(`Raw message content: ${content}`);
         try {
           const data = content ? JSON.parse(content) : null;
-          console.log("Parsed message data:", data);
           await callback(data);
           this.channel!.ack(msg);
-          console.log("Message processed and acknowledged");
         } catch (error) {
           console.error("Error processing message:", error);
           console.error("Raw message content:", content);

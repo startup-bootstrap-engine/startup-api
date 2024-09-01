@@ -2,8 +2,10 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
+import { PATHFINDING_LIGHTWEIGHT_WALKABLE_THRESHOLD } from "@providers/constants/PathfindingConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
+import { MathHelper } from "@providers/math/MathHelper";
 import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
 import { NPCTarget } from "@providers/npc/movement/NPCTarget";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
@@ -25,7 +27,8 @@ export class Pathfinding {
     private gridManager: GridManager,
     private lightweightPathfinder: LightweightPathfinder,
     private npcTarget: NPCTarget,
-    private messagingBrokerMessaging: MessagingBroker
+    private messagingBrokerMessaging: MessagingBroker,
+    private mathHelper: MathHelper
   ) {}
 
   public async addListener(): Promise<void> {
@@ -114,6 +117,19 @@ export class Pathfinding {
       const finder = new PF.BestFirstFinder();
       path = finder.findPath(firstNode.x, firstNode.y, lastNode.x, lastNode.y, grid);
     } else {
+      // Check if the surrounding area is clear
+      const isClear = this.isAreaClearOfSolids(grid, firstNode.x, firstNode.y);
+
+      const isCloseToTarget = this.isCloseToTarget(gridCourse);
+
+      if (isClear || isCloseToTarget) {
+        const result = await this.triggerLightweightPathfinding(npc, gridCourse.end.x, gridCourse.end.y);
+
+        if (result) {
+          return result;
+        }
+      }
+
       const requestData = {
         startX: firstNode.x,
         startY: firstNode.y,
@@ -123,6 +139,7 @@ export class Pathfinding {
       };
 
       try {
+        console.log("Sending pathfinding request to rpg_pathfinding");
         const result = await this.messagingBrokerMessaging.sendAndWaitForResponse<
           typeof requestData,
           IRPGPathfinderResponse
@@ -146,6 +163,42 @@ export class Pathfinding {
     }
 
     return pathWithoutOffset;
+  }
+
+  // Helper method to check if the start and end points are close
+  private isCloseToTarget(gridCourse: IGridCourse): boolean {
+    const distance = this.mathHelper.getDistanceInGridCells(
+      gridCourse.start.x,
+      gridCourse.start.y,
+      gridCourse.end.x,
+      gridCourse.end.y
+    );
+    return distance <= 3;
+  }
+
+  private isAreaClearOfSolids(grid: PF.Grid, x: number, y: number, radius: number = 1): boolean {
+    let walkableTiles = 0;
+    let totalTiles = 0;
+
+    for (let i = -radius; i <= radius; i++) {
+      for (let j = -radius; j <= radius; j++) {
+        const tileX = x + i;
+        const tileY = y + j;
+
+        // Check if within grid bounds
+        if (tileX >= 0 && tileX < grid.width && tileY >= 0 && tileY < grid.height) {
+          totalTiles++;
+          if (grid.isWalkableAt(tileX, tileY)) {
+            walkableTiles++;
+          }
+        }
+      }
+    }
+
+    // Calculate the percentage of walkable tiles
+    const walkablePercentage = (walkableTiles / totalTiles) * 100;
+
+    return walkablePercentage >= PATHFINDING_LIGHTWEIGHT_WALKABLE_THRESHOLD;
   }
 
   public async clearAllJobs(): Promise<void> {

@@ -9,7 +9,7 @@ import (
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
-	"github.com/streadway/amqp"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -97,16 +97,28 @@ func main() {
 	// Start HTTP server in a goroutine
 	go startHTTPServer()
 
-	// Set up RabbitMQ connection
+	// Set up RabbitMQ connection with retry
 	rabbitMQHost := os.Getenv("RABBITMQ_HOST")
 	rabbitMQPort := os.Getenv("RABBITMQ_PORT")
 	rabbitMQUser := os.Getenv("RABBITMQ_DEFAULT_USER")
 	rabbitMQPass := os.Getenv("RABBITMQ_DEFAULT_PASS")
 
 	rabbitMQURL := fmt.Sprintf("amqp://%s:%s@%s:%s/", rabbitMQUser, rabbitMQPass, rabbitMQHost, rabbitMQPort)
-	conn, err := amqp.Dial(rabbitMQURL)
+
+	var conn *amqp.Connection
+	var err error
+
+	// Retry connection to RabbitMQ
+	for i := 0; i < 5; i++ {
+		conn, err = amqp.Dial(rabbitMQURL)
+		if err == nil {
+			break
+		}
+		time.Sleep(5 * time.Second)
+	}
+
 	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ: %s", err)
+		log.Fatalf("Failed to connect to RabbitMQ after 5 attempts: %s", err)
 	}
 	defer conn.Close()
 
@@ -164,8 +176,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to register a consumer: %s", err)
 	}
-
-	forever := make(chan bool)
 
 	go func() {
 		for d := range msgs {
