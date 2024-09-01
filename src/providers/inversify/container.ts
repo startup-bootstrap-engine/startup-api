@@ -16,10 +16,12 @@ import { ItemCraftableQueue } from "@providers/item/ItemCraftableQueue";
 import { Locker } from "@providers/locks/Locker";
 import { MapLoader } from "@providers/map/MapLoader";
 import { MapTransitionDifferentMap } from "@providers/map/MapTransition/MapTransitionDifferentMap";
+import { MicroserviceMessaging } from "@providers/microservice/MicroserviceMessaging";
 import { NPCExperience } from "@providers/npc/NPCExperience/NPCExperience";
 import { NPCLoader } from "@providers/npc/NPCLoader";
 import { NPCManager } from "@providers/npc/NPCManager";
 import { BullBoardMonitor } from "@providers/queue/BullBoardMonitor";
+import { RabbitMQ } from "@providers/rabbitmq/RabbitMQ";
 import { PM2Helper } from "@providers/server/PM2Helper";
 import { ServerBootstrap } from "@providers/server/ServerBootstrap";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
@@ -57,6 +59,9 @@ container.load(
 );
 
 autoProvide(container);
+
+export const rabbitMQ = container.get<RabbitMQ>(RabbitMQ);
+export const microserviceMessaging = container.get<MicroserviceMessaging>(MicroserviceMessaging);
 
 export const database = container.get<Database>(Database);
 export const cronJobs = container.get<Cronjob>(Cronjob);

@@ -1,79 +1,55 @@
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { RabbitMQ } from "@providers/rabbitmq/RabbitMQ";
 import { Time } from "@providers/time/Time";
-import { v4 as uuidv4 } from "uuid";
-import { RabbitMQService } from "./RabbitMQService";
 
 @provideSingleton(MicroserviceMessaging)
 export class MicroserviceMessaging {
   private static EXCHANGE = "rpg_microservices";
 
-  constructor(private rabbitMQService: RabbitMQService, private time: Time) {}
+  constructor(private rabbitMQ: RabbitMQ, private time: Time) {}
 
   async initialize(): Promise<void> {
     let retries = 5;
     while (retries > 0) {
       try {
-        await this.rabbitMQService.connect();
-        await this.rabbitMQService.assertExchange(MicroserviceMessaging.EXCHANGE, "topic");
-        console.log("✅ Successfully connected to RabbitMQ and asserted exchange");
+        await this.rabbitMQ.assertExchange(MicroserviceMessaging.EXCHANGE, "topic");
+        console.log("✅ MicroserviceMessaging: ted to RabbitMQ and asserted exchange");
         return;
       } catch (error) {
-        console.error(`Failed to initialize RabbitMQ connection. Retries left: ${retries}`);
+        console.error(`❌ Failed to initialize RabbitMQ connection. Retries left: ${retries}`);
+        if (error instanceof Error) {
+          console.error(`❌ Error details: ${error.message}`);
+        }
         retries--;
-        await this.time.waitForSeconds(5); // Wait for 5 seconds before retrying
+        if (retries > 0) {
+          console.log("⚠️ Retrying in 5 seconds...");
+          await this.time.waitForSeconds(5);
+        }
       }
     }
-    throw new Error("Failed to initialize RabbitMQ connection after multiple retries");
-  }
-
-  async sendRequest(service: string, action: string, data: any): Promise<any> {
-    const routingKey = `${service}.${action}`;
-    const correlationId = uuidv4();
-    const replyQueue = await this.rabbitMQService.channel!.assertQueue("", { exclusive: true });
-
-    return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        reject(new Error(`Request timed out after 30 seconds for ${service}.${action}`));
-      }, 30000);
-
-      this.rabbitMQService.channel!.consume(
-        replyQueue.queue,
-        (msg) => {
-          if (msg?.properties.correlationId === correlationId) {
-            clearTimeout(timeout);
-            console.log(`Received response for ${service}.${action} with correlationId ${correlationId}`);
-            resolve(JSON.parse(msg.content.toString()));
-          }
-        },
-        { noAck: true }
-      );
-
-      this.rabbitMQService.channel!.publish(
-        MicroserviceMessaging.EXCHANGE,
-        routingKey,
-        Buffer.from(JSON.stringify(data)),
-        {
-          correlationId: correlationId,
-          replyTo: replyQueue.queue,
-        }
-      );
-
-      console.log(`Request sent to ${service}.${action} with correlationId ${correlationId}`);
-    });
+    console.error("Failed to initialize RabbitMQ connection after multiple retries");
   }
 
   async sendMessage(service: string, action: string, data: any): Promise<void> {
     const routingKey = `${service}.${action}`;
-    await this.rabbitMQService.publishMessage(MicroserviceMessaging.EXCHANGE, routingKey, data);
+    console.log(`📩 Sending message to ${routingKey}:`, data);
+    await this.rabbitMQ.publishMessage(MicroserviceMessaging.EXCHANGE, routingKey, data);
   }
 
   async listenForMessages(service: string, action: string, callback: (data: any) => Promise<void>): Promise<void> {
     const routingKey = `${service}.${action}`;
     const queue = `${service}_${action}_queue`;
-    await this.rabbitMQService.consumeMessages(MicroserviceMessaging.EXCHANGE, queue, routingKey, callback);
+
+    await this.rabbitMQ.assertQueue(queue);
+    await this.rabbitMQ.bindQueue(queue, MicroserviceMessaging.EXCHANGE, routingKey);
+    await this.rabbitMQ.consumeMessages(MicroserviceMessaging.EXCHANGE, queue, routingKey, async (data) => {
+      console.log(`📩 Received message on ${routingKey}:`, data);
+      await callback(data);
+    });
+    console.log(`Listening for messages on ${routingKey} (queue: ${queue})`);
   }
 
   async close(): Promise<void> {
-    await this.rabbitMQService.closeConnection();
+    await this.rabbitMQ.close();
   }
 }
