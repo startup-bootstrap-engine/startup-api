@@ -99,7 +99,13 @@ export class NPCLoot {
             npcBody.isDeadBodyLootable = true;
             isDeadBodyLootable = true;
           }
+
           if (lootItem.subType === ItemSubType.CraftingResource) {
+            if (lootItem.name === "Worm") {
+              await this.simpleTutorial.sendSimpleTutorialActionToCharacter(killer, "first-worm");
+              break;
+            }
+
             await this.simpleTutorial.sendSimpleTutorialActionToCharacter(killer, "first-crafting-material");
           }
         }
