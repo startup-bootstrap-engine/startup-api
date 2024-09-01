@@ -73,13 +73,13 @@ describe("GuildTerritory.ts", () => {
     it("should return the guild with the highest control points for the given map", async () => {
       const map = "TestMap";
       testGuild.controlPoints = [
-        { map: "map1", point: 300 },
-        { map, point: 100 },
+        { map: "map1", point: 300, lastUpdated: new Date() },
+        { map, point: 100, lastUpdated: new Date() },
       ];
       await testGuild.save();
       testGuild2.controlPoints = [
-        { map: "map2", point: 50 },
-        { map, point: 200 },
+        { map: "map2", point: 50, lastUpdated: new Date() },
+        { map, point: 200, lastUpdated: new Date() },
       ];
       await testGuild2.save();
       const result = await guildTerritory.getMapControl(map);
@@ -89,13 +89,13 @@ describe("GuildTerritory.ts", () => {
     it("should return null if no guilds are found", async () => {
       const map = "TestMap";
       testGuild.controlPoints = [
-        { map: "map1", point: 300 },
-        { map: "map2", point: 100 },
+        { map: "map1", point: 300, lastUpdated: new Date() },
+        { map: "map2", point: 100, lastUpdated: new Date() },
       ];
       await testGuild.save();
       testGuild2.controlPoints = [
-        { map: "map2", point: 50 },
-        { map: "map3", point: 200 },
+        { map: "map2", point: 50, lastUpdated: new Date() },
+        { map: "map3", point: 200, lastUpdated: new Date() },
       ];
       await testGuild2.save();
       const result = await guildTerritory.getMapControl(map);

@@ -19,6 +19,7 @@ const guildSchema = createSchema({
     {
       map: Type.string({ required: true }),
       point: Type.number({ required: true, default: 0 }),
+      lastUpdated: Type.date({ required: true, default: Date.now }),
     },
   ],
   guildSkills: Type.objectId({

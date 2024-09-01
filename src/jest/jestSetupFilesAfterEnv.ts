@@ -82,6 +82,9 @@ jest.mock("@providers/constants/GuildConstants", () => ({
   GUILD_LEVEL_BONUS: 0.2,
   GUILD_LEVEL_BONUS_MAX: 50,
   GUILD_INACTIVITY_THRESHOLD_DAYS: 15,
+  GUILD_CONTROL_POINT_DECREASE_PERCENTAGE: 10,
+  GUILD_CONTROL_MINIMUM_THRESHOLD: 5,
+  GUILD_TERRITORY_INACTIVITY_THRESHOLD_DAYS: 1,
 }));
 
 jest.mock("@providers/constants/PartyConstants", () => ({
