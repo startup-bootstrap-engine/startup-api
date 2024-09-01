@@ -2,15 +2,15 @@ import { container, unitTestHelper } from "@providers/inversify/container";
 
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { GridManager } from "../../GridManager";
-import { PathfindingQueue } from "../PathfindingQueue";
+import { Pathfinding } from "../Pathfinding";
 
-describe("PathfindingQueue", () => {
-  let pathfinder: PathfindingQueue;
+describe("Pathfinding", () => {
+  let pathfinder: Pathfinding;
   let gridManager: GridManager;
   let testNPC: INPC;
 
   beforeAll(async () => {
-    pathfinder = container.get(PathfindingQueue);
+    pathfinder = container.get(Pathfinding);
     gridManager = container.get<GridManager>(GridManager);
 
     await unitTestHelper.initializeMapLoader();

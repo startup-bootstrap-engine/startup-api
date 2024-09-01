@@ -26,7 +26,7 @@ import { ItemDropVerifier } from "@providers/item/ItemDrop/ItemDropVerifier";
 import { ItemUseCycleQueue } from "@providers/item/ItemUseCycleQueue";
 import { ItemContainerTransactionQueue } from "@providers/itemContainer/ItemContainerTransactionQueue";
 import { Locker } from "@providers/locks/Locker";
-import { PathfindingQueue } from "@providers/map/pathfinding/PathfindingQueue";
+import { Pathfinding } from "@providers/map/pathfinding/Pathfinding";
 import { NPCBattleCycleQueue } from "@providers/npc/NPCBattleCycleQueue";
 import { NPCCycleQueue } from "@providers/npc/NPCCycleQueue";
 import { NPCCycleTracker } from "@providers/npc/NPCCycleTracker";
@@ -57,7 +57,7 @@ export class ServerBootstrap {
     private seeder: Seeder,
     private characterConnection: CharacterConnection,
     private characterConsumptionControl: CharacterConsumptionControl,
-    private pathfindingQueue: PathfindingQueue,
+    private pathfindingQueue: Pathfinding,
     private characterBuffActivator: CharacterBuffActivator,
     private spellSilence: SpellSilence,
     private characterTextureChange: CharacterTextureChange,

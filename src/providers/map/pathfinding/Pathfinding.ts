@@ -23,8 +23,8 @@ interface IRPGPathfinderResponse {
   error?: string;
 }
 
-@provideSingleton(PathfindingQueue)
-export class PathfindingQueue {
+@provideSingleton(Pathfinding)
+export class Pathfinding {
   constructor(
     private locker: Locker,
     private dynamicQueue: DynamicQueue,

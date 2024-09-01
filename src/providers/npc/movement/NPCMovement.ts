@@ -6,7 +6,7 @@ import { CharacterView } from "@providers/character/CharacterView";
 import { NPC_CAN_ATTACK_IN_NON_PVP_ZONE } from "@providers/constants/NPCConstants";
 import { GridManager } from "@providers/map/GridManager";
 import { MapNonPVPZone } from "@providers/map/MapNonPVPZone";
-import { PathfindingQueue } from "@providers/map/pathfinding/PathfindingQueue";
+import { Pathfinding } from "@providers/map/pathfinding/Pathfinding";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { Stealth } from "@providers/spells/data/logic/rogue/Stealth";
@@ -36,7 +36,7 @@ export class NPCMovement {
     private characterView: CharacterView,
     private npcWarn: NPCWarn,
     private stealth: Stealth,
-    private pathfindingQueue: PathfindingQueue
+    private pathfindingQueue: Pathfinding
   ) {}
 
   public isNPCAtPathPosition(npc: INPC, gridX: number, gridY: number): boolean {
