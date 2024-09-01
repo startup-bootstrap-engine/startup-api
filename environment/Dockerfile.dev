@@ -24,9 +24,10 @@ EXPOSE 5100
 EXPOSE 5101
 
 # Set environment variables for New Relic
-ENV NEW_RELIC_NO_CONFIG_FILE=true
-ENV NEW_RELIC_DISTRIBUTED_TRACING_ENABLED=true \
-    NEW_RELIC_LOG=stdout
+ENV NEW_RELIC_NO_CONFIG_FILE=true \
+    NEW_RELIC_DISTRIBUTED_TRACING_ENABLED=true \
+    NEW_RELIC_LOG=stdout \
+    NEW_RELIC_LOG_LEVEL=error
 
 # Command to run the application
 CMD ["yarn", "dev"]

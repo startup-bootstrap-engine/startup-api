@@ -18,11 +18,16 @@ services:
       CHOKIDAR_USEPOLLING: "true" # enables hot-reloading on windows host
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
       NEW_RELIC_APP_NAME: "Definya API Dev"
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     links:
       - rpg-db
     depends_on:
       - rpg-db
       - rpg-redis
+      - rpg-rabbitmq
     networks:
       - rpg-network
   rpg-npc:
@@ -41,12 +46,17 @@ services:
       CHOKIDAR_USEPOLLING: "true" # enables hot-reloading on windows host
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
       NEW_RELIC_APP_NAME: "Definya API Dev"
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     links:
       - rpg-db
     depends_on:
       - rpg-api
       - rpg-db
       - rpg-redis
+      - rpg-rabbitmq
     networks:
       - rpg-network
   rpg-pathfinder:
@@ -109,5 +119,28 @@ services:
     networks:
       - rpg-network
 
+  rpg-rabbitmq:
+    container_name: rpg-rabbitmq
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672" # AMQP protocol port
+      - "15672:15672" # Management UI port
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./environment/rabbitmq-init.sh:/docker-entrypoint-initdb.d/rabbitmq-init.sh
+    networks:
+      - rpg-network
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
 networks:
   rpg-network:
+
+volumes:
+  rabbitmq_data:
