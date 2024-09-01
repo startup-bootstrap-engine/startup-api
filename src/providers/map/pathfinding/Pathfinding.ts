@@ -6,7 +6,7 @@ import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MathHelper } from "@providers/math/MathHelper";
-import { MicroserviceMessaging } from "@providers/microservice/MicroserviceMessaging";
+import { MessagingBrokerMessaging } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
 import { NPCTarget } from "@providers/npc/movement/NPCTarget";
 import { ResultsPoller } from "@providers/poller/ResultsPoller";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
@@ -29,13 +29,13 @@ export class Pathfinding {
     private gridManager: GridManager,
     private lightweightPathfinder: LightweightPathfinder,
     private npcTarget: NPCTarget,
-    private microserviceMessaging: MicroserviceMessaging,
+    private messagingBrokerMessaging: MessagingBrokerMessaging,
     private inMemoryHashTable: InMemoryHashTable,
     private mathHelper: MathHelper
   ) {}
 
   public async addListener(): Promise<void> {
-    await this.microserviceMessaging.listenForMessages("rpg_pathfinding", "path_result", async (data) => {});
+    await this.messagingBrokerMessaging.listenForMessages("rpg_pathfinding", "path_result", async (data) => {});
   }
 
   @TrackNewRelicTransaction()
@@ -129,7 +129,7 @@ export class Pathfinding {
       };
 
       try {
-        const result = await this.microserviceMessaging.sendAndWaitForResponse<
+        const result = await this.messagingBrokerMessaging.sendAndWaitForResponse<
           typeof requestData,
           IRPGPathfinderResponse
         >("rpg_pathfinding", "find_path", "rpg_pathfinding", "path_result", requestData);

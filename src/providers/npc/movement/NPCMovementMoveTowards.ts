@@ -261,50 +261,60 @@ export class NPCMovementMoveTowards {
   @TrackNewRelicTransaction()
   private async moveTowardsPosition(npc: INPC, target: ICharacter, x: number, y: number): Promise<void> {
     try {
-      const shortestPath = await this.npcMovement.getShortestPathNextPosition(
-        npc,
-        target,
-        ToGridX(npc.x),
-        ToGridY(npc.y),
-        ToGridX(x),
-        ToGridY(y)
-      );
-
-      if (!shortestPath) {
-        // throw new Error("No shortest path found!");
-        await this.npcTarget.tryToSetTarget(npc);
-        return;
-      }
-      const { newGridX, newGridY, nextMovementDirection } = shortestPath;
-      const validCoordinates = this.mapHelper.areAllCoordinatesValid([newGridX, newGridY]);
-
-      if (validCoordinates && nextMovementDirection) {
-        const hasMoved = await this.npcMovement.moveNPC(
+      if (appEnv.general.IS_UNIT_TEST) {
+        const shortestPath = await this.npcMovement.getShortestPathNextPosition(
           npc,
-          npc.x,
-          npc.y,
-          FromGridX(newGridX),
-          FromGridY(newGridY),
-          nextMovementDirection
+          target,
+          ToGridX(npc.x),
+          ToGridY(npc.y),
+          ToGridX(x),
+          ToGridY(y)
         );
 
-        if (!hasMoved) {
-          // probably there's a solid on the way, lets clear the pathfinding caching to force a recalculation
-          await this.pathfindingCaching.delete(npc.scene, {
-            start: {
-              x: ToGridX(npc.x),
-              y: ToGridY(npc.y),
-            },
-            end: {
-              x: ToGridX(x),
-              y: ToGridY(y),
-            },
-          });
+        if (!shortestPath) {
+          // throw new Error("No shortest path found!");
+          await this.npcTarget.tryToSetTarget(npc);
+          return;
         }
+
+        await this.handleMovement(npc, x, y, shortestPath);
+        return;
       }
+
+      // if not test, we use a messaging broker system
     } catch (error) {
       console.error(error);
       throw error;
+    }
+  }
+
+  private async handleMovement(npc: INPC, x: number, y: number, shortestPath: any): Promise<void> {
+    const { newGridX, newGridY, nextMovementDirection } = shortestPath;
+    const validCoordinates = this.mapHelper.areAllCoordinatesValid([newGridX, newGridY]);
+
+    if (validCoordinates && nextMovementDirection) {
+      const hasMoved = await this.npcMovement.moveNPC(
+        npc,
+        npc.x,
+        npc.y,
+        FromGridX(newGridX),
+        FromGridY(newGridY),
+        nextMovementDirection
+      );
+
+      if (!hasMoved) {
+        // probably there's a solid on the way, lets clear the pathfinding caching to force a recalculation
+        await this.pathfindingCaching.delete(npc.scene, {
+          start: {
+            x: ToGridX(npc.x),
+            y: ToGridY(npc.y),
+          },
+          end: {
+            x: ToGridX(x),
+            y: ToGridY(y),
+          },
+        });
+      }
     }
   }
 }
