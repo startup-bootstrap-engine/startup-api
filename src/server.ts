@@ -6,6 +6,7 @@ import "reflect-metadata";
 import { appEnv } from "@providers/config/env";
 import {
   bullBoardMonitor,
+  container,
   cronJobs,
   database,
   inMemoryHashTable,
@@ -17,6 +18,7 @@ import {
   serverHelper,
   socketAdapter,
 } from "@providers/inversify/container";
+import { MessagingBrokerHandlers } from "@providers/microservice/messaging-broker/MessagingBrokerHandlers";
 import { errorHandlerMiddleware } from "@providers/middlewares/ErrorHandlerMiddleware";
 import { router } from "@providers/server/Router";
 import { app } from "@providers/server/app";
@@ -65,10 +67,13 @@ function getPort(): number {
 async function initializeServerComponents(): Promise<void> {
   const { IS_MICROSERVICE } = appEnv.general;
 
+  const messagingBrokerSubscribers = container.get(MessagingBrokerHandlers);
+
   await Promise.all([
     database.initialize(),
     redisManager.connect(),
     !IS_MICROSERVICE && socketAdapter.init(appEnv.socket.type), // no need for socket connection in microservices, because we use rpg-api for that only
+    IS_MICROSERVICE && messagingBrokerSubscribers.onAddHandlers(),
   ]);
 
   await inMemoryHashTable.init();
