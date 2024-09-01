@@ -8,7 +8,6 @@ import { Locker } from "@providers/locks/Locker";
 import { MathHelper } from "@providers/math/MathHelper";
 import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
 import { NPCTarget } from "@providers/npc/movement/NPCTarget";
-import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { FromGridX, FromGridY } from "@rpg-engine/shared";
 import PF from "pathfinding";
 import { GridManager, IGridCourse } from "../GridManager";
@@ -19,15 +18,22 @@ interface IRPGPathfinderResponse {
   error?: string;
 }
 
+interface IRPGPathfinderRequestData {
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+  grid: PF.Grid;
+}
+
 @provideSingleton(Pathfinding)
 export class Pathfinding {
   constructor(
     private locker: Locker,
-    private dynamicQueue: DynamicQueue,
     private gridManager: GridManager,
     private lightweightPathfinder: LightweightPathfinder,
     private npcTarget: NPCTarget,
-    private messagingBrokerMessaging: MessagingBroker,
+    private messagingBroker: MessagingBroker,
     private mathHelper: MathHelper
   ) {}
 
@@ -74,6 +80,43 @@ export class Pathfinding {
     }
   }
 
+  public async requestShortestPathCalculation(
+    npc: INPC,
+    target: ICharacter | null,
+    map: string,
+    startGridX: number,
+    startGridY: number,
+    endGridX: number,
+    endGridY: number
+  ): Promise<void> {
+    try {
+      const canProceed = await this.locker.lock(`pathfinding-${npc._id}`);
+
+      if (!canProceed) {
+        return;
+      }
+
+      const { grid, firstNode, lastNode } = this.prepareGridAndNodes(map, {
+        start: { x: startGridX, y: startGridY },
+        end: { x: endGridX, y: endGridY },
+      });
+
+      const data: IRPGPathfinderRequestData = {
+        startX: firstNode.x,
+        startY: firstNode.y,
+        endX: lastNode.x,
+        endY: lastNode.y,
+        grid,
+      };
+
+      await this.messagingBroker.sendMessage("rpg_pathfinding", "find_path", data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      await this.locker.unlock(`pathfinding-${npc._id}`);
+    }
+  }
+
   private async triggerLightweightPathfinding(
     npc: INPC,
     endGridX: number,
@@ -98,67 +141,125 @@ export class Pathfinding {
     gridCourse: IGridCourse,
     retries = 0
   ): Promise<number[][]> {
-    const data = this.gridManager.generateGridBetweenPoints(map, gridCourse);
-    const grid = data.grid;
-
-    const firstNode = { x: gridCourse.start.x - data.startX, y: gridCourse.start.y - data.startY };
-    const lastNode = { x: gridCourse.end.x - data.startX, y: gridCourse.end.y - data.startY };
-
-    grid.setWalkableAt(firstNode.x, firstNode.y, true);
-    grid.setWalkableAt(lastNode.x, lastNode.y, true);
+    const { grid, firstNode, lastNode, startX, startY } = this.prepareGridAndNodes(map, gridCourse);
 
     let path: number[][];
 
     if (appEnv.general.IS_UNIT_TEST) {
-      const finder = new PF.BestFirstFinder();
-      path = finder.findPath(firstNode.x, firstNode.y, lastNode.x, lastNode.y, grid);
+      path = this.findPathInUnitTest(firstNode, lastNode, grid);
     } else {
-      // Check if the surrounding area is clear
-      const isClear = this.isAreaClearOfSolids(grid, firstNode.x, firstNode.y);
-
-      const isCloseToTarget = this.isCloseToTarget(gridCourse);
-
-      if (isClear || isCloseToTarget) {
-        const result = await this.triggerLightweightPathfinding(npc, gridCourse.end.x, gridCourse.end.y);
-
-        if (result) {
-          return result;
-        }
-      }
-
-      const requestData = {
-        startX: firstNode.x,
-        startY: firstNode.y,
-        endX: lastNode.x,
-        endY: lastNode.y,
-        grid,
-      };
-
-      try {
-        console.log("Sending pathfinding request to rpg_pathfinding");
-        const result = await this.messagingBrokerMessaging.sendAndWaitForResponse<
-          typeof requestData,
-          IRPGPathfinderResponse
-        >("rpg_pathfinding", "find_path", "rpg_pathfinding", "path_result", requestData);
-
-        if ("error" in result && result.error) {
-          throw new Error(result.error);
-        }
-        return result.path;
-      } catch (error) {
-        console.error("Error in pathfinding:", error);
-        throw error;
-      }
+      path = await this.findPathInProduction(npc, grid, gridCourse, firstNode, lastNode);
     }
 
-    const pathWithoutOffset = path.map(([x, y]) => [x + data.startX, y + data.startY]);
+    const pathWithOffset = this.applyOffsetToPath(path, startX, startY);
 
-    if (pathWithoutOffset.length < 1 && retries < 3) {
-      gridCourse.offset = Math.pow(10, retries + 1);
+    if (this.shouldRetry(pathWithOffset, retries)) {
+      gridCourse.offset = this.calculateNewOffset(retries);
       return await this.getResultsFromPathfindingAlgorithm(npc, map, gridCourse, retries + 1);
     }
 
-    return pathWithoutOffset;
+    return pathWithOffset;
+  }
+
+  private prepareGridAndNodes(
+    map: string,
+    gridCourse: IGridCourse
+  ): {
+    grid: PF.Grid;
+    firstNode: { x: number; y: number };
+    lastNode: { x: number; y: number };
+    startX: number;
+    startY: number;
+  } {
+    const data = this.gridManager.generateGridBetweenPoints(map, gridCourse);
+    const firstNode = { x: gridCourse.start.x - data.startX, y: gridCourse.start.y - data.startY };
+    const lastNode = { x: gridCourse.end.x - data.startX, y: gridCourse.end.y - data.startY };
+
+    data.grid.setWalkableAt(firstNode.x, firstNode.y, true);
+    data.grid.setWalkableAt(lastNode.x, lastNode.y, true);
+
+    return { grid: data.grid, firstNode, lastNode, startX: data.startX, startY: data.startY };
+  }
+
+  private findPathInUnitTest(
+    firstNode: { x: number; y: number },
+    lastNode: { x: number; y: number },
+    grid: PF.Grid
+  ): number[][] {
+    const finder = new PF.BestFirstFinder();
+    return finder.findPath(firstNode.x, firstNode.y, lastNode.x, lastNode.y, grid);
+  }
+
+  private async findPathInProduction(
+    npc: INPC,
+    grid: PF.Grid,
+    gridCourse: IGridCourse,
+    firstNode: { x: number; y: number },
+    lastNode: { x: number; y: number }
+  ): Promise<number[][]> {
+    if (this.shouldUseLightweightPathfinding(grid, firstNode, gridCourse)) {
+      const result = await this.triggerLightweightPathfinding(npc, gridCourse.end.x, gridCourse.end.y);
+      if (result) {
+        return result;
+      }
+    }
+
+    return await this.requestPathfindingFromService(grid, firstNode, lastNode);
+  }
+
+  private shouldUseLightweightPathfinding(
+    grid: PF.Grid,
+    firstNode: { x: number; y: number },
+    gridCourse: IGridCourse
+  ): boolean {
+    const isClear = this.isAreaClearOfSolids(grid, firstNode.x, firstNode.y);
+    const isCloseToTarget = this.isCloseToTarget(gridCourse);
+    return isClear || isCloseToTarget;
+  }
+
+  private async requestPathfindingFromService(
+    grid: PF.Grid,
+    firstNode: { x: number; y: number },
+    lastNode: { x: number; y: number }
+  ): Promise<number[][]> {
+    const requestData = {
+      startX: firstNode.x,
+      startY: firstNode.y,
+      endX: lastNode.x,
+      endY: lastNode.y,
+      grid,
+    };
+
+    try {
+      const result = await this.messagingBroker.sendAndWaitForResponse<typeof requestData, IRPGPathfinderResponse>(
+        "rpg_pathfinding",
+        "find_path",
+        "rpg_pathfinding",
+        "path_result",
+        requestData
+      );
+
+      if ("error" in result && result.error) {
+        throw new Error(result.error);
+      }
+
+      return result.path;
+    } catch (error) {
+      console.error("Error in pathfinding:", error);
+      throw error;
+    }
+  }
+
+  private applyOffsetToPath(path: number[][], startX: number, startY: number): number[][] {
+    return path.map(([x, y]) => [x + startX, y + startY]);
+  }
+
+  private shouldRetry(path: number[][], retries: number): boolean {
+    return path.length < 1 && retries < 3;
+  }
+
+  private calculateNewOffset(retries: number): number {
+    return Math.pow(10, retries + 1);
   }
 
   // Helper method to check if the start and end points are close
@@ -195,13 +296,5 @@ export class Pathfinding {
     const walkablePercentage = (walkableTiles / totalTiles) * 100;
 
     return walkablePercentage >= PATHFINDING_LIGHTWEIGHT_WALKABLE_THRESHOLD;
-  }
-
-  public async clearAllJobs(): Promise<void> {
-    await this.dynamicQueue.clearAllJobs();
-  }
-
-  public async shutdown(): Promise<void> {
-    await this.dynamicQueue.shutdown();
   }
 }
