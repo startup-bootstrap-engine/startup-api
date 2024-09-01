@@ -4,6 +4,7 @@ import { spellBoltCreation } from "./SpellBoltCreation";
 import { spellCrimsonArrowCreation } from "./SpellCrimsonArrowCreation";
 import { spellEagleEyes } from "./SpellEagleEyes";
 import { spellEmeraldArrowCreation } from "./SpellEmeraldArrowCreation";
+import { spellHunterExecution } from "./SpellExecution";
 import { spellFireBoltCreation } from "./SpellFireBoltCreation";
 import { spellFrostArrowCreation } from "./SpellFrostArrowCreation";
 import { spellPoisonArrowCreation } from "./SpellPoisonArrowCreation";
@@ -21,4 +22,5 @@ export const hunterSpellsIndex = {
   [SpellsBlueprint.EmeraldArrowCreation]: spellEmeraldArrowCreation,
   [SpellsBlueprint.WildfireVolley]: spellWildfireVolley,
   [SpellsBlueprint.Arrowstorm]: spellArrowStorm,
+  [SpellsBlueprint.HunterExecution]: spellHunterExecution,
 };

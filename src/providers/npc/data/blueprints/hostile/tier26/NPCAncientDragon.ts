@@ -39,7 +39,7 @@ export const npcAncientDragon: INPCTierBlueprint<26> = {
   ...generateMoveTowardsMovement(),
   name: "Ancient Dragon",
   key: HostileNPCsBlueprint.AncientDragon,
-  subType: NPCSubtype.Animal,
+  subType: NPCSubtype.Dragon,
   // @ts-ignore
   textureKey: "yellow-dragon-02",
   alignment: NPCAlignment.Hostile,

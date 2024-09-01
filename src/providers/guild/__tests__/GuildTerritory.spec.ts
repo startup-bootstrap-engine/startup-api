@@ -1,6 +1,5 @@
 import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
-import { UISocketEvents } from "@rpg-engine/shared";
 import { GuildTerritory } from "../GuildTerritory";
 
 describe("GuildTerritory.ts", () => {
@@ -126,15 +125,17 @@ describe("GuildTerritory.ts", () => {
   });
 
   describe("setMapControl", () => {
-    it("should set map control for a guild if it has the highest points", async () => {
+    it("should set initial map control when no guild controls the map", async () => {
       const map = "TestMap";
+
+      jest.spyOn(guildTerritory, "getGuildByTerritoryMap").mockResolvedValue(null);
 
       jest.spyOn(guildTerritory, "getMapControl").mockResolvedValue(testGuild);
       // @ts-ignore
       const removeTerritoriesSpy = jest.spyOn(guildTerritory, "removeTerritoriesForMap").mockResolvedValue(undefined);
       const updateOneSpy = jest.spyOn(Guild, "updateOne").mockResolvedValue({} as any);
       // @ts-ignore
-      const spySendEventToAllUsers = jest.spyOn(guildTerritory.socketMessaging, "sendEventToAllUsers");
+      const spySendEventToAllUsers = jest.spyOn(guildTerritory.guildCommon, "sendMessageToAllMembers");
 
       await guildTerritory.trySetMapControl(map);
 
@@ -143,10 +144,32 @@ describe("GuildTerritory.ts", () => {
         { _id: testGuild._id },
         { $push: { territoriesOwned: { map, lootShare: 15, controlPoint: true } } }
       );
-      expect(spySendEventToAllUsers).toHaveBeenCalledWith(UISocketEvents.ShowMessage, {
-        message: `${map} is now controlled by ${testGuild.name}.`,
-        type: "info",
-      });
+      expect(spySendEventToAllUsers).toHaveBeenCalledWith(`${map} is now controlled by ${testGuild.name}.`, testGuild);
+    });
+
+    it("should transfer map control when a new guild gains highest points", async () => {
+      const map = "TestMap";
+
+      jest.spyOn(guildTerritory, "getGuildByTerritoryMap").mockResolvedValue({ _id: "1234" } as any);
+
+      jest.spyOn(guildTerritory, "getMapControl").mockResolvedValue(testGuild);
+      // @ts-ignore
+      const removeTerritoriesSpy = jest.spyOn(guildTerritory, "removeTerritoriesForMap").mockResolvedValue(undefined);
+      const updateOneSpy = jest.spyOn(Guild, "updateOne").mockResolvedValue({} as any);
+      // @ts-ignore
+      const spySendEventToAllUsers = jest.spyOn(guildTerritory.guildCommon, "sendMessageToAllMembers");
+
+      await guildTerritory.trySetMapControl(map);
+
+      expect(removeTerritoriesSpy).toHaveBeenCalledWith(map);
+      expect(updateOneSpy).toHaveBeenCalledWith(
+        { _id: testGuild._id },
+        { $push: { territoriesOwned: { map, lootShare: 15, controlPoint: true } } }
+      );
+      expect(spySendEventToAllUsers).toHaveBeenCalledWith(
+        `${testGuild.name} has stolen the control of ${map}.`,
+        testGuild
+      );
     });
 
     it("should do nothing if the guild already owns the map", async () => {

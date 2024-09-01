@@ -48,6 +48,7 @@ export class WithdrawItem {
             { itemContainerId: originContainer._id.toString(), type: ItemContainerType.Depot },
             { itemContainerId: targetContainer._id.toString(), type: ItemContainerType.Inventory },
           ],
+          shouldAddOwnership: true,
         }
       );
 

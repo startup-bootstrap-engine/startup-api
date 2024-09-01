@@ -199,6 +199,7 @@ jest.mock("@providers/constants/BattleConstants", () => ({
   MAGE_MANA_SHIELD_DAMAGE_REDUCTION: 1,
   GENERATE_BLOOD_GROUND_ON_HIT: 5,
   GENERATE_BLOOD_ON_DEATH: 25,
+  EXECUTION_DEFAULT_HEALTH_THRESHOLD: 30,
 }));
 
 jest.mock("@providers/constants/LootConstants", () => ({

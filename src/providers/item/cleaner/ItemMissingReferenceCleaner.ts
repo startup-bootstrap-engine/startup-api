@@ -31,7 +31,13 @@ export class ItemMissingReferenceCleaner {
     try {
       console.log("Starting cleanup of items without owner...");
 
-      const items = await Item.find({ owner: { $exists: false }, carrier: { $exists: false } }).lean();
+      const items = await Item.find({
+        owner: { $exists: false },
+        carrier: { $exists: false },
+        isEquipped: { $ne: true },
+        isInDepot: { $ne: true },
+        isInContainer: { $ne: true },
+      }).lean();
 
       const itemsIdsToDelete: string[] = [];
       const itemContainersIdsToDelete: string[] = [];

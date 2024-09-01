@@ -187,7 +187,6 @@ export class ServerBootstrap {
     await this.inMemoryHashTable.deleteAll("npc-stationary-count");
     await this.inMemoryHashTable.deleteAll("npc-positions");
 
-    await this.raidManager.deleteAllRaids();
     await this.itemDropVerifier.clearAllItemDrops();
 
     await this.cooldown.clearAll();

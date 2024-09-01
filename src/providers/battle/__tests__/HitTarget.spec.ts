@@ -145,24 +145,26 @@ describe("HitTarget", () => {
       expect(updatedTestCharacter.health).toBeGreaterThan(characterHealth - attackDamage);
     });
 
-    it("when a hit occurred before a healing spell cast,  it should properly adjusted the health", async () => {
+    it("when a hit occurred before a healing spell cast, it should properly adjust the health", async () => {
       const attackDamage = 20;
       const characterHealth = testCharacter.health;
 
       // Mock hit functionality
-      jest
-        // @ts-ignore
-        .spyOn(hitTarget.battleEvent, "calculateEvent" as any)
-        .mockImplementation(() => BattleEventType.Hit);
+      // @ts-ignore
+      jest.spyOn(hitTarget.battleEvent, "calculateEvent" as any).mockImplementation(() => BattleEventType.Hit);
       // @ts-ignore
       jest.spyOn(hitTarget.battleDamageCalculator, "calculateHitDamage" as any).mockImplementation(() => attackDamage);
 
+      // Ensure hit is fully resolved before moving on
       await hitTarget.hit(testNPC, testCharacter);
 
+      // Ensure healing spell is fully cast before moving on
       await spellCast.castSpell({ magicWords: "talas faenya" }, testCharacter);
 
+      // Fetch the updated character after all operations
       const updatedTestCharacter = (await Character.findById(testCharacter._id)) as ICharacter;
 
+      // Ensure health was decreased but not below the damage level
       expect(updatedTestCharacter.health).toBeLessThan(characterHealth);
       expect(updatedTestCharacter.health).toBeGreaterThan(characterHealth - attackDamage);
     });

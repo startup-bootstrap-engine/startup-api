@@ -3,6 +3,7 @@ import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemCon
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { ItemOwnership } from "@providers/item/ItemOwnership";
 import { ItemUpdater } from "@providers/item/ItemUpdater";
 import { ItemView } from "@providers/item/ItemView";
 import { ItemContainerTransactionQueue } from "@providers/itemContainer/ItemContainerTransactionQueue";
@@ -20,7 +21,8 @@ export class DepositItem {
     private mapHelper: MapHelper,
     private socketMessaging: SocketMessaging,
     private itemUpdater: ItemUpdater,
-    private itemContainerTransactionQueue: ItemContainerTransactionQueue
+    private itemContainerTransactionQueue: ItemContainerTransactionQueue,
+    private itemOwnership: ItemOwnership
   ) {}
 
   @TrackNewRelicTransaction()
@@ -66,7 +68,7 @@ export class DepositItem {
       );
 
       if (result) {
-        await this.handleItemInDepot(item);
+        await this.handleItemInDepot(item, character);
       }
 
       return result;
@@ -125,11 +127,13 @@ export class DepositItem {
           { itemContainerId: targetContainer._id.toString(), type: ItemContainerType.Depot },
           { itemContainerId: originContainer._id.toString(), type: ItemContainerType.Inventory },
         ],
+        shouldAddOwnership: true,
       }
     );
   }
 
-  private async handleItemInDepot(item: IItem): Promise<void> {
+  private async handleItemInDepot(item: IItem, character: ICharacter): Promise<void> {
+    await this.itemOwnership.addItemOwnership(item, character);
     await this.markItemAsInDepot(item);
 
     if (this.isItemFromMap(item)) {

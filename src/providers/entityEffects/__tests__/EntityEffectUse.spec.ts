@@ -129,11 +129,17 @@ describe("EntityEffectUse.ts", () => {
   });
 
   it("should not call EntityEffectCycle if character already has an effect applied", async () => {
+    // Ensure testTarget is set up properly
     testTarget.appliedEntityEffects = [poisonEntityEffect.key];
     await testTarget.save();
 
+    // Mock any random elements if necessary
+    jest.spyOn(_, "random").mockReturnValue(100);
+
+    // Call the method under test
     await entityEffectUse.applyEntityEffects(testTarget, testAttacker);
 
+    // Check that EntityEffectCycle was not called
     expect(entityEffectSpy).not.toHaveBeenCalled();
   });
 

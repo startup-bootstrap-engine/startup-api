@@ -179,7 +179,7 @@ export class NPCDeathQueue {
     const npcBody = new Item({
       ...blueprintData, // base body props
       key: `${npc.key}-body`,
-      bodyFromId: npc.id,
+      bodyFromId: npc._id,
       texturePath: `${npc.textureKey}/death/0.png`,
       textureKey: npc.textureKey,
       name: `${npc.name}'s body`,

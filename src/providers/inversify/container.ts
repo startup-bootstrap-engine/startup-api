@@ -12,6 +12,7 @@ import { RedisManager } from "@providers/database/RedisManager";
 import { EntityEffectUse } from "@providers/entityEffects/EntityEffectUse";
 import { EquipmentSlots } from "@providers/equipment/EquipmentSlots";
 import { HashGenerator } from "@providers/hash/HashGenerator";
+import { ItemCraftableQueue } from "@providers/item/ItemCraftableQueue";
 import { Locker } from "@providers/locks/Locker";
 import { MapLoader } from "@providers/map/MapLoader";
 import { MapTransitionDifferentMap } from "@providers/map/MapTransition/MapTransitionDifferentMap";
@@ -88,6 +89,8 @@ export const spellCalculator = container.get<SpellCalculator>(SpellCalculator);
 export const characterBuffActivator = container.get<CharacterBuffActivator>(CharacterBuffActivator);
 
 export const skillIncrease = container.get<SkillIncrease>(SkillIncrease);
+
+export const itemCraftable = container.get<ItemCraftableQueue>(ItemCraftableQueue);
 
 export const serverBootstrap = container.get<ServerBootstrap>(ServerBootstrap);
 

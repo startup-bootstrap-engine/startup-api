@@ -177,15 +177,15 @@ export class CharacterItemContainer {
         }
       );
 
+      if (shouldAddOwnership) {
+        await this.itemOwnership.addItemOwnership(item, character);
+      }
+
       return result;
     } catch (error) {
       console.error(error);
       return false;
     } finally {
-      if (shouldAddOwnership) {
-        await this.itemOwnership.addItemOwnership(item, character);
-      }
-
       await this.clearCache(toContainerId, character._id, item.type as ItemType);
 
       await this.locker.unlock(`item-${item._id}-add-item-to-container`);

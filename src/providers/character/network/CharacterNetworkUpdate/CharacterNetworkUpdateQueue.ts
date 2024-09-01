@@ -137,27 +137,69 @@ export class CharacterNetworkUpdateQueue {
     data: ICharacterPositionUpdateFromClient,
     isMoving: boolean
   ): Promise<void> {
-    const hasTransition = this.mapTransition.getTransition(character, data.newX, data.newY);
+    // Calculate the new position based on origin and direction
+    const { newX, newY } = this.calculateNewPosition(data.originX, data.originY, data.direction);
+
+    // Check if the new position is valid (not solid and within bounds)
+    const isNewPositionValid = await this.characterMovementValidation.isValid(character, newX, newY, isMoving);
+
+    if (!isNewPositionValid) {
+      this.sendConfirmation(character, data.direction, false);
+      return;
+    }
+
+    const hasTransition = this.mapTransition.getTransition(character, newX, newY);
 
     if (hasTransition) {
-      // if we have a transition, we don't need to do anything else, just let it teleport
-
       const destination = this.mapTransition.getDestinationFromTransition(hasTransition);
       if (!destination) {
         return;
       }
 
-      await this.mapTransition.handleMapTransition(character, data.newX, data.newY);
+      await this.mapTransition.handleMapTransition(character, newX, newY);
       return;
     }
 
     await this.syncIfPositionMismatch(character, { x: character.x, y: character.y }, data.originX, data.originY);
 
-    this.characterMovementWarn.warn(character, data);
+    this.characterMovementWarn.warn(character, { ...data, newX, newY });
     await this.npcManager.startBehaviorLoopUsingMicroservice(character);
-    await this.updateServerSideEmitterInfo(character, data.newX, data.newY, isMoving, data.direction);
-    void this.mapTransitionNonPVPZone.handleNonPVPZone(character, data.newX, data.newY);
+    await this.updateServerSideEmitterInfo(character, newX, newY, isMoving, data.direction);
+    void this.mapTransitionNonPVPZone.handleNonPVPZone(character, newX, newY);
     this.sendConfirmation(character, data.direction, true);
+  }
+
+  private calculateNewPosition(
+    originX: number,
+    originY: number,
+    direction: AnimationDirection
+  ): { newX: number; newY: number } {
+    const gridSize = GRID_WIDTH; // Assuming GRID_WIDTH is the size of one grid cell
+    let newX = originX;
+    let newY = originY;
+
+    if (!this.movementHelper.isSnappedToGrid(newX, newY)) {
+      const snappedPosition = this.snapToGrid(newX, newY);
+      newX = snappedPosition.x;
+      newY = snappedPosition.y;
+    }
+
+    switch (direction) {
+      case "up":
+        newY -= gridSize;
+        break;
+      case "down":
+        newY += gridSize;
+        break;
+      case "left":
+        newX -= gridSize;
+        break;
+      case "right":
+        newX += gridSize;
+        break;
+    }
+
+    return { newX, newY };
   }
 
   private trackPing(data: ICharacterPositionUpdateFromClient): void {
@@ -177,6 +219,13 @@ export class CharacterNetworkUpdateQueue {
         this.newRelic.trackMetric(NewRelicMetricCategory.Count, NewRelicSubCategory.Characters, "Character/Ping", ping);
       }
     }
+  }
+
+  private snapToGrid(x: number, y: number): { x: number; y: number } {
+    return {
+      x: Math.round(x / GRID_WIDTH) * GRID_WIDTH,
+      y: Math.round(y / GRID_WIDTH) * GRID_WIDTH,
+    };
   }
 
   private sendConfirmation(character: ICharacter, direction: AnimationDirection, isPositionUpdateValid: boolean): void {

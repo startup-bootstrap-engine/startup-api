@@ -119,7 +119,6 @@ export class MapTransitionQueue {
       (job) => {
         const { character, destination } = job.data;
 
-        console.log("MapTransitionQueue: Executing job for character", character._id, "destination:", destination);
         void this.execTeleportCharacter(character, destination);
       },
       {

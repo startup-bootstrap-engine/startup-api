@@ -71,8 +71,17 @@ export class SpellLearn {
 
   private async addToCharacterLearnedSpells(characterId: Types.ObjectId, spells: ISpell[]): Promise<void> {
     const character = (await Character.findById(characterId).lean()) as ICharacter;
+    if (!character) {
+      console.warn(`Character with ID ${characterId} not found.`);
+      return;
+    }
+
     const learned = character.learnedSpells ?? [];
     spells.forEach((spell) => {
+      if (!spell) {
+        console.warn(`Encountered null or undefined spell for character ID ${characterId}.`);
+        return;
+      }
       if (!learned.includes(spell.key) && this.spellValidation.isAvailableForCharacter(spell, character)) {
         learned.push(spell.key);
       }
