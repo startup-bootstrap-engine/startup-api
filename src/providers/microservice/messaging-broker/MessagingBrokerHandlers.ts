@@ -7,6 +7,5 @@ export class MessagingBrokerHandlers {
 
   public async onAddHandlers(): Promise<void> {
     console.log("💌 Adding messaging broker handlers...");
-    await this.pathfinding.addListener();
   }
 }

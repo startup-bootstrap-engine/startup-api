@@ -31,10 +31,6 @@ export class Pathfinding {
     private mathHelper: MathHelper
   ) {}
 
-  public async addListener(): Promise<void> {
-    await this.messagingBrokerMessaging.listenForMessages("rpg_pathfinding", "path_result", async (data) => {});
-  }
-
   @TrackNewRelicTransaction()
   public async findShortestPath(
     npc: INPC,
