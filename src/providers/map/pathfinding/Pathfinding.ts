@@ -2,7 +2,6 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
-import { PATHFINDING_LIGHTWEIGHT_WALKABLE_THRESHOLD } from "@providers/constants/PathfindingConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
@@ -12,8 +11,6 @@ import { NPCTarget } from "@providers/npc/movement/NPCTarget";
 import { ResultsPoller } from "@providers/poller/ResultsPoller";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { FromGridX, FromGridY } from "@rpg-engine/shared";
-import { Job } from "bullmq";
-import dayjs from "dayjs";
 import PF from "pathfinding";
 import { GridManager, IGridCourse } from "../GridManager";
 import { LightweightPathfinder } from "./LightweightPathfinder";
@@ -71,61 +68,16 @@ export class Pathfinding {
       });
 
       if (pathfindingResult && pathfindingResult?.length > 0) {
-        const expirationDate = dayjs().add(1, "day").toISOString();
-
         return pathfindingResult;
       }
 
       await this.npcTarget.tryToSetTarget(npc);
 
       return await this.triggerLightweightPathfinding(npc, endGridX, endGridY);
-
-      // const pathfindingResult = await this.startPathfindingQueue(
-      //   npc,
-      //   target,
-      //   startGridX,
-      //   startGridY,
-      //   endGridX,
-      //   endGridY
-      // );
-
-      // if (pathfindingResult && pathfindingResult?.length > 0) {
-      //   return pathfindingResult;
-      // }
-
-      // await this.npcTarget.tryToSetTarget(npc);
-
-      // return await this.triggerLightweightPathfinding(npc, endGridX, endGridY);
     } catch (error) {
       console.error(error);
     } finally {
       await this.locker.unlock(`pathfinding-${npc._id}`);
-    }
-  }
-
-  @TrackNewRelicTransaction()
-  public async startPathfindingQueue(
-    npc: INPC,
-    target: ICharacter | null,
-    startGridX: number,
-    startGridY: number,
-    endGridX: number,
-    endGridY: number
-  ): Promise<number[][] | undefined> {
-    try {
-      const job = await this.addPathfindingJob(npc, target, startGridX, startGridY, endGridX, endGridY);
-      if (!job) {
-        return;
-      }
-
-      const result = await this.resultsPoller.pollResults(
-        "pathfinding",
-        `pathfinding-${npc._id}-${startGridX}-${startGridY}-${endGridX}-${endGridY}`
-      );
-
-      return result;
-    } catch (error) {
-      console.error(error);
     }
   }
 
@@ -142,46 +94,6 @@ export class Pathfinding {
 
     if (nearestGridToTarget?.length) {
       return nearestGridToTarget;
-    }
-
-    return undefined;
-  }
-
-  private async addPathfindingJob(
-    npc: INPC,
-    target: ICharacter | null,
-    startGridX: number,
-    startGridY: number,
-    endGridX: number,
-    endGridY: number
-  ): Promise<Job | undefined> {
-    try {
-      return await this.dynamicQueue.addJob(
-        "npc-pathfinding-queue",
-        async (job) => {
-          const { npc, startGridX, startGridY, endGridX, endGridY } = job.data;
-
-          const path = await this.getResultsFromPathfindingAlgorithm(npc, npc.scene, {
-            start: { x: startGridX, y: startGridY },
-            end: { x: endGridX, y: endGridY },
-          });
-
-          await this.resultsPoller.prepareResultToBePolled(
-            "pathfinding",
-            `pathfinding-${npc._id}-${startGridX}-${startGridY}-${endGridX}-${endGridY}`,
-            path?.length > 0 ? path : false
-          );
-        },
-        {
-          npc,
-          startGridX,
-          startGridY,
-          endGridX,
-          endGridY,
-        }
-      );
-    } catch (error) {
-      console.error(error);
     }
 
     return undefined;
@@ -208,19 +120,6 @@ export class Pathfinding {
       const finder = new PF.BestFirstFinder();
       path = finder.findPath(firstNode.x, firstNode.y, lastNode.x, lastNode.y, grid);
     } else {
-      // Check if the surrounding area is clear
-      // const isClear = this.isAreaClearOfSolids(grid, firstNode.x, firstNode.y);
-
-      // const isCloseToTarget = this.isCloseToTarget(gridCourse);
-
-      // if (isClear || isCloseToTarget) {
-      //   const result = await this.triggerLightweightPathfinding(npc, gridCourse.end.x, gridCourse.end.y);
-
-      //   if (result) {
-      //     return result;
-      //   }
-      // }
-
       const requestData = {
         startX: firstNode.x,
         startY: firstNode.y,
@@ -253,42 +152,6 @@ export class Pathfinding {
     }
 
     return pathWithoutOffset;
-  }
-
-  // Helper method to check if the start and end points are close
-  private isCloseToTarget(gridCourse: IGridCourse): boolean {
-    const distance = this.mathHelper.getDistanceInGridCells(
-      gridCourse.start.x,
-      gridCourse.start.y,
-      gridCourse.end.x,
-      gridCourse.end.y
-    );
-    return distance <= 3;
-  }
-
-  private isAreaClearOfSolids(grid: PF.Grid, x: number, y: number, radius: number = 1): boolean {
-    let walkableTiles = 0;
-    let totalTiles = 0;
-
-    for (let i = -radius; i <= radius; i++) {
-      for (let j = -radius; j <= radius; j++) {
-        const tileX = x + i;
-        const tileY = y + j;
-
-        // Check if within grid bounds
-        if (tileX >= 0 && tileX < grid.width && tileY >= 0 && tileY < grid.height) {
-          totalTiles++;
-          if (grid.isWalkableAt(tileX, tileY)) {
-            walkableTiles++;
-          }
-        }
-      }
-    }
-
-    // Calculate the percentage of walkable tiles
-    const walkablePercentage = (walkableTiles / totalTiles) * 100;
-
-    return walkablePercentage >= PATHFINDING_LIGHTWEIGHT_WALKABLE_THRESHOLD;
   }
 
   public async clearAllJobs(): Promise<void> {
