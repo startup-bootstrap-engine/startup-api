@@ -224,17 +224,17 @@ export class PathfindingQueue {
       path = finder.findPath(firstNode.x, firstNode.y, lastNode.x, lastNode.y, grid);
     } else {
       // Check if the surrounding area is clear
-      const isClear = this.isAreaClearOfSolids(grid, firstNode.x, firstNode.y);
+      // const isClear = this.isAreaClearOfSolids(grid, firstNode.x, firstNode.y);
 
-      const isCloseToTarget = this.isCloseToTarget(gridCourse);
+      // const isCloseToTarget = this.isCloseToTarget(gridCourse);
 
-      if (isClear || isCloseToTarget) {
-        const result = await this.triggerLightweightPathfinding(npc, gridCourse.end.x, gridCourse.end.y);
+      // if (isClear || isCloseToTarget) {
+      //   const result = await this.triggerLightweightPathfinding(npc, gridCourse.end.x, gridCourse.end.y);
 
-        if (result) {
-          return result;
-        }
-      }
+      //   if (result) {
+      //     return result;
+      //   }
+      // }
 
       const requestData = {
         startX: firstNode.x,
