@@ -433,16 +433,11 @@ describe("SpellArea - PVP", () => {
 
     await spellArea.cast(testCharacter, testAnotherCharacter, MagicPower.High, testSpellAreaOptions);
 
-    expect(isSamePartySpy).toHaveBeenCalled();
-
-    // second isSamePartySpy should be false
-
-    const firstValue = await isSamePartySpy.mock.results[0].value;
-    expect(firstValue).toBe(true);
-
-    const secondValue = await isSamePartySpy.mock.results[1].value;
-    expect(secondValue).toBe(false);
-
     expect(isSamePartySpy).toHaveBeenCalledTimes(2);
+
+    const [firstValue, secondValue] = await Promise.all(isSamePartySpy.mock.results.map((result) => result.value));
+
+    expect(firstValue).toBe(true);
+    expect(secondValue).toBe(false);
   });
 });
