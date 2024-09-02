@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "tsc": "tsc -p . --pretty --skipLibCheck --noEmit",
-    "test": "yarn jest test --silent",
+    "test": "DEBUG_MODE=false yarn jest test --silent",
     "test:ci": "yarn jest test --silent --maxWorkers=2 --forceExit",
     "test:debug": "jest test --detectOpenHandles --maxWorkers=4 --maxConcurrency=4 --max-old-space-size=20096",
     "test:coverage": "yarn jest --silent --coverage --maxWorkers=4 --maxConcurrency=4 --forceExit",
