@@ -126,7 +126,7 @@ describe("GuildTerritory.ts", () => {
 
   describe("setMapControl", () => {
     it("should set initial map control when no guild controls the map", async () => {
-      const map = "TestMap";
+      const map = "test-map";
 
       jest.spyOn(guildTerritory, "getGuildByTerritoryMap").mockResolvedValue(null);
 
@@ -144,31 +144,51 @@ describe("GuildTerritory.ts", () => {
         { _id: testGuild._id },
         { $push: { territoriesOwned: { map, lootShare: 15, controlPoint: true } } }
       );
-      expect(spySendEventToAllUsers).toHaveBeenCalledWith(`${map} is now controlled by ${testGuild.name}.`, testGuild);
+      expect(spySendEventToAllUsers).toHaveBeenCalledWith(
+        `${testGuild.name} has taken control of Test Map.`,
+        testGuild
+      );
     });
 
     it("should transfer map control when a new guild gains highest points", async () => {
       const map = "TestMap";
 
-      jest.spyOn(guildTerritory, "getGuildByTerritoryMap").mockResolvedValue({ _id: "1234" } as any);
+      // Mock the old control (previously controlling guild)
+      const oldControlGuild = {
+        _id: "1234",
+        name: "Old Guild",
+        territoriesOwned: [{ map, lootShare: 15, controlPoint: true }],
+      } as IGuild;
 
+      // Mock the new guild (current highest points guild)
+      jest.spyOn(guildTerritory, "getGuildByTerritoryMap").mockResolvedValue(oldControlGuild);
       jest.spyOn(guildTerritory, "getMapControl").mockResolvedValue(testGuild);
+
       // @ts-ignore
       const removeTerritoriesSpy = jest.spyOn(guildTerritory, "removeTerritoriesForMap").mockResolvedValue(undefined);
       const updateOneSpy = jest.spyOn(Guild, "updateOne").mockResolvedValue({} as any);
       // @ts-ignore
-      const spySendEventToAllUsers = jest.spyOn(guildTerritory.guildCommon, "sendMessageToAllMembers");
+      const spySendEventToAllMembers = jest.spyOn(guildTerritory.guildCommon, "sendMessageToAllMembers");
+      // @ts-ignore
+      const spyDiscordBotSendMessage = jest.spyOn(guildTerritory.discordBot, "sendMessage");
 
       await guildTerritory.trySetMapControl(map);
+
+      const formattedMapName = guildTerritory.getFormattedTerritoryName(map);
+      expect(spySendEventToAllMembers).toHaveBeenCalledWith(
+        `😈 ${testGuild.name} has stolen the control of ${formattedMapName} from ${oldControlGuild.name}.`,
+        testGuild
+      );
+
+      expect(spyDiscordBotSendMessage).toHaveBeenCalledWith(
+        `😈 ${testGuild.name} has stolen the control of ${formattedMapName} from ${oldControlGuild.name}.`,
+        "guilds"
+      );
 
       expect(removeTerritoriesSpy).toHaveBeenCalledWith(map);
       expect(updateOneSpy).toHaveBeenCalledWith(
         { _id: testGuild._id },
         { $push: { territoriesOwned: { map, lootShare: 15, controlPoint: true } } }
-      );
-      expect(spySendEventToAllUsers).toHaveBeenCalledWith(
-        `${testGuild.name} has stolen the control of ${map}.`,
-        testGuild
       );
     });
 
