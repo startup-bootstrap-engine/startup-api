@@ -2,10 +2,8 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
-import { PATHFINDING_LIGHTWEIGHT_WALKABLE_THRESHOLD } from "@providers/constants/PathfindingConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
-import { MathHelper } from "@providers/math/MathHelper";
 import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
 import { AvailableMicroservices, MicroserviceRequest } from "@providers/microservice/MicroserviceRequest";
 import { NPCTarget } from "@providers/npc/movement/NPCTarget";
@@ -13,6 +11,7 @@ import { FromGridX, FromGridY } from "@rpg-engine/shared";
 import PF from "pathfinding";
 import { GridManager, IGridCourse } from "../GridManager";
 import { LightweightPathfinder } from "./LightweightPathfinder";
+import { PathfindingFallbackChecker } from "./PathfindingFallbackChecker";
 
 export interface IRPGPathfinderResponse {
   path: number[][];
@@ -41,7 +40,7 @@ export class Pathfinding {
     private lightweightPathfinder: LightweightPathfinder,
     private npcTarget: NPCTarget,
     private messagingBroker: MessagingBroker,
-    private mathHelper: MathHelper,
+    private pathfindingFallbackChecker: PathfindingFallbackChecker,
     private microserviceRequest: MicroserviceRequest
   ) {}
 
@@ -211,7 +210,7 @@ export class Pathfinding {
     firstNode: { x: number; y: number },
     lastNode: { x: number; y: number }
   ): Promise<number[][]> {
-    if (this.shouldUseLightweightPathfinding(grid, firstNode, gridCourse)) {
+    if (this.pathfindingFallbackChecker.shouldUseLightweightPathfinding(grid, firstNode, gridCourse)) {
       const result = await this.triggerLightweightPathfinding(npc, gridCourse.end.x, gridCourse.end.y);
       if (result) {
         return result;
@@ -219,16 +218,6 @@ export class Pathfinding {
     }
 
     return await this.requestPathfindingFromService(grid, firstNode, lastNode);
-  }
-
-  private shouldUseLightweightPathfinding(
-    grid: PF.Grid,
-    firstNode: { x: number; y: number },
-    gridCourse: IGridCourse
-  ): boolean {
-    const isClear = this.isAreaClearOfSolids(grid, firstNode.x, firstNode.y);
-    const isCloseToTarget = this.isCloseToTarget(gridCourse);
-    return isClear || isCloseToTarget;
   }
 
   private async requestPathfindingFromService(
@@ -272,41 +261,5 @@ export class Pathfinding {
 
   private calculateNewOffset(retries: number): number {
     return Math.pow(10, retries + 1);
-  }
-
-  // Helper method to check if the start and end points are close
-  private isCloseToTarget(gridCourse: IGridCourse): boolean {
-    const distance = this.mathHelper.getDistanceInGridCells(
-      gridCourse.start.x,
-      gridCourse.start.y,
-      gridCourse.end.x,
-      gridCourse.end.y
-    );
-    return distance <= 3;
-  }
-
-  private isAreaClearOfSolids(grid: PF.Grid, x: number, y: number, radius: number = 1): boolean {
-    let walkableTiles = 0;
-    let totalTiles = 0;
-
-    for (let i = -radius; i <= radius; i++) {
-      for (let j = -radius; j <= radius; j++) {
-        const tileX = x + i;
-        const tileY = y + j;
-
-        // Check if within grid bounds
-        if (tileX >= 0 && tileX < grid.width && tileY >= 0 && tileY < grid.height) {
-          totalTiles++;
-          if (grid.isWalkableAt(tileX, tileY)) {
-            walkableTiles++;
-          }
-        }
-      }
-    }
-
-    // Calculate the percentage of walkable tiles
-    const walkablePercentage = (walkableTiles / totalTiles) * 100;
-
-    return walkablePercentage >= PATHFINDING_LIGHTWEIGHT_WALKABLE_THRESHOLD;
   }
 }
