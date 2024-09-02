@@ -136,7 +136,7 @@ describe("GemAttachToEquip", () => {
 
     // Check updated description
     expect(updatedEquipItem?.equippedBuffDescription).toStrictEqual(
-      "Initial description. Ruby Gem: +60 atk, +59 def, 68% chance to apply burning effects. Additional buffs: sword: +20%, resistance: +15%, magicResistance: +15%."
+      "Initial description. Ruby Gem: +60 atk, +59 def, 68% chance of applying burning effects. Additional buffs: Sword: +20%, Resistance: +15%, Magic Resistance: +15%."
     );
   });
 

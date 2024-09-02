@@ -8,4 +8,5 @@ export const GemSchema = createSchema({
     defense: Type.number({ required: false }),
   }),
   gemEntityEffectsAdd: Type.array({ required: false }).of(Type.string()),
+  gemEntityEffectChance: Type.number({ required: false }),
 });

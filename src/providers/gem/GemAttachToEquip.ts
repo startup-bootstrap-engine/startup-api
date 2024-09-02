@@ -30,6 +30,7 @@ export interface IAttachedItemGem {
     defense?: number;
   };
   gemEntityEffectsAdd?: string[];
+  gemEntityEffectChance?: number;
 }
 
 @provide(GemAttachToEquip)
@@ -128,6 +129,7 @@ export class GemAttachToEquip {
       name: gemItemBlueprint.name,
       gemStatBuff: gemItemBlueprint.gemStatBuff,
       gemEntityEffectsAdd: gemItemBlueprint.gemEntityEffectsAdd,
+      gemEntityEffectChance: gemItemBlueprint.gemEntityEffectChance,
     };
 
     const updated = await Item.findByIdAndUpdate(targetItem._id, {
@@ -192,12 +194,6 @@ export class GemAttachToEquip {
     const newAttack = currentAttack + (gemItemBlueprint.gemStatBuff?.attack || 0);
     const newDefense = currentDefense + (gemItemBlueprint.gemStatBuff?.defense || 0);
 
-    // send message to user
-    this.socketMessaging.sendMessageToCharacter(
-      targetItem.owner as ICharacter,
-      `Attached '${gemItemBlueprint.name}' to ${targetItem.name}.`
-    );
-
     // Update the item in the database
     await Item.findByIdAndUpdate(targetItem._id, {
       $set: {
@@ -225,36 +221,81 @@ export class GemAttachToEquip {
     gemItemBlueprint: IItemGem,
     isArmorOrShield: boolean
   ): Promise<void> {
-    let updatedMessage = `${gemItemBlueprint.name}: +${gemItemBlueprint.gemStatBuff?.attack || 0} atk, +${
-      gemItemBlueprint.gemStatBuff?.defense || 0
-    } def, ${gemItemBlueprint.gemEntityEffectChance || 0}% chance to apply ${
-      gemItemBlueprint.gemEntityEffectsAdd?.join(", ") || ""
-    } effects.`;
+    const currentItem = await Item.findById(targetItem._id).lean();
+    if (!currentItem) {
+      throw new Error(`Item with ID ${targetItem._id} not found`);
+    }
 
-    if (gemItemBlueprint.gemEquippedBuffAdd) {
-      const buffs = Array.isArray(gemItemBlueprint.gemEquippedBuffAdd)
-        ? gemItemBlueprint.gemEquippedBuffAdd
-        : [gemItemBlueprint.gemEquippedBuffAdd];
-      const buffsDescriptions = buffs.map((buff) => `${buff.trait}: +${buff.buffPercentage}%`);
-      updatedMessage += ` Additional buffs: ${buffsDescriptions.join(", ")}.`;
+    const attachedGems = currentItem.attachedGems || [];
+    let totalAttack = 0;
+    let totalDefense = 0;
+    const entityEffects: Set<string> = new Set();
+    let entityEffectChance = 0;
+    const gemNames: Set<string> = new Set();
+
+    for (const gem of attachedGems) {
+      totalAttack += gem.gemStatBuff?.attack || 0;
+      totalDefense += gem.gemStatBuff?.defense || 0;
+      if (gem.gemEntityEffectsAdd) {
+        gem.gemEntityEffectsAdd.forEach((effect) => entityEffects.add(effect));
+      }
+
+      entityEffectChance = Math.max(entityEffectChance, gem.gemEntityEffectChance || 0);
+      gemNames.add(gem.name?.replace(" Gem", "")!);
+    }
+
+    const gemNamesArray = Array.from(gemNames);
+    let gemDescription = "";
+
+    if (gemNamesArray.length > 0) {
+      gemDescription = gemNamesArray.length === 1 ? `${gemNamesArray[0]} Gem: ` : `${gemNamesArray.join(", ")} Gems: `;
     }
 
     if (isArmorOrShield) {
-      updatedMessage = `${gemItemBlueprint.name}: +${gemItemBlueprint.gemStatBuff?.defense || 0} def.`;
-      if (gemItemBlueprint.gemEquippedBuffAdd) {
-        const buffs = Array.isArray(gemItemBlueprint.gemEquippedBuffAdd)
-          ? gemItemBlueprint.gemEquippedBuffAdd
-          : [gemItemBlueprint.gemEquippedBuffAdd];
-        const buffsDescriptions = buffs.map((buff) => `${buff.trait}: +${buff.buffPercentage}%`);
-        updatedMessage += ` Additional buffs: ${buffsDescriptions.join(", ")}.`;
-      }
+      gemDescription += `+${totalDefense} def`;
+    } else {
+      gemDescription += `+${totalAttack} atk, +${totalDefense} def`;
     }
 
-    const newDescription = (targetItem.equippedBuffDescription || "") + " " + updatedMessage;
+    if (entityEffects.size > 0) {
+      gemDescription += `, ${entityEffectChance}% chance of applying ${Array.from(entityEffects).join(", ")} effects.`;
+    }
+
+    // Preserve existing description if it exists
+    const existingDescription = currentItem.equippedBuffDescription || "";
+    const [baseDescription, existingBuffs] = existingDescription.split(/gems?:|Additional buffs:/);
+
+    let updatedDescription = baseDescription.trim();
+    if (gemNamesArray.length > 0) {
+      updatedDescription += ` ${gemDescription}`;
+    }
+    if (existingBuffs) {
+      updatedDescription += ` Additional buffs:${existingBuffs}.`;
+    } else if (gemItemBlueprint.gemEquippedBuffAdd) {
+      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+      const formatTrait = (trait: string) => {
+        return trait
+          .split(/(?=[A-Z])/)
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+      };
+
+      const buffs = Array.isArray(gemItemBlueprint.gemEquippedBuffAdd)
+        ? gemItemBlueprint.gemEquippedBuffAdd
+            .map((buff) => `${formatTrait(buff.trait)}: +${buff.buffPercentage}%`)
+            .join(", ")
+        : `${formatTrait(gemItemBlueprint.gemEquippedBuffAdd.trait)}: +${
+            gemItemBlueprint.gemEquippedBuffAdd.buffPercentage
+          }%`;
+
+      updatedDescription += ` Additional buffs: ${buffs}.`;
+    }
 
     await Item.findByIdAndUpdate(targetItem._id, {
       $set: {
-        equippedBuffDescription: newDescription,
+        equippedBuffDescription: updatedDescription.trim(),
+        entityEffects: Array.from(entityEffects),
+        entityEffectChance: entityEffectChance,
       },
     });
   }
