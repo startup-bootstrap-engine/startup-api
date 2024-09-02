@@ -466,17 +466,31 @@ describe("GemAttachToEquip", () => {
   });
 
   it("should correctly stack multiple gems' stats cumulatively", async () => {
-    // Set initial stats for the equipment
-    const initialAttack = 50;
-    const initialDefense = 30;
-    await Item.findByIdAndUpdate(testEquipItem._id, { attack: initialAttack, defense: initialDefense });
+    // @ts-ignore
+    jest.spyOn(gemAttachToEquip, "getMaxGemsForTier").mockReturnValue(2);
 
     // Get gem blueprints
     const gemBlueprint1 = await blueprintManager.getBlueprint<IItemGem>("items", GemsBlueprint.RubyGem);
     const gemBlueprint2 = await blueprintManager.getBlueprint<IItemGem>("items", GemsBlueprint.SapphireGem);
 
+    // add second to inventory
+    await characterItemContainer.addItemToContainer(testGemItem2, testCharacter, inventoryItemContainer._id, {
+      shouldAddOwnership: true,
+    });
+
+    // Set initial stats for the equipment
+    const initialAttack = 50;
+    const initialDefense = 30;
+    testEquipItem = await Item.findByIdAndUpdate(
+      testEquipItem._id,
+      { attack: initialAttack, defense: initialDefense },
+      { new: true }
+    ).lean();
+
     // Attach first gem
-    await gemAttachToEquip.attachGemToEquip(testGemItem1, testEquipItem, testCharacter);
+    const firstAttach = await gemAttachToEquip.attachGemToEquip(testGemItem1, testEquipItem, testCharacter);
+
+    expect(firstAttach).toBe(true);
 
     // Fetch updated equip item after first gem
     let updatedEquipItem = await Item.findById(testEquipItem._id).lean();
@@ -488,7 +502,13 @@ describe("GemAttachToEquip", () => {
     expect(updatedEquipItem?.defense).toBe(expectedDefenseAfterFirstGem);
 
     // Attach second gem
-    await gemAttachToEquip.attachGemToEquip(testGemItem2, updatedEquipItem as IItem, testCharacter);
+    const secondAttach = await gemAttachToEquip.attachGemToEquip(
+      testGemItem2,
+      updatedEquipItem as IItem,
+      testCharacter
+    );
+
+    expect(secondAttach).toBe(true);
 
     // Fetch final updated equip item
     updatedEquipItem = await Item.findById(testEquipItem._id).lean();
