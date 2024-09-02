@@ -79,7 +79,7 @@ export class NPCMovement {
   }
 
   @TrackNewRelicTransaction()
-  public async getShortestPathNextPosition(
+  public async deprecatedGetShortedPathNextPosition(
     npc: INPC,
     target: ICharacter | null,
     startGridX: number,
@@ -87,6 +87,7 @@ export class NPCMovement {
     endGridX: number,
     endGridY: number
   ): Promise<IShortestPathPositionResult | undefined> {
+    //! Deprecated, but not removed because unit tests still rely on it.
     try {
       const npcPath = await this.pathfindingQueue.deprecatedFindShortedPath(
         npc,

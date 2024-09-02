@@ -306,7 +306,7 @@ export class NPCMovementMoveTowards {
 
   private async moveTowardsPosition(npc: INPC, target: ICharacter, x: number, y: number): Promise<void> {
     if (appEnv.general.IS_UNIT_TEST) {
-      const shortestPath = await this.npcMovement.getShortestPathNextPosition(
+      const shortestPath = await this.npcMovement.deprecatedGetShortedPathNextPosition(
         npc,
         target,
         ToGridX(npc.x),
