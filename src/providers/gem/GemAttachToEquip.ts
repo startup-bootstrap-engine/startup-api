@@ -46,7 +46,6 @@ export class GemAttachToEquip {
   ) {}
 
   public async attachGemToEquip(originItem: IItem, targetItem: IItem, character: ICharacter): Promise<boolean> {
-    console.log("attaching gem ", originItem.key);
     const gemItemBlueprint = await blueprintManager.getBlueprint<IItemGem>("items", originItem.key);
 
     await clearCacheForKey(`${character._id}-inventory`);
