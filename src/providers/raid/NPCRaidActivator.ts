@@ -160,7 +160,7 @@ export class NPCRaidActivator {
     //! Hack to re-seed if these rais are not available somehow (mysterious bug)
     if (allRaids.length === 0) {
       console.warn("No raids available for activation, re-seeding");
-      await this.raidSeeder.seedRaids();
+      await this.raidSeeder.seed();
     }
 
     const raids = await this.raidManager.queryRaids({ status: false });
