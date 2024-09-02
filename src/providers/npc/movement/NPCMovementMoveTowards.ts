@@ -25,8 +25,9 @@ import { NPCMovement } from "./NPCMovement";
 import { NPCTarget } from "./NPCTarget";
 
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { IRPGPathfinderResponse, Pathfinding } from "@providers/map/pathfinding/Pathfinding";
 import { PathfindingCaching } from "@providers/map/pathfinding/PathfindingCaching";
-import { DynamicQueue } from "@providers/queue/DynamicQueue";
+import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
 import { debounce } from "lodash";
 
 export interface ICharacterHealth {
@@ -48,7 +49,8 @@ export class NPCMovementMoveTowards {
     private pathfindingCaching: PathfindingCaching,
     private locker: Locker,
     private npcBattleCycleQueue: NPCBattleCycleQueue,
-    private dynamicQueue: DynamicQueue
+    private messagingBroker: MessagingBroker,
+    private pathfinding: Pathfinding
   ) {
     this.debouncedFaceTarget = debounce(this.faceTarget.bind(this), 300);
   }
@@ -258,9 +260,52 @@ export class NPCMovementMoveTowards {
     await this.npcBattleCycleQueue.addToQueue(npc, npcSkills);
   }
 
-  @TrackNewRelicTransaction()
+  public async addPathfindingResultsListener(): Promise<void> {
+    await this.messagingBroker.listenForMessages(
+      "rpg_pathfinding",
+      "path_result",
+      async (data: IRPGPathfinderResponse) => {
+        if (data.error) {
+          console.error(`Pathfinding error for NPC ${data.npcId}:`, data.error);
+          return;
+        }
+
+        const npc = await NPC.findById(data.npcId).lean<INPC>({ virtuals: true, defaults: true });
+
+        if (!npc) {
+          console.error(`NPC with id ${data.npcId} not found`);
+          return;
+        }
+
+        console.log(`🚶‍♂️ Received pathfinding result for NPC ${npc.key}`);
+        console.log(data.path);
+
+        const path = this.pathfinding.applyOffsetToPath(data.path, data.offsetStartX, data.offsetStartY);
+
+        console.log("with offset", path);
+
+        if (!path) {
+          console.log(`No path found for NPC ${npc.key}: `, path);
+
+          return;
+        }
+
+        const nextPosition = this.npcMovement.calculateNextPosition(npc, path);
+
+        if (!nextPosition) {
+          await this.npcTarget.tryToSetTarget(npc);
+          return;
+        }
+
+        console.log(`🚶‍♂️ Moving NPC ${npc.key} to`, nextPosition);
+
+        await this.handleMovement(npc, npc.x, npc.y, nextPosition);
+      }
+    );
+  }
+
   private async moveTowardsPosition(npc: INPC, target: ICharacter, x: number, y: number): Promise<void> {
-    try {
+    if (appEnv.general.IS_UNIT_TEST) {
       const shortestPath = await this.npcMovement.getShortestPathNextPosition(
         npc,
         target,
@@ -278,16 +323,23 @@ export class NPCMovementMoveTowards {
 
       await this.handleMovement(npc, x, y, shortestPath);
       return;
-
-      // if not test, we use a messaging broker system
-    } catch (error) {
-      console.error(error);
-      throw error;
     }
+
+    // if not test, we use a messaging broker system
+    await this.pathfinding.requestShortestPathCalculation(
+      npc,
+      target,
+      npc.scene,
+      ToGridX(npc.x),
+      ToGridY(npc.y),
+      ToGridX(x),
+      ToGridY(y)
+    );
   }
 
   private async handleMovement(npc: INPC, x: number, y: number, shortestPath: any): Promise<void> {
     const { newGridX, newGridY, nextMovementDirection } = shortestPath;
+
     const validCoordinates = this.mapHelper.areAllCoordinatesValid([newGridX, newGridY]);
 
     if (validCoordinates && nextMovementDirection) {

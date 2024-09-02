@@ -15,16 +15,22 @@ import (
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type PathRequest struct {
-	StartX int  `json:"startX"`
-	StartY int  `json:"startY"`
-	EndX   int  `json:"endX"`
-	EndY   int  `json:"endY"`
-	Grid   Grid `json:"grid"`
+	StartX       int    `json:"startX"`
+	StartY       int    `json:"startY"`
+	EndX         int    `json:"endX"`
+	EndY         int    `json:"endY"`
+	Grid         Grid   `json:"grid"`
+	NpcId        string `json:"npcId"`
+	OffsetStartX int    `json:"offsetStartX"`
+	OffsetStartY int    `json:"offsetStartY"`
 }
 
 type PathResponse struct {
-	Path  [][]int `json:"path"`
-	Error string  `json:"error,omitempty"`
+	Path         [][]int `json:"path"`
+	Error        string  `json:"error,omitempty"`
+	NpcId        string  `json:"npcId"`
+	OffsetStartX int     `json:"offsetStartX"`
+	OffsetStartY int     `json:"offsetStartY"`
 }
 
 type HealthCheckResponse struct {
@@ -188,7 +194,7 @@ func main() {
 				}
 
 				path, err := BreadthFirstFinder(req.StartX, req.StartY, req.EndX, req.EndY, req.Grid)
-				resp := PathResponse{Path: path}
+				resp := PathResponse{Path: path, Error: "", NpcId: req.NpcId, OffsetStartX: req.OffsetStartX, OffsetStartY: req.OffsetStartY}
 				if err != nil {
 					resp.Error = err.Error()
 				}

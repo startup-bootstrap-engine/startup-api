@@ -56,6 +56,8 @@ export class NPCMovement {
       const [newGridX, newGridY] = [ToGridX(newX), ToGridY(newY)];
       const [oldGridX, oldGridY] = [ToGridX(oldX), ToGridY(oldY)];
 
+      console.log("Moving NPC", npc.key, "from", oldGridX, oldGridY, "to", newGridX, newGridY);
+
       if (await this.isDestinationSolid(npc, newGridX, newGridY)) {
         return false;
       }
@@ -96,24 +98,28 @@ export class NPCMovement {
         endGridY
       );
 
-      if (!npcPath?.length) return;
-
-      const [newGridX, newGridY] = npcPath[1] ?? npcPath[0];
-      if (!newGridX || !newGridY) return;
-
-      const nextMovementDirection = this.movementHelper.getGridMovementDirection(
-        ToGridX(npc.x),
-        ToGridY(npc.y),
-        newGridX,
-        newGridY
-      );
-      if (!nextMovementDirection) return;
-
-      return { newGridX, newGridY, nextMovementDirection };
+      return this.calculateNextPosition(npc, npcPath);
     } catch (error) {
       console.error(`Error finding path for NPC ${npc.key}:`, error);
       throw error;
     }
+  }
+
+  public calculateNextPosition(npc: INPC, npcPath: number[][] | undefined): IShortestPathPositionResult | undefined {
+    if (!npcPath?.length) return;
+
+    const [newGridX, newGridY] = npcPath[1] ?? npcPath[0];
+    if (!newGridX || !newGridY) return;
+
+    const nextMovementDirection = this.movementHelper.getGridMovementDirection(
+      ToGridX(npc.x),
+      ToGridY(npc.y),
+      newGridX,
+      newGridY
+    );
+    if (!nextMovementDirection) return;
+
+    return { newGridX, newGridY, nextMovementDirection };
   }
 
   private async isDestinationSolid(npc: INPC, newGridX: number, newGridY: number): Promise<boolean> {

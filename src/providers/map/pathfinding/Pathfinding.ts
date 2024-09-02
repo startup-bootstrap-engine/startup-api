@@ -7,15 +7,19 @@ import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MathHelper } from "@providers/math/MathHelper";
 import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
+import { AvailableMicroservices, MicroserviceRequest } from "@providers/microservice/MicroserviceRequest";
 import { NPCTarget } from "@providers/npc/movement/NPCTarget";
 import { FromGridX, FromGridY } from "@rpg-engine/shared";
 import PF from "pathfinding";
 import { GridManager, IGridCourse } from "../GridManager";
 import { LightweightPathfinder } from "./LightweightPathfinder";
 
-interface IRPGPathfinderResponse {
+export interface IRPGPathfinderResponse {
   path: number[][];
   error?: string;
+  npcId: string;
+  offsetStartX: number;
+  offsetStartY: number;
 }
 
 interface IRPGPathfinderRequestData {
@@ -24,6 +28,9 @@ interface IRPGPathfinderRequestData {
   endX: number;
   endY: number;
   grid: PF.Grid;
+  npcId: string;
+  offsetStartX: number;
+  offsetStartY: number;
 }
 
 @provideSingleton(Pathfinding)
@@ -34,7 +41,8 @@ export class Pathfinding {
     private lightweightPathfinder: LightweightPathfinder,
     private npcTarget: NPCTarget,
     private messagingBroker: MessagingBroker,
-    private mathHelper: MathHelper
+    private mathHelper: MathHelper,
+    private microserviceRequest: MicroserviceRequest
   ) {}
 
   @TrackNewRelicTransaction()
@@ -96,22 +104,28 @@ export class Pathfinding {
         return;
       }
 
-      const { grid, firstNode, lastNode } = this.prepareGridAndNodes(map, {
+      const gridCourse = {
         start: { x: startGridX, y: startGridY },
         end: { x: endGridX, y: endGridY },
-      });
+      };
 
+      const { grid, firstNode, lastNode, startX, startY } = this.prepareGridAndNodes(map, gridCourse);
+
+      // Proceed to request pathfinding from service
       const data: IRPGPathfinderRequestData = {
         startX: firstNode.x,
         startY: firstNode.y,
         endX: lastNode.x,
         endY: lastNode.y,
         grid,
+        npcId: npc._id,
+        offsetStartX: startX,
+        offsetStartY: startY,
       };
 
       await this.messagingBroker.sendMessage("rpg_pathfinding", "find_path", data);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       await this.locker.unlock(`pathfinding-${npc._id}`);
     }
@@ -231,15 +245,13 @@ export class Pathfinding {
     };
 
     try {
-      const result = await this.messagingBroker.sendAndWaitForResponse<typeof requestData, IRPGPathfinderResponse>(
-        "rpg_pathfinding",
-        "find_path",
-        "rpg_pathfinding",
-        "path_result",
+      const result = await this.microserviceRequest.request<IRPGPathfinderResponse>(
+        AvailableMicroservices.RpgPathfinding,
+        "/path",
         requestData
       );
 
-      if ("error" in result && result.error) {
+      if (result?.error) {
         throw new Error(result.error);
       }
 
@@ -250,7 +262,7 @@ export class Pathfinding {
     }
   }
 
-  private applyOffsetToPath(path: number[][], startX: number, startY: number): number[][] {
+  public applyOffsetToPath(path: number[][], startX: number, startY: number): number[][] {
     return path.map(([x, y]) => [x + startX, y + startY]);
   }
 
