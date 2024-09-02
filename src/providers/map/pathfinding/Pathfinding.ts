@@ -5,13 +5,11 @@ import { appEnv } from "@providers/config/env";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
-import { AvailableMicroservices, MicroserviceRequest } from "@providers/microservice/MicroserviceRequest";
 import { NPCTarget } from "@providers/npc/movement/NPCTarget";
 import { FromGridX, FromGridY } from "@rpg-engine/shared";
 import PF from "pathfinding";
 import { GridManager, IGridCourse } from "../GridManager";
 import { LightweightPathfinder } from "./LightweightPathfinder";
-import { PathfindingFallbackChecker } from "./PathfindingFallbackChecker";
 
 export interface IRPGPathfinderResponse {
   path: number[][];
@@ -39,53 +37,8 @@ export class Pathfinding {
     private gridManager: GridManager,
     private lightweightPathfinder: LightweightPathfinder,
     private npcTarget: NPCTarget,
-    private messagingBroker: MessagingBroker,
-    private pathfindingFallbackChecker: PathfindingFallbackChecker,
-    private microserviceRequest: MicroserviceRequest
+    private messagingBroker: MessagingBroker
   ) {}
-
-  @TrackNewRelicTransaction()
-  public async findShortestPath(
-    npc: INPC,
-    target: ICharacter | null,
-    map: string,
-    startGridX: number,
-    startGridY: number,
-    endGridX: number,
-    endGridY: number
-  ): Promise<number[][] | undefined> {
-    const canProceed = await this.locker.lock(`pathfinding-${npc._id}`);
-
-    if (!canProceed) {
-      return;
-    }
-
-    try {
-      if (appEnv.general.IS_UNIT_TEST) {
-        return this.getResultsFromPathfindingAlgorithm(npc, map, {
-          start: { x: startGridX, y: startGridY },
-          end: { x: endGridX, y: endGridY },
-        });
-      }
-
-      const pathfindingResult = await this.getResultsFromPathfindingAlgorithm(npc, npc.scene, {
-        start: { x: startGridX, y: startGridY },
-        end: { x: endGridX, y: endGridY },
-      });
-
-      if (pathfindingResult && pathfindingResult?.length > 0) {
-        return pathfindingResult;
-      }
-
-      await this.npcTarget.tryToSetTarget(npc);
-
-      return await this.triggerLightweightPathfinding(npc, endGridX, endGridY);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      await this.locker.unlock(`pathfinding-${npc._id}`);
-    }
-  }
 
   public async requestShortestPathCalculation(
     npc: INPC,
@@ -96,21 +49,12 @@ export class Pathfinding {
     endGridX: number,
     endGridY: number
   ): Promise<void> {
+    if (!(await this.locker.lock(`pathfinding-${npc._id}`))) return;
+
     try {
-      const canProceed = await this.locker.lock(`pathfinding-${npc._id}`);
-
-      if (!canProceed) {
-        return;
-      }
-
-      const gridCourse = {
-        start: { x: startGridX, y: startGridY },
-        end: { x: endGridX, y: endGridY },
-      };
-
+      const gridCourse = this.createGridCourse(startGridX, startGridY, endGridX, endGridY);
       const { grid, firstNode, lastNode, startX, startY } = this.prepareGridAndNodes(map, gridCourse);
 
-      // Proceed to request pathfinding from service
       const data: IRPGPathfinderRequestData = {
         startX: firstNode.x,
         startY: firstNode.y,
@@ -122,12 +66,50 @@ export class Pathfinding {
         offsetStartY: startY,
       };
 
+      // We're currently using a messaging broker to communicate with the pathfinding microservice
       await this.messagingBroker.sendMessage("rpg_pathfinding", "find_path", data);
     } catch (error) {
       console.error(error);
     } finally {
       await this.locker.unlock(`pathfinding-${npc._id}`);
     }
+  }
+
+  @TrackNewRelicTransaction()
+  public async deprecatedFindShortedPath(
+    npc: INPC,
+    target: ICharacter | null,
+    map: string,
+    startGridX: number,
+    startGridY: number,
+    endGridX: number,
+    endGridY: number
+  ): Promise<number[][] | undefined> {
+    //! This is only kept here for unit tests. It should be removed "in the future".
+
+    if (!(await this.locker.lock(`pathfinding-${npc._id}`))) return;
+
+    try {
+      const pathfindingResult = appEnv.general.IS_UNIT_TEST
+        ? await this.deprecatedGetPathfindingResults(
+            map,
+            this.createGridCourse(startGridX, startGridY, endGridX, endGridY)
+          )
+        : await this.triggerLightweightPathfinding(npc, endGridX, endGridY);
+
+      if (pathfindingResult && pathfindingResult.length > 0) return pathfindingResult;
+
+      await this.npcTarget.tryToSetTarget(npc);
+      return await this.triggerLightweightPathfinding(npc, endGridX, endGridY);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      await this.locker.unlock(`pathfinding-${npc._id}`);
+    }
+  }
+
+  private createGridCourse(startX: number, startY: number, endX: number, endY: number): IGridCourse {
+    return { start: { x: startX, y: startY }, end: { x: endX, y: endY } };
   }
 
   private async triggerLightweightPathfinding(
@@ -140,38 +122,13 @@ export class Pathfinding {
       FromGridX(endGridX),
       FromGridY(endGridY)
     );
-
-    if (nearestGridToTarget?.length) {
-      return nearestGridToTarget;
-    }
-
-    return undefined;
+    return nearestGridToTarget?.length ? nearestGridToTarget : undefined;
   }
 
-  private async getResultsFromPathfindingAlgorithm(
-    npc: INPC,
-    map: string,
-    gridCourse: IGridCourse,
-    retries = 0
-  ): Promise<number[][]> {
+  private deprecatedGetPathfindingResults(map: string, gridCourse: IGridCourse): number[][] {
     const { grid, firstNode, lastNode, startX, startY } = this.prepareGridAndNodes(map, gridCourse);
-
-    let path: number[][];
-
-    if (appEnv.general.IS_UNIT_TEST) {
-      path = this.findPathInUnitTest(firstNode, lastNode, grid);
-    } else {
-      path = await this.findPathInProduction(npc, grid, gridCourse, firstNode, lastNode);
-    }
-
-    const pathWithOffset = this.applyOffsetToPath(path, startX, startY);
-
-    if (this.shouldRetry(pathWithOffset, retries)) {
-      gridCourse.offset = this.calculateNewOffset(retries);
-      return await this.getResultsFromPathfindingAlgorithm(npc, map, gridCourse, retries + 1);
-    }
-
-    return pathWithOffset;
+    const path = this.findPathInUnitTest(firstNode, lastNode, grid);
+    return this.applyOffsetToPath(path, startX, startY);
   }
 
   private prepareGridAndNodes(
@@ -185,7 +142,6 @@ export class Pathfinding {
     startY: number;
   } {
     const data = this.gridManager.generateGridBetweenPoints(map, gridCourse, 10);
-
     const firstNode = { x: gridCourse.start.x - data.startX, y: gridCourse.start.y - data.startY };
     const lastNode = { x: gridCourse.end.x - data.startX, y: gridCourse.end.y - data.startY };
 
@@ -200,67 +156,10 @@ export class Pathfinding {
     lastNode: { x: number; y: number },
     grid: PF.Grid
   ): number[][] {
-    const finder = new PF.BestFirstFinder();
-    return finder.findPath(firstNode.x, firstNode.y, lastNode.x, lastNode.y, grid);
-  }
-
-  private async findPathInProduction(
-    npc: INPC,
-    grid: PF.Grid,
-    gridCourse: IGridCourse,
-    firstNode: { x: number; y: number },
-    lastNode: { x: number; y: number }
-  ): Promise<number[][]> {
-    if (this.pathfindingFallbackChecker.shouldUseLightweightPathfinding(grid, firstNode, gridCourse)) {
-      const result = await this.triggerLightweightPathfinding(npc, gridCourse.end.x, gridCourse.end.y);
-      if (result) {
-        return result;
-      }
-    }
-
-    return await this.requestPathfindingFromService(grid, firstNode, lastNode);
-  }
-
-  private async requestPathfindingFromService(
-    grid: PF.Grid,
-    firstNode: { x: number; y: number },
-    lastNode: { x: number; y: number }
-  ): Promise<number[][]> {
-    const requestData = {
-      startX: firstNode.x,
-      startY: firstNode.y,
-      endX: lastNode.x,
-      endY: lastNode.y,
-      grid,
-    };
-
-    try {
-      const result = await this.microserviceRequest.request<IRPGPathfinderResponse>(
-        AvailableMicroservices.RpgPathfinding,
-        "/path",
-        requestData
-      );
-
-      if (result?.error) {
-        throw new Error(result.error);
-      }
-
-      return result.path;
-    } catch (error) {
-      console.error("Error in pathfinding:", error);
-      throw error;
-    }
+    return new PF.BestFirstFinder().findPath(firstNode.x, firstNode.y, lastNode.x, lastNode.y, grid);
   }
 
   public applyOffsetToPath(path: number[][], startX: number, startY: number): number[][] {
     return path.map(([x, y]) => [x + startX, y + startY]);
-  }
-
-  private shouldRetry(path: number[][], retries: number): boolean {
-    return path.length < 1 && retries < 3;
-  }
-
-  private calculateNewOffset(retries: number): number {
-    return Math.pow(10, retries + 1);
   }
 }

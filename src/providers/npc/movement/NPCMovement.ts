@@ -88,7 +88,7 @@ export class NPCMovement {
     endGridY: number
   ): Promise<IShortestPathPositionResult | undefined> {
     try {
-      const npcPath = await this.pathfindingQueue.findShortestPath(
+      const npcPath = await this.pathfindingQueue.deprecatedFindShortedPath(
         npc,
         target,
         npc.scene,

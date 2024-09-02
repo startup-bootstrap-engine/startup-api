@@ -26,6 +26,12 @@ describe("ItemModel", () => {
         },
       }
     );
+
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("should trigger the deletion protection if the item is equipped", async () => {
