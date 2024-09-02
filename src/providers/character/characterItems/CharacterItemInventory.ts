@@ -290,7 +290,18 @@ export class CharacterItemInventory {
       return false;
     }
 
-    return await this.removeItemFromInventory(item._id, character);
+    const removed = await this.removeItemFromInventory(item._id, character);
+    if (removed) {
+      await this.clearEquipmentSlotCaching(character._id.toString()); // Ensure cache is cleared
+    }
+
+    return removed;
+  }
+
+  private async clearEquipmentSlotCaching(ownerId: string): Promise<void> {
+    await this.inMemoryHashTable.delete("equipment-slots", ownerId.toString());
+    await this.inMemoryHashTable.delete("character-shield", ownerId.toString());
+    await this.inMemoryHashTable.delete("inventory-weight", ownerId.toString()); // Add this line
   }
 
   /**
@@ -500,15 +511,10 @@ export class CharacterItemInventory {
 
     const removed = await this.removeItemFromContainer(item, inventoryItemContainer);
     if (removed) {
-      return true;
+      await this.clearEquipmentSlotCaching(character._id.toString()); // Ensure cache is cleared
     }
 
-    this.socketMessaging.sendErrorMessageToCharacter(
-      character,
-      "Oops! Something went wrong while trying to remove the item from the inventory."
-    );
-
-    return false;
+    return removed;
   }
 
   private async removeItemFromContainer(item: IItem, container: IItemContainer): Promise<boolean> {

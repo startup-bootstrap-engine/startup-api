@@ -238,11 +238,11 @@ export class ItemDrop {
 
     const wasItemDeleted = await this.characterItems.deleteItemFromContainer(item._id, character, "equipment");
 
-    if (!wasItemDeleted) {
-      return false;
+    if (wasItemDeleted) {
+      await this.clearEquipmentSlotCaching(character._id.toString()); // Ensure cache is cleared
     }
 
-    return true;
+    return wasItemDeleted;
   }
 
   /**
@@ -252,22 +252,22 @@ export class ItemDrop {
     const targetContainer = await ItemContainer.findById(fromContainerId).lean();
 
     if (!item) {
-      this.socketMessaging.sendErrorMessageToCharacter(character);
+      this.sendErrorMessage(character);
       return false;
     }
 
     if (!targetContainer) {
-      this.socketMessaging.sendErrorMessageToCharacter(character);
+      this.sendErrorMessage(character);
       return false;
     }
 
     const wasItemDeleted = await this.characterItems.deleteItemFromContainer(item._id, character, "inventory");
 
-    if (!wasItemDeleted) {
-      return false;
+    if (wasItemDeleted) {
+      await this.clearEquipmentSlotCaching(character._id.toString()); // Ensure cache is cleared
     }
 
-    return true;
+    return wasItemDeleted;
   }
 
   @TrackNewRelicTransaction()
@@ -280,6 +280,12 @@ export class ItemDrop {
       // eslint-disable-next-line mongoose-lean/require-lean
       await items[i].save();
     }
+  }
+
+  private async clearEquipmentSlotCaching(ownerId: string): Promise<void> {
+    await this.inMemoryHashTable.delete("equipment-slots", ownerId.toString());
+    await this.inMemoryHashTable.delete("character-shield", ownerId.toString());
+    await this.inMemoryHashTable.delete("inventory-weight", ownerId.toString()); // Add this line
   }
 
   private sendRefreshItemsEvent(payloadUpdate: IEquipmentAndInventoryUpdatePayload, character: ICharacter): void {
