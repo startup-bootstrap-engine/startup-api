@@ -1,5 +1,6 @@
 import { ISkill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
+
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
@@ -25,7 +26,6 @@ import { NPCMovementMoveAway } from "./movement/NPCMovementMoveAway";
 import { NPCMovementMoveTowards } from "./movement/NPCMovementMoveTowards";
 import { NPCMovementRandomPath } from "./movement/NPCMovementRandomPath";
 import { NPCMovementStopped } from "./movement/NPCMovementStopped";
-
 @provideSingleton(NPCCycleQueue)
 export class NPCCycleQueue {
   constructor(
@@ -67,6 +67,7 @@ export class NPCCycleQueue {
       },
       {
         queueScaleBy: "active-npcs",
+        hasConcurrency: true,
       },
 
       {

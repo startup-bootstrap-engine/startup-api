@@ -65,6 +65,18 @@ export class BattleDamageCalculator {
       weapon?.item
     );
 
+    if (isNaN(reducedDamage)) {
+      console.error("calculateHitDamage returned NaN. Inputs:", {
+        attacker: attacker._id,
+        target: target._id,
+        isMagicAttack,
+        totalPotentialAttackerDamage,
+        adjustedDamage,
+        reducedDamage,
+      });
+      return 0; // Return a default value instead of NaN
+    }
+
     return Math.max(0, Math.min(reducedDamage, target.health));
   }
 

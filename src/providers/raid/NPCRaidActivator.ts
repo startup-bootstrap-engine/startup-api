@@ -10,6 +10,7 @@ import { IUIShowMessage, UISocketEvents } from "@rpg-engine/shared";
 import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 import random from "lodash/random";
+import { NPCRaidSeeder } from "./NPCRaidSeeder";
 import { IRaid, RaidManager } from "./RaidManager";
 
 @provide(NPCRaidActivator)
@@ -20,7 +21,8 @@ export class NPCRaidActivator {
     private raidManager: RaidManager,
     private time: Time,
     private discordBot: DiscordBot,
-    private locker: Locker
+    private locker: Locker,
+    private raidSeeder: NPCRaidSeeder
   ) {}
 
   @TrackNewRelicTransaction()
@@ -153,10 +155,17 @@ export class NPCRaidActivator {
   }
 
   private async getRandomInactiveRaid(): Promise<IRaid | null> {
+    const allRaids = await this.raidManager.getAllRaids();
+
+    //! Hack to re-seed if these rais are not available somehow (mysterious bug)
+    if (allRaids.length === 0) {
+      console.warn("No raids available for activation, re-seeding");
+      await this.raidSeeder.seedRaids();
+    }
+
     const raids = await this.raidManager.queryRaids({ status: false });
 
     if (raids.length === 0) {
-      const allRaids = await this.raidManager.getAllRaids();
       console.log(allRaids);
 
       console.warn("No inactive raids available for activation.");
