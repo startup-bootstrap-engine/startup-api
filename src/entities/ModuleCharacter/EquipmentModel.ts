@@ -1,6 +1,6 @@
 import { createLeanSchema } from "@providers/database/mongooseHelpers";
 import { containerSlotsCaching, hashGenerator, inMemoryHashTable } from "@providers/inversify/container";
-import { SpeedGooseCacheAutoCleaner } from "speedgoose";
+import { clearCacheForKey, SpeedGooseCacheAutoCleaner } from "speedgoose";
 import { ExtractDoc, Type, typedModel } from "ts-mongoose";
 
 export const equipmentSchema = createLeanSchema(
@@ -133,9 +133,25 @@ const onCheckEquipmentChange = async function (equipment: IEquipment): Promise<v
 
 equipmentSchema.post("save", async function (this: IEquipment) {
   if (this.owner) {
-    await clearEquipmentSlotCaching(this.owner.toString());
+    await Promise.all([
+      inMemoryHashTable.delete("equipment-slots", this.owner.toString()),
+      inMemoryHashTable.delete("character-weapon", this.owner.toString()),
+      inMemoryHashTable.delete("inventory-weight", this.owner.toString()),
+      await clearCacheForKey(`${this.owner}-equipment`),
+      onCheckEquipmentChange(this),
+    ]);
+  }
+});
 
-    await onCheckEquipmentChange(this);
+equipmentSchema.post("findOneAndUpdate", async function (doc) {
+  if (doc?.owner) {
+    await Promise.all([
+      inMemoryHashTable.delete("equipment-slots", doc.owner.toString()),
+      inMemoryHashTable.delete("character-weapon", doc.owner.toString()),
+      inMemoryHashTable.delete("inventory-weight", doc.owner.toString()),
+      await clearCacheForKey(`${doc.owner}-equipment`),
+      onCheckEquipmentChange(doc),
+    ]);
   }
 });
 
