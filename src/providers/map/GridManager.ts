@@ -34,6 +34,7 @@ interface IGridBetweenPoints {
 @provideSingleton(GridManager)
 export class GridManager {
   private grids: Map<string, number[][]> = new Map();
+  private defaultMinimumGridRadius: number = 10;
 
   constructor(
     private mapSolids: MapSolids,
@@ -135,7 +136,11 @@ export class GridManager {
     }
   }
 
-  public generateGridBetweenPoints(map: string, gridCourse: IGridCourse): IGridBetweenPoints {
+  public generateGridBetweenPoints(
+    map: string,
+    gridCourse: IGridCourse,
+    minimumGridRadius?: number
+  ): IGridBetweenPoints {
     const tree = this.getGrid(map);
     if (!tree || tree.length === 0) {
       throw new Error(`The tree is empty or not defined for map: ${map}`);
@@ -147,7 +152,7 @@ export class GridManager {
       throw new Error(`Offset is not defined for startX: ${dimens.startX} and startY: ${dimens.startY}`);
     }
 
-    const bounds = this.getSubGridBounds(map, gridCourse);
+    const bounds = this.getSubGridBounds(map, gridCourse, minimumGridRadius);
     const solids = this.getSolidsSet(tree, bounds, offset);
     const matrix = this.generateMatrixBetweenPoints(bounds, (x, y) =>
       solids.has(`${x + offset.gridOffsetX}-${y + offset.gridOffsetY}`)
@@ -156,25 +161,43 @@ export class GridManager {
     return { grid: new PF.Grid(matrix), startX: bounds.startX, startY: bounds.startY };
   }
 
-  private getSubGridBounds(map: string, gridCourse: IGridCourse): IGridBounds {
+  private getSubGridBounds(map: string, gridCourse: IGridCourse, minimumGridRadius?: number): IGridBounds {
     const { start, end, offset = 0 } = gridCourse;
+    const gridRadius = minimumGridRadius || this.defaultMinimumGridRadius;
+
     let startX = Math.min(start.x, end.x);
     let startY = Math.min(start.y, end.y);
     let width = Math.abs(end.x - start.x) + 1;
     let height = Math.abs(end.y - start.y) + 1;
 
+    // Ensure the grid is at least gridRadius * 2 + 1 in each dimension
+    width = Math.max(width, gridRadius * 2 + 1);
+    height = Math.max(height, gridRadius * 2 + 1);
+
+    // Adjust startX and startY to center the path within the minimum grid
+    startX = Math.floor((start.x + end.x - width) / 2);
+    startY = Math.floor((start.y + end.y - height) / 2);
+
+    // Ensure startX and startY are within the valid bounds of the map
+    const mapDimens = this.mapProperties.getMapDimensions(map);
+    startX = Math.max(startX, mapDimens.startX);
+    startY = Math.max(startY, mapDimens.startY);
+
+    // Ensure width and height do not exceed the map dimensions
+    const availableWidth = mapDimens.width - startX;
+    const availableHeight = mapDimens.height - startY;
+    width = Math.min(width, availableWidth);
+    height = Math.min(height, availableHeight);
+
     if (offset > 0) {
-      const mapDimens = this.mapProperties.getMapDimensions(map);
-      const { startX: minGridX, startY: minGridY, width: maxGridX, height: maxGridY } = mapDimens;
+      startX = Math.max(startX - offset, mapDimens.startX);
+      startY = Math.max(startY - offset, mapDimens.startY);
 
-      startX = Math.max(startX - offset, minGridX);
-      startY = Math.max(startY - offset, minGridY);
+      const offsetWidth = Math.min(width + offset * 2, availableWidth);
+      const offsetHeight = Math.min(height + offset * 2, availableHeight);
 
-      const availableWidth = maxGridX - startX;
-      const availableHeight = maxGridY - startY;
-
-      width = Math.min(width + offset * 2, availableWidth);
-      height = Math.min(height + offset * 2, availableHeight);
+      width = offsetWidth;
+      height = offsetHeight;
     }
 
     return { startX, startY, height, width };

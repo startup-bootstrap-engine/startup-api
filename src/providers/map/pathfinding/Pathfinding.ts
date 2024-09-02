@@ -184,7 +184,8 @@ export class Pathfinding {
     startX: number;
     startY: number;
   } {
-    const data = this.gridManager.generateGridBetweenPoints(map, gridCourse);
+    const data = this.gridManager.generateGridBetweenPoints(map, gridCourse, 10);
+
     const firstNode = { x: gridCourse.start.x - data.startX, y: gridCourse.start.y - data.startY };
     const lastNode = { x: gridCourse.end.x - data.startX, y: gridCourse.end.y - data.startY };
 
