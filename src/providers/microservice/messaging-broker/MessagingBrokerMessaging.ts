@@ -53,7 +53,6 @@ export class MessagingBroker {
     await this.rabbitMQ.assertQueue(queue);
     await this.rabbitMQ.bindQueue(queue, MessagingBroker.EXCHANGE, routingKey);
     await this.rabbitMQ.consumeMessages(MessagingBroker.EXCHANGE, queue, routingKey, async (data) => {
-      console.log(`📩 Received message on ${routingKey}:`, data);
       await callback(data);
     });
     console.log(`Listening for messages on ${routingKey} (queue: ${queue})`);
@@ -61,40 +60,5 @@ export class MessagingBroker {
 
   async close(): Promise<void> {
     await this.rabbitMQ.close();
-  }
-
-  async sendAndWaitForResponse<T, R>(
-    sendService: string,
-    sendAction: string,
-    receiveService: string,
-    receiveAction: string,
-    data: T,
-    timeout: number = 30000
-  ): Promise<R> {
-    await this.ensureInitialized();
-    return await new Promise<R>(async (resolve, reject) => {
-      const correlationId = Math.random().toString(36).substring(2, 15);
-      const replyQueue = `reply_${correlationId}`;
-
-      await this.rabbitMQ.assertQueue(replyQueue);
-
-      const timeoutId = setTimeout(async () => {
-        reject(new Error("Timeout waiting for response"));
-        await this.rabbitMQ.deleteQueue(replyQueue);
-      }, timeout);
-
-      await this.rabbitMQ.consumeMessages(
-        MessagingBroker.EXCHANGE,
-        replyQueue,
-        `${receiveService}.${receiveAction}`,
-        async (response: R) => {
-          clearTimeout(timeoutId);
-          resolve(response);
-          await this.rabbitMQ.deleteQueue(replyQueue);
-        }
-      );
-
-      await this.sendMessage(sendService, sendAction, { ...data, replyTo: replyQueue, correlationId });
-    });
   }
 }
