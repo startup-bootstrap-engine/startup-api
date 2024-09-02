@@ -123,6 +123,9 @@ describe("EntityEffectUse.ts", () => {
   it("should not call EntityEffectCycle if there are EntityEffect and probability is minimum", async () => {
     poisonEntityEffect.probability = 0;
 
+    // Mock any random elements if necessary
+    jest.spyOn(_, "random").mockReturnValue(1);
+
     await entityEffectUse.applyEntityEffects(testTarget, testAttacker);
 
     expect(entityEffectSpy).not.toHaveBeenCalled();
