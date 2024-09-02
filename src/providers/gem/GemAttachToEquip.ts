@@ -179,25 +179,21 @@ export class GemAttachToEquip {
     targetItem: IItem,
     isArmorOrShield: boolean
   ): Promise<void> {
-    // Fetch the current item stats from the database
     const currentItem = await Item.findById(targetItem._id).lean();
 
     if (!currentItem) {
       throw new Error(`Item with ID ${targetItem._id} not found`);
     }
 
-    // Use 0 as the default value if attack or defense are undefined
     const currentAttack = currentItem.attack ?? 0;
     const currentDefense = currentItem.defense ?? 0;
 
-    // Calculate new stats
-    const newAttack = currentAttack + (gemItemBlueprint.gemStatBuff?.attack || 0);
+    const newAttack = isArmorOrShield ? currentAttack : currentAttack + (gemItemBlueprint.gemStatBuff?.attack || 0);
     const newDefense = currentDefense + (gemItemBlueprint.gemStatBuff?.defense || 0);
 
-    // Update the item in the database
     await Item.findByIdAndUpdate(targetItem._id, {
       $set: {
-        attack: isArmorOrShield ? currentAttack : newAttack,
+        attack: newAttack,
         defense: newDefense,
       },
     });
@@ -255,28 +251,31 @@ export class GemAttachToEquip {
     }
 
     if (isArmorOrShield) {
-      gemDescription += `+${totalDefense} def.`;
+      gemDescription += `+${totalDefense} def`;
     } else {
       gemDescription += `+${totalAttack} atk, +${totalDefense} def`;
     }
 
     if (entityEffects.size > 0) {
-      gemDescription += `, ${entityEffectChance}% chance of applying ${Array.from(entityEffects).join(", ")} effects.`;
+      gemDescription += `, ${entityEffectChance}% chance of applying ${Array.from(entityEffects).join(", ")} effects`;
     }
 
-    // Preserve existing description if it exists
+    // Preserve existing description if it exists, but remove any previous gem description
     const existingDescription = currentItem.equippedBuffDescription || "";
-    const [baseDescription, existingBuffs] = existingDescription.split(/gems?:|Additional buffs:/);
+    const [baseDescription, existingBuffs] = existingDescription.split(/Additional buffs:/);
 
-    let updatedDescription = baseDescription.trim();
-    if (gemNamesArray.length > 0) {
-      updatedDescription += ` ${gemDescription}`;
+    // Remove any existing gem description from the base description
+    const cleanBaseDescription = baseDescription.replace(/.*Gems?:.*$/, "").trim();
+
+    let updatedDescription = cleanBaseDescription;
+    if (gemDescription) {
+      updatedDescription += (updatedDescription ? " " : "") + gemDescription + ".";
     }
+
     if (existingBuffs) {
-      updatedDescription += ` Additional buffs:${existingBuffs}.`;
+      updatedDescription += " Additional buffs:" + existingBuffs;
     } else if (gemItemBlueprint.gemEquippedBuffAdd) {
-      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-      const formatTrait = (trait: string) => {
+      const formatTrait = (trait: string): string => {
         return trait
           .split(/(?=[A-Z])/)
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
