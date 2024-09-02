@@ -70,9 +70,15 @@ services:
       - ./microservices/rpg-pathfinder:/app
     environment:
       - GO111MODULE=on
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
     command: air
     networks:
       - rpg-network
+    depends_on:
+      - rpg-rabbitmq
   rpg-db:
     container_name: rpg-db
     image: mongo
@@ -133,11 +139,6 @@ services:
       - ./environment/rabbitmq-init.sh:/docker-entrypoint-initdb.d/rabbitmq-init.sh
     networks:
       - rpg-network
-    healthcheck:
-      test: ["CMD", "rabbitmqctl", "status"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
 
 networks:
   rpg-network:
