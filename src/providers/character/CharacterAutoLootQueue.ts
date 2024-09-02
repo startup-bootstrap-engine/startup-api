@@ -1,4 +1,4 @@
-import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
@@ -6,6 +6,7 @@ import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { appEnv } from "@providers/config/env";
 import { GuildPayingTribute } from "@providers/guild/GuildPayingTribute";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { Locker } from "@providers/locks/Locker";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { AnimationEffectKeys, IItemUpdate, ItemSocketEvents, ItemSubType, ItemType } from "@rpg-engine/shared";
@@ -13,6 +14,7 @@ import { CharacterInventory } from "./CharacterInventory";
 import { CharacterValidation } from "./CharacterValidation";
 import { CharacterView } from "./CharacterView";
 import { CharacterItemContainer } from "./characterItems/CharacterItemContainer";
+import { CharacterItemSlots } from "./characterItems/CharacterItemSlots";
 
 @provideSingleton(CharacterAutoLootQueue)
 export class CharacterAutoLootQueue {
@@ -24,7 +26,9 @@ export class CharacterAutoLootQueue {
     private characterView: CharacterView,
     private animationEffect: AnimationEffect,
     private dynamicQueue: DynamicQueue,
-    private guildPayingTribute: GuildPayingTribute
+    private guildPayingTribute: GuildPayingTribute,
+    private locker: Locker,
+    private characterItemSlots: CharacterItemSlots
   ) {}
 
   public async autoLoot(character: ICharacter, itemIdsToLoot: string[]): Promise<void> {
@@ -42,29 +46,33 @@ export class CharacterAutoLootQueue {
 
   @TrackNewRelicTransaction()
   public async execAutoLoot(character: ICharacter, itemIdsToLoot: string[]): Promise<void> {
-    try {
-      if (!this.characterValidation.hasBasicValidation(character)) {
-        return;
-      }
+    if (!this.characterValidation.hasBasicValidation(character)) {
+      return;
+    }
 
-      const inventoryItemContainer = await this.characterItemContainer.getInventoryItemContainer(character);
-      if (!inventoryItemContainer) {
-        this.sendErrorMessage(character, "Sorry, you cannot loot items without an inventory.");
-        return;
-      }
+    const inventoryItemContainer = await this.characterItemContainer.getInventoryItemContainer(character);
+    if (!inventoryItemContainer) {
+      this.sendErrorMessage(character, "Sorry, you cannot loot items without an inventory.");
+      return;
+    }
 
-      const [bodies, itemContainerMap] = await this.getBodiesAndContainers(itemIdsToLoot);
+    const [bodies, itemContainerMap] = await this.getBodiesAndContainers(itemIdsToLoot);
 
-      const lootedItemNamesAndQty: string[] = [];
+    const lootedItemNamesAndQty: string[] = [];
+    const disableLootingPromises: Promise<any>[] = [];
 
-      const disableLootingPromises: Promise<any>[] = [];
+    for (const bodyItem of bodies) {
+      const canProceed = await this.locker.lock(`loot-${bodyItem._id}`);
+      if (!canProceed) continue;
 
-      for (const bodyItem of bodies) {
+      try {
         const itemContainer = itemContainerMap.get(String(bodyItem.itemContainer));
         if (!itemContainer) {
           console.log(`Item container with id ${bodyItem.itemContainer} not found`);
           continue;
         }
+
+        const isCharacterDeadBody = await this.isCharacterDeadBody(bodyItem);
 
         for (const slot of Object.values(itemContainer.slots as Record<string, IItem>)) {
           if (!slot) continue;
@@ -72,35 +80,46 @@ export class CharacterAutoLootQueue {
           const item = await this.findItem(slot._id);
           if (!item) continue;
 
-          const remainingQty = await this.guildPayingTribute.payTribute(character, item);
+          let remainingQty = item.stackQty || 1;
+
+          if (!isCharacterDeadBody) {
+            remainingQty = await this.guildPayingTribute.payTribute(character, item);
+          }
 
           if (remainingQty <= 0) {
             await this.handleFullDeduction(character, item, itemContainer, bodyItem);
             continue;
           }
 
-          await this.handleItemLooting(
+          item.stackQty = remainingQty;
+
+          const lootSuccess = await this.handleItemLooting(
             character,
             item,
-            remainingQty,
             inventoryItemContainer,
             lootedItemNamesAndQty,
             itemContainer,
             bodyItem,
             disableLootingPromises
           );
+
+          if (!lootSuccess) {
+            // If looting fails, break the loop to prevent further attempts
+            break;
+          }
         }
+      } catch (err) {
+        console.error(`Error during auto-loot for body ${bodyItem._id}:`, err);
+      } finally {
+        await this.locker.unlock(`loot-${bodyItem._id}`);
       }
-
-      if (lootedItemNamesAndQty.length > 0) {
-        this.socketMessaging.sendMessageToCharacter(character, `Auto-loot: ${lootedItemNamesAndQty.join(", ")}`);
-      }
-
-      await Promise.all([this.characterInventory.sendInventoryUpdateEvent(character), ...disableLootingPromises]);
-    } catch (error) {
-      console.error(error);
-      throw error;
     }
+
+    if (lootedItemNamesAndQty.length > 0) {
+      this.socketMessaging.sendMessageToCharacter(character, `Auto-loot: ${lootedItemNamesAndQty.join(", ")}`);
+    }
+
+    await Promise.all([this.characterInventory.sendInventoryUpdateEvent(character), ...disableLootingPromises]);
   }
 
   private async getBodiesAndContainers(itemIdsToLoot: string[]): Promise<[IItem[], Map<string, IItemContainer>]> {
@@ -149,31 +168,46 @@ export class CharacterAutoLootQueue {
   private async handleItemLooting(
     character: ICharacter,
     item: IItem,
-    remainingQty: number,
     inventoryItemContainer: IItemContainer,
     lootedItemNamesAndQty: string[],
     itemContainer: IItemContainer,
     bodyItem: IItem,
     disableLootingPromises: Promise<any>[]
-  ): Promise<void> {
-    item.stackQty = remainingQty;
-    if (
-      !(await this.characterItemContainer.addItemToContainer(item, character, inventoryItemContainer._id, {
-        shouldAddOwnership: true,
-      }))
-    ) {
-      console.log(`Failed to add ${item.name} to inventory. Skipping...`);
-      return;
+  ): Promise<boolean> {
+    const hasAvailableSlot = await this.characterItemSlots.hasAvailableSlot(inventoryItemContainer._id, item);
+
+    if (!hasAvailableSlot) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, your inventory is full.");
+      return false;
     }
 
-    if (!(await this.characterItemContainer.removeItemFromContainer(item, character, itemContainer))) {
+    const addItemSuccess = await this.characterItemContainer.addItemToContainer(
+      item,
+      character,
+      inventoryItemContainer._id,
+      {
+        shouldAddOwnership: true,
+      }
+    );
+
+    if (!addItemSuccess) {
+      console.log(`Failed to add ${item.name} to inventory. Skipping...`);
+      return false;
+    }
+
+    const removeItemSuccess = await this.characterItemContainer.removeItemFromContainer(item, character, itemContainer);
+    if (!removeItemSuccess) {
+      // If removal fails, attempt to remove the item from the character's inventory
+      await this.characterItemContainer.removeItemFromContainer(item, character, inventoryItemContainer);
       console.log(`Failed to remove ${item.name} from body. Skipping...`);
-      return;
+      return false;
     }
 
     const quantityText = item.stackQty ? (item.stackQty === 1 ? "1x" : `${item.stackQty}x`) : "1x";
     lootedItemNamesAndQty.push(`${quantityText} ${item.name}`);
     disableLootingPromises.push(this.disableLooting(character, bodyItem));
+
+    return true;
   }
 
   private async disableLooting(character: ICharacter, bodyItem: IItem): Promise<void> {
@@ -206,5 +240,11 @@ export class CharacterAutoLootQueue {
       stackQty: bodyItem.stackQty || 0,
       isStackable: bodyItem.maxStackSize > 1,
     });
+  }
+
+  private async isCharacterDeadBody(bodyItem: IItem): Promise<boolean> {
+    // Check if the body item has an associated Character document
+    const character = await Character.findOne({ _id: bodyItem.owner }).lean();
+    return !!character;
   }
 }

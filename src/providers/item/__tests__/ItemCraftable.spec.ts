@@ -60,6 +60,12 @@ describe("ItemCraftable.ts", () => {
     sendEventToUser = jest.spyOn(SocketMessaging.prototype, "sendEventToUser");
 
     await testCharacter.populate("skills").execPopulate();
+
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("should load craftable items", async () => {

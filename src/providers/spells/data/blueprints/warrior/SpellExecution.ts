@@ -19,7 +19,7 @@ export const warriorSpellExecution: Partial<ISpell> = {
   textureAtlas: "icons",
   texturePath: "spell-icons/berserker-execution.png",
   castingType: SpellCastingType.RangedCasting,
-  magicWords: "insania supplicium",
+  magicWords: "gurth an-uir",
   manaCost: 175,
   minLevelRequired: 6,
   minMagicLevelRequired: 6,

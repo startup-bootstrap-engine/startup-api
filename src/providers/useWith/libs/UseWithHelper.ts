@@ -25,21 +25,33 @@ export class UseWithHelper {
     return true;
   }
 
-  public async getItem(character: ICharacter, itemId: string): Promise<IItem> {
-    const item = (await Item.findOne({ _id: itemId }).lean({
-      virtuals: true,
-      defaults: true,
-    })) as IItem;
+  public async getItem(character: ICharacter, itemId: string): Promise<IItem | undefined> {
+    // wrap try catch
 
-    if (!item) {
-      throw new Error(`UseWith > Item with id ${itemId} does not exist!`);
+    try {
+      const item = (await Item.findOne({ _id: itemId }).lean({
+        virtuals: true,
+        defaults: true,
+      })) as IItem;
+
+      if (!item) {
+        throw new Error(`UseWith > Item with id ${itemId} does not exist!`);
+      }
+
+      if (item.owner?.toString() !== character._id.toString()) {
+        console.log(`Ownership error: Item ID: ${itemId} - itemKey: ${item.key}`);
+        console.log(`Item owner ID: ${item.owner?.toString()}`);
+        console.log(`Character ID: ${character._id.toString()}`);
+        throw new Error(`UseWith > Item with id ${itemId} does not belong to the character!`);
+      }
+
+      return item;
+    } catch (error) {
+      console.error(`Error in getItem: ${error.message}`);
+      console.error(`Character ID: ${character._id.toString()}`);
+      console.error(`Item ID: ${itemId}`);
+      throw error;
     }
-
-    if (item.owner?.toString() !== character._id.toString()) {
-      throw new Error(`UseWith > Item with id ${itemId} does not belong to the character!`);
-    }
-
-    return item;
   }
 }
 

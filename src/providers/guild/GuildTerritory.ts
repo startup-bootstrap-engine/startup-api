@@ -1,4 +1,5 @@
 import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
+import { DiscordBot } from "@providers/discord/DiscordBot";
 import { MapName } from "@providers/map/MapName";
 import { provide } from "inversify-binding-decorators";
 import { UpdateWriteOpResult } from "mongoose";
@@ -11,7 +12,7 @@ interface IGuildMapPoints {
 
 @provide(GuildTerritory)
 export class GuildTerritory {
-  constructor(private mapName: MapName, private guildCommon: GuildCommon) {}
+  constructor(private mapName: MapName, private guildCommon: GuildCommon, private discordBot: DiscordBot) {}
 
   public async trySetMapControl(map: string): Promise<void> {
     try {
@@ -44,14 +45,20 @@ export class GuildTerritory {
     newControl: IGuild,
     oldControl: IGuild | null
   ): Promise<void> {
+    const formattedMapName = this.getFormattedTerritoryName(map);
+    let message: string;
+
     if (!oldControl) {
-      await this.guildCommon.sendMessageToAllMembers(`${map} is now controlled by ${newControl.name}.`, newControl);
-    } else if (oldControl._id.toString() !== newControl._id.toString()) {
-      await this.guildCommon.sendMessageToAllMembers(
-        `${newControl.name} has stolen the control of ${map}.`,
-        newControl
-      );
+      message = `${newControl.name} has taken control of ${formattedMapName}.`;
+    } else {
+      message = `😈 ${newControl.name} has stolen the control of ${formattedMapName} from ${oldControl.name}.`;
     }
+
+    // Send message to all guild members
+    await this.guildCommon.sendMessageToAllMembers(message, newControl);
+
+    // Send message to Discord
+    await this.discordBot.sendMessage(message, "guilds");
   }
 
   private async updateMapControl(map: string, guild: IGuild): Promise<void> {

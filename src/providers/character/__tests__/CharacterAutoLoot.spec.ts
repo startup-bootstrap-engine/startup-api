@@ -2,7 +2,7 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { Item } from "@entities/ModuleInventory/ItemModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
-import { FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { ContainersBlueprint, FoodsBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { CharacterAutoLootQueue } from "../CharacterAutoLootQueue";
 import { CharacterInventory } from "../CharacterInventory";
 import { CharacterItemContainer } from "../characterItems/CharacterItemContainer";
@@ -140,12 +140,73 @@ describe("CharacterAutoLootQueue", () => {
     mockValidation.mockRestore();
   });
 
+  it("should correctly loot a backpack as a regular item", async () => {
+    // @ts-ignore
+    jest.spyOn(characterAutoLoot, "isCharacterDeadBody").mockResolvedValue(false);
+
+    const backpackItem = await unitTestHelper.createMockItemFromBlueprint(ContainersBlueprint.Backpack, {
+      isItemContainer: true,
+    });
+
+    const bodyItem = await unitTestHelper.createMockCharacterDeadBody(testCharacter);
+    const bodyItemContainer = await ItemContainer.findById(bodyItem.itemContainer);
+
+    if (!bodyItemContainer) {
+      throw new Error("Body item container not found");
+    }
+
+    // Add the backpack to the dead body's inventory
+    await characterItemContainer.addItemToContainer(backpackItem, testCharacter, bodyItemContainer._id, {
+      shouldAddOwnership: true,
+    });
+
+    // Create and add an item to the backpack (this should not be looted)
+    const itemInBackpack = await unitTestHelper.createMockItemFromBlueprint(FoodsBlueprint.Apple);
+    const backpackContainer = await ItemContainer.findById(backpackItem.itemContainer);
+
+    if (!backpackContainer) {
+      throw new Error("Backpack container not found");
+    }
+
+    await characterItemContainer.addItemToContainer(itemInBackpack, testCharacter, backpackContainer._id, {
+      shouldAddOwnership: true,
+    });
+
+    // Act: Execute the autoLoot
+    await characterAutoLoot.execAutoLoot(testCharacter, [bodyItem._id.toString()]);
+
+    // Assert: Verify that the backpack was looted as a regular item
+    const updatedContainer = await characterInventory.getInventoryItemContainer(testCharacter);
+    const lootedItems = await characterInventory.getAllItemsFromContainer(updatedContainer!._id);
+
+    const lootedBackpack = lootedItems.find((item) => item.key === ContainersBlueprint.Backpack);
+    expect(lootedBackpack).toBeDefined();
+    expect(lootedBackpack!.isItemContainer).toBe(true);
+
+    // Verify that the item inside the backpack was not looted
+    const lootedBackpackContainer = await ItemContainer.findOne({
+      parentItem: lootedBackpack!._id,
+    }).lean<IItemContainer>();
+
+    const itemsInLootedBackpack = await characterInventory.getAllItemsFromContainer(lootedBackpackContainer!._id);
+    expect(itemsInLootedBackpack.length).toBe(1);
+  });
+
   // Internal tests for tribute logic
   describe("Tributes", () => {
     let bodyItemContainer: IItemContainer;
 
     beforeEach(async () => {
       bodyItemContainer = await unitTestHelper.createMockItemContainer();
+
+      // @ts-ignore
+      jest.spyOn(characterAutoLoot, "isCharacterDeadBody").mockResolvedValue(false);
+
+      jest.clearAllMocks();
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
     });
 
     // Helper function to set up loot with tribute
@@ -250,6 +311,39 @@ describe("CharacterAutoLootQueue", () => {
     it("should handle invalid tribute deduction (negative quantity)", async () => {
       const lootedItem = await setupLootWithTribute(10, -5); // Invalid negative quantity
       expect(lootedItem).toBeUndefined(); // No item should be looted
+    });
+
+    it("should skip guild tribute if the body is a character's dead body", async () => {
+      // Arrange: Create the necessary mocks and setup
+      const item = await unitTestHelper.createMockItem({ stackQty: 10 });
+      const bodyItem = await unitTestHelper.createMockCharacterDeadBody(testCharacter);
+      const bodyItemContainer = await ItemContainer.findById(bodyItem.itemContainer);
+
+      if (!bodyItemContainer) {
+        throw new Error("Body item container not found");
+      }
+
+      await characterItemContainer.addItemToContainer(item, testCharacter, bodyItemContainer._id, {
+        shouldAddOwnership: true,
+      });
+
+      // Mock the isCharacterDeadBody to return true
+      // @ts-ignore
+      jest.spyOn(characterAutoLoot, "isCharacterDeadBody").mockResolvedValue(true);
+
+      // Mock the payTribute function to ensure it is not called
+      // @ts-ignore
+      const payTributeSpy = jest.spyOn(characterAutoLoot.guildPayingTribute, "payTribute");
+
+      // Act: Execute the autoLoot
+      await characterAutoLoot.execAutoLoot(testCharacter, [bodyItem._id.toString()]);
+
+      // Assert: Verify the tribute was not applied and item was looted fully
+      expect(payTributeSpy).not.toHaveBeenCalled();
+      const updatedContainer = await characterInventory.getInventoryItemContainer(testCharacter);
+      const lootedItem = await characterInventory.getAllItemsFromContainer(updatedContainer!._id);
+
+      expect(lootedItem[0].stackQty).toBe(10); // Item should be looted without any deduction
     });
   });
 });

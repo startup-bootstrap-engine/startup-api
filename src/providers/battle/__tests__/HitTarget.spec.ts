@@ -67,7 +67,6 @@ describe("HitTarget", () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
     jest.restoreAllMocks();
   });
 
