@@ -1,4 +1,4 @@
-import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { IItemContainer, ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
@@ -66,13 +66,21 @@ export class CharacterAutoLootQueue {
           continue;
         }
 
+        // Check if the body is a character's dead body
+        const isCharacterDeadBody = await this.isCharacterDeadBody(bodyItem);
+
         for (const slot of Object.values(itemContainer.slots as Record<string, IItem>)) {
           if (!slot) continue;
 
           const item = await this.findItem(slot._id);
           if (!item) continue;
 
-          const remainingQty = await this.guildPayingTribute.payTribute(character, item);
+          let remainingQty = item.stackQty || 1;
+
+          // Skip guild tribute for character dead bodies
+          if (!isCharacterDeadBody) {
+            remainingQty = await this.guildPayingTribute.payTribute(character, item);
+          }
 
           if (remainingQty <= 0) {
             await this.handleFullDeduction(character, item, itemContainer, bodyItem);
@@ -206,5 +214,11 @@ export class CharacterAutoLootQueue {
       stackQty: bodyItem.stackQty || 0,
       isStackable: bodyItem.maxStackSize > 1,
     });
+  }
+
+  private async isCharacterDeadBody(bodyItem: IItem): Promise<boolean> {
+    // Check if the body item has an associated Character document
+    const character = await Character.findOne({ _id: bodyItem.owner }).lean();
+    return !!character;
   }
 }
