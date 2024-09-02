@@ -236,11 +236,14 @@ export class GemAttachToEquip {
     for (const gem of attachedGems) {
       totalAttack += gem.gemStatBuff?.attack || 0;
       totalDefense += gem.gemStatBuff?.defense || 0;
-      if (gem.gemEntityEffectsAdd) {
-        gem.gemEntityEffectsAdd.forEach((effect) => entityEffects.add(effect));
+
+      if (!isArmorOrShield) {
+        if (gem.gemEntityEffectsAdd) {
+          gem.gemEntityEffectsAdd.forEach((effect) => entityEffects.add(effect));
+        }
+        entityEffectChance = Math.max(entityEffectChance, gem.gemEntityEffectChance || 0);
       }
 
-      entityEffectChance = Math.max(entityEffectChance, gem.gemEntityEffectChance || 0);
       gemNames.add(gem.name?.replace(" Gem", "")!);
     }
 
@@ -252,7 +255,7 @@ export class GemAttachToEquip {
     }
 
     if (isArmorOrShield) {
-      gemDescription += `+${totalDefense} def`;
+      gemDescription += `+${totalDefense} def.`;
     } else {
       gemDescription += `+${totalAttack} atk, +${totalDefense} def`;
     }
