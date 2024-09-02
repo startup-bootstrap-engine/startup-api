@@ -1,6 +1,5 @@
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
-
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterView } from "@providers/character/CharacterView";
 import { NPC_CAN_ATTACK_IN_NON_PVP_ZONE } from "@providers/constants/NPCConstants";
@@ -53,8 +52,8 @@ export class NPCMovement {
     chosenMovementDirection: NPCDirection
   ): Promise<boolean> {
     try {
-      const [newGridX, newGridY] = [ToGridX(newX), ToGridY(newY)];
-      const [oldGridX, oldGridY] = [ToGridX(oldX), ToGridY(oldY)];
+      const [newGridX, newGridY] = this.convertToGrid(newX, newY);
+      const [oldGridX, oldGridY] = this.convertToGrid(oldX, oldY);
 
       console.log("Moving NPC", npc.key, "from", oldGridX, oldGridY, "to", newGridX, newGridY);
 
@@ -64,8 +63,7 @@ export class NPCMovement {
 
       await this.updateGridWalkability(npc.scene, oldGridX, oldGridY, newGridX, newGridY);
 
-      const nearbyCharacters = await this.npcView.getCharactersInView(npc);
-      const canUpdateNPC = await this.handleNearbyCharacters(npc, nearbyCharacters, chosenMovementDirection);
+      const canUpdateNPC = await this.handleNearbyCharacters(npc, chosenMovementDirection);
 
       if (canUpdateNPC) {
         await this.updateNPCInDatabase(npc, newX, newY, chosenMovementDirection);
@@ -148,11 +146,8 @@ export class NPCMovement {
     await this.gridManager.setWalkable(map, newGridX, newGridY, false);
   }
 
-  private async handleNearbyCharacters(
-    npc: INPC,
-    nearbyCharacters: ICharacter[],
-    chosenMovementDirection: NPCDirection
-  ): Promise<boolean> {
+  private async handleNearbyCharacters(npc: INPC, chosenMovementDirection: NPCDirection): Promise<boolean> {
+    const nearbyCharacters = await this.npcView.getCharactersInView(npc);
     let canUpdateNPC = true;
 
     for (const character of nearbyCharacters) {
@@ -172,17 +167,12 @@ export class NPCMovement {
     character: ICharacter,
     chosenMovementDirection: NPCDirection
   ): Promise<void> {
-    const clearTarget = await this.shouldClearTarget(npc, character);
-
-    if (clearTarget) {
+    if (await this.shouldClearTarget(npc, character)) {
       console.log(`Clearing ${npc.key} target: handling character interaction with ${character._id}`);
-
       await this.npcTarget.clearTarget(npc);
     }
 
-    const isOnCharView = await this.characterView.isOnCharacterView(character._id, npc._id, "npcs");
-
-    if (!isOnCharView) {
+    if (!(await this.characterView.isOnCharacterView(character._id, npc._id, "npcs"))) {
       await this.npcWarn.warnCharacterAboutSingleNPCCreation(npc, character);
     } else {
       this.sendNPCPositionUpdate(npc, character, chosenMovementDirection);
@@ -190,22 +180,14 @@ export class NPCMovement {
   }
 
   private async shouldClearTarget(npc: INPC, character: ICharacter): Promise<boolean> {
-    const isRaid = npc.raidKey !== undefined;
-    const freeze = !isRaid;
-
-    if (!NPC_CAN_ATTACK_IN_NON_PVP_ZONE && freeze) {
+    if (!NPC_CAN_ATTACK_IN_NON_PVP_ZONE && npc.raidKey === undefined) {
       const isCharInNonPVPZone = this.mapNonPVPZone.isNonPVPZoneAtXY(character.scene, character.x, character.y);
       if (isCharInNonPVPZone && npc.alignment === NPCAlignment.Hostile) {
         return true;
       }
     }
 
-    const isTargetInvisible = await this.stealth.isInvisible(character);
-    if (isTargetInvisible) {
-      return true;
-    }
-
-    return false;
+    return await this.stealth.isInvisible(character);
   }
 
   private sendNPCPositionUpdate(npc: INPC, character: ICharacter, chosenMovementDirection: NPCDirection): void {
@@ -229,5 +211,9 @@ export class NPCMovement {
     chosenMovementDirection: NPCDirection
   ): Promise<void> {
     await NPC.updateOne({ _id: npc._id }, { x: newX, y: newY, direction: chosenMovementDirection });
+  }
+
+  private convertToGrid(x: number, y: number): [number, number] {
+    return [ToGridX(x), ToGridY(y)];
   }
 }
