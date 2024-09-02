@@ -6,6 +6,7 @@ import { AnimationEffect } from "@providers/animation/AnimationEffect";
 import { appEnv } from "@providers/config/env";
 import { GuildPayingTribute } from "@providers/guild/GuildPayingTribute";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { Locker } from "@providers/locks/Locker";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { AnimationEffectKeys, IItemUpdate, ItemSocketEvents, ItemSubType, ItemType } from "@rpg-engine/shared";
@@ -24,7 +25,8 @@ export class CharacterAutoLootQueue {
     private characterView: CharacterView,
     private animationEffect: AnimationEffect,
     private dynamicQueue: DynamicQueue,
-    private guildPayingTribute: GuildPayingTribute
+    private guildPayingTribute: GuildPayingTribute,
+    private locker: Locker
   ) {}
 
   public async autoLoot(character: ICharacter, itemIdsToLoot: string[]): Promise<void> {
@@ -60,43 +62,58 @@ export class CharacterAutoLootQueue {
       const disableLootingPromises: Promise<any>[] = [];
 
       for (const bodyItem of bodies) {
-        const itemContainer = itemContainerMap.get(String(bodyItem.itemContainer));
-        if (!itemContainer) {
-          console.log(`Item container with id ${bodyItem.itemContainer} not found`);
-          continue;
-        }
+        const canProceed = await this.locker.lock(`loot-${bodyItem._id}`);
 
-        // Check if the body is a character's dead body
-        const isCharacterDeadBody = await this.isCharacterDeadBody(bodyItem);
-
-        for (const slot of Object.values(itemContainer.slots as Record<string, IItem>)) {
-          if (!slot) continue;
-
-          const item = await this.findItem(slot._id);
-          if (!item) continue;
-
-          let remainingQty = item.stackQty || 1;
-
-          // Skip guild tribute for character dead bodies
-          if (!isCharacterDeadBody) {
-            remainingQty = await this.guildPayingTribute.payTribute(character, item);
-          }
-
-          if (remainingQty <= 0) {
-            await this.handleFullDeduction(character, item, itemContainer, bodyItem);
+        try {
+          if (!canProceed) {
             continue;
           }
 
-          await this.handleItemLooting(
-            character,
-            item,
-            remainingQty,
-            inventoryItemContainer,
-            lootedItemNamesAndQty,
-            itemContainer,
-            bodyItem,
-            disableLootingPromises
-          );
+          const itemContainer = itemContainerMap.get(String(bodyItem.itemContainer));
+          if (!itemContainer) {
+            console.log(`Item container with id ${bodyItem.itemContainer} not found`);
+            continue;
+          }
+
+          // Check if the body is a character's dead body
+          const isCharacterDeadBody = await this.isCharacterDeadBody(bodyItem);
+
+          for (const slot of Object.values(itemContainer.slots as Record<string, IItem>)) {
+            if (!slot) continue;
+
+            const item = await this.findItem(slot._id);
+            if (!item) continue;
+
+            let remainingQty = item.stackQty || 1;
+
+            // Skip guild tribute for character dead bodies
+            if (!isCharacterDeadBody) {
+              remainingQty = await this.guildPayingTribute.payTribute(character, item);
+            }
+
+            if (remainingQty <= 0) {
+              await this.handleFullDeduction(character, item, itemContainer, bodyItem);
+              continue;
+            }
+
+            // Adjust the stack quantity to match the remaining quantity
+            item.stackQty = remainingQty;
+
+            await this.handleItemLooting(
+              character,
+              item,
+              remainingQty,
+              inventoryItemContainer,
+              lootedItemNamesAndQty,
+              itemContainer,
+              bodyItem,
+              disableLootingPromises
+            );
+          }
+        } catch (err) {
+          console.error(err);
+        } finally {
+          await this.locker.unlock(`loot-${bodyItem._id}`);
         }
       }
 
