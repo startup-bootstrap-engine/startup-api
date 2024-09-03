@@ -681,7 +681,7 @@ export class UnitTestHelper {
 
   public async createMockQuest(
     npcId: string,
-    options?: IMockQuestOptions,
+    options?: IMockQuestOptions | null,
     extraProps?: Record<string, unknown> | null
   ): Promise<IQuest> {
     if (!npcId) {
