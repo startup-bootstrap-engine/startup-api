@@ -33,7 +33,7 @@ export const npcElderGolem: INPCTierBlueprint<18> = {
   isGiantForm: true,
   tier: 18,
   // @ts-ignore
-  baseHealth: 30000,
+  baseHealth: 6000,
   canSwitchToRandomTarget: true,
   healthRandomizerDice: Dice.D20,
   skillRandomizerDice: Dice.D20,
