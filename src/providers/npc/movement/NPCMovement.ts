@@ -55,8 +55,6 @@ export class NPCMovement {
       const [newGridX, newGridY] = this.convertToGrid(newX, newY);
       const [oldGridX, oldGridY] = this.convertToGrid(oldX, oldY);
 
-      console.log("Moving NPC", npc.key, "from", oldGridX, oldGridY, "to", newGridX, newGridY);
-
       if (await this.isDestinationSolid(npc, newGridX, newGridY)) {
         return false;
       }

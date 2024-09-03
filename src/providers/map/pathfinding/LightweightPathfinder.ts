@@ -16,6 +16,12 @@ interface IPathPosition {
   distance?: number;
 }
 
+export interface ILightweightPathfinderResponse {
+  npcId: string;
+  targetX: number;
+  targetY: number;
+}
+
 @provide(LightweightPathfinder)
 export class LightweightPathfinder {
   private static readonly MAX_STATIONARY_COUNT = 5;

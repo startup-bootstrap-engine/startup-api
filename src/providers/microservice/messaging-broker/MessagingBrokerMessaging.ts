@@ -39,7 +39,7 @@ export class MessagingBroker {
     }
   }
 
-  async sendMessage(service: string, action: string, data: any): Promise<void> {
+  async sendMessage<T>(service: string, action: string, data: T): Promise<void> {
     await this.ensureInitialized();
     const routingKey = `${service}.${action}`;
     await this.rabbitMQ.publishMessage(MessagingBroker.EXCHANGE, routingKey, data);
