@@ -437,7 +437,6 @@ describe("HitTarget", () => {
 
     expect(targetCharacter.health).toBe(targetCharacter.maxHealth - expectedDamage);
   });
-
   it("should correctly handle mana shield absorbing damage", async () => {
     const baseDamage = 50;
 
@@ -445,26 +444,34 @@ describe("HitTarget", () => {
       // @ts-ignore
       .spyOn(hitTarget.battleEvent, "calculateEvent" as any)
       .mockImplementation(() => BattleEventType.Hit);
-    // @ts-ignore
-    jest.spyOn(hitTarget.battleDamageCalculator, "calculateHitDamage" as any).mockImplementation(() => baseDamage);
+
+    // Mock calculateHitDamage to return consistent base damage
+    jest
+      // @ts-ignore
+      .spyOn(hitTarget.battleDamageCalculator, "calculateHitDamage" as any)
+      .mockReturnValue(baseDamage);
+
+    // Ensure mana shield is present and it fully absorbs the damage
     jest
       // @ts-ignore
       .spyOn(hitTarget.manaShield, "hasManaShield" as any)
-      .mockResolvedValueOnce(true);
+      .mockResolvedValue(true);
+
     jest
       // @ts-ignore
       .spyOn(hitTarget.manaShield, "handleManaShield" as any)
-      .mockResolvedValueOnce(true); // Shield absorbs full damage
+      .mockResolvedValue(true); // Shield absorbs full damage
 
-    // Mock generateBloodOnGround
+    // Mock generateBloodOnGround to avoid its call since damage is absorbed
     const generateBloodOnGroundMock = jest
       // @ts-ignore
-      .spyOn(hitTarget.battleEffects, "generateBloodOnGround")
-      // @ts-ignore
+      .spyOn(hitTarget.battleEffects, "generateBloodOnGround" as any)
       .mockImplementation(() => {});
 
+    // Execute the hit
     await hitTarget.hit(attackerCharacter, targetCharacter);
 
+    // Assertions
     expect(targetCharacter.health).toBe(targetCharacter.maxHealth);
     expect(generateBloodOnGroundMock).not.toHaveBeenCalled();
   });
