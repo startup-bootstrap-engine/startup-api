@@ -201,6 +201,11 @@ itemSchema.virtual("fullDescription").get(function (this: IItem): string {
   if (this.rarity) {
     message += ` Rarity: ${this.rarity}.`;
   }
+
+  if (this.tier) {
+    message += ` Tier: ${this.tier}.`;
+  }
+
   return message;
 });
 
