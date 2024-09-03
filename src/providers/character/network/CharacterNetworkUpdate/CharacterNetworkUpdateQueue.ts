@@ -14,6 +14,7 @@ import {
   ICharacterPositionUpdateConfirm,
   ICharacterPositionUpdateFromClient,
   ICharacterSyncPosition,
+  MapLayers,
   ToGridX,
   ToGridY,
 } from "@rpg-engine/shared";
@@ -22,6 +23,7 @@ import { NewRelic } from "@providers/analytics/NewRelic";
 import { MAX_PING_TRACKING_THRESHOLD } from "@providers/constants/ServerConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
+import { MapTiles } from "@providers/map/MapTiles";
 import { MapTransitionNonPVPZone } from "@providers/map/MapTransition/MapTransitionNonPvpZone";
 import { MapTransitionQueue } from "@providers/map/MapTransition/MapTransitionQueue";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
@@ -46,7 +48,8 @@ export class CharacterNetworkUpdateQueue {
     private locker: Locker,
     private mapTransition: MapTransitionQueue,
     private dynamicQueue: DynamicQueue,
-    private mapTransitionNonPVPZone: MapTransitionNonPVPZone
+    private mapTransitionNonPVPZone: MapTransitionNonPVPZone,
+    private mapTiles: MapTiles
   ) {}
 
   public onCharacterUpdatePosition(channel: SocketChannel): void {
@@ -138,7 +141,14 @@ export class CharacterNetworkUpdateQueue {
     isMoving: boolean
   ): Promise<void> {
     // Calculate the new position based on origin and direction
-    const { newX, newY } = this.calculateNewPosition(data.originX, data.originY, data.direction);
+    const { newX, newY } = this.calculateNewPosition(
+      character.scene,
+      data.newX,
+      data.newY,
+      data.originX,
+      data.originY,
+      data.direction
+    );
 
     // Check if the new position is valid (not solid and within bounds)
     const isNewPositionValid = await this.characterMovementValidation.isValid(character, newX, newY, isMoving);
@@ -170,13 +180,15 @@ export class CharacterNetworkUpdateQueue {
   }
 
   private calculateNewPosition(
+    map: string,
+    newX: number,
+    newY: number,
     originX: number,
     originY: number,
     direction: AnimationDirection
   ): { newX: number; newY: number } {
-    const gridSize = GRID_WIDTH; // Assuming GRID_WIDTH is the size of one grid cell
-    let newX = originX;
-    let newY = originY;
+    const gridX = ToGridX(newX);
+    const gridY = ToGridY(newY);
 
     if (!this.movementHelper.isSnappedToGrid(newX, newY)) {
       const snappedPosition = this.snapToGrid(newX, newY);
@@ -184,21 +196,36 @@ export class CharacterNetworkUpdateQueue {
       newY = snappedPosition.y;
     }
 
-    switch (direction) {
-      case "up":
-        newY -= gridSize;
-        break;
-      case "down":
-        newY += gridSize;
-        break;
-      case "left":
-        newX -= gridSize;
-        break;
-      case "right":
-        newX += gridSize;
-        break;
+    const isDestinationCoordinateValid =
+      this.mapTiles.isMapCoordinateWithinBounds(map, gridX, gridY) &&
+      !this.mapTiles.isSolid(map, gridX, gridY, MapLayers.Character) &&
+      !this.mapTiles.isPassage(map, gridX, gridY, MapLayers.Character);
+
+    if (!isDestinationCoordinateValid) {
+      const gridSize = GRID_WIDTH; // Assuming GRID_WIDTH is the size of one grid cell
+      let adjustedX = originX;
+      let adjustedY = originY;
+
+      switch (direction) {
+        case "up":
+          adjustedY -= gridSize;
+          break;
+        case "down":
+          adjustedY += gridSize;
+          break;
+        case "left":
+          adjustedX -= gridSize;
+          break;
+        case "right":
+          adjustedX += gridSize;
+          break;
+      }
+
+      // returns adjustedX and adjustedY based on server side calculations
+      return { newX: adjustedX, newY: adjustedY };
     }
 
+    // returns same position as data.newX and data.newY if the new position is valid
     return { newX, newY };
   }
 
