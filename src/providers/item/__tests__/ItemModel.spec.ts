@@ -42,7 +42,7 @@ describe("ItemModel.ts", () => {
     expect(testItem.isEquipable).toBeTruthy();
     expect(testItem.maxStackSize > 1).toBeFalsy();
     expect(testItem.fullDescription).toBe(
-      `${testItem.name}: ${testItem.description} Attack: ${testItem.attack}. Defense: ${testItem.defense}. Weight: ${testItem.weight}. Rarity: ${testItem.rarity}.`
+      `${testItem.name}: ${testItem.description} Attack: ${testItem.attack}. Defense: ${testItem.defense}. Weight: ${testItem.weight}. Rarity: ${testItem.rarity}. Tier: 1.`
     );
   });
 
@@ -50,7 +50,7 @@ describe("ItemModel.ts", () => {
     expect(testItemArmor.isEquipable).toBeTruthy();
     expect(testItemArmor.maxStackSize > 1).toBeFalsy();
     expect(testItemArmor.fullDescription).toBe(
-      `${testItemArmor.name}: ${testItemArmor.description} Defense: ${testItemArmor.defense}. Weight: ${testItemArmor.weight}. Rarity: ${testItemArmor.rarity}.`
+      `${testItemArmor.name}: ${testItemArmor.description} Defense: ${testItemArmor.defense}. Weight: ${testItemArmor.weight}. Rarity: ${testItemArmor.rarity}. Tier: 1.`
     );
   });
 
@@ -58,7 +58,7 @@ describe("ItemModel.ts", () => {
     expect(testItem.isEquipable).toBeTruthy();
     expect(testItem.maxStackSize > 1).toBeFalsy();
     expect(testItem.fullDescription).toBe(
-      `${testItem.name}: ${testItem.description} Attack: ${testItem.attack}. Weight: ${testItem.weight}. Rarity: ${testItem.rarity}.`
+      `${testItem.name}: ${testItem.description} Attack: ${testItem.attack}. Weight: ${testItem.weight}. Rarity: ${testItem.rarity}. Tier: 1.`
     );
   });
 
@@ -73,7 +73,7 @@ describe("ItemModel.ts", () => {
     expect(testItem.isEquipable).toBeTruthy();
     expect(testItem.maxStackSize > 1).toBeFalsy();
     expect(testItem.fullDescription).toBe(
-      `${testItem.name}: ${testItem.description} Weight: ${testItem.weight}. Rarity: ${testItem.rarity}.`
+      `${testItem.name}: ${testItem.description} Weight: ${testItem.weight}. Rarity: ${testItem.rarity}. Tier: 1.`
     );
   });
 

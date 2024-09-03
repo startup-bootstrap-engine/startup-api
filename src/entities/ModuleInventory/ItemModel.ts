@@ -202,7 +202,13 @@ itemSchema.virtual("fullDescription").get(function (this: IItem): string {
     message += ` Rarity: ${this.rarity}.`;
   }
 
-  if (this.tier) {
+  if (
+    this.tier &&
+    (this.type === ItemType.Weapon ||
+      this.type === ItemType.Armor ||
+      this.type === ItemType.Accessory ||
+      this.type === ItemType.Jewelry)
+  ) {
     message += ` Tier: ${this.tier}.`;
   }
 
