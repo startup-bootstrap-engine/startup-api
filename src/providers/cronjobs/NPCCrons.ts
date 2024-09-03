@@ -32,7 +32,7 @@ export class NPCCrons {
       await this.npcSpawnCron();
     });
 
-    this.cronJobScheduler.uniqueSchedule("npc-raid-activator", "*/45 * * * *", async () => {
+    this.cronJobScheduler.uniqueSchedule("npc-raid-activator", "*/55 * * * *", async () => {
       console.log("Trying to activate raids...");
       await this.npcRaidActivator.activateRaids();
     });

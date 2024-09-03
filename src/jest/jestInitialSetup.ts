@@ -1,8 +1,9 @@
-import "reflect-metadata";
-
 import "express-async-errors";
-
+import "reflect-metadata";
 import redis from "./redisV4Mock";
+
+//! Useful for debugging during tests
+process.env.DEBUG_MODE = "true";
 
 jest.setTimeout(30000);
 

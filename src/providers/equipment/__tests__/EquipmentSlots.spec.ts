@@ -51,7 +51,7 @@ describe("EquipmentSlots.ts", () => {
 
     const leftHandItem = equipmentSet.leftHand as unknown as IItem;
 
-    expect(leftHandItem._id).toEqual(newItem._id);
+    expect(leftHandItem?._id).toEqual(newItem?._id);
   });
 
   it("should properly add a STACKABLE item to an equipment slot, and stack it with the existing item (maxStackSize not reached)", async () => {
