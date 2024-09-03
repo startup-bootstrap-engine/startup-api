@@ -3,7 +3,8 @@ import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { Equipment } from "@entities/ModuleCharacter/EquipmentModel";
 import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem as IItemModel, Item } from "@entities/ModuleInventory/ItemModel";
-import { IQuest as IQuestModel, Quest } from "@entities/ModuleQuest/QuestModel";
+import { IQuest, Quest } from "@entities/ModuleQuest/QuestModel";
+
 import {
   IQuestObjectiveInteraction,
   IQuestObjectiveKill,
@@ -19,13 +20,13 @@ import { EquipmentSlots } from "@providers/equipment/EquipmentSlots";
 import { blueprintManager } from "@providers/inversify/container";
 import { AvailableBlueprints } from "@providers/item/data/types/itemsBlueprintTypes";
 import { ItemDrop } from "@providers/item/ItemDrop/ItemDrop";
+import { Locker } from "@providers/locks/Locker";
 import { MovementHelper } from "@providers/movement/MovementHelper";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import {
   IEquipmentAndInventoryUpdatePayload,
   IItem,
   IItemContainer,
-  IQuest,
   IQuestsResponse,
   ItemSocketEvents,
   IUIShowMessage,
@@ -36,6 +37,7 @@ import {
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
+import { Types } from "mongoose";
 
 interface IGetObjectivesResult {
   objectives: IQuestObjectiveInteraction[] | IQuestObjectiveKill[];
@@ -55,35 +57,114 @@ export class QuestSystem {
     private equipmentSlots: EquipmentSlots,
     private movementHelper: MovementHelper,
     private itemDrop: ItemDrop,
-    private characterItems: CharacterItems
+    private characterItems: CharacterItems,
+    private locker: Locker
   ) {}
 
   @TrackNewRelicTransaction()
   public async updateQuests(type: QuestType, character: ICharacter, targetKey: string): Promise<void> {
-    const objectivesData = await this.getObjectivesData(character, type);
-    if (_.isEmpty(objectivesData)) {
+    const canProceed = await this.locker.lock(`updateQuests-${character.id}`);
+
+    if (!canProceed) {
       return;
     }
 
-    let updatedQuest: IQuestModel | undefined;
-    switch (type) {
-      case QuestType.Kill:
-        updatedQuest = await this.updateKillObjective(objectivesData, targetKey);
+    try {
+      const objectivesData = await this.getObjectivesData(character, type);
+      if (_.isEmpty(objectivesData)) {
+        return;
+      }
+
+      let updatedQuest: IQuest | undefined;
+      switch (type) {
+        case QuestType.Kill:
+          updatedQuest = await this.updateKillObjective(objectivesData, targetKey);
+          break;
+        case QuestType.Interaction:
+          updatedQuest = await this.updateInteractionObjective(objectivesData, targetKey, character);
+          break;
+        default:
+          throw new Error(`Invalid quest type ${type}`);
+      }
+
+      if (!updatedQuest) {
+        return;
+      }
+
+      if (await this.hasStatus(updatedQuest, QuestStatus.Completed, character.id)) {
+        await this.releaseRewards(updatedQuest as unknown as IQuest, character);
+      }
+    } catch (err) {
+      console.log(err);
+      throw new Error(err);
+    } finally {
+      await this.locker.unlock(`updateQuests-${character.id}`);
+    }
+  }
+
+  public async hasStatus(quest: IQuest, status: QuestStatus, characterId: string): Promise<boolean> {
+    const objectives = await this.getObjectiveDetails(quest);
+    if (!objectives.length) {
+      throw new Error(`Quest with id ${quest.id} does not have objectives`);
+    }
+    const recordData =
+      (await QuestRecord.find({
+        character: Types.ObjectId(characterId),
+        quest: quest._id,
+      }).lean()) || [];
+    // Case pending && completed ==> All should be same state
+    // Case in progress ==> With 1 in progress is inProgress state
+    // Case in progress ==> With 1 completed and 1 pending, is also inProgress state
+    let currentStatus = QuestStatus.Pending;
+    for (let i = 0; i < recordData.length; i++) {
+      const obj = recordData[i];
+      if (i === 0) {
+        currentStatus = obj.status as QuestStatus;
+        continue;
+      }
+
+      if (obj.status === QuestStatus.InProgress) {
+        currentStatus = obj.status;
         break;
-      case QuestType.Interaction:
-        updatedQuest = await this.updateInteractionObjective(objectivesData, targetKey, character);
+      }
+
+      if (
+        (currentStatus === QuestStatus.Pending && obj.status === QuestStatus.Completed) ||
+        (currentStatus === QuestStatus.Completed && obj.status === QuestStatus.Pending)
+      ) {
+        currentStatus = QuestStatus.InProgress;
         break;
-      default:
-        throw new Error(`Invalid quest type ${type}`);
+      }
     }
 
-    if (!updatedQuest) {
-      return;
+    // reapeatable quests can be done again if are completed
+    if (currentStatus === QuestStatus.Completed && status === QuestStatus.Pending && quest.canBeRepeated) {
+      return true;
     }
 
-    if (await updatedQuest.hasStatus(QuestStatus.Completed, character.id)) {
-      await this.releaseRewards(updatedQuest as unknown as IQuest, character);
+    return currentStatus === status;
+  }
+
+  public async getObjectiveDetails(quest: IQuest): Promise<IQuestObjectiveKill[] | IQuestObjectiveInteraction[]> {
+    const killObj = (await QuestObjectiveKill.find({
+      _id: { $in: quest.objectives },
+    }).lean()) as any[];
+
+    const interactionObj = (await QuestObjectiveInteraction.find({
+      _id: { $in: quest.objectives },
+    }).lean()) as any[];
+
+    const objectives: any[] = [];
+
+    if (!_.isEmpty(killObj)) {
+      objectives.push(...killObj);
     }
+
+    if (!_.isEmpty(interactionObj)) {
+      objectives.push(...interactionObj);
+    }
+
+    return objectives;
   }
 
   private async getObjectivesData(
@@ -127,28 +208,36 @@ export class QuestSystem {
    * @param data quest objective data for the character
    * @param creatureKey key of the creature killed
    */
-  private async updateKillObjective(data: IGetObjectivesResult, creatureKey: string): Promise<IQuestModel | undefined> {
-    // check for each objective if the creature key is within their
+  private async updateKillObjective(data: IGetObjectivesResult, creatureKey: string): Promise<IQuest | undefined> {
+    // Check for each objective if the creature key is within their
     // creatureKey array. If many cases, only update the first one
 
     const baseCreatureKey = creatureKey.replace(/-\d+$/, "");
 
-    for (const i in data.objectives) {
-      const obj = data.objectives[i] as IQuestObjectiveKill;
-      if (obj.creatureKeys!.indexOf(baseCreatureKey) > -1) {
-        // get the quest record for the character
-        const record = data.records.filter((r) => r.objective.toString() === obj._id.toString());
-        if (!record.length) {
+    for (const obj of data.objectives) {
+      const killObjective = obj as IQuestObjectiveKill;
+      if (killObjective.creatureKeys!.indexOf(baseCreatureKey) > -1) {
+        // Get the quest record for the character
+        const record = data.records.find((r) => r.objective.toString() === killObjective._id.toString());
+        if (!record) {
           throw new Error("Character hasn't started this quest");
         }
 
-        record[0].killCount!++;
-        if (record[0].killCount === obj.killCountTarget) {
-          record[0].status = QuestStatus.Completed;
-        }
+        const updatedRecord = await QuestRecord.findOneAndUpdate(
+          { _id: record._id },
+          {
+            $inc: { killCount: 1 },
+            $set: {
+              status:
+                (record.killCount || 0) + 1 === killObjective.killCountTarget ? QuestStatus.Completed : record.status,
+            },
+          },
+          { new: true, lean: true }
+        );
 
-        await record[0].save();
-        return (await Quest.findById(record[0].quest)) as IQuestModel;
+        if (updatedRecord) {
+          return (await Quest.findById(updatedRecord.quest).lean()) as IQuest;
+        }
       }
     }
     return undefined;
@@ -168,7 +257,7 @@ export class QuestSystem {
     data: IGetObjectivesResult,
     npcKey: string,
     character: ICharacter
-  ): Promise<IQuestModel | undefined> {
+  ): Promise<IQuest | undefined> {
     npcKey = this.stripTrailingNumbers(npcKey);
 
     // check for each objective if the npc key is the correspondiong npc
@@ -251,7 +340,7 @@ export class QuestSystem {
         // update the quest status to Completed
         record[0].status = QuestStatus.Completed;
         await record[0].save();
-        return (await Quest.findById(record[0].quest)) as IQuestModel;
+        return (await Quest.findById(record[0].quest)) as IQuest;
       }
     }
     return undefined;
@@ -407,7 +496,7 @@ export class QuestSystem {
 
     this.socketMessaging.sendEventToUser<IQuestsResponse>(character.channelId!, QuestSocketEvents.Completed, {
       npcId: quest.npcId!.toString(),
-      quests: [quest],
+      quests: [quest as any],
     });
   }
 

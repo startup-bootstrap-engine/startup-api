@@ -6,17 +6,20 @@ import { QuestRecord } from "@entities/ModuleQuest/QuestRecordModel";
 import { container, unitTestHelper } from "@providers/inversify/container";
 import { QuestStatus, QuestType } from "@rpg-engine/shared";
 import { QuestNetworkGet } from "../network/QuestNetworkGet";
+import { QuestSystem } from "../QuestSystem";
 
 describe("QuestNetworkGet.ts", () => {
   let questNetworkGet: QuestNetworkGet,
     testNPC: INPC,
     testCharacter: ICharacter,
     testKillQuest: IQuest,
-    testInteractionQuest: IQuest;
+    testInteractionQuest: IQuest,
+    questSystem: QuestSystem;
   const objectivesCount = 2;
 
   beforeAll(() => {
     questNetworkGet = container.get<QuestNetworkGet>(QuestNetworkGet);
+    questSystem = container.get<QuestSystem>(QuestSystem);
   });
 
   beforeEach(async () => {
@@ -38,9 +41,9 @@ describe("QuestNetworkGet.ts", () => {
     await testNPC.save();
 
     // asign quest to the testCharacter
-    const killObjs = await testKillQuest.objectivesDetails;
+    const killObjs = await questSystem.getObjectiveDetails(testKillQuest);
     // @ts-ignore
-    const interactObjs = await testInteractionQuest.objectivesDetails;
+    const interactObjs = await questSystem.getObjectiveDetails(testInteractionQuest);
 
     for (const obj of killObjs) {
       const questRecord = new QuestRecord();

@@ -11,7 +11,7 @@ import { container, unitTestHelper } from "@providers/inversify/container";
 import { CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { FriendlyNPCsBlueprint, HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
 import { InteractionQuestSubtype } from "@providers/unitTests/UnitTestHelper";
-import { QuestStatus, QuestType } from "@rpg-engine/shared";
+import { IItemContainer, QuestStatus, QuestType } from "@rpg-engine/shared";
 import { QuestSystem } from "../QuestSystem";
 
 describe("QuestSystem.ts", () => {
@@ -52,7 +52,7 @@ describe("QuestSystem.ts", () => {
 
   it("should update quest and release rewards | type interaction", async () => {
     await questSystem.updateQuests(QuestType.Interaction, testCharacter, npcKey);
-    expect(await testInteractionQuest.hasStatus(QuestStatus.Completed, testCharacter.id)).toEqual(true);
+    expect(await questSystem.hasStatus(testInteractionQuest, QuestStatus.Completed, testCharacter.id)).toEqual(true);
     expect(releaseRewards).toBeCalledTimes(1);
   });
 
@@ -60,7 +60,9 @@ describe("QuestSystem.ts", () => {
     const questItemKeys = [CraftingResourcesBlueprint.Silk, CraftingResourcesBlueprint.Diamond];
     await equipItems(testCharacter, questItemKeys, 10);
     await questSystem.updateQuests(QuestType.Interaction, testCharacter, "");
-    expect(await testInteractionCraftQuest.hasStatus(QuestStatus.Completed, testCharacter.id)).toEqual(true);
+    expect(await questSystem.hasStatus(testInteractionCraftQuest, QuestStatus.Completed, testCharacter.id)).toEqual(
+      true
+    );
     expect(releaseRewards).toBeCalledTimes(1);
     await assertRemainingQty(testCharacter, characterItems, questItemKeys, [2, 8]);
   });
@@ -69,7 +71,9 @@ describe("QuestSystem.ts", () => {
     const questItemKeys = [CraftingResourcesBlueprint.Silk, CraftingResourcesBlueprint.Diamond];
     await equipItems(testCharacter, questItemKeys, 8);
     await questSystem.updateQuests(QuestType.Interaction, testCharacter, "");
-    expect(await testInteractionCraftQuest.hasStatus(QuestStatus.Completed, testCharacter.id)).toEqual(true);
+    expect(await questSystem.hasStatus(testInteractionCraftQuest, QuestStatus.Completed, testCharacter.id)).toEqual(
+      true
+    );
     expect(releaseRewards).toBeCalledTimes(1);
     await assertRemainingQty(testCharacter, characterItems, questItemKeys, [0, 6]);
   });
@@ -145,6 +149,36 @@ describe("QuestSystem.ts", () => {
     });
   });
 
+  it("should release rewards correctly", async () => {
+    const rewardQuest = await unitTestHelper.createMockQuest(testNPC.id, null, {
+      rewards: [{ itemKeys: [CraftingResourcesBlueprint.Silk], qty: 1 }],
+    });
+    await createQuestRecord(rewardQuest, testCharacter);
+
+    const backpackContainer = (await getBackpackContainer(testCharacter)) as unknown as IItemContainer;
+    const nonNullSlotsOld = Object.values(backpackContainer.slots).filter((slot) => slot !== null).length;
+
+    await questSystem.updateQuests(QuestType.Interaction, testCharacter, npcKey);
+
+    const updatedBackpackContainer = (await getBackpackContainer(testCharacter)) as unknown as IItemContainer;
+    const nonNullSlotsNew = Object.values(updatedBackpackContainer.slots).filter((slot) => slot !== null).length;
+
+    expect(nonNullSlotsNew).toBeGreaterThan(nonNullSlotsOld);
+  });
+
+  it("should not complete quest if required items are missing", async () => {
+    const itemRequirementQuest = await unitTestHelper.createMockQuest(testNPC.id, null, {
+      type: QuestType.Interaction,
+      subtype: InteractionQuestSubtype.craft,
+      requiredItems: [{ itemKey: CraftingResourcesBlueprint.Diamond, qty: 1 }],
+    });
+    await createQuestRecord(itemRequirementQuest, testCharacter);
+
+    await questSystem.updateQuests(QuestType.Interaction, testCharacter, npcKey);
+
+    expect(await questSystem.hasStatus(itemRequirementQuest, QuestStatus.InProgress, testCharacter.id)).toBe(true);
+  });
+
   // Helper functions
   function resetMocks() {
     jest.clearAllMocks();
@@ -175,9 +209,9 @@ describe("QuestSystem.ts", () => {
     for (let i = 1; i <= 5 * objectivesCount; i++) {
       await questSystem.updateQuests(QuestType.Kill, testCharacter, creatureKey);
       if (i !== 5 * objectivesCount) {
-        expect(await testKillQuest.hasStatus(QuestStatus.InProgress, testCharacter.id)).toEqual(true);
+        expect(await questSystem.hasStatus(testKillQuest, QuestStatus.InProgress, testCharacter.id)).toEqual(true);
       } else {
-        expect(await testKillQuest.hasStatus(QuestStatus.Completed, testCharacter.id)).toEqual(true);
+        expect(await questSystem.hasStatus(testKillQuest, QuestStatus.Completed, testCharacter.id)).toEqual(true);
         expect(releaseRewards).toBeCalledTimes(1);
       }
     }
@@ -197,7 +231,7 @@ describe("QuestSystem.ts", () => {
   }
 
   async function createQuestRecord(quest: IQuest, character: ICharacter): Promise<void> {
-    const objs = await quest.objectivesDetails;
+    const objs = await questSystem.getObjectiveDetails(quest);
     for (const obj of objs) {
       const questRecord = new QuestRecord();
       questRecord.quest = quest._id;

@@ -19,13 +19,15 @@ import {
   UISocketEvents,
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import { QuestSystem } from "../QuestSystem";
 
 @provide(QuestNetworkChoose)
 export class QuestNetworkChoose {
   constructor(
     private socketAuth: SocketAuth,
     private mathHelper: MathHelper,
-    private socketMessaging: SocketMessaging
+    private socketMessaging: SocketMessaging,
+    private questSystem: QuestSystem
   ) {}
 
   public onChooseQuest(channel: SocketChannel): void {
@@ -48,13 +50,13 @@ export class QuestNetworkChoose {
           throw new Error(`ChooseQuest > Quest not found: ${data.questId}`);
         }
 
-        const isPending = await quest.hasStatus(QuestStatus.Pending, character.id);
+        const isPending = await this.questSystem.hasStatus(quest, QuestStatus.Pending, character.id);
         if (!isPending) {
           throw new Error(`ChooseQuest > Quest is not pending: ${data.questId}`);
         }
 
         // check if quest was already completed by character
-        const isCompleted = await quest.hasStatus(QuestStatus.Completed, character.id);
+        const isCompleted = await this.questSystem.hasStatus(quest, QuestStatus.Completed, character.id);
         if (isCompleted && !quest.canBeRepeated) {
           return this.sendAlreadyCompletedQuest(character);
         }
@@ -79,7 +81,7 @@ export class QuestNetworkChoose {
 
           // get quests objectives and update their status to InProgress
           // save quest record mapping character and objective/s
-          const objectives = await quest.objectivesDetails;
+          const objectives = await this.questSystem.getObjectiveDetails(quest);
           for (const obj of objectives) {
             const questRecord = new QuestRecord();
             questRecord.quest = quest._id;
