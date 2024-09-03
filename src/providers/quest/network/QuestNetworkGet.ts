@@ -26,13 +26,15 @@ import {
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { Types } from "mongoose";
+import { QuestSystem } from "../QuestSystem";
 
 @provide(QuestNetworkGet)
 export class QuestNetworkGet {
   constructor(
     private socketAuth: SocketAuth,
     private mathHelper: MathHelper,
-    private socketMessaging: SocketMessaging
+    private socketMessaging: SocketMessaging,
+    private questSystem: QuestSystem
   ) {}
 
   public onGetQuests(channel: SocketChannel): void {
@@ -153,7 +155,7 @@ export class QuestNetworkGet {
       }
 
       questsMap[quest._id] = true;
-      const objectives = await quest.objectivesDetails;
+      const objectives = await this.questSystem.getObjectiveDetails(quest);
       const objData: any[] = [];
 
       for (const obj of objectives) {
@@ -215,7 +217,7 @@ export class QuestNetworkGet {
     let response: IQuest | undefined;
 
     if (status) {
-      const hasRequiredStatus = await quest.hasStatus(status, characterId);
+      const hasRequiredStatus = await this.questSystem.hasStatus(quest, status, characterId);
       if (hasRequiredStatus) {
         response = {
           _id: quest._id,
@@ -243,9 +245,9 @@ export class QuestNetworkGet {
         objectives: objData || (quest.objectives as any[]),
       };
 
-      if (await quest.hasStatus(QuestStatus.InProgress, characterId)) {
+      if (await this.questSystem.hasStatus(quest, QuestStatus.InProgress, characterId)) {
         response.status = QuestStatus.InProgress;
-      } else if (await quest.hasStatus(QuestStatus.Pending, characterId)) {
+      } else if (await this.questSystem.hasStatus(quest, QuestStatus.Pending, characterId)) {
         response.status = QuestStatus.Pending;
       } else {
         response.status = QuestStatus.Completed;
