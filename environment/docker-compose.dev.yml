@@ -1,4 +1,5 @@
-version: "3"
+version: "3.8" # Upgraded version to support health checks
+
 services:
   rpg-api:
     container_name: rpg-api
@@ -25,11 +26,15 @@ services:
     links:
       - rpg-db
     depends_on:
-      - rpg-db
-      - rpg-redis
-      - rpg-rabbitmq
+      rpg-db:
+        condition: service_started
+      rpg-redis:
+        condition: service_started
+      rpg-rabbitmq:
+        condition: service_healthy
     networks:
       - rpg-network
+
   rpg-npc:
     container_name: rpg-npc
     restart: always
@@ -53,12 +58,17 @@ services:
     links:
       - rpg-db
     depends_on:
-      - rpg-api
-      - rpg-db
-      - rpg-redis
-      - rpg-rabbitmq
+      rpg-api:
+        condition: service_started
+      rpg-db:
+        condition: service_started
+      rpg-redis:
+        condition: service_started
+      rpg-rabbitmq:
+        condition: service_healthy
     networks:
       - rpg-network
+
   rpg-pathfinder:
     container_name: rpg-pathfinder
     build:
@@ -78,7 +88,9 @@ services:
     networks:
       - rpg-network
     depends_on:
-      - rpg-rabbitmq
+      rpg-rabbitmq:
+        condition: service_healthy
+
   rpg-db:
     container_name: rpg-db
     image: mongo
@@ -99,6 +111,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     networks:
       - rpg-network
+
   rpg-redis:
     container_name: rpg-redis
     restart: always
@@ -139,6 +152,11 @@ services:
       - ./environment/rabbitmq-init.sh:/docker-entrypoint-initdb.d/rabbitmq-init.sh
     networks:
       - rpg-network
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 1s # Run the health check every 5 seconds
+      timeout: 3s # Wait 2 seconds for a response
+      retries: 3 # Mark as unhealthy after 3 failed attempts
 
 networks:
   rpg-network:
