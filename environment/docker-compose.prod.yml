@@ -112,12 +112,12 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
       - ./environment/rabbitmq-init.sh:/docker-entrypoint-initdb.d/rabbitmq-init.sh
-    network_mode: bridge
+    networks_mode: bridge
     healthcheck:
-      test: ["CMD", "rabbitmqctl", "status"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 1s # Run the health check every 5 seconds
+      timeout: 3s # Wait 2 seconds for a response
+      retries: 3 # Mark as unhealthy after 3 failed attempts
 
 volumes:
   rabbitmq_data:
