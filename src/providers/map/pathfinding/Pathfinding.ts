@@ -53,7 +53,13 @@ export class Pathfinding {
 
     try {
       const gridCourse = this.createGridCourse(startGridX, startGridY, endGridX, endGridY);
-      const { grid, firstNode, lastNode, startX, startY } = this.prepareGridAndNodes(map, gridCourse);
+      const output = this.prepareGridAndNodes(map, gridCourse)!;
+
+      if (!output || !output.grid || !output.firstNode || !output.lastNode || !output.startX || !output.startY) {
+        return;
+      }
+
+      const { grid, firstNode, lastNode, startX, startY } = output;
 
       const data: IRPGPathfinderRequestData = {
         startX: firstNode.x,
@@ -126,7 +132,14 @@ export class Pathfinding {
   }
 
   private deprecatedGetPathfindingResults(map: string, gridCourse: IGridCourse): number[][] {
-    const { grid, firstNode, lastNode, startX, startY } = this.prepareGridAndNodes(map, gridCourse);
+    const output = this.prepareGridAndNodes(map, gridCourse)!;
+
+    if (!output || !output.grid || !output.firstNode || !output.lastNode || !output.startX || !output.startY) {
+      return [];
+    }
+
+    const { grid, firstNode, lastNode, startX, startY } = output;
+
     const path = this.findPathInUnitTest(firstNode, lastNode, grid);
     return this.applyOffsetToPath(path, startX, startY);
   }
@@ -134,21 +147,35 @@ export class Pathfinding {
   private prepareGridAndNodes(
     map: string,
     gridCourse: IGridCourse
-  ): {
-    grid: PF.Grid;
-    firstNode: { x: number; y: number };
-    lastNode: { x: number; y: number };
-    startX: number;
-    startY: number;
-  } {
+  ):
+    | {
+        grid: PF.Grid;
+        firstNode: { x: number; y: number };
+        lastNode: { x: number; y: number };
+        startX: number;
+        startY: number;
+      }
+    | undefined {
     const data = this.gridManager.generateGridBetweenPoints(map, gridCourse, 10);
+    if (!data || !data.grid) {
+      throw new Error("Grid data is not properly initialized.");
+    }
+
     const firstNode = { x: gridCourse.start.x - data.startX, y: gridCourse.start.y - data.startY };
     const lastNode = { x: gridCourse.end.x - data.startX, y: gridCourse.end.y - data.startY };
+
+    if (!this.isNodeWithinBounds(data.grid, firstNode) || !this.isNodeWithinBounds(data.grid, lastNode)) {
+      return;
+    }
 
     data.grid.setWalkableAt(firstNode.x, firstNode.y, true);
     data.grid.setWalkableAt(lastNode.x, lastNode.y, true);
 
     return { grid: data.grid, firstNode, lastNode, startX: data.startX, startY: data.startY };
+  }
+
+  private isNodeWithinBounds(grid: PF.Grid, node: { x: number; y: number }): boolean {
+    return node.x >= 0 && node.x < grid.width && node.y >= 0 && node.y < grid.height;
   }
 
   private findPathInUnitTest(
