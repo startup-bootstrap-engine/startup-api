@@ -71,7 +71,7 @@ async function initializeServerComponents(): Promise<void> {
     database.initialize(),
     redisManager.connect(),
     !IS_MICROSERVICE && socketAdapter.init(appEnv.socket.type), // no need for socket connection in microservices, because we use rpg-api for that only
-    IS_MICROSERVICE && messagingBrokerHandlers.onAddHandlers(),
+    messagingBrokerHandlers.onAddHandlers(),
   ]);
 
   await messagingBroker.initialize();
