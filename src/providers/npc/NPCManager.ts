@@ -1,7 +1,7 @@
 /* eslint-disable no-void */
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 
-import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { NPC_MIN_DISTANCE_TO_ACTIVATE } from "@providers/constants/NPCConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
@@ -12,7 +12,8 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { appEnv } from "@providers/config/env";
 import { Locker } from "@providers/locks/Locker";
 import { MathHelper } from "@providers/math/MathHelper";
-import { AvailableMicroservices, MicroserviceRequest } from "@providers/microservice/MicroserviceRequest";
+import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
+import { MicroserviceRequest } from "@providers/microservice/MicroserviceRequest";
 import { RaidManager } from "@providers/raid/RaidManager";
 import { NPCCycleQueue } from "./NPCCycleQueue";
 
@@ -26,7 +27,8 @@ export class NPCManager {
     private raidManager: RaidManager,
     private npcCycleQueue: NPCCycleQueue,
     private locker: Locker,
-    private microservice: MicroserviceRequest
+    private microservice: MicroserviceRequest,
+    private messagingBroker: MessagingBroker
   ) {}
 
   @TrackNewRelicTransaction()
@@ -44,19 +46,24 @@ export class NPCManager {
     }
   }
 
+  public async startBehaviorLoopListener(): Promise<void> {
+    await this.messagingBroker.listenForMessages("npc-manager", "start-behavior-loop", async (data) => {
+      const characterId = data.characterId;
+
+      const character = await Character.findById(characterId).lean<ICharacter>({ virtuals: true, defaults: true });
+
+      await this.startNearbyNPCsBehaviorLoop(character);
+    });
+  }
+
   public async startBehaviorLoopUsingMicroservice(character: ICharacter): Promise<void> {
     if (appEnv.general.IS_UNIT_TEST) {
       return await this.startNearbyNPCsBehaviorLoop(character);
     }
 
-    await this.microservice.request(
-      AvailableMicroservices.RpgNPC,
-      "/npcs/start-behavior-loop",
-      {
-        characterId: character._id,
-      },
-      "POST"
-    );
+    await this.messagingBroker.sendMessage("npc-manager", "start-behavior-loop", {
+      characterId: character._id,
+    });
   }
 
   @TrackNewRelicTransaction()
