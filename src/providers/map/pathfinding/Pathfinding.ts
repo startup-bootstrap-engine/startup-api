@@ -156,7 +156,7 @@ export class Pathfinding {
         startY: number;
       }
     | undefined {
-    const data = this.gridManager.generateGridBetweenPoints(map, gridCourse, 10);
+    const data = this.gridManager.generateGridBetweenPoints(map, gridCourse, 20);
     if (!data || !data.grid) {
       throw new Error("Grid data is not properly initialized.");
     }
