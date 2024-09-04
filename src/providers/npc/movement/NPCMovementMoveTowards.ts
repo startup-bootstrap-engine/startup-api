@@ -280,8 +280,7 @@ export class NPCMovementMoveTowards {
         const path = await this.lightweightPathfinder.calculateLightPathfinding(npc, data.targetX, data.targetY);
 
         if (!path?.length) {
-          console.log(`No path found for NPC ${npc.key}: `, path);
-
+          await this.npcTarget.tryToSetTarget(npc);
           return;
         }
 
@@ -291,8 +290,6 @@ export class NPCMovementMoveTowards {
           await this.npcTarget.tryToSetTarget(npc);
           return;
         }
-
-        console.log(`🚶‍♂️[LIGHTWEIGHT PATHFINDING] Moving NPC ${npc.key} to`, nextPosition);
 
         await this.handleMovement(npc, npc.x, npc.y, nextPosition);
       }
@@ -326,8 +323,6 @@ export class NPCMovementMoveTowards {
             await this.npcTarget.tryToSetTarget(npc);
           }
 
-          console.log(`LIGHTWEIGHT: No path found for NPC ${npc.key}: `, path);
-
           if (!targetCharacter) {
             return;
           }
@@ -351,8 +346,6 @@ export class NPCMovementMoveTowards {
           await this.npcTarget.tryToSetTarget(npc);
           return;
         }
-
-        console.log(`🚶‍♂️[ADVANCED PATHFINDING] Moving NPC ${npc.key} to`, nextPosition);
 
         await this.handleMovement(npc, npc.x, npc.y, nextPosition);
       }
