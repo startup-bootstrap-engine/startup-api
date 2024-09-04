@@ -45,7 +45,11 @@ export class MessagingBroker {
     await this.rabbitMQ.publishMessage(MessagingBroker.EXCHANGE, routingKey, data);
   }
 
-  async listenForMessages(service: string, action: string, callback: (data: any) => Promise<void>): Promise<void> {
+  async listenForMessages(
+    service: string,
+    action: string,
+    callback: (data: any) => Promise<void> | void
+  ): Promise<void> {
     await this.ensureInitialized();
     const routingKey = `${service}.${action}`;
     const queue = `${service}_${action}_queue`;
