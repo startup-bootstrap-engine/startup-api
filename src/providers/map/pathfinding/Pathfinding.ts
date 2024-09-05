@@ -55,10 +55,6 @@ export class Pathfinding {
       const gridCourse = this.createGridCourse(startGridX, startGridY, endGridX, endGridY);
       const output = this.prepareGridAndNodes(map, gridCourse)!;
 
-      if (!output || !output.grid || !output.firstNode || !output.lastNode || !output.startX || !output.startY) {
-        return;
-      }
-
       const { grid, firstNode, lastNode, startX, startY } = output;
 
       const data: IRPGPathfinderRequestData = {
@@ -133,17 +129,6 @@ export class Pathfinding {
 
   private deprecatedGetPathfindingResults(map: string, gridCourse: IGridCourse): number[][] {
     const output = this.prepareGridAndNodes(map, gridCourse)!;
-
-    if (
-      !output ||
-      !output.grid ||
-      !output.firstNode ||
-      !output.lastNode ||
-      output.startX === undefined ||
-      output.startY === undefined
-    ) {
-      return [];
-    }
 
     const { grid, firstNode, lastNode, startX, startY } = output;
 
