@@ -23,8 +23,11 @@ export class MessagingBrokerHandlers {
       case "rpg-npc":
         console.log("💌 Adding messaging broker handlers...");
 
+        console.log('📡 Adding "pathfinding" listener...');
         await this.npcMovementMoveTowards.addPathfindingResultsListener();
+        console.log('📡 Adding "lightweight pathfinding" listener...');
         await this.npcMovementMoveTowards.addLightweightPathfindingResultsListener();
+        console.log('📡 Adding "NPC behavior loop" listener...');
         await this.npcManager.startBehaviorLoopListener();
         break;
     }

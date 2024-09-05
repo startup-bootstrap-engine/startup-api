@@ -42,6 +42,7 @@ export class NPCManager {
 
     //! Dont use Promise.all here. This will lead to some NPCs getting stuck
     for (const npc of npcsToActivate) {
+      console.log(`Starting behavior loop for NPC ${npc.key}`);
       await this.startBehaviorLoop(npc);
     }
   }
@@ -49,6 +50,8 @@ export class NPCManager {
   public async startBehaviorLoopListener(): Promise<void> {
     await this.messagingBroker.listenForMessages("npc-manager", "start-behavior-loop", async (data) => {
       const characterId = data.characterId;
+
+      console.log(`Starting behavior loop for NPCs triggered by character ${characterId}`);
 
       const character = await Character.findById(characterId).lean<ICharacter>({ virtuals: true, defaults: true });
 
