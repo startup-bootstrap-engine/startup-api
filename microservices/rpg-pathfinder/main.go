@@ -124,16 +124,17 @@ func main() {
 	var err error
 
 	// Retry connection to RabbitMQ
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 30; i++ {
 		conn, err = amqp.Dial(rabbitMQURL)
 		if err == nil {
 			break
 		}
-		time.Sleep(5 * time.Second)
+		log.Printf("Failed to connect to RabbitMQ (attempt %d): %s", i+1, err)
+		time.Sleep(10 * time.Second)
 	}
 
 	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ after 5 attempts: %s", err)
+		log.Fatalf("Failed to connect to RabbitMQ after 30 attempts: %s", err)
 	}
 	defer conn.Close()
 

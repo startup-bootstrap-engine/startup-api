@@ -131,6 +131,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 20s
     networks:
       - rpg-network
     depends_on:
@@ -279,10 +280,10 @@ services:
     networks:
       - rpg-network
     deploy:
-      replicas: 1
+      replicas: 2
       placement:
         constraints:
-          - node.role == manager
+          - node.labels.api == true
       update_config:
         parallelism: 1
         delay: 10s
