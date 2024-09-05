@@ -134,7 +134,14 @@ export class Pathfinding {
   private deprecatedGetPathfindingResults(map: string, gridCourse: IGridCourse): number[][] {
     const output = this.prepareGridAndNodes(map, gridCourse)!;
 
-    if (!output || !output.grid || !output.firstNode || !output.lastNode || !output.startX || !output.startY) {
+    if (
+      !output ||
+      !output.grid ||
+      !output.firstNode ||
+      !output.lastNode ||
+      output.startX === undefined ||
+      output.startY === undefined
+    ) {
       return [];
     }
 
