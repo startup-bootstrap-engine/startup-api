@@ -11,6 +11,8 @@ import {
   inMemoryHashTable,
   inMemoryRepository,
   mapLoader,
+  messagingBroker,
+  messagingBrokerHandlers,
   newRelic,
   redisManager,
   serverBootstrap,
@@ -68,8 +70,11 @@ async function initializeServerComponents(): Promise<void> {
   await Promise.all([
     database.initialize(),
     redisManager.connect(),
-    !IS_MICROSERVICE && socketAdapter.init(appEnv.socket.type), // no need for socket connection in microservices, because we use rpg-api for that only
+    !IS_MICROSERVICE && socketAdapter.init(appEnv.socket.type), // no need for socket connection in microservices, because we use rpg-api as the main server
+    messagingBrokerHandlers.onAddHandlers(),
   ]);
+
+  await messagingBroker.initialize();
 
   await inMemoryHashTable.init();
   await inMemoryRepository.init();

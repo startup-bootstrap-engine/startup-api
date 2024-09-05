@@ -13,7 +13,6 @@ import { CharacterActionsTracker } from "@providers/character/CharacterActionsTr
 import { CharacterConsumptionControl } from "@providers/character/CharacterConsumptionControl";
 import { CharacterMonitorCallbackTracker } from "@providers/character/CharacterMonitorInterval/CharacterMonitorCallbackTracker";
 import { CharacterNetworkUpdateQueue } from "@providers/character/network/CharacterNetworkUpdate/CharacterNetworkUpdateQueue";
-import { CharacterNetworkCreateQueue } from "@providers/character/network/characterCreate/CharacterNetworkCreateQueue";
 import { ChatNetworkGlobalMessagingQueue } from "@providers/chat/network/ChatNetworkGlobalMessagingQueue";
 import { appEnv } from "@providers/config/env";
 import { cache } from "@providers/constants/CacheConstants";
@@ -26,7 +25,8 @@ import { ItemDropVerifier } from "@providers/item/ItemDrop/ItemDropVerifier";
 import { ItemUseCycleQueue } from "@providers/item/ItemUseCycleQueue";
 import { ItemContainerTransactionQueue } from "@providers/itemContainer/ItemContainerTransactionQueue";
 import { Locker } from "@providers/locks/Locker";
-import { PathfindingQueue } from "@providers/map/pathfinding/PathfindingQueue";
+import { Pathfinding } from "@providers/map/pathfinding/Pathfinding";
+import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
 import { NPCBattleCycleQueue } from "@providers/npc/NPCBattleCycleQueue";
 import { NPCCycleQueue } from "@providers/npc/NPCCycleQueue";
 import { NPCCycleTracker } from "@providers/npc/NPCCycleTracker";
@@ -36,8 +36,6 @@ import { PartyCRUD } from "@providers/party/PartyCRUD";
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
 import { ResultsPoller } from "@providers/poller/ResultsPoller";
 import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
-import { RaidManager } from "@providers/raid/RaidManager";
-import { SkillBuff } from "@providers/skill/SkillBuff";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import { ManaShield } from "@providers/spells/data/logic/mage/ManaShield";
 import SpellSilence from "@providers/spells/data/logic/mage/druid/SpellSilence";
@@ -57,7 +55,7 @@ export class ServerBootstrap {
     private seeder: Seeder,
     private characterConnection: CharacterConnection,
     private characterConsumptionControl: CharacterConsumptionControl,
-    private pathfindingQueue: PathfindingQueue,
+    private pathfindingQueue: Pathfinding,
     private characterBuffActivator: CharacterBuffActivator,
     private spellSilence: SpellSilence,
     private characterTextureChange: CharacterTextureChange,
@@ -74,7 +72,6 @@ export class ServerBootstrap {
     private entityEffectDuration: EntityEffectDurationControl,
     private characterMonitorCallbackTracker: CharacterMonitorCallbackTracker,
     private characterNetworkUpdateQueue: CharacterNetworkUpdateQueue,
-    private characterNetworkCreateQueue: CharacterNetworkCreateQueue,
     private patreonAPI: PatreonAPI,
     private useWithTileQueue: UseWithTileQueue,
     private chatNetworkGlobalMessaging: ChatNetworkGlobalMessagingQueue,
@@ -86,13 +83,13 @@ export class ServerBootstrap {
     private itemContainerTransactionQueue: ItemContainerTransactionQueue,
     private itemDropVerifier: ItemDropVerifier,
     private queueActivityMonitor: QueueActivityMonitor,
-    private raidManager: RaidManager,
+
     private manaShield: ManaShield,
     private cooldown: Cooldown,
-    private skillBuffQueue: SkillBuff,
     private itemCraftbookQueue: ItemCraftbookQueue,
     private npcCycleTracker: NPCCycleTracker,
-    private resultsPoller: ResultsPoller
+    private resultsPoller: ResultsPoller,
+    private messagingBroker: MessagingBroker
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -115,7 +112,7 @@ export class ServerBootstrap {
 
     this.discordBot.initialize();
 
-    await this.queueShutdownHandling();
+    await this.shutdownHandling();
 
     await this.clearSomeQueues();
 
@@ -128,10 +125,9 @@ export class ServerBootstrap {
     }
   }
 
-  public queueShutdownHandling(): void {
+  public shutdownHandling(): void {
     const execQueueShutdown = async (): Promise<void> => {
       await this.hitTarget.shutdown();
-      await this.pathfindingQueue.shutdown();
       await this.itemUseCycleQueue.shutdown();
       await this.npcBattleCycleQueue.shutdown();
       await this.npcCycleQueue.shutdown();
@@ -145,12 +141,15 @@ export class ServerBootstrap {
 
     process.on("SIGTERM", async () => {
       await execQueueShutdown();
+      await this.messagingBroker.close();
 
       process.exit(0);
     });
 
     process.on("SIGINT", async () => {
       await execQueueShutdown();
+
+      await this.messagingBroker.close();
       process.exit(0);
     });
   }
@@ -229,7 +228,6 @@ export class ServerBootstrap {
   private async clearSomeQueues(): Promise<void> {
     await this.queueActivityMonitor.clearAllQueues();
 
-    await this.pathfindingQueue.clearAllJobs();
     await this.hitTarget.clearAllJobs();
     await this.itemUseCycleQueue.clearAllJobs();
     await this.npcBattleCycleQueue.clearAllJobs();

@@ -132,6 +132,11 @@ export class UseWithTileQueue {
     // Check if the character has the originItem
     const originItem = await this.useWithHelper.getItem(character, data.originItemId.toString());
 
+    if (!originItem) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, this item does not exist");
+      return;
+    }
+
     const itemBlueprint = itemsBlueprintIndex[originItem.baseKey] as Partial<IItemUseWith>;
 
     // Check if tile position is at character's reach
@@ -202,6 +207,11 @@ export class UseWithTileQueue {
         return;
       }
 
+      if (!originItem) {
+        this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, this item does not exist");
+        return;
+      }
+
       const originItemBlueprint = blueprintManager.getBlueprint("items", originItem.baseKey) as Record<string, unknown>;
 
       if (originItem.baseKey !== useWithKey && originItemBlueprint?.toolCategory !== useWithKey) {
@@ -220,6 +230,11 @@ export class UseWithTileQueue {
       MAP_LAYERS_TO_ID[data.targetTile.layer],
       "usewith_target_item_key"
     );
+
+    if (!originItem) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, this item does not exist");
+      return;
+    }
 
     const useWithTileEffect = itemBlueprint.useWithTileEffect;
 

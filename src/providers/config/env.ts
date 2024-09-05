@@ -86,4 +86,11 @@ export const appEnv = {
     refreshToken: process.env.PATREON_REFRESH_TOKEN,
     accessTokenExpiration: Number(process.env.PATREON_ACCESS_TOKEN_EXPIRATION),
   },
+
+  rabbitmq: {
+    host: process.env.RABBITMQ_HOST,
+    port: process.env.RABBITMQ_PORT,
+    username: process.env.RABBITMQ_DEFAULT_USER,
+    password: process.env.RABBITMQ_DEFAULT_PASS,
+  },
 };

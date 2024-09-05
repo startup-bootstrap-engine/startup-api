@@ -2,15 +2,15 @@ import { container, unitTestHelper } from "@providers/inversify/container";
 
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { GridManager } from "../../GridManager";
-import { PathfindingQueue } from "../PathfindingQueue";
+import { Pathfinding } from "../Pathfinding";
 
-describe("PathfindingQueue", () => {
-  let pathfinder: PathfindingQueue;
+describe("Pathfinding", () => {
+  let pathfinder: Pathfinding;
   let gridManager: GridManager;
   let testNPC: INPC;
 
   beforeAll(async () => {
-    pathfinder = container.get(PathfindingQueue);
+    pathfinder = container.get(Pathfinding);
     gridManager = container.get<GridManager>(GridManager);
 
     await unitTestHelper.initializeMapLoader();
@@ -29,7 +29,15 @@ describe("PathfindingQueue", () => {
   });
 
   it("should properly find the shortest path between 2 points with negative coordinates", async () => {
-    const path = await pathfinder.findShortestPath(testNPC, null, "unit-test-map-negative-coordinate", -11, 10, -8, 12);
+    const path = await pathfinder.deprecatedFindShortedPath(
+      testNPC,
+      null,
+      "unit-test-map-negative-coordinate",
+      -11,
+      10,
+      -8,
+      12
+    );
 
     if (!path) {
       throw new Error("❌Could not find path");
@@ -46,7 +54,15 @@ describe("PathfindingQueue", () => {
   });
 
   it("should properly find the shortest path between 2 points WITHOUT negative coordinates", async () => {
-    const path = await pathfinder.findShortestPath(testNPC, null, "unit-test-map-negative-coordinate", 15, 24, 17, 25);
+    const path = await pathfinder.deprecatedFindShortedPath(
+      testNPC,
+      null,
+      "unit-test-map-negative-coordinate",
+      15,
+      24,
+      17,
+      25
+    );
 
     if (!path) {
       throw new Error("❌Could not find path");
@@ -61,7 +77,15 @@ describe("PathfindingQueue", () => {
   });
 
   it("calculates a shortest path between points (NEGATIVE COORDINATES), top left to bottom right", async () => {
-    const path = await pathfinder.findShortestPath(testNPC, null, "unit-test-map-negative-coordinate", -11, 14, -9, 16);
+    const path = await pathfinder.deprecatedFindShortedPath(
+      testNPC,
+      null,
+      "unit-test-map-negative-coordinate",
+      -11,
+      14,
+      -9,
+      16
+    );
 
     expect(path).toBeDefined();
 
@@ -70,7 +94,15 @@ describe("PathfindingQueue", () => {
   });
 
   it("calculates a shortest path between points (NEGATIVE COORDINATES), bottom right to top left", async () => {
-    const path = await pathfinder.findShortestPath(testNPC, null, "unit-test-map-negative-coordinate", -3, 17, -11, 9);
+    const path = await pathfinder.deprecatedFindShortedPath(
+      testNPC,
+      null,
+      "unit-test-map-negative-coordinate",
+      -3,
+      17,
+      -11,
+      9
+    );
 
     expect(path).toBeDefined();
 
@@ -99,7 +131,15 @@ describe("PathfindingQueue", () => {
   });
 
   it("calculates a shortest path between points (NEGATIVE COORDINATES), bottom right to top left, another test", async () => {
-    const path = await pathfinder.findShortestPath(testNPC, null, "unit-test-map-negative-coordinate", -9, 16, -11, 14);
+    const path = await pathfinder.deprecatedFindShortedPath(
+      testNPC,
+      null,
+      "unit-test-map-negative-coordinate",
+      -9,
+      16,
+      -11,
+      14
+    );
 
     expect(path).toBeDefined();
 
@@ -108,7 +148,15 @@ describe("PathfindingQueue", () => {
   });
 
   it("calculates a shortest path between points (NEGATIVE COORDINATES), top right to bottom left", async () => {
-    const path = await pathfinder.findShortestPath(testNPC, null, "unit-test-map-negative-coordinate", -4, 9, -6, 11);
+    const path = await pathfinder.deprecatedFindShortedPath(
+      testNPC,
+      null,
+      "unit-test-map-negative-coordinate",
+      -4,
+      9,
+      -6,
+      11
+    );
 
     expect(path).toBeDefined();
 
@@ -124,7 +172,15 @@ describe("PathfindingQueue", () => {
   it("calculates a shortest path between points (NEGATIVE COORDINATES), bottom left to top right", async () => {
     console.time("pathfindingQuadTree.findShortestPathBetweenPoints");
 
-    const path = await pathfinder.findShortestPath(testNPC, null, "unit-test-map-negative-coordinate", -6, 11, -4, 9);
+    const path = await pathfinder.deprecatedFindShortedPath(
+      testNPC,
+      null,
+      "unit-test-map-negative-coordinate",
+      -6,
+      11,
+      -4,
+      9
+    );
 
     expect(path).toBeDefined();
 
@@ -138,7 +194,15 @@ describe("PathfindingQueue", () => {
   });
 
   it("calculates a shortest path between points (POSITIVE COORDINATES), top left to bottom right", async () => {
-    const path = await pathfinder.findShortestPath(testNPC, null, "unit-test-map-negative-coordinate", 6, 22, 9, 25);
+    const path = await pathfinder.deprecatedFindShortedPath(
+      testNPC,
+      null,
+      "unit-test-map-negative-coordinate",
+      6,
+      22,
+      9,
+      25
+    );
 
     expect(path).toBeDefined();
 
@@ -154,7 +218,15 @@ describe("PathfindingQueue", () => {
   });
 
   it("calculates a shortest path between points (POSITIVE COORDINATES), top right to bottom left", async () => {
-    const path = await pathfinder.findShortestPath(testNPC, null, "unit-test-map-negative-coordinate", 9, 12, 6, 15);
+    const path = await pathfinder.deprecatedFindShortedPath(
+      testNPC,
+      null,
+      "unit-test-map-negative-coordinate",
+      9,
+      12,
+      6,
+      15
+    );
 
     expect(path).toBeDefined();
 
@@ -170,7 +242,15 @@ describe("PathfindingQueue", () => {
   });
 
   it("calculates a shortest path between points (POSITIVE COORDINATES), bottom right to top left", async () => {
-    const path = await pathfinder.findShortestPath(testNPC, null, "unit-test-map-negative-coordinate", 9, 15, 6, 12);
+    const path = await pathfinder.deprecatedFindShortedPath(
+      testNPC,
+      null,
+      "unit-test-map-negative-coordinate",
+      9,
+      15,
+      6,
+      12
+    );
 
     expect(path).toBeDefined();
 
@@ -186,7 +266,15 @@ describe("PathfindingQueue", () => {
   });
 
   it("calculates a shortest path between points (POSITIVE COORDINATES), bottom left to top right", async () => {
-    const path = await pathfinder.findShortestPath(testNPC, null, "unit-test-map-negative-coordinate", 6, 15, 9, 12);
+    const path = await pathfinder.deprecatedFindShortedPath(
+      testNPC,
+      null,
+      "unit-test-map-negative-coordinate",
+      6,
+      15,
+      9,
+      12
+    );
 
     expect(path).toBeDefined();
 
@@ -202,7 +290,15 @@ describe("PathfindingQueue", () => {
   });
 
   it("calculates a shortest path between points (MIX COORDINATES), horizontal line, forward", async () => {
-    const path = await pathfinder.findShortestPath(testNPC, null, "unit-test-map-negative-coordinate", -2, 18, 1, 18);
+    const path = await pathfinder.deprecatedFindShortedPath(
+      testNPC,
+      null,
+      "unit-test-map-negative-coordinate",
+      -2,
+      18,
+      1,
+      18
+    );
 
     expect(path).toBeDefined();
 
@@ -215,7 +311,15 @@ describe("PathfindingQueue", () => {
   });
 
   it("calculates a shortest path between points (MIX COORDINATES), horizontal line, reverse", async () => {
-    const path = await pathfinder.findShortestPath(testNPC, null, "unit-test-map-negative-coordinate", 1, 18, -2, 18);
+    const path = await pathfinder.deprecatedFindShortedPath(
+      testNPC,
+      null,
+      "unit-test-map-negative-coordinate",
+      1,
+      18,
+      -2,
+      18
+    );
 
     expect(path).toBeDefined();
 
@@ -228,7 +332,15 @@ describe("PathfindingQueue", () => {
   });
 
   it("calculates a shortest path between points (MIX COORDINATES), vertical line, forward", async () => {
-    const path = await pathfinder.findShortestPath(testNPC, null, "unit-test-map-negative-coordinate", -15, 0, -15, 3);
+    const path = await pathfinder.deprecatedFindShortedPath(
+      testNPC,
+      null,
+      "unit-test-map-negative-coordinate",
+      -15,
+      0,
+      -15,
+      3
+    );
 
     expect(path).toBeDefined();
 
@@ -241,7 +353,15 @@ describe("PathfindingQueue", () => {
   });
 
   it("calculates a shortest path between points (MIX COORDINATES), vertical line, reverse", async () => {
-    const path = await pathfinder.findShortestPath(testNPC, null, "unit-test-map-negative-coordinate", -15, 3, -15, 0);
+    const path = await pathfinder.deprecatedFindShortedPath(
+      testNPC,
+      null,
+      "unit-test-map-negative-coordinate",
+      -15,
+      3,
+      -15,
+      0
+    );
 
     expect(path).toBeDefined();
 
@@ -254,7 +374,15 @@ describe("PathfindingQueue", () => {
   });
 
   it("calculates a shortest path between points, straight line, obstacle in path", async () => {
-    const path = await pathfinder.findShortestPath(testNPC, null, "unit-test-map-negative-coordinate", -10, 12, -8, 12);
+    const path = await pathfinder.deprecatedFindShortedPath(
+      testNPC,
+      null,
+      "unit-test-map-negative-coordinate",
+      -10,
+      12,
+      -8,
+      12
+    );
 
     expect(path).toBeDefined();
 
@@ -268,7 +396,15 @@ describe("PathfindingQueue", () => {
   });
 
   it("calculates a shortest path between points, at the bottom corner of map", async () => {
-    const path = await pathfinder.findShortestPath(testNPC, null, "unit-test-map-negative-coordinate", 30, 31, 31, 30);
+    const path = await pathfinder.deprecatedFindShortedPath(
+      testNPC,
+      null,
+      "unit-test-map-negative-coordinate",
+      30,
+      31,
+      31,
+      30
+    );
 
     expect(path).toBeDefined();
 
@@ -283,7 +419,7 @@ describe("PathfindingQueue", () => {
     it("should find a path under a narrow corridor", async () => {
       // start on 13,7 end on 19,7
 
-      const path = await pathfinder.findShortestPath(testNPC, null, "unit-test-map", 13, 7, 19, 7);
+      const path = await pathfinder.deprecatedFindShortedPath(testNPC, null, "unit-test-map", 13, 7, 19, 7);
 
       expect(path).toBeDefined();
 

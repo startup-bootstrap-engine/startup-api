@@ -32,6 +32,7 @@ server=$(<swarm-accessory-nodes.txt)
 commands=(
     "docker pull definya/definya-team:docs-latest"
     "docker pull definya/definya-team:client-latest"
+    "docker pull definya/definya-team:rpg-pathfinder-latest"
 )
 
 # Loop through each command and run it on the server

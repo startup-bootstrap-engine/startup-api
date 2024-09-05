@@ -25,8 +25,13 @@ import { NPCMovement } from "./NPCMovement";
 import { NPCTarget } from "./NPCTarget";
 
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import {
+  ILightweightPathfinderResponse,
+  LightweightPathfinder,
+} from "@providers/map/pathfinding/LightweightPathfinder";
+import { IRPGPathfinderResponse, Pathfinding } from "@providers/map/pathfinding/Pathfinding";
 import { PathfindingCaching } from "@providers/map/pathfinding/PathfindingCaching";
-import { DynamicQueue } from "@providers/queue/DynamicQueue";
+import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
 import { debounce } from "lodash";
 
 export interface ICharacterHealth {
@@ -48,7 +53,9 @@ export class NPCMovementMoveTowards {
     private pathfindingCaching: PathfindingCaching,
     private locker: Locker,
     private npcBattleCycleQueue: NPCBattleCycleQueue,
-    private dynamicQueue: DynamicQueue
+    private messagingBroker: MessagingBroker,
+    private pathfinding: Pathfinding,
+    private lightweightPathfinder: LightweightPathfinder
   ) {
     this.debouncedFaceTarget = debounce(this.faceTarget.bind(this), 300);
   }
@@ -258,10 +265,104 @@ export class NPCMovementMoveTowards {
     await this.npcBattleCycleQueue.addToQueue(npc, npcSkills);
   }
 
-  @TrackNewRelicTransaction()
+  public async addLightweightPathfindingResultsListener(): Promise<void> {
+    await this.messagingBroker.listenForMessages(
+      "rpg_pathfinding",
+      "lightweight_path",
+      async (data: ILightweightPathfinderResponse) => {
+        const npc = await NPC.findById(data.npcId).lean<INPC>({ virtuals: true, defaults: true });
+
+        if (!npc) {
+          console.error(`NPC with id ${data.npcId} not found`);
+          return;
+        }
+
+        const path = await this.lightweightPathfinder.calculateLightPathfinding(npc, data.targetX, data.targetY);
+
+        if (path?.length) {
+          console.log(`[LIGHTWEIGHT PATHFINDING] for NPC ${npc._id}:`, path);
+        }
+
+        if (!path?.length) {
+          await this.npcTarget.tryToSetTarget(npc);
+          return;
+        }
+
+        const nextPosition = this.npcMovement.calculateNextPosition(npc, path);
+
+        if (!nextPosition) {
+          await this.npcTarget.tryToSetTarget(npc);
+          return;
+        }
+
+        await this.handleMovement(npc, npc.x, npc.y, nextPosition);
+      }
+    );
+  }
+
+  public async addPathfindingResultsListener(): Promise<void> {
+    await this.messagingBroker.listenForMessages(
+      "rpg_pathfinding",
+      "path_result",
+      async (data: IRPGPathfinderResponse) => {
+        if (data.error) {
+          console.error(`Pathfinding error for NPC ${data.npcId}:`, data.error);
+          return;
+        }
+
+        const npc = await NPC.findById(data.npcId).lean<INPC>({ virtuals: true, defaults: true });
+
+        if (!npc) {
+          console.error(`NPC with id ${data.npcId} not found`);
+          return;
+        }
+
+        const path = this.pathfinding.applyOffsetToPath(data.path, data.offsetStartX, data.offsetStartY);
+
+        if (path.length) {
+          console.log(`[ADVANCED PATHFINDING] for NPC ${npc._id}:`, path);
+        }
+
+        if (!path?.length) {
+          const targetCharacter = await Character.findById(npc.targetCharacter).select("x y").lean<ICharacter>();
+
+          if (!targetCharacter) {
+            // try to set
+            await this.npcTarget.tryToSetTarget(npc);
+          }
+
+          if (!targetCharacter) {
+            return;
+          }
+
+          await this.messagingBroker.sendMessage<ILightweightPathfinderResponse>(
+            "rpg_pathfinding",
+            "lightweight_path",
+            {
+              npcId: npc._id,
+              targetX: targetCharacter.x,
+              targetY: targetCharacter.y,
+            }
+          );
+
+          return;
+        }
+
+        const nextPosition = this.npcMovement.calculateNextPosition(npc, path);
+
+        if (!nextPosition) {
+          await this.npcTarget.tryToSetTarget(npc);
+          return;
+        }
+
+        await this.handleMovement(npc, npc.x, npc.y, nextPosition);
+      }
+    );
+  }
+
   private async moveTowardsPosition(npc: INPC, target: ICharacter, x: number, y: number): Promise<void> {
-    try {
-      const shortestPath = await this.npcMovement.getShortestPathNextPosition(
+    if (appEnv.general.IS_UNIT_TEST) {
+      const shortestPath = await this.npcMovement.deprecatedGetShortedPathNextPosition(
         npc,
         target,
         ToGridX(npc.x),
@@ -275,36 +376,51 @@ export class NPCMovementMoveTowards {
         await this.npcTarget.tryToSetTarget(npc);
         return;
       }
-      const { newGridX, newGridY, nextMovementDirection } = shortestPath;
-      const validCoordinates = this.mapHelper.areAllCoordinatesValid([newGridX, newGridY]);
 
-      if (validCoordinates && nextMovementDirection) {
-        const hasMoved = await this.npcMovement.moveNPC(
-          npc,
-          npc.x,
-          npc.y,
-          FromGridX(newGridX),
-          FromGridY(newGridY),
-          nextMovementDirection
-        );
+      await this.handleMovement(npc, x, y, shortestPath);
+      return;
+    }
 
-        if (!hasMoved) {
-          // probably there's a solid on the way, lets clear the pathfinding caching to force a recalculation
-          await this.pathfindingCaching.delete(npc.scene, {
-            start: {
-              x: ToGridX(npc.x),
-              y: ToGridY(npc.y),
-            },
-            end: {
-              x: ToGridX(x),
-              y: ToGridY(y),
-            },
-          });
-        }
+    // if not test, we use a messaging broker system
+    await this.pathfinding.requestShortestPathCalculation(
+      npc,
+      target,
+      npc.scene,
+      ToGridX(npc.x),
+      ToGridY(npc.y),
+      ToGridX(x),
+      ToGridY(y)
+    );
+  }
+
+  private async handleMovement(npc: INPC, x: number, y: number, shortestPath: any): Promise<void> {
+    const { newGridX, newGridY, nextMovementDirection } = shortestPath;
+
+    const validCoordinates = this.mapHelper.areAllCoordinatesValid([newGridX, newGridY]);
+
+    if (validCoordinates && nextMovementDirection) {
+      const hasMoved = await this.npcMovement.moveNPC(
+        npc,
+        npc.x,
+        npc.y,
+        FromGridX(newGridX),
+        FromGridY(newGridY),
+        nextMovementDirection
+      );
+
+      if (!hasMoved) {
+        // probably there's a solid on the way, lets clear the pathfinding caching to force a recalculation
+        await this.pathfindingCaching.delete(npc.scene, {
+          start: {
+            x: ToGridX(npc.x),
+            y: ToGridY(npc.y),
+          },
+          end: {
+            x: ToGridX(x),
+            y: ToGridY(y),
+          },
+        });
       }
-    } catch (error) {
-      console.error(error);
-      throw error;
     }
   }
 }

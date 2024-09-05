@@ -99,3 +99,25 @@ services:
       - ./config/redis.conf:/redis.conf
     command: ["redis-server", "/redis.conf", "--port", "${REDIS_PORT}"]
     network_mode: bridge
+
+  rpg-rabbitmq:
+    container_name: rpg-rabbitmq
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672" # AMQP protocol port
+      - "15672:15672" # Management UI port
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./environment/rabbitmq-init.sh:/docker-entrypoint-initdb.d/rabbitmq-init.sh
+    networks_mode: bridge
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 1s # Run the health check every 5 seconds
+      timeout: 3s # Wait 2 seconds for a response
+      retries: 3 # Mark as unhealthy after 3 failed attempts
+
+volumes:
+  rabbitmq_data:

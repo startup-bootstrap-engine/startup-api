@@ -4,25 +4,34 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
+	"os"
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type PathRequest struct {
-	StartX int  `json:"startX"`
-	StartY int  `json:"startY"`
-	EndX   int  `json:"endX"`
-	EndY   int  `json:"endY"`
-	Grid   Grid `json:"grid"`
+	StartX       int    `json:"startX"`
+	StartY       int    `json:"startY"`
+	EndX         int    `json:"endX"`
+	EndY         int    `json:"endY"`
+	Grid         Grid   `json:"grid"`
+	NpcId        string `json:"npcId"`
+	OffsetStartX int    `json:"offsetStartX"`
+	OffsetStartY int    `json:"offsetStartY"`
 }
 
 type PathResponse struct {
-	Path  [][]int `json:"path"`
-	Error string  `json:"error,omitempty"`
+	Path         [][]int `json:"path"`
+	Error        string  `json:"error,omitempty"`
+	NpcId        string  `json:"npcId"`
+	OffsetStartX int     `json:"offsetStartX"`
+	OffsetStartY int     `json:"offsetStartY"`
 }
 
 type HealthCheckResponse struct {
@@ -92,8 +101,147 @@ func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	// Start HTTP server in a goroutine
+	go startHTTPServer()
+
+	// Set up RabbitMQ connection with retry
+	rabbitMQHost := os.Getenv("RABBITMQ_HOST")
+	rabbitMQPort := os.Getenv("RABBITMQ_PORT")
+	rabbitMQUser := os.Getenv("RABBITMQ_DEFAULT_USER")
+	rabbitMQPass := os.Getenv("RABBITMQ_DEFAULT_PASS")
+
+	log.Printf("RabbitMQ Host: %s", rabbitMQHost)
+	log.Printf("RabbitMQ Port: %s", rabbitMQPort)
+	log.Printf("RabbitMQ User: %s", rabbitMQUser)
+	log.Printf("RabbitMQ Pass: %s", "********")
+
+	if rabbitMQUser == "" || rabbitMQPass == "" {
+		log.Fatal("RabbitMQ credentials are not set in environment variables")
+	}
+
+	rabbitMQURL := fmt.Sprintf("amqp://%s:%s@%s:%s/", rabbitMQUser, rabbitMQPass, rabbitMQHost, rabbitMQPort)
+
+	var conn *amqp.Connection
+	var err error
+
+	// wait 10 seconds before starting
+	time.Sleep(10 * time.Second)
+
+	maxRetries := 30
+	for i := 0; i < maxRetries; i++ {
+		conn, err = amqp.Dial(rabbitMQURL)
+		if err == nil {
+			break
+		}
+		log.Printf("Failed to connect to RabbitMQ (attempt %d/%d): %s", i+1, maxRetries, err)
+		time.Sleep(time.Duration(math.Pow(2, float64(i))) * time.Second)
+	}
+
+	if err != nil {
+		log.Fatalf("Failed to connect to RabbitMQ after 30 attempts: %s", err)
+	}
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	if err != nil {
+		log.Fatalf("Failed to open a channel: %s", err)
+	}
+	defer ch.Close()
+
+	err = ch.ExchangeDeclare(
+		"rpg_microservices", // name
+		"topic",             // type
+		true,                // durable
+		false,               // auto-deleted
+		false,               // internal
+		false,               // no-wait
+		nil,                 // arguments
+	)
+	if err != nil {
+		log.Fatalf("Failed to declare an exchange: %s", err)
+	}
+
+	q, err := ch.QueueDeclare(
+		"rpg_pathfinding_queue", // name
+		false,                   // durable
+		false,                   // delete when unused
+		false,                   // exclusive
+		false,                   // no-wait
+		nil,                     // arguments
+	)
+	if err != nil {
+		log.Fatalf("Failed to declare a queue: %s", err)
+	}
+
+	err = ch.QueueBind(
+		q.Name,              // queue name
+		"rpg_pathfinding.*", // routing key
+		"rpg_microservices", // exchange
+		false,
+		nil,
+	)
+	if err != nil {
+		log.Fatalf("Failed to bind a queue: %s", err)
+	}
+
+	msgs, err := ch.Consume(
+		q.Name, // queue
+		"",     // consumer
+		true,   // auto-ack
+		false,  // exclusive
+		false,  // no-local
+		false,  // no-wait
+		nil,    // args
+	)
+	if err != nil {
+		log.Fatalf("Failed to register a consumer: %s", err)
+	}
+
+	go func() {
+		for d := range msgs {
+			if d.RoutingKey == "rpg_pathfinding.find_path" {
+				var req PathRequest
+				err := json.Unmarshal(d.Body, &req)
+				if err != nil {
+					log.Printf("Error unmarshaling request: %s", err)
+					continue
+				}
+
+				path, err := BreadthFirstFinder(req.StartX, req.StartY, req.EndX, req.EndY, req.Grid)
+				resp := PathResponse{Path: path, Error: "", NpcId: req.NpcId, OffsetStartX: req.OffsetStartX, OffsetStartY: req.OffsetStartY}
+				if err != nil {
+					resp.Error = err.Error()
+				}
+
+				respBody, err := json.Marshal(resp)
+				if err != nil {
+					log.Printf("Error marshaling response: %s", err)
+					continue
+				}
+
+				err = ch.Publish(
+					"rpg_microservices",           // exchange
+					"rpg_pathfinding.path_result", // routing key
+					false,                         // mandatory
+					false,                         // immediate
+					amqp.Publishing{
+						ContentType: "application/json",
+						Body:        respBody,
+					})
+				if err != nil {
+					log.Printf("Error publishing response: %s", err)
+				}
+			}
+		}
+	}()
+
+	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
+	<-make(chan bool)
+}
+
+func startHTTPServer() {
 	http.HandleFunc("/path", pathHandler)
-	http.HandleFunc("/health", healthCheckHandler) // Health check endpoint
+	http.HandleFunc("/health", healthCheckHandler)
 
 	port := ":5004"
 	fmt.Printf("Starting server on port %s\n", port)

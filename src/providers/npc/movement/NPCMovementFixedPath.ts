@@ -15,7 +15,7 @@ export class NPCMovementFixedPath {
   @TrackNewRelicTransaction()
   public async startFixedPathMovement(npc: INPC, endGridX: number, endGridY: number): Promise<void> {
     try {
-      const shortestPath = await this.NPCMovement.getShortestPathNextPosition(
+      const shortestPath = await this.NPCMovement.deprecatedGetShortedPathNextPosition(
         npc,
         null,
         ToGridX(npc.x),
