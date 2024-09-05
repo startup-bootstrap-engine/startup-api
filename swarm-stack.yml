@@ -57,13 +57,12 @@ services:
       NEW_RELIC_APP_NAME: "Definya API"
       RABBITMQ_HOST: rpg-rabbitmq
       RABBITMQ_PORT: 5672
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
     networks:
       - rpg-network
     depends_on:
-      rpg-rabbitmq:
-        condition: service_healthy
+      - rpg-rabbitmq
 
   rpg-npc:
     image: definya/definya-team:api-latest
@@ -80,8 +79,8 @@ services:
       NEW_RELIC_APP_NAME: "Definya NPC"
       RABBITMQ_HOST: rpg-rabbitmq
       RABBITMQ_PORT: 5672
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
     deploy:
       replicas: 2
       restart_policy:
@@ -101,8 +100,7 @@ services:
     networks:
       - rpg-network
     depends_on:
-      rpg-rabbitmq:
-        condition: service_healthy
+      - rpg-rabbitmq
 
   rpg-pathfinder:
     image: definya/definya-team:rpg-pathfinder-latest
@@ -112,8 +110,8 @@ services:
       NEW_RELIC_APP_NAME: "Definya Pathfinder"
       RABBITMQ_HOST: rpg-rabbitmq
       RABBITMQ_PORT: 5672
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
     deploy:
       replicas: 6
       restart_policy:
@@ -136,8 +134,7 @@ services:
     networks:
       - rpg-network
     depends_on:
-      rpg-rabbitmq:
-        condition: service_healthy
+      - rpg-rabbitmq
 
   rpg-client:
     image: definya/definya-team:client-latest
@@ -272,13 +269,13 @@ services:
       - "5672:5672" # AMQP protocol port
       - "15672:15672" # Management UI port
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
       NEW_RELIC_APP_NAME: "Definya RabbitMQ"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-      - ./environment/rabbitmq-init.sh:/docker-entrypoint-initdb.d/rabbitmq-init.sh
+      - ./environment/rabbit-init.sh:/docker-entrypoint-initdb.d/rabbit-init.sh
     networks:
       - rpg-network
     deploy:

@@ -109,6 +109,15 @@ func main() {
 	rabbitMQUser := os.Getenv("RABBITMQ_DEFAULT_USER")
 	rabbitMQPass := os.Getenv("RABBITMQ_DEFAULT_PASS")
 
+	log.Printf("RabbitMQ Host: %s", rabbitMQHost)
+	log.Printf("RabbitMQ Port: %s", rabbitMQPort)
+	log.Printf("RabbitMQ User: %s", rabbitMQUser)
+	log.Printf("RabbitMQ Pass: %s", "********")
+
+	if rabbitMQUser == "" || rabbitMQPass == "" {
+		log.Fatal("RabbitMQ credentials are not set in environment variables")
+	}
+
 	rabbitMQURL := fmt.Sprintf("amqp://%s:%s@%s:%s/", rabbitMQUser, rabbitMQPass, rabbitMQHost, rabbitMQPort)
 
 	var conn *amqp.Connection
