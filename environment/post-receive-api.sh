@@ -21,12 +21,19 @@ while read oldrev newrev refname; do
     fi
 done
 
+
+
 # Deploy the project!
 
 echo "Refreshing source code..."
 GIT_WORK_TREE=$DEPLOY_DIR git checkout -f
 
 cd ~/definya/api
+
+# Source the .env file
+set -a
+source .env
+set +a
 
 # Build based on production Dockerfile
 cp ./environment/Dockerfile.prod ./Dockerfile    
