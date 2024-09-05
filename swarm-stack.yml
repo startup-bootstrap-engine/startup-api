@@ -131,7 +131,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 10s
+      start_period: 30s
     networks:
       - rpg-network
     depends_on:
@@ -290,17 +290,11 @@ services:
         failure_action: rollback
       restart_policy:
         condition: on-failure
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.definya.com`)"
-        - "traefik.http.routers.rabbitmq.entrypoints=websecure"
-        - "traefik.http.routers.rabbitmq.tls.certresolver=myresolver"
-        - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
 
 networks:
   rpg-network:

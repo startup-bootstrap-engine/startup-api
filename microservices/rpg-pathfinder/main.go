@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"time"
@@ -123,14 +124,17 @@ func main() {
 	var conn *amqp.Connection
 	var err error
 
-	// Retry connection to RabbitMQ
-	for i := 0; i < 30; i++ {
+	// wait 10 seconds before starting
+	time.Sleep(10 * time.Second)
+
+	maxRetries := 30
+	for i := 0; i < maxRetries; i++ {
 		conn, err = amqp.Dial(rabbitMQURL)
 		if err == nil {
 			break
 		}
-		log.Printf("Failed to connect to RabbitMQ (attempt %d): %s", i+1, err)
-		time.Sleep(10 * time.Second)
+		log.Printf("Failed to connect to RabbitMQ (attempt %d/%d): %s", i+1, maxRetries, err)
+		time.Sleep(time.Duration(math.Pow(2, float64(i))) * time.Second)
 	}
 
 	if err != nil {
