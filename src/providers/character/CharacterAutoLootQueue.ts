@@ -195,6 +195,8 @@ export class CharacterAutoLootQueue {
       return false;
     }
 
+    // Handle stackQty for non-stackable items
+    const itemStackQty = item.stackQty ?? 1;
     const removeItemSuccess = await this.characterItemContainer.removeItemFromContainer(item, character, itemContainer);
     if (!removeItemSuccess) {
       // If removal fails, attempt to remove the item from the character's inventory
@@ -203,7 +205,7 @@ export class CharacterAutoLootQueue {
       return false;
     }
 
-    const quantityText = item.stackQty ? (item.stackQty === 1 ? "1x" : `${item.stackQty}x`) : "1x";
+    const quantityText = itemStackQty === 1 ? "1x" : `${itemStackQty}x`;
     lootedItemNamesAndQty.push(`${quantityText} ${item.name}`);
     disableLootingPromises.push(this.disableLooting(character, bodyItem));
 
