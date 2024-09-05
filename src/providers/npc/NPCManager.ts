@@ -51,8 +51,6 @@ export class NPCManager {
     await this.messagingBroker.listenForMessages("npc-manager", "start-behavior-loop", async (data) => {
       const characterId = data.characterId;
 
-      console.log(`Starting behavior loop for NPCs triggered by character ${characterId}`);
-
       const character = await Character.findById(characterId).lean<ICharacter>({ virtuals: true, defaults: true });
 
       await this.startNearbyNPCsBehaviorLoop(character);

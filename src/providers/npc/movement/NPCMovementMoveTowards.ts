@@ -279,10 +279,6 @@ export class NPCMovementMoveTowards {
 
         const path = await this.lightweightPathfinder.calculateLightPathfinding(npc, data.targetX, data.targetY);
 
-        if (path?.length) {
-          console.log(`[LIGHTWEIGHT PATHFINDING] for NPC ${npc._id}:`, path);
-        }
-
         if (!path?.length) {
           await this.npcTarget.tryToSetTarget(npc);
           return;
@@ -318,10 +314,6 @@ export class NPCMovementMoveTowards {
         }
 
         const path = this.pathfinding.applyOffsetToPath(data.path, data.offsetStartX, data.offsetStartY);
-
-        if (path.length) {
-          console.log(`[ADVANCED PATHFINDING] for NPC ${npc._id}:`, path);
-        }
 
         if (!path?.length) {
           const targetCharacter = await Character.findById(npc.targetCharacter).select("x y").lean<ICharacter>();
