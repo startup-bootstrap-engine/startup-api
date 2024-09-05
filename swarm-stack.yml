@@ -55,8 +55,15 @@ services:
       FORCE_COLOR: "true"
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
       NEW_RELIC_APP_NAME: "Definya API"
+      RABBITMQ_HOST: rpg-rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     networks:
       - rpg-network
+    depends_on:
+      rpg-rabbitmq:
+        condition: service_healthy
 
   rpg-npc:
     image: definya/definya-team:api-latest
@@ -71,6 +78,10 @@ services:
       CHOKIDAR_USEPOLLING: "true"
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
       NEW_RELIC_APP_NAME: "Definya NPC"
+      RABBITMQ_HOST: rpg-rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     deploy:
       replicas: 2
       restart_policy:
@@ -89,6 +100,9 @@ services:
         max_failure_ratio: 0.3
     networks:
       - rpg-network
+    depends_on:
+      rpg-rabbitmq:
+        condition: service_healthy
 
   rpg-pathfinder:
     image: definya/definya-team:rpg-pathfinder-latest
@@ -96,6 +110,10 @@ services:
       GO111MODULE: "on"
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
       NEW_RELIC_APP_NAME: "Definya Pathfinder"
+      RABBITMQ_HOST: rpg-rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     deploy:
       replicas: 6
       restart_policy:
@@ -117,6 +135,9 @@ services:
       retries: 5
     networks:
       - rpg-network
+    depends_on:
+      rpg-rabbitmq:
+        condition: service_healthy
 
   rpg-client:
     image: definya/definya-team:client-latest
@@ -245,6 +266,44 @@ services:
     networks:
       - rpg-network
 
+  rpg-rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672" # AMQP protocol port
+      - "15672:15672" # Management UI port
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
+      NEW_RELIC_APP_NAME: "Definya RabbitMQ"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./environment/rabbitmq-init.sh:/docker-entrypoint-initdb.d/rabbitmq-init.sh
+    networks:
+      - rpg-network
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.definya.com`)"
+        - "traefik.http.routers.rabbitmq.entrypoints=websecure"
+        - "traefik.http.routers.rabbitmq.tls.certresolver=myresolver"
+        - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 networks:
   rpg-network:
     external: true
@@ -252,3 +311,4 @@ networks:
 volumes:
   rpg-db-data:
   rpg-redis-data:
+  rabbitmq_data:
