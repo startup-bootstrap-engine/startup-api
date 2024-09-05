@@ -21,7 +21,7 @@ export class MessagingBrokerHandlers {
 
     switch (MICROSERVICE_NAME) {
       case "rpg-npc":
-        console.log("💌 Adding messaging broker handlers...");
+        console.log("💌 Adding messaging broker handlers");
 
         console.log('📡 Adding "pathfinding" listener...');
         await this.npcMovementMoveTowards.addPathfindingResultsListener();
