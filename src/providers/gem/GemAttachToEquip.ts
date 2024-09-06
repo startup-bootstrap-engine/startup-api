@@ -185,11 +185,8 @@ export class GemAttachToEquip {
       throw new Error(`Item with ID ${targetItem._id} not found`);
     }
 
-    const currentAttack = currentItem.attack ?? 0;
-    const currentDefense = currentItem.defense ?? 0;
-
-    const newAttack = isArmorOrShield ? currentAttack : currentAttack + (gemItemBlueprint.gemStatBuff?.attack || 0);
-    const newDefense = currentDefense + (gemItemBlueprint.gemStatBuff?.defense || 0);
+    const newAttack = (currentItem.attack || 0) + (isArmorOrShield ? 0 : gemItemBlueprint.gemStatBuff?.attack || 0);
+    const newDefense = (currentItem.defense || 0) + (gemItemBlueprint.gemStatBuff?.defense || 0);
 
     await Item.findByIdAndUpdate(targetItem._id, {
       $set: {
@@ -200,14 +197,24 @@ export class GemAttachToEquip {
   }
 
   private async attachGemEntityEffectsToEquip(gemItemBlueprint: IItemGem, targetItem: IItem): Promise<void> {
+    const currentItem = await Item.findById(targetItem._id).lean();
+
+    if (!currentItem) {
+      throw new Error(`Item with ID ${targetItem._id} not found`);
+    }
+
+    const updatedEntityEffects = [
+      ...new Set([...(currentItem.entityEffects || []), ...(gemItemBlueprint.gemEntityEffectsAdd || [])]),
+    ];
+    const updatedEntityEffectChance = Math.max(
+      currentItem.entityEffectChance || 0,
+      gemItemBlueprint.gemEntityEffectChance || 0
+    );
+
     await Item.findByIdAndUpdate(targetItem._id, {
-      $addToSet: {
-        entityEffects: {
-          $each: gemItemBlueprint.gemEntityEffectsAdd,
-        },
-      },
       $set: {
-        entityEffectChance: gemItemBlueprint.gemEntityEffectChance,
+        entityEffects: updatedEntityEffects,
+        entityEffectChance: updatedEntityEffectChance,
       },
     });
   }

@@ -636,4 +636,127 @@ describe("GemAttachToEquip", () => {
     expect(updatedItem?.attack).toBeFalsy(); // Attack should not change for armor
     expect(updatedItem?.defense).toBe((armorItem.defense || 0) + (testGemBlueprint1.gemStatBuff?.defense || 0));
   });
+
+  describe("Gem stacking behavior", () => {
+    let testWeaponItem: IItem;
+    let testGemItem1: IItem;
+    let testGemItem2: IItem;
+    let gemBlueprint1: IItemGem;
+    let gemBlueprint2: IItemGem;
+
+    beforeEach(async () => {
+      // Create a test weapon
+      testWeaponItem = await unitTestHelper.createMockItemFromBlueprint(SwordsBlueprint.Sword, {
+        attack: 10,
+        defense: 5,
+        owner: testCharacter._id,
+      });
+
+      // Create two different gem items
+      testGemItem1 = await unitTestHelper.createMockItemFromBlueprint(GemsBlueprint.RubyGem, {
+        owner: testCharacter._id,
+      });
+      testGemItem2 = await unitTestHelper.createMockItemFromBlueprint(GemsBlueprint.SapphireGem, {
+        owner: testCharacter._id,
+      });
+
+      // Add gems to character's inventory
+      await characterItemContainer.addItemToContainer(testGemItem1, testCharacter, inventoryItemContainer._id, {
+        shouldAddOwnership: true,
+      });
+      await characterItemContainer.addItemToContainer(testGemItem2, testCharacter, inventoryItemContainer._id, {
+        shouldAddOwnership: true,
+      });
+
+      // Get gem blueprints
+      gemBlueprint1 = blueprintManager.getBlueprint<IItemGem>("items", GemsBlueprint.RubyGem);
+      gemBlueprint2 = blueprintManager.getBlueprint<IItemGem>("items", GemsBlueprint.SapphireGem);
+
+      // Mock the getMaxGemsForTier method to allow multiple gems
+      // @ts-ignore
+      jest.spyOn(gemAttachToEquip, "getMaxGemsForTier").mockReturnValue(2);
+    });
+
+    it("should correctly stack stats from multiple gems", async () => {
+      await gemAttachToEquip.attachGemToEquip(testGemItem1, testWeaponItem, testCharacter);
+      await gemAttachToEquip.attachGemToEquip(testGemItem2, testWeaponItem, testCharacter);
+
+      const updatedWeapon = await Item.findById(testWeaponItem._id).lean();
+
+      const expectedAttack = 10 + gemBlueprint1.gemStatBuff!.attack! + gemBlueprint2.gemStatBuff!.attack!;
+      const expectedDefense = 5 + gemBlueprint1.gemStatBuff!.defense! + gemBlueprint2.gemStatBuff!.defense!;
+
+      expect(updatedWeapon?.attack).toBe(expectedAttack);
+      expect(updatedWeapon?.defense).toBe(expectedDefense);
+    });
+
+    it("should correctly stack entity effects from multiple gems", async () => {
+      await gemAttachToEquip.attachGemToEquip(testGemItem1, testWeaponItem, testCharacter);
+      await gemAttachToEquip.attachGemToEquip(testGemItem2, testWeaponItem, testCharacter);
+
+      const updatedWeapon = await Item.findById(testWeaponItem._id).lean();
+
+      const expectedEffects = [
+        ...new Set([...gemBlueprint1.gemEntityEffectsAdd!, ...gemBlueprint2.gemEntityEffectsAdd!]),
+      ];
+      const expectedChance = Math.max(gemBlueprint1.gemEntityEffectChance!, gemBlueprint2.gemEntityEffectChance!);
+
+      expect(updatedWeapon?.entityEffects).toEqual(expect.arrayContaining(expectedEffects));
+      expect(updatedWeapon?.entityEffects?.length).toBe(expectedEffects.length);
+      expect(updatedWeapon?.entityEffectChance).toBe(expectedChance);
+    });
+
+    it("should correctly update the description with stacked gem effects", async () => {
+      await gemAttachToEquip.attachGemToEquip(testGemItem1, testWeaponItem, testCharacter);
+      await gemAttachToEquip.attachGemToEquip(testGemItem2, testWeaponItem, testCharacter);
+
+      const updatedWeapon = await Item.findById(testWeaponItem._id).lean();
+
+      const expectedAttack = gemBlueprint1.gemStatBuff!.attack! + gemBlueprint2.gemStatBuff!.attack!;
+      const expectedDefense = gemBlueprint1.gemStatBuff!.defense! + gemBlueprint2.gemStatBuff!.defense!;
+      const expectedEffects = [
+        ...new Set([...gemBlueprint1.gemEntityEffectsAdd!, ...gemBlueprint2.gemEntityEffectsAdd!]),
+      ];
+      const expectedChance = Math.max(gemBlueprint1.gemEntityEffectChance!, gemBlueprint2.gemEntityEffectChance!);
+
+      expect(updatedWeapon?.equippedBuffDescription).toContain(
+        `Ruby, Sapphire Gems: +${expectedAttack} atk, +${expectedDefense} def`
+      );
+      expect(updatedWeapon?.equippedBuffDescription).toContain(
+        `${expectedChance}% chance of applying ${expectedEffects.join(", ")} effects`
+      );
+    });
+
+    it("should not override stronger gem effects with weaker ones", async () => {
+      // Attach the stronger gem first
+      await gemAttachToEquip.attachGemToEquip(testGemItem1, testWeaponItem, testCharacter);
+
+      // Create a weaker gem
+      const weakerGemItem = await unitTestHelper.createMockItemFromBlueprint(GemsBlueprint.AmethystGem, {
+        owner: testCharacter._id,
+      });
+      await characterItemContainer.addItemToContainer(weakerGemItem, testCharacter, inventoryItemContainer._id, {
+        shouldAddOwnership: true,
+      });
+      const weakerGemBlueprint = blueprintManager.getBlueprint<IItemGem>("items", GemsBlueprint.AmethystGem);
+
+      // Attach the weaker gem
+      await gemAttachToEquip.attachGemToEquip(weakerGemItem, testWeaponItem, testCharacter);
+
+      const updatedWeapon = await Item.findById(testWeaponItem._id).lean();
+
+      const expectedAttack = 10 + gemBlueprint1.gemStatBuff!.attack! + weakerGemBlueprint.gemStatBuff!.attack!;
+      const expectedDefense = 5 + gemBlueprint1.gemStatBuff!.defense! + weakerGemBlueprint.gemStatBuff!.defense!;
+      const expectedEffects = [
+        ...new Set([...gemBlueprint1.gemEntityEffectsAdd!, ...weakerGemBlueprint.gemEntityEffectsAdd!]),
+      ];
+      const expectedChance = Math.max(gemBlueprint1.gemEntityEffectChance!, weakerGemBlueprint.gemEntityEffectChance!);
+
+      expect(updatedWeapon?.attack).toBe(expectedAttack);
+      expect(updatedWeapon?.defense).toBe(expectedDefense);
+      expect(updatedWeapon?.entityEffects).toEqual(expect.arrayContaining(expectedEffects));
+      expect(updatedWeapon?.entityEffects?.length).toBe(expectedEffects.length);
+      expect(updatedWeapon?.entityEffectChance).toBe(expectedChance);
+    });
+  });
 });

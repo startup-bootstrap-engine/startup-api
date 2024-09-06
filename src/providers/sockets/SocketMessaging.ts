@@ -56,16 +56,6 @@ export class SocketMessaging {
 
   public sendEventToUser<T>(userChannel: string, eventName: string, data?: T): void {
     if (appEnv.general.MICROSERVICE_NAME === "rpg-npc") {
-      // void this.microservice.request(
-      //   AvailableMicroservices.RpgAPI,
-      //   "/sockets/send-event",
-      //   {
-      //     userChannel,
-      //     eventName,
-      //     data,
-      //   },
-      //   "POST"
-      // );
       void this.messagingBroker.sendMessage("socket-messaging", "sendEventToUser", {
         userChannel,
         eventName,
