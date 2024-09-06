@@ -7,6 +7,8 @@ WORKDIR /app
 # Copy the source code
 COPY . .
 
+ENV NEW_RELIC_RULES_IGNORE_URL_REGEXES=".*RabbitMQ.*"
+
 # Build the Go application
 RUN go build -o app .
 
