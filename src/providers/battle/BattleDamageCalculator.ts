@@ -66,14 +66,17 @@ export class BattleDamageCalculator {
     );
 
     if (isNaN(reducedDamage)) {
-      console.error("calculateHitDamage returned NaN. Inputs:", {
-        attacker: attacker._id,
-        target: target._id,
-        isMagicAttack,
-        totalPotentialAttackerDamage,
-        adjustedDamage,
-        reducedDamage,
-      });
+      console.error(
+        "calculateHitDamage returned NaN. Inputs:",
+        JSON.stringify({
+          attacker: attacker._id,
+          target: target._id,
+          isMagicAttack,
+          totalPotentialAttackerDamage,
+          adjustedDamage,
+          reducedDamage,
+        })
+      );
       return 0; // Return a default value instead of NaN
     }
 

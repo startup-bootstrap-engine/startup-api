@@ -53,7 +53,11 @@ export class Pathfinding {
 
     try {
       const gridCourse = this.createGridCourse(startGridX, startGridY, endGridX, endGridY);
-      const output = this.prepareGridAndNodes(map, gridCourse)!;
+      const output = this.prepareGridAndNodes(map, gridCourse);
+
+      if (!output?.grid) {
+        return;
+      }
 
       const { grid, firstNode, lastNode, startX, startY } = output;
 
