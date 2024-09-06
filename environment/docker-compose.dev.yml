@@ -26,12 +26,9 @@ services:
     links:
       - rpg-db
     depends_on:
-      rpg-db:
-        condition: service_started
-      rpg-redis:
-        condition: service_started
-      rpg-rabbitmq:
-        condition: service_healthy
+      - rpg-db
+      - rpg-redis
+      - rpg-rabbitmq
     networks:
       - rpg-network
 
@@ -58,14 +55,10 @@ services:
     links:
       - rpg-db
     depends_on:
-      rpg-api:
-        condition: service_started
-      rpg-db:
-        condition: service_started
-      rpg-redis:
-        condition: service_started
-      rpg-rabbitmq:
-        condition: service_healthy
+      - rpg-api
+      - rpg-db
+      - rpg-redis
+      - rpg-rabbitmq
     networks:
       - rpg-network
 
@@ -88,8 +81,7 @@ services:
     networks:
       - rpg-network
     depends_on:
-      rpg-rabbitmq:
-        condition: service_healthy
+      - rpg-rabbitmq
 
   rpg-db:
     container_name: rpg-db
@@ -152,11 +144,6 @@ services:
       - ./environment/rabbitmq-init.sh:/docker-entrypoint-initdb.d/rabbitmq-init.sh
     networks:
       - rpg-network
-    healthcheck:
-      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
-      interval: 1s # Run the health check every 5 seconds
-      timeout: 3s # Wait 2 seconds for a response
-      retries: 3 # Mark as unhealthy after 3 failed attempts
 
 networks:
   rpg-network:

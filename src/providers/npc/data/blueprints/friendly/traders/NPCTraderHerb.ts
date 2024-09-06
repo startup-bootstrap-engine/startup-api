@@ -20,9 +20,7 @@ export const npcTraderHerbalist = {
     {
       key: CraftingResourcesBlueprint.Worm,
     },
-    {
-      key: CraftingResourcesBlueprint.Herb,
-    },
+
     {
       key: CraftingResourcesBlueprint.Herb,
     },
