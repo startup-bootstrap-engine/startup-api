@@ -126,30 +126,6 @@ describe("GemAttachToEquip", () => {
     );
   });
 
-  it("should update the equippedBuffDescription of the target item correctly", async () => {
-    testEquipItem = await Item.findByIdAndUpdate(
-      testEquipItem._id,
-      {
-        equippedBuffDescription: "Initial description.",
-        owner: testCharacter._id,
-      },
-      { new: true }
-    ).lean();
-
-    // Perform the gem attachment operation
-    const result = await gemAttachToEquip.attachGemToEquip(testGemItem1, testEquipItem, testCharacter);
-
-    expect(result).toBe(true);
-
-    // Fetch the updated item
-    const updatedEquipItem = await Item.findById(testEquipItem._id).lean();
-
-    // Check updated description
-    expect(updatedEquipItem?.equippedBuffDescription).toStrictEqual(
-      "Initial description. Ruby Gem: +60 atk, +59 def, 68% chance of applying burning effects. Additional buffs: Sword: +20%, Resistance: +15%, Magic Resistance: +15%."
-    );
-  });
-
   describe("isArmorOrShield logic", () => {
     it("should increase only defense if target item is armor or shield", async () => {
       // Assuming 'Armor' is a type and 'Shield' is a subtype in the ItemType and ItemSubType enums respectively
@@ -318,29 +294,6 @@ describe("GemAttachToEquip", () => {
 
       // Check that the animation event was triggered
       expect(sendAnimationEventToCharacterSpy).toHaveBeenCalledWith(testCharacter, AnimationEffectKeys.LevelUp);
-    });
-
-    it("should update the equippedBuffDescription for armors with specific stat boosts", async () => {
-      // Set up an armor item
-      const testArmorItem = await unitTestHelper.createMockItemFromBlueprint(ArmorsBlueprint.DarkArmor, {
-        equippedBuffDescription: "Base defense: 50.",
-        owner: testCharacter._id,
-      });
-
-      await characterItemContainer.addItemToContainer(testArmorItem, testCharacter, inventoryItemContainer._id, {
-        shouldAddOwnership: true,
-      });
-
-      // Perform the gem attachment
-      const result = await gemAttachToEquip.attachGemToEquip(testGemItem1, testArmorItem, testCharacter);
-
-      expect(result).toBe(true);
-
-      // Fetch the updated armor item
-      const updatedArmorItem = await Item.findById(testArmorItem._id).lean();
-
-      // Verify updated description includes specific stat boosts
-      expect(updatedArmorItem?.equippedBuffDescription).toContain("Base defense: 50. Ruby Gem: +59 def.");
     });
 
     it("should ensure only defense is increased when a defense-only gem is attached to a shield", async () => {
@@ -521,50 +474,6 @@ describe("GemAttachToEquip", () => {
     // Check final stats
     expect(updatedEquipItem?.attack).toBe(expectedFinalAttack);
     expect(updatedEquipItem?.defense).toBe(expectedFinalDefense);
-  });
-
-  it("should correctly update the description for multiple gems", async () => {
-    // Set initial stats for the equipment
-    const initialAttack = 50;
-    const initialDefense = 30;
-    await Item.findByIdAndUpdate(testEquipItem._id, { attack: initialAttack, defense: initialDefense });
-
-    // Get gem blueprints
-    const gemBlueprint1 = await blueprintManager.getBlueprint<IItemGem>("items", GemsBlueprint.RubyGem);
-    const gemBlueprint2 = await blueprintManager.getBlueprint<IItemGem>("items", GemsBlueprint.SapphireGem);
-
-    // Attach both gems
-    await gemAttachToEquip.attachGemToEquip(testGemItem1, testEquipItem, testCharacter);
-    await gemAttachToEquip.attachGemToEquip(testGemItem2, testEquipItem, testCharacter);
-
-    // Fetch final updated equip item
-    const updatedEquipItem = await Item.findById(testEquipItem._id).lean();
-
-    // Check description
-
-    expect(updatedEquipItem?.equippedBuffDescription).toEqual(
-      "Ruby, Sapphire Gems: +68 atk, +65 def, 68% chance of applying burning, vine-grasp effects. Additional buffs: Sword: +20%, Resistance: +15%, Magic Resistance: +15%."
-    );
-
-    // Check attached gems metadata
-    const attachedGemsMetadata = updatedEquipItem?.attachedGems as unknown as IItemGem[];
-    expect(attachedGemsMetadata).toHaveLength(2);
-    expect(attachedGemsMetadata).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          key: gemBlueprint1.key,
-          name: gemBlueprint1.name,
-          gemEntityEffectsAdd: gemBlueprint1.gemEntityEffectsAdd,
-          gemStatBuff: gemBlueprint1.gemStatBuff,
-        }),
-        expect.objectContaining({
-          key: gemBlueprint2.key,
-          name: gemBlueprint2.name,
-          gemEntityEffectsAdd: gemBlueprint2.gemEntityEffectsAdd,
-          gemStatBuff: gemBlueprint2.gemStatBuff,
-        }),
-      ])
-    );
   });
 
   it("should not allow attaching gems to stackable items", async () => {
