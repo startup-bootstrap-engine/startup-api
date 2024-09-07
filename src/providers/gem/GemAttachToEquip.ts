@@ -21,6 +21,7 @@ import {
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { clearCacheForKey } from "speedgoose";
+import { GemAttachDescriptionUpdater } from "./GemAttachDescriptionUpdater";
 
 export interface IAttachedItemGem {
   key: string;
@@ -42,7 +43,8 @@ export class GemAttachToEquip {
     private characterWeight: CharacterWeightQueue,
     private animationEffect: AnimationEffect,
     private characterInventory: CharacterInventory,
-    private characterItemSlots: CharacterItemSlots
+    private characterItemSlots: CharacterItemSlots,
+    private gemAttachDescriptionUpdater: GemAttachDescriptionUpdater
   ) {}
 
   public async attachGemToEquip(originItem: IItem, targetItem: IItem, character: ICharacter): Promise<boolean> {
@@ -82,7 +84,11 @@ export class GemAttachToEquip {
     }
 
     if (gemItemBlueprint.gemEntityEffectsAdd && gemItemBlueprint.gemEntityEffectsAdd.length > 0) {
-      await this.updateTargetEquippedBuffDescription(targetItem, gemItemBlueprint, isArmorOrShield);
+      await this.gemAttachDescriptionUpdater.updateTargetEquippedBuffDescription(
+        targetItem,
+        gemItemBlueprint,
+        isArmorOrShield
+      );
     }
 
     // refresh item state
@@ -215,96 +221,6 @@ export class GemAttachToEquip {
       $set: {
         entityEffects: updatedEntityEffects,
         entityEffectChance: updatedEntityEffectChance,
-      },
-    });
-  }
-
-  private async updateTargetEquippedBuffDescription(
-    targetItem: IItem,
-    gemItemBlueprint: IItemGem,
-    isArmorOrShield: boolean
-  ): Promise<void> {
-    const currentItem = await Item.findById(targetItem._id).lean();
-    if (!currentItem) {
-      throw new Error(`Item with ID ${targetItem._id} not found`);
-    }
-
-    const attachedGems = currentItem.attachedGems || [];
-    let totalAttack = 0;
-    let totalDefense = 0;
-    const entityEffects: Set<string> = new Set();
-    let entityEffectChance = 0;
-    const gemNames: Set<string> = new Set();
-
-    for (const gem of attachedGems) {
-      totalAttack += gem.gemStatBuff?.attack || 0;
-      totalDefense += gem.gemStatBuff?.defense || 0;
-
-      if (!isArmorOrShield) {
-        if (gem.gemEntityEffectsAdd) {
-          gem.gemEntityEffectsAdd.forEach((effect) => entityEffects.add(effect));
-        }
-        entityEffectChance = Math.max(entityEffectChance, gem.gemEntityEffectChance || 0);
-      }
-
-      gemNames.add(gem.name?.replace(" Gem", "")!);
-    }
-
-    const gemNamesArray = Array.from(gemNames);
-    let gemDescription = "";
-
-    if (gemNamesArray.length > 0) {
-      gemDescription = gemNamesArray.length === 1 ? `${gemNamesArray[0]} Gem: ` : `${gemNamesArray.join(", ")} Gems: `;
-    }
-
-    if (isArmorOrShield) {
-      gemDescription += `+${totalDefense} def`;
-    } else {
-      gemDescription += `+${totalAttack} atk, +${totalDefense} def`;
-    }
-
-    if (entityEffects.size > 0) {
-      gemDescription += `, ${entityEffectChance}% chance of applying ${Array.from(entityEffects).join(", ")} effects`;
-    }
-
-    // Preserve existing description if it exists, but remove any previous gem description
-    const existingDescription = currentItem.equippedBuffDescription || "";
-    const [baseDescription, existingBuffs] = existingDescription.split(/Additional buffs:/);
-
-    // Remove any existing gem description from the base description
-    const cleanBaseDescription = baseDescription.replace(/.*Gems?:.*$/, "").trim();
-
-    let updatedDescription = cleanBaseDescription;
-    if (gemDescription) {
-      updatedDescription += (updatedDescription ? " " : "") + gemDescription + ".";
-    }
-
-    if (existingBuffs) {
-      updatedDescription += " Additional buffs:" + existingBuffs;
-    } else if (gemItemBlueprint.gemEquippedBuffAdd) {
-      const formatTrait = (trait: string): string => {
-        return trait
-          .split(/(?=[A-Z])/)
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" ");
-      };
-
-      const buffs = Array.isArray(gemItemBlueprint.gemEquippedBuffAdd)
-        ? gemItemBlueprint.gemEquippedBuffAdd
-            .map((buff) => `${formatTrait(buff.trait)}: +${buff.buffPercentage}%`)
-            .join(", ")
-        : `${formatTrait(gemItemBlueprint.gemEquippedBuffAdd.trait)}: +${
-            gemItemBlueprint.gemEquippedBuffAdd.buffPercentage
-          }%`;
-
-      updatedDescription += ` Additional buffs: ${buffs}.`;
-    }
-
-    await Item.findByIdAndUpdate(targetItem._id, {
-      $set: {
-        equippedBuffDescription: updatedDescription.trim(),
-        entityEffects: Array.from(entityEffects),
-        entityEffectChance: entityEffectChance,
       },
     });
   }
