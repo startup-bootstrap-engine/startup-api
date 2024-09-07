@@ -1,37 +1,36 @@
-version: "3"
+version: "3.8" # Upgraded version to support health checks
 
 services:
   rpg-api:
     container_name: rpg-api
     restart: always
-    image: definya/definya-team:api-latest
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "3"
+    build: .
     env_file: .env
+    ports:
+      - "$SERVER_PORT:$SERVER_PORT"
+      - "9229:9229" # debugging port
+      - "$SOCKET_PORT:$SOCKET_PORT"
+      - "$SOCKET_UDP_RANGE"
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
+    environment:
+      FORCE_COLOR: "true"
+      CHOKIDAR_USEPOLLING: "true" # enables hot-reloading on windows host
+      NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
+      NEW_RELIC_APP_NAME: "Definya API Dev"
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     links:
       - rpg-db
-      - rpg-redis
     depends_on:
       - rpg-db
       - rpg-redis
-    network_mode: bridge
-    ports:
-      - "${SERVER_PORT}:${SERVER_PORT}"
-      - "$SOCKET_PORT:$SOCKET_PORT"
-      # - "$SOCKET_UDP_RANGE" #!COMMENT THIS IN IF USING UDP
-    environment:
-      FORCE_COLOR: "true"
-      VIRTUAL_HOST: ${API_SUBDOMAIN}
-      LETSENCRYPT_HOST: ${API_SUBDOMAIN}
-      LETSENCRYPT_EMAIL: ${ADMIN_EMAIL}
-      VIRTUAL_PORT: ${SERVER_PORT}
-      NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
-      NEW_RELIC_APP_NAME: "Definya API"
+      - rpg-rabbitmq
+    networks:
+      - rpg-network
 
   rpg-npc:
     container_name: rpg-npc
@@ -49,13 +48,20 @@ services:
       CHOKIDAR_USEPOLLING: "true" # enables hot-reloading on windows host
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
       NEW_RELIC_APP_NAME: "Definya API Dev"
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     links:
       - rpg-db
     depends_on:
       - rpg-api
       - rpg-db
       - rpg-redis
-    network_mode: bridge
+      - rpg-rabbitmq
+    networks:
+      - rpg-network
+
   rpg-pathfinder:
     container_name: rpg-pathfinder
     build:
@@ -63,9 +69,20 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5004:5004"
+    volumes:
+      - ./microservices/rpg-pathfinder:/app
     environment:
       - GO111MODULE=on
-    network_mode: bridge
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    command: air
+    networks:
+      - rpg-network
+    depends_on:
+      - rpg-rabbitmq
+
   rpg-db:
     container_name: rpg-db
     image: mongo
@@ -84,7 +101,8 @@ services:
       MONGO_PORT: ${MONGO_PORT}
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    network_mode: bridge
+    networks:
+      - rpg-network
 
   rpg-redis:
     container_name: rpg-redis
@@ -98,7 +116,19 @@ services:
     volumes:
       - ./config/redis.conf:/redis.conf
     command: ["redis-server", "/redis.conf", "--port", "${REDIS_PORT}"]
-    network_mode: bridge
+    networks:
+      - rpg-network
+
+  redis-commander:
+    container_name: redis-commander
+    restart: always
+    image: rediscommander/redis-commander:latest
+    ports:
+      - "8081:8081"
+    environment:
+      REDIS_HOSTS: "redis:rpg-redis:6380"
+    networks:
+      - rpg-network
 
   rpg-rabbitmq:
     container_name: rpg-rabbitmq
@@ -112,12 +142,12 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
       - ./environment/rabbitmq-init.sh:/docker-entrypoint-initdb.d/rabbitmq-init.sh
-    networks_mode: bridge
-    healthcheck:
-      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
-      interval: 1s # Run the health check every 5 seconds
-      timeout: 3s # Wait 2 seconds for a response
-      retries: 3 # Mark as unhealthy after 3 failed attempts
+    networks:
+      - rpg-network
+
+networks:
+  rpg-network:
+    driver: bridge
 
 volumes:
   rabbitmq_data:
