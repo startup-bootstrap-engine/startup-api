@@ -45,6 +45,7 @@ import { PartyCRUD } from "@providers/party/PartyCRUD";
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
 import { ResultsPoller } from "@providers/poller/ResultsPoller";
 import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
+import { RedisPubSub } from "@providers/redis/RedisPubSub";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import { ManaShield } from "@providers/spells/data/logic/mage/ManaShield";
 import SpellSilence from "@providers/spells/data/logic/mage/druid/SpellSilence";
@@ -112,7 +113,8 @@ export class ServerBootstrap {
     private NPCBattleCycleQueue: NPCBattleCycleQueue,
     private NPCCycleQueue: NPCCycleQueue,
     private NPCDeathQueue: NPCDeathQueue,
-    private spellNetworkCastQueue: SpellNetworkCastQueue
+    private spellNetworkCastQueue: SpellNetworkCastQueue,
+    private redisPubSub: RedisPubSub
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -175,6 +177,7 @@ export class ServerBootstrap {
       await this.NPCCycleQueue.shutdown();
       await this.NPCDeathQueue.shutdown();
       await this.spellNetworkCastQueue.shutdown();
+      await this.redisPubSub.unsubscribe();
     };
 
     process.on("SIGTERM", async () => {

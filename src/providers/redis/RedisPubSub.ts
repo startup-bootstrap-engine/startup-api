@@ -39,4 +39,10 @@ export class RedisPubSub {
 
     await this.pubConnection.publish(channel, message);
   }
+
+  public async unsubscribe(): Promise<void> {
+    if (this.subConnection) {
+      await this.subConnection.unsubscribe();
+    }
+  }
 }
