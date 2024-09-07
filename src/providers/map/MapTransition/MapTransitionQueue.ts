@@ -180,4 +180,8 @@ export class MapTransitionQueue {
       }
     }
   }
+
+  public shutdown(): Promise<void> {
+    return this.dynamicQueue.shutdown();
+  }
 }

@@ -315,4 +315,8 @@ export class CharacterDeath {
       await this.npcTarget.clearTarget(attacker as INPC);
     }
   }
+
+  public shutdown(): Promise<void> {
+    return this.dynamicQueue.shutdown();
+  }
 }

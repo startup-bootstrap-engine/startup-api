@@ -249,4 +249,8 @@ export class CharacterAutoLootQueue {
     const character = await Character.findOne({ _id: bodyItem.owner }).lean();
     return !!character;
   }
+
+  public shutdown(): Promise<void> {
+    return this.dynamicQueue.shutdown();
+  }
 }

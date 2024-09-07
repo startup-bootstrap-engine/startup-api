@@ -183,4 +183,8 @@ export class LightweightPathfinder {
     await this.inMemoryHashTable.set("npc-force-pathfinding-calculation", npc._id, true);
     return [];
   }
+
+  public async shutdown(): Promise<void> {
+    await this.dynamicQueue.shutdown();
+  }
 }

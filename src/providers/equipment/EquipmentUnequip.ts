@@ -242,4 +242,8 @@ export class EquipmentUnequip {
 
     return true;
   }
+
+  public async shutdown(): Promise<void> {
+    await this.dynamicQueue.shutdown();
+  }
 }

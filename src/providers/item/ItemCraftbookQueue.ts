@@ -244,4 +244,8 @@ export class ItemCraftbookQueue {
   public async clearAllJobs(): Promise<void> {
     await this.dynamicQueue.clearAllJobs();
   }
+
+  public async shutdown(): Promise<void> {
+    await this.dynamicQueue.shutdown();
+  }
 }

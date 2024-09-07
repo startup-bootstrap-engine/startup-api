@@ -161,4 +161,8 @@ export class CharacterNetworkCreateQueue {
       this.battleTargeting.cancelTargeting(character),
     ]);
   }
+
+  public shutdown(): Promise<void> {
+    return this.dynamicQueue.shutdown();
+  }
 }

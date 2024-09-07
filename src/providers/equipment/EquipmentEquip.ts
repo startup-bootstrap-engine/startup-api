@@ -355,4 +355,8 @@ export class EquipmentEquip {
   public getAllowedItemTypes(): ItemType[] {
     return Object.keys(ItemType).map((key) => ItemType[key]);
   }
+
+  public async shutdown(): Promise<void> {
+    await this.dynamicQueue.shutdown();
+  }
 }
