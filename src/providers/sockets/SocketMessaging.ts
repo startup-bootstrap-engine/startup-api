@@ -3,7 +3,6 @@ import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterView } from "@providers/character/CharacterView";
 import { appEnv } from "@providers/config/env";
-import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { NPCView } from "@providers/npc/NPCView";
 import { RedisPubSub, RedisPubSubChannels } from "@providers/redis/RedisPubSub";
 import { SocketAdapter } from "@providers/sockets/SocketAdapter";
@@ -16,9 +15,10 @@ import {
   UIMessageType,
   UISocketEvents,
 } from "@rpg-engine/shared";
+import { provide } from "inversify-binding-decorators";
 import { Types } from "mongoose";
 
-@provideSingleton(SocketMessaging)
+@provide(SocketMessaging)
 export class SocketMessaging {
   constructor(
     private characterView: CharacterView,
