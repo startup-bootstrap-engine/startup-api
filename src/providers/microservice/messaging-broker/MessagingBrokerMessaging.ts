@@ -1,5 +1,6 @@
 /* eslint-disable no-async-promise-executor */
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { Locker } from "@providers/locks/Locker";
 import { RabbitMQ } from "@providers/rabbitmq/RabbitMQ";
 import { Time } from "@providers/time/Time";
 
@@ -8,7 +9,7 @@ export class MessagingBroker {
   private static EXCHANGE = "rpg_microservices";
   private initialized = false;
 
-  constructor(private rabbitMQ: RabbitMQ, private time: Time) {}
+  constructor(private rabbitMQ: RabbitMQ, private time: Time, private locker: Locker) {}
 
   async initialize(): Promise<void> {
     if (this.initialized) return;
@@ -57,7 +58,11 @@ export class MessagingBroker {
     await this.rabbitMQ.assertQueue(queue);
     await this.rabbitMQ.bindQueue(queue, MessagingBroker.EXCHANGE, routingKey);
     await this.rabbitMQ.consumeMessages(MessagingBroker.EXCHANGE, queue, routingKey, async (data) => {
-      await callback(data);
+      try {
+        await callback(data);
+      } catch (err) {
+        console.error(`Failed to lock messaging-broker-${service}-${action}`, err);
+      }
     });
     console.log(`Listening for messages on ${routingKey} (queue: ${queue})`);
   }

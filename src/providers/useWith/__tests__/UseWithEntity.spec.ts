@@ -106,6 +106,7 @@ describe("UseWithEntity.ts", () => {
   };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     await prepareData();
 
     executeEffectMock = jest.spyOn(useWithEntity as any, "executeEffect");
@@ -124,7 +125,6 @@ describe("UseWithEntity.ts", () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
     jest.restoreAllMocks();
   });
 

@@ -5,6 +5,10 @@ import { appEnv } from "@providers/config/env";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
+import {
+  MessagingBrokerActions,
+  MessagingBrokerServices,
+} from "@providers/microservice/messaging-broker/MessagingBrokerTypes";
 import { NPCTarget } from "@providers/npc/movement/NPCTarget";
 import { FromGridX, FromGridY } from "@rpg-engine/shared";
 import PF from "pathfinding";
@@ -73,7 +77,11 @@ export class Pathfinding {
       };
 
       // We're currently using a messaging broker to communicate with the pathfinding microservice
-      await this.messagingBroker.sendMessage("rpg_pathfinding", "find_path", data);
+      await this.messagingBroker.sendMessage(
+        MessagingBrokerServices.RpgPathfinding,
+        MessagingBrokerActions.FindPath,
+        data
+      );
     } catch (error) {
       console.error(error);
     } finally {

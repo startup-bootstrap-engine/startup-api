@@ -32,6 +32,10 @@ import {
 import { IRPGPathfinderResponse, Pathfinding } from "@providers/map/pathfinding/Pathfinding";
 import { PathfindingCaching } from "@providers/map/pathfinding/PathfindingCaching";
 import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
+import {
+  MessagingBrokerActions,
+  MessagingBrokerServices,
+} from "@providers/microservice/messaging-broker/MessagingBrokerTypes";
 import { debounce } from "lodash";
 
 export interface ICharacterHealth {
@@ -267,8 +271,8 @@ export class NPCMovementMoveTowards {
 
   public async addLightweightPathfindingResultsListener(): Promise<void> {
     await this.messagingBroker.listenForMessages(
-      "rpg_pathfinding",
-      "lightweight_path",
+      MessagingBrokerServices.RpgPathfinding,
+      MessagingBrokerActions.LightweightPath,
       async (data: ILightweightPathfinderResponse) => {
         const npc = await NPC.findById(data.npcId).lean<INPC>({ virtuals: true, defaults: true });
 
@@ -298,8 +302,9 @@ export class NPCMovementMoveTowards {
 
   public async addPathfindingResultsListener(): Promise<void> {
     await this.messagingBroker.listenForMessages(
-      "rpg_pathfinding",
-      "path_result",
+      MessagingBrokerServices.RpgPathfinding,
+      MessagingBrokerActions.PathResult,
+
       async (data: IRPGPathfinderResponse) => {
         if (data.error) {
           console.error(`Pathfinding error for NPC ${data.npcId}:`, data.error);
@@ -328,8 +333,9 @@ export class NPCMovementMoveTowards {
           }
 
           await this.messagingBroker.sendMessage<ILightweightPathfinderResponse>(
-            "rpg_pathfinding",
-            "lightweight_path",
+            MessagingBrokerServices.RpgPathfinding,
+            MessagingBrokerActions.LightweightPath,
+
             {
               npcId: npc._id,
               targetX: targetCharacter.x,

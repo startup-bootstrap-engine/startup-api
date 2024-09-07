@@ -13,6 +13,10 @@ import { appEnv } from "@providers/config/env";
 import { Locker } from "@providers/locks/Locker";
 import { MathHelper } from "@providers/math/MathHelper";
 import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
+import {
+  MessagingBrokerActions,
+  MessagingBrokerServices,
+} from "@providers/microservice/messaging-broker/MessagingBrokerTypes";
 import { MicroserviceRequest } from "@providers/microservice/MicroserviceRequest";
 import { RaidManager } from "@providers/raid/RaidManager";
 import { NPCCycleQueue } from "./NPCCycleQueue";
@@ -48,13 +52,18 @@ export class NPCManager {
   }
 
   public async startBehaviorLoopListener(): Promise<void> {
-    await this.messagingBroker.listenForMessages("npc-manager", "start-behavior-loop", async (data) => {
-      const characterId = data.characterId;
+    await this.messagingBroker.listenForMessages(
+      MessagingBrokerServices.NpcManager,
+      MessagingBrokerActions.StartBehaviorLoop,
 
-      const character = await Character.findById(characterId).lean<ICharacter>({ virtuals: true, defaults: true });
+      async (data) => {
+        const characterId = data.characterId;
 
-      await this.startNearbyNPCsBehaviorLoop(character);
-    });
+        const character = await Character.findById(characterId).lean<ICharacter>({ virtuals: true, defaults: true });
+
+        await this.startNearbyNPCsBehaviorLoop(character);
+      }
+    );
   }
 
   public async startBehaviorLoopUsingMicroservice(character: ICharacter): Promise<void> {
@@ -62,9 +71,14 @@ export class NPCManager {
       return await this.startNearbyNPCsBehaviorLoop(character);
     }
 
-    await this.messagingBroker.sendMessage("npc-manager", "start-behavior-loop", {
-      characterId: character._id,
-    });
+    await this.messagingBroker.sendMessage(
+      MessagingBrokerServices.NpcManager,
+      MessagingBrokerActions.StartBehaviorLoop,
+
+      {
+        characterId: character._id,
+      }
+    );
   }
 
   @TrackNewRelicTransaction()

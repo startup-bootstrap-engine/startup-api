@@ -4,6 +4,11 @@ import { appEnv } from "@providers/config/env";
 import { GuildLeader } from "@providers/guild/GuildLeader";
 import { GuildTerritory } from "@providers/guild/GuildTerritory";
 import { Locker } from "@providers/locks/Locker";
+import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
+import {
+  MessagingBrokerActions,
+  MessagingBrokerServices,
+} from "@providers/microservice/messaging-broker/MessagingBrokerTypes";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { TextFormatter } from "@providers/text/TextFormatter";
@@ -23,6 +28,12 @@ export interface IDestination {
   gridY: number;
 }
 
+export interface IMapTransitionListenerMessage {
+  character: ICharacter;
+  newX: number;
+  newY: number;
+}
+
 @provide(MapTransitionQueue)
 export class MapTransitionQueue {
   constructor(
@@ -39,8 +50,21 @@ export class MapTransitionQueue {
     private cooldown: Cooldown,
     private locker: Locker,
     private guildLeader: GuildLeader,
-    private textFormatter: TextFormatter
+    private textFormatter: TextFormatter,
+    private messagingBroker: MessagingBroker
   ) {}
+
+  public async addMapTransitionListener(): Promise<void> {
+    await this.messagingBroker.listenForMessages(
+      MessagingBrokerServices.MapTransition,
+      MessagingBrokerActions.HandleMapTransition,
+      async (data: IMapTransitionListenerMessage) => {
+        const { character, newX, newY } = data;
+
+        await this.handleMapTransition(character, newX, newY);
+      }
+    );
+  }
 
   @TrackNewRelicTransaction()
   public async handleMapTransition(character: ICharacter, newX: number, newY: number): Promise<boolean> {

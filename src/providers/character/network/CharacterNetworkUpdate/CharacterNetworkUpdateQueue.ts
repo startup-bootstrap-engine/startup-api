@@ -25,7 +25,12 @@ import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { MapTiles } from "@providers/map/MapTiles";
 import { MapTransitionNonPVPZone } from "@providers/map/MapTransition/MapTransitionNonPvpZone";
-import { MapTransitionQueue } from "@providers/map/MapTransition/MapTransitionQueue";
+import { IMapTransitionListenerMessage, MapTransitionQueue } from "@providers/map/MapTransition/MapTransitionQueue";
+import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
+import {
+  MessagingBrokerActions,
+  MessagingBrokerServices,
+} from "@providers/microservice/messaging-broker/MessagingBrokerTypes";
 import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
 import dayjs from "dayjs";
@@ -49,7 +54,8 @@ export class CharacterNetworkUpdateQueue {
     private mapTransition: MapTransitionQueue,
     private dynamicQueue: DynamicQueue,
     private mapTransitionNonPVPZone: MapTransitionNonPVPZone,
-    private mapTiles: MapTiles
+    private mapTiles: MapTiles,
+    private messagingBroker: MessagingBroker
   ) {}
 
   public onCharacterUpdatePosition(channel: SocketChannel): void {
@@ -166,7 +172,16 @@ export class CharacterNetworkUpdateQueue {
         return;
       }
 
-      await this.mapTransition.handleMapTransition(character, newX, newY);
+      // await this.mapTransition.handleMapTransition(character, newX, newY);
+      await this.messagingBroker.sendMessage<IMapTransitionListenerMessage>(
+        MessagingBrokerServices.MapTransition,
+        MessagingBrokerActions.HandleMapTransition,
+        {
+          character,
+          newX,
+          newY,
+        }
+      );
       return;
     }
 
