@@ -16,6 +16,7 @@ import {
   messagingBrokerHandlers,
   newRelic,
   redisManager,
+  redisPubSubListeners,
   serverBootstrap,
   serverHelper,
   socketAdapter,
@@ -24,7 +25,6 @@ import { errorHandlerMiddleware } from "@providers/middlewares/ErrorHandlerMiddl
 import { RedisPubSub } from "@providers/redis/RedisPubSub";
 import { router } from "@providers/server/Router";
 import { app } from "@providers/server/app";
-import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { NewRelicTransactionCategory } from "@providers/types/NewRelicTypes";
 import { EnvType } from "@rpg-engine/shared/dist";
 
@@ -70,7 +70,6 @@ function getPort(): number {
 async function initializeServerComponents(): Promise<void> {
   const { IS_MICROSERVICE } = appEnv.general;
 
-  const socketMessaging = container.get(SocketMessaging);
   const redisPubSub = container.get(RedisPubSub);
 
   await Promise.all([
@@ -82,7 +81,7 @@ async function initializeServerComponents(): Promise<void> {
   ]);
 
   // This should happen on rpg-api only. We have to use pub sub because remember the client only connects to rpg-api, not to rpg-npc (and other microservices). So rpg-npc has to send messages to rpg-api through redis pub sub
-  !IS_MICROSERVICE && (await socketMessaging.subscribeToSocketEvents());
+  !IS_MICROSERVICE && (await redisPubSubListeners.addSubscribers());
   await messagingBroker.initialize();
 
   await inMemoryHashTable.init();

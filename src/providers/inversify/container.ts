@@ -23,6 +23,7 @@ import { NPCLoader } from "@providers/npc/NPCLoader";
 import { NPCManager } from "@providers/npc/NPCManager";
 import { BullBoardMonitor } from "@providers/queue/BullBoardMonitor";
 import { RabbitMQ } from "@providers/rabbitmq/RabbitMQ";
+import { RedisPubSubListeners } from "@providers/redis/RedisPubSubListeners";
 import { PM2Helper } from "@providers/server/PM2Helper";
 import { ServerBootstrap } from "@providers/server/ServerBootstrap";
 import { SkillIncrease } from "@providers/skill/SkillIncrease";
@@ -64,7 +65,7 @@ autoProvide(container);
 export const rabbitMQ = container.get<RabbitMQ>(RabbitMQ);
 export const messagingBroker = container.get<MessagingBroker>(MessagingBroker);
 export const messagingBrokerHandlers = container.get<MessagingBrokerHandlers>(MessagingBrokerHandlers);
-
+export const redisPubSubListeners = container.get<RedisPubSubListeners>(RedisPubSubListeners);
 export const database = container.get<Database>(Database);
 export const cronJobs = container.get<Cronjob>(Cronjob);
 export const seeds = container.get<Seeder>(Seeder);
