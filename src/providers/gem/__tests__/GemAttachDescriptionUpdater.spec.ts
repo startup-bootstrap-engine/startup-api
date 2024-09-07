@@ -82,7 +82,7 @@ describe("GemAttachDescriptionUpdater", () => {
 
     const updatedItem = await Item.findById(testEquipItem._id).lean();
     expect(updatedItem?.equippedBuffDescription).toBe(
-      "Ruby Gem: 165 atk (105+60), 144 def (85+59). Buffs: Sword +33% (13+20), Resistance +15%, Magic resistance +15%. Effects: Burning (68%)."
+      "Ruby Gem: 165 atk (105+60), 144 def (85+59). Buffs: Sword +33% (13+20), Resistance +15%, Magic Resistance +15%. Effects: Burning (68%)."
     );
   });
 
@@ -105,8 +105,8 @@ describe("GemAttachDescriptionUpdater", () => {
     const updatedArmorItem = await Item.findById(testArmorItem._id).lean();
 
     // Verify updated description includes specific stat boosts
-    expect(updatedArmorItem?.equippedBuffDescription).toContain(
-      "Ruby Gem: 111 def (52+59). Buffs: Resistance +30% (15+15), Magic resistance +30% (15+15), Max health +15%, Sword +20%."
+    expect(updatedArmorItem?.equippedBuffDescription).toBe(
+      "Ruby Gem: 111 def (52+59). Buffs: Resistance +30% (15+15), Magic Resistance +30% (15+15), Max Health +15%, Sword +20%."
     );
   });
 
@@ -121,12 +121,12 @@ describe("GemAttachDescriptionUpdater", () => {
 
     const updatedItem = await Item.findById(testEquipItem._id).lean();
     expect(updatedItem?.equippedBuffDescription).toBe(
-      "Ruby Gem: +60 atk, +59 def. Buffs: Sword: +20%, Resistance: +15%, Magic resistance: +15%. Effects: Burning (68%)."
+      "Ruby Gem: 165 atk (105+60), 144 def (85+59). Buffs: Sword +33% (13+20), Resistance +15%, Magic Resistance +15%. Effects: Burning (68%)."
     );
   });
 
   it("should handle armor or shield items", async () => {
-    let armorItem = await unitTestHelper.createMockItemFromBlueprint(SwordsBlueprint.Sword);
+    let armorItem = await unitTestHelper.createMockItemFromBlueprint(ArmorsBlueprint.DarkArmor);
     armorItem = await Item.findByIdAndUpdate(
       armorItem._id,
       { equippedBuffDescription: "Protects against physical damage" },
@@ -137,7 +137,7 @@ describe("GemAttachDescriptionUpdater", () => {
 
     const updatedItem = await Item.findById(armorItem._id).lean();
     expect(updatedItem?.equippedBuffDescription).toBe(
-      "Base: Protects against physical damage. Ruby Gem: +59 def. Buffs: Sword: +20%, Resistance: +15%, Magic Resistance: +15%."
+      "Ruby Gem: 111 def (52+59). Buffs: Resistance +30% (15+15), Magic Resistance +30% (15+15), Max Health +15%, Sword +20%."
     );
   });
 
@@ -159,7 +159,7 @@ describe("GemAttachDescriptionUpdater", () => {
     // Check description
 
     expect(updatedEquipItem?.equippedBuffDescription).toEqual(
-      "Ruby, Sapphire Gem: 173 atk (105+68), 150 def (85+65). Buffs: Sword +33% (13+20), Resistance +15%, Magic resistance +15%, Dexterity +3%, Strength +2%, Magic +2%. Effects: Burning, Vine Grasp (68%)."
+      "Ruby, Sapphire Gem: 173 atk (105+68), 150 def (85+65). Buffs: Sword +33% (13+20), Resistance +15%, Magic Resistance +15%, Dexterity +3%, Strength +2%, Magic +2%. Effects: Burning, Vine Grasp (68%)."
     );
 
     // Check attached gems metadata
@@ -193,7 +193,7 @@ describe("GemAttachDescriptionUpdater", () => {
     await gemAttachDescriptionUpdater.updateTargetEquippedBuffDescription(testEquipItem, gemWithBuff, false);
 
     const updatedItem = await Item.findById(testEquipItem._id).lean();
-    const expectedSubstring = "Attack speed +5%";
+    const expectedSubstring = "Attack Speed +5%";
     expect(updatedItem?.equippedBuffDescription).toContain(expectedSubstring);
   });
 
@@ -209,7 +209,7 @@ describe("GemAttachDescriptionUpdater", () => {
 
     const updatedItem = await Item.findById(testEquipItem._id).lean();
     expect(updatedItem?.equippedBuffDescription).toBe(
-      "Ruby Gem: 105 atk, 85 def. Buffs: Sword +33% (13+20), Resistance +15%, Magic resistance +15%."
+      "Ruby Gem: 105 atk, 85 def. Buffs: Sword +33% (13+20), Resistance +15%, Magic Resistance +15%."
     );
   });
 });

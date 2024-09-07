@@ -31,16 +31,6 @@ export class GemAttachDescriptionUpdater {
       isArmorOrShield
     );
 
-    // console.log(`
-    // REPORT:
-    //   attachedGems: ${JSON.stringify(attachedGemNames)}
-    //   weaponBuffs: ${JSON.stringify(weaponBuffs)}
-    //   gemBuffs: ${JSON.stringify(gemBuffs)}
-    //   entityEffects: ${JSON.stringify(entityEffects)}
-    //   totalStats: ${JSON.stringify(totalStats)}
-    //   Description: ${readableOutput}
-    // `);
-
     await Item.updateOne(
       {
         _id: targetItem._id,
@@ -159,7 +149,11 @@ export class GemAttachDescriptionUpdater {
   private capitalize(text: string): string {
     // Handle camelCase and concatenated words (e.g., MagicResistance -> Magic Resistance)
     const spacedText = text.replace(/([a-z])([A-Z])/g, "$1 $2");
-    return spacedText.charAt(0).toUpperCase() + spacedText.slice(1).toLowerCase();
+    // Split the text into words, capitalize each word, and join them back together
+    return spacedText
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
   }
 
   private formatDashCase(text: string): string {
