@@ -6,6 +6,7 @@ import "reflect-metadata";
 import { appEnv } from "@providers/config/env";
 import {
   bullBoardMonitor,
+  container,
   cronJobs,
   database,
   inMemoryHashTable,
@@ -20,8 +21,10 @@ import {
   socketAdapter,
 } from "@providers/inversify/container";
 import { errorHandlerMiddleware } from "@providers/middlewares/ErrorHandlerMiddleware";
+import { RedisPubSub } from "@providers/redis/RedisPubSub";
 import { router } from "@providers/server/Router";
 import { app } from "@providers/server/app";
+import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { NewRelicTransactionCategory } from "@providers/types/NewRelicTypes";
 import { EnvType } from "@rpg-engine/shared/dist";
 
@@ -67,13 +70,19 @@ function getPort(): number {
 async function initializeServerComponents(): Promise<void> {
   const { IS_MICROSERVICE } = appEnv.general;
 
+  const socketMessaging = container.get(SocketMessaging);
+  const redisPubSub = container.get(RedisPubSub);
+
   await Promise.all([
     database.initialize(),
     redisManager.connect(),
     !IS_MICROSERVICE && socketAdapter.init(appEnv.socket.type), // no need for socket connection in microservices, because we use rpg-api as the main server
     messagingBrokerHandlers.onAddHandlers(),
+    redisPubSub.init(),
   ]);
 
+  // This should happen on rpg-api only. We have to use pub sub because remember the client only connects to rpg-api, not to rpg-npc (and other microservices). So rpg-npc has to send messages to rpg-api through redis pub sub
+  !IS_MICROSERVICE && (await socketMessaging.subscribeToSocketEvents());
   await messagingBroker.initialize();
 
   await inMemoryHashTable.init();

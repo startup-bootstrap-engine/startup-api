@@ -13,11 +13,7 @@ export class MessagingBrokerHandlers {
   ) {}
 
   public async onAddHandlers(): Promise<void> {
-    const { MICROSERVICE_NAME, IS_MICROSERVICE } = appEnv.general;
-
-    if (!IS_MICROSERVICE) {
-      await this.socketMessaging.addSendEventToUserListener();
-    }
+    const { MICROSERVICE_NAME } = appEnv.general;
 
     switch (MICROSERVICE_NAME) {
       case "rpg-npc":

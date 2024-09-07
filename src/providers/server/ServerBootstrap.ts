@@ -10,21 +10,30 @@ import { Seeder } from "@providers/seeds/Seeder";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { HitTargetQueue } from "@providers/battle/HitTargetQueue";
 import { CharacterActionsTracker } from "@providers/character/CharacterActionsTracker";
+import { CharacterAutoLootQueue } from "@providers/character/CharacterAutoLootQueue";
 import { CharacterConsumptionControl } from "@providers/character/CharacterConsumptionControl";
+import { CharacterDeath } from "@providers/character/CharacterDeath/CharacterDeath";
 import { CharacterMonitorCallbackTracker } from "@providers/character/CharacterMonitorInterval/CharacterMonitorCallbackTracker";
 import { CharacterNetworkUpdateQueue } from "@providers/character/network/CharacterNetworkUpdate/CharacterNetworkUpdateQueue";
+import { CharacterNetworkCreateQueue } from "@providers/character/network/characterCreate/CharacterNetworkCreateQueue";
+import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
 import { ChatNetworkGlobalMessagingQueue } from "@providers/chat/network/ChatNetworkGlobalMessagingQueue";
 import { appEnv } from "@providers/config/env";
 import { cache } from "@providers/constants/CacheConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DiscordBot } from "@providers/discord/DiscordBot";
 import { EntityEffectDurationControl } from "@providers/entityEffects/EntityEffectDurationControl";
+import { EquipmentEquip } from "@providers/equipment/EquipmentEquip";
+import { EquipmentUnequip } from "@providers/equipment/EquipmentUnequip";
 import { ErrorHandlingTracker } from "@providers/errorHandling/ErrorHandlingTracker";
+import { ItemCraftableQueue } from "@providers/item/ItemCraftableQueue";
 import { ItemCraftbookQueue } from "@providers/item/ItemCraftbookQueue";
 import { ItemDropVerifier } from "@providers/item/ItemDrop/ItemDropVerifier";
 import { ItemUseCycleQueue } from "@providers/item/ItemUseCycleQueue";
 import { ItemContainerTransactionQueue } from "@providers/itemContainer/ItemContainerTransactionQueue";
 import { Locker } from "@providers/locks/Locker";
+import { MapTransitionQueue } from "@providers/map/MapTransition/MapTransitionQueue";
+import { LightweightPathfinder } from "@providers/map/pathfinding/LightweightPathfinder";
 import { Pathfinding } from "@providers/map/pathfinding/Pathfinding";
 import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
 import { NPCBattleCycleQueue } from "@providers/npc/NPCBattleCycleQueue";
@@ -89,7 +98,21 @@ export class ServerBootstrap {
     private itemCraftbookQueue: ItemCraftbookQueue,
     private npcCycleTracker: NPCCycleTracker,
     private resultsPoller: ResultsPoller,
-    private messagingBroker: MessagingBroker
+    private messagingBroker: MessagingBroker,
+    private mapTransitionQueue: MapTransitionQueue,
+    private characterAutoLootQueue: CharacterAutoLootQueue,
+    private characterDeathQueue: CharacterDeath,
+    private characterNetworkCreateQueue: CharacterNetworkCreateQueue,
+    private characterWeightQueue: CharacterWeightQueue,
+    private equipmentEquipQueue: EquipmentEquip,
+    private equipmentUnequipQueue: EquipmentUnequip,
+    private itemCraftableQueue: ItemCraftableQueue,
+    private itemDragAndDropQueue: ItemUseCycleQueue,
+    private lightweightPathfinderQueue: LightweightPathfinder,
+    private NPCBattleCycleQueue: NPCBattleCycleQueue,
+    private NPCCycleQueue: NPCCycleQueue,
+    private NPCDeathQueue: NPCDeathQueue,
+    private spellNetworkCastQueue: SpellNetworkCastQueue
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -137,6 +160,21 @@ export class ServerBootstrap {
       await this.spellNetworkCast.shutdown();
       await this.npcDeathQueue.shutdown();
       await this.itemContainerTransactionQueue.shutdown();
+      await this.mapTransitionQueue.shutdown();
+      await this.characterAutoLootQueue.shutdown();
+      await this.characterDeathQueue.shutdown();
+      await this.characterNetworkCreateQueue.shutdown();
+      await this.characterWeightQueue.shutdown();
+      await this.equipmentEquipQueue.shutdown();
+      await this.equipmentUnequipQueue.shutdown();
+      await this.itemCraftableQueue.shutdown();
+      await this.itemCraftbookQueue.shutdown();
+      await this.itemDragAndDropQueue.shutdown();
+      await this.lightweightPathfinderQueue.shutdown();
+      await this.NPCBattleCycleQueue.shutdown();
+      await this.NPCCycleQueue.shutdown();
+      await this.NPCDeathQueue.shutdown();
+      await this.spellNetworkCastQueue.shutdown();
     };
 
     process.on("SIGTERM", async () => {

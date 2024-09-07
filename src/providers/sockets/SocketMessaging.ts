@@ -1,11 +1,11 @@
-// @ts-ignore
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterView } from "@providers/character/CharacterView";
 import { appEnv } from "@providers/config/env";
-import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { NPCView } from "@providers/npc/NPCView";
+import { RedisPubSub, RedisPubSubChannels } from "@providers/redis/RedisPubSub";
 import { SocketAdapter } from "@providers/sockets/SocketAdapter";
 import {
   CharacterSkullType,
@@ -16,17 +16,33 @@ import {
   UIMessageType,
   UISocketEvents,
 } from "@rpg-engine/shared";
-import { provide } from "inversify-binding-decorators";
 import { Types } from "mongoose";
 
-@provide(SocketMessaging)
+@provideSingleton(SocketMessaging)
 export class SocketMessaging {
   constructor(
     private characterView: CharacterView,
     private npcView: NPCView,
     private socketAdapter: SocketAdapter,
-    private messagingBroker: MessagingBroker
+    private redisPubSub: RedisPubSub
   ) {}
+
+  public async initPubSub(): Promise<void> {
+    await this.redisPubSub.init();
+  }
+
+  public async subscribeToSocketEvents(): Promise<void> {
+    try {
+      await this.redisPubSub.subscribe(RedisPubSubChannels.SocketEvents, (message) => {
+        const { userChannel, eventName, data } = JSON.parse(message);
+        this.sendEventToUser(userChannel, eventName, data);
+      });
+
+      console.log("🔌 Socket Messaging initialized on microservice");
+    } catch (error) {
+      console.error("Failed to initialize Socket Messaging on microservice:", error);
+    }
+  }
 
   public sendErrorMessageToCharacter(character: ICharacter, message?: string, type: UIMessageType = "error"): void {
     if ((appEnv.general.ENV === EnvType.Development && !appEnv.general.IS_UNIT_TEST) || appEnv.general.DEBUG_MODE) {
@@ -46,25 +62,14 @@ export class SocketMessaging {
     });
   }
 
-  public async addSendEventToUserListener(): Promise<void> {
-    await this.messagingBroker.listenForMessages("socket-messaging", "sendEventToUser", (data) => {
-      const { userChannel, eventName, data: eventData } = data;
-
-      this.sendEventToUser(userChannel, eventName, eventData);
-    });
-  }
-
   public sendEventToUser<T>(userChannel: string, eventName: string, data?: T): void {
     if (appEnv.general.MICROSERVICE_NAME === "rpg-npc") {
-      void this.messagingBroker.sendMessage("socket-messaging", "sendEventToUser", {
-        userChannel,
-        eventName,
-        data,
-      });
-      return;
+      this.redisPubSub
+        .publish(RedisPubSubChannels.SocketEvents, JSON.stringify({ userChannel, eventName, data }))
+        .catch((error) => console.error("Failed to publish event to Redis:", error));
+    } else {
+      void this.socketAdapter.emitToUser(userChannel, eventName, data || {});
     }
-
-    void this.socketAdapter.emitToUser(userChannel, eventName, data || {});
   }
 
   //! Careful with the method! This sends an event to ALL USERS ON THE SERVER!
