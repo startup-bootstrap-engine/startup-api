@@ -617,22 +617,15 @@ describe("GemAttachToEquip", () => {
 
     it("should correctly update the description with stacked gem effects", async () => {
       await gemAttachToEquip.attachGemToEquip(testGemItem1, testWeaponItem, testCharacter);
+
+      testWeaponItem = await Item.findById(testWeaponItem._id).lean();
+
       await gemAttachToEquip.attachGemToEquip(testGemItem2, testWeaponItem, testCharacter);
 
       const updatedWeapon = await Item.findById(testWeaponItem._id).lean();
 
-      const expectedAttack = gemBlueprint1.gemStatBuff!.attack! + gemBlueprint2.gemStatBuff!.attack!;
-      const expectedDefense = gemBlueprint1.gemStatBuff!.defense! + gemBlueprint2.gemStatBuff!.defense!;
-      const expectedEffects = [
-        ...new Set([...gemBlueprint1.gemEntityEffectsAdd!, ...gemBlueprint2.gemEntityEffectsAdd!]),
-      ];
-      const expectedChance = Math.max(gemBlueprint1.gemEntityEffectChance!, gemBlueprint2.gemEntityEffectChance!);
-
-      expect(updatedWeapon?.equippedBuffDescription).toContain(
-        `Ruby, Sapphire Gems: +${expectedAttack} atk, +${expectedDefense} def`
-      );
-      expect(updatedWeapon?.equippedBuffDescription).toContain(
-        `${expectedChance}% chance of applying ${expectedEffects.join(", ")} effects`
+      expect(updatedWeapon?.equippedBuffDescription).toBe(
+        "Ruby, Sapphire Gem: 76 atk (8+68), 72 def (7+65). Buffs: Sword +20%, Resistance +15%, Magic Resistance +15%, Dexterity +3%, Strength +2%, Magic +2%. Effects: Burning, Vine Grasp (68%)."
       );
     });
 
