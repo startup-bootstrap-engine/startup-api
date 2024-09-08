@@ -25,6 +25,8 @@ import { NPCHealthManaCalculator } from "./NPCHealthManaCalculator";
 
 @provide(NPCSeeder)
 export class NPCSeeder {
+  private npcSeedData: Map<string, INPCSeedData>;
+
   constructor(
     private npcLoader: NPCLoader,
     private gridManager: GridManager,
@@ -37,13 +39,12 @@ export class NPCSeeder {
 
   @TrackNewRelicTransaction()
   public async seed(): Promise<void> {
-    const npcSeedData = await this.npcLoader.loadNPCSeedData();
-    const npcDataArray = Array.from(npcSeedData.values());
+    this.npcSeedData = await this.npcLoader.loadNPCSeedData();
+    const npcDataArray = Array.from(this.npcSeedData.values());
     const existingNPCs = await this.fetchExistingNPCs(npcDataArray);
 
-    const npcPromises = npcDataArray.map(async (NPCData) => {
+    const npcPromises = npcDataArray.map((NPCData) => {
       const npcFound = this.findExistingNPC(existingNPCs, NPCData);
-      await this.setInitialNPCPositionAsSolid(NPCData);
       const customizedNPC = this.getNPCDataWithMultipliers(NPCData);
 
       if (!npcFound) {
@@ -164,12 +165,17 @@ export class NPCSeeder {
 
       const randomMaxHealth = this.npcHealthManaCalculator.getNPCMaxHealthRandomized(npc);
 
+      // Get the initial position from npcSeedData
+      const seedData = this.findSeedDataForNPC(npc);
+      const initialX = seedData ? seedData.initialX : npc.initialX;
+      const initialY = seedData ? seedData.initialY : npc.initialY;
+
       const updateParams = {
         health: randomMaxHealth,
         maxHealth: randomMaxHealth,
         mana: npc.maxMana,
-        x: npc.initialX,
-        y: npc.initialY,
+        x: initialX,
+        y: initialY,
         currentMovementType: npc.originalMovementType,
         xpToRelease: [],
         isBehaviorEnabled: false,
@@ -184,11 +190,23 @@ export class NPCSeeder {
             targetCharacter: "",
           },
         }
-      );
+      ).lean();
+
+      // Ensure the position is marked as solid in the grid
+      await this.gridManager.setWalkable(npc.scene, ToGridX(initialX), ToGridY(initialY), false);
     } catch (error) {
       console.log(`❌ Failed to reset NPC ${npc.key}`);
       console.error(error);
     }
+  }
+
+  private findSeedDataForNPC(npc: INPC): INPCSeedData | undefined {
+    for (const [key, seedData] of this.npcSeedData.entries()) {
+      if (seedData.scene === npc.scene && seedData.tiledId === npc.tiledId) {
+        return seedData;
+      }
+    }
+    return undefined;
   }
 
   private async createNewNPCWithSkills(NPCData: INPCSeedData): Promise<void> {
@@ -267,17 +285,5 @@ export class NPCSeeder {
     }
 
     return clonedNPC.skills;
-  }
-
-  private async setInitialNPCPositionAsSolid(NPCData: INPCSeedData): Promise<void> {
-    try {
-      // mark NPC initial position as solid on the map (pathfinding)
-      await this.gridManager.setWalkable(NPCData.scene, ToGridX(NPCData.x), ToGridY(NPCData.y), false);
-    } catch (error) {
-      console.log(
-        `❌ Failed to set NPC ${NPCData.key} initial position (${NPCData.x}, ${NPCData.y}) as solid on the map (${NPCData.scene})`
-      );
-      console.error(error);
-    }
   }
 }
