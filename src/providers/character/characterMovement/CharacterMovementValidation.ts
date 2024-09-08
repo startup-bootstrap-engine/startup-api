@@ -90,7 +90,9 @@ export class CharacterMovementValidation {
         1
       );
 
-      console.log(`🚫 ${character.name} is trying to move to a solid!`);
+      console.log(
+        `🚫 ${character.name} is trying to move to a solid at ${ToGridX(newX)}, ${ToGridY(newY)}, ${character.scene}`
+      );
 
       // try to deviate the character from the solid. First check if there's a  empty position around
 
