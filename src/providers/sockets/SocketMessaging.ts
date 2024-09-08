@@ -37,8 +37,6 @@ export class SocketMessaging {
         const { userChannel, eventName, data } = JSON.parse(message);
         this.sendEventToUser(userChannel, eventName, data);
       });
-
-      console.log("🔌 Socket Messaging initialized on microservice");
     } catch (error) {
       console.error("Failed to initialize Socket Messaging on microservice:", error);
     }

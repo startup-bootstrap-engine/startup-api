@@ -6,7 +6,7 @@ export const availableRaids: IRaid[] = [
     key: "orc-raid-ilya",
     startingMessage: "Orcs are invading Ilya! Defend the city!",
     triggeringChance: 7,
-    minDuration: 15,
+    minDuration: 1,
   },
   {
     name: "Goblin Gangs",
@@ -41,7 +41,7 @@ export const availableRaids: IRaid[] = [
     key: "lifebringer-raid-shadowlands",
     startingMessage: "Lightbringers are invading shadowlands! Elves and Dwarfs everywhere!",
     triggeringChance: 5,
-    minDuration: 15,
+    minDuration: 4,
   },
   {
     name: "Elora's Raid on Shadowlands",
