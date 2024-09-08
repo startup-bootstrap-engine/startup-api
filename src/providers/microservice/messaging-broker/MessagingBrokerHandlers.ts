@@ -15,9 +15,9 @@ export class MessagingBrokerHandlers {
   public async onAddHandlers(): Promise<void> {
     const { MICROSERVICE_NAME } = appEnv.general;
 
-    // const IS_MICROSERVICE = !!MICROSERVICE_NAME;
+    const IS_MICROSERVICE = !!MICROSERVICE_NAME;
 
-    await this.mapTransitionQueue.addMapTransitionListener(); // Listened added in all services. RabbitMQ will do a load balancing between the them automatically (round-robin)
+    !IS_MICROSERVICE && (await this.mapTransitionQueue.addMapTransitionListener()); // Listened added in all services. RabbitMQ will do a load balancing between the them automatically (round-robin)
 
     switch (MICROSERVICE_NAME) {
       case "rpg-npc":

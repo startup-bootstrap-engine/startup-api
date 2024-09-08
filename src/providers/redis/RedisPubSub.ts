@@ -27,20 +27,19 @@ export class RedisPubSub {
     await this.subConnection.subscribe(channel);
 
     this.subConnection.on("message", async (ch, message) => {
+      const canProceed = await this.locker.lock(`redis-pubsub-subscribe-${channel}-${message}`);
+
+      if (!canProceed) {
+        return;
+      }
       try {
-        const canProceed = await this.locker.lock(`redis-pubsub-subscribe-${channel}`);
-
-        if (!canProceed) {
-          return;
-        }
-
         if (ch === channel) {
           callback(message);
         }
       } catch (error) {
         console.error("Error processing message:", error);
       } finally {
-        await this.locker.unlock(`redis-pubsub-subscribe-${channel}`);
+        await this.locker.unlock(`redis-pubsub-subscribe-${channel}-${message}`);
       }
     });
   }
@@ -51,7 +50,7 @@ export class RedisPubSub {
     }
 
     try {
-      const canProceed = await this.locker.lock(`redis-pubsub-publish-${channel}`);
+      const canProceed = await this.locker.lock(`redis-pubsub-publish-${channel}-${message}`);
 
       if (!canProceed) {
         return;
@@ -61,7 +60,7 @@ export class RedisPubSub {
     } catch (err) {
       console.error("Error publishing message:", err);
     } finally {
-      await this.locker.unlock(`redis-pubsub-publish-${channel}`);
+      await this.locker.unlock(`redis-pubsub-publish-${channel}-${message}`);
     }
   }
 

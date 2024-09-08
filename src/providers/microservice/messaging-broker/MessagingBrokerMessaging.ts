@@ -58,11 +58,7 @@ export class MessagingBroker {
     await this.rabbitMQ.assertQueue(queue);
     await this.rabbitMQ.bindQueue(queue, MessagingBroker.EXCHANGE, routingKey);
     await this.rabbitMQ.consumeMessages(MessagingBroker.EXCHANGE, queue, routingKey, async (data) => {
-      try {
-        await callback(data);
-      } catch (err) {
-        console.error(`Failed to lock messaging-broker-${service}-${action}`, err);
-      }
+      await callback(data);
     });
     console.log(`Listening for messages on ${routingKey} (queue: ${queue})`);
   }
