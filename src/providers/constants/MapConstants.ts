@@ -15,4 +15,4 @@ export const UNIT_TESTING_MAPS = ["unit-test-map.json", "example.json", "unit-te
 
 export const DYNAMIC_MAP_DARKNESS = 0.8; // TODO: Set to 0.95 when there're torches or light spell
 
-export const TEMPORARILY_BLOCKED_MAPS: string[] = [];
+export const TEMPORARILY_BLOCKED_MAPS: string[] = ["caves-03"];
