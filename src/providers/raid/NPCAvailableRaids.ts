@@ -5,8 +5,8 @@ export const availableRaids: IRaid[] = [
     name: "Ilya Orc's Invasion",
     key: "orc-raid-ilya",
     startingMessage: "Orcs are invading Ilya! Defend the city!",
-    triggeringChance: 7,
-    minDuration: 1,
+    triggeringChance: 1,
+    minDuration: 15,
   },
   {
     name: "Goblin Gangs",

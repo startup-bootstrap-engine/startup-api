@@ -60,7 +60,7 @@ describe("NPCRaidSeeder", () => {
     const updatedRaid = await raidManager.getRaid("orc-raid-ilya");
     expect(updatedRaid).toMatchObject({
       startingMessage: "Orcs are invading Ilya! Defend the city!", // should be updated from availableRaids
-      triggeringChance: 7, // should be updated from availableRaids
+      triggeringChance: 1, // should be updated from availableRaids
       minDuration: 15, // should be updated from availableRaids
     });
   });

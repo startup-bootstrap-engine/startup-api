@@ -14,7 +14,6 @@ import {
   ICharacterPositionUpdateConfirm,
   ICharacterPositionUpdateFromClient,
   ICharacterSyncPosition,
-  MapLayers,
   ToGridX,
   ToGridY,
 } from "@rpg-engine/shared";
@@ -146,15 +145,15 @@ export class CharacterNetworkUpdateQueue {
     data: ICharacterPositionUpdateFromClient,
     isMoving: boolean
   ): Promise<void> {
+    let newX = data.newX;
+    let newY = data.newY;
+
     // Calculate the new position based on origin and direction
-    const { newX, newY } = this.calculateNewPosition(
-      character.scene,
-      data.newX,
-      data.newY,
-      data.originX,
-      data.originY,
-      data.direction
-    );
+
+    const { snappedX, snappedY } = this.snapToGridIfNeeded(data.newX, data.newY);
+
+    newX = snappedX;
+    newY = snappedY;
 
     // Check if the new position is valid (not solid and within bounds)
     const isNewPositionValid = await this.characterMovementValidation.isValid(character, newX, newY, isMoving);
@@ -194,16 +193,9 @@ export class CharacterNetworkUpdateQueue {
     this.sendConfirmation(character, data.direction, true);
   }
 
-  private calculateNewPosition(
-    map: string,
-    newX: number,
-    newY: number,
-    originX: number,
-    originY: number,
-    direction: AnimationDirection
-  ): { newX: number; newY: number } {
-    const gridX = ToGridX(newX);
-    const gridY = ToGridY(newY);
+  private snapToGridIfNeeded(x: number, y: number): { snappedX: number; snappedY: number } {
+    let newX = x;
+    let newY = y;
 
     if (!this.movementHelper.isSnappedToGrid(newX, newY)) {
       const snappedPosition = this.snapToGrid(newX, newY);
@@ -211,37 +203,7 @@ export class CharacterNetworkUpdateQueue {
       newY = snappedPosition.y;
     }
 
-    const isDestinationCoordinateValid =
-      this.mapTiles.isMapCoordinateWithinBounds(map, gridX, gridY) &&
-      !this.mapTiles.isSolid(map, gridX, gridY, MapLayers.Character) &&
-      !this.mapTiles.isPassage(map, gridX, gridY, MapLayers.Character);
-
-    if (!isDestinationCoordinateValid) {
-      const gridSize = GRID_WIDTH; // Assuming GRID_WIDTH is the size of one grid cell
-      let adjustedX = originX;
-      let adjustedY = originY;
-
-      switch (direction) {
-        case "up":
-          adjustedY -= gridSize;
-          break;
-        case "down":
-          adjustedY += gridSize;
-          break;
-        case "left":
-          adjustedX -= gridSize;
-          break;
-        case "right":
-          adjustedX += gridSize;
-          break;
-      }
-
-      // returns adjustedX and adjustedY based on server side calculations
-      return { newX: adjustedX, newY: adjustedY };
-    }
-
-    // returns same position as data.newX and data.newY if the new position is valid
-    return { newX, newY };
+    return { snappedX: newX, snappedY: newY };
   }
 
   private trackPing(data: ICharacterPositionUpdateFromClient): void {
