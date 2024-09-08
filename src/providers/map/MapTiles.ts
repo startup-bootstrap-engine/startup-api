@@ -284,25 +284,26 @@ export class MapTiles {
   }
 
   private areAllLayersTileEmpty(map: string, gridX: number, gridY: number): boolean {
-    for (const layer of MAP_LAYERS) {
-      let tileId;
-
-      try {
-        tileId = this.getTileId(map, gridX, gridY, MAP_LAYERS_TO_ID[layer]);
-
-        if (tileId === undefined) {
-          continue;
-        }
-      } catch (error) {
-        continue;
-      }
-
-      if (tileId >= 0) {
-        return false;
-      }
+    const mapData = MapLoader.maps.get(map);
+    if (!mapData) {
+      throw new Error(`Failed to find map ${map}`);
     }
 
-    return true;
+    return mapData.layers.every((layer) => {
+      if (layer.type !== "tilelayer" || !layer.chunks) {
+        return true; // Non-tile layers or layers without chunks are considered empty
+      }
+
+      const chunk = this.getTargetChunk(layer.chunks, gridX, gridY);
+      if (!chunk) {
+        return true; // If no chunk is found, consider it empty
+      }
+
+      const tileIndex = (gridY - chunk.y) * chunk.width + (gridX - chunk.x);
+      const tileId = chunk.data[tileIndex];
+
+      return tileId === 0; // 0 represents an empty tile in Tiled
+    });
   }
 
   private isBitwise = (n: number): boolean => {
