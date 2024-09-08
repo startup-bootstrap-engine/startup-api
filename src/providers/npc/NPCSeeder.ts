@@ -227,6 +227,7 @@ export class NPCSeeder {
 
       const npcHealth = this.npcHealthManaCalculator.getNPCMaxHealthRandomized(NPCData as unknown as INPC);
 
+      console.log(`🔧 Creating new NPC ${NPCData.key}/${NPCData.tiledId}`);
       const newNPC = new NPC({
         ...NPCData,
         health: npcHealth,
