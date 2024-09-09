@@ -119,6 +119,45 @@ describe("QuestSystem.ts", () => {
     );
   });
 
+  describe("Required Items Missing", () => {
+    it("should not complete quest if required items are missing", async () => {
+      const itemRequirementQuest = await unitTestHelper.createMockQuest(testNPC.id, null, {
+        type: QuestType.Interaction,
+        subtype: InteractionQuestSubtype.craft,
+        requiredItems: [{ itemKey: CraftingResourcesBlueprint.Diamond, qty: 1 }],
+      });
+      await createQuestRecord(itemRequirementQuest, testCharacter);
+
+      await questSystem.updateQuests(QuestType.Interaction, testCharacter, npcKey);
+
+      expect(await questSystem.hasStatus(itemRequirementQuest, QuestStatus.InProgress, testCharacter.id)).toBe(true);
+    });
+  });
+
+  describe("Interaction Craft  ", () => {
+    it("should update quest and release rewards | type interaction craft - stack remaining", async () => {
+      const questItemKeys = [CraftingResourcesBlueprint.Silk, CraftingResourcesBlueprint.Diamond];
+      await equipItems(testCharacter, questItemKeys, 10);
+      await questSystem.updateQuests(QuestType.Interaction, testCharacter, "");
+      expect(await questSystem.hasStatus(testInteractionCraftQuest, QuestStatus.Completed, testCharacter.id)).toEqual(
+        true
+      );
+      expect(releaseRewards).toBeCalledTimes(1);
+      await assertRemainingQty(testCharacter, characterItems, questItemKeys, [2, 8]);
+    });
+
+    it("should complete quest and release rewards when exact quantity remains", async () => {
+      const questItemKeys = [CraftingResourcesBlueprint.Silk, CraftingResourcesBlueprint.Diamond];
+      await equipItems(testCharacter, questItemKeys, 8);
+      await questSystem.updateQuests(QuestType.Interaction, testCharacter, "");
+      expect(await questSystem.hasStatus(testInteractionCraftQuest, QuestStatus.Completed, testCharacter.id)).toEqual(
+        true
+      );
+      expect(releaseRewards).toBeCalledTimes(1);
+      await assertRemainingQty(testCharacter, characterItems, questItemKeys, [0, 6]);
+    });
+  });
+
   describe("QuestSystem Edge Cases", () => {
     beforeEach(resetMocks);
 
