@@ -23,10 +23,10 @@ export const SOCKET_IO_CONFIG: Partial<ServerOptions> = {
   },
   transports: ["websocket", "polling"],
 
-  // Adjusted configuration to balance performance and resource usage
-  maxHttpBufferSize: 1e8, // Increase to 100MB if needed
-  pingTimeout: 30000, // 30 seconds timeout
-  pingInterval: 7000, // 7 seconds interval
+  // Optimized for MMORPG real-time interactions
+  maxHttpBufferSize: 1e8, // 100MB
+  pingTimeout: 10000, // 10 seconds timeout
+  pingInterval: 3000, // 3 seconds interval
 };
 
 /* Ping Interval

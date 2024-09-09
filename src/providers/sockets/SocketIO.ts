@@ -8,7 +8,7 @@ import { SocketIOAuthMiddleware } from "@providers/middlewares/SocketIOAuthMiddl
 import { EnvType, ISocket } from "@rpg-engine/shared";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { provide } from "inversify-binding-decorators";
-import { RedisClientOptions, createClient } from "redis";
+import { createClient, RedisClientOptions } from "redis";
 import { Socket, Server as SocketIOServer } from "socket.io";
 
 @provide(SocketIO)
@@ -32,28 +32,45 @@ export class SocketIO implements ISocket {
           socket: {
             host: appEnv.database.REDIS_CONTAINER,
             port: appEnv.database.REDIS_PORT,
-            connectTimeout: 30000,
+            connectTimeout: 20000,
             // keep connection alive for a mmorpg
-            keepAlive: 10000,
+            keepAlive: 5000,
             noDelay: true,
-            reconnectStrategy: (retries) => Math.min(100 * 2 ** retries, 30000), // Increase the base retry time
+            reconnectStrategy: (retries) => Math.min(100 * 2 ** retries, 20000),
           },
-          pingInterval: 10000, // 10 seconds
+          pingInterval: 5000, // 5 seconds
         };
 
-        const pubClient = createClient(redisOptions);
-        const subClient = pubClient.duplicate();
+        const pubClient = createClient(redisOptions) as any;
+        const subClient = pubClient.duplicate() as any;
 
-        try {
-          await pubClient.connect();
-          await subClient.connect();
-          this.socket.adapter(createAdapter(pubClient, subClient));
-          this.socket.use(SocketIOAuthMiddleware);
-          this.socket.listen(appEnv.socket.port.SOCKET);
-        } catch (error) {
-          console.error("Redis connection error:", error);
-          this.newRelic.noticeError(error);
-        }
+        pubClient.on("error", (err) => {
+          console.error("Redis Pub Client Error:", err);
+          this.newRelic.noticeError(err);
+        });
+
+        subClient.on("error", (err) => {
+          console.error("Redis Sub Client Error:", err);
+          this.newRelic.noticeError(err);
+        });
+
+        pubClient.on("connect", () => console.log("Redis Pub Client Connected"));
+        subClient.on("connect", () => console.log("Redis Sub Client Connected"));
+
+        const connectRedis = async (): Promise<void> => {
+          try {
+            await pubClient.connect();
+            await subClient.connect();
+            this.socket.adapter(createAdapter(pubClient, subClient));
+            console.log("Redis adapter set for Socket.IO");
+          } catch (error) {
+            console.error("Redis connection error:", error);
+            this.newRelic.noticeError(error);
+            setTimeout(connectRedis, 5000); // Retry connection after 5 seconds
+          }
+        };
+
+        await connectRedis();
         break;
     }
   }
