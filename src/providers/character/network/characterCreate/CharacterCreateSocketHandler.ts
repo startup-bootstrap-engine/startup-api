@@ -26,18 +26,9 @@ export class CharacterCreateSocketHandler {
         await socketEventsBinderControl.unbindEvents(channel);
 
         // make sure isOnline is turned off
+        await Character.updateOne({ _id: character._id }, { isOnline: false, channelId: undefined }).lean();
 
-        await Character.updateOne(
-          {
-            _id: character._id,
-          },
-          {
-            isOnline: false,
-            channelId: undefined,
-          }
-        );
-
-        console.log(`Client disconnected: ${channel.id}, Reason: ${reason}`);
+        const disconnectInitiator = this.getDisconnectInitiator(reason);
 
         /*
         transport close: This occurs when the client explicitly closes the connection, such as when a user closes their browser tab or the client application terminates the connection.
@@ -53,14 +44,46 @@ export class CharacterCreateSocketHandler {
         client namespace disconnect: Emitted when the client disconnects from a namespace explicitly by calling disconnect() on the namespace.
         */
 
-        // Log the disconnection reason with NewRelic or any other monitoring tool you're using
+        // Log the disconnection reason with NewRelic
         this.newRelic.trackMetric(
           NewRelicMetricCategory.Count,
           NewRelicSubCategory.Server,
           `SocketIODisconnect/${reason}`,
           1
         );
+
+        this.newRelic.trackMetric(
+          NewRelicMetricCategory.Count,
+          NewRelicSubCategory.Server,
+          `SocketIODisconnect/${reason}/${disconnectInitiator}`,
+          1
+        );
+
+        this.newRelic.trackMetric(
+          NewRelicMetricCategory.Count,
+          NewRelicSubCategory.Server,
+          `SocketIODisconnect/${disconnectInitiator}`,
+          1
+        );
+
+        console.log(`Client disconnected: ${channel.id}, Reason: ${reason}, Initiator: ${disconnectInitiator}`);
       });
+    }
+  }
+
+  private getDisconnectInitiator(reason: string): string {
+    switch (reason) {
+      case "transport close":
+      case "ping timeout":
+      case "transport error":
+        return "client";
+      case "io server disconnect":
+        return "server";
+      case "io client disconnect":
+      case "client namespace disconnect":
+        return "client_explicit";
+      default:
+        return "unknown";
     }
   }
 }
