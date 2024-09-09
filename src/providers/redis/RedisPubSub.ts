@@ -1,7 +1,7 @@
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { Locker } from "@providers/locks/Locker";
 import Redis from "ioredis";
+import { v4 as uuidv4 } from "uuid";
 
 export enum RedisPubSubChannels {
   SocketEvents = "rpg-api-socket-events",
@@ -12,7 +12,7 @@ export class RedisPubSub {
   private subConnection: Redis;
   private pubConnection: Redis;
 
-  constructor(private redisManager: RedisManager, private locker: Locker) {}
+  constructor(private redisManager: RedisManager) {}
 
   public async init(): Promise<void> {
     this.subConnection = await this.redisManager.getPoolClient("redis-pubsub-sub");
@@ -27,19 +27,18 @@ export class RedisPubSub {
     await this.subConnection.subscribe(channel);
 
     this.subConnection.on("message", async (ch, message) => {
-      const canProceed = await this.locker.lock(`redis-pubsub-subscribe-${channel}-${message}`);
+      if (ch === channel) {
+        const { id, data } = JSON.parse(message);
+        const lockKey = `processed:${id}`;
 
-      if (!canProceed) {
-        return;
-      }
-      try {
-        if (ch === channel) {
-          callback(message);
+        const pipeline = this.pubConnection.pipeline();
+        pipeline.set(lockKey, "1", "EX", 60, "NX");
+        pipeline.get(lockKey);
+
+        const results = await pipeline.exec();
+        if (results?.[0][1] === "OK") {
+          callback(data);
         }
-      } catch (error) {
-        console.error("Error processing message:", error);
-      } finally {
-        await this.locker.unlock(`redis-pubsub-subscribe-${channel}-${message}`);
       }
     });
   }
@@ -50,17 +49,11 @@ export class RedisPubSub {
     }
 
     try {
-      const canProceed = await this.locker.lock(`redis-pubsub-publish-${channel}-${message}`);
-
-      if (!canProceed) {
-        return;
-      }
-
-      await this.pubConnection.publish(channel, message);
+      const id = uuidv4();
+      const wrappedMessage = JSON.stringify({ id, data: message });
+      await this.pubConnection.publish(channel, wrappedMessage);
     } catch (err) {
       console.error("Error publishing message:", err);
-    } finally {
-      await this.locker.unlock(`redis-pubsub-publish-${channel}-${message}`);
     }
   }
 
