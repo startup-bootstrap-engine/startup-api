@@ -32,11 +32,11 @@ export class SocketIO implements ISocket {
           socket: {
             host: appEnv.database.REDIS_CONTAINER,
             port: appEnv.database.REDIS_PORT,
-            connectTimeout: 20000,
+            connectTimeout: 30000, // 30 seconds timeout (higher latency tolerance)
             // keep connection alive for a mmorpg
             keepAlive: 5000,
             noDelay: true,
-            reconnectStrategy: (retries) => Math.min(100 * 2 ** retries, 30000), // Increase the base retry time
+            reconnectStrategy: (retries) => Math.min(100 * 2 ** retries, 60000), // Increased backoff strategy
           },
           pingInterval: 5000, // 10 seconds
         };

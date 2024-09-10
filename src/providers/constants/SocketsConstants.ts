@@ -21,12 +21,12 @@ export const SOCKET_IO_CONFIG: Partial<ServerOptions> = {
     origin: appEnv.general.ENV === EnvType.Development ? "*" : appEnv.general.APP_URL,
     credentials: true,
   },
-  transports: ["websocket", "polling"],
+  transports: ["websocket"], // Force WebSocket-only to reduce overhead from fallback to polling
 
   // Optimized for MMORPG real-time interactions
   maxHttpBufferSize: 1e8, // 100MB
-  pingTimeout: 10000, // 10 seconds timeout
-  pingInterval: 3000, // 3 seconds interval
+  pingTimeout: 30000, // 30 seconds timeout
+  pingInterval: 7000, // 7 seconds interval
 };
 
 /* Ping Interval
