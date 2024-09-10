@@ -25,8 +25,8 @@ export const SOCKET_IO_CONFIG: Partial<ServerOptions> = {
 
   // Optimized for MMORPG real-time interactions
   maxHttpBufferSize: 1e8, // 100MB
-  pingTimeout: 30000, // 30 seconds timeout
-  pingInterval: 7000, // 7 seconds interval
+  pingTimeout: 60000,
+  pingInterval: 15000,
 };
 
 /* Ping Interval
