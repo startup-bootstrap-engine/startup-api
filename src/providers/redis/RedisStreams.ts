@@ -22,19 +22,6 @@ export class RedisStreams {
       throw new Error("Connection to Redis failed.");
     }
 
-    // Add Redis connection error handling
-    this.streamConnection.on("error", (err) => {
-      console.error("Redis stream connection error:", err);
-    });
-
-    this.streamConnection.on("end", () => {
-      console.log("Redis connection ended.");
-    });
-
-    this.streamConnection.on("reconnecting", () => {
-      console.log("Reconnecting to Redis...");
-    });
-
     console.log("✅ Redis stream connection initialized.");
   }
 
