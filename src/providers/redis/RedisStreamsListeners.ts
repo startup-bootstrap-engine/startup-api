@@ -1,3 +1,4 @@
+import { appEnv } from "@providers/config/env";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { provide } from "inversify-binding-decorators";
 
@@ -6,6 +7,11 @@ export class RedisStreamsListeners {
   constructor(private socketMessaging: SocketMessaging) {}
 
   public async addSubscribers(): Promise<void> {
-    await this.socketMessaging.subscribeToSocketEvents();
+    const { MICROSERVICE_NAME } = appEnv.general;
+
+    const IS_MICROSERVICE = !!MICROSERVICE_NAME;
+
+    // Rpg-api only
+    !IS_MICROSERVICE && (await this.socketMessaging.subscribeToSocketEvents());
   }
 }

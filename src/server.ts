@@ -84,8 +84,8 @@ async function initializeServerComponents(): Promise<void> {
   ]);
 
   // This should happen on rpg-api only. We have to use pub sub because remember the client only connects to rpg-api, not to rpg-npc (and other microservices). So rpg-npc has to send messages to rpg-api through redis pub sub
-  !IS_MICROSERVICE && (await redisPubSubListeners.addSubscribers());
-  !IS_MICROSERVICE && (await redisStreamsListeners.addSubscribers());
+  await redisPubSubListeners.addSubscribers();
+  await redisStreamsListeners.addSubscribers();
   await messagingBroker.initialize();
 
   await inMemoryHashTable.init();
