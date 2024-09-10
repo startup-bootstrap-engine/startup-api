@@ -2,6 +2,7 @@ import { appEnv } from "@providers/config/env";
 import { MapTransitionQueue } from "@providers/map/MapTransition/MapTransitionQueue";
 import { NPCMovementMoveTowards } from "@providers/npc/movement/NPCMovementMoveTowards";
 import { NPCManager } from "@providers/npc/NPCManager";
+import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { provide } from "inversify-binding-decorators";
 
 @provide(MessagingBrokerHandlers)
@@ -9,7 +10,8 @@ export class MessagingBrokerHandlers {
   constructor(
     private npcMovementMoveTowards: NPCMovementMoveTowards,
     private npcManager: NPCManager,
-    private mapTransitionQueue: MapTransitionQueue
+    private mapTransitionQueue: MapTransitionQueue,
+    private socketMessaging: SocketMessaging
   ) {}
 
   public async onAddHandlers(): Promise<void> {
@@ -18,6 +20,8 @@ export class MessagingBrokerHandlers {
     const IS_MICROSERVICE = !!MICROSERVICE_NAME;
 
     !IS_MICROSERVICE && (await this.mapTransitionQueue.addMapTransitionListener()); // Listened added in all services. RabbitMQ will do a load balancing between the them automatically (round-robin)
+
+    !IS_MICROSERVICE && (await this.socketMessaging.addSendEventToUserListener());
 
     switch (MICROSERVICE_NAME) {
       case "rpg-npc":
