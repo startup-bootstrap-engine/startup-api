@@ -60,7 +60,6 @@ export class MessagingBroker {
     await this.rabbitMQ.consumeMessages(MessagingBroker.EXCHANGE, queue, routingKey, async (data) => {
       await callback(data);
     });
-    console.log(`Listening for messages on ${routingKey} (queue: ${queue})`);
   }
 
   async close(): Promise<void> {

@@ -66,7 +66,7 @@ export class CharacterCreateSocketHandler {
           1
         );
 
-        console.log(`Client disconnected: ${channel.id}, Reason: ${reason}, Initiator: ${disconnectInitiator}`);
+        console.log(`🔌⛔️ Client disconnected: ${channel.id}, Reason: ${reason}, Initiator: ${disconnectInitiator}`);
       });
     }
   }

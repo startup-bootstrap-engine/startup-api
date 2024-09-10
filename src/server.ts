@@ -17,6 +17,8 @@ import {
   newRelic,
   redisManager,
   redisPubSubListeners,
+  redisStreams,
+  redisStreamsListeners,
   serverBootstrap,
   serverHelper,
   socketAdapter,
@@ -78,10 +80,12 @@ async function initializeServerComponents(): Promise<void> {
     !IS_MICROSERVICE && socketAdapter.init(appEnv.socket.type), // no need for socket connection in microservices, because we use rpg-api as the main server
     messagingBrokerHandlers.onAddHandlers(),
     redisPubSub.init(),
+    redisStreams.init(),
   ]);
 
   // This should happen on rpg-api only. We have to use pub sub because remember the client only connects to rpg-api, not to rpg-npc (and other microservices). So rpg-npc has to send messages to rpg-api through redis pub sub
   !IS_MICROSERVICE && (await redisPubSubListeners.addSubscribers());
+  !IS_MICROSERVICE && (await redisStreamsListeners.addSubscribers());
   await messagingBroker.initialize();
 
   await inMemoryHashTable.init();
