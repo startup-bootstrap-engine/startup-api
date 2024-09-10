@@ -1,6 +1,6 @@
-import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { NPC } from "@entities/ModuleNPC/NPCModel";
-import { IQuestObjectiveInteraction, QuestObjectiveInteraction } from "@entities/ModuleQuest/QuestObjectiveModel";
+import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
+import { Quest } from "@entities/ModuleQuest/QuestModel";
+import { QuestObjectiveInteraction } from "@entities/ModuleQuest/QuestObjectiveModel";
 import { QuestRecord } from "@entities/ModuleQuest/QuestRecordModel";
 import { MathHelper } from "@providers/math/MathHelper";
 import { QuestSystem } from "@providers/quest/QuestSystem";
@@ -12,7 +12,6 @@ import {
   GRID_WIDTH,
   INPCGetInfoEmitterClient,
   INPCStartDialog,
-  IQuest,
   NPCMovementType,
   NPCSocketEvents,
   NPCTargetType,
@@ -73,8 +72,11 @@ export class NPCNetworkDialogStart {
                 }
               );
 
+              const hasQuestWithNPC = await this.doesNPCHasInProgressQuestWithCharacter(npc, character._id);
               // Update interaction quest for character (if has any)
-              await this.updateRelevantQuests(character, npc.baseKey);
+              if (hasQuestWithNPC) {
+                await this.questSystem.updateQuests(QuestType.Interaction, character, npc.baseKey);
+              }
 
               setTimeout(async () => {
                 await NPC.findByIdAndUpdate(
@@ -102,32 +104,30 @@ export class NPCNetworkDialogStart {
     );
   }
 
-  private async updateRelevantQuests(character: ICharacter, npcKey: string): Promise<void> {
-    const questRecords = await QuestRecord.find({
-      character: character._id,
+  private async doesNPCHasInProgressQuestWithCharacter(npc: INPC, characterId: string): Promise<boolean> {
+    const inProgressQuestsFromCharacter = await QuestRecord.find({
+      character: characterId,
       status: QuestStatus.InProgress,
-    })
-      .populate({
-        path: "quest",
-        populate: {
-          path: "objectives",
-          model: QuestObjectiveInteraction,
-        },
-      })
-      .lean();
+    }).lean();
 
-    for (const record of questRecords) {
-      const quest = record.quest as IQuest;
-      if (!quest || !quest.objectives) continue;
+    for (const questRecord of inProgressQuestsFromCharacter) {
+      const isInteractive = await QuestObjectiveInteraction.findOne({
+        _id: questRecord.objective,
+      }).lean();
 
-      for (const objective of quest.objectives) {
-        const interactionObjective = objective as IQuestObjectiveInteraction;
+      if (!isInteractive) {
+        continue;
+      }
 
-        if (interactionObjective.type === QuestType.Interaction && interactionObjective.targetNPCkey === npcKey) {
-          await this.questSystem.updateQuests(QuestType.Interaction, character, npcKey);
-          return; // Exit after updating the first matching quest
-        }
+      const quest = await Quest.findOne({
+        _id: questRecord.quest,
+        npcId: npc._id,
+      }).lean();
+      if (quest) {
+        return true;
       }
     }
+
+    return false;
   }
 }

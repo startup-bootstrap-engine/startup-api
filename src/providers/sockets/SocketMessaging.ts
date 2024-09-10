@@ -4,7 +4,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { CharacterView } from "@providers/character/CharacterView";
 import { appEnv } from "@providers/config/env";
 import { NPCView } from "@providers/npc/NPCView";
-import { RedisPubSub, RedisPubSubChannels } from "@providers/redis/RedisPubSub";
+import { RedisStreamChannels, RedisStreams } from "@providers/redis/RedisStreams";
 import { SocketAdapter } from "@providers/sockets/SocketAdapter";
 import {
   CharacterSkullType,
@@ -24,18 +24,18 @@ export class SocketMessaging {
     private characterView: CharacterView,
     private npcView: NPCView,
     private socketAdapter: SocketAdapter,
-    private redisPubSub: RedisPubSub
+    private redisStreams: RedisStreams
   ) {}
-
-  public async initPubSub(): Promise<void> {
-    await this.redisPubSub.init();
-  }
 
   public async subscribeToSocketEvents(): Promise<void> {
     try {
-      await this.redisPubSub.subscribe(RedisPubSubChannels.SocketEvents, (message) => {
-        const { userChannel, eventName, data } = JSON.parse(message);
-        this.sendEventToUser(userChannel, eventName, data);
+      await this.redisStreams.readFromStream(RedisStreamChannels.SocketEvents, (message) => {
+        if (message && typeof message === "object") {
+          const { userChannel, eventName, data } = message;
+          this.sendEventToUser(userChannel, eventName, data);
+        } else {
+          console.error("Invalid message format:", message);
+        }
       });
     } catch (error) {
       console.error("Failed to initialize Socket Messaging on microservice:", error);
@@ -62,9 +62,9 @@ export class SocketMessaging {
 
   public sendEventToUser<T>(userChannel: string, eventName: string, data?: T): void {
     if (appEnv.general.MICROSERVICE_NAME === "rpg-npc") {
-      this.redisPubSub
-        .publish(RedisPubSubChannels.SocketEvents, JSON.stringify({ userChannel, eventName, data }))
-        .catch((error) => console.error("Failed to publish event to Redis:", error));
+      this.redisStreams
+        .addToStream(RedisStreamChannels.SocketEvents, { userChannel, eventName, data })
+        .catch((error) => console.error("Failed to add event to Redis stream:", error));
     } else {
       void this.socketAdapter.emitToUser(userChannel, eventName, data || {});
     }

@@ -149,7 +149,6 @@ export class RabbitMQ {
         throw new Error("RabbitMQ channel not initialized");
       }
       await this.channel.bindQueue(queue, exchange, routingKey);
-      console.log(`Queue ${queue} bound to exchange ${exchange} with routing key ${routingKey}`);
     });
   }
 

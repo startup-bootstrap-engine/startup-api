@@ -46,6 +46,7 @@ import { PatreonAPI } from "@providers/patreon/PatreonAPI";
 import { ResultsPoller } from "@providers/poller/ResultsPoller";
 import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
 import { RedisPubSub } from "@providers/redis/RedisPubSub";
+import { RedisStreams } from "@providers/redis/RedisStreams";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import { ManaShield } from "@providers/spells/data/logic/mage/ManaShield";
 import SpellSilence from "@providers/spells/data/logic/mage/druid/SpellSilence";
@@ -114,7 +115,8 @@ export class ServerBootstrap {
     private NPCCycleQueue: NPCCycleQueue,
     private NPCDeathQueue: NPCDeathQueue,
     private spellNetworkCastQueue: SpellNetworkCastQueue,
-    private redisPubSub: RedisPubSub
+    private redisPubSub: RedisPubSub,
+    private redisStreams: RedisStreams
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -254,6 +256,8 @@ export class ServerBootstrap {
     this.npcFreezer.init();
 
     await this.locker.clear();
+
+    await this.redisStreams.clearAllStreams();
   }
 
   private addUnhandledRejectionListener(): void {
