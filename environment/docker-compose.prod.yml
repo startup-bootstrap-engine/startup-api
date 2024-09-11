@@ -141,7 +141,7 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-      - ./environment/rabbitmq-init.sh:/docker-entrypoint-initdb.d/rabbitmq-init.sh
+      - ./environment/rabbit-init.sh:/docker-entrypoint-initdb.d/rabbit-init.sh
     networks:
       - rpg-network
 
