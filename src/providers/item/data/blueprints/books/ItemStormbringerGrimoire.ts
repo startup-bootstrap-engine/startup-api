@@ -61,5 +61,5 @@ export const itemStormbringerGrimoire: IEquippableItemBlueprint = {
       },
     },
   ],
-  equippedBuffDescription: "Increases attack interval speed by 5%, magic by 5% and dexterity by 5% respectively",
+  equippedBuffDescription: "Reduces attack interval speed by 5%, magic by 5% and dexterity by 5% respectively",
 };
