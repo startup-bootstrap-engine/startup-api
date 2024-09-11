@@ -471,7 +471,7 @@ export class SkillIncrease {
       const minimumSP = this.skillCalculator.getSPForLevel(skillDetails.level);
 
       if (skillDetails.skillPoints < minimumSP) {
-        console.error(
+        console.warn(
           `Skill ${skillKey} for character ${skills.owner} has SP ${skillDetails.skillPoints} which is less than the minimum ${minimumSP} for level ${skillDetails.level}. Adjusting...`
         );
         skillDetails.skillPoints = minimumSP;
