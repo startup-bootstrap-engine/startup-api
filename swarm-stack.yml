@@ -294,10 +294,11 @@ services:
         condition: on-failure
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.definya.com`)"
-      - "traefik.http.routers.rabbitmq.entrypoints=websecure"
-      - "traefik.http.routers.rabbitmq.tls.certresolver=myresolver"
-      - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
+      - "traefik.http.routers.rpg-rabbitmq.rule=Host(`rabbitmq.definya.com`)"
+      - "traefik.http.routers.rpg-rabbitmq.entrypoints=websecure"
+      - "traefik.http.routers.rpg-rabbitmq.tls.certresolver=myresolver"
+      - "traefik.http.services.rpg-rabbitmq.loadbalancer.server.port=15672"
+      - "traefik.http.routers.rpg-rabbitmq.service=rpg-rabbitmq"
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 30s
