@@ -23,12 +23,6 @@ EXPOSE 5002
 EXPOSE 5100
 EXPOSE 5101
 
-# Set environment variables for New Relic logging
-ENV NEW_RELIC_DISTRIBUTED_TRACING_ENABLED=true \
-    NEW_RELIC_LOG=stdout \
-    NEW_RELIC_LOG_LEVEL=error \
-    NEW_RELIC_RULES_IGNORE_URL_REGEXES="OtherTransaction/Message/RabbitMQ/Exchange/Named/rpg_microservices"
-
 # Install PM2 globally
 RUN npm install -g pm2
 
