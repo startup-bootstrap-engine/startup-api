@@ -24,9 +24,9 @@ export const SOCKET_IO_CONFIG: Partial<ServerOptions> = {
   transports: ["websocket"], // Force WebSocket-only to reduce overhead from fallback to polling
 
   // Optimized for MMORPG real-time interactions
-  maxHttpBufferSize: 1e8, // 100MB
-  pingTimeout: 60000,
-  pingInterval: 15000,
+  maxHttpBufferSize: 5e6, // 100MB
+  pingTimeout: 80000,
+  pingInterval: 10000,
 };
 
 /* Ping Interval

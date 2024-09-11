@@ -43,9 +43,13 @@ services:
 
         # #  Add sticky session for websockets
         #! Careful because when combined with multi client, this will lead all MC characters to be connected to the same server, compromising load balancer
-        # - "traefik.http.services.rpg-api-socket-service.loadbalancer.sticky=true"
-        # - "traefik.http.services.rpg-api-socket-service.loadbalancer.sticky.cookie.name=StickyCookie"
-        # - "traefik.http.services.rpg-api-socket-service.loadbalancer.sticky.cookie.secure=true"
+        - "traefik.http.services.rpg-api-socket-service.loadbalancer.sticky=true"
+        - "traefik.http.services.rpg-api-socket-service.loadbalancer.sticky.cookie.name=StickyCookie"
+        - "traefik.http.services.rpg-api-socket-service.loadbalancer.sticky.cookie.secure=true"
+
+        - "traefik.http.middlewares.websocket.headers.customrequestheaders.Connection=Upgrade"
+        - "traefik.http.middlewares.websocket.headers.customrequestheaders.Upgrade=websocket"
+        - "traefik.http.routers.rpg-api-socket.middlewares=websocket@docker"
 
     logging:
       options:

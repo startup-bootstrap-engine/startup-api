@@ -39,9 +39,9 @@ services:
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
 
-      - "--entryPoints.web.transport.respondingTimeouts.readTimeout=15s"
-      - "--entryPoints.web.transport.respondingTimeouts.writeTimeout=15s"
-      - "--entryPoints.web.transport.respondingTimeouts.idleTimeout=10m"
+      - "--entryPoints.web.transport.respondingTimeouts.readTimeout=30s"
+      - "--entryPoints.web.transport.respondingTimeouts.writeTimeout=30s"
+      - "--entryPoints.web.transport.respondingTimeouts.idleTimeout=30m"
 
       # Logging & Debugging
       - --accesslog=true
