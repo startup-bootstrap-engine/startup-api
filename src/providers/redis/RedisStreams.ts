@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable require-await */
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { Time } from "@providers/time/Time";
 import Redis from "ioredis";
-import { v4 as uuidv4 } from "uuid";
 
 export enum RedisStreamChannels {
   SocketEvents = "rpg-api-socket-events",
@@ -10,30 +12,108 @@ export enum RedisStreamChannels {
 @provideSingleton(RedisStreams)
 export class RedisStreams {
   private streamConnection: Redis;
-  private readonly MAX_STREAM_LENGTH = 10000; // Adjust this value as needed
+  private readonly MAX_STREAM_LENGTH = 10000;
+  private readonly TRIM_INTERVAL_MS = 60000;
+  private isShuttingDown = false;
+  private reconnectTimeout: NodeJS.Timeout | null = null;
 
-  constructor(private redisManager: RedisManager) {}
+  constructor(private redisManager: RedisManager, private time: Time) {}
 
-  // Initialize the Redis connection
   public async init(): Promise<void> {
-    this.streamConnection = await this.redisManager.getPoolClient("redis-streams");
+    await this.connectToRedis();
+    console.log("✅ Redis stream connection initialized.");
 
-    if (!this.streamConnection) {
-      throw new Error("Connection to Redis failed.");
+    for (const channel of Object.values(RedisStreamChannels)) {
+      await this.ensureConsumerGroup(channel);
     }
 
-    console.log("✅ Redis stream connection initialized.");
+    void this.startPeriodicTrim();
   }
 
-  // Add a message to the Redis stream
-  public async addToStream(channel: RedisStreamChannels, message: Record<string, any>): Promise<string> {
+  private async connectToRedis(): Promise<void> {
+    try {
+      this.streamConnection = await this.redisManager.getPoolClient("redis-streams");
+      if (!this.streamConnection) {
+        throw new Error("Connection to Redis failed.");
+      }
+      this.streamConnection.on("error", this.handleRedisError.bind(this));
+      this.streamConnection.on("close", this.handleRedisClose.bind(this));
+    } catch (error) {
+      console.error("Failed to connect to Redis:", error);
+      await this.scheduleReconnect();
+    }
+  }
+
+  private handleRedisError(error: Error): void {
+    console.error("Redis connection error:", error);
+    if (!this.isShuttingDown) {
+      void this.scheduleReconnect();
+    }
+  }
+
+  private handleRedisClose(): void {
+    if (!this.isShuttingDown) {
+      void this.scheduleReconnect();
+    }
+  }
+
+  private async scheduleReconnect(): Promise<void> {
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+    }
+    await this.time.waitForMilliseconds(5000); // Wait before reconnecting
+    if (!this.isShuttingDown) {
+      await this.connectToRedis();
+    }
+  }
+
+  public async shutdown(): Promise<void> {
+    this.isShuttingDown = true;
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+    }
+    if (this.streamConnection) {
+      await this.streamConnection.quit();
+    }
+  }
+
+  private async ensureConnection(): Promise<void> {
+    if (!this.streamConnection || this.streamConnection.status !== "ready") {
+      await this.connectToRedis();
+    }
+  }
+
+  private async ensureConsumerGroup(channel: RedisStreamChannels): Promise<void> {
+    await this.ensureConnection();
+    const groupName = this.getConsumerGroupName(channel);
+    try {
+      await this.streamConnection.xgroup("CREATE", channel, groupName, "$", "MKSTREAM");
+      console.log(`Consumer group '${groupName}' created for channel '${channel}'.`);
+    } catch (err) {
+      if (err.message.includes("BUSYGROUP")) {
+        console.log(`Consumer group '${groupName}' already exists for channel '${channel}'.`);
+      } else {
+        console.error(`Error ensuring consumer group for channel '${channel}':`, err);
+        throw err;
+      }
+    }
+  }
+
+  private getConsumerGroupName(channel: RedisStreamChannels): string {
+    return `${channel}_consumer_group`;
+  }
+
+  private generateConsumerName(channel: RedisStreamChannels): string {
+    return `${channel}_consumer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  public async addToStream(channel: RedisStreamChannels, message: Record<string, any>): Promise<string | null> {
     if (!this.streamConnection) {
       throw new Error("Redis stream connection not initialized.");
     }
 
     try {
-      const id = uuidv4();
-      const jsonMessage = JSON.stringify({ id, ...message });
+      const jsonMessage = JSON.stringify(message);
       const result = await this.streamConnection.xadd(channel, "*", "message", jsonMessage);
 
       if (!result) {
@@ -42,12 +122,6 @@ export class RedisStreams {
 
       console.log(`Added message to stream ${channel}: ${jsonMessage}`);
 
-      // Publish a notification
-      await this.streamConnection.publish(channel, "new_message");
-
-      // Check and trim the stream if necessary
-      await this.checkAndTrimStream(channel);
-
       return result;
     } catch (err) {
       console.error(`Error adding message to stream ${channel}:`, err);
@@ -55,92 +129,81 @@ export class RedisStreams {
     }
   }
 
-  private async checkAndTrimStream(channel: RedisStreamChannels): Promise<void> {
-    try {
-      const streamLength = await this.streamConnection.xlen(channel);
-      if (streamLength > this.MAX_STREAM_LENGTH) {
-        await this.trimStream(channel, this.MAX_STREAM_LENGTH);
-        console.log(`Trimmed stream ${channel} to ${this.MAX_STREAM_LENGTH} messages`);
-      }
-    } catch (err) {
-      console.error(`Error checking and trimming stream ${channel}:`, err);
-    }
-  }
+  public async readFromStream(channel: RedisStreamChannels, callback: (message: any) => Promise<void>): Promise<void> {
+    const groupName = this.getConsumerGroupName(channel);
+    const consumerName = this.generateConsumerName(channel);
 
-  // Read from a Redis stream with proper loop control
-  public async readFromStream(
-    channel: RedisStreamChannels,
-    callback: (message: any) => void,
-    lastId: string = "0-0"
-  ): Promise<void> {
-    if (!this.streamConnection) {
-      throw new Error("Redis stream connection not initialized.");
-    }
-
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    const processStreamMessages = async () => {
+    while (!this.isShuttingDown) {
       try {
-        const result = await this.streamConnection.xread("COUNT", 100, "STREAMS", channel, lastId);
+        await this.ensureConnection();
+        const result = await this.streamConnection.xreadgroup(
+          "GROUP",
+          groupName,
+          consumerName,
+          "COUNT",
+          500, // Increased batch size
+          "BLOCK",
+          2000, // Reduced block time
+          "STREAMS",
+          channel,
+          ">"
+        );
+
         if (result && result.length > 0) {
-          const [[, messages]] = result;
-          const pipeline = this.streamConnection.pipeline();
-
-          // Set locks for each message in the pipeline
-          for (const [id, [, _message]] of messages) {
-            const lockKey = `stream:${channel}:${id}`;
-            pipeline.set(lockKey, "1", "EX", 60, "NX");
-          }
-
-          const lockResults = await pipeline.exec();
-
-          // Only process messages that were successfully locked
-          const lockedMessages = messages.filter((_, idx) => lockResults?.[idx]?.[1] === "OK");
-
-          for (const [id, [, message]] of lockedMessages) {
-            try {
-              const parsedMessage = JSON.parse(message);
-              await callback(parsedMessage);
-              lastId = id; // Update the last processed ID
-            } catch (parseError) {
-              console.error(`Error parsing message: ${parseError}`, message);
-              await callback(message); // Ensure the raw message is still processed if parsing fails
-            }
-          }
+          const [[, messages]] = result as any[];
+          await Promise.all(
+            messages.map(async ([id, [, message]]) => {
+              try {
+                const parsedMessage = JSON.parse(message);
+                await callback(parsedMessage);
+                await this.streamConnection.xack(channel, groupName, id);
+              } catch (error) {
+                console.error(`Error processing message ${id}:`, error);
+                await this.streamConnection.xack(channel, groupName, id);
+              }
+            })
+          );
         }
-      } catch (err) {
-        console.error("Error reading from stream:", err);
+      } catch (error) {
+        if (error.message.includes("NOGROUP")) {
+          console.error(`Consumer group '${groupName}' does not exist. Recreating...`);
+          await this.ensureConsumerGroup(channel);
+        } else {
+          console.error(`Error reading from stream ${channel}:`, error);
+          await this.time.waitForMilliseconds(5000);
+        }
       }
-    };
-
-    // Process the initial stream messages
-    void processStreamMessages();
-
-    // Set up pub/sub for real-time notifications
-    const pubSubClient = this.streamConnection.duplicate();
-    await pubSubClient.subscribe(channel);
-
-    pubSubClient.on("message", (ch) => {
-      if (ch === channel) {
-        void processStreamMessages();
-      }
-    });
+    }
   }
 
-  // Trim the Redis stream to control length
-  public async trimStream(channel: RedisStreamChannels, maxLen: number): Promise<void> {
+  private async trimStream(channel: RedisStreamChannels, maxLen: number): Promise<void> {
     try {
+      await this.ensureConnection();
       await this.streamConnection.xtrim(channel, "MAXLEN", "~", maxLen);
     } catch (err) {
-      console.error("Error trimming stream:", err);
+      console.error(`Error trimming stream '${channel}':`, err);
     }
   }
 
-  // Delete a Redis stream
+  private async startPeriodicTrim(): Promise<void> {
+    while (!this.isShuttingDown) {
+      try {
+        for (const channel of Object.values(RedisStreamChannels)) {
+          await this.trimStream(channel, this.MAX_STREAM_LENGTH);
+        }
+      } catch (err) {
+        console.error("Error during periodic stream trimming:", err);
+      }
+      await this.time.waitForMilliseconds(this.TRIM_INTERVAL_MS);
+    }
+  }
+
   public async deleteStream(channel: RedisStreamChannels): Promise<void> {
     try {
       await this.streamConnection.del(channel);
+      console.log(`Deleted stream '${channel}'.`);
     } catch (err) {
-      console.error("Error deleting stream:", err);
+      console.error(`Error deleting stream '${channel}':`, err);
     }
   }
 

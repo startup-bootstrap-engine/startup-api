@@ -257,7 +257,7 @@ export class ServerBootstrap {
 
     await this.locker.clear();
 
-    await this.redisStreams.clearAllStreams();
+    await this.redisStreams.shutdown();
   }
 
   private addUnhandledRejectionListener(): void {

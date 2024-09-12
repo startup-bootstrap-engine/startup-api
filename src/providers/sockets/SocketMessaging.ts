@@ -3,8 +3,8 @@ import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterView } from "@providers/character/CharacterView";
 import { appEnv } from "@providers/config/env";
-import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
 import { NPCView } from "@providers/npc/NPCView";
+import { RedisStreamChannels, RedisStreams } from "@providers/redis/RedisStreams";
 import { SocketAdapter } from "@providers/sockets/SocketAdapter";
 import {
   CharacterSkullType,
@@ -24,13 +24,13 @@ export class SocketMessaging {
     private characterView: CharacterView,
     private npcView: NPCView,
     private socketAdapter: SocketAdapter,
-    private messagingBroker: MessagingBroker
+    private redisStreams: RedisStreams
   ) {}
 
-  public async addSendEventToUserListener(): Promise<void> {
-    await this.messagingBroker.listenForMessages("socket-messaging", "sendEventToUser", (data) => {
-      const { userChannel, eventName, data: eventData } = data;
-
+  public addSendEventToUserListener(): void {
+    // eslint-disable-next-line require-await
+    void this.redisStreams.readFromStream(RedisStreamChannels.SocketEvents, async (message) => {
+      const { userChannel, eventName, data: eventData } = message;
       this.sendEventToUser(userChannel, eventName, eventData);
     });
   }
@@ -55,10 +55,10 @@ export class SocketMessaging {
 
   public sendEventToUser<T>(userChannel: string, eventName: string, data?: T): void {
     if (appEnv.general.MICROSERVICE_NAME === "rpg-npc") {
-      void this.messagingBroker.sendMessage("socket-messaging", "sendEventToUser", {
+      void this.redisStreams.addToStream(RedisStreamChannels.SocketEvents, {
         userChannel,
         eventName,
-        data,
+        data: data || {},
       });
     } else {
       void this.socketAdapter.emitToUser(userChannel, eventName, data || {});
