@@ -8,7 +8,7 @@
       "autorestart": true,
       "instances": "max",
       "exec_mode": "cluster",
-      "node_args": "-r dotenv/config -r ./register-paths.js",
+      "node_args": "-r dotenv/config -r newrelic -r ./register-paths.js",
       "max_memory_restart": "8G",
       "kill_timeout": 20000,
       "min_uptime": 10000,
