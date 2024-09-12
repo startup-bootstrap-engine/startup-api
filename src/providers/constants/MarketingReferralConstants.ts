@@ -6,7 +6,7 @@ export const CRAFTING_SOCIAL_CRYSTAL_MIN_TIER_REQUIREMENT = 7; // minimum tier t
 
 export const CRAFTING_SOCIAL_CRYSTAL_MAX_CAP_REQUIREMENT = 9; // max cap of social crystals required to craft items
 
-export const CRAFTING_SOCIAL_CRYSTAL_DAILY_REWARD_CHANCE = 15; // chance to get social crystals as daily reward, in %
+export const CRAFTING_SOCIAL_CRYSTAL_DAILY_REWARD_CHANCE = 100; // chance to get social crystals as daily reward, in %
 
 // MapTransitions that requires crystals
 
