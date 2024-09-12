@@ -34,9 +34,7 @@ dayjs.extend(duration);
 
 // Load New Relic if not running unit tests
 if (!appEnv.general.IS_UNIT_TEST) {
-  const newrelic = require("newrelic");
-
-  newrelic.setTransactionName("ignore", "OtherTransaction/Message/RabbitMQ");
+  require("newrelic");
 }
 
 // Determine the port to use
