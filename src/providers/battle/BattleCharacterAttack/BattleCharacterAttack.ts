@@ -7,6 +7,7 @@ import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterSkull } from "@providers/character/CharacterSkull";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
+import { Locker } from "@providers/locks/Locker";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { EntityType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -29,7 +30,7 @@ export class BattleCharacterAttack {
     private battleCycle: BattleCycle,
     private socketMessaging: SocketMessaging,
     private battleCharacterAttackIntervalSpeed: BattleCharacterAttackIntervalSpeed,
-
+    private locker: Locker,
     private characterSkull: CharacterSkull
   ) {}
 
@@ -47,84 +48,97 @@ export class BattleCharacterAttack {
 
   @TrackNewRelicTransaction()
   private async execCharacterBattleCycleLoop(character: ICharacter, target: ICharacter | INPC): Promise<void> {
-    const updatedCharacter = (await Character.findOne({ _id: character._id, scene: target.scene }).lean({
-      virtuals: true,
-      defaults: true,
-    })) as ICharacter;
+    const lockKey = `battle_cycle_${character._id}`;
+    const hasLock = await this.locker.hasLock(lockKey);
 
-    if (!updatedCharacter) {
-      this.battleCycle.stop(character._id);
-      return;
+    if (hasLock) {
+      return; // Battle cycle is already running for this character
     }
 
-    const hasBasicValidation = this.characterValidation.hasBasicValidation(updatedCharacter);
+    try {
+      await this.locker.lock(lockKey, 5); // Lock for 5 seconds
 
-    if (!hasBasicValidation) {
-      await this.battleTargeting.cancelTargeting(updatedCharacter);
-      await this.battleNetworkStopTargeting.stopTargeting(updatedCharacter);
-      return;
-    }
-
-    const characterSkills = (await Skill.findOne({ owner: character._id })
-      .lean({
+      const updatedCharacter = (await Character.findOne({ _id: character._id, scene: target.scene }).lean({
         virtuals: true,
         defaults: true,
-      })
-      .cacheQuery({
-        cacheKey: `${character._id}-skills`,
-      })) as ISkill;
+      })) as ICharacter;
 
-    updatedCharacter.skills = characterSkills;
-
-    let updatedTarget;
-
-    if (target.type === EntityType.NPC) {
-      updatedTarget = await NPC.findOne({ _id: target._id, scene: target.scene }).lean({
-        virtuals: true,
-        defaults: true,
-      });
-
-      if (!updatedTarget) {
+      if (!updatedCharacter) {
         this.battleCycle.stop(character._id);
         return;
       }
 
-      const updatedNPCSkills = await Skill.findOne({ owner: target._id, ownerType: "NPC" })
+      const hasBasicValidation = this.characterValidation.hasBasicValidation(updatedCharacter);
+
+      if (!hasBasicValidation) {
+        await this.battleTargeting.cancelTargeting(updatedCharacter);
+        await this.battleNetworkStopTargeting.stopTargeting(updatedCharacter);
+        return;
+      }
+
+      const characterSkills = (await Skill.findOne({ owner: character._id })
         .lean({
           virtuals: true,
           defaults: true,
         })
         .cacheQuery({
+          cacheKey: `${character._id}-skills`,
+        })) as ISkill;
+
+      updatedCharacter.skills = characterSkills;
+
+      let updatedTarget;
+
+      if (target.type === EntityType.NPC) {
+        updatedTarget = await NPC.findOne({ _id: target._id, scene: target.scene }).lean({
+          virtuals: true,
+          defaults: true,
+        });
+
+        if (!updatedTarget) {
+          this.battleCycle.stop(character._id);
+          return;
+        }
+
+        const updatedNPCSkills = await Skill.findOne({ owner: target._id, ownerType: "NPC" })
+          .lean({
+            virtuals: true,
+            defaults: true,
+          })
+          .cacheQuery({
+            cacheKey: `${target._id}-skills`,
+          });
+
+        updatedTarget.skills = updatedNPCSkills;
+      }
+
+      if (target.type === EntityType.Character) {
+        updatedTarget = await Character.findOne({ _id: target._id, scene: target.scene }).lean({
+          virtuals: true,
+          defaults: true,
+        });
+
+        if (!updatedTarget) {
+          this.battleCycle.stop(character._id);
+          return;
+        }
+
+        // eslint-disable-next-line mongoose-lean/require-lean
+        const updatedCharacterSkills = await Skill.findOne({ owner: target._id, ownerType: "Character" }).cacheQuery({
           cacheKey: `${target._id}-skills`,
         });
 
-      updatedTarget.skills = updatedNPCSkills;
-    }
-
-    if (target.type === EntityType.Character) {
-      updatedTarget = await Character.findOne({ _id: target._id, scene: target.scene }).lean({
-        virtuals: true,
-        defaults: true,
-      });
-
-      if (!updatedTarget) {
-        this.battleCycle.stop(character._id);
-        return;
+        updatedTarget.skills = updatedCharacterSkills;
       }
 
-      // eslint-disable-next-line mongoose-lean/require-lean
-      const updatedCharacterSkills = await Skill.findOne({ owner: target._id, ownerType: "Character" }).cacheQuery({
-        cacheKey: `${target._id}-skills`,
-      });
+      if (!updatedCharacter || !updatedTarget) {
+        throw new Error("Failed to get updated required elements for attacking target.");
+      }
 
-      updatedTarget.skills = updatedCharacterSkills;
+      await this.attackTarget(updatedCharacter, updatedTarget);
+    } finally {
+      await this.locker.unlock(lockKey);
     }
-
-    if (!updatedCharacter || !updatedTarget) {
-      throw new Error("Failed to get updated required elements for attacking target.");
-    }
-
-    await this.attackTarget(updatedCharacter, updatedTarget);
   }
 
   @TrackNewRelicTransaction()
