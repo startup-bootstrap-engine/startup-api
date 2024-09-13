@@ -16,12 +16,16 @@ import { NPC_GIANT_FORM_LOOT_MULTIPLIER } from "@providers/constants/NPCConstant
 import { LOW_SKILL_LEVEL_SP_INCREASE_BONUS } from "@providers/constants/SkillConstants";
 import { blueprintManager } from "@providers/inversify/container";
 import { ItemRarity } from "@providers/item/ItemRarity";
-import { AvailableBlueprints, OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import {
+  AvailableBlueprints,
+  CraftingResourcesBlueprint,
+  OthersBlueprint,
+} from "@providers/item/data/types/itemsBlueprintTypes";
+import { SimpleTutorial } from "@providers/simpleTutorial/SimpleTutorial";
 import { INPCLoot, ItemSubType, ItemType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { random, round } from "lodash";
 import { calculateGold } from "./NPCGold";
-import { SimpleTutorial } from "@providers/simpleTutorial/SimpleTutorial";
 
 @provide(NPCLoot)
 export class NPCLoot {
@@ -101,7 +105,7 @@ export class NPCLoot {
           }
 
           if (lootItem.subType === ItemSubType.CraftingResource) {
-            if (lootItem.name === "Worm") {
+            if (lootItem.name === CraftingResourcesBlueprint.Worm) {
               await this.simpleTutorial.sendSimpleTutorialActionToCharacter(killer, "first-worm");
               break;
             }
