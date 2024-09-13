@@ -180,6 +180,8 @@ export class ServerBootstrap {
       await this.NPCDeathQueue.shutdown();
       await this.spellNetworkCastQueue.shutdown();
       await this.redisPubSub.unsubscribe();
+
+      await this.redisStreams.shutdown();
     };
 
     process.on("SIGTERM", async () => {
@@ -256,8 +258,6 @@ export class ServerBootstrap {
     this.npcFreezer.init();
 
     await this.locker.clear();
-
-    await this.redisStreams.shutdown();
   }
 
   private addUnhandledRejectionListener(): void {
