@@ -2,7 +2,7 @@
 /* eslint-disable no-void */
 /* eslint-disable no-new */
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
-import { ISkill, Skill } from "@entities/ModuleCharacter/SkillsModel";
+import { Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterSkull } from "@providers/character/CharacterSkull";
@@ -39,16 +39,29 @@ export class BattleCharacterAttack {
       return;
     }
 
-    const attackIntervalSpeed = await this.battleCharacterAttackIntervalSpeed.tryReducingAttackIntervalSpeed(character);
+    const lockKey = `battle-loop-${character._id}`;
+    const hasLocked = await this.locker.lock(lockKey);
 
-    await this.battleCycle.init(character, target._id, attackIntervalSpeed, async () => {
-      await this.execCharacterBattleCycleLoop(character, target);
-    });
+    if (!hasLocked) {
+      return;
+    }
+
+    try {
+      const attackIntervalSpeed = await this.battleCharacterAttackIntervalSpeed.tryReducingAttackIntervalSpeed(
+        character
+      );
+
+      await this.battleCycle.init(character, target._id, attackIntervalSpeed, async () => {
+        await this.execCharacterBattleCycleLoop(character, target);
+      });
+    } finally {
+      await this.locker.unlock(lockKey);
+    }
   }
 
   @TrackNewRelicTransaction()
   private async execCharacterBattleCycleLoop(character: ICharacter, target: ICharacter | INPC): Promise<void> {
-    const lockKey = `battle_cycle_${character._id}`;
+    const lockKey = `battle-cycle-${character._id}`;
     const hasLock = await this.locker.hasLock(lockKey);
 
     if (hasLock) {
@@ -58,12 +71,13 @@ export class BattleCharacterAttack {
     try {
       await this.locker.lock(lockKey, 5); // Lock for 5 seconds
 
-      const updatedCharacter = (await Character.findOne({ _id: character._id, scene: target.scene }).lean({
+      const updatedCharacter = await Character.findOne({ _id: character._id, scene: target.scene }).lean<ICharacter>({
         virtuals: true,
         defaults: true,
-      })) as ICharacter;
+      });
 
       if (!updatedCharacter) {
+        console.log(`Character ${character._id} not found. Stopping battle cycle.`);
         this.battleCycle.stop(character._id);
         return;
       }
@@ -76,14 +90,20 @@ export class BattleCharacterAttack {
         return;
       }
 
-      const characterSkills = (await Skill.findOne({ owner: character._id })
+      const characterSkills = await Skill.findOne({ owner: character._id })
         .lean({
           virtuals: true,
           defaults: true,
         })
         .cacheQuery({
           cacheKey: `${character._id}-skills`,
-        })) as ISkill;
+        });
+
+      if (!characterSkills) {
+        console.log(`Skills not found for character ${character._id}. Stopping battle cycle.`);
+        this.battleCycle.stop(character._id);
+        return;
+      }
 
       updatedCharacter.skills = characterSkills;
 
@@ -96,6 +116,7 @@ export class BattleCharacterAttack {
         });
 
         if (!updatedTarget) {
+          console.log(`NPC target ${target._id} not found. Stopping battle cycle.`);
           this.battleCycle.stop(character._id);
           return;
         }
@@ -119,6 +140,7 @@ export class BattleCharacterAttack {
         });
 
         if (!updatedTarget) {
+          console.log(`Character target ${target._id} not found. Stopping battle cycle.`);
           this.battleCycle.stop(character._id);
           return;
         }
