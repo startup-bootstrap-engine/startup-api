@@ -49,8 +49,6 @@ export class ChatNetworkGuildMessaging {
   }
 
   private async handleGuildChatMessageCreate(data: IChatMessageCreatePayload, character: ICharacter): Promise<void> {
-    console.log("handleGuildChatMessageCreate", data);
-
     if (data.message.length >= MAX_MESSAGE_LENGTH) {
       this.socketMessaging.sendErrorMessageToCharacter(
         character,
