@@ -1,6 +1,7 @@
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { provide } from "inversify-binding-decorators";
 import { ChatNetworkGlobalMessagingQueue } from "./ChatNetworkGlobalMessagingQueue";
+import { ChatNetworkGuildMessaging } from "./ChatNetworkGuildMessaging";
 import { ChatNetworkPrivateMessaging } from "./ChatNetworkPrivateMessaging";
 import { ChatNetworkTradeMessaging } from "./ChatNetworkTradeMessaging";
 
@@ -9,7 +10,8 @@ export class ChatNetwork {
   constructor(
     private chatNetworkGlobalMessaging: ChatNetworkGlobalMessagingQueue,
     private chatNetworkPrivateMessaging: ChatNetworkPrivateMessaging,
-    private chatNetworkTradeMessaging: ChatNetworkTradeMessaging
+    private chatNetworkTradeMessaging: ChatNetworkTradeMessaging,
+    private chatNetworkGuildMessaging: ChatNetworkGuildMessaging
   ) {}
 
   public onAddEventListeners(channel: SocketChannel): void {
@@ -17,5 +19,6 @@ export class ChatNetwork {
     this.chatNetworkPrivateMessaging.onPrivateMessaging(channel);
     this.chatNetworkTradeMessaging.onTradeMessagingCreate(channel);
     this.chatNetworkTradeMessaging.onTradeMessagingRead(channel);
+    this.chatNetworkGuildMessaging.onGuildMessaging(channel);
   }
 }

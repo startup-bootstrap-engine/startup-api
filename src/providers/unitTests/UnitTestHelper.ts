@@ -69,7 +69,9 @@ import {
   questRewardsMock,
 } from "./mock/questMock";
 
+import { GuildChatLog, IGuildChatLog } from "@entities/ModuleSystem/GuildChatLogModel";
 import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
+import { guildChatLogMock } from "./mock/guildChatLogMock";
 import { guildMock } from "./mock/guildMock";
 import { userMock } from "./mock/userMock";
 
@@ -869,5 +871,16 @@ export class UnitTestHelper {
     await newGuild.save();
 
     return newGuild;
+  }
+
+  public async createMockGuildChatLog(extraProps?: Partial<IGuildChatLog>): Promise<IGuildChatLog> {
+    const newGuildChatLog = new GuildChatLog({
+      ...guildChatLogMock,
+      ...extraProps,
+    });
+
+    await newGuildChatLog.save();
+
+    return newGuildChatLog;
   }
 }
