@@ -15,6 +15,10 @@ export class RedisStreams {
   private streamWriter!: Redis;
   private isShuttingDown: boolean = false;
   private periodicTrimInterval: NodeJS.Timeout | null = null;
+  private reconnectionAttempts: number = 0;
+  private readonly maxReconnectionDelay: number = 60000; // 60 seconds
+  private readonly initialReconnectionDelay: number = 5000; // 5 seconds
+  private readonly consumerNames: Map<RedisStreamChannels, string> = new Map();
 
   constructor(private redisManager: RedisManager, private time: Time) {}
 
@@ -45,6 +49,9 @@ export class RedisStreams {
       // Ensure both connections are ready
       await Promise.all([this.streamWriter.ping(), this.streamReader.ping()]);
       console.log("Connected to Redis successfully for both Reader and Writer.");
+
+      // Reset reconnection attempts after successful connection
+      this.reconnectionAttempts = 0;
     } catch (error) {
       console.error("Failed to connect to Redis:", error);
       await this.scheduleReconnect();
@@ -68,7 +75,22 @@ export class RedisStreams {
           throw error; // Re-throw to prevent initialization if a critical error occurs
         }
       }
+
+      // Initialize consistent consumer names
+      if (!this.consumerNames.has(channel)) {
+        this.consumerNames.set(channel, this.getConsumerName(channel));
+      }
     }
+  }
+
+  /**
+   * Generate a consistent consumer name for a given channel.
+   * @param channel - The Redis stream channel.
+   * @returns The consumer name.
+   */
+  private getConsumerName(channel: RedisStreamChannels): string {
+    // You can customize the consumer name format as needed
+    return `${channel}_consumer`;
   }
 
   /**
@@ -76,22 +98,46 @@ export class RedisStreams {
    */
   public async shutdown(): Promise<void> {
     this.isShuttingDown = true;
+
+    // Clear periodic trim interval
     if (this.periodicTrimInterval) {
       clearInterval(this.periodicTrimInterval);
       this.periodicTrimInterval = null;
     }
+
+    // Close stream connections gracefully
     const shutdownPromises: Promise<void>[] = [];
     if (this.streamWriter) {
-      // @ts-ignore
-      shutdownPromises.push(this.streamWriter.quit());
-      console.log("Redis writer connection closed gracefully.");
+      shutdownPromises.push(
+        this.streamWriter
+          .quit()
+          // eslint-disable-next-line promise/always-return
+          .then(() => {
+            console.log("Redis writer connection closed gracefully.");
+          })
+          .catch((error) => {
+            console.error("Error closing Redis writer connection:", error);
+          })
+      );
     }
     if (this.streamReader) {
-      // @ts-ignore
-      shutdownPromises.push(this.streamReader.quit());
-      console.log("Redis reader connection closed gracefully.");
+      shutdownPromises.push(
+        this.streamReader
+          .quit()
+          // eslint-disable-next-line promise/always-return
+          .then(() => {
+            console.log("Redis reader connection closed gracefully.");
+          })
+          .catch((error) => {
+            console.error("Error closing Redis reader connection:", error);
+          })
+      );
     }
+
     await Promise.all(shutdownPromises);
+
+    // Optionally, wait for all ongoing operations to complete
+    // This can be implemented using additional tracking mechanisms if needed
   }
 
   /**
@@ -108,11 +154,18 @@ export class RedisStreams {
       }
 
       const serializedMessage = this.serializeMessage(message);
+
+      // Validate message size (optional)
+      if (serializedMessage.length > 1000) {
+        // Example limit
+        throw new Error("Message size exceeds the allowed limit.");
+      }
+
       const messageId = await this.streamWriter.xadd(channel, "*", ...serializedMessage);
       return messageId;
     } catch (error) {
       console.error(`Failed to add message to stream '${channel}':`, error);
-      // Optionally, you can implement retry logic here
+      // Optionally, implement retry logic or dead-letter queueing here
       return null;
     }
   }
@@ -124,7 +177,7 @@ export class RedisStreams {
    */
   public async readFromStream(channel: RedisStreamChannels, callback: (message: any) => Promise<void>): Promise<void> {
     const groupName = this.getConsumerGroupName(channel);
-    const consumerName = this.generateConsumerName(channel);
+    const consumerName = this.consumerNames.get(channel)!; // Guaranteed to exist after initialization
 
     while (!this.isShuttingDown) {
       try {
@@ -138,7 +191,7 @@ export class RedisStreams {
           groupName,
           consumerName,
           "COUNT",
-          10,
+          10, // Batch size
           "BLOCK",
           5000, // 5 seconds
           "STREAMS",
@@ -160,17 +213,22 @@ export class RedisStreams {
               }
             }
           }
+        } else {
+          // No messages retrieved; optionally implement additional logic
         }
       } catch (error: any) {
         if (error.message.includes("NOGROUP")) {
           try {
             await this.streamReader.xgroup("CREATE", channel, groupName, "0", "MKSTREAM");
+            console.log(`Consumer group '${groupName}' created during readFromStream.`);
           } catch (createError: any) {
             if (!createError.message.includes("BUSYGROUP")) {
+              console.error(`Failed to create consumer group '${groupName}' during readFromStream:`, createError);
               await this.scheduleReconnect();
             }
           }
         } else {
+          console.error(`Error reading from stream '${channel}':`, error);
           await this.time.waitForMilliseconds(5000); // Wait before retrying
         }
       }
@@ -201,9 +259,15 @@ export class RedisStreams {
    */
   private startPeriodicTrim(): void {
     const trimIntervalMs = 60 * 60 * 1000; // Every hour
+    const staggerOffsetMs = 5000; // 5 seconds stagger between channels
+
     this.periodicTrimInterval = setInterval(async () => {
       for (const channel of Object.values(RedisStreamChannels)) {
-        await this.trimStream(channel, 10000); // Example max length
+        // Stagger trim operations to distribute load
+        setTimeout(async () => {
+          if (this.isShuttingDown) return;
+          await this.trimStream(channel, 10000); // Example max length
+        }, staggerOffsetMs);
       }
     }, trimIntervalMs);
   }
@@ -243,6 +307,7 @@ export class RedisStreams {
   private handleRedisError(error: Error, connectionType: string): void {
     console.error(`Redis ${connectionType} connection error:`, error);
     // Depending on the error, you might want to initiate reconnection
+    // For example, if it's a connection-related error
   }
 
   /**
@@ -257,17 +322,30 @@ export class RedisStreams {
   }
 
   /**
-   * Schedule a reconnection attempt after a delay.
+   * Schedule a reconnection attempt with exponential backoff.
    */
   private async scheduleReconnect(): Promise<void> {
-    const retryDelay = 5000; // 5 seconds
     if (this.isShuttingDown) return;
 
+    const retryDelay = Math.min(
+      this.initialReconnectionDelay * 2 ** this.reconnectionAttempts,
+      this.maxReconnectionDelay
+    );
+
     console.log(`Reconnecting to Redis in ${retryDelay / 1000} seconds...`);
+
     setTimeout(async () => {
       if (this.isShuttingDown) return;
-      await this.connectToRedis();
-      await this.initializeConsumerGroups();
+
+      try {
+        await this.connectToRedis();
+        await this.initializeConsumerGroups();
+        console.log("Reconnected to Redis successfully.");
+      } catch (error) {
+        console.error("Reconnection attempt failed:", error);
+        this.reconnectionAttempts += 1;
+        await this.scheduleReconnect(); // Recursive call for next retry
+      }
     }, retryDelay);
   }
 
@@ -281,15 +359,6 @@ export class RedisStreams {
   }
 
   /**
-   * Generate a unique consumer name for a given channel.
-   * @param channel - The Redis stream channel.
-   * @returns The consumer name.
-   */
-  private generateConsumerName(channel: RedisStreamChannels): string {
-    return `${channel}_consumer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  /**
    * Serialize a message object into a flat array suitable for XADD.
    * @param message - The message object.
    * @returns An array of field-value pairs.
@@ -297,7 +366,12 @@ export class RedisStreams {
   private serializeMessage(message: Record<string, any>): string[] {
     const serialized: string[] = [];
     for (const [key, value] of Object.entries(message)) {
-      serialized.push(key, JSON.stringify(value));
+      try {
+        serialized.push(key, JSON.stringify(value));
+      } catch (error) {
+        console.error(`Failed to serialize field '${key}':`, error);
+        // Optionally, skip this field or handle the error as needed
+      }
     }
     return serialized;
   }
