@@ -2,6 +2,7 @@
 /* eslint-disable require-await */
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { Time } from "@providers/time/Time";
 import Redis from "ioredis";
 
 export enum RedisStreamChannels {
@@ -15,7 +16,7 @@ export class RedisStreams {
   private isShuttingDown: boolean = false;
   private periodicTrimInterval: NodeJS.Timeout | null = null;
 
-  constructor(private redisManager: RedisManager) {}
+  constructor(private redisManager: RedisManager, private time: Time) {}
 
   /**
    * Initialize the RedisStreams by connecting to Redis and setting up consumer groups.
@@ -160,9 +161,26 @@ export class RedisStreams {
             }
           }
         }
-      } catch (error) {
-        console.error(`Error reading from stream '${channel}':`, error);
-        await this.scheduleReconnect();
+      } catch (error: any) {
+        if (error.message.includes("NOGROUP")) {
+          console.warn(
+            `Consumer group '${groupName}' does not exist for channel '${channel}'. Attempting to create it.`
+          );
+          try {
+            await this.streamReader.xgroup("CREATE", channel, groupName, "0", "MKSTREAM");
+            console.log(`Consumer group '${groupName}' created successfully for channel '${channel}'.`);
+          } catch (createError: any) {
+            if (createError.message.includes("BUSYGROUP")) {
+              console.log(`Consumer group '${groupName}' already exists for channel '${channel}'.`);
+            } else {
+              console.error(`Failed to create consumer group '${groupName}' for channel '${channel}':`, createError);
+              await this.scheduleReconnect();
+            }
+          }
+        } else {
+          console.error(`Error reading from stream '${channel}':`, error);
+          await this.time.waitForMilliseconds(5000); // Wait before retrying
+        }
       }
     }
   }
