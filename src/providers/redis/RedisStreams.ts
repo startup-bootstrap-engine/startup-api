@@ -163,22 +163,14 @@ export class RedisStreams {
         }
       } catch (error: any) {
         if (error.message.includes("NOGROUP")) {
-          console.warn(
-            `Consumer group '${groupName}' does not exist for channel '${channel}'. Attempting to create it.`
-          );
           try {
             await this.streamReader.xgroup("CREATE", channel, groupName, "0", "MKSTREAM");
-            console.log(`Consumer group '${groupName}' created successfully for channel '${channel}'.`);
           } catch (createError: any) {
-            if (createError.message.includes("BUSYGROUP")) {
-              console.log(`Consumer group '${groupName}' already exists for channel '${channel}'.`);
-            } else {
-              console.error(`Failed to create consumer group '${groupName}' for channel '${channel}':`, createError);
+            if (!createError.message.includes("BUSYGROUP")) {
               await this.scheduleReconnect();
             }
           }
         } else {
-          console.error(`Error reading from stream '${channel}':`, error);
           await this.time.waitForMilliseconds(5000); // Wait before retrying
         }
       }
