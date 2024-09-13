@@ -21,7 +21,7 @@ import {
   CraftingResourcesBlueprint,
   OthersBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
-import { SimpleTutorial } from "@providers/simpleTutorial/SimpleTutorial";
+import { SimpleTutorial } from "@providers/tutorial/simpleTutorial/SimpleTutorial";
 import { INPCLoot, ItemSubType, ItemType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { random, round } from "lodash";
