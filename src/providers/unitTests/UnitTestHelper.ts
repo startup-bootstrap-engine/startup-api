@@ -265,7 +265,10 @@ export class UnitTestHelper {
     return container;
   }
 
-  public async createMockCharacterDeadBody(character: ICharacter): Promise<IItem> {
+  public async createMockCharacterDeadBody(
+    character: ICharacter,
+    extraProps?: Record<string, unknown>
+  ): Promise<IItem> {
     const blueprintData = await blueprintManager.getBlueprint<IItem>("items", BodiesBlueprint.CharacterBody);
 
     const charBody = new Item({
@@ -277,6 +280,7 @@ export class UnitTestHelper {
       y: character.y,
       generateContainerSlots: 20,
       isItemContainer: true,
+      ...extraProps,
     });
 
     await charBody.save();
