@@ -1,19 +1,22 @@
+/* src/providers/rabbitmq/RabbitMQ.ts */
+
 import { appEnv } from "@providers/config/env";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import amqp, { Channel, Connection } from "amqplib";
+import amqp, { Channel, Connection, Options } from "amqplib";
 
 @provideSingleton(RabbitMQ)
 export class RabbitMQ {
   public connection: Connection | null = null;
   public channel: Channel | null = null;
 
-  private async retryOperation<T>(operation: () => Promise<T>, retries = 3, delay = 1000): Promise<T> {
+  private reconnecting: boolean = false;
+
+  private async retryOperation<T>(operation: () => Promise<T>, retries = 5, delay = 5000): Promise<T> {
     for (let i = 0; i < retries; i++) {
       try {
         return await operation();
       } catch (error) {
-        if (i === retries - 1) throw error;
-        console.warn(`Operation failed, retrying in ${delay}ms...`, error);
+        console.warn(`Operation failed, retrying in ${delay}ms... Attempt ${i + 1} of ${retries}`, error);
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
@@ -37,10 +40,55 @@ export class RabbitMQ {
     await this.retryOperation(async () => {
       const { host, port, username, password } = appEnv.rabbitmq;
       const url = `amqp://${username}:${password}@${host}:${port}`;
-      this.connection = await amqp.connect(url);
+      const connectionOptions: Options.Connect = {
+        heartbeat: 60, // Heartbeat interval in seconds
+        reconnect: true, // Custom option for handling reconnections
+      };
+      this.connection = await amqp.connect(url, connectionOptions);
       this.channel = await this.connection.createChannel();
       console.log(`✅ Successfully connected to RabbitMQ at ${url}`);
+
+      // Handle connection close and errors
+      this.connection.on("error", (err) => {
+        console.error("RabbitMQ connection error:", err);
+        this.connection = null;
+        this.channel = null;
+        void this.handleReconnection();
+      });
+
+      this.connection.on("close", () => {
+        console.warn("RabbitMQ connection closed");
+        this.connection = null;
+        this.channel = null;
+        void this.handleReconnection();
+      });
     });
+  }
+
+  private async handleReconnection(): Promise<void> {
+    if (this.reconnecting) return;
+    this.reconnecting = true;
+    console.log("Attempting to reconnect to RabbitMQ...");
+
+    const retryDelay = 5000; // 5 seconds
+    const maxRetries = 10;
+    let attempt = 0;
+
+    while (attempt < maxRetries) {
+      try {
+        await this.connect();
+        console.log("✅ Reconnected to RabbitMQ successfully");
+        this.reconnecting = false;
+        return;
+      } catch (error) {
+        attempt++;
+        console.error(`❌ Reconnection attempt ${attempt} failed. Retrying in ${retryDelay / 1000} seconds...`);
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+      }
+    }
+
+    console.error("❌ Failed to reconnect to RabbitMQ after multiple attempts");
+    this.reconnecting = false;
   }
 
   async createQueue(queue: string): Promise<void> {
@@ -54,12 +102,16 @@ export class RabbitMQ {
   }
 
   async sendMessage(queue: string, message: string): Promise<void> {
+    // eslint-disable-next-line require-await
     await this.retryOperation(async () => {
       if (!this.channel) {
         throw new Error("RabbitMQ channel not initialized");
       }
 
-      await this.channel.sendToQueue(queue, Buffer.from(message));
+      const sent = this.channel.sendToQueue(queue, Buffer.from(message), { persistent: true });
+      if (!sent) {
+        throw new Error("Failed to send message to queue");
+      }
     });
   }
 
@@ -74,6 +126,7 @@ export class RabbitMQ {
   }
 
   async publishMessage(exchange: string, routingKey: string, data: any): Promise<void> {
+    // eslint-disable-next-line require-await
     await this.retryOperation(async () => {
       if (!this.channel) {
         throw new Error("RabbitMQ channel not initialized");
@@ -83,7 +136,10 @@ export class RabbitMQ {
         persistent: true,
         contentType: "application/json",
       };
-      await this.channel.publish(exchange, routingKey, message, options);
+      const published = this.channel.publish(exchange, routingKey, message, options);
+      if (!published) {
+        throw new Error("Failed to publish message");
+      }
     });
   }
 
@@ -99,39 +155,46 @@ export class RabbitMQ {
 
     await this.channel.assertQueue(queue, { durable: true });
     await this.channel.bindQueue(queue, exchange, routingKey);
-    await this.channel.consume(queue, async (msg) => {
-      if (msg) {
-        const content = msg.content.toString();
-        try {
-          const data = content ? JSON.parse(content) : null;
-          await callback(data);
-          this.channel!.ack(msg);
-        } catch (error) {
-          console.error("Error processing message:", error);
-          console.error("Raw message content:", content);
-          this.channel!.ack(msg);
-          console.log("Error occurred, but message acknowledged");
+    console.log(`✅ Bound queue ${queue} to exchange ${exchange} with routing key ${routingKey}`);
+
+    await this.channel.consume(
+      queue,
+      async (msg) => {
+        if (msg) {
+          const content = msg.content.toString();
+          try {
+            const data = content ? JSON.parse(content) : null;
+            await callback(data);
+            this.channel!.ack(msg);
+          } catch (error) {
+            console.error("Error processing message:", error);
+            console.error("Raw message content:", content);
+            this.channel!.nack(msg, false, false); // Discard the message
+            console.log("❌ Message rejected and discarded");
+          }
         }
-      }
-    });
+      },
+      { noAck: false }
+    );
+
+    console.log(`✅ Started consuming messages from queue: ${queue}`);
   }
 
   async closeConnection(): Promise<void> {
     if (this.channel) {
       await this.channel.close();
+      this.channel = null;
+      console.log("✅ RabbitMQ channel closed");
     }
     if (this.connection) {
       await this.connection.close();
+      this.connection = null;
+      console.log("✅ RabbitMQ connection closed");
     }
   }
 
   async close(): Promise<void> {
-    if (this.channel) {
-      await this.channel.close();
-    }
-    if (this.connection) {
-      await this.connection.close();
-    }
+    await this.closeConnection();
   }
 
   async assertQueue(queue: string): Promise<void> {
@@ -153,6 +216,11 @@ export class RabbitMQ {
   }
 
   async deleteQueue(queue: string): Promise<void> {
-    await this.channel.deleteQueue(queue);
+    await this.retryOperation(async () => {
+      if (!this.channel) {
+        throw new Error("RabbitMQ channel not initialized");
+      }
+      await this.channel.deleteQueue(queue);
+    });
   }
 }

@@ -281,9 +281,16 @@ services:
       RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
       RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
       RABBITMQ_PLUGINS: "rabbitmq_management"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
       - ./environment/rabbit-init.sh:/docker-entrypoint-initdb.d/rabbit-init.sh
+      - ./environment/rabbitmq-config/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+
     networks:
       - rpg-network
     deploy:
