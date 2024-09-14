@@ -46,80 +46,95 @@ export class CharacterAutoLootQueue {
 
   @TrackNewRelicTransaction()
   public async execAutoLoot(character: ICharacter, itemIdsToLoot: string[]): Promise<void> {
-    if (!this.characterValidation.hasBasicValidation(character)) {
-      return;
-    }
+    try {
+      if (!this.characterValidation.hasBasicValidation(character)) {
+        return;
+      }
 
-    const inventoryItemContainer = await this.characterItemContainer.getInventoryItemContainer(character);
-    if (!inventoryItemContainer) {
-      this.sendErrorMessage(character, "Sorry, you cannot loot items without an inventory.");
-      return;
-    }
+      const inventoryItemContainer = await this.characterItemContainer.getInventoryItemContainer(character);
+      if (!inventoryItemContainer) {
+        this.sendErrorMessage(character, "Sorry, you cannot loot items without an inventory.");
 
-    const [bodies, itemContainerMap] = await this.getBodiesAndContainers(itemIdsToLoot);
+        return;
+      }
 
-    const lootedItemNamesAndQty: string[] = [];
-    const disableLootingPromises: Promise<any>[] = [];
+      const [bodies, itemContainerMap] = await this.getBodiesAndContainers(itemIdsToLoot);
 
-    for (const bodyItem of bodies) {
-      const canProceed = await this.locker.lock(`loot-${bodyItem._id}`);
-      if (!canProceed) continue;
+      if (bodies.length === 0) {
+        this.socketMessaging.sendMessageToCharacter(character, "No dead bodies found to loot.");
+        return;
+      }
 
-      try {
-        const itemContainer = itemContainerMap.get(String(bodyItem.itemContainer));
-        if (!itemContainer) {
-          console.log(`Item container with id ${bodyItem.itemContainer} not found`);
+      const lootedItemNamesAndQty: string[] = [];
+      const disableLootingPromises: Promise<any>[] = [];
+
+      for (const bodyItem of bodies) {
+        const canProceed = await this.locker.lock(`loot-${bodyItem._id}`);
+        if (!canProceed) {
           continue;
         }
 
-        const isCharacterDeadBody = await this.isCharacterDeadBody(bodyItem);
-
-        for (const slot of Object.values(itemContainer.slots as Record<string, IItem>)) {
-          if (!slot) continue;
-
-          const item = await this.findItem(slot._id);
-          if (!item) continue;
-
-          let remainingQty = item.stackQty || 1;
-
-          if (!isCharacterDeadBody) {
-            remainingQty = await this.guildPayingTribute.payTribute(character, item);
-          }
-
-          if (remainingQty <= 0) {
-            await this.handleFullDeduction(character, item, itemContainer, bodyItem);
+        try {
+          const itemContainer = itemContainerMap.get(String(bodyItem.itemContainer));
+          if (!itemContainer) {
+            console.log(`Item container with id ${bodyItem.itemContainer} not found`);
             continue;
           }
 
-          item.stackQty = remainingQty;
+          const isCharacterDeadBody = await this.isCharacterDeadBody(bodyItem);
 
-          const lootSuccess = await this.handleItemLooting(
-            character,
-            item,
-            inventoryItemContainer,
-            lootedItemNamesAndQty,
-            itemContainer,
-            bodyItem,
-            disableLootingPromises
-          );
+          for (const slot of Object.values(itemContainer.slots as Record<string, IItem>)) {
+            if (!slot) continue;
 
-          if (!lootSuccess) {
-            // If looting fails, break the loop to prevent further attempts
-            break;
+            const item = await this.findItem(slot._id);
+            if (!item) {
+              continue;
+            }
+
+            let remainingQty = item.maxStackSize === 1 ? 1 : item.stackQty || 1;
+
+            if (!isCharacterDeadBody) {
+              remainingQty = await this.guildPayingTribute.payTribute(character, item);
+            }
+
+            if (remainingQty <= 0) {
+              await this.handleFullDeduction(character, item, itemContainer, bodyItem);
+              continue;
+            }
+
+            item.stackQty = remainingQty;
+
+            const lootSuccess = await this.handleItemLooting(
+              character,
+              item,
+              inventoryItemContainer,
+              lootedItemNamesAndQty,
+              itemContainer,
+              bodyItem,
+              disableLootingPromises
+            );
+
+            if (!lootSuccess) {
+              // If looting fails, break the loop to prevent further attempts
+              console.error(`Looting failed for item ${item._id}. Skipping remaining items in body ${bodyItem._id}.`);
+              break;
+            }
           }
+        } catch (err) {
+          console.error(`Error during auto-loot for body ${bodyItem._id}:`, err);
+        } finally {
+          await this.locker.unlock(`loot-${bodyItem._id}`);
         }
-      } catch (err) {
-        console.error(`Error during auto-loot for body ${bodyItem._id}:`, err);
-      } finally {
-        await this.locker.unlock(`loot-${bodyItem._id}`);
       }
-    }
 
-    if (lootedItemNamesAndQty.length > 0) {
-      this.socketMessaging.sendMessageToCharacter(character, `Auto-loot: ${lootedItemNamesAndQty.join(", ")}`);
-    }
+      if (lootedItemNamesAndQty.length > 0) {
+        this.socketMessaging.sendMessageToCharacter(character, `Auto-loot: ${lootedItemNamesAndQty.join(", ")}`);
+      }
 
-    await Promise.all([this.characterInventory.sendInventoryUpdateEvent(character), ...disableLootingPromises]);
+      await Promise.all([this.characterInventory.sendInventoryUpdateEvent(character), ...disableLootingPromises]);
+    } catch (err) {
+      console.error(`Unhandled error during auto-loot for character ${character._id}:`, err);
+    }
   }
 
   private async getBodiesAndContainers(itemIdsToLoot: string[]): Promise<[IItem[], Map<string, IItemContainer>]> {

@@ -1,4 +1,5 @@
-/* eslint-disable no-async-promise-executor */
+/* src/providers/messaging/MessagingBroker.ts */
+
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Locker } from "@providers/locks/Locker";
 import { RabbitMQ } from "@providers/rabbitmq/RabbitMQ";

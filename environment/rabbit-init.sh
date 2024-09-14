@@ -12,3 +12,6 @@ rabbitmqctl set_user_tags $RABBITMQ_DEFAULT_USER administrator
 rabbitmqctl set_permissions -p / $RABBITMQ_DEFAULT_USER ".*" ".*" ".*"
 
 echo "RabbitMQ user created and permissions set."
+
+# Enable AMQP 1.0 plugin
+rabbitmq-plugins enable rabbitmq_amqp1_0

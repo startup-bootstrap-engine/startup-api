@@ -118,7 +118,6 @@ export class NPCRaidActivator {
     const activeRaids = await this.raidManager.queryRaids({ status: true });
 
     if (activeRaids.length === 0) {
-      console.log("No active raids to shut down.");
       return;
     }
 
@@ -157,7 +156,7 @@ export class NPCRaidActivator {
   private async getRandomInactiveRaid(): Promise<IRaid | null> {
     const allRaids = await this.raidManager.getAllRaids();
 
-    //! Hack to re-seed if these rais are not available somehow (mysterious bug)
+    //! Hack to re-seed if these raids are not available somehow (mysterious bug)
     if (allRaids.length === 0) {
       console.warn("No raids available for activation, re-seeding");
       await this.raidSeeder.seed();
@@ -167,23 +166,26 @@ export class NPCRaidActivator {
 
     if (raids.length === 0) {
       console.log(allRaids);
-
       console.warn("No inactive raids available for activation.");
       return null;
     }
 
-    const eligibleRaids = raids.filter((raid) => {
-      const randomValue = random(0, 100); // Get a random number between 1 and 100
+    const randomValue = random(0, 100); // Generate a random number once
 
-      return randomValue <= raid.triggeringChance * RAID_TRIGGERING_CHANCE_RATIO; // Check if the random number is less than or equal to the raid's triggering chance
+    // Loop through each raid and compare randomValue against triggeringChance * RAID_TRIGGERING_CHANCE_RATIO
+    const eligibleRaids = raids.filter((raid) => {
+      return randomValue <= raid.triggeringChance * RAID_TRIGGERING_CHANCE_RATIO;
     });
 
     if (eligibleRaids.length === 0) {
-      return null; // Return null if no raids are eligible
+      console.log("No raids passed the probability check. No raid will be activated.");
+      return null;
     }
 
-    const randomIndex = Math.floor(Math.random() * eligibleRaids.length); // Get a random index between 0 and the number of eligible raids
+    const randomIndex = Math.floor(Math.random() * eligibleRaids.length); // Randomly select one eligible raid
+    const selectedRaid = eligibleRaids[randomIndex];
 
-    return eligibleRaids[randomIndex]; // Return the raid at the random index
+    console.log("Selected raid passes the probability check:", selectedRaid.key);
+    return selectedRaid; // Return the selected raid
   }
 }
