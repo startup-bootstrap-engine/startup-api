@@ -248,7 +248,6 @@ export class RedisStreams {
       }
 
       await this.streamWriter.xtrim(channel, "MAXLEN", "~", maxLen);
-      console.log(`Stream '${channel}' trimmed to max length ${maxLen}.`);
     } catch (error) {
       console.error(`Failed to trim stream '${channel}':`, error);
     }
