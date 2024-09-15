@@ -168,30 +168,35 @@ export class BattleCharacterAttack {
         const attackSuccess = await this.attackTarget(updatedCharacter, updatedTarget);
 
         if (!attackSuccess) {
-          // Attack failed, stop battle cycle
-          await this.stopBattleCycleWithLogging(updatedCharacter._id, "Attack failed.");
+          // retry
+          await this.scheduleNextAttack(updatedCharacter, updatedTarget);
+
           return;
         }
 
         // Wait for attack interval
         await this.time.waitForMilliseconds(attackIntervalSpeed);
 
-        // trigger the next attack
-        await this.messagingBroker.sendMessage(
-          MessagingBrokerServices.BattleCycle,
-          MessagingBrokerActions.BattleCycleAttack,
-          {
-            characterId: updatedCharacter._id,
-            targetId: updatedTarget._id,
-            targetType: updatedTarget.type,
-            targetScene: updatedTarget.scene,
-          }
-        );
+        // Trigger the next attack
+        await this.scheduleNextAttack(updatedCharacter, updatedTarget);
       }
     } finally {
       // Release the lock
       await this.locker.unlock(lockKey);
     }
+  }
+
+  private async scheduleNextAttack(character: ICharacter, target: ICharacter | INPC): Promise<void> {
+    await this.messagingBroker.sendMessage(
+      MessagingBrokerServices.BattleCycle,
+      MessagingBrokerActions.BattleCycleAttack,
+      {
+        characterId: character._id,
+        targetId: target._id,
+        targetType: target.type,
+        targetScene: target.scene,
+      }
+    );
   }
 
   /**
@@ -298,6 +303,9 @@ export class BattleCharacterAttack {
 
     // Perform range check and execute the attack
     const attackSuccessful = await this.battleAttackTarget.checkRangeAndAttack(character, target);
+
+    console.log("attackSuccessful", attackSuccessful);
+
     if (attackSuccessful) {
       // If attacking another character, check for unjustified attacks
       if (target.type === EntityType.Character) {
