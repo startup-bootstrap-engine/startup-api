@@ -57,7 +57,6 @@ export class RabbitMQ {
       });
 
       this.connection.on("close", () => {
-        console.warn("RabbitMQ connection closed");
         this.connection = null;
         this.channel = null;
         void this.handleReconnection();

@@ -1,3 +1,4 @@
+import { BattleCharacterAttack } from "@providers/battle/BattleCharacterAttack/BattleCharacterAttack";
 import { appEnv } from "@providers/config/env";
 import { MapTransitionQueue } from "@providers/map/MapTransition/MapTransitionQueue";
 import { NPCMovementMoveTowards } from "@providers/npc/movement/NPCMovementMoveTowards";
@@ -9,7 +10,8 @@ export class MessagingBrokerHandlers {
   constructor(
     private npcMovementMoveTowards: NPCMovementMoveTowards,
     private npcManager: NPCManager,
-    private mapTransitionQueue: MapTransitionQueue
+    private mapTransitionQueue: MapTransitionQueue,
+    private battleCharacterAttack: BattleCharacterAttack
   ) {}
 
   public async onAddHandlers(): Promise<void> {
@@ -17,8 +19,13 @@ export class MessagingBrokerHandlers {
 
     const IS_MICROSERVICE = !!MICROSERVICE_NAME;
 
-    !IS_MICROSERVICE && (await this.mapTransitionQueue.addMapTransitionListener()); // Listened added in all services. RabbitMQ will do a load balancing between the them automatically (round-robin)
+    // rpg-api
+    if (!IS_MICROSERVICE) {
+      await this.battleCharacterAttack.listenToBattleCycle();
+      await this.mapTransitionQueue.addMapTransitionListener();
+    }
 
+    // microservices
     switch (MICROSERVICE_NAME) {
       case "rpg-npc":
         console.log("💌 Adding messaging broker handlers");

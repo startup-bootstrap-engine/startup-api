@@ -19,6 +19,7 @@ import {
 } from "@rpg-engine/shared";
 import { EntityAttackType, EntityType } from "@rpg-engine/shared/dist/types/entity.types";
 import { provide } from "inversify-binding-decorators";
+import { BattleCycleManager } from "../BattleCycleManager";
 import { HitTargetQueue } from "../HitTargetQueue";
 import { BattleNetworkStopTargeting } from "../network/BattleNetworkStopTargetting";
 import { BattleAttackRanged } from "./BattleAttackRanged";
@@ -38,7 +39,8 @@ export class BattleAttackTarget {
     private hitTarget: HitTargetQueue,
     private npcSpellArea: NPCSpellArea,
     private mapSolidsTrajectory: MapSolidsTrajectory,
-    private locker: Locker
+    private locker: Locker,
+    private battleCycleManager: BattleCycleManager
   ) {}
 
   @TrackNewRelicTransaction()
@@ -54,6 +56,7 @@ export class BattleAttackTarget {
       await this.locker.lock(lockKey, 5); // Lock for 5 seconds
 
       if (!target.isAlive) {
+        await this.battleCycleManager.stopBattleCycle(attacker.id);
         return false;
       }
 
@@ -150,6 +153,7 @@ export class BattleAttackTarget {
         if (attacker.type === EntityType.Character) {
           const character = attacker as ICharacter;
           await this.battleNetworkStopTargeting.stopTargeting(character);
+          await this.battleCycleManager.stopBattleCycle(character._id);
 
           this.socketMessaging.sendEventToUser<IBattleCancelTargeting>(
             character.channelId!,
@@ -195,6 +199,7 @@ export class BattleAttackTarget {
       );
 
       await this.battleNetworkStopTargeting.stopTargeting(character);
+      await this.battleCycleManager.stopBattleCycle(character._id);
     }
   }
 

@@ -8,6 +8,7 @@ import { PushNotificationHelper } from "@providers/pushNotification/PushNotifica
 import { Seeder } from "@providers/seeds/Seeder";
 
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { BattleCycleManager } from "@providers/battle/BattleCycleManager";
 import { HitTargetQueue } from "@providers/battle/HitTargetQueue";
 import { CharacterActionsTracker } from "@providers/character/CharacterActionsTracker";
 import { CharacterAutoLootQueue } from "@providers/character/CharacterAutoLootQueue";
@@ -116,7 +117,8 @@ export class ServerBootstrap {
     private NPCDeathQueue: NPCDeathQueue,
     private spellNetworkCastQueue: SpellNetworkCastQueue,
     private redisPubSub: RedisPubSub,
-    private redisStreams: RedisStreams
+    private redisStreams: RedisStreams,
+    private battleCycleManager: BattleCycleManager
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -258,6 +260,8 @@ export class ServerBootstrap {
     this.npcFreezer.init();
 
     await this.locker.clear();
+
+    await this.battleCycleManager.clear();
   }
 
   private addUnhandledRejectionListener(): void {
