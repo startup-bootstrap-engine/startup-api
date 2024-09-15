@@ -1,7 +1,6 @@
 /* src/providers/messaging/MessagingBroker.ts */
 
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { Locker } from "@providers/locks/Locker";
 import { RabbitMQ } from "@providers/rabbitmq/RabbitMQ";
 import { Time } from "@providers/time/Time";
 
@@ -10,7 +9,7 @@ export class MessagingBroker {
   private static EXCHANGE = "rpg_microservices";
   private initialized = false;
 
-  constructor(private rabbitMQ: RabbitMQ, private time: Time, private locker: Locker) {}
+  constructor(private rabbitMQ: RabbitMQ, private time: Time) {}
 
   async initialize(): Promise<void> {
     if (this.initialized) return;

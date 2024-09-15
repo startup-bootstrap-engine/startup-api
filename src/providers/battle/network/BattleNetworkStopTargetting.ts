@@ -5,11 +5,11 @@ import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { BattleSocketEvents } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { BattleCycle } from "../BattleCycle";
+import { BattleCycleManager } from "../BattleCycleManager";
 
 @provide(BattleNetworkStopTargeting)
 export class BattleNetworkStopTargeting {
-  constructor(private socketAuth: SocketAuth, private locker: Locker, private battleCycle: BattleCycle) {}
+  constructor(private socketAuth: SocketAuth, private locker: Locker, private battleCycleManager: BattleCycleManager) {}
 
   public onBattleStopTargeting(channel: SocketChannel): void {
     this.socketAuth.authCharacterOn(channel, BattleSocketEvents.StopTargeting, async (data, character) => {
@@ -22,7 +22,7 @@ export class BattleNetworkStopTargeting {
     if (character) {
       await Character.updateOne({ _id: character._id }, { $unset: { target: 1 } });
 
-      await this.battleCycle.stop(character._id);
+      await this.battleCycleManager.stopBattleCycle(character._id.toString());
 
       await this.locker.unlock(`character-${character._id}-battle-targeting`);
     }

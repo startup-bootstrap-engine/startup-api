@@ -1,14 +1,14 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { BattleCycle } from "@providers/battle/BattleCycle";
+import { BattleCycleManager } from "@providers/battle/BattleCycleManager";
 import { appEnv } from "@providers/config/env";
 import { NPCMovementType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
 @provide(CharacterTarget)
 export class CharacterTarget {
-  constructor(private battleCycle: BattleCycle) {}
+  constructor(private battleCycleManager: BattleCycleManager) {}
 
   @TrackNewRelicTransaction()
   public async clearTarget(character: ICharacter): Promise<void> {
@@ -22,7 +22,7 @@ export class CharacterTarget {
 
     // and on battle cycle
 
-    await this.battleCycle.stop(character._id);
+    await this.battleCycleManager.stopBattleCycle(character._id);
   }
 
   @TrackNewRelicTransaction()

@@ -116,7 +116,7 @@ export class CharacterAutoLootQueue {
 
             if (!lootSuccess) {
               // If looting fails, break the loop to prevent further attempts
-              console.error(`Looting failed for item ${item._id}. Skipping remaining items in body ${bodyItem._id}.`);
+
               break;
             }
           }

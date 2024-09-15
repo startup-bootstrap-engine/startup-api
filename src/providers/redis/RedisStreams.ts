@@ -258,7 +258,7 @@ export class RedisStreams {
    * Start a periodic task to trim all streams.
    */
   private startPeriodicTrim(): void {
-    const trimIntervalMs = 60 * 60 * 1000; // Every hour
+    const trimIntervalMs = 60 * 1000; // Every minute
     const staggerOffsetMs = 5000; // 5 seconds stagger between channels
 
     this.periodicTrimInterval = setInterval(async () => {

@@ -1,5 +1,6 @@
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { NewRelic } from "@providers/analytics/NewRelic";
+import { BattleCycleManager } from "@providers/battle/BattleCycleManager";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { SpecialEffect } from "@providers/entityEffects/SpecialEffect";
 import { PartyCRUD } from "@providers/party/PartyCRUD";
@@ -34,7 +35,8 @@ export class CharacterNetworkLogout {
     private skillStatsIncrease: SkillStatsIncrease,
     private partyCRUD: PartyCRUD,
     private partyMembers: PartyMembers,
-    private newRelic: NewRelic
+    private newRelic: NewRelic,
+    private battleCycleManager: BattleCycleManager
   ) {}
 
   public onCharacterLogout(channel: SocketChannel): void {
@@ -55,6 +57,7 @@ export class CharacterNetworkLogout {
       await this.performCleanup(data, character);
       await this.updateSkillsAndStats(character);
       await this.notifyNearbyCharacters(data, character);
+      await this.battleCycleManager.stopBattleCycle(character._id);
 
       await this.finalizeLogout(character, channel);
     } catch (error) {

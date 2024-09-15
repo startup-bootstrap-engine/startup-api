@@ -195,6 +195,28 @@ describe("BattleCharacterAttack.spec.ts", () => {
     expect(result).toBe(true);
   });
 
+  describe("onHandleCharacterBattleLoop", () => {
+    it("should return early if character is null", async () => {
+      const result = await battleCharacterAttack.onHandleCharacterBattleLoop(null as unknown as ICharacter, testNPC);
+      expect(result).toBeUndefined();
+    });
+
+    it("should return early if target is null", async () => {
+      const result = await battleCharacterAttack.onHandleCharacterBattleLoop(testCharacter, null as unknown as INPC);
+      expect(result).toBeUndefined();
+    });
+
+    it("should return early if unable to acquire lock", async () => {
+      // @ts-ignore
+      jest.spyOn(battleCharacterAttack.locker, "lock").mockResolvedValue(false);
+
+      await battleCharacterAttack.onHandleCharacterBattleLoop(testCharacter, testNPC);
+
+      // @ts-ignore
+      expect(battleCharacterAttack.locker.lock).toHaveBeenCalledWith(`battle-loop-${testCharacter._id}`);
+    });
+  });
+
   // Out of range not working,
   // battleAttackTarget.checkRangeAndAttack(character, target) returns true
 
