@@ -90,14 +90,6 @@ export class BattleCharacterAttack {
 
       // Loop as long as the battle cycle is active
       while (await this.battleCycleManager.hasBattleCycle(character._id)) {
-        const hasBasicValidation = this.characterValidation.hasBasicValidation(character);
-
-        if (!hasBasicValidation) {
-          await this.battleTargeting.cancelTargeting(character);
-          await this.battleNetworkStopTargeting.stopTargeting(character);
-          break;
-        }
-
         // Determine the attack interval speed, potentially reducing it based on character stats
         const attackIntervalSpeed = await this.battleCharacterAttackIntervalSpeed.tryReducingAttackIntervalSpeed(
           character
@@ -116,9 +108,22 @@ export class BattleCharacterAttack {
           break;
         }
 
-        const updatedCharacter = (await this.getCharacterById(character._id, target.scene, true)) as ICharacter;
+        if (updatedTarget.health <= 0) {
+          await this.stopBattleCycleWithLogging(character._id, "Target is dead.");
+          break;
+        }
+
+        const updatedCharacter = (await this.getCharacterById(character._id, updatedTarget.scene, true)) as ICharacter;
 
         if (!updatedCharacter) {
+          break;
+        }
+
+        const hasBasicValidation = this.characterValidation.hasBasicValidation(updatedCharacter);
+
+        if (!hasBasicValidation) {
+          await this.battleTargeting.cancelTargeting(updatedCharacter);
+          await this.battleNetworkStopTargeting.stopTargeting(updatedCharacter);
           break;
         }
 
@@ -195,20 +200,42 @@ export class BattleCharacterAttack {
    * Retrieves a target (Character or NPC) by ID and type with necessary fields.
    */
   private async getTargetById(targetId: string, targetType: EntityType): Promise<ICharacter | INPC | null> {
+    let target: ICharacter | INPC | null = null;
+    let skills: any = null;
+
     switch (targetType) {
       case EntityType.Character:
-        return await Character.findOne({ _id: targetId }).lean<ICharacter>({
+        target = await Character.findOne({ _id: targetId }).lean<ICharacter>({
           virtuals: true,
           defaults: true,
         });
+        break;
       case EntityType.NPC:
-        return await NPC.findOne({ _id: targetId }).lean<INPC>({
+        target = await NPC.findOne({ _id: targetId }).lean<INPC>({
           virtuals: true,
           defaults: true,
         });
+        break;
       default:
         return null;
     }
+
+    if (target) {
+      skills = await Skill.findOne({ owner: target._id })
+        .lean({
+          virtuals: true,
+          defaults: true,
+        })
+        .cacheQuery({
+          cacheKey: `${target._id}-skills`,
+        });
+
+      if (skills) {
+        target.skills = skills;
+      }
+    }
+
+    return target;
   }
 
   /**
