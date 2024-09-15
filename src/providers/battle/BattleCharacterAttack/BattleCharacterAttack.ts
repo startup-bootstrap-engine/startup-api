@@ -2,17 +2,14 @@
 /* eslint-disable no-void */
 /* eslint-disable no-new */
 import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { Skill } from "@entities/ModuleCharacter/SkillsModel";
 import { INPC, NPC } from "@entities/ModuleNPC/NPCModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { CharacterSkull } from "@providers/character/CharacterSkull";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { Locker } from "@providers/locks/Locker";
-import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
-import {
-  MessagingBrokerActions,
-  MessagingBrokerServices,
-} from "@providers/microservice/messaging-broker/MessagingBrokerTypes";
 import { Cooldown } from "@providers/time/Cooldown";
+import { Time } from "@providers/time/Time";
 import { EntityType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { BattleAttackTarget } from "../BattleAttackTarget/BattleAttackTarget";
@@ -34,49 +31,9 @@ export class BattleCharacterAttack {
     private battleCharacterAttackIntervalSpeed: BattleCharacterAttackIntervalSpeed,
     private locker: Locker,
     private characterSkull: CharacterSkull,
-    private messagingBroker: MessagingBroker,
-    private cooldown: Cooldown
+    private cooldown: Cooldown,
+    private time: Time
   ) {}
-
-  /**
-   * Initializes the listener for battle cycle attack messages.
-   * Ensures that cooldowns are respected and attack intervals are not duplicated.
-   */
-  public async listenToBattleCycle(): Promise<void> {
-    await this.messagingBroker.listenForMessages(
-      MessagingBrokerServices.BattleCycle,
-      MessagingBrokerActions.BattleCycleAttack,
-      async (message) => {
-        const { characterId } = message;
-
-        // Check if the character is currently in a battle cycle
-        const hasBattleCycle = await this.battleCycleManager.hasBattleCycle(characterId);
-        if (!hasBattleCycle) {
-          return;
-        }
-
-        // Retrieve the character and target from the battle cycle manager
-        const { targetId, targetType } = await this.battleCycleManager.getCurrentTarget(characterId);
-
-        // Retrieve the character from the database
-        const character = await this.getCharacterById(characterId);
-        if (!character) {
-          await this.battleCycleManager.stopBattleCycle(characterId);
-          return;
-        }
-
-        // Retrieve the target (Character or NPC) from the database
-        const target = await this.getTargetById(targetId, targetType);
-        if (!target) {
-          await this.battleCycleManager.stopBattleCycle(characterId);
-          return;
-        }
-
-        // Execute the battle cycle loop with the retrieved character and target
-        await this.execCharacterBattleCycleLoop(character, target);
-      }
-    );
-  }
 
   /**
    * Handles the character battle loop, ensuring cooldowns are respected,
@@ -133,6 +90,14 @@ export class BattleCharacterAttack {
 
       // Loop as long as the battle cycle is active
       while (await this.battleCycleManager.hasBattleCycle(character._id)) {
+        const hasBasicValidation = this.characterValidation.hasBasicValidation(character);
+
+        if (!hasBasicValidation) {
+          await this.battleTargeting.cancelTargeting(character);
+          await this.battleNetworkStopTargeting.stopTargeting(character);
+          break;
+        }
+
         // Determine the attack interval speed, potentially reducing it based on character stats
         const attackIntervalSpeed = await this.battleCharacterAttackIntervalSpeed.tryReducingAttackIntervalSpeed(
           character
@@ -151,28 +116,34 @@ export class BattleCharacterAttack {
           break;
         }
 
+        const updatedCharacter = (await this.getCharacterById(character._id, target.scene, true)) as ICharacter;
+
+        if (!updatedCharacter) {
+          break;
+        }
+
         // Check remaining cooldown
         const remainingCooldown = await this.cooldown.getRemainingCooldownTime(cooldownKey);
 
         if (remainingCooldown > 0) {
           // Wait for the cooldown
-          await this.sleep(remainingCooldown);
+          await this.time.waitForMilliseconds(remainingCooldown);
         }
 
         // Set the cooldown for the next attack
         await this.cooldown.setCooldown(cooldownKey, attackIntervalSpeed / 1000);
 
         // Perform the attack
-        const attackSuccess = await this.attackTarget(character, updatedTarget);
+        const attackSuccess = await this.attackTarget(updatedCharacter, updatedTarget);
 
         if (!attackSuccess) {
           // Attack failed, stop battle cycle
-          await this.stopBattleCycleWithLogging(character._id, "Attack failed.");
+          await this.stopBattleCycleWithLogging(updatedCharacter._id, "Attack failed.");
           break;
         }
 
         // Wait for attack interval
-        await this.sleep(attackIntervalSpeed);
+        await this.time.waitForMilliseconds(attackIntervalSpeed);
       }
     } finally {
       // Release the lock
@@ -181,20 +152,43 @@ export class BattleCharacterAttack {
   }
 
   /**
-   * Utility function to pause execution for a given duration.
-   */
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  /**
    * Retrieves a character by ID with necessary fields.
    */
-  private async getCharacterById(characterId: string): Promise<ICharacter | null> {
-    return await Character.findOne({ _id: characterId }).lean<ICharacter>({
+  private async getCharacterById(
+    characterId: string,
+    scene: string,
+    withSkills: boolean = false
+  ): Promise<ICharacter | undefined> {
+    const character = await Character.findOne({ _id: characterId, scene }).lean<ICharacter>({
       virtuals: true,
       defaults: true,
     });
+
+    if (!character) {
+      await this.battleCycleManager.stopBattleCycle(characterId);
+      return;
+    }
+
+    if (withSkills) {
+      const characterSkills = await Skill.findOne({ owner: character._id })
+        .lean({
+          virtuals: true,
+          defaults: true,
+        })
+        .cacheQuery({
+          cacheKey: `${character._id}-skills`,
+        });
+
+      if (!characterSkills) {
+        console.log(`Skills not found for character ${character._id}. Stopping battle cycle.`);
+        await this.battleCycleManager.stopBattleCycle(character._id);
+        return;
+      }
+
+      character.skills = characterSkills;
+    }
+
+    return character;
   }
 
   /**
