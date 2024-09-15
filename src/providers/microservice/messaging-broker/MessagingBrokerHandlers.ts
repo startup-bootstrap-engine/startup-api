@@ -22,6 +22,7 @@ export class MessagingBrokerHandlers {
     // rpg-api
     if (!IS_MICROSERVICE) {
       await this.mapTransitionQueue.addMapTransitionListener();
+      await this.battleCharacterAttack.setupListeners();
     }
 
     // microservices

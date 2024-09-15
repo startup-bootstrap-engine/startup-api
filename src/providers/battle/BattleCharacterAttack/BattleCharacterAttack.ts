@@ -8,6 +8,11 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { CharacterSkull } from "@providers/character/CharacterSkull";
 import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { Locker } from "@providers/locks/Locker";
+import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
+import {
+  MessagingBrokerActions,
+  MessagingBrokerServices,
+} from "@providers/microservice/messaging-broker/MessagingBrokerTypes";
 import { Cooldown } from "@providers/time/Cooldown";
 import { Time } from "@providers/time/Time";
 import { EntityType } from "@rpg-engine/shared";
@@ -32,13 +37,33 @@ export class BattleCharacterAttack {
     private locker: Locker,
     private characterSkull: CharacterSkull,
     private cooldown: Cooldown,
-    private time: Time
+    private time: Time,
+    private messagingBroker: MessagingBroker
   ) {}
 
   /**
    * Handles the character battle loop, ensuring cooldowns are respected,
    * attack intervals are not duplicated, and target switches are managed properly.
    */
+
+  public async setupListeners(): Promise<void> {
+    await this.messagingBroker.listenForMessages(
+      MessagingBrokerServices.BattleCycle,
+      MessagingBrokerActions.BattleCycleAttack,
+      async (data) => {
+        const { characterId, targetId, targetType, targetScene } = data;
+        const character = await this.getCharacterById(characterId, targetScene, true);
+        const target = await this.getTargetById(targetId, targetType);
+
+        if (!character || !target) {
+          return;
+        }
+
+        await this.execCharacterBattleCycleLoop(character, target);
+      }
+    );
+  }
+
   public async onHandleCharacterBattleLoop(character: ICharacter, target: ICharacter | INPC): Promise<void> {
     if (!character || !target) {
       return;
@@ -88,8 +113,9 @@ export class BattleCharacterAttack {
     try {
       const cooldownKey = `battle-cycle-cooldown-${character._id}`;
 
-      // Loop as long as the battle cycle is active
-      while (await this.battleCycleManager.hasBattleCycle(character._id)) {
+      const hasBattleCycle = await this.battleCycleManager.hasBattleCycle(character._id);
+
+      if (hasBattleCycle) {
         // Determine the attack interval speed, potentially reducing it based on character stats
         const attackIntervalSpeed = await this.battleCharacterAttackIntervalSpeed.tryReducingAttackIntervalSpeed(
           character
@@ -99,24 +125,24 @@ export class BattleCharacterAttack {
         const targetData = await this.battleCycleManager.getCurrentTarget(character._id);
         if (!targetData) {
           await this.stopBattleCycleWithLogging(character._id, "No target data.");
-          break;
+          return;
         }
 
         const updatedTarget = await this.getTargetById(targetData.targetId, targetData.targetType);
         if (!updatedTarget) {
           await this.stopBattleCycleWithLogging(character._id, "Target not found.");
-          break;
+          return;
         }
 
         if (updatedTarget.health <= 0) {
           await this.stopBattleCycleWithLogging(character._id, "Target is dead.");
-          break;
+          return;
         }
 
         const updatedCharacter = (await this.getCharacterById(character._id, updatedTarget.scene, true)) as ICharacter;
 
         if (!updatedCharacter) {
-          break;
+          return;
         }
 
         const hasBasicValidation = this.characterValidation.hasBasicValidation(updatedCharacter);
@@ -124,7 +150,7 @@ export class BattleCharacterAttack {
         if (!hasBasicValidation) {
           await this.battleTargeting.cancelTargeting(updatedCharacter);
           await this.battleNetworkStopTargeting.stopTargeting(updatedCharacter);
-          break;
+          return;
         }
 
         // Check remaining cooldown
@@ -144,11 +170,23 @@ export class BattleCharacterAttack {
         if (!attackSuccess) {
           // Attack failed, stop battle cycle
           await this.stopBattleCycleWithLogging(updatedCharacter._id, "Attack failed.");
-          break;
+          return;
         }
 
         // Wait for attack interval
         await this.time.waitForMilliseconds(attackIntervalSpeed);
+
+        // trigger the next attack
+        await this.messagingBroker.sendMessage(
+          MessagingBrokerServices.BattleCycle,
+          MessagingBrokerActions.BattleCycleAttack,
+          {
+            characterId: updatedCharacter._id,
+            targetId: updatedTarget._id,
+            targetType: updatedTarget.type,
+            targetScene: updatedTarget.scene,
+          }
+        );
       }
     } finally {
       // Release the lock
