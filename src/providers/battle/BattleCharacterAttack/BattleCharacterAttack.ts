@@ -304,8 +304,6 @@ export class BattleCharacterAttack {
     // Perform range check and execute the attack
     const attackSuccessful = await this.battleAttackTarget.checkRangeAndAttack(character, target);
 
-    console.log("attackSuccessful", attackSuccessful);
-
     if (attackSuccessful) {
       // If attacking another character, check for unjustified attacks
       if (target.type === EntityType.Character) {
