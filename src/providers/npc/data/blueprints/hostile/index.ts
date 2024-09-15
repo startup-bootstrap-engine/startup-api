@@ -110,6 +110,11 @@ import { npcOrcBerserker } from "./tier7/NPCOrcBerserker";
 import { npcOrcMage } from "./tier7/NPCOrcMage";
 import { npcForestWalker } from "./tier8/NPCForestWalker";
 import { npcDwarfMage } from "./tier9/NPCDwarfMage";
+import { npcBloodyShadow } from "./tier15/NPCBloodyShadow";
+import { npcMadBloodGolem } from "./tier15/NPCMadBloodGolem";
+import { npcBloodySkeletonWarrior } from "./tier16/NPCBloodySkeletonWarrior";
+import { npcCursedGhost } from "./tier16/NPCCursedGhost";
+import { npcBloodyBerserkTroll } from "./tier17/NPCBloodyBerserkTroll";
 
 export const hostileNPCs = {
   [HostileNPCsBlueprint.Orc]: npcOrc,
@@ -223,4 +228,9 @@ export const hostileNPCs = {
   [HostileNPCsBlueprint.LavaGolem]: npcLavaGolem,
   [HostileNPCsBlueprint.AlphaWolf]: npcAlphaWolf,
   [HostileNPCsBlueprint.DwarfKing]: npcDwarfKing,
+  [HostileNPCsBlueprint.BloodySkeletonWarrior]: npcBloodySkeletonWarrior,
+  [HostileNPCsBlueprint.BloodyBerserkTroll]: npcBloodyBerserkTroll,
+  [HostileNPCsBlueprint.BloodyShadow]: npcBloodyShadow,
+  [HostileNPCsBlueprint.CursedGhost]: npcCursedGhost,
+  [HostileNPCsBlueprint.MadBloodGolem]: npcMadBloodGolem,
 };

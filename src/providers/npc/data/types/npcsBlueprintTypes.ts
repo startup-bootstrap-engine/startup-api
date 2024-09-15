@@ -192,4 +192,9 @@ export enum HostileNPCsBlueprint {
   // Trainer
   BattleCompanion = "battle-companion",
   BattleCompanionMagic = "battle-companion-magic",
+  CursedGhost = "cursedG-ghost",
+  BloodyBerserkTroll = "bloody-berserk-troll",
+  BloodyShadow = "bloody-shadow",
+  MadBloodGolem = "mad-blood-golem",
+  BloodySkeletonWarrior = "bloody-skeleton-warrior",
 }
