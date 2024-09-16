@@ -82,5 +82,3 @@ function checkInQuests(itemKey: string): boolean {
     return quest.rewards?.some((reward) => reward.itemKeys.includes(itemKey));
   });
 }
-
-unassignedItemChecker();

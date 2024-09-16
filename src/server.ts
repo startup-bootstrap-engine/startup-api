@@ -94,7 +94,9 @@ async function initializeServerComponents(): Promise<void> {
 
   await mapLoader.init(); // must be the first thing loaded!
 
-  appEnv.general.DEBUG_MODE && unassignedItemChecker();
+  if (appEnv.general.ENV === EnvType.Development && appEnv.general.DEBUG_MODE === true) {
+    unassignedItemChecker();
+  }
 
   app.use(router);
   app.use(errorHandlerMiddleware);
