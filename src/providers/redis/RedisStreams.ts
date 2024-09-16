@@ -48,7 +48,7 @@ export class RedisStreams {
 
       // Ensure both connections are ready
       await Promise.all([this.streamWriter.ping(), this.streamReader.ping()]);
-      console.log("Connected to Redis successfully for both Reader and Writer.");
+      console.log("✅ RedisStreams: Connected to Redis successfully for both Reader and Writer.");
 
       // Reset reconnection attempts after successful connection
       this.reconnectionAttempts = 0;

@@ -99,7 +99,6 @@ export class RabbitMQ {
 
       // Optional: Set prefetch for consume channel to limit unacknowledged messages
       await this.consumeChannel.prefetch(10);
-      console.log("✅ Publish and Consume channels are set up with prefetch=10");
 
       // Handle connection events
       this.connection.on("error", (err) => {
@@ -226,7 +225,6 @@ export class RabbitMQ {
 
     await this.consumeChannel.assertQueue(queue, { durable: true });
     await this.consumeChannel.bindQueue(queue, exchange, routingKey);
-    console.log(`✅ Bound queue "${queue}" to exchange "${exchange}" with routing key "${routingKey}"`);
 
     await this.consumeChannel.consume(
       queue,
@@ -294,7 +292,6 @@ export class RabbitMQ {
         await this.publishChannel.assertExchange(exchange, type, {
           durable: true,
         });
-        console.log(`✅ Exchange "${exchange}" asserted with type "${type}"`);
       },
       this.maxRetries,
       this.retryDelay
@@ -360,7 +357,6 @@ export class RabbitMQ {
         }
 
         await this.publishChannel.assertQueue(queue, { durable: true });
-        console.log(`✅ Asserted queue: "${queue}"`);
       },
       this.maxRetries,
       this.retryDelay
@@ -381,7 +377,6 @@ export class RabbitMQ {
         }
 
         await this.publishChannel.bindQueue(queue, exchange, routingKey);
-        console.log(`✅ Bound queue "${queue}" to exchange "${exchange}" with routing key "${routingKey}"`);
       },
       this.maxRetries,
       this.retryDelay

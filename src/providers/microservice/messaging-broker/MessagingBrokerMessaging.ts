@@ -20,7 +20,6 @@ export class MessagingBroker {
         await this.rabbitMQ.connect();
         await this.rabbitMQ.assertExchange(MessagingBroker.EXCHANGE, "topic");
         this.initialized = true;
-        console.log("✅ MessagingBroker: Connected to RabbitMQ and asserted exchange");
         return;
       } catch (error) {
         console.error(`❌ Failed to initialize RabbitMQ connection. Retries left: ${retries}`);
