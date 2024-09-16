@@ -46,6 +46,7 @@ import { PartyCRUD } from "@providers/party/PartyCRUD";
 import { PatreonAPI } from "@providers/patreon/PatreonAPI";
 import { ResultsPoller } from "@providers/poller/ResultsPoller";
 import { QueueActivityMonitor } from "@providers/queue/QueueActivityMonitor";
+import { RabbitMQ } from "@providers/rabbitmq/RabbitMQ";
 import { RedisPubSub } from "@providers/redis/RedisPubSub";
 import { RedisStreams } from "@providers/redis/RedisStreams";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
@@ -118,7 +119,8 @@ export class ServerBootstrap {
     private spellNetworkCastQueue: SpellNetworkCastQueue,
     private redisPubSub: RedisPubSub,
     private redisStreams: RedisStreams,
-    private battleCycleManager: BattleCycleManager
+    private battleCycleManager: BattleCycleManager,
+    private rabbitMQ: RabbitMQ
   ) {}
 
   // operations that can be executed in only one CPU instance without issues with pm2 (ex. setup centralized state doesnt need to be setup in every pm2 instance!)
@@ -184,6 +186,8 @@ export class ServerBootstrap {
       await this.redisPubSub.unsubscribe();
 
       await this.redisStreams.shutdown();
+
+      await this.rabbitMQ.close();
     };
 
     process.on("SIGTERM", async () => {

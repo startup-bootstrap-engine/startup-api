@@ -275,7 +275,6 @@ services:
   rpg-rabbitmq:
     image: rabbitmq:3-management
     ports:
-      - "5672:5672" # AMQP protocol port
       - "15672:15672" # Management UI port
     environment:
       RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
@@ -289,7 +288,6 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
       - ./environment/rabbit-init.sh:/docker-entrypoint-initdb.d/rabbit-init.sh
-      - ./environment/rabbitmq-config/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
 
     networks:
       - rpg-network

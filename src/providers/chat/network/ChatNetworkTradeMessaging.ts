@@ -65,6 +65,8 @@ export class ChatNetworkTradeMessaging {
             previousTradeChatLogs
           );
         } catch (error) {
+          console.error(error);
+
           this.socketMessaging.sendErrorMessageToCharacter(character, "Error sending message");
         }
       }
