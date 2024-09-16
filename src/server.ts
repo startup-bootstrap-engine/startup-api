@@ -29,6 +29,7 @@ import { router } from "@providers/server/Router";
 import { app } from "@providers/server/app";
 import { NewRelicTransactionCategory } from "@providers/types/NewRelicTypes";
 import { EnvType } from "@rpg-engine/shared/dist";
+import { unassignedItemChecker } from "scripts/unassignedItemChecker";
 
 dayjs.extend(duration);
 
@@ -92,6 +93,8 @@ async function initializeServerComponents(): Promise<void> {
   !IS_MICROSERVICE && cronJobs.start(); // only schedule on rpg-api
 
   await mapLoader.init(); // must be the first thing loaded!
+
+  appEnv.general.DEBUG_MODE && unassignedItemChecker();
 
   app.use(router);
   app.use(errorHandlerMiddleware);
