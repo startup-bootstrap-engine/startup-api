@@ -218,6 +218,9 @@ export class RedisStreams {
           throw new Error("Reader connection is not active.");
         }
 
+        // Attempt to create the consumer group if it doesn't exist
+        await this.createConsumerGroupIfNotExists(channel);
+
         const streams = await this.streamReader.xreadgroup(
           "GROUP",
           groupName,
@@ -274,12 +277,28 @@ export class RedisStreams {
         }
       } catch (error) {
         if (error.message.includes("NOGROUP")) {
-          console.warn(`Consumer group not found for channel '${channel}'. Creating group.`);
-          await this.initializeConsumerGroups();
-          continue; // Retry the loop after recreating the group
+          console.warn(`Consumer group not found for channel '${channel}'. Attempting to create.`);
+          await this.createConsumerGroupIfNotExists(channel);
+          continue; // Retry the loop after creating the group
         }
         console.error(`Error reading from stream '${channel}':`, error);
         await this.scheduleReconnect();
+      }
+    }
+  }
+
+  private async createConsumerGroupIfNotExists(channel: RedisStreamChannels): Promise<void> {
+    const groupName = this.getConsumerGroupName(channel);
+    try {
+      await this.streamReader.xgroup("CREATE", channel, groupName, "0", "MKSTREAM");
+      console.log(`Consumer group '${groupName}' created for channel '${channel}'.`);
+    } catch (error: any) {
+      if (error.message.includes("BUSYGROUP")) {
+        // Group already exists, which is fine
+        console.log(`Consumer group '${groupName}' already exists for channel '${channel}'.`);
+      } else {
+        // Unexpected error, rethrow
+        throw error;
       }
     }
   }
