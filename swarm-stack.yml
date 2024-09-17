@@ -99,7 +99,7 @@ services:
           - spread: node.id
         max_replicas_per_node: 1
       update_config:
-        parallelism: 1
+        parallelism: 2
         delay: 10s
         failure_action: rollback
         monitor: 10s
