@@ -16,11 +16,7 @@ import { NPC_GIANT_FORM_LOOT_MULTIPLIER } from "@providers/constants/NPCConstant
 import { LOW_SKILL_LEVEL_SP_INCREASE_BONUS } from "@providers/constants/SkillConstants";
 import { blueprintManager } from "@providers/inversify/container";
 import { ItemRarity } from "@providers/item/ItemRarity";
-import {
-  AvailableBlueprints,
-  CraftingResourcesBlueprint,
-  OthersBlueprint,
-} from "@providers/item/data/types/itemsBlueprintTypes";
+import { AvailableBlueprints, OthersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { SimpleTutorial } from "@providers/tutorial/simpleTutorial/SimpleTutorial";
 import { INPCLoot, ItemSubType, ItemType } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
@@ -104,14 +100,14 @@ export class NPCLoot {
             isDeadBodyLootable = true;
           }
 
-          if (lootItem.subType === ItemSubType.CraftingResource) {
-            if (lootItem.name === CraftingResourcesBlueprint.Worm) {
-              await this.simpleTutorial.sendSimpleTutorialActionToCharacter(killer, "first-worm");
-              break;
-            }
+          // if (lootItem.subType === ItemSubType.CraftingResource) {
+          //   if (lootItem.name === CraftingResourcesBlueprint.Worm) {
+          //     await this.simpleTutorial.sendSimpleTutorialActionToCharacter(killer, "first-worm");
+          //     break;
+          //   }
 
-            await this.simpleTutorial.sendSimpleTutorialActionToCharacter(killer, "first-crafting-material");
-          }
+          //   await this.simpleTutorial.sendSimpleTutorialActionToCharacter(killer, "first-crafting-material");
+          // }
         }
       }
     }
