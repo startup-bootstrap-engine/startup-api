@@ -177,11 +177,10 @@ export class RedisStreams {
    */
   public async readFromStream(channel: RedisStreamChannels, callback: (message: any) => Promise<void>): Promise<void> {
     const groupName = this.getConsumerGroupName(channel);
-    const consumerName = this.consumerNames.get(channel)!; // Guaranteed to exist after initialization
+    const consumerName = this.consumerNames.get(channel)!;
 
     while (!this.isShuttingDown) {
       try {
-        // Ensure the reader connection is active
         if (!this.streamReader || this.streamReader.status !== "ready") {
           throw new Error("Reader connection is not active.");
         }
@@ -191,46 +190,33 @@ export class RedisStreams {
           groupName,
           consumerName,
           "COUNT",
-          10, // Batch size
+          10,
           "BLOCK",
-          5000, // 5 seconds
+          5000,
           "STREAMS",
           channel,
           ">"
         );
 
         if (streams) {
-          // @ts-ignore
-          for (const [stream, messages] of streams) {
+          for (const stream of streams) {
+            // @ts-ignore
+            const [_, messages] = stream;
             for (const [id, fields] of messages) {
-              const message = this.deserializeMessage(fields);
               try {
+                const message = this.deserializeMessage(fields);
                 await callback(message);
                 await this.streamReader.xack(channel, groupName, id);
               } catch (processingError) {
-                console.error(`Error processing message ${id} from stream '${channel}':`, processingError);
-                // Optionally, implement retry logic or move the message to a dead-letter queue
+                console.error(`Error processing message ID ${id}:`, processingError);
+                // Optionally, handle retries or move to a dead-letter stream
               }
             }
           }
-        } else {
-          // No messages retrieved; optionally implement additional logic
         }
-      } catch (error: any) {
-        if (error.message.includes("NOGROUP")) {
-          try {
-            await this.streamReader.xgroup("CREATE", channel, groupName, "0", "MKSTREAM");
-            console.log(`Consumer group '${groupName}' created during readFromStream.`);
-          } catch (createError: any) {
-            if (!createError.message.includes("BUSYGROUP")) {
-              console.error(`Failed to create consumer group '${groupName}' during readFromStream:`, createError);
-              await this.scheduleReconnect();
-            }
-          }
-        } else {
-          console.error(`Error reading from stream '${channel}':`, error);
-          await this.time.waitForMilliseconds(5000); // Wait before retrying
-        }
+      } catch (error) {
+        console.error(`Error reading from stream '${channel}':`, error);
+        await this.scheduleReconnect();
       }
     }
   }
