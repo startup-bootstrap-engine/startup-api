@@ -75,9 +75,7 @@ export class RedisStreams {
         await this.streamReader.xgroup("CREATE", channel, groupName, "0", "MKSTREAM");
         console.log(`Consumer group '${groupName}' created for channel '${channel}'.`);
       } catch (error: any) {
-        if (error.message.includes("BUSYGROUP")) {
-          console.log(`Consumer group '${groupName}' already exists for channel '${channel}'.`);
-        } else {
+        if (!error.message.includes("BUSYGROUP")) {
           console.error(`Error creating consumer group '${groupName}' for channel '${channel}':`, error);
           throw error; // Re-throw to prevent initialization if a critical error occurs
         }
