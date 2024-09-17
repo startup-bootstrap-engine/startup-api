@@ -20,6 +20,9 @@ export class RedisStreams {
   private readonly initialReconnectionDelay: number = 5000; // 5 seconds
   private readonly consumerNames: Map<RedisStreamChannels, string> = new Map();
 
+  private readonly maxRetries: number = 3;
+  private readonly retryDelay: number = 1000; // 1 second
+
   constructor(private redisManager: RedisManager, private time: Time) {}
 
   /**
@@ -46,8 +49,12 @@ export class RedisStreams {
       this.streamReader.on("error", (error: Error) => this.handleRedisError(error, "Reader"));
       this.streamReader.on("end", () => this.handleRedisClose("Reader"));
 
-      // Ensure both connections are ready
-      await Promise.all([this.streamWriter.ping(), this.streamReader.ping()]);
+      // Use pipelining to send multiple commands at once
+      const pipeline = this.streamWriter.pipeline();
+      pipeline.ping();
+      pipeline.ping();
+      await pipeline.exec();
+
       console.log("✅ RedisStreams: Connected to Redis successfully for both Reader and Writer.");
 
       // Reset reconnection attempts after successful connection
@@ -146,18 +153,15 @@ export class RedisStreams {
    * @param message - The message to add.
    * @returns The ID of the added message or null if failed.
    */
-  public async addToStream(channel: RedisStreamChannels, message: Record<string, any>): Promise<string | null> {
+  private async addToStream(channel: RedisStreamChannels, message: Record<string, any>): Promise<string | null> {
     try {
-      // Ensure the writer connection is active
       if (!this.streamWriter || this.streamWriter.status !== "ready") {
         throw new Error("Writer connection is not active.");
       }
 
       const serializedMessage = this.serializeMessage(message);
 
-      // Validate message size (optional)
       if (serializedMessage.length > 1000) {
-        // Example limit
         throw new Error("Message size exceeds the allowed limit.");
       }
 
@@ -165,9 +169,37 @@ export class RedisStreams {
       return messageId;
     } catch (error) {
       console.error(`Failed to add message to stream '${channel}':`, error);
-      // Optionally, implement retry logic or dead-letter queueing here
+      // Implement retry logic
+      for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+        try {
+          const messageId = await this.retryOperation(() =>
+            this.streamWriter!.xadd(channel, "*", ...this.serializeMessage(message))
+          );
+          return messageId;
+        } catch (retryError) {
+          console.error(`Retry ${attempt} failed for adding message to stream '${channel}':`, retryError);
+        }
+      }
+      // Optionally, push the message to a dead-letter queue or alert monitoring
       return null;
     }
+  }
+
+  private async retryOperation<T>(operation: () => Promise<T>): Promise<T> {
+    let attempt = 0;
+    while (attempt < this.maxRetries) {
+      try {
+        return await operation();
+      } catch (error) {
+        attempt++;
+        if (attempt >= this.maxRetries) {
+          throw error;
+        }
+        console.error(`Retry attempt ${attempt} failed. Retrying in ${this.retryDelay}ms...`);
+        await this.time.waitForMilliseconds(this.retryDelay);
+      }
+    }
+    throw new Error("Max retries reached");
   }
 
   /**
@@ -178,6 +210,7 @@ export class RedisStreams {
   public async readFromStream(channel: RedisStreamChannels, callback: (message: any) => Promise<void>): Promise<void> {
     const groupName = this.getConsumerGroupName(channel);
     const consumerName = this.consumerNames.get(channel)!;
+    const MAX_CONCURRENT_PROCESSING = 50; // Adjust based on system capacity
 
     while (!this.isShuttingDown) {
       try {
@@ -190,7 +223,7 @@ export class RedisStreams {
           groupName,
           consumerName,
           "COUNT",
-          10,
+          100, // Increased batch size
           "BLOCK",
           5000,
           "STREAMS",
@@ -202,15 +235,40 @@ export class RedisStreams {
           for (const stream of streams) {
             // @ts-ignore
             const [_, messages] = stream;
+            const ackIds: string[] = [];
+            const processingPromises: Promise<void>[] = [];
+
             for (const [id, fields] of messages) {
-              try {
-                const message = this.deserializeMessage(fields);
-                await callback(message);
-                await this.streamReader.xack(channel, groupName, id);
-              } catch (processingError) {
-                console.error(`Error processing message ID ${id}:`, processingError);
-                // Optionally, handle retries or move to a dead-letter stream
+              if (processingPromises.length >= MAX_CONCURRENT_PROCESSING) {
+                await Promise.race(processingPromises);
               }
+
+              const processingPromise = (async () => {
+                try {
+                  const message = this.deserializeMessage(fields);
+                  await callback(message);
+                  ackIds.push(id);
+                } catch (processingError) {
+                  console.error(`Error processing message ID ${id}:`, processingError);
+                  // Optionally, handle retries or move to a dead-letter stream
+                } finally {
+                  // Remove the completed promise from the array
+                  // @ts-ignore
+                  const index = processingPromises.indexOf(processingPromise);
+                  if (index > -1) {
+                    processingPromises.splice(index, 1);
+                  }
+                }
+              })();
+
+              processingPromises.push(processingPromise);
+            }
+
+            // Wait for all processing to complete
+            await Promise.all(processingPromises);
+
+            if (ackIds.length > 0) {
+              await this.streamReader.xack(channel, groupName, ...ackIds);
             }
           }
         }
