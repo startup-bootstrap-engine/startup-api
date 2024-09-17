@@ -4,7 +4,7 @@
 import { appEnv } from "@providers/config/env";
 import { SOCKET_IO_CONFIG } from "@providers/constants/SocketsConstants";
 import { SocketIOAuthMiddleware } from "@providers/middlewares/SocketIOAuthMiddleware";
-import { ISocket } from "@rpg-engine/shared";
+import { EnvType, ISocket } from "@rpg-engine/shared";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { provide } from "inversify-binding-decorators";
 import { RedisClientOptions, createClient } from "redis";
@@ -20,41 +20,41 @@ export class SocketIO implements ISocket {
   public async init(): Promise<void> {
     this.socket = new SocketIOServer(SOCKET_IO_CONFIG);
 
-    // switch (appEnv.general.ENV) {
-    //   case EnvType.Development:
-    //     this.socket.use(SocketIOAuthMiddleware);
-    //     this.socket.listen(appEnv.socket.port.SOCKET);
-    //     console.log(`🔌 TCP socket initialized on ${appEnv.socket.port.SOCKET}`);
-    //     break;
-    //   case EnvType.Production:
-    const redisOptions: RedisClientOptions = {
-      socket: {
-        host: appEnv.database.REDIS_CONTAINER,
-        port: appEnv.database.REDIS_PORT,
-        connectTimeout: 80000, // (higher latency tolerance)
-        // keep connection alive for a mmorpg
-        keepAlive: 10000,
-        noDelay: true,
-        reconnectStrategy: (retries) => Math.min(100 * 2 ** retries, 80000), // Increased backoff strategy
-      },
-    };
+    switch (appEnv.general.ENV) {
+      case EnvType.Development:
+        this.socket.use(SocketIOAuthMiddleware);
+        this.socket.listen(appEnv.socket.port.SOCKET);
+        console.log(`🔌 TCP socket initialized on ${appEnv.socket.port.SOCKET}`);
+        break;
+      case EnvType.Production:
+        const redisOptions: RedisClientOptions = {
+          socket: {
+            host: appEnv.database.REDIS_CONTAINER,
+            port: appEnv.database.REDIS_PORT,
+            connectTimeout: 80000, // (higher latency tolerance)
+            // keep connection alive for a mmorpg
+            keepAlive: 10000,
+            noDelay: true,
+            reconnectStrategy: (retries) => Math.min(100 * 2 ** retries, 80000), // Increased backoff strategy
+          },
+        };
 
-    const pubClient = createClient(redisOptions);
-    const subClient = pubClient.duplicate();
+        const pubClient = createClient(redisOptions);
+        const subClient = pubClient.duplicate();
 
-    await Promise.all([pubClient.connect(), subClient.connect()]);
+        await Promise.all([pubClient.connect(), subClient.connect()]);
 
-    // Enable sticky-session
-    this.socket.adapter(
-      createAdapter(pubClient, subClient, {
-        requestsTimeout: 5000,
-      })
-    );
+        // Enable sticky-session
+        this.socket.adapter(
+          createAdapter(pubClient, subClient, {
+            requestsTimeout: 5000,
+          })
+        );
 
-    this.socket.use(SocketIOAuthMiddleware);
-    this.socket.listen(appEnv.socket.port.SOCKET);
-    //     break;
-    // }
+        this.socket.use(SocketIOAuthMiddleware);
+        this.socket.listen(appEnv.socket.port.SOCKET);
+        break;
+    }
   }
 
   public emitToUser<T>(channel: string, eventName: string, data?: T): void {
