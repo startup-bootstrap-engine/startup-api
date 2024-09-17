@@ -46,7 +46,6 @@ export class NPCManager {
 
     //! Dont use Promise.all here. This will lead to some NPCs getting stuck
     for (const npc of npcsToActivate) {
-      console.log(`Starting behavior loop for NPC ${npc.key}`);
       await this.startBehaviorLoop(npc);
     }
   }
