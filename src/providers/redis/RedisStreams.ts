@@ -153,7 +153,7 @@ export class RedisStreams {
    * @param message - The message to add.
    * @returns The ID of the added message or null if failed.
    */
-  private async addToStream(channel: RedisStreamChannels, message: Record<string, any>): Promise<string | null> {
+  public async addToStream(channel: RedisStreamChannels, message: Record<string, any>): Promise<string | null> {
     try {
       if (!this.streamWriter || this.streamWriter.status !== "ready") {
         throw new Error("Writer connection is not active.");
