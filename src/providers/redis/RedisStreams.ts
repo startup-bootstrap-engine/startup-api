@@ -244,7 +244,8 @@ export class RedisStreams {
     try {
       // Use the writer connection for trimming
       if (!this.streamWriter || this.streamWriter.status !== "ready") {
-        throw new Error("Writer connection is not active for trimming.");
+        console.warn("Writer connection is not active for trimming.");
+        return; // Skip trimming if writer is not active
       }
 
       await this.streamWriter.xtrim(channel, "MAXLEN", "~", maxLen);
@@ -298,54 +299,29 @@ export class RedisStreams {
     }
   }
 
-  /**
-   * Handle Redis errors by logging and attempting reconnection.
-   * @param error - The error encountered.
-   * @param connectionType - The type of connection ('Reader' or 'Writer').
-   */
-  private handleRedisError(error: Error, connectionType: string): void {
+  private async handleRedisError(error: Error, connectionType: string): Promise<void> {
     console.error(`Redis ${connectionType} connection error:`, error);
-    // Depending on the error, you might want to initiate reconnection
-    // For example, if it's a connection-related error
-  }
-
-  /**
-   * Handle Redis connection closure by attempting to reconnect.
-   * @param connectionType - The type of connection ('Reader' or 'Writer').
-   */
-  private handleRedisClose(connectionType: string): void {
     if (!this.isShuttingDown) {
-      console.warn(`Redis ${connectionType} connection closed. Attempting to reconnect...`);
-      void this.scheduleReconnect();
+      await this.scheduleReconnect();
     }
   }
 
-  /**
-   * Schedule a reconnection attempt with exponential backoff.
-   */
+  private async handleRedisClose(connectionType: string): Promise<void> {
+    console.warn(`Redis ${connectionType} connection closed.`);
+    if (!this.isShuttingDown) {
+      await this.scheduleReconnect();
+    }
+  }
+
   private async scheduleReconnect(): Promise<void> {
     if (this.isShuttingDown) return;
 
-    const retryDelay = Math.min(
-      this.initialReconnectionDelay * 2 ** this.reconnectionAttempts,
-      this.maxReconnectionDelay
-    );
+    this.reconnectionAttempts++;
+    const delay = Math.min(this.initialReconnectionDelay * 2 ** this.reconnectionAttempts, this.maxReconnectionDelay);
+    console.log(`Scheduling reconnect attempt ${this.reconnectionAttempts} in ${delay / 1000} seconds.`);
 
-    console.log(`Reconnecting to Redis in ${retryDelay / 1000} seconds...`);
-
-    setTimeout(async () => {
-      if (this.isShuttingDown) return;
-
-      try {
-        await this.connectToRedis();
-        await this.initializeConsumerGroups();
-        console.log("Reconnected to Redis successfully.");
-      } catch (error) {
-        console.error("Reconnection attempt failed:", error);
-        this.reconnectionAttempts += 1;
-        await this.scheduleReconnect(); // Recursive call for next retry
-      }
-    }, retryDelay);
+    await this.time.waitForMilliseconds(delay);
+    await this.connectToRedis();
   }
 
   /**
@@ -363,16 +339,7 @@ export class RedisStreams {
    * @returns An array of field-value pairs.
    */
   private serializeMessage(message: Record<string, any>): string[] {
-    const serialized: string[] = [];
-    for (const [key, value] of Object.entries(message)) {
-      try {
-        serialized.push(key, JSON.stringify(value));
-      } catch (error) {
-        console.error(`Failed to serialize field '${key}':`, error);
-        // Optionally, skip this field or handle the error as needed
-      }
-    }
-    return serialized;
+    return Object.entries(message).flatMap(([key, value]) => [key, JSON.stringify(value)]);
   }
 
   /**
