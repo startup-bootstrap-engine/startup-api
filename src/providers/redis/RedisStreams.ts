@@ -216,8 +216,6 @@ export class RedisStreams {
           throw new Error("Reader connection is not active.");
         }
 
-        await this.createConsumerGroupIfNotExists(channel);
-
         const streams = await this.streamReader.xreadgroup(
           "GROUP",
           groupName,
