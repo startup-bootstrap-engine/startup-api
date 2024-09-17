@@ -275,7 +275,6 @@ export class RedisStreams {
         }
       } catch (error) {
         if (error.message.includes("NOGROUP")) {
-          console.warn(`Consumer group not found for channel '${channel}'. Attempting to create.`);
           await this.createConsumerGroupIfNotExists(channel);
           continue; // Retry the loop after creating the group
         }
