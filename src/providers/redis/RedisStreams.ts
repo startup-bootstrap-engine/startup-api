@@ -273,6 +273,11 @@ export class RedisStreams {
           }
         }
       } catch (error) {
+        if (error.message.includes("NOGROUP")) {
+          console.warn(`Consumer group not found for channel '${channel}'. Creating group.`);
+          await this.initializeConsumerGroups();
+          continue; // Retry the loop after recreating the group
+        }
         console.error(`Error reading from stream '${channel}':`, error);
         await this.scheduleReconnect();
       }
