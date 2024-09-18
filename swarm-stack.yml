@@ -41,8 +41,7 @@ services:
         - traefik.http.services.rpg-api-socket-service.loadbalancer.server.port=5101
         - traefik.http.routers.rpg-api-socket.service=rpg-api-socket-service
 
-        # #  Add sticky session for websockets
-        #! Careful because when combined with multi client, this will lead all MC characters to be connected to the same server, compromising load balancer
+        # Add sticky session for websockets
         - "traefik.http.services.rpg-api-socket-service.loadbalancer.sticky=true"
         - "traefik.http.services.rpg-api-socket-service.loadbalancer.sticky.cookie.name=StickyCookie"
         - "traefik.http.services.rpg-api-socket-service.loadbalancer.sticky.cookie.secure=true"
@@ -52,9 +51,10 @@ services:
         - "traefik.http.routers.rpg-api-socket.middlewares=websocket@docker"
 
     logging:
+      driver: "json-file"
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: "5m" # Reduced from "10m"
+        max-file: "2" # Reduced from "3"
     environment:
       FORCE_COLOR: "true"
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
@@ -104,6 +104,11 @@ services:
         failure_action: rollback
         monitor: 10s
         max_failure_ratio: 0.3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m" # Added log rotation
+        max-file: "2"
     networks:
       - rpg-network
     depends_on:
@@ -141,6 +146,11 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m" # Added log rotation
+        max-file: "2"
     networks:
       - rpg-network
     depends_on:
@@ -154,9 +164,10 @@ services:
       timeout: 10s
       retries: 3
     logging:
+      driver: "json-file"
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: "5m" # Reduced from "10m"
+        max-file: "2" # Reduced from "3"
     deploy:
       replicas: 1
       restart_policy:
@@ -184,9 +195,10 @@ services:
       timeout: 10s
       retries: 3
     logging:
+      driver: "json-file"
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: "5m" # Reduced from "10m"
+        max-file: "2" # Reduced from "3"
     deploy:
       replicas: 1
       restart_policy:
@@ -210,9 +222,10 @@ services:
     image: mongo:7.0.0
     command: mongod --port ${MONGO_PORT}
     logging:
+      driver: "json-file"
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: "5m" # Reduced from "10m"
+        max-file: "2" # Reduced from "3"
     volumes:
       - rpg-db-data:/data/db
       - ./docker_scripts/:/docker-entrypoint-initdb.d
@@ -248,6 +261,11 @@ services:
     environment:
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
       NEW_RELIC_APP_NAME: "Definya Redis"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m" # Added log rotation
+        max-file: "2"
     networks:
       - rpg-network
     deploy:
@@ -270,6 +288,11 @@ services:
       NRIA_DISPLAY_NAME: "Definya Swarm Node"
     deploy:
       mode: global
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m" # Added log rotation
+        max-file: "2"
     networks:
       - rpg-network
 
@@ -284,14 +307,11 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-size: "10m"
-        max-file: "5"
+        max-size: "5m" # Reduced from "10m"
+        max-file: "2" # Reduced from "5"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
       - ./environment/rabbit-init.sh:/docker-entrypoint-initdb.d/rabbit-init.sh
-
-    networks:
-      - rpg-network
     deploy:
       replicas: 1
       placement:
@@ -315,6 +335,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    networks:
+      - rpg-network
 
 networks:
   rpg-network:
