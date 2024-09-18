@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable require-await */
+import { SERVER_API_NODES_QTY } from "@providers/constants/ServerConstants";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { Time } from "@providers/time/Time";
@@ -208,7 +209,7 @@ export class RedisStreams {
   public async readFromStream(channel: RedisStreamChannels, callback: (message: any) => Promise<void>): Promise<void> {
     const groupName = this.getConsumerGroupName(channel);
     const consumerName = this.consumerNames.get(channel)!;
-    const MAX_CONCURRENT_PROCESSING = 50; // Adjust based on system capacity
+    const MAX_CONCURRENT_PROCESSING = SERVER_API_NODES_QTY * 2;
 
     while (!this.isShuttingDown) {
       try {
@@ -317,7 +318,7 @@ export class RedisStreams {
    * Start a periodic task to trim all streams.
    */
   private startPeriodicTrim(): void {
-    const trimIntervalMs = 60 * 1000; // Every minute
+    const trimIntervalMs = 10 * 60 * 1000; // 10 minutes
     const staggerOffsetMs = 5000; // 5 seconds stagger between channels
 
     this.periodicTrimInterval = setInterval(async () => {

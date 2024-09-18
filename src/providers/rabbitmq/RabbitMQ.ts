@@ -70,7 +70,7 @@ export class RabbitMQ {
       const { host, port, username, password } = appEnv.rabbitmq;
       const url = `amqp://${encodeURIComponent(username!)}:${encodeURIComponent(password!)}@${host}:${port}`;
       const connectionOptions: Options.Connect = {
-        heartbeat: 60,
+        heartbeat: 15,
       };
       this.connection = await amqp.connect(url, connectionOptions);
       console.log(`✅ Successfully connected to RabbitMQ at ${url}`);
