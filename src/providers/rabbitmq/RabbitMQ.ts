@@ -220,39 +220,76 @@ export class RabbitMQ {
     callback: (data: any) => Promise<void>
   ): Promise<void> {
     if (!this.consumeChannel || !this.isChannelValid(this.consumeChannel)) {
-      throw new Error("RabbitMQ consume channel not initialized or invalid");
+      await this.reconnectConsumeChannel();
     }
 
-    await this.consumeChannel.assertQueue(queue, { durable: true });
-    await this.consumeChannel.bindQueue(queue, exchange, routingKey);
+    try {
+      await this.consumeChannel.assertQueue(queue, { durable: true });
+      await this.consumeChannel.bindQueue(queue, exchange, routingKey);
 
-    await this.consumeChannel.consume(
-      queue,
-      async (msg: Message | null) => {
-        if (msg) {
-          const content = msg.content.toString();
-          try {
-            const data = content ? JSON.parse(content) : null;
-            await callback(data);
-            if (this.isChannelValid(this.consumeChannel)) {
-              this.consumeChannel.ack(msg);
-            } else {
-              console.warn("Consume channel invalid. Cannot acknowledge message.");
-            }
-          } catch (error) {
-            console.error("Error processing message:", error);
-            console.error("Raw message content:", content);
-            if (this.isChannelValid(this.consumeChannel)) {
-              this.consumeChannel.nack(msg, false, false); // Discard the message
-              console.log(`❌ Message rejected and discarded with delivery tag ${msg.fields.deliveryTag}`);
-            } else {
-              console.warn("Consume channel invalid. Cannot reject message.");
+      await this.consumeChannel.consume(
+        queue,
+        async (msg: Message | null) => {
+          if (msg) {
+            const content = msg.content.toString();
+            try {
+              const data = content ? JSON.parse(content) : null;
+              await callback(data);
+              if (this.isChannelValid(this.consumeChannel)) {
+                try {
+                  this.consumeChannel.ack(msg);
+                } catch (ackError) {
+                  console.error("Failed to acknowledge message:", ackError, msg);
+                }
+              } else {
+                console.warn("Consume channel invalid. Cannot acknowledge message.");
+              }
+            } catch (error) {
+              console.error("Error processing message:", error);
+              console.error("Raw message content:", content);
+              if (this.isChannelValid(this.consumeChannel)) {
+                try {
+                  this.consumeChannel.nack(msg, false, false); // Discard the message
+                  console.log(`❌ Message rejected and discarded with delivery tag ${msg.fields.deliveryTag}`);
+                } catch (nackError) {
+                  console.error("Failed to reject message:", nackError, msg);
+                }
+              } else {
+                console.warn("Consume channel invalid. Cannot reject message.");
+              }
             }
           }
-        }
-      },
-      { noAck: false }
-    );
+        },
+        { noAck: false }
+      );
+    } catch (consumptionError) {
+      console.error("Failed to set up consumer:", consumptionError);
+      // Optionally implement retry logic here
+    }
+  }
+
+  /**
+   * Reconnects the consume channel.
+   */
+  private async reconnectConsumeChannel(): Promise<void> {
+    if (!this.connection || !this.isChannelValid(this.connection)) {
+      await this.connect();
+    }
+
+    if (this.consumeChannel) {
+      try {
+        await this.consumeChannel.close();
+      } catch (error) {
+        console.error("Error closing consume channel:", error);
+      }
+    }
+
+    try {
+      this.consumeChannel = await this.connection.createChannel();
+      console.log("✅ Consume channel reconnected");
+    } catch (error) {
+      console.error("Error creating consume channel:", error);
+    }
   }
 
   /**
