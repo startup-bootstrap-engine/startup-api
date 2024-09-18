@@ -2,6 +2,7 @@
 /* src/providers/rabbitmq/RabbitMQ.ts */
 
 import { appEnv } from "@providers/config/env";
+import { SERVER_API_NODES_QTY } from "@providers/constants/ServerConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import amqp, { Channel, Connection, Message, Options } from "amqplib";
 
@@ -165,7 +166,7 @@ export class RabbitMQ {
     }
 
     const channel = await this.connection.createChannel();
-    await channel.prefetch(10);
+    await channel.prefetch(SERVER_API_NODES_QTY * 2);
 
     try {
       await channel.assertQueue(queue, { durable: true });
