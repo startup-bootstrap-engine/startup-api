@@ -43,10 +43,12 @@ export class RedisIOClient {
         }
       );
 
+      // @ts-ignore
       this.pool.on("factoryCreateError", (err) => {
         console.error("Redis Pool Create Error", err);
       });
 
+      // @ts-ignore
       this.pool.on("factoryDestroyError", (err) => {
         console.error("Redis Pool Destroy Error", err);
       });
