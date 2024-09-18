@@ -348,12 +348,16 @@ export class MapTiles {
   }
 
   private getLayer(map: string, layerName: MapLayers): ITiledLayer | undefined {
-    const mapData = MapLoader.maps.get(map);
+    try {
+      const mapData = MapLoader.maps.get(map);
 
-    if (!mapData) {
-      throw new Error(`Failed to find map ${map}`);
+      if (!mapData) {
+        throw new Error(`Failed to find map ${map}`);
+      }
+
+      return mapData.layers.find((layer) => layer.name.toLowerCase() === TiledLayerNames[layerName].toLowerCase());
+    } catch (err) {
+      console.log(err);
     }
-
-    return mapData.layers.find((layer) => layer.name.toLowerCase() === TiledLayerNames[layerName].toLowerCase());
   }
 }

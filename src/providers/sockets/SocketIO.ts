@@ -44,6 +44,11 @@ export class SocketIO implements ISocket {
 
         await Promise.all([pubClient.connect(), subClient.connect()]);
 
+        // @ts-ignore
+        pubClient.on("error", (err) => console.error("Redis Pub Client Error:", err));
+        // @ts-ignore
+        subClient.on("error", (err) => console.error("Redis Sub Client Error:", err));
+
         // Enable sticky-session
         this.socket.adapter(
           createAdapter(pubClient, subClient, {

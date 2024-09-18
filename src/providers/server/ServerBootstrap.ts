@@ -185,9 +185,9 @@ export class ServerBootstrap {
       await this.spellNetworkCastQueue.shutdown();
       await this.redisPubSub.unsubscribe();
 
-      await this.redisStreams.shutdown();
+      // await this.redisStreams.shutdown();
 
-      await this.rabbitMQ.close();
+      // await this.rabbitMQ.close();
     };
 
     process.on("SIGTERM", async () => {

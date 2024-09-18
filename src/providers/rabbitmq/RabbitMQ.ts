@@ -2,6 +2,7 @@
 /* src/providers/rabbitmq/RabbitMQ.ts */
 
 import { appEnv } from "@providers/config/env";
+import { SERVER_API_NODES_QTY } from "@providers/constants/ServerConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import amqp, { Channel, Connection, Message, Options } from "amqplib";
 
@@ -69,7 +70,7 @@ export class RabbitMQ {
       const { host, port, username, password } = appEnv.rabbitmq;
       const url = `amqp://${encodeURIComponent(username!)}:${encodeURIComponent(password!)}@${host}:${port}`;
       const connectionOptions: Options.Connect = {
-        heartbeat: 60,
+        heartbeat: 15,
       };
       this.connection = await amqp.connect(url, connectionOptions);
       console.log(`✅ Successfully connected to RabbitMQ at ${url}`);
@@ -165,7 +166,7 @@ export class RabbitMQ {
     }
 
     const channel = await this.connection.createChannel();
-    await channel.prefetch(10);
+    await channel.prefetch(SERVER_API_NODES_QTY * 2);
 
     try {
       await channel.assertQueue(queue, { durable: true });
