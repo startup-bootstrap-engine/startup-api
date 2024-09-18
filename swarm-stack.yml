@@ -126,10 +126,12 @@ services:
       RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
       RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
     deploy:
-      replicas: 3
+      replicas: 2
       restart_policy:
         condition: on-failure
       placement:
+        constraints:
+          - node.labels.api == true
         preferences:
           - spread: node.id
         max_replicas_per_node: 1

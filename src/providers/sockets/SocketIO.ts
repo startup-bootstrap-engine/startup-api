@@ -4,10 +4,10 @@
 import { appEnv } from "@providers/config/env";
 import { SOCKET_IO_CONFIG } from "@providers/constants/SocketsConstants";
 import { SocketIOAuthMiddleware } from "@providers/middlewares/SocketIOAuthMiddleware";
-import { EnvType, ISocket } from "@rpg-engine/shared";
+import { ISocket } from "@rpg-engine/shared";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { provide } from "inversify-binding-decorators";
-import { RedisClientOptions, createClient } from "redis";
+import IORedis from "ioredis";
 import { Socket, Server as SocketIOServer } from "socket.io";
 
 @provide(SocketIO)
@@ -15,51 +15,42 @@ export class SocketIO implements ISocket {
   constructor() {}
 
   private socket: SocketIOServer;
-  public channel: Socket;
 
-  public async init(): Promise<void> {
+  public init(): void {
     this.socket = new SocketIOServer(SOCKET_IO_CONFIG);
 
-    switch (appEnv.general.ENV) {
-      case EnvType.Development:
-        this.socket.use(SocketIOAuthMiddleware);
-        this.socket.listen(appEnv.socket.port.SOCKET);
-        console.log(`🔌 TCP socket initialized on ${appEnv.socket.port.SOCKET}`);
-        break;
-      case EnvType.Production:
-        const redisOptions: RedisClientOptions = {
-          socket: {
-            host: appEnv.database.REDIS_CONTAINER,
-            port: appEnv.database.REDIS_PORT,
-            connectTimeout: 80000, // (higher latency tolerance)
-            // keep connection alive for a mmorpg
-            keepAlive: 10000,
-            noDelay: true,
-            reconnectStrategy: (retries) => Math.min(100 * 2 ** retries, 80000), // Increased backoff strategy
-          },
-        };
+    const redisOptions = {
+      host: appEnv.database.REDIS_CONTAINER,
+      port: Number(appEnv.database.REDIS_PORT),
+      connectTimeout: 80000, // Higher latency tolerance
+      keepAlive: 10000, // Keep connection alive for MMORPG
+      retryStrategy: (retries: number) => Math.min(100 * 2 ** retries, 80000), // Exponential backoff
+    };
 
-        const pubClient = createClient(redisOptions);
-        const subClient = pubClient.duplicate();
+    const pubClient = new IORedis(redisOptions);
+    const subClient = pubClient.duplicate();
 
-        await Promise.all([pubClient.connect(), subClient.connect()]);
+    pubClient.on("error", (err) => {
+      console.error("Redis Pub Client Error:", err);
+    });
 
-        // @ts-ignore
-        pubClient.on("error", (err) => console.error("Redis Pub Client Error:", err));
-        // @ts-ignore
-        subClient.on("error", (err) => console.error("Redis Sub Client Error:", err));
+    pubClient.on("end", () => {
+      console.warn("Redis Pub Client Connection Closed. Attempting to reconnect...");
+    });
 
-        // Enable sticky-session
-        this.socket.adapter(
-          createAdapter(pubClient, subClient, {
-            requestsTimeout: 5000,
-          })
-        );
+    subClient.on("error", (err) => {
+      console.error("Redis Sub Client Error:", err);
+    });
 
-        this.socket.use(SocketIOAuthMiddleware);
-        this.socket.listen(appEnv.socket.port.SOCKET);
-        break;
-    }
+    subClient.on("end", () => {
+      console.warn("Redis Sub Client Connection Closed. Attempting to reconnect...");
+    });
+
+    this.socket.adapter(createAdapter(pubClient, subClient, { requestsTimeout: 5000 }));
+
+    this.socket.use(SocketIOAuthMiddleware);
+    this.socket.listen(appEnv.socket.port.SOCKET);
+    console.log(`🔌 TCP socket initialized on port ${appEnv.socket.port.SOCKET}`);
   }
 
   public emitToUser<T>(channel: string, eventName: string, data?: T): void {
