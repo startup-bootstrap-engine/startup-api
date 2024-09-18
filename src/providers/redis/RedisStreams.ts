@@ -40,6 +40,15 @@ export class RedisStreams {
    */
   private async connectToRedis(): Promise<void> {
     try {
+      // release previous connections
+      if (this.streamWriter) {
+        await this.redisManager.releasePoolClient(this.streamWriter);
+      }
+
+      if (this.streamReader) {
+        await this.redisManager.releasePoolClient(this.streamReader);
+      }
+
       // Initialize writer connection
       this.streamWriter = await this.redisManager.getPoolClient("redis-streams-writer");
       this.streamWriter.on("error", (error: Error) => this.handleRedisError(error, "Writer"));
