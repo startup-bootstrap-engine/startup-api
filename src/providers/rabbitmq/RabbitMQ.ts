@@ -16,44 +16,33 @@ interface IConsumerConfig {
 export class RabbitMQ {
   private connection: Connection | null = null;
   private publishChannel: Channel | null = null;
-  private consumeChannel: Channel | null = null;
 
   private reconnecting: boolean = false;
-  private readonly retryDelay: number = 5000; // 5 seconds
+  private readonly retryDelay: number = 5000;
   private readonly maxRetries: number = 10;
   private currentRetries: number = 0;
 
   private consumers: IConsumerConfig[] = [];
+  private consumerChannels: Map<string, Channel> = new Map();
 
   constructor() {
-    // Initialize connection on instantiation
     this.connect().catch((err) => {
       console.error("Initial connection failed:", err);
       void this.handleReconnection();
     });
   }
 
-  /**
-   * Checks if a given channel is valid.
-   * @param channel The AMQP channel to check.
-   * @returns Boolean indicating if the channel is valid.
-   */
   private isChannelValid(channel: Channel | null): boolean {
     return (
       channel !== null &&
+      !channel._closing &&
+      !channel._closed &&
       channel.connection !== null &&
       !channel.connection.closeEmitted &&
       !channel.connection.stream.destroyed
     );
   }
 
-  /**
-   * Attempts to perform an operation with retries.
-   * @param operation The asynchronous operation to perform.
-   * @param retries Number of retry attempts.
-   * @param delay Delay between retries in milliseconds.
-   * @returns The result of the successful operation.
-   */
   private async retryOperation<T>(operation: () => Promise<T>, retries = 5, delay = 5000): Promise<T> {
     for (let i = 0; i < retries; i++) {
       try {
@@ -66,20 +55,12 @@ export class RabbitMQ {
     throw new Error("Operation failed after multiple retries");
   }
 
-  /**
-   * Utility method to create a delay.
-   * @param ms Milliseconds to delay.
-   * @returns A promise that resolves after the specified delay.
-   */
   private delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  /**
-   * Establishes a connection to RabbitMQ and sets up channels.
-   */
   public async connect(): Promise<void> {
-    if (this.connection && this.isChannelValid(this.publishChannel) && this.isChannelValid(this.consumeChannel)) {
+    if (this.connection && this.isChannelValid(this.publishChannel)) {
       console.log("RabbitMQ is already connected and channels are valid");
       return;
     }
@@ -88,19 +69,13 @@ export class RabbitMQ {
       const { host, port, username, password } = appEnv.rabbitmq;
       const url = `amqp://${encodeURIComponent(username!)}:${encodeURIComponent(password!)}@${host}:${port}`;
       const connectionOptions: Options.Connect = {
-        heartbeat: 60, // Heartbeat interval in seconds
+        heartbeat: 60,
       };
       this.connection = await amqp.connect(url, connectionOptions);
       console.log(`✅ Successfully connected to RabbitMQ at ${url}`);
 
-      // Setup separate channels for publishing and consuming
       this.publishChannel = await this.connection.createChannel();
-      this.consumeChannel = await this.connection.createChannel();
 
-      // Optional: Set prefetch for consume channel to limit unacknowledged messages
-      await this.consumeChannel.prefetch(10);
-
-      // Handle connection events
       this.connection.on("error", (err) => {
         console.error("RabbitMQ connection error:", err);
         this.cleanup();
@@ -113,7 +88,6 @@ export class RabbitMQ {
         void this.handleReconnection();
       });
 
-      // Handle channel close events
       this.publishChannel.on("error", (err) => {
         console.error("Publish channel error:", err);
       });
@@ -122,32 +96,16 @@ export class RabbitMQ {
         console.warn("Publish channel closed");
       });
 
-      this.consumeChannel.on("error", (err) => {
-        console.error("Consume channel error:", err);
-      });
-
-      this.consumeChannel.on("close", () => {
-        console.warn("Consume channel closed");
-        void this.handleReconnection();
-      });
-
-      // Re-establish consumers after setting up channels
       await this.reestablishConsumers();
     });
   }
 
-  /**
-   * Cleans up connection and channels.
-   */
   private cleanup(): void {
     this.connection = null;
     this.publishChannel = null;
-    this.consumeChannel = null;
+    this.consumerChannels.clear();
   }
 
-  /**
-   * Handles reconnection logic with retries.
-   */
   private async handleReconnection(): Promise<void> {
     if (this.reconnecting) return;
     this.reconnecting = true;
@@ -174,22 +132,12 @@ export class RabbitMQ {
     this.reconnecting = false;
   }
 
-  /**
-   * Re-establishes all registered consumers after reconnection.
-   */
   private async reestablishConsumers(): Promise<void> {
     for (const consumer of this.consumers) {
       await this.setupConsumer(consumer.exchange, consumer.queue, consumer.routingKey, consumer.callback);
     }
   }
 
-  /**
-   * Registers and sets up a consumer.
-   * @param exchange The exchange to bind to.
-   * @param queue The queue to consume from.
-   * @param routingKey The routing key for binding.
-   * @param callback The callback to process messages.
-   */
   public async consumeMessages(
     exchange: string,
     queue: string,
@@ -206,28 +154,24 @@ export class RabbitMQ {
     await this.setupConsumer(exchange, queue, routingKey, callback);
   }
 
-  /**
-   * Sets up a single consumer.
-   * @param exchange The exchange to bind to.
-   * @param queue The queue to consume from.
-   * @param routingKey The routing key for binding.
-   * @param callback The callback to process messages.
-   */
   private async setupConsumer(
     exchange: string,
     queue: string,
     routingKey: string,
     callback: (data: any) => Promise<void>
   ): Promise<void> {
-    if (!this.consumeChannel || !this.isChannelValid(this.consumeChannel)) {
-      await this.reconnectConsumeChannel();
+    if (!this.connection || !this.isChannelValid(this.connection)) {
+      await this.connect();
     }
 
-    try {
-      await this.consumeChannel.assertQueue(queue, { durable: true });
-      await this.consumeChannel.bindQueue(queue, exchange, routingKey);
+    const channel = await this.connection.createChannel();
+    await channel.prefetch(10);
 
-      await this.consumeChannel.consume(
+    try {
+      await channel.assertQueue(queue, { durable: true });
+      await channel.bindQueue(queue, exchange, routingKey);
+
+      const { consumerTag } = await channel.consume(
         queue,
         async (msg: Message | null) => {
           if (msg) {
@@ -235,9 +179,9 @@ export class RabbitMQ {
             try {
               const data = content ? JSON.parse(content) : null;
               await callback(data);
-              if (this.isChannelValid(this.consumeChannel)) {
+              if (this.isChannelValid(channel)) {
                 try {
-                  this.consumeChannel.ack(msg);
+                  channel.ack(msg);
                 } catch (ackError) {
                   console.error("Failed to acknowledge message:", ackError, msg);
                 }
@@ -247,9 +191,9 @@ export class RabbitMQ {
             } catch (error) {
               console.error("Error processing message:", error);
               console.error("Raw message content:", content);
-              if (this.isChannelValid(this.consumeChannel)) {
+              if (this.isChannelValid(channel)) {
                 try {
-                  this.consumeChannel.nack(msg, false, false); // Discard the message
+                  channel.nack(msg, false, false);
                   console.log(`❌ Message rejected and discarded with delivery tag ${msg.fields.deliveryTag}`);
                 } catch (nackError) {
                   console.error("Failed to reject message:", nackError, msg);
@@ -262,41 +206,23 @@ export class RabbitMQ {
         },
         { noAck: false }
       );
+
+      this.consumerChannels.set(consumerTag, channel);
+
+      channel.on("close", () => {
+        console.warn(`Channel closed for consumer ${consumerTag}`);
+        this.consumerChannels.delete(consumerTag);
+        void this.setupConsumer(exchange, queue, routingKey, callback);
+      });
+
+      channel.on("error", (err) => {
+        console.error(`Channel error for consumer ${consumerTag}:`, err);
+      });
     } catch (consumptionError) {
       console.error("Failed to set up consumer:", consumptionError);
-      // Optionally implement retry logic here
     }
   }
 
-  /**
-   * Reconnects the consume channel.
-   */
-  private async reconnectConsumeChannel(): Promise<void> {
-    if (!this.connection || !this.isChannelValid(this.connection)) {
-      await this.connect();
-    }
-
-    if (this.consumeChannel) {
-      try {
-        await this.consumeChannel.close();
-      } catch (error) {
-        console.error("Error closing consume channel:", error);
-      }
-    }
-
-    try {
-      this.consumeChannel = await this.connection.createChannel();
-      console.log("✅ Consume channel reconnected");
-    } catch (error) {
-      console.error("Error creating consume channel:", error);
-    }
-  }
-
-  /**
-   * Sends a message to a specific queue.
-   * @param queue The target queue.
-   * @param message The message content.
-   */
   public async sendMessage(queue: string, message: string): Promise<void> {
     await this.retryOperation(
       async () => {
@@ -314,11 +240,6 @@ export class RabbitMQ {
     );
   }
 
-  /**
-   * Asserts an exchange with the given type.
-   * @param exchange The exchange name.
-   * @param type The type of the exchange (e.g., 'direct', 'fanout', 'topic').
-   */
   public async assertExchange(exchange: string, type: string): Promise<void> {
     await this.retryOperation(
       async () => {
@@ -335,12 +256,6 @@ export class RabbitMQ {
     );
   }
 
-  /**
-   * Publishes a message to an exchange with a routing key.
-   * @param exchange The target exchange.
-   * @param routingKey The routing key.
-   * @param data The message data.
-   */
   public async publishMessage(exchange: string, routingKey: string, data: any): Promise<void> {
     await this.retryOperation(
       async () => {
@@ -363,10 +278,6 @@ export class RabbitMQ {
     );
   }
 
-  /**
-   * Creates a durable queue.
-   * @param queue The queue name.
-   */
   public async createQueue(queue: string): Promise<void> {
     await this.retryOperation(
       async () => {
@@ -382,10 +293,6 @@ export class RabbitMQ {
     );
   }
 
-  /**
-   * Asserts a queue.
-   * @param queue The queue name.
-   */
   public async assertQueue(queue: string): Promise<void> {
     await this.retryOperation(
       async () => {
@@ -400,12 +307,6 @@ export class RabbitMQ {
     );
   }
 
-  /**
-   * Binds a queue to an exchange with a routing key.
-   * @param queue The queue name.
-   * @param exchange The exchange name.
-   * @param routingKey The routing key.
-   */
   public async bindQueue(queue: string, exchange: string, routingKey: string): Promise<void> {
     await this.retryOperation(
       async () => {
@@ -420,10 +321,6 @@ export class RabbitMQ {
     );
   }
 
-  /**
-   * Deletes a queue.
-   * @param queue The queue name.
-   */
   public async deleteQueue(queue: string): Promise<void> {
     await this.retryOperation(
       async () => {
@@ -439,16 +336,17 @@ export class RabbitMQ {
     );
   }
 
-  /**
-   * Closes all channels and the connection gracefully.
-   */
   public async close(): Promise<void> {
     try {
-      if (this.consumeChannel) {
-        await this.consumeChannel.close();
-        console.log("✅ Consume channel closed");
-        this.consumeChannel = null;
+      for (const [consumerTag, channel] of this.consumerChannels) {
+        try {
+          await channel.close();
+          console.log(`✅ Consumer channel closed for ${consumerTag}`);
+        } catch (error) {
+          console.error(`Error closing consumer channel for ${consumerTag}:`, error);
+        }
       }
+      this.consumerChannels.clear();
       if (this.publishChannel) {
         await this.publishChannel.close();
         console.log("✅ Publish channel closed");
