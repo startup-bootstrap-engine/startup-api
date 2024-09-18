@@ -183,7 +183,7 @@ export class RabbitMQ {
                 try {
                   channel.ack(msg);
                 } catch (ackError) {
-                  console.error("Failed to acknowledge message:", ackError, msg);
+                  console.error("Failed to acknowledge message:", ackError, data);
                 }
               } else {
                 console.warn("Consume channel invalid. Cannot acknowledge message.");
@@ -196,7 +196,7 @@ export class RabbitMQ {
                   channel.nack(msg, false, false);
                   console.log(`❌ Message rejected and discarded with delivery tag ${msg.fields.deliveryTag}`);
                 } catch (nackError) {
-                  console.error("Failed to reject message:", nackError, msg);
+                  console.error("Failed to reject message:", nackError, content);
                 }
               } else {
                 console.warn("Consume channel invalid. Cannot reject message.");
