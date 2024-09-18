@@ -88,7 +88,7 @@ services:
       RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
       RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
     deploy:
-      replicas: 4
+      replicas: 2
       restart_policy:
         condition: on-failure
       placement:
@@ -96,13 +96,7 @@ services:
           - node.labels.npc == true
         preferences:
           - spread: node.id
-      resources:
-        limits:
-          cpus: "1.25" # Limit each replica to use up to 1.25 CPU cores
-          memory: 3.5G # Limit each replica to use up to 3.5GB of RAM
-        reservations:
-          cpus: "1.25" # Reserve 1.25 CPU cores for each replica
-          memory: 3.5G # Reserve 3.5GB of RAM for each replica
+        max_replicas_per_node: 1
       update_config:
         parallelism: 2
         delay: 10s
