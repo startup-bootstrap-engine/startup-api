@@ -39,6 +39,7 @@ import {
 import { characterMock } from "@providers/unitTests/mock/characterMock";
 import {
   CharacterSkullType,
+  IQuestObjectiveKill,
   ISocketTransmissionZone,
   NPCMovementType,
   PeriodOfDay,
@@ -97,6 +98,7 @@ interface IMockQuestOptions {
   type?: QuestType;
   objectivesCount?: number;
   subtype?: InteractionQuestSubtype;
+  emptyObjectives?: boolean;
 }
 
 @provide(UnitTestHelper)
@@ -685,6 +687,28 @@ export class UnitTestHelper {
     return newUser;
   }
 
+  public async createMockKillQuest(
+    npcId: string,
+    killCount: number = 1,
+    extraProps?: Record<string, unknown>
+  ): Promise<IQuest> {
+    const baseQuest = await this.createMockQuest(
+      npcId,
+      {
+        type: QuestType.Kill,
+        objectivesCount: killCount,
+        emptyObjectives: true,
+      },
+      extraProps
+    );
+
+    await this.addQuestKillObjectiveMock(baseQuest, {
+      killCountTarget: killCount,
+    });
+
+    return baseQuest;
+  }
+
   public async createMockQuest(
     npcId: string,
     options?: IMockQuestOptions | null,
@@ -707,34 +731,36 @@ export class UnitTestHelper {
       objectives: [],
     });
 
-    const objCount = options ? options.objectivesCount || 1 : 1;
+    if (!options?.emptyObjectives) {
+      const objCount = options ? options.objectivesCount || 1 : 1;
 
-    if (options && options.type) {
-      switch (options.type) {
-        case QuestType.Interaction:
-          if (options.subtype === InteractionQuestSubtype.craft) {
+      if (options && options.type) {
+        switch (options.type) {
+          case QuestType.Interaction:
+            if (options.subtype === InteractionQuestSubtype.craft) {
+              for (let i = 0; i < objCount; i++) {
+                await this.addQuestInteractionCraftObjectiveMock(testQuest);
+              }
+              break;
+            }
             for (let i = 0; i < objCount; i++) {
-              await this.addQuestInteractionCraftObjectiveMock(testQuest);
+              await this.addQuestInteractionObjectiveMock(testQuest);
             }
             break;
-          }
-          for (let i = 0; i < objCount; i++) {
-            await this.addQuestInteractionObjectiveMock(testQuest);
-          }
-          break;
 
-        case QuestType.Kill:
-          for (let i = 0; i < objCount; i++) {
-            await this.addQuestKillObjectiveMock(testQuest);
-          }
-          break;
-        default:
-          throw new Error(`unsupported quest type ${options.type}`);
-      }
-    } else {
-      // by default create 1 objective kill
-      for (let i = 0; i < objCount; i++) {
-        await this.addQuestKillObjectiveMock(testQuest);
+          case QuestType.Kill:
+            for (let i = 0; i < objCount; i++) {
+              await this.addQuestKillObjectiveMock(testQuest);
+            }
+            break;
+          default:
+            throw new Error(`unsupported quest type ${options.type}`);
+        }
+      } else {
+        // by default create 1 objective kill
+        for (let i = 0; i < objCount; i++) {
+          await this.addQuestKillObjectiveMock(testQuest);
+        }
       }
     }
 
@@ -757,12 +783,16 @@ export class UnitTestHelper {
     quest.objectives!.push(testQuestObjectiveInteraction._id);
   }
 
-  private async addQuestKillObjectiveMock(quest: IQuest): Promise<void> {
+  public async addQuestKillObjectiveMock(quest: IQuest, overrideProps?: Partial<IQuestObjectiveKill>): Promise<void> {
     let testQuestObjectiveKill = new QuestObjectiveKill({
       ...questKillObjectiveMock,
+      ...overrideProps,
     });
+
     testQuestObjectiveKill = await testQuestObjectiveKill.save();
     quest.objectives!.push(testQuestObjectiveKill._id);
+
+    await quest.save();
   }
 
   public async createMockDepot(npc: INPC, characterId: string, extraProps?: Partial<IItemContainer>): Promise<IDepot> {

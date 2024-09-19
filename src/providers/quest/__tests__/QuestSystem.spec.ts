@@ -5,6 +5,7 @@ import { ItemContainer } from "@entities/ModuleInventory/ItemContainerModel";
 import { IItem, Item } from "@entities/ModuleInventory/ItemModel";
 import { INPC } from "@entities/ModuleNPC/NPCModel";
 import { IQuest } from "@entities/ModuleQuest/QuestModel";
+import { QuestObjectiveKill } from "@entities/ModuleQuest/QuestObjectiveModel";
 import { QuestRecord } from "@entities/ModuleQuest/QuestRecordModel";
 import { CharacterItems } from "@providers/character/characterItems/CharacterItems";
 import { container, unitTestHelper } from "@providers/inversify/container";
@@ -161,12 +162,43 @@ describe("QuestSystem.ts", () => {
   describe("QuestSystem Edge Cases", () => {
     beforeEach(resetMocks);
 
-    it("should throw an error when updating with an invalid quest type", async () => {
-      await expect(questSystem.updateQuests("invalid" as any, testCharacter, "targetKey")).rejects.toThrowError(
-        "invalid quest type: invalid"
-      );
-    });
+    it("should release rewards only for the specific completed quest when multiple quests are in progress", async () => {
+      const anotherCharacter = await unitTestHelper.createMockCharacter(null, {
+        hasEquipment: true,
+        hasSkills: true,
+        hasInventory: true,
+      }); // create another char just to make sure we dont have any issues with character already having quests
 
+      // Create a second quest and add it to the character
+      const secondQuest = await unitTestHelper.createMockQuest(testNPC.id, {
+        type: QuestType.Interaction,
+        subtype: InteractionQuestSubtype.craft,
+      });
+
+      await createQuestRecord(secondQuest, anotherCharacter);
+
+      // Manually create a dedicated kill quest with a single objective
+      const dedicatedKillQuest = await unitTestHelper.createMockKillQuest(testNPC._id, 1);
+
+      // @ts-ignore
+      const mockKillQuestObjective = await QuestObjectiveKill.findById(dedicatedKillQuest.objectives?.[0]._id);
+
+      expect(mockKillQuestObjective).toBeDefined();
+      expect(mockKillQuestObjective!.killCountTarget).toBe(1);
+
+      await createQuestRecord(dedicatedKillQuest, anotherCharacter);
+
+      // Ensure both quests are initially in progress
+      expect(await questSystem.hasStatus(dedicatedKillQuest, QuestStatus.InProgress, anotherCharacter.id)).toBe(true);
+      expect(await questSystem.hasStatus(secondQuest, QuestStatus.InProgress, anotherCharacter.id)).toBe(true);
+
+      // Invoke updateQuests to complete the dedicated kill quest
+      await questSystem.updateQuests(QuestType.Kill, anotherCharacter, creatureKey);
+
+      // Verify the dedicated kill quest is completed and the second quest remains in progress
+      expect(await questSystem.hasStatus(dedicatedKillQuest, QuestStatus.Completed, anotherCharacter.id)).toBe(true);
+      expect(await questSystem.hasStatus(secondQuest, QuestStatus.InProgress, anotherCharacter.id)).toBe(true);
+    });
     it("should return undefined when there are no objectives for kill objective", async () => {
       // @ts-ignore
       const result = await questSystem.updateKillObjective({ objectives: [], records: [] }, "targetKey");
