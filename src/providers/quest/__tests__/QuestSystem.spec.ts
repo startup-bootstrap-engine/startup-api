@@ -218,6 +218,15 @@ describe("QuestSystem.ts", () => {
       const result = await questSystem.updateKillObjective(objectivesData, "targetKey");
       expect(result).toBeUndefined();
     });
+
+    it("should not update quests if locker is engaged", async () => {
+      // @ts-ignore
+      jest.spyOn(questSystem.locker, "lock").mockResolvedValueOnce(false);
+
+      await questSystem.updateQuests(QuestType.Kill, testCharacter, creatureKey);
+
+      expect(releaseRewards).not.toBeCalled();
+    });
   });
 
   it("should release rewards correctly", async () => {
