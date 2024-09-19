@@ -63,7 +63,8 @@ export class QuestSystem {
 
   @TrackNewRelicTransaction()
   public async updateQuests(type: QuestType, character: ICharacter, targetKey: string): Promise<void> {
-    const canProceed = await this.locker.lock(`updateQuests-${character.id}`);
+    const lockKey = `update-quests-${character.id}`;
+    const canProceed = await this.locker.lock(lockKey);
 
     if (!canProceed) {
       return;
@@ -87,18 +88,17 @@ export class QuestSystem {
           throw new Error(`Invalid quest type ${type}`);
       }
 
-      if (!updatedQuest) {
-        return;
-      }
-
-      if (await this.hasStatus(updatedQuest, QuestStatus.Completed, character.id)) {
-        await this.releaseRewards(updatedQuest as unknown as IQuest, character);
+      if (updatedQuest) {
+        const isCompleted = await this.hasStatus(updatedQuest, QuestStatus.Completed, character.id);
+        if (isCompleted) {
+          await this.releaseRewards(updatedQuest, character);
+        }
       }
     } catch (err) {
       console.log(err);
-      throw new Error(err);
+      throw new Error(err.message || "An unexpected error occurred");
     } finally {
-      await this.locker.unlock(`updateQuests-${character.id}`);
+      await this.locker.unlock(lockKey);
     }
   }
 
@@ -209,28 +209,27 @@ export class QuestSystem {
    * @param creatureKey key of the creature killed
    */
   private async updateKillObjective(data: IGetObjectivesResult, creatureKey: string): Promise<IQuest | undefined> {
-    // Check for each objective if the creature key is within their
-    // creatureKey array. If many cases, only update the first one
-
     const baseCreatureKey = creatureKey.replace(/-\d+$/, "");
 
     for (const obj of data.objectives) {
       const killObjective = obj as IQuestObjectiveKill;
-      if (killObjective.creatureKeys!.indexOf(baseCreatureKey) > -1) {
-        // Get the quest record for the character
+      if (killObjective.creatureKeys!.includes(baseCreatureKey)) {
         const record = data.records.find((r) => r.objective.toString() === killObjective._id.toString());
         if (!record) {
           throw new Error("Character hasn't started this quest");
         }
 
+        const prevKillCount = record.killCount || 0;
+
+        const newKillCount = prevKillCount + 1;
+
+        const newStatus = newKillCount === killObjective.killCountTarget ? QuestStatus.Completed : record.status;
+
         const updatedRecord = await QuestRecord.findOneAndUpdate(
           { _id: record._id },
           {
             $inc: { killCount: 1 },
-            $set: {
-              status:
-                (record.killCount || 0) + 1 === killObjective.killCountTarget ? QuestStatus.Completed : record.status,
-            },
+            $set: { status: newStatus },
           },
           { new: true, lean: true }
         );
@@ -351,6 +350,12 @@ export class QuestSystem {
   }
 
   private async releaseRewards(quest: IQuest, character: ICharacter): Promise<void> {
+    // Verify the quest is completed before releasing rewards
+    const isQuestCompleted = await this.hasStatus(quest, QuestStatus.Completed, character.id);
+    if (!isQuestCompleted) {
+      return;
+    }
+
     const rewards = await QuestReward.find({ _id: { $in: quest.rewards } });
 
     // Get character's backpack to store there the rewards

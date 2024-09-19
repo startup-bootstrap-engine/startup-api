@@ -54,6 +54,11 @@ export class SocketMessaging {
   }
 
   public sendEventToUser<T>(userChannel: string, eventName: string, data?: T): void {
+    if (appEnv.general.IS_UNIT_TEST) {
+      void this.socketAdapter.emitToUser(userChannel, eventName, data || {});
+      return;
+    }
+
     if (appEnv.general.MICROSERVICE_NAME === "rpg-npc") {
       // Add to stream to be processed by the rpg-socket service
       void this.redisStreams.addToStream(RedisStreamChannels.SocketEvents, {

@@ -139,16 +139,29 @@ export class CharacterTextureChange {
       const spellTypeStored = await this.inMemoryHashTable.getAll("SpellType");
       await this.inMemoryHashTable.deleteAll("SpellType");
 
-      if (!spellTypeStored) return;
+      if (spellTypeStored) {
+        for (const key of Object.keys(spellTypeStored)) {
+          const spellData = await this.inMemoryHashTable.getAll(key);
+          await this.inMemoryHashTable.deleteAll(key);
 
-      for (const key of Object.keys(spellTypeStored)) {
-        const spellData = await this.inMemoryHashTable.getAll(key);
-        await this.inMemoryHashTable.deleteAll(key);
+          if (spellData) {
+            for (const spellKey of Object.keys(spellData)) {
+              await this.updateCharacterTexture(spellKey, spellData[spellKey] as string);
+            }
+          }
+        }
+      }
 
-        if (!spellData) continue;
+      // Handle texture reverts to ensure textures are reset on restart
+      const textureReverts = await this.inMemoryHashTable.getAll("character-texture-revert");
+      await this.inMemoryHashTable.deleteAll("character-texture-revert");
 
-        for (const spellKey of Object.keys(spellData)) {
-          await this.updateCharacterTexture(spellKey, spellData[spellKey] as string);
+      if (textureReverts) {
+        for (const characterId of Object.keys(textureReverts)) {
+          const namespaces = textureReverts[characterId] as Record<string, ITextureRevert>;
+          for (const namespace of Object.keys(namespaces)) {
+            await this.revertTexture(characterId, namespace); // Revert texture
+          }
         }
       }
     } catch (error) {

@@ -1,5 +1,6 @@
 - Always look for pattern samples on the codebase involving what you want to generate. Please follow codebase patterns!
 - Mongoose queries: always favor .lean and also atomic updates
-- Note that models already generate types on the schema, so no need to generate twice
 - no need to try catch on controllers
 - remember to use return type on functions
+- for lock keys, prefer dash-case
+- always prefix interfaces with I (IUser, ICharacter, etc)
