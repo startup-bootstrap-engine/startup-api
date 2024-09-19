@@ -21,18 +21,9 @@ export const SOCKET_IO_CONFIG: Partial<ServerOptions> = {
     origin: appEnv.general.ENV === EnvType.Development ? "*" : appEnv.general.APP_URL,
     credentials: true,
   },
-  transports: ["websocket"], // Force WebSocket-only to reduce overhead from fallback to polling
 
   // Optimized for MMORPG real-time interactions
   maxHttpBufferSize: 5e6, // 100MB
   pingTimeout: 80000,
   pingInterval: 10000,
 };
-
-/* Ping Interval
-
-General Recommendation: A pingInterval of around 25-30 seconds is a common default in many applications, providing a balance between keeping the connection alive and minimizing unnecessary traffic. However, for more dynamic environments like MMORPGs, this might be too high.
-
-For Responsive Gameplay: Considering the need for more responsive gameplay, a pingInterval of 1-5 seconds might be more appropriate. This range is aggressive but can help ensure that connections are alive and responsive, which is critical for fast-paced game actions.
-
-*/
