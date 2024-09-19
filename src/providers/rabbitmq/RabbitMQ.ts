@@ -27,6 +27,10 @@ export class RabbitMQ {
   private consumerChannels: Map<string, Channel> = new Map();
 
   constructor() {
+    if (appEnv.general.IS_UNIT_TEST) {
+      return;
+    }
+
     this.connect().catch((err) => {
       console.error("Initial connection failed:", err);
       void this.handleReconnection();
