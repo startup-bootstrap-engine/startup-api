@@ -1,6 +1,6 @@
 {
   "name": "@rpg-engine/api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
@@ -30,7 +30,8 @@
     "db:export:swarm": "./environment/db-export-swarm.sh",
     "db:import:swarm": "echo 'Please import by running bash ./environment/db-import-swarm.sh'",
     "db:download": "./environment/db-download.sh",
-    "cache:clear": "sudo rm -rf ./src/providers/data/cache/**"
+    "cache:clear": "sudo rm -rf ./src/providers/data/cache/**",
+    "tag:release": "VERSION=$(node -p -e \"require('./package.json').version\") && git tag -fa latest-stable -m 'Latest stable tag' && git tag v$VERSION && git push origin latest-stable --force --no-verify && git push origin v$VERSION"
   },
   "husky": {
     "hooks": {
