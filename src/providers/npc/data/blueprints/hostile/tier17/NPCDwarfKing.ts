@@ -301,6 +301,10 @@ export const npcDwarfKing: INPCTierBlueprint<17> = {
       itemBlueprintKey: ToolsBlueprint.EmberEdgePickaxe,
       chance: LootProbability.VeryRare,
     },
+    {
+      itemBlueprintKey: BooksBlueprint.MagicOrb,
+      chance: LootProbability.Uncommon,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
   areaSpells: [

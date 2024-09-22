@@ -136,6 +136,14 @@ export const npcOrcRaider: INPCTierBlueprint<12> = {
       itemBlueprintKey: ToolsBlueprint.LogSplitterAxe,
       chance: LootProbability.Common,
     },
+    {
+      itemBlueprintKey: DaggersBlueprint.VerdantJitte,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.YetiHalberd,
+      chance: LootProbability.Rare,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.VineGrasp],
   areaSpells: [

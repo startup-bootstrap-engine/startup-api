@@ -137,6 +137,10 @@ export const npcDarkElf: INPCTierBlueprint<16> = {
       itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
       chance: LootProbability.Rare,
     },
+    {
+      itemBlueprintKey: StaffsBlueprint.RainbowWand,
+      chance: LootProbability.Rare,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],
   areaSpells: [

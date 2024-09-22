@@ -142,6 +142,10 @@ export const npcForestWalker: INPCTierBlueprint<8> = {
       itemBlueprintKey: GemsBlueprint.MistyQuartzGem,
       chance: LootProbability.Rare,
     },
+    {
+      itemBlueprintKey: RangedWeaponsBlueprint.TurkishGoldenBow,
+      chance: LootProbability.Rare,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Poison],
   areaSpells: [

@@ -124,6 +124,10 @@ export const npcElf: INPCTierBlueprint<4> = {
       chance: LootProbability.VeryRare,
       quantityRange: [10, 20],
     },
+    {
+      itemBlueprintKey: RangedWeaponsBlueprint.CorruptionBow,
+      chance: LootProbability.Rare,
+    },
   ],
   areaSpells: [
     {

@@ -3,6 +3,7 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
   ArmorsBlueprint,
+  AxesBlueprint,
   CraftingResourcesBlueprint,
   GlovesBlueprint,
   HelmetsBlueprint,
@@ -92,6 +93,10 @@ export const npcFireFox: INPCTierBlueprint<11> = {
       itemBlueprintKey: CraftingResourcesBlueprint.PhoenixFeather,
       chance: LootProbability.Rare,
       quantityRange: [5, 10],
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.HellishVikingAxe,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning],

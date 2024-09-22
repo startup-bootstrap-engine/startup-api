@@ -17,6 +17,9 @@ import { recipeLeatherHelmet } from "./recipeLeatherHelmet";
 import { recipeRedHoodie } from "./recipeRedHoodie";
 import { recipeCelestialCrown } from "./recipeCelestialCrown";
 import { recipeAzureWizardHat } from "./recipeAzureWizardHat";
+import { recipeJadeEmperorsHelm } from "./recipeJadeEmperorsHelm";
+import { recipeMysticVeil } from "./recipeMysticVeil";
+import { recipeSorcerersVeil } from "./recipeSorcerersVeil";
 
 export const recipeHelmetsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [HelmetsBlueprint.BerserkersHelmet]: [recipeBerserkersHelmet],
@@ -36,4 +39,7 @@ export const recipeHelmetsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [HelmetsBlueprint.RedHoodie]: [recipeRedHoodie],
   [HelmetsBlueprint.CelestialCrown]: [recipeCelestialCrown],
   [HelmetsBlueprint.AzureWizardHat]: [recipeAzureWizardHat],
+  [HelmetsBlueprint.JadeEmperorsHelm]: [recipeJadeEmperorsHelm],
+  [HelmetsBlueprint.MysticVeil]: [recipeMysticVeil],
+  [HelmetsBlueprint.SorcerersVeil]: [recipeSorcerersVeil],
 };

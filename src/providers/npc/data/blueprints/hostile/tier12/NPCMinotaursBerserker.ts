@@ -1,6 +1,7 @@
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
+  AxesBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
@@ -136,6 +137,14 @@ export const npcMinotaurBerserker: INPCTierBlueprint<12> = {
     {
       itemBlueprintKey: GemsBlueprint.ObsidianGem,
       chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.SorcerersVeil,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.YggdrasilVikingAxe,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

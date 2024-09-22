@@ -18,6 +18,7 @@ import {
   SeedsBlueprint,
   ShieldsBlueprint,
   SpearsBlueprint,
+  StaffsBlueprint,
   SwordsBlueprint,
   ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -203,6 +204,14 @@ export const npcDwarfGuardian: INPCTierBlueprint<12> = {
     },
     {
       itemBlueprintKey: GemsBlueprint.EarthstoneGem,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.VerdantJitte,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: StaffsBlueprint.AppendicesStaff,
       chance: LootProbability.Rare,
     },
   ],

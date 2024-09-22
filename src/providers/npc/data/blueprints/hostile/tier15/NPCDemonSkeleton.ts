@@ -151,6 +151,10 @@ export const npcDemonSkeleton: INPCTierBlueprint<15> = {
       itemBlueprintKey: ContainersBlueprint.Backpack,
       chance: LootProbability.Uncommon,
     },
+    {
+      itemBlueprintKey: SwordsBlueprint.PhoenixFury,
+      chance: LootProbability.VeryRare,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Corruption],
   areaSpells: [

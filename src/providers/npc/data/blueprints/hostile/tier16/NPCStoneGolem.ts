@@ -216,6 +216,10 @@ export const npcStoneGolem: INPCTierBlueprint<16> = {
       itemBlueprintKey: HelmetsBlueprint.YellowEnchanterHat,
       chance: LootProbability.Rare,
     },
+    {
+      itemBlueprintKey: DaggersBlueprint.FrostBiteDagger,
+      chance: LootProbability.Rare,
+    },
   ],
   areaSpells: [
     {

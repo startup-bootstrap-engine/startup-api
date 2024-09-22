@@ -1,9 +1,9 @@
-import { AccessoriesBlueprint, CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
+import { ContainersBlueprint, CraftingResourcesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { CraftingSkill } from "@rpg-engine/shared";
 import { IUseWithCraftingRecipe } from "../../useWithTypes";
 
-export const recipeBandana: IUseWithCraftingRecipe = {
-  outputKey: AccessoriesBlueprint.Bandana,
+export const recipePouch: IUseWithCraftingRecipe = {
+  outputKey: ContainersBlueprint.Pouch,
   outputQtyRange: [1, 1],
   requiredItems: [
     {
@@ -11,8 +11,8 @@ export const recipeBandana: IUseWithCraftingRecipe = {
       qty: 5,
     },
     {
-      key: CraftingResourcesBlueprint.SewingThread,
-      qty: 15,
+      key: CraftingResourcesBlueprint.WoodenBoard,
+      qty: 5,
     },
   ],
   minCraftingRequirements: [CraftingSkill.Blacksmithing, 1],

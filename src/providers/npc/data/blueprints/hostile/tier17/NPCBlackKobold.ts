@@ -13,6 +13,7 @@ import {
   MacesBlueprint,
   PotionsBlueprint,
   ShieldsBlueprint,
+  StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
@@ -192,6 +193,10 @@ export const npcBlackKobold: INPCTierBlueprint<17> = {
     {
       itemBlueprintKey: AxesBlueprint.GuardianAxe,
       chance: LootProbability.SemiCommon,
+    },
+    {
+      itemBlueprintKey: StaffsBlueprint.RainbowWand,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],

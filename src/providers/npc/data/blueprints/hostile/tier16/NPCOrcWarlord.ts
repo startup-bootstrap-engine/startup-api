@@ -127,6 +127,10 @@ export const npcOrcWarlord: INPCTierBlueprint<16> = {
       itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
       chance: LootProbability.Rare,
     },
+    {
+      itemBlueprintKey: SwordsBlueprint.CelestialReaver,
+      chance: LootProbability.VeryRare,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
   areaSpells: [

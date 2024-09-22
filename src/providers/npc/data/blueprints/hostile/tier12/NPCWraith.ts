@@ -8,6 +8,7 @@ import {
   CraftingResourcesBlueprint,
   DaggersBlueprint,
   GlovesBlueprint,
+  HelmetsBlueprint,
   LegsBlueprint,
   OthersBlueprint,
   RangedWeaponsBlueprint,
@@ -129,6 +130,10 @@ export const npcWraith: INPCTierBlueprint<12> = {
     {
       itemBlueprintKey: ToolsBlueprint.LogSplitterAxe,
       chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.SorcerersVeil,
+      chance: LootProbability.Uncommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],

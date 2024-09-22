@@ -9,6 +9,7 @@ import {
   CraftingResourcesBlueprint,
   DaggersBlueprint,
   GlovesBlueprint,
+  HelmetsBlueprint,
   LegsBlueprint,
   MacesBlueprint,
   OthersBlueprint,
@@ -173,6 +174,10 @@ export const npcLitch: INPCTierBlueprint<14> = {
     {
       itemBlueprintKey: ToolsBlueprint.ElderHeartAxe,
       chance: LootProbability.Common,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.JadeEmperorsHelm,
+      chance: LootProbability.Uncommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Corruption],

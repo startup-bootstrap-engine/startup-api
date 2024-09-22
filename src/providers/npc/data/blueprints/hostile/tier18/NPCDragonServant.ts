@@ -205,6 +205,10 @@ export const npcDragonServant: INPCTierBlueprint<18> = {
       itemBlueprintKey: HelmetsBlueprint.MysticVeilHat,
       chance: LootProbability.Rare,
     },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.SmokeRing,
+      chance: LootProbability.Rare,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Burning],
   areaSpells: [

@@ -8,6 +8,7 @@ import {
   GemsBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
+  OthersBlueprint,
   RangedWeaponsBlueprint,
   SeedsBlueprint,
   StaffsBlueprint,
@@ -131,6 +132,10 @@ export const npcOrcArcher: INPCTierBlueprint<6> = {
     {
       itemBlueprintKey: GemsBlueprint.SapphireGem,
       chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: OthersBlueprint.Map,
+      chance: LootProbability.Uncommon,
     },
   ],
 };

@@ -3,6 +3,7 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
+  AccessoriesBlueprint,
   DaggersBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
@@ -97,6 +98,10 @@ export const npcCyclops: INPCTierBlueprint<14> = {
     {
       itemBlueprintKey: ToolsBlueprint.EmberEdgePickaxe,
       chance: LootProbability.SemiCommon,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.SilverKey,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

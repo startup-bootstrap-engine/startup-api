@@ -3,6 +3,7 @@ import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
   ArmorsBlueprint,
   BootsBlueprint,
+  ContainersBlueprint,
   CraftingResourcesBlueprint,
   GemsBlueprint,
   HelmetsBlueprint,
@@ -104,6 +105,10 @@ export const npcSkeletonKnight: INPCTierBlueprint<5> = {
     },
     {
       itemBlueprintKey: GemsBlueprint.EmeraldGem,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: ContainersBlueprint.Pouch,
       chance: LootProbability.Uncommon,
     },
   ],

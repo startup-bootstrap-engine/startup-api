@@ -7,8 +7,10 @@ import {
   DaggersBlueprint,
   FoodsBlueprint,
   GemsBlueprint,
+  HelmetsBlueprint,
   RangedWeaponsBlueprint,
   SeedsBlueprint,
+  SwordsBlueprint,
   ToolsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { HostileNPCsBlueprint } from "@providers/npc/data/types/npcsBlueprintTypes";
@@ -110,6 +112,14 @@ export const npcMinotaurArcher: INPCTierBlueprint<12> = {
     {
       itemBlueprintKey: GemsBlueprint.EarthstoneGem,
       chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.MysticVeil,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.DamascusSword,
+      chance: LootProbability.Uncommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Burning],

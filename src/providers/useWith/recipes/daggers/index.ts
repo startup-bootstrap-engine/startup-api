@@ -1,6 +1,5 @@
 import { DaggersBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { IUseWithCraftingRecipe } from "@providers/useWith/useWithTypes";
-import { recipeFrostbiteBlade } from "../swords/tier3/recipeFrostbiteBlade";
 import { recipeWoodenDagger } from "./tier0/recipeWoodenDagger";
 import { recipeStormswiftDagger } from "./tier10/recipeStormswiftDagger";
 import { recipeAstralDagger } from "./tier11/recipeAstralDagger";
@@ -26,6 +25,8 @@ import { recipeHexBladeDagger } from "./tier8/recipeHexBladeDagger";
 import { recipeMistfireDagger } from "./tier9/recipeMistfireDagger";
 import { recipeSpiritBlade } from "./tier9/recipeSpiritBlade";
 import { recipeGreenDagger } from "./tier18/recipeGreenDagger";
+import { recipeFrostBiteDagger } from "./tier7/recipeFrostBiteDagger";
+import { recipeVerdantJitte } from "./tier4/recipeVerdantJitte";
 
 export const recipeDaggersIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [DaggersBlueprint.FrostDagger]: [recipeFrostDagger],
@@ -38,7 +39,6 @@ export const recipeDaggersIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [DaggersBlueprint.MistfireDagger]: [recipeMistfireDagger],
   [DaggersBlueprint.StarshardDagger]: [recipeStarshardDagger],
   [DaggersBlueprint.StormswiftDagger]: [recipeStormswiftDagger],
-  [DaggersBlueprint.FrostBiteDagger]: [recipeFrostbiteBlade],
   [DaggersBlueprint.EmberbladeDagger]: [recipeEmberbladeDagger],
   [DaggersBlueprint.ShadowstrikeDagger]: [recipeShadowstrikeDagger],
   [DaggersBlueprint.CelestialShardDagger]: [recipeCelestialShardDagger],
@@ -54,4 +54,6 @@ export const recipeDaggersIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [DaggersBlueprint.AzurefireDagger]: [recipeAzurefireDagger],
   [DaggersBlueprint.WildfireDagger]: [recipeWildfireDagger],
   [DaggersBlueprint.GreenDagger]: [recipeGreenDagger],
+  [DaggersBlueprint.FrostBiteDagger]: [recipeFrostBiteDagger],
+  [DaggersBlueprint.VerdantJitte]: [recipeVerdantJitte],
 };

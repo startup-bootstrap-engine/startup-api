@@ -1,6 +1,7 @@
 import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
+  AccessoriesBlueprint,
   BootsBlueprint,
   DaggersBlueprint,
   FoodsBlueprint,
@@ -115,6 +116,10 @@ export const npcAsterion: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.GoldenRing,
       chance: LootProbability.Rare,
     },
   ],

@@ -150,6 +150,10 @@ export const npcDwarfMage: INPCTierBlueprint<9> = {
       itemBlueprintKey: GemsBlueprint.CoralReefGem,
       chance: LootProbability.VeryRare,
     },
+    {
+      itemBlueprintKey: RangedWeaponsBlueprint.YggdrasilBow,
+      chance: LootProbability.Rare,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Burning],
   areaSpells: [

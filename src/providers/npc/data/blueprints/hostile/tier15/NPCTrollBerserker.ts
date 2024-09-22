@@ -15,6 +15,7 @@ import { generateMoveTowardsMovement } from "../../../abstractions/BaseNeutralNP
 
 import { EntityEffectBlueprint } from "@providers/entityEffects/data/types/entityEffectBlueprintTypes";
 import {
+  AccessoriesBlueprint,
   AxesBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
@@ -164,6 +165,10 @@ export const npcTrollBerserker: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.MistfireDagger,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.JadeRing,
       chance: LootProbability.Rare,
     },
   ],

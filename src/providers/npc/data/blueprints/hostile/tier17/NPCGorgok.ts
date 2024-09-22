@@ -184,6 +184,10 @@ export const npcGorgok: INPCTierBlueprint<17> = {
       itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
       chance: LootProbability.Rare,
     },
+    {
+      itemBlueprintKey: DaggersBlueprint.FrostBiteDagger,
+      chance: LootProbability.Rare,
+    },
   ],
   areaSpells: [
     {

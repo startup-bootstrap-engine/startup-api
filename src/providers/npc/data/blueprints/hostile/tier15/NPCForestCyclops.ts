@@ -104,6 +104,10 @@ export const npcForestCyclops: INPCTierBlueprint<15> = {
       itemBlueprintKey: ToolsBlueprint.WoodsManAxe,
       chance: LootProbability.Rare,
     },
+    {
+      itemBlueprintKey: HelmetsBlueprint.JadeEmperorsHelm,
+      chance: LootProbability.Uncommon,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Poison, EntityEffectBlueprint.Bleeding],
   areaSpells: [
