@@ -1,23 +1,26 @@
 import { AccessoriesBlueprint } from "@providers/item/data/types/itemsBlueprintTypes";
 import { IUseWithCraftingRecipe } from "@providers/useWith/useWithTypes";
-import { recipeAmuletOfDeath } from "./recipeAmuletOfDeath";
-import { recipeAzureNecklace } from "./recipeAzureNecklace";
-import { recipeBandana } from "./recipeBandana";
-import { recipeBloodstoneAmulet } from "./recipeBloodstoneAmulet";
-import { recipeCorruptionNecklace } from "./recipeCorruptionNecklace";
-import { recipeDeathNecklace } from "./recipeDeathNecklace";
-import { recipeElvenRing } from "./recipeElvenRing";
-import { recipeEmeraldEleganceNecklace } from "./recipeEmeraldEleganceNecklace";
-import { recipeGildedNecklace } from "./recipeGildedNecklace";
-import { recipeGoldenGlimmerRing } from "./recipeGoldenGlimmerRing";
-import { recipeGoldenGlowRing } from "./recipeGoldenGlowRing";
-import { recipeHasteRing } from "./recipeHasteRing";
-import { recipeOrcRing } from "./recipeOrcRing";
-import { recipePendantOfLife } from "./recipePendantOfLife";
-import { recipePendantOfMana } from "./recipePendantOfMana";
-import { recipeSapphireSerenadeRing } from "./recipeSapphireSerenadeRing";
-import { recipeScarletNecklace } from "./recipeScarletNecklace";
-import { recipeTwilightEmberNecklace } from "./recipeTwilightEmberNecklace";
+import { recipeAmuletOfDeath } from "./tier0/recipeAmuletOfDeath";
+import { recipeAzureNecklace } from "./tier23/recipeAzureNecklace";
+import { recipeBandana } from "./tier0/recipeBandana";
+import { recipeBloodstoneAmulet } from "./tier13/recipeBloodstoneAmulet";
+import { recipeCorruptionNecklace } from "./tier0/recipeCorruptionNecklace";
+import { recipeDeathNecklace } from "./tier0/recipeDeathNecklace";
+import { recipeElvenRing } from "./tier0/recipeElvenRing";
+import { recipeEmeraldEleganceNecklace } from "./tier17/recipeEmeraldEleganceNecklace";
+import { recipeGildedNecklace } from "./tier22/recipeGildedNecklace";
+import { recipeGoldenGlimmerRing } from "./tier28/recipeGoldenGlimmerRing";
+import { recipeGoldenGlowRing } from "./tier31/recipeGoldenGlowRing";
+import { recipeHasteRing } from "./tier1/recipeHasteRing";
+import { recipeOrcRing } from "./tier1/recipeOrcRing";
+import { recipePendantOfLife } from "./tier0/recipePendantOfLife";
+import { recipePendantOfMana } from "./tier0/recipePendantOfMana";
+import { recipeSapphireSerenadeRing } from "./tier30/recipeSapphireSerenadeRing";
+import { recipeScarletNecklace } from "./tier24/recipeScarletNecklace";
+import { recipeTwilightEmberNecklace } from "./tier23/recipeTwilightEmberNecklace";
+import { recipeGoldenRing } from "./tier2/recipeGoldenRing";
+import { recipeJadeRing } from "./tier2/recipeJadeRing";
+import { recipeSmokeRing } from "./tier26/recipeSmokeRing";
 
 export const recipeAccessoriesIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [AccessoriesBlueprint.Bandana]: [recipeBandana],
@@ -38,4 +41,7 @@ export const recipeAccessoriesIndex: Record<string, IUseWithCraftingRecipe[]> = 
   [AccessoriesBlueprint.SapphireSerenadeRing]: [recipeSapphireSerenadeRing],
   [AccessoriesBlueprint.ScarletNecklace]: [recipeScarletNecklace],
   [AccessoriesBlueprint.TwilightEmberNecklace]: [recipeTwilightEmberNecklace],
+  [AccessoriesBlueprint.SmokeRing]: [recipeSmokeRing],
+  [AccessoriesBlueprint.GoldenRing]: [recipeGoldenRing],
+  [AccessoriesBlueprint.JadeRing]: [recipeJadeRing],
 };

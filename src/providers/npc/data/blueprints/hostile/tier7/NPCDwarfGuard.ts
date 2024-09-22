@@ -126,6 +126,10 @@ export const npcDwarfGuard: INPCTierBlueprint<7> = {
       itemBlueprintKey: HelmetsBlueprint.InfantryHelmet,
       chance: LootProbability.Uncommon,
     },
+    {
+      itemBlueprintKey: RangedWeaponsBlueprint.ScythianGoldenBow,
+      chance: LootProbability.Rare,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
 };

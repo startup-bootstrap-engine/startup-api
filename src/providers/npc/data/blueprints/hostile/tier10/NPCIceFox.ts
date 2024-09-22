@@ -7,6 +7,7 @@ import {
   DaggersBlueprint,
   FoodsBlueprint,
   GlovesBlueprint,
+  OthersBlueprint,
   RangedWeaponsBlueprint,
   ShieldsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
@@ -103,6 +104,10 @@ export const npcIceFox: INPCTierBlueprint<10> = {
       itemBlueprintKey: CraftingResourcesBlueprint.BlueFeather,
       chance: LootProbability.Common,
       quantityRange: [3, 5],
+    },
+    {
+      itemBlueprintKey: OthersBlueprint.RoyalChalice,
+      chance: LootProbability.Uncommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Freezing],

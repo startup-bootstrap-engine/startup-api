@@ -10,6 +10,7 @@ import { recipeMysticWardenCodex } from "./recipeMysticWardenCodex";
 import { recipePotioncraftPrimer } from "./recipePotioncraftPrimer";
 import { recipeSpellboundCodex } from "./recipeSpellboundCodex";
 import { recipeStormbringerGrimoire } from "./recipeStormbringerGrimoire";
+import { recipeMagicOrb } from "./recipeMagicOrb";
 
 export const recipeBooksIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [BooksBlueprint.ArcaneArbiterChronicles]: [recipeArcaneArbiterChronicles],
@@ -22,4 +23,5 @@ export const recipeBooksIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [BooksBlueprint.PotioncraftPrimer]: [recipePotioncraftPrimer],
   [BooksBlueprint.SpellboundCodex]: [recipeSpellboundCodex],
   [BooksBlueprint.MysteryOrb]: [recipeMysteryOrb],
+  [BooksBlueprint.MagicOrb]: [recipeMagicOrb],
 };

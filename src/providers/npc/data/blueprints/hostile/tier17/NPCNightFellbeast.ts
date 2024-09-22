@@ -133,6 +133,10 @@ export const npcNightFellbeast: INPCTierBlueprint<17> = {
       itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
       chance: LootProbability.Rare,
     },
+    {
+      itemBlueprintKey: AccessoriesBlueprint.SmokeRing,
+      chance: LootProbability.Rare,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
   areaSpells: [

@@ -161,6 +161,10 @@ export const npcMadBloodGolem: INPCTierBlueprint<15> = {
       itemBlueprintKey: AccessoriesBlueprint.SapphireRing,
       chance: LootProbability.Rare,
     },
+    {
+      itemBlueprintKey: SwordsBlueprint.Voidslayer,
+      chance: LootProbability.VeryRare,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding],
   areaSpells: [

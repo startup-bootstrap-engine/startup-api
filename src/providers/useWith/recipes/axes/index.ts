@@ -61,6 +61,11 @@ import { recipeBlightReaver } from "./tier17/recipeBlightReaver";
 import { recipeDragonfireAxe } from "./tier17/recipeDragonfireAxe";
 import { recipeAbyssalCleave } from "./tier18/recipeAbyssalCleave";
 import { recipeFrostbiteAxe } from "./tier18/recipeFrostbiteAxe";
+import { recipeYggdrasilWarAxe } from "./tier5/recipeYggdrasilWarAxe";
+import { recipeYggdrasilVikingAxe } from "./tier4/recipeYggdrasilVikingAxe";
+import { recipeHellishVikingAxe } from "./tier3/recipeHellishVikingAxe";
+import { recipeHellishWarAxe } from "./tier3/recipeHellishWarAxe";
+import { recipeYetiHalberd } from "./tier4/recipeYetiHalberd";
 
 export const recipeAxesIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [AxesBlueprint.Axe]: [recipeAxe],
@@ -124,4 +129,9 @@ export const recipeAxesIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [AxesBlueprint.DragonfireAxe]: [recipeDragonfireAxe],
   [AxesBlueprint.FrostbiteAxe]: [recipeFrostbiteAxe],
   [AxesBlueprint.AbyssalCleave]: [recipeAbyssalCleave],
+  [AxesBlueprint.YggdrasilWarAxe]: [recipeYggdrasilWarAxe],
+  [AxesBlueprint.YggdrasilVikingAxe]: [recipeYggdrasilVikingAxe],
+  [AxesBlueprint.YetiHalberd]: [recipeYetiHalberd],
+  [AxesBlueprint.HellishVikingAxe]: [recipeHellishVikingAxe],
+  [AxesBlueprint.HellishWarAxe]: [recipeHellishWarAxe],
 };

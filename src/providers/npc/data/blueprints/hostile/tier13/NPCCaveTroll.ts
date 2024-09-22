@@ -139,6 +139,10 @@ export const npcCaveTroll: INPCTierBlueprint<13> = {
       itemBlueprintKey: ToolsBlueprint.EmberEdgePickaxe,
       chance: LootProbability.Rare,
     },
+    {
+      itemBlueprintKey: HelmetsBlueprint.MysticVeil,
+      chance: LootProbability.Uncommon,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
 };

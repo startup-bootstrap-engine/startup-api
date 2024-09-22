@@ -160,6 +160,10 @@ export const npcDragonKnight: INPCTierBlueprint<16> = {
       itemBlueprintKey: HelmetsBlueprint.AmethystArchmageHat,
       chance: LootProbability.Rare,
     },
+    {
+      itemBlueprintKey: DaggersBlueprint.FrostBiteDagger,
+      chance: LootProbability.Rare,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],
   areaSpells: [

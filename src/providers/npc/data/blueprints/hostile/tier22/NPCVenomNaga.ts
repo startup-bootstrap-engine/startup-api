@@ -256,6 +256,10 @@ export const npcVenomNaga: INPCTierBlueprint<21> = {
       itemBlueprintKey: HelmetsBlueprint.ArcaneAdepthat,
       chance: LootProbability.SemiCommon,
     },
+    {
+      itemBlueprintKey: GemsBlueprint.EmeraldGlory,
+      chance: LootProbability.Common,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
   areaSpells: [

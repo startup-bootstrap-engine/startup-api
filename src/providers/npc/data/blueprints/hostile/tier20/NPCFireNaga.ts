@@ -262,6 +262,10 @@ export const npcFireNaga: INPCTierBlueprint<20> = {
       itemBlueprintKey: HelmetsBlueprint.ArcaneAdepthat,
       chance: LootProbability.SemiCommon,
     },
+    {
+      itemBlueprintKey: BooksBlueprint.MagicOrb,
+      chance: LootProbability.Uncommon,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
   areaSpells: [

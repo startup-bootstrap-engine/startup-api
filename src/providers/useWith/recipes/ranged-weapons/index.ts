@@ -57,6 +57,10 @@ import { recipeGaleWingBow } from "./tier8/recipeGaleWingBow";
 import { recipeVampiricBow } from "./tier8/recipeVampiricBow";
 import { recipeNightshadeBow } from "./tier9/recipeNightshadeBow";
 import { recipeWindriderBow } from "./tier9/recipeWindriderBow";
+import { recipeCorruptionBow } from "./tier2/recipeCorruptionBow";
+import { recipeScythianGoldenBow } from "./tier4/recipeScythianGoldenBow";
+import { recipeTurkishGoldenBow } from "./tier4/recipeTurkishGoldenBow";
+import { recipeYggdrasilBow } from "./tier5/recipeYggdrasilBow";
 
 export const recipeRangedIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [RangedWeaponsBlueprint.Arrow]: [recipeArrow],
@@ -116,4 +120,8 @@ export const recipeRangedIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [RangedWeaponsBlueprint.NightshadeBow]: [recipeNightshadeBow],
   [RangedWeaponsBlueprint.DarkVeinBow]: [recipeDarkVeinBow],
   [RangedWeaponsBlueprint.RubyTalonBow]: [recipeRubyTalonBow],
+  [RangedWeaponsBlueprint.CorruptionBow]: [recipeCorruptionBow],
+  [RangedWeaponsBlueprint.ScythianGoldenBow]: [recipeScythianGoldenBow],
+  [RangedWeaponsBlueprint.TurkishGoldenBow]: [recipeTurkishGoldenBow],
+  [RangedWeaponsBlueprint.YggdrasilBow]: [recipeYggdrasilBow],
 };

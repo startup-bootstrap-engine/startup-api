@@ -130,7 +130,6 @@ export const npcIceTroll: INPCTierBlueprint<10> = {
       chance: LootProbability.Uncommon,
       quantityRange: [1, 3],
     },
-
     {
       itemBlueprintKey: StaffsBlueprint.FrostbiteWand,
       chance: LootProbability.Rare,
@@ -138,6 +137,10 @@ export const npcIceTroll: INPCTierBlueprint<10> = {
     {
       itemBlueprintKey: GemsBlueprint.JasperGem,
       chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.HellishWarAxe,
+      chance: LootProbability.Rare,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Freezing],

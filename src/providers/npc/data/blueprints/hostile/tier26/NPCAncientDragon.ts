@@ -299,6 +299,14 @@ export const npcAncientDragon: INPCTierBlueprint<26> = {
       itemBlueprintKey: HelmetsBlueprint.ArcaneAdepthat,
       chance: LootProbability.Uncommon,
     },
+    {
+      itemBlueprintKey: BooksBlueprint.MagicOrb,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: GemsBlueprint.EmeraldGlory,
+      chance: LootProbability.Common,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
   areaSpells: [

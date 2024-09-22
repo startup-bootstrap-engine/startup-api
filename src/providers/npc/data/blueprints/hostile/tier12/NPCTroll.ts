@@ -19,6 +19,7 @@ import {
   RangedWeaponsBlueprint,
   SeedsBlueprint,
   StaffsBlueprint,
+  SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
 import { INPCTierBlueprint } from "@providers/npc/data/types/npcTierTypes";
@@ -124,6 +125,14 @@ export const npcTroll: INPCTierBlueprint<12> = {
     {
       itemBlueprintKey: DaggersBlueprint.DewDagger,
       chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.MysticVeil,
+      chance: LootProbability.Uncommon,
+    },
+    {
+      itemBlueprintKey: SwordsBlueprint.DamascusSword,
+      chance: LootProbability.Uncommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

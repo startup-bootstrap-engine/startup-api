@@ -152,6 +152,10 @@ export const npcBloodySkeletonWarrior: INPCTierBlueprint<16> = {
       itemBlueprintKey: AxesBlueprint.GuardianAxe,
       chance: LootProbability.SemiCommon,
     },
+    {
+      itemBlueprintKey: SwordsBlueprint.LunarEclipseBlade,
+      chance: LootProbability.VeryRare,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding, EntityEffectBlueprint.Corruption],
   areaSpells: [

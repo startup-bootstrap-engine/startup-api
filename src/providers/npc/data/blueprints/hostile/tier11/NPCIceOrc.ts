@@ -119,6 +119,10 @@ export const npcIceOrc: INPCTierBlueprint<11> = {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
       chance: LootProbability.Rare,
     },
+    {
+      itemBlueprintKey: HelmetsBlueprint.SorcerersVeil,
+      chance: LootProbability.Uncommon,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Freezing, EntityEffectBlueprint.Bleeding],
   areaSpells: [

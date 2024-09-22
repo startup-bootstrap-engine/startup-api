@@ -17,6 +17,7 @@ import { recipeStuddedShield } from "./recipeStuddedShield";
 import { recipeTemporalRoundShield } from "./recipeTemporalRoundShield";
 import { recipeWardenOfTheWoods } from "./recipeWardenOfTheWoods";
 import { recipeWoodenShield } from "./recipeWoodenShield";
+import { recipeYetiShield } from "./tier3/recipeYetiShield";
 
 export const recipeShieldsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [ShieldsBlueprint.FrostShield]: [recipeFrostShield],
@@ -36,4 +37,5 @@ export const recipeShieldsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [ShieldsBlueprint.TemporalRoundShield]: [recipeTemporalRoundShield],
   [ShieldsBlueprint.WardenOfTheWoods]: [recipeWardenOfTheWoods],
   [ShieldsBlueprint.EmeraldShield]: [recipeEmeraldShield],
+  [ShieldsBlueprint.YetiShield]: [recipeYetiShield],
 };

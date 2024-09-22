@@ -7,6 +7,7 @@ import {
   AxesBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
+  HelmetsBlueprint,
   MacesBlueprint,
   RangedWeaponsBlueprint,
   SeedsBlueprint,
@@ -100,6 +101,10 @@ export const npcCaveCyclops: INPCTierBlueprint<15> = {
     {
       itemBlueprintKey: ToolsBlueprint.EmeraldEclipsesPickaxe,
       chance: LootProbability.SemiCommon,
+    },
+    {
+      itemBlueprintKey: HelmetsBlueprint.JadeEmperorsHelm,
+      chance: LootProbability.Uncommon,
     },
   ],
   entityEffects: [EntityEffectBlueprint.Bleeding],

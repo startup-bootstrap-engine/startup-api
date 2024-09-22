@@ -11,6 +11,7 @@ import {
   GlovesBlueprint,
   HelmetsBlueprint,
   LegsBlueprint,
+  MacesBlueprint,
   OthersBlueprint,
   RangedWeaponsBlueprint,
   StaffsBlueprint,
@@ -172,6 +173,10 @@ export const npcBlackOrc: INPCTierBlueprint<15> = {
     },
     {
       itemBlueprintKey: ToolsBlueprint.WoodsManAxe,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: MacesBlueprint.YggdrasilKingMace,
       chance: LootProbability.Rare,
     },
   ],

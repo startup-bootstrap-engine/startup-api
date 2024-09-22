@@ -143,6 +143,10 @@ export const npcCursedGhost: INPCTierBlueprint<16> = {
       itemBlueprintKey: DaggersBlueprint.ObsidianEdgeDagger,
       chance: LootProbability.Rare,
     },
+    {
+      itemBlueprintKey: SwordsBlueprint.CelestialReaver,
+      chance: LootProbability.VeryRare,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Bleeding],
   areaSpells: [

@@ -180,6 +180,10 @@ export const npcMinotaurMage: INPCTierBlueprint<15> = {
       itemBlueprintKey: ToolsBlueprint.WoodsManAxe,
       chance: LootProbability.Rare,
     },
+    {
+      itemBlueprintKey: SwordsBlueprint.PhoenixFury,
+      chance: LootProbability.VeryRare,
+    },
   ],
   entityEffects: [EntityEffectBlueprint.Burning, EntityEffectBlueprint.Freezing],
   areaSpells: [

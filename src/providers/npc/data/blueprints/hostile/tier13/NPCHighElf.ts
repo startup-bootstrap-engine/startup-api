@@ -2,6 +2,7 @@ import { Dice } from "@providers/constants/DiceConstants";
 import { MovementSpeed } from "@providers/constants/MovementConstants";
 import {
   AccessoriesBlueprint,
+  AxesBlueprint,
   BootsBlueprint,
   CraftingResourcesBlueprint,
   DaggersBlueprint,
@@ -157,6 +158,14 @@ export const npcHighElf: INPCTierBlueprint<13> = {
     {
       itemBlueprintKey: ToolsBlueprint.EmeraldEclipsesPickaxe,
       chance: LootProbability.VeryRare,
+    },
+    {
+      itemBlueprintKey: DaggersBlueprint.VerdantJitte,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: AxesBlueprint.YggdrasilWarAxe,
+      chance: LootProbability.Rare,
     },
   ],
   areaSpells: [

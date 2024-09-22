@@ -80,6 +80,12 @@ import { recipeVenomStrikeSword } from "./tier8/recipeVenomStrikeSword";
 import { recipeGorgonBlade } from "./tier9/recipeGorgonBlade";
 import { recipeLightBringerSword } from "./tier9/recipeLightBringerSword";
 import { recipeThunderStrikeSword } from "./tier9/recipeThunderStrikeSword";
+import { recipeZephyrBlade } from "./tier11/recipeZephyrBlade";
+import { recipeCelestialReaver } from "./tier12/recipeCelestialReaver";
+import { recipePhoenixFury } from "./tier12/recipePhoenixFury";
+import { recipeLunarEclipseBlade } from "./tier13/recipeLunarEclipseBlade";
+import { recipeVoidslayer } from "./tier13/recipeVoidSlayer";
+import { recipeDamascusSword } from "./tier3/recipeDamascusSword ";
 
 export const recipeSwordsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [SwordsBlueprint.ElvenSword]: [recipeElvenSword],
@@ -162,4 +168,10 @@ export const recipeSwordsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [SwordsBlueprint.AstralSaber]: [recipeAstralSaber],
   [SwordsBlueprint.ThunderclapScimitar]: [recipeThunderclapScimitar],
   [SwordsBlueprint.SoulrenderSword]: [recipeSoulrenderSword],
+  [SwordsBlueprint.Voidslayer]: [recipeVoidslayer],
+  [SwordsBlueprint.LunarEclipseBlade]: [recipeLunarEclipseBlade],
+  [SwordsBlueprint.PhoenixFury]: [recipePhoenixFury],
+  [SwordsBlueprint.CelestialReaver]: [recipeCelestialReaver],
+  [SwordsBlueprint.ZephyrBlade]: [recipeZephyrBlade],
+  [SwordsBlueprint.DamascusSword]: [recipeDamascusSword],
 };

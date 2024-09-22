@@ -9,6 +9,7 @@ import {
   LegsBlueprint,
   SeedsBlueprint,
   ShieldsBlueprint,
+  StaffsBlueprint,
   SwordsBlueprint,
 } from "@providers/item/data/types/itemsBlueprintTypes";
 import { LootProbability } from "@providers/npc/data/types/npcLootTypes";
@@ -103,6 +104,10 @@ export const npcKobold: INPCTierBlueprint<13> = {
     },
     {
       itemBlueprintKey: DaggersBlueprint.ThunderboltDagger,
+      chance: LootProbability.Rare,
+    },
+    {
+      itemBlueprintKey: StaffsBlueprint.HellishStaff,
       chance: LootProbability.Rare,
     },
   ],

@@ -15,6 +15,7 @@ import { recipeIronWoodCrusherClub } from "./tier7/recipeIronwoodCrusherClub";
 import { recipeMetalMasherClub } from "./tier7/recipeMetalMasherClub";
 import { recipeStarfirMaulClub } from "./tier9/recipeStarfirMaulClub";
 import { recipeStonefangCleaverClub } from "./tier8/recipeStoneFangCleaverClub";
+import { recipeYggdrasilKingMace } from "./tier5/recipeYggdrasilKingMace";
 
 export const recipeMacesIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [MacesBlueprint.SpikedClub]: [recipeSpikedClub],
@@ -32,4 +33,5 @@ export const recipeMacesIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [MacesBlueprint.MetalMasherClub]: [recipeMetalMasherClub],
   [MacesBlueprint.StarfirMaulClub]: [recipeStarfirMaulClub],
   [MacesBlueprint.StonefangCleaverClub]: [recipeStonefangCleaverClub],
+  [MacesBlueprint.YggdrasilKingMace]: [recipeYggdrasilKingMace],
 };

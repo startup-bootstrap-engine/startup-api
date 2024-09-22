@@ -29,6 +29,9 @@ import { recipeSangriaStaff } from "./tier5/recipeSangriaStaff";
 import { recipeTartarusStaff } from "./tier5/recipeTartarusStaff";
 import { recipeSpellbinderWand } from "./tier7/recipeSpellbinderWand";
 import { recipeNaturesWand } from "./tier8/recipeNaturesWand";
+import { recipeAppendicesStaff } from "./tier1/recipeAppendicesStaff";
+import { recipeRainbowWand } from "./tier10/recipeRainbowWand";
+import { recipeLightningWand } from "./tier12/recipeLightningWand";
 
 export const recipeStaffsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [StaffsBlueprint.FireStaff]: [recipeFireStaff],
@@ -60,4 +63,7 @@ export const recipeStaffsIndex: Record<string, IUseWithCraftingRecipe[]> = {
   [StaffsBlueprint.DoomsdayStaff]: [recipeDoomsdayStaff],
   [StaffsBlueprint.MysticLightningStaff]: [recipeMysticLightningStaff],
   [StaffsBlueprint.ShadowLordWand]: [recipeShadowLordWand],
+  [StaffsBlueprint.LightningWand]: [recipeLightningWand],
+  [StaffsBlueprint.RainbowWand]: [recipeRainbowWand],
+  [StaffsBlueprint.AppendicesStaff]: [recipeAppendicesStaff],
 };
