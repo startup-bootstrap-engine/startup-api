@@ -11,7 +11,7 @@ const chatLogSchema = createLeanSchema(
     }),
     type: Type.string({
       required: true,
-      default: ChatMessageType.Global,
+      default: ChatMessageType.Local,
       enum: TypeHelper.enumToStringArray(ChatMessageType),
     }),
     x: Type.number({ required: true }),

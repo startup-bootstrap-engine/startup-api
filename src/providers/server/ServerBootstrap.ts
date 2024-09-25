@@ -18,7 +18,7 @@ import { CharacterMonitorCallbackTracker } from "@providers/character/CharacterM
 import { CharacterNetworkUpdateQueue } from "@providers/character/network/CharacterNetworkUpdate/CharacterNetworkUpdateQueue";
 import { CharacterNetworkCreateQueue } from "@providers/character/network/characterCreate/CharacterNetworkCreateQueue";
 import { CharacterWeightQueue } from "@providers/character/weight/CharacterWeightQueue";
-import { ChatNetworkGlobalMessagingQueue } from "@providers/chat/network/ChatNetworkGlobalMessagingQueue";
+import { ChatNetworkLocalMessagingQueue } from "@providers/chat/network/ChatNetworkLocalMessagingQueue";
 import { appEnv } from "@providers/config/env";
 import { cache } from "@providers/constants/CacheConstants";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
@@ -87,7 +87,7 @@ export class ServerBootstrap {
     private characterNetworkUpdateQueue: CharacterNetworkUpdateQueue,
     private patreonAPI: PatreonAPI,
     private useWithTileQueue: UseWithTileQueue,
-    private chatNetworkGlobalMessaging: ChatNetworkGlobalMessagingQueue,
+    private chatNetworkLocalMessaging: ChatNetworkLocalMessagingQueue,
     private spellNetworkCast: SpellNetworkCastQueue,
     private characterActionsTracker: CharacterActionsTracker,
     private errorHandlingTracker: ErrorHandlingTracker,
@@ -164,7 +164,7 @@ export class ServerBootstrap {
       await this.npcCycleQueue.shutdown();
       await this.characterNetworkUpdateQueue.shutdown();
       await this.useWithTileQueue.shutdown();
-      await this.chatNetworkGlobalMessaging.shutdown();
+      await this.chatNetworkLocalMessaging.shutdown();
       await this.spellNetworkCast.shutdown();
       await this.npcDeathQueue.shutdown();
       await this.itemContainerTransactionQueue.shutdown();
@@ -286,7 +286,7 @@ export class ServerBootstrap {
     await this.npcBattleCycleQueue.clearAllJobs();
     await this.characterNetworkUpdateQueue.clearAllJobs();
     await this.useWithTileQueue.clearAllJobs();
-    await this.chatNetworkGlobalMessaging.clearAllJobs();
+    await this.chatNetworkLocalMessaging.clearAllJobs();
     await this.spellNetworkCast.clearAllJobs();
     await this.npcDeathQueue.clearAllJobs();
     await this.npcCycleQueue.clearAllJobs();

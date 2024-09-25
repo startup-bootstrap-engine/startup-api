@@ -3,7 +3,7 @@ import { ChatMessageType } from "@rpg-engine/shared";
 export const chatLogsMock = [
   {
     _id: "628595f979ba73002f95b31d",
-    type: ChatMessageType.Global,
+    type: ChatMessageType.Local,
     message: "Mensagem 1",
     emitter: "628595d079ba73002f95aef5",
     x: 150,
@@ -16,7 +16,7 @@ export const chatLogsMock = [
 
   {
     _id: "6285977c79ba73002f95d2e8",
-    type: ChatMessageType.Global,
+    type: ChatMessageType.Local,
     message: "Mensagem 2",
     emitter: "628595d079ba73002f95aef5",
     x: 150,
@@ -29,7 +29,7 @@ export const chatLogsMock = [
 
   {
     _id: "6285977c79ba73002f95d2ec",
-    type: ChatMessageType.Global,
+    type: ChatMessageType.Local,
     message: "Mensagem 3",
     emitter: "628595d079ba73002f95aef5",
     x: 150,
@@ -42,7 +42,7 @@ export const chatLogsMock = [
 
   {
     _id: "6285977d79ba73002f95d2f0",
-    type: ChatMessageType.Global,
+    type: ChatMessageType.Local,
     message: "Mensagem 4",
     emitter: "628595d079ba73002f95aef5",
     x: 150,
@@ -55,7 +55,7 @@ export const chatLogsMock = [
 
   {
     _id: "6285979e79ba73002f95d517",
-    type: ChatMessageType.Global,
+    type: ChatMessageType.Local,
     message: "Mensagem 5",
     emitter: "628595d079ba73002f95aef5",
     x: 150,
@@ -68,7 +68,7 @@ export const chatLogsMock = [
 
   {
     _id: "6285a2cc487abf002f1bb1ec",
-    type: ChatMessageType.Global,
+    type: ChatMessageType.Local,
     message: "Mensagem 6",
     emitter: "628595d079ba73002f95aef5",
     x: 150,

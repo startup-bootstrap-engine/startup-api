@@ -1,41 +1,33 @@
 /* eslint-disable mongoose-lean/require-lean */
-import { Character, type ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { type ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { TradeChatLog } from "@entities/ModuleSystem/TradeChatLogModal";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { DiscordBot } from "@providers/discord/DiscordBot";
-import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
-import { SpellCast } from "@providers/spells/SpellCast";
 import { ChatSocketEvents, ITradeChatMessage, ITradeChatMessageCreatePayload } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import { ChatNetworkBaseMessaging } from "./ChatNetworkBaseMessaging";
 import { ChatUtils } from "./ChatUtils";
 
 @provide(ChatNetworkTradeMessaging)
 export class ChatNetworkTradeMessaging {
   constructor(
-    private socketAuth: SocketAuth,
     private socketMessaging: SocketMessaging,
-    private spellCast: SpellCast,
-    private characterValidation: CharacterValidation,
+
     private chatUtils: ChatUtils,
-    private discordBot: DiscordBot
+    private discordBot: DiscordBot,
+    private chatNetworkBaseMessaging: ChatNetworkBaseMessaging
   ) {}
 
   @TrackNewRelicTransaction()
   public onTradeMessagingRead(channel: SocketChannel): void {
-    this.socketAuth.authCharacterOn(
+    this.chatNetworkBaseMessaging.registerReadEvent(
       channel,
       ChatSocketEvents.TradeChatMessageRead,
+      // @ts-ignore
       async (data: { limit: number }, character: ICharacter) => {
         try {
-          const canChat = this.characterValidation.hasBasicValidation(character);
-
-          if (!canChat) {
-            return;
-          }
-
           const tradeChatLogs = await TradeChatLog.find({})
             .sort({ createdAt: -1 })
             .populate("emitter", "name")
@@ -66,7 +58,6 @@ export class ChatNetworkTradeMessaging {
           );
         } catch (error) {
           console.error(error);
-
           this.socketMessaging.sendErrorMessageToCharacter(character, "Error sending message");
         }
       }
@@ -75,32 +66,14 @@ export class ChatNetworkTradeMessaging {
 
   @TrackNewRelicTransaction()
   public onTradeMessagingCreate(channel: SocketChannel): void {
-    this.socketAuth.authCharacterOn(
+    this.chatNetworkBaseMessaging.registerCreateEvent(
       channel,
       ChatSocketEvents.TradeChatMessageCreate,
+      // @ts-ignore
       async (data: ITradeChatMessageCreatePayload, character: ICharacter) => {
         try {
-          const canChat = this.characterValidation.hasBasicValidation(character);
-
-          if (!canChat) {
-            return;
-          }
-
           if (data.message.startsWith("/")) {
             await this.chatUtils.handleAdminCommand(data.message.substring(1), character);
-            return;
-          }
-
-          if (this.spellCast.isSpellCasting(data.message)) {
-            const spellCharacter = (await Character.findById(character._id)) as ICharacter;
-            await this.spellCast.castSpell({ magicWords: data.message }, spellCharacter);
-          }
-
-          if (data.message.length > 200) {
-            this.socketMessaging.sendErrorMessageToCharacter(
-              character,
-              "Chat message is too long, maximum is 200 characters"
-            );
             return;
           }
 

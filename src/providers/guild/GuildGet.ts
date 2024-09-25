@@ -3,7 +3,7 @@ import { Guild, IGuild } from "@entities/ModuleSystem/GuildModel";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { GuildSocketEvents, IGuildInfo } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
-import { GuildCommon } from "./GuildCommon";
+import { GuildCommon, IGuildInfoWithOptionalUpgradeTokens } from "./GuildCommon";
 
 @provide(GuildGet)
 export class GuildGet {
@@ -44,8 +44,8 @@ export class GuildGet {
     this.sendGuild(guildInfo, character);
   }
 
-  private sendGuild(guild: IGuildInfo | null, character: ICharacter): void {
-    this.socketMessaging.sendEventToUser<IGuildInfo | null>(
+  private sendGuild(guild: IGuildInfoWithOptionalUpgradeTokens | null, character: ICharacter): void {
+    this.socketMessaging.sendEventToUser<IGuildInfoWithOptionalUpgradeTokens | null>(
       character.channelId!,
       GuildSocketEvents.GuildInfoOpen,
       guild

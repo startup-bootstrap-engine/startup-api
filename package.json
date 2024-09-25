@@ -91,7 +91,7 @@
     "@babel/preset-env": "^7.16.11",
     "@capacitor/core": "^6.1.0",
     "@jonit-dev/decorators-utils": "^0.1.4",
-    "@rpg-engine/shared": "^0.9.66",
+    "@rpg-engine/shared": "^0.9.75",
     "@rpg-engine/soul": "^0.1.16",
     "@shelf/jest-mongodb": "^2.2.1",
     "@swc/core": "^1.3.104",

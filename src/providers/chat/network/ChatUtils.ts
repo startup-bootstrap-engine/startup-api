@@ -1,8 +1,8 @@
 import { profanity } from "@2toad/profanity";
 import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
-import {
-  IChatMessageCreatePayload,
+import type {
+  ILocalChatMessageCreatePayload as IChatMessageCreatePayload,
   IPrivateChatMessageCreatePayload,
   ITradeChatMessageCreatePayload,
 } from "@rpg-engine/shared";

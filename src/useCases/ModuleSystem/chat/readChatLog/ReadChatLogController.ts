@@ -1,6 +1,6 @@
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { AuthMiddleware } from "@providers/middlewares/AuthMiddleware";
-import { IChatMessage } from "@rpg-engine/shared";
+import { ILocalChatMessage } from "@rpg-engine/shared";
 import { Response } from "express";
 import { controller, httpGet, interfaces, queryParam } from "inversify-express-utils";
 import { IAuthenticatedRequest } from "../../../../providers/types/ServerTypes";
@@ -15,7 +15,7 @@ export class ReadChatLogController implements interfaces.Controller {
     @queryParam() chatLogZone,
     req: IAuthenticatedRequest,
     res: Response
-  ): Promise<IChatMessage[]> {
+  ): Promise<ILocalChatMessage[]> {
     const { x, y, scene } = chatLogZone;
 
     if (!x || !y || !scene) {

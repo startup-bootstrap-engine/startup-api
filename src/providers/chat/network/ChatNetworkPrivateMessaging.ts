@@ -6,15 +6,9 @@ import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
-import { SpellCast } from "@providers/spells/SpellCast";
-import {
-  ChatMessageStatus,
-  ChatSocketEvents,
-  IPrivateChatMessageCreatePayload,
-  IPrivateChatMessageReadPayload,
-  IPrivateChatMessageReadResponse,
-} from "@rpg-engine/shared";
+import { ChatMessageStatus, ChatSocketEvents, IPrivateChatMessageReadResponse } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
+import { ChatNetworkBaseMessaging } from "./ChatNetworkBaseMessaging";
 import { ChatUtils } from "./ChatUtils";
 
 interface IUnseenSendersResponse {
@@ -27,117 +21,78 @@ export class ChatNetworkPrivateMessaging {
   constructor(
     private socketAuth: SocketAuth,
     private socketMessaging: SocketMessaging,
-    private spellCast: SpellCast,
+    private chatBaseNetworkMessaging: ChatNetworkBaseMessaging, // Keep the existing instance
     private characterValidation: CharacterValidation,
     private chatUtils: ChatUtils
   ) {}
 
   @TrackNewRelicTransaction()
   public onPrivateMessaging(channel: SocketChannel): void {
-    this.socketAuth.authCharacterOn(
+    this.chatBaseNetworkMessaging.registerCreateEvent(
       channel,
       ChatSocketEvents.PrivateChatMessageCreate,
-      async (data: IPrivateChatMessageCreatePayload, character: ICharacter) => {
-        try {
-          const receiverCharacter = await Character.findById(data.receiver._id);
-          const canChat = this.characterValidation.hasBasicValidation(character);
+      async (data, character) => {
+        const receiverCharacter = await Character.findById(data.receiver._id);
 
-          if (!canChat || !receiverCharacter) {
-            return;
-          }
-
-          if (data.message.startsWith("/")) {
-            await this.chatUtils.handleAdminCommand(data.message.substring(1), character);
-            return;
-          }
-
-          if (this.spellCast.isSpellCasting(data.message)) {
-            const spellCharacter = (await Character.findById(character._id)) as ICharacter;
-
-            await this.spellCast.castSpell({ magicWords: data.message }, spellCharacter);
-          }
-
-          if (data.message.length >= 200) {
-            this.socketMessaging.sendErrorMessageToCharacter(
-              character,
-              "Chat message is too long, maximum is 200 characters"
-            );
-          }
-
-          if (data.message.length > 0) {
-            data = this.chatUtils.replaceProfanity(data);
-
-            await this.saveChatLog(data.message, character._id, receiverCharacter._id);
-
-            const chatLogs = await this.getPreviousChatLogs(character, receiverCharacter);
-
-            this.chatUtils.sendMessagesToCharacter(chatLogs, character, ChatSocketEvents.PrivateChatMessageRead);
-            this.chatUtils.sendMessagesToCharacter(
-              chatLogs,
-              receiverCharacter,
-              ChatSocketEvents.PrivateChatMessageRead
-            );
-          }
-        } catch (error) {
-          console.log(error);
+        if (!receiverCharacter) {
+          return;
         }
-      }
-    );
 
-    this.socketAuth.authCharacterOn(
-      channel,
-      ChatSocketEvents.PrivateChatMessageRead,
-      async (data: IPrivateChatMessageReadPayload, character: ICharacter) => {
-        try {
-          const receiverCharacter = await Character.findById(data.receiverId);
-          const canChat = this.characterValidation.hasBasicValidation(character);
-
-          if (!canChat || !receiverCharacter) {
-            return;
-          }
-
-          const unseenMessages = await PrivateChatLog.find({
-            status: ChatMessageStatus.Unseen,
-            receiver: character._id,
-          });
-
-          await PrivateChatLog.updateMany(
-            { _id: { $in: unseenMessages.map((message) => message._id) } },
-            { $set: { status: ChatMessageStatus.Seen } }
-          );
-
+        if (data.message.length > 0) {
+          await this.saveChatLog(data.message, character._id, receiverCharacter._id);
           const chatLogs = await this.getPreviousChatLogs(character, receiverCharacter);
           this.chatUtils.sendMessagesToCharacter(chatLogs, character, ChatSocketEvents.PrivateChatMessageRead);
           this.chatUtils.sendMessagesToCharacter(chatLogs, receiverCharacter, ChatSocketEvents.PrivateChatMessageRead);
-        } catch (error) {
-          console.log(error);
         }
       }
     );
 
-    this.socketAuth.authCharacterOn(
+    this.chatBaseNetworkMessaging.registerReadEvent(
+      channel,
+      ChatSocketEvents.PrivateChatMessageRead,
+      async (data, character) => {
+        const receiverCharacter = await Character.findById(data.receiverId);
+        const canChat = this.characterValidation.hasBasicValidation(character);
+
+        if (!canChat || !receiverCharacter) {
+          return;
+        }
+
+        const unseenMessages = await PrivateChatLog.find({
+          status: ChatMessageStatus.Unseen,
+          receiver: character._id,
+        });
+
+        await PrivateChatLog.updateMany(
+          { _id: { $in: unseenMessages.map((message) => message._id) } },
+          { $set: { status: ChatMessageStatus.Seen } }
+        );
+
+        const chatLogs = await this.getPreviousChatLogs(character, receiverCharacter);
+        this.chatUtils.sendMessagesToCharacter(chatLogs, character, ChatSocketEvents.PrivateChatMessageRead);
+        this.chatUtils.sendMessagesToCharacter(chatLogs, receiverCharacter, ChatSocketEvents.PrivateChatMessageRead);
+      }
+    );
+
+    this.chatBaseNetworkMessaging.registerReadEvent(
       channel,
       ChatSocketEvents.PrivateChatMessageGetUnseenMessageCharacters,
-      async (_, character: ICharacter) => {
-        try {
-          const unseenMessages = await PrivateChatLog.find({
-            status: ChatMessageStatus.Unseen,
-            receiver: character._id,
-          })
-            .sort({ createdAt: -1 })
-            .limit(10);
-          const uniqueSenderIds = [...new Set(unseenMessages.map((message) => message.emitter))];
-          const unseenSenders = await Character.find({ _id: { $in: uniqueSenderIds } }, "name");
-          this.socketMessaging.sendEventToUser<IUnseenSendersResponse>(
-            character.channelId!,
-            ChatSocketEvents.PrivateChatMessageGetUnseenMessageCharacters,
-            {
-              characters: unseenSenders,
-            }
-          );
-        } catch (error) {
-          console.error("Error fetching unseen messages:", error);
-        }
+      async (_, character) => {
+        const unseenMessages = await PrivateChatLog.find({
+          status: ChatMessageStatus.Unseen,
+          receiver: character._id,
+        })
+          .sort({ createdAt: -1 })
+          .limit(10);
+        const uniqueSenderIds = [...new Set(unseenMessages.map((message) => message.emitter))];
+        const unseenSenders = await Character.find({ _id: { $in: uniqueSenderIds } }, "name");
+        this.socketMessaging.sendEventToUser<IUnseenSendersResponse>(
+          character.channelId!,
+          ChatSocketEvents.PrivateChatMessageGetUnseenMessageCharacters,
+          {
+            characters: unseenSenders,
+          }
+        );
       }
     );
   }

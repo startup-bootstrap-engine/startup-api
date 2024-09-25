@@ -1,47 +1,42 @@
-import { Character, ICharacter } from "@entities/ModuleCharacter/CharacterModel";
+import { ICharacter } from "@entities/ModuleCharacter/CharacterModel";
 import { ChatLog } from "@entities/ModuleSystem/ChatLogModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { CharacterValidation } from "@providers/character/CharacterValidation";
 import { CharacterView } from "@providers/character/CharacterView";
-import { SocketAuth } from "@providers/sockets/SocketAuth";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { DynamicQueue } from "@providers/queue/DynamicQueue";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketTransmissionZone } from "@providers/sockets/SocketTransmissionZone";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
-import { SpellCast } from "@providers/spells/SpellCast";
 import {
   ChatMessageType,
   ChatSocketEvents,
   GRID_HEIGHT,
   GRID_WIDTH,
-  IChatMessageCreatePayload,
-  IChatMessageReadPayload,
+  ILocalChatMessageCreatePayload,
+  ILocalChatMessageReadPayload,
   SOCKET_TRANSMISSION_ZONE_WIDTH,
 } from "@rpg-engine/shared";
+import { ChatNetworkBaseMessaging } from "./ChatNetworkBaseMessaging";
 import { ChatUtils } from "./ChatUtils";
 
-import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { DynamicQueue } from "@providers/queue/DynamicQueue";
-
-@provideSingleton(ChatNetworkGlobalMessagingQueue)
-export class ChatNetworkGlobalMessagingQueue {
+@provideSingleton(ChatNetworkLocalMessagingQueue)
+export class ChatNetworkLocalMessagingQueue {
   constructor(
-    private socketAuth: SocketAuth,
     private socketMessaging: SocketMessaging,
     private characterView: CharacterView,
     private socketTransmissionZone: SocketTransmissionZone,
-    private spellCast: SpellCast,
-    private characterValidation: CharacterValidation,
     private chatUtils: ChatUtils,
-    private dynamicQueue: DynamicQueue
+    private dynamicQueue: DynamicQueue,
+    private chatNetworkBaseMessaging: ChatNetworkBaseMessaging // Add this line
   ) {}
 
-  public async addToQueue(data: IChatMessageCreatePayload, character: ICharacter): Promise<void> {
+  public async addToQueue(data: ILocalChatMessageCreatePayload, character: ICharacter): Promise<void> {
     await this.dynamicQueue.addJob(
-      "chat-global-messaging",
+      "chat-local-messaging",
       (job) => {
         const { data, character } = job.data;
 
-        void this.execGlobalMessaging(data, character);
+        void this.execLocalMessaging(data, character);
       },
       {
         character,
@@ -59,56 +54,25 @@ export class ChatNetworkGlobalMessagingQueue {
   }
 
   @TrackNewRelicTransaction()
-  public onGlobalMessaging(channel: SocketChannel): void {
-    this.socketAuth.authCharacterOn(
+  public onLocalMessaging(channel: SocketChannel): void {
+    this.chatNetworkBaseMessaging.registerCreateEvent(
       channel,
-      ChatSocketEvents.GlobalChatMessageCreate,
-      async (data: IChatMessageCreatePayload, character: ICharacter) => {
+      ChatSocketEvents.LocalChatMessageCreate,
+      async (data: ILocalChatMessageCreatePayload, character: ICharacter) => {
         await this.addToQueue(data, character);
       }
     );
   }
 
   @TrackNewRelicTransaction()
-  private async execGlobalMessaging(data: IChatMessageCreatePayload, character: ICharacter): Promise<void> {
+  private async execLocalMessaging(data: ILocalChatMessageCreatePayload, character: ICharacter): Promise<void> {
     try {
-      const canChat = this.characterValidation.hasBasicValidation(character);
-
-      if (!canChat) {
-        return;
-      }
-
-      if (data.message.startsWith("/")) {
-        await this.chatUtils.handleAdminCommand(data.message.substring(1), character);
-        return;
-      }
-
-      let spellCastPromise;
-      if (this.spellCast.isSpellCasting(data.message)) {
-        const spellCharacter = (await Character.findById(character._id).lean({
-          virtuals: true,
-          defaults: true,
-        })) as ICharacter;
-
-        spellCastPromise = this.spellCast.castSpell({ magicWords: data.message }, spellCharacter);
-      }
-
       const charactersInViewPromise = this.characterView.getCharactersInView(character as ICharacter);
 
       // eslint-disable-next-line no-unused-vars
-      const [_, nearbyCharacters] = await Promise.all([spellCastPromise, charactersInViewPromise]);
-
-      if (data.message.length >= 200) {
-        this.socketMessaging.sendErrorMessageToCharacter(
-          character,
-          "Chat message is too long, maximum is 200 characters"
-        );
-        return;
-      }
+      const [nearbyCharacters] = await Promise.all([charactersInViewPromise]);
 
       if (data.message.length > 0) {
-        data = this.chatUtils.replaceProfanity(data);
-
         const chatLog = new ChatLog({
           message: data.message,
           emitter: character._id,
@@ -124,7 +88,7 @@ export class ChatNetworkGlobalMessagingQueue {
         const chatLogs = await this.getChatLogsInZone(character);
 
         this.sendMessagesToNearbyCharacters(chatLogs, nearbyCharacters);
-        this.chatUtils.sendMessagesToCharacter(chatLogs, character, ChatSocketEvents.GlobalChatMessageRead);
+        this.chatUtils.sendMessagesToCharacter(chatLogs, character, ChatSocketEvents.LocalChatMessageRead);
       }
     } catch (error) {
       console.error(error);
@@ -132,14 +96,14 @@ export class ChatNetworkGlobalMessagingQueue {
     }
   }
 
-  private sendMessagesToNearbyCharacters(chatLogs: IChatMessageReadPayload, nearbyCharacters: ICharacter[]): void {
+  private sendMessagesToNearbyCharacters(chatLogs: ILocalChatMessageReadPayload, nearbyCharacters: ICharacter[]): void {
     for (const nearbyCharacter of nearbyCharacters) {
       const isValidCharacterTarget = this.chatUtils.shouldCharacterReceiveMessage(nearbyCharacter);
 
       if (isValidCharacterTarget) {
-        this.socketMessaging.sendEventToUser<IChatMessageReadPayload>(
+        this.socketMessaging.sendEventToUser<ILocalChatMessageReadPayload>(
           nearbyCharacter.channelId!,
-          ChatSocketEvents.GlobalChatMessageRead,
+          ChatSocketEvents.LocalChatMessageRead,
           chatLogs
         );
       }
@@ -147,7 +111,7 @@ export class ChatNetworkGlobalMessagingQueue {
   }
 
   @TrackNewRelicTransaction()
-  public async getChatLogsInZone(character: ICharacter): Promise<IChatMessageReadPayload> {
+  public async getChatLogsInZone(character: ICharacter): Promise<ILocalChatMessageReadPayload> {
     const socketTransmissionZone = this.socketTransmissionZone.calculateSocketTransmissionZone(
       character.x,
       character.y,
