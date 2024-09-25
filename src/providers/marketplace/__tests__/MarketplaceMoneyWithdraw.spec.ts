@@ -83,10 +83,10 @@ describe("MarketplaceMoneyWithdraw.ts", () => {
   });
 
   it("should withdraw only part of the money if there is no space in bag", async () => {
-    await MarketplaceMoney.create({ owner: testCharacter._id, money: 110000 });
+    await MarketplaceMoney.create({ owner: testCharacter._id, money: 110000000 }); // Increased money amount
     const gold = await unitTestHelper.createMockItem({
-      stackQty: 90000,
-      maxStackSize: 99999,
+      stackQty: 90000000, // Increased stackQty
+      maxStackSize: 99999999, // Updated maxStackSize
       key: OthersBlueprint.GoldCoin,
     });
     const inventory = await characterInventory.getInventory(testCharacter);
@@ -94,10 +94,10 @@ describe("MarketplaceMoneyWithdraw.ts", () => {
     const success = await marketplaceMoneyWithdraw.withdrawMoneyFromMarketplace(testCharacter, testNPC._id);
     expect(success).toBe(true);
     const marketplaceMoney = await MarketplaceMoney.findOne({ owner: testCharacter._id });
-    expect(marketplaceMoney?.money).toBe(2);
+    expect(marketplaceMoney?.money).toBe(2); // Updated expected remaining money
     const container = await ItemContainer.findById(inventory?.itemContainer);
-    expect(container?.slots[0].stackQty).toBe(99999);
-    expect(container?.slots[1].stackQty).toBe(99999);
+    expect(container?.slots[0].stackQty).toBe(99999999); // Updated expected stackQty
+    expect(container?.slots[1].stackQty).toBe(99999999); // Updated expected stackQty
   });
 
   it("should handle invalid character ID", async () => {
