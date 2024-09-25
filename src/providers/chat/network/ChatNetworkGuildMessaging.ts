@@ -9,8 +9,8 @@ import {
   ChatMessageStatus,
   ChatMessageType,
   ChatSocketEvents,
-  IChatMessage,
-  IChatMessageCreatePayload,
+  ILocalChatMessage as IChatMessage,
+  ILocalChatMessageCreatePayload as IChatMessageCreatePayload,
   IUIShowMessage,
   UISocketEvents,
 } from "@rpg-engine/shared";

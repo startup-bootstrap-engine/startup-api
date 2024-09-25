@@ -13,6 +13,10 @@ import {
 } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
+export type IGuildInfoWithOptionalUpgradeTokens = Omit<IGuildInfo, "upgradeTokens"> & {
+  upgradeTokens?: number | undefined;
+};
+
 @provide(GuildCommon)
 export class GuildCommon {
   constructor(private socketMessaging: SocketMessaging) {}
@@ -29,7 +33,8 @@ export class GuildCommon {
     });
   }
 
-  public async convertToGuildInfo(guild: IGuild): Promise<IGuildInfo> {
+  // IGuildInfoWithOptionalUpgradeTokens is used to return the guild info with the optional upgradeTokens field.
+  public async convertToGuildInfo(guild: IGuild): Promise<IGuildInfoWithOptionalUpgradeTokens> {
     const memberDetails = await this.createMemberDetails(guild.members);
 
     const guildSkillsInfo: IGuildSkillsInfo[] = [];
@@ -69,6 +74,7 @@ export class GuildCommon {
       territoriesOwned: guild.territoriesOwned,
       guildSkills: guildSkillsInfo,
       guidLevel: guildLevel,
+      // upgradeTokens: something //what value should it be?
     };
   }
 

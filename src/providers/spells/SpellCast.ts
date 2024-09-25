@@ -25,6 +25,7 @@ import {
   AnimationEffectKeys,
   BasicAttribute,
   CharacterSocketEvents,
+  ChatSocketEvents,
   EntityType,
   ICharacterAttributeChanged,
   ISpell,
@@ -121,7 +122,7 @@ export class SpellCast {
   }
 
   private setTargetData(data: ISpellCast, character: ICharacter): void {
-    if (character.target.id !== undefined && character.target.type !== undefined) {
+    if (character.target && character.target.id !== undefined && character.target.type !== undefined) {
       data.targetId = character.target.id as unknown as string;
       data.targetType = character.target.type as unknown as EntityType;
     }
@@ -499,6 +500,18 @@ export class SpellCast {
         );
       }
     }
+
+    sendEventsPromises.push(
+      this.socketMessaging.sendEventToCharactersAroundCharacter(
+        updatedCharacter,
+        ChatSocketEvents.ChatDisplayTextOnCharacter,
+        {
+          characterId: updatedCharacter._id,
+          text: spell.magicWords,
+        },
+        true
+      )
+    );
 
     await Promise.all(sendEventsPromises);
   }

@@ -75,7 +75,9 @@ async function initializeServerComponents(): Promise<void> {
 
   const redisPubSub = container.get(RedisPubSub);
 
-  await Promise.all([database.initialize(), redisManager.connect(), socketAdapter.init(appEnv.socket.type)]);
+  await Promise.all([database.initialize(), redisManager.connect()]);
+
+  await socketAdapter.init(appEnv.socket.type);
 
   await messagingBrokerHandlers.onAddHandlers();
   await redisPubSub.init();

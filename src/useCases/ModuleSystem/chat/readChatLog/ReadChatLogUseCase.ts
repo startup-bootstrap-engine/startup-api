@@ -1,7 +1,7 @@
 import { ChatLog } from "@entities/ModuleSystem/ChatLogModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { SocketTransmissionZone } from "@providers/sockets/SocketTransmissionZone";
-import { GRID_HEIGHT, GRID_WIDTH, IChatMessage, SOCKET_TRANSMISSION_ZONE_WIDTH } from "@rpg-engine/shared";
+import { GRID_HEIGHT, GRID_WIDTH, ILocalChatMessage, SOCKET_TRANSMISSION_ZONE_WIDTH } from "@rpg-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { Model } from "mongoose";
 
@@ -10,7 +10,7 @@ export class ReadChatLogUseCase {
   constructor(private socketTransmissionZone: SocketTransmissionZone) {}
 
   @TrackNewRelicTransaction()
-  public async getChatLogInZone(chatLogZone): Promise<IChatMessage[]> {
+  public async getChatLogInZone(chatLogZone): Promise<ILocalChatMessage[]> {
     const socketTransmissionZone = this.socketTransmissionZone.calculateSocketTransmissionZone(
       chatLogZone.x,
       chatLogZone.y,
@@ -47,7 +47,7 @@ export class ReadChatLogUseCase {
       .lean();
 
     chatLogsInView.reverse();
-    return chatLogsInView as unknown as IChatMessage[];
+    return chatLogsInView as unknown as ILocalChatMessage[];
   }
 
   private isNumber(value: any): boolean {
