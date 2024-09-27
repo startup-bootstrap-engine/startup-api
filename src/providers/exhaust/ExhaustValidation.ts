@@ -1,4 +1,4 @@
-import { USER_EXHAUST_TIMEOUT } from "@providers/constants/ServerConstants";
+import { CUSTOM_EXHAUSTABLE_EVENTS, USER_EXHAUST_TIMEOUT } from "@providers/constants/ServerConstants";
 import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 import { CharacterLastAction } from "../character/CharacterLastAction";
@@ -9,6 +9,7 @@ export class ExhaustValidation {
 
   public async verifyLastActionExhaustTime(characterId: string, action: string): Promise<boolean> {
     const actionLastExecution = await this.characterLastAction.getActionLastExecution(characterId, action);
+
     if (actionLastExecution === undefined) {
       // first time action was executed
       await this.characterLastAction.setActionLastExecution(characterId, action);
@@ -16,7 +17,8 @@ export class ExhaustValidation {
     }
     const now = dayjs(new Date());
     const actionDiff = now.diff(dayjs(actionLastExecution), "millisecond");
-    if (actionDiff < USER_EXHAUST_TIMEOUT) {
+
+    if (actionDiff < (CUSTOM_EXHAUSTABLE_EVENTS[action] || USER_EXHAUST_TIMEOUT)) {
       return true;
     } else {
       await this.characterLastAction.setActionLastExecution(characterId, action);

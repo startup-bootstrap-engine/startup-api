@@ -351,15 +351,10 @@ export class SpellCast {
       return false;
     }
 
-    const hasSpellCooldown = await this.spellCoolDown.haveSpellCooldown(character._id, spell.magicWords);
-    if (hasSpellCooldown) {
-      await this.spellCoolDown.getAllSpellCooldowns(character);
-      const timeLeft = await this.spellCoolDown.getTimeLeft(character._id, spell.magicWords);
-      this.socketMessaging.sendErrorMessageToCharacter(
-        character,
-        `Sorry, this spell is in cooldown. ${timeLeft} secs left`
-      );
-
+    // Check for spell cooldown before proceeding
+    const hasCooldown = await this.spellCoolDown.haveSpellCooldown(character, spell.magicWords);
+    if (hasCooldown) {
+      this.socketMessaging.sendErrorMessageToCharacter(character, "Sorry, this spell is on cooldown.");
       return false;
     }
 

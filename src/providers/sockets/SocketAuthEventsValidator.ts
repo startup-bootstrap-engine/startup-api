@@ -6,6 +6,7 @@ import { CharacterLastAction } from "@providers/character/CharacterLastAction";
 import { appEnv } from "@providers/config/env";
 import { BYPASS_EVENTS_AS_LAST_ACTION } from "@providers/constants/EventsConstants";
 import {
+  CUSTOM_EXHAUSTABLE_EVENTS,
   EXHAUSTABLE_EVENTS,
   LOCKABLE_EVENTS,
   LOGGABLE_EVENTS,
@@ -57,10 +58,11 @@ export class SocketAuthEventsValidator {
   }
 
   public async isExhausted(character: ICharacter, event: string): Promise<boolean> {
-    return (
-      EXHAUSTABLE_EVENTS.includes(event) &&
-      (await this.exhaustValidation.verifyLastActionExhaustTime(character.channelId!, event))
-    );
+    const result =
+      (EXHAUSTABLE_EVENTS.includes(event) || CUSTOM_EXHAUSTABLE_EVENTS[event]) &&
+      (await this.exhaustValidation.verifyLastActionExhaustTime(character.channelId!, event));
+
+    return result;
   }
 
   public notifyExhaustion(channelId: string): void {

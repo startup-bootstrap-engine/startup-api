@@ -21,19 +21,22 @@ export const SERVER_API_NODES_PM2_PROCESSES_QTY = 4; // 4 processes per node
 // 10 min
 export const SERVER_DISCONNECT_IDLE_TIMEOUT = 10; // how many minutes does a character needs to be inactive to be disconnected
 
-export const USER_EXHAUST_TIMEOUT = 1500;
+export const USER_EXHAUST_TIMEOUT = 1000;
 
 export const EXHAUSTABLE_EVENTS = [
   ChatSocketEvents.GlobalChatMessageCreate,
   ChatSocketEvents.GlobalChatMessageRead,
   ChatSocketEvents.PrivateChatMessageCreate,
   ItemSocketEvents.UseWith,
-  "CastSpell",
   "UseWithItem",
   UseWithSocketEvents.UseWithTile,
   ItemSocketEvents.Use,
   ItemSocketEvents.CraftItem,
 ] as string[];
+
+export const CUSTOM_EXHAUSTABLE_EVENTS = {
+  [SpellSocketEvents.CastSpell]: 500,
+};
 
 export const LOGGABLE_EVENTS = [
   ItemSocketEvents.Use,
@@ -70,7 +73,6 @@ export const THROTTABLE_EVENTS = {
   [UseWithSocketEvents.UseWithTile]: 2000,
   [ItemSocketEvents.CraftItem]: 2000,
   [ChatSocketEvents.GlobalChatMessageCreate]: THROTTABLE_DEFAULT_MS_THRESHOLD,
-  [SpellSocketEvents.CastSpell]: THROTTABLE_DEFAULT_MS_THRESHOLD,
   [ChatSocketEvents.PrivateChatMessageCreate]: THROTTABLE_DEFAULT_MS_THRESHOLD,
 };
 
