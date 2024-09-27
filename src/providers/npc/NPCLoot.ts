@@ -173,7 +173,10 @@ export class NPCLoot {
 
   private async calculateLootChance(killer: ICharacter, loot: INPCLoot, baseMultiplier = 1): Promise<number> {
     try {
-      const blueprintData = blueprintManager.getBlueprint<IItem>("items", loot.itemBlueprintKey as AvailableBlueprints);
+      const blueprintData = await blueprintManager.getBlueprint<IItem>(
+        "items",
+        loot.itemBlueprintKey as AvailableBlueprints
+      );
 
       if (!blueprintData) {
         throw new Error(`Error while calculating loot chance for item with key ${loot.itemBlueprintKey}`);
