@@ -21,9 +21,4 @@ export const SOCKET_IO_CONFIG: Partial<ServerOptions> = {
     origin: appEnv.general.ENV === EnvType.Development ? "*" : appEnv.general.APP_URL,
     credentials: true,
   },
-
-  // Optimized for MMORPG real-time interactions
-  maxHttpBufferSize: 5e6, // 100MB
-  pingTimeout: 80000,
-  pingInterval: 10000,
 };
