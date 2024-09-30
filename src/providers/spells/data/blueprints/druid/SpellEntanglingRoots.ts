@@ -8,6 +8,7 @@ import {
   AnimationEffectKeys,
   BasicAttribute,
   CharacterClass,
+  EntityType,
   ISkill,
   ISpell,
   RangeTypes,
@@ -50,7 +51,7 @@ export const spellEntanglingRoots: Partial<ISpell> = {
         cacheKey: `${target?._id}-skills`,
       })) as unknown as ISkill;
 
-    if (targetSkills?.level! > NPC_MAX_STUN_LEVEL) {
+    if (target.type === EntityType.NPC && targetSkills?.level! > NPC_MAX_STUN_LEVEL) {
       socketMessaging.sendErrorMessageToCharacter(character, "This target is immune to stun effects.");
       return false;
     }
