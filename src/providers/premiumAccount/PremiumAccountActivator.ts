@@ -1,6 +1,6 @@
 import { IUser, User } from "@entities/ModuleSystem/UserModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
-import { UserAccountTypes } from "@rpg-engine/shared";
+import { UserAccountTypes } from "@startup-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
 @provide(PremiumAccountActivator)

@@ -1,5 +1,5 @@
 import { createLeanSchema } from "@providers/database/mongooseHelpers";
-import { PeriodOfDay, TypeHelper } from "@rpg-engine/shared";
+import { PeriodOfDay, TypeHelper } from "@startup-engine/shared";
 import { ExtractDoc, Type, typedModel } from "ts-mongoose";
 
 const MapControlTimeSchema = createLeanSchema(

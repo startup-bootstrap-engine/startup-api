@@ -12,9 +12,9 @@ services:
           echo 'On manager node. Performing selective cleanup...';
           # Remove unused images, but not volumes
           docker image prune -af;
-          # Remove containers not linked to running services, excluding rpg-db and rpg-redis
-          docker container prune -f --filter 'label!=com.docker.swarm.service.name=rpg-db' --filter 'label!=com.docker.swarm.service.name=rpg-redis';
-          # Remove networks not used by at least one container, excluding rpg-network
+          # Remove containers not linked to running services, excluding startup-db and startup-redis
+          docker container prune -f --filter 'label!=com.docker.swarm.service.name=startup-db' --filter 'label!=com.docker.swarm.service.name=startup-redis';
+          # Remove networks not used by at least one container, excluding startup-network
           docker network prune -f --filter 'label!=com.docker.stack.namespace=rpg';
         else
           echo 'On worker node. Performing full cleanup...';
@@ -33,8 +33,8 @@ services:
       restart_policy:
         condition: any
     networks:
-      - rpg-network
+      - startup-network
 
 networks:
-  rpg-network:
+  startup-network:
     external: true

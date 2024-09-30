@@ -1,7 +1,7 @@
 import { cache } from "@providers/constants/CacheConstants";
 import { ForbiddenError } from "@providers/errors/ForbiddenError";
 import { AuthMiddleware } from "@providers/middlewares/AuthMiddleware";
-import { UserTypes } from "@rpg-engine/shared";
+import { UserTypes } from "@startup-engine/shared";
 import { controller, httpGet, interfaces, request } from "inversify-express-utils";
 
 @controller("/cache", AuthMiddleware)

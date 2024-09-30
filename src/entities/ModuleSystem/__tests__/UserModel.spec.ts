@@ -1,5 +1,5 @@
 import { unitTestHelper } from "@providers/inversify/container";
-import { UserAuthFlow, UserTypes } from "@rpg-engine/shared";
+import { UserAuthFlow, UserTypes } from "@startup-engine/shared";
 import { IUser } from "../UserModel";
 
 describe("UserModel.ts", () => {

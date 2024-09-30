@@ -1,5 +1,5 @@
 import { User } from "@entities/ModuleSystem/UserModel";
-import { EnvType } from "@rpg-engine/shared/dist";
+import { EnvType } from "@startup-engine/shared/dist";
 import firebaseAdmin from "firebase-admin";
 import { provide } from "inversify-binding-decorators";
 import { appEnv } from "../config/env";

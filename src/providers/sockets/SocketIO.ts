@@ -4,8 +4,8 @@
 import { appEnv } from "@providers/config/env";
 import { SOCKET_IO_CONFIG } from "@providers/constants/SocketsConstants";
 import { SocketIOAuthMiddleware } from "@providers/middlewares/SocketIOAuthMiddleware";
-import { ISocket } from "@rpg-engine/shared";
 import { createAdapter } from "@socket.io/redis-adapter";
+import { ISocket } from "@startup-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import IORedis from "ioredis";
 import { Socket, Server as SocketIOServer } from "socket.io";

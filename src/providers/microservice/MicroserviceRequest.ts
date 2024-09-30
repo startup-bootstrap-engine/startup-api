@@ -7,20 +7,20 @@ import http from "http";
 import https from "https";
 
 export enum AvailableMicroservices {
-  RpgPathfinding = "rpg-pathfinding",
-  RpgNPC = "rpg-npc",
-  RpgAPI = "rpg-api",
+  RpgPathfinding = "startup-pathfinding",
+  RpgNPC = "startup-npc",
+  RpgAPI = "startup-api",
 }
 
 const MICROSERVICE_METADATA = {
   [AvailableMicroservices.RpgPathfinding]: {
-    baseUrl: "http://rpg-pathfinder:5004",
+    baseUrl: "http://startup-pathfinder:5004",
   },
   [AvailableMicroservices.RpgNPC]: {
-    baseUrl: "http://rpg-npc:5005",
+    baseUrl: "http://startup-npc:5005",
   },
   [AvailableMicroservices.RpgAPI]: {
-    baseUrl: "http://rpg-api:5002",
+    baseUrl: "http://startup-api:5002",
   },
 };
 

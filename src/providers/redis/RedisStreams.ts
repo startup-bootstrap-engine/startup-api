@@ -7,7 +7,7 @@ import { Time } from "@providers/time/Time";
 import Redis from "ioredis";
 
 export enum RedisStreamChannels {
-  SocketEvents = "rpg-api-socket-events",
+  SocketEvents = "startup-api-socket-events",
 }
 
 @provideSingleton(RedisStreams)

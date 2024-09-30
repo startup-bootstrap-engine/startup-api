@@ -1,8 +1,8 @@
 version: "3.8" # Upgraded version to support health checks
 
 services:
-  rpg-api:
-    container_name: rpg-api
+  startup-api:
+    container_name: startup-api
     restart: always
     build: .
     env_file: .env
@@ -24,67 +24,16 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     links:
-      - rpg-db
+      - startup-db
     depends_on:
-      - rpg-db
-      - rpg-redis
-      - rpg-rabbitmq
+      - startup-db
+      - startup-redis
+      - startup-rabbitmq
     networks:
-      - rpg-network
+      - startup-network
 
-  rpg-npc:
-    container_name: rpg-npc
-    restart: always
-    build: .
-    env_file: .env
-    ports:
-      - "5005:5005"
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
-    environment:
-      MICROSERVICE_NAME: "rpg-npc"
-      FORCE_COLOR: "true"
-      CHOKIDAR_USEPOLLING: "true" # enables hot-reloading on windows host
-      NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
-      NEW_RELIC_APP_NAME: "Definya API Dev"
-      RABBITMQ_HOST: ${RABBITMQ_HOST}
-      RABBITMQ_PORT: ${RABBITMQ_PORT}
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
-    links:
-      - rpg-db
-    depends_on:
-      - rpg-api
-      - rpg-db
-      - rpg-redis
-      - rpg-rabbitmq
-    networks:
-      - rpg-network
-
-  rpg-pathfinder:
-    container_name: rpg-pathfinder
-    build:
-      context: ./microservices/rpg-pathfinder
-      dockerfile: Dockerfile
-    ports:
-      - "5004:5004"
-    volumes:
-      - ./microservices/rpg-pathfinder:/app
-    environment:
-      - GO111MODULE=on
-      - RABBITMQ_HOST=${RABBITMQ_HOST}
-      - RABBITMQ_PORT=${RABBITMQ_PORT}
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
-    command: air
-    networks:
-      - rpg-network
-    depends_on:
-      - rpg-rabbitmq
-
-  rpg-db:
-    container_name: rpg-db
+  startup-db:
+    container_name: startup-db
     image: mongo
     restart: always
     command: mongod --port ${MONGO_PORT}
@@ -102,10 +51,10 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     networks:
-      - rpg-network
+      - startup-network
 
-  rpg-redis:
-    container_name: rpg-redis
+  startup-redis:
+    container_name: startup-redis
     restart: always
     image: redis:latest
     ports:
@@ -117,21 +66,21 @@ services:
       - ./config/redis.conf:/redis.conf
     command: ["redis-server", "/redis.conf", "--port", "${REDIS_PORT}"]
     networks:
-      - rpg-network
+      - startup-network
 
-  redis-commander:
-    container_name: redis-commander
+  startup-redis-commander:
+    container_name: startup-redis-commander
     restart: always
     image: rediscommander/redis-commander:latest
     ports:
       - "8081:8081"
     environment:
-      REDIS_HOSTS: "redis:rpg-redis:6380"
+      REDIS_HOSTS: "redis:startup-redis:6380"
     networks:
-      - rpg-network
+      - startup-network
 
-  rpg-rabbitmq:
-    container_name: rpg-rabbitmq
+  startup-rabbitmq:
+    container_name: startup-rabbitmq
     image: rabbitmq:3-management
     ports:
       - "5672:5672" # AMQP protocol port
@@ -143,10 +92,10 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
       - ./environment/rabbit-init.sh:/docker-entrypoint-initdb.d/rabbit-init.sh
     networks:
-      - rpg-network
+      - startup-network
 
 networks:
-  rpg-network:
+  startup-network:
 
 volumes:
   rabbitmq_data:

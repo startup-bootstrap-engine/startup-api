@@ -1,5 +1,5 @@
 import { appEnv } from "@providers/config/env";
-import { EnvType } from "@rpg-engine/shared/dist";
+import { EnvType } from "@startup-engine/shared/dist";
 import apicache from "apicache-plus";
 import Redis from "ioredis";
 

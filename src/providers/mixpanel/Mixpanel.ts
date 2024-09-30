@@ -1,4 +1,4 @@
-import { EnvType } from "@rpg-engine/shared/dist";
+import { EnvType } from "@startup-engine/shared/dist";
 import { provide } from "inversify-binding-decorators";
 import Mixpanel from "mixpanel";
 import { IUser } from "../../entities/ModuleSystem/UserModel";

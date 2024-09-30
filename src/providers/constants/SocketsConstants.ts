@@ -1,6 +1,6 @@
 import { appEnv } from "@providers/config/env";
 import { GeckosAuthMiddleware } from "@providers/middlewares/GeckosAuthMiddleware";
-import { EnvType } from "@rpg-engine/shared";
+import { EnvType } from "@startup-engine/shared";
 import { ServerOptions } from "socket.io";
 
 export const GECKOS_CONFIG = {

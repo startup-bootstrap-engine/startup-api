@@ -1,6 +1,6 @@
 import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
-import { IResource } from "@rpg-engine/shared";
+import { IResource } from "@startup-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { Redis } from "ioredis";
 

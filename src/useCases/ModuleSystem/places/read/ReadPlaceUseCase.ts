@@ -1,6 +1,6 @@
 import { NotFoundError } from "@providers/errors/NotFoundError";
 import { PlaceHelper } from "@providers/places/PlaceHelper";
-import { ICountry, ICountryCity } from "@rpg-engine/shared";
+import { ICountry, ICountryCity } from "@startup-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
 @provide(ReadPlaceUseCase)

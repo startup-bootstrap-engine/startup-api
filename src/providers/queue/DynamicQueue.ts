@@ -12,7 +12,7 @@ import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { NewRelicMetricCategory, NewRelicSubCategory } from "@providers/types/NewRelicTypes";
-import { EnvType } from "@rpg-engine/shared";
+import { EnvType } from "@startup-engine/shared";
 import { DefaultJobOptions, Job, Queue, QueueBaseOptions, Worker, WorkerOptions } from "bullmq";
 import { Redis } from "ioredis";
 import { random } from "lodash";

@@ -24,7 +24,7 @@ export class ServerHelper {
   }
 
   private getTerminalColor(environment: string, microserviceName?: string): string {
-    if (microserviceName === "rpg-npc") {
+    if (microserviceName === "startup-npc") {
       return "GREEN";
     }
 

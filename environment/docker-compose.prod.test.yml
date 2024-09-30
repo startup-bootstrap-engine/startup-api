@@ -1,8 +1,8 @@
 version: "3"
 
 services:
-  rpg-api:
-    container_name: rpg-api
+  startup-api:
+    container_name: startup-api
     restart: always
     build: .
     logging:
@@ -14,11 +14,11 @@ services:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     links:
-      - rpg-db
-      - rpg-redis
+      - startup-db
+      - startup-redis
     depends_on:
-      - rpg-db
-      - rpg-redis
+      - startup-db
+      - startup-redis
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
       - "${SOCKET_PORT}:${SOCKET_PORT}"
@@ -32,23 +32,10 @@ services:
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
       NEW_RELIC_APP_NAME: "Definya API"
     networks:
-      - rpg-network
-  rpg-pathfinder:
-    container_name: rpg-pathfinder
-    build:
-      context: ./microservices/rpg-pathfinder
-      dockerfile: Dockerfile
-    ports:
-      - "5004:5004"
-    volumes:
-      - ./microservices/rpg-pathfinder:/app
-    environment:
-      - GO111MODULE=on
-    command: air
-    networks:
-      - rpg-network
-  rpg-db:
-    container_name: rpg-db
+      - startup-network
+
+  startup-db:
+    container_name: startup-db
     image: mongo
     restart: always
     command: mongod --port ${MONGO_PORT}
@@ -66,10 +53,10 @@ services:
       MONGO_INITDB_ROOT_USERNAME: "${MONGO_INITDB_ROOT_USERNAME}"
       MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INITDB_ROOT_PASSWORD}"
     networks:
-      - rpg-network
+      - startup-network
 
-  rpg-redis:
-    container_name: rpg-redis
+  startup-redis:
+    container_name: startup-redis
     restart: always
     image: redis:latest
     ports:
@@ -79,8 +66,8 @@ services:
       - ./config/redis.conf:/redis.conf
     command: ["redis-server", "/redis.conf", "--port", "${REDIS_PORT}"]
     networks:
-      - rpg-network
+      - startup-network
 
 networks:
-  rpg-network:
+  startup-network:
     external: true

@@ -16,7 +16,7 @@ import { RedisPubSub } from "@providers/redis/RedisPubSub";
 import { RedisStreams } from "@providers/redis/RedisStreams";
 import { SocketSessionControl } from "@providers/sockets/SocketSessionControl";
 import { Cooldown } from "@providers/time/Cooldown";
-import { EnvType } from "@rpg-engine/shared";
+import { EnvType } from "@startup-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { PM2Helper } from "./PM2Helper";
 

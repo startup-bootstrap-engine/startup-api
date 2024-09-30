@@ -1,6 +1,6 @@
 import { appEnv } from "@providers/config/env";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { ISocket, SocketTypes } from "@rpg-engine/shared";
+import { ISocket, SocketTypes } from "@startup-engine/shared";
 import { GeckosIO } from "./GeckosIO";
 import { SocketIO } from "./SocketIO";
 import { SocketSessionControl } from "./SocketSessionControl";

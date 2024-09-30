@@ -3,7 +3,7 @@ import { appEnv } from "@providers/config/env";
 import { InternalServerError } from "@providers/errors/InternalServerError";
 import { NotFoundError } from "@providers/errors/NotFoundError";
 import { TS } from "@providers/translation/TranslationHelper";
-import { UserAuthFlow } from "@rpg-engine/shared";
+import { UserAuthFlow } from "@startup-engine/shared";
 import bcrypt from "bcrypt";
 import { provide } from "inversify-binding-decorators";
 import jwt from "jsonwebtoken";

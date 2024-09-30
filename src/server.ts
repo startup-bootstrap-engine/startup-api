@@ -27,7 +27,7 @@ import { RedisPubSub } from "@providers/redis/RedisPubSub";
 import { router } from "@providers/server/Router";
 import { app } from "@providers/server/app";
 import { NewRelicTransactionCategory } from "@providers/types/NewRelicTypes";
-import { EnvType } from "@rpg-engine/shared/dist";
+import { EnvType } from "@startup-engine/shared/dist";
 
 dayjs.extend(duration);
 
@@ -59,7 +59,7 @@ app.listen(port, async () => {
  * @returns {number} The port number.
  */
 function getPort(): number {
-  if (appEnv.general.MICROSERVICE_NAME === "rpg-npc") {
+  if (appEnv.general.MICROSERVICE_NAME === "startup-npc") {
     return 5005;
   }
   return Number(appEnv.general.SERVER_PORT) || 3002;
@@ -90,7 +90,7 @@ async function initializeServerComponents(): Promise<void> {
 
   await bullBoardMonitor.init();
 
-  !IS_MICROSERVICE && cronJobs.start(); // only schedule on rpg-api
+  !IS_MICROSERVICE && cronJobs.start(); // only schedule on startup-api
 
   app.use(router);
   app.use(errorHandlerMiddleware);

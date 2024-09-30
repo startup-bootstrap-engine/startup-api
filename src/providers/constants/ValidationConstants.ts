@@ -1,4 +1,4 @@
-import { TranslationTypes, TypeHelper } from "@rpg-engine/shared/dist";
+import { TranslationTypes, TypeHelper } from "@startup-engine/shared/dist";
 import { ValidationArguments } from "class-validator";
 import { injectable } from "inversify";
 import { TS } from "../translation/TranslationHelper";

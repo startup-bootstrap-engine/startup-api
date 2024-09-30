@@ -2,7 +2,7 @@
 import { Data, GeckosServer } from "@geckos.io/server";
 import { appEnv } from "@providers/config/env";
 import { GECKOS_CONFIG } from "@providers/constants/SocketsConstants";
-import { EnvType, ISocket } from "@rpg-engine/shared";
+import { EnvType, ISocket } from "@startup-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
 @provide(GeckosIO)

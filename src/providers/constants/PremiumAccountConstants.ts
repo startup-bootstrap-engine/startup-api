@@ -1,4 +1,4 @@
-import { SpellsBlueprint, UserAccountTypes } from "@rpg-engine/shared";
+import { SpellsBlueprint, UserAccountTypes } from "@startup-engine/shared";
 
 type CustomSpellCooldown = {
   [spell: string]: number;

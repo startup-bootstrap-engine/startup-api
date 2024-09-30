@@ -2,7 +2,7 @@
 
 echo "💡 Creating docker network and installing required some project dependencies..."
 
-docker network create rpg-network
+docker network create startup-network
 
 sudo apt-get install wget -y 
 

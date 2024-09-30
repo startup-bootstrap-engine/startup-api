@@ -4,7 +4,7 @@ import Redis from "ioredis";
 import { v4 as uuidv4 } from "uuid";
 
 export enum RedisPubSubChannels {
-  SocketEvents = "rpg-api-socket-events",
+  SocketEvents = "startup-api-socket-events",
 }
 
 @provideSingleton(RedisPubSub)

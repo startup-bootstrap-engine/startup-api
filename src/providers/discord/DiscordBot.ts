@@ -2,7 +2,7 @@ import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNe
 import { appEnv } from "@providers/config/env";
 import { DISCORD_CHANNEL_IDS, DiscordChannelName } from "@providers/constants/DiscordConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { EnvType } from "@rpg-engine/shared";
+import { EnvType } from "@startup-engine/shared";
 import { Client, ColorResolvable, Colors, EmbedBuilder, GatewayIntentBits, TextChannel } from "discord.js";
 
 const emojisMessages = ["✨", "⭐", "🌀", "🌌", "🚀", "🤟", "🤙", "💪🏻", "💪🏽"];

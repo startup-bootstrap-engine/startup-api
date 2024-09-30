@@ -1,6 +1,6 @@
 import { appEnv } from "@providers/config/env";
 import { PM2Helper } from "@providers/server/PM2Helper";
-import { EnvType } from "@rpg-engine/shared";
+import { EnvType } from "@startup-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
 import { QueueCrons } from "./QueueCrons";

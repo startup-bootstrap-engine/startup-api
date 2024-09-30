@@ -1,4 +1,4 @@
-import { IGoogleOAuthUrlResponse } from "@rpg-engine/shared";
+import { IGoogleOAuthUrlResponse } from "@startup-engine/shared";
 import { Request, Response } from "express";
 import { controller, httpGet, interfaces } from "inversify-express-utils";
 import { GenerateGoogleOAuthUrlUseCase } from "./GenerateGoogleOAuthUrlUseCase";

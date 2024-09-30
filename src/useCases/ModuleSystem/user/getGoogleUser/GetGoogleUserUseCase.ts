@@ -1,4 +1,4 @@
-import { IGoogleOAuthUserInfoResponse } from "@rpg-engine/shared";
+import { IGoogleOAuthUserInfoResponse } from "@startup-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { GoogleOAuthHelper } from "../../../../providers/auth/GoogleOauthHelper";
 

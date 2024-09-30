@@ -1,7 +1,7 @@
 import { Identify } from "@amplitude/identify";
 import { DEFAULT_DATE_FORMAT } from "@providers/constants/DateConstants";
 import { MixpanelTracker } from "@providers/mixpanel/Mixpanel";
-import { EnvType } from "@rpg-engine/shared/dist";
+import { EnvType } from "@startup-engine/shared/dist";
 import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 import { IUser } from "../../entities/ModuleSystem/UserModel";

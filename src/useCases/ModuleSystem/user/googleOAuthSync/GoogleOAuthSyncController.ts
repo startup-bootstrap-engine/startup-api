@@ -2,7 +2,7 @@ import { User } from "@entities/ModuleSystem/UserModel";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { TS } from "@providers/translation/TranslationHelper";
-import { IGoogleOAuthIdTokenResponse, IGoogleOAuthUserInfoResponse, UserAuthFlow } from "@rpg-engine/shared";
+import { IGoogleOAuthIdTokenResponse, IGoogleOAuthUserInfoResponse, UserAuthFlow } from "@startup-engine/shared";
 import { Request, Response } from "express";
 import { controller, httpGet, httpPost, interfaces } from "inversify-express-utils";
 import { GoogleOAuthHelper } from "../../../../providers/auth/GoogleOauthHelper";

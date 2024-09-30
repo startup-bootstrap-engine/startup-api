@@ -38,20 +38,20 @@ set +a
 # Build based on production Dockerfile
 cp ./environment/Dockerfile.prod ./Dockerfile    
 
-# Build and push rpg-api Docker image
-echo "🐳 Building and pushing rpg-api Docker image..."
+# Build and push startup-api Docker image
+echo "🐳 Building and pushing startup-api Docker image..."
 docker build -t definya/definya-team:api-latest .
 docker push definya/definya-team:api-latest
 
 
-cp ~/definya/api/microservices/rpg-pathfinder/environment/Dockerfile.prod ~/definya/api/microservices/rpg-pathfinder/Dockerfile
+cp ~/definya/api/microservices/startup-pathfinder/environment/Dockerfile.prod ~/definya/api/microservices/startup-pathfinder/Dockerfile
 
-# Build and push rpg-pathfinder Docker image
-echo "🐳 Building and pushing rpg-pathfinder Docker image..."
-cd ~/definya/api/microservices/rpg-pathfinder
+# Build and push startup-pathfinder Docker image
+echo "🐳 Building and pushing startup-pathfinder Docker image..."
+cd ~/definya/api/microservices/startup-pathfinder
 
-docker build -t definya/definya-team:rpg-pathfinder-latest .
-docker push definya/definya-team:rpg-pathfinder-latest
+docker build -t definya/definya-team:startup-pathfinder-latest .
+docker push definya/definya-team:startup-pathfinder-latest
 
 # Update the Docker Swarm stack
 echo "🐳 Updating swarm..."

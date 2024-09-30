@@ -3,7 +3,7 @@ import { UserAuth } from "@providers/auth/UserAuth";
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { NotFoundError } from "@providers/errors/NotFoundError";
 import { TS } from "@providers/translation/TranslationHelper";
-import { IAuthResponse } from "@rpg-engine/shared";
+import { IAuthResponse } from "@startup-engine/shared";
 import { validate } from "email-validator";
 import { provide } from "inversify-binding-decorators";
 import { AuthLoginDTO } from "../AuthDTO";

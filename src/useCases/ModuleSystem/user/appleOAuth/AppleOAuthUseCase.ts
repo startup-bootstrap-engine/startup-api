@@ -4,7 +4,7 @@ import { AppleOAuthHelper } from "@providers/auth/AppleOAuthHelper";
 import { UserAuth } from "@providers/auth/UserAuth";
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
-import { IAuthResponse, UserAuthFlow } from "@rpg-engine/shared";
+import { IAuthResponse, UserAuthFlow } from "@startup-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { AppleOAuthDTO } from "../AuthDTO";
 

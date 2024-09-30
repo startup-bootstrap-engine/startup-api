@@ -1,4 +1,4 @@
-import { UserExperience, UserGoal } from "@rpg-engine/shared/dist";
+import { UserExperience, UserGoal } from "@startup-engine/shared/dist";
 import { Type } from "class-transformer";
 import { IsEnum, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
 import { tsDefaultDecorator, tsEnumDecorator } from "../../../providers/constants/ValidationConstants";

@@ -1,5 +1,5 @@
 import { createLeanSchema } from "@providers/database/mongooseHelpers";
-import { ChatMessageType, TypeHelper } from "@rpg-engine/shared";
+import { ChatMessageType, TypeHelper } from "@startup-engine/shared";
 import { ExtractDoc, Type, typedModel } from "ts-mongoose";
 
 const chatLogSchema = createLeanSchema(

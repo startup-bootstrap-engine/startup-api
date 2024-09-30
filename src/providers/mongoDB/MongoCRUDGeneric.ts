@@ -2,7 +2,7 @@
 import { IUser } from "@entities/ModuleSystem/UserModel";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { NotFoundError } from "@providers/errors/NotFoundError";
-import { IPaginationResponse } from "@rpg-engine/shared/dist";
+import { IPaginationResponse } from "@startup-engine/shared/dist";
 import { provide } from "inversify-binding-decorators";
 import _ from "lodash";
 import { Document, FilterQuery, Model } from "mongoose";

@@ -4,7 +4,7 @@ import { UserAuth } from "@providers/auth/UserAuth";
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { NotFoundError } from "@providers/errors/NotFoundError";
 import { TS } from "@providers/translation/TranslationHelper";
-import { UserAuthFlow } from "@rpg-engine/shared";
+import { UserAuthFlow } from "@startup-engine/shared";
 import randomString from "crypto-random-string";
 import { provide } from "inversify-binding-decorators";
 import { TransactionalEmail } from "../../../../../emails/TransactionalEmail";

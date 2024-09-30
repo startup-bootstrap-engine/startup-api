@@ -21,15 +21,15 @@ export class SocketMessaging {
       return;
     }
 
-    if (appEnv.general.MICROSERVICE_NAME === "rpg-npc") {
-      // Add to stream to be processed by the rpg-socket service
+    if (appEnv.general.MICROSERVICE_NAME === "startup-npc") {
+      // Add to stream to be processed by the startup-socket service
       void this.redisStreams.addToStream(RedisStreamChannels.SocketEvents, {
         userChannel,
         eventName,
         data: data || {},
       });
     } else {
-      // We're in the rpg-socket service; emit directly to the user
+      // We're in the startup-socket service; emit directly to the user
       void this.socketAdapter.emitToUser(userChannel, eventName, data || {});
     }
   }

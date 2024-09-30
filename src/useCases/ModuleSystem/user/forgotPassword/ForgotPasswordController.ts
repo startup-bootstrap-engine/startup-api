@@ -1,5 +1,5 @@
 import { DTOValidatorMiddleware } from "@providers/middlewares/DTOValidatorMiddleware";
-import { HttpStatus } from "@rpg-engine/shared";
+import { HttpStatus } from "@startup-engine/shared";
 import { Request, Response } from "express";
 import { controller, httpPost, interfaces, JsonContent, requestBody } from "inversify-express-utils";
 import { AuthForgotPasswordDTO } from "../AuthDTO";

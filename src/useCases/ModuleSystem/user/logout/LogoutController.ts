@@ -1,6 +1,6 @@
 import { AuthMiddleware } from "@providers/middlewares/AuthMiddleware";
 import { DTOValidatorMiddleware } from "@providers/middlewares/DTOValidatorMiddleware";
-import { HttpStatus } from "@rpg-engine/shared";
+import { HttpStatus } from "@startup-engine/shared";
 import { Response } from "express";
 import { controller, httpPost, interfaces, requestBody } from "inversify-express-utils";
 import { IAuthenticatedRequest } from "../../../../providers/types/ServerTypes";

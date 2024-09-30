@@ -1,6 +1,6 @@
 import { IUser, User } from "@entities/ModuleSystem/UserModel";
 import { appEnv } from "@providers/config/env";
-import { HttpStatus } from "@rpg-engine/shared";
+import { HttpStatus } from "@startup-engine/shared";
 import http from "http";
 import jwt from "jsonwebtoken";
 

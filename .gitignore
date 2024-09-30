@@ -19,10 +19,7 @@ environment/backups/**
 docker-compose.yml
 Dockerfile
 
-# Do not ignore the Dockerfile in microservices/rpg-pathfinder/
-!microservices/rpg-pathfinder/Dockerfile
-
-microservices/rpg-pathfinder/tmp
+ 
 
 globalConfig.json
 
@@ -35,4 +32,4 @@ pulbic/maps/unit-test-map.json
 build-errors.log
 
 
-microservices/rpg-pathfinder/tmp/
+ 

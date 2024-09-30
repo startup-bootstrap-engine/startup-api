@@ -1,5 +1,5 @@
 import { DTOValidatorMiddleware } from "@providers/middlewares/DTOValidatorMiddleware";
-import { IAuthResponse } from "@rpg-engine/shared";
+import { IAuthResponse } from "@startup-engine/shared";
 import rateLimit from "express-rate-limit";
 import { controller, httpPost, interfaces, request, requestBody } from "inversify-express-utils";
 import { AuthLoginDTO } from "../AuthDTO";

@@ -1,4 +1,4 @@
-import { UserTypes } from "@rpg-engine/shared";
+import { UserTypes } from "@startup-engine/shared";
 import { IUser } from "../../entities/ModuleSystem/UserModel";
 import { UnauthorizedError } from "../errors/UnauthorizedError";
 import { TS } from "../translation/TranslationHelper";

@@ -1,4 +1,4 @@
-import { calculateSPToNextLevel, calculateXPToNextLevel } from "@rpg-engine/shared";
+import { calculateSPToNextLevel, calculateXPToNextLevel } from "@startup-engine/shared";
 import { ExtractDoc, Type, createSchema, typedModel } from "ts-mongoose";
 
 export enum ElementalType {

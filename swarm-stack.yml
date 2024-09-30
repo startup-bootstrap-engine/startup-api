@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  rpg-api:
+  startup-api:
     image: definya/definya-team:api-latest
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:5002"]
@@ -28,27 +28,27 @@ services:
       labels:
         # Basic setup for API config
         - traefik.enable=true
-        - traefik.http.routers.rpg-api.rule=Host(`na.definya.com`)
-        - traefik.http.routers.rpg-api.entrypoints=websecure
-        - traefik.http.routers.rpg-api.tls.certresolver=myresolver
-        - traefik.http.services.rpg-api-service.loadbalancer.server.port=5002
-        - traefik.http.routers.rpg-api.service=rpg-api-service
+        - traefik.http.routers.startup-api.rule=Host(`na.definya.com`)
+        - traefik.http.routers.startup-api.entrypoints=websecure
+        - traefik.http.routers.startup-api.tls.certresolver=myresolver
+        - traefik.http.services.startup-api-service.loadbalancer.server.port=5002
+        - traefik.http.routers.startup-api.service=startup-api-service
 
         # Websockets
-        - traefik.http.routers.rpg-api-socket.rule=Host(`na.definya.com`) && Path(`/socket.io/`)
-        - traefik.http.routers.rpg-api-socket.entrypoints=websecure
-        - traefik.http.routers.rpg-api-socket.tls.certresolver=myresolver
-        - traefik.http.services.rpg-api-socket-service.loadbalancer.server.port=5101
-        - traefik.http.routers.rpg-api-socket.service=rpg-api-socket-service
+        - traefik.http.routers.startup-api-socket.rule=Host(`na.definya.com`) && Path(`/socket.io/`)
+        - traefik.http.routers.startup-api-socket.entrypoints=websecure
+        - traefik.http.routers.startup-api-socket.tls.certresolver=myresolver
+        - traefik.http.services.startup-api-socket-service.loadbalancer.server.port=5101
+        - traefik.http.routers.startup-api-socket.service=startup-api-socket-service
 
         # Add sticky session for websockets
-        - "traefik.http.services.rpg-api-socket-service.loadbalancer.sticky=true"
-        - "traefik.http.services.rpg-api-socket-service.loadbalancer.sticky.cookie.name=StickyCookie"
-        - "traefik.http.services.rpg-api-socket-service.loadbalancer.sticky.cookie.secure=true"
+        - "traefik.http.services.startup-api-socket-service.loadbalancer.sticky=true"
+        - "traefik.http.services.startup-api-socket-service.loadbalancer.sticky.cookie.name=StickyCookie"
+        - "traefik.http.services.startup-api-socket-service.loadbalancer.sticky.cookie.secure=true"
 
         - "traefik.http.middlewares.websocket.headers.customrequestheaders.Connection=Upgrade"
         - "traefik.http.middlewares.websocket.headers.customrequestheaders.Upgrade=websocket"
-        - "traefik.http.routers.rpg-api-socket.middlewares=websocket@docker"
+        - "traefik.http.routers.startup-api-socket.middlewares=websocket@docker"
 
     logging:
       driver: "json-file"
@@ -64,13 +64,13 @@ services:
       RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
       RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
     networks:
-      - rpg-network
+      - startup-network
     depends_on:
-      - rpg-rabbitmq
-      - rpg-redis
-      - rpg-db
+      - startup-rabbitmq
+      - startup-redis
+      - startup-db
 
-  rpg-npc:
+  startup-npc:
     image: definya/definya-team:api-latest
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:5005"]
@@ -78,7 +78,7 @@ services:
       timeout: 30s
       retries: 5
     environment:
-      MICROSERVICE_NAME: "rpg-npc"
+      MICROSERVICE_NAME: "startup-npc"
       FORCE_COLOR: "true"
       CHOKIDAR_USEPOLLING: "true"
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
@@ -109,55 +109,13 @@ services:
         max-size: "5m" # Added log rotation
         max-file: "2"
     networks:
-      - rpg-network
+      - startup-network
     depends_on:
-      - rpg-rabbitmq
-      - rpg-redis
-      - rpg-db
+      - startup-rabbitmq
+      - startup-redis
+      - startup-db
 
-  rpg-pathfinder:
-    image: definya/definya-team:rpg-pathfinder-latest
-    environment:
-      GO111MODULE: "on"
-      NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
-      NEW_RELIC_APP_NAME: "Definya Pathfinder"
-      RABBITMQ_HOST: "${RABBITMQ_HOST}"
-      RABBITMQ_PORT: "${RABBITMQ_PORT}"
-      RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
-      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
-    deploy:
-      replicas: 2
-      restart_policy:
-        condition: on-failure
-      placement:
-        constraints:
-          - node.labels.api == true
-        preferences:
-          - spread: node.id
-        max_replicas_per_node: 1
-      update_config:
-        parallelism: 3
-        delay: 2s
-        failure_action: rollback
-        monitor: 10s
-        max_failure_ratio: 0.3
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:5004/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "5m" # Added log rotation
-        max-file: "2"
-    networks:
-      - rpg-network
-    depends_on:
-      - rpg-rabbitmq
-
-  rpg-client:
+  startup-client:
     image: definya/definya-team:client-latest
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080"]
@@ -175,10 +133,10 @@ services:
         condition: on-failure
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.rpg-client.rule=Host(`play.definya.com`)"
-        - "traefik.http.routers.rpg-client.entrypoints=websecure"
-        - "traefik.http.routers.rpg-client.tls.certresolver=myresolver"
-        - "traefik.http.services.rpg-client.loadbalancer.server.port=8080"
+        - "traefik.http.routers.startup-client.rule=Host(`play.definya.com`)"
+        - "traefik.http.routers.startup-client.entrypoints=websecure"
+        - "traefik.http.routers.startup-client.tls.certresolver=myresolver"
+        - "traefik.http.services.startup-client.loadbalancer.server.port=8080"
       placement:
         constraints:
           - node.labels.accessory == true
@@ -186,9 +144,9 @@ services:
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
       NEW_RELIC_APP_NAME: "Definya Client"
     networks:
-      - rpg-network
+      - startup-network
 
-  rpg-docs:
+  startup-docs:
     image: definya/definya-team:docs-latest
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:3000"]
@@ -206,10 +164,10 @@ services:
         condition: on-failure
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.rpg-docs.rule=Host(`docs.definya.com`) || Host(`definya.com`)"
-        - "traefik.http.routers.rpg-docs.entrypoints=websecure"
-        - "traefik.http.routers.rpg-docs.tls.certresolver=myresolver"
-        - "traefik.http.services.rpg-docs.loadbalancer.server.port=3000"
+        - "traefik.http.routers.startup-docs.rule=Host(`docs.definya.com`) || Host(`definya.com`)"
+        - "traefik.http.routers.startup-docs.entrypoints=websecure"
+        - "traefik.http.routers.startup-docs.tls.certresolver=myresolver"
+        - "traefik.http.services.startup-docs.loadbalancer.server.port=3000"
       placement:
         constraints:
           - node.labels.accessory == true
@@ -217,9 +175,9 @@ services:
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
       NEW_RELIC_APP_NAME: "Definya Docs"
     networks:
-      - rpg-network
+      - startup-network
 
-  rpg-db:
+  startup-db:
     image: mongo:7.0.0
     command: mongod --port ${MONGO_PORT}
     logging:
@@ -228,7 +186,7 @@ services:
         max-size: "5m" # Reduced from "10m"
         max-file: "2" # Reduced from "3"
     volumes:
-      - rpg-db-data:/data/db
+      - startup-db-data:/data/db
       - ./docker_scripts/:/docker-entrypoint-initdb.d
     ports:
       - "${MONGO_PORT}:${MONGO_PORT}"
@@ -249,14 +207,14 @@ services:
       timeout: 15s
       retries: 3
     networks:
-      - rpg-network
+      - startup-network
 
-  rpg-redis:
+  startup-redis:
     image: redis:7.2.0
     ports:
       - "${REDIS_PORT}:${REDIS_PORT}"
     volumes:
-      - rpg-redis-data:/data
+      - startup-redis-data:/data
       - ./config/redis.conf:/usr/local/etc/redis/redis.conf
     command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--port", "${REDIS_PORT}"]
     environment:
@@ -268,7 +226,7 @@ services:
         max-size: "5m" # Added log rotation
         max-file: "2"
     networks:
-      - rpg-network
+      - startup-network
     deploy:
       placement:
         constraints:
@@ -295,9 +253,9 @@ services:
         max-size: "5m" # Added log rotation
         max-file: "2"
     networks:
-      - rpg-network
+      - startup-network
 
-  rpg-rabbitmq:
+  startup-rabbitmq:
     image: rabbitmq:3-management
     ports:
       - "15672:15672" # Management UI port
@@ -326,24 +284,24 @@ services:
         condition: on-failure
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.rpg-rabbitmq.rule=Host(`rabbitmq.definya.com`)"
-      - "traefik.http.routers.rpg-rabbitmq.entrypoints=websecure"
-      - "traefik.http.routers.rpg-rabbitmq.tls.certresolver=myresolver"
-      - "traefik.http.services.rpg-rabbitmq.loadbalancer.server.port=15672"
-      - "traefik.http.routers.rpg-rabbitmq.service=rpg-rabbitmq"
+      - "traefik.http.routers.startup-rabbitmq.rule=Host(`rabbitmq.definya.com`)"
+      - "traefik.http.routers.startup-rabbitmq.entrypoints=websecure"
+      - "traefik.http.routers.startup-rabbitmq.tls.certresolver=myresolver"
+      - "traefik.http.services.startup-rabbitmq.loadbalancer.server.port=15672"
+      - "traefik.http.routers.startup-rabbitmq.service=startup-rabbitmq"
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 30s
       timeout: 10s
       retries: 5
     networks:
-      - rpg-network
+      - startup-network
 
 networks:
-  rpg-network:
+  startup-network:
     external: true
 
 volumes:
-  rpg-db-data:
-  rpg-redis-data:
+  startup-db-data:
+  startup-redis-data:
   rabbitmq_data:

@@ -3,7 +3,7 @@ import { BadRequestError } from "@providers/errors/BadRequestError";
 import { NotFoundError } from "@providers/errors/NotFoundError";
 import { AuthMiddleware } from "@providers/middlewares/AuthMiddleware";
 import { TS } from "@providers/translation/TranslationHelper";
-import { HttpStatus } from "@rpg-engine/shared";
+import { HttpStatus } from "@startup-engine/shared";
 import { Request, Response } from "express";
 import { controller, httpGet, interfaces, request, requestParam, response } from "inversify-express-utils";
 import { isAdminMiddleware } from "../../../../providers/middlewares/IsAdminMiddleware";

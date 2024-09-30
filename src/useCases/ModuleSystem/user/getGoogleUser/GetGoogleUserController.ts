@@ -1,5 +1,5 @@
 import { User } from "@entities/ModuleSystem/UserModel";
-import { IGoogleOAuthUserInfoResponse, UserAuthFlow } from "@rpg-engine/shared";
+import { IGoogleOAuthUserInfoResponse, UserAuthFlow } from "@startup-engine/shared";
 import { Request, Response } from "express";
 import { controller, httpGet, interfaces } from "inversify-express-utils";
 import { appEnv } from "../../../../providers/config/env";

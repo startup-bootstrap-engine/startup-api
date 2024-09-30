@@ -1,5 +1,5 @@
 /* eslint-disable mongoose-lean/require-lean */
-import { TypeHelper, UserAccountTypes, UserAuthFlow, UserTypes } from "@rpg-engine/shared";
+import { TypeHelper, UserAccountTypes, UserAuthFlow, UserTypes } from "@startup-engine/shared";
 import bcrypt from "bcrypt";
 import uniqueValidator from "mongoose-unique-validator";
 import { SpeedGooseCacheAutoCleaner } from "speedgoose";

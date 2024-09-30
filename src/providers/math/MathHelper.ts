@@ -1,4 +1,4 @@
-import { Direction, GRID_WIDTH } from "@rpg-engine/shared";
+import { Direction, GRID_WIDTH } from "@startup-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import _, { random } from "lodash";
 import numberString from "number-string";

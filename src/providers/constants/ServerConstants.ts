@@ -5,7 +5,7 @@ import {
   SpellSocketEvents,
   UseWithSocketEvents,
   ViewSocketEvents,
-} from "@rpg-engine/shared";
+} from "@startup-engine/shared";
 
 import os from "os";
 
