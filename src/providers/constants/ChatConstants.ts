@@ -1,1 +1,0 @@
-export const TRADE_CHAT_LOG_CLEANUP_THRESHOLD = 30; // 30days

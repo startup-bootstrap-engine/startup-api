@@ -1,5 +1,5 @@
 import { SpellsBlueprint, UserAccountTypes } from "@rpg-engine/shared";
-import { MovementSpeed } from "./MovementConstants";
+
 type CustomSpellCooldown = {
   [spell: string]: number;
 };
@@ -7,7 +7,7 @@ type CustomSpellCooldown = {
 export interface IPremiumAccountData {
   SPXPLostOnDeathReduction: number;
   InventoryLossOnDeathReduction: number;
-  maxSpeed: MovementSpeed;
+
   XPBuff: number;
   lootDropBuff: number;
   spellCooldownReduction: {
@@ -41,7 +41,7 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
   [UserAccountTypes.PremiumBronze]: {
     SPXPLostOnDeathReduction: 20,
     InventoryLossOnDeathReduction: 20,
-    maxSpeed: MovementSpeed.Fast,
+
     XPBuff: 5,
     lootDropBuff: 5,
     spellCooldownReduction: {
@@ -56,7 +56,7 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
   [UserAccountTypes.PremiumSilver]: {
     SPXPLostOnDeathReduction: 35,
     InventoryLossOnDeathReduction: 35,
-    maxSpeed: MovementSpeed.Fast,
+
     XPBuff: 15,
     lootDropBuff: 15,
     spellCooldownReduction: {
@@ -71,7 +71,7 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
   [UserAccountTypes.PremiumGold]: {
     SPXPLostOnDeathReduction: 60,
     InventoryLossOnDeathReduction: 60,
-    maxSpeed: MovementSpeed.Fast,
+
     XPBuff: 25,
     lootDropBuff: 25,
     spellCooldownReduction: {
@@ -86,7 +86,7 @@ export const PREMIUM_ACCOUNT_METADATA: IPremiumAccountPlansData = {
   [UserAccountTypes.PremiumUltimate]: {
     SPXPLostOnDeathReduction: 80,
     InventoryLossOnDeathReduction: 80,
-    maxSpeed: MovementSpeed.Fast,
+
     XPBuff: 35,
     lootDropBuff: 35,
     spellCooldownReduction: {
