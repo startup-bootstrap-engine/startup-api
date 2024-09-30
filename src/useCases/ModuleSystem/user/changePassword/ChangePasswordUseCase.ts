@@ -15,6 +15,10 @@ export class ChangePasswordUseCase {
   constructor(private analyticsHelper: AnalyticsHelper, private userAuth: UserAuth) {}
 
   public async changePassword(user: IUser, authChangePasswordDTO: AuthChangePasswordDTO): Promise<void> {
+    if (user.email === "playstore-testing@gmail.com") {
+      throw new BadRequestError("You are not allowed to change the password for this user");
+    }
+
     await this.analyticsHelper.track("ChangePassword", user);
 
     const { currentPassword, newPassword } = authChangePasswordDTO;

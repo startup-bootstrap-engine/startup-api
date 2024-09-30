@@ -1,6 +1,7 @@
 import { IUser, User } from "@entities/ModuleSystem/UserModel";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { UserAuth } from "@providers/auth/UserAuth";
+import { BadRequestError } from "@providers/errors/BadRequestError";
 import { NotFoundError } from "@providers/errors/NotFoundError";
 import { TS } from "@providers/translation/TranslationHelper";
 import { UserAuthFlow } from "@rpg-engine/shared";
@@ -16,6 +17,9 @@ export class ForgotPasswordUseCase {
 
   public async forgotPassword(email: string): Promise<boolean> {
     try {
+      if (email === "playstore-testing@gmail.com") {
+        throw new BadRequestError("You are not allowed to reset the password for this user");
+      }
       // Try to get user with the mentioned email
       let user = await User.findOne({ email }).lean<IUser>();
 
