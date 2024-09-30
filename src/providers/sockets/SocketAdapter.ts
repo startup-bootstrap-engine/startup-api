@@ -1,8 +1,6 @@
-import { Character } from "@entities/ModuleCharacter/CharacterModel";
 import { appEnv } from "@providers/config/env";
-import { socketEventsBinderControl } from "@providers/inversify/container";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import { CharacterSocketEvents, ISocket, SocketTypes } from "@rpg-engine/shared";
+import { ISocket, SocketTypes } from "@rpg-engine/shared";
 import { GeckosIO } from "./GeckosIO";
 import { SocketIO } from "./SocketIO";
 import { SocketSessionControl } from "./SocketSessionControl";
@@ -63,39 +61,29 @@ export class SocketAdapter implements ISocket {
 
   public onConnect(): void {
     SocketAdapter.socketClass?.onConnect(async (channel) => {
-      const socketQuery = channel?.handshake?.query;
-
-      const hasCharacterId = socketQuery.characterId !== "undefined" && socketQuery.characterId !== undefined;
-
-      if (hasCharacterId) {
-        const characterId = socketQuery.characterId as string;
-
-        const hasSocketOngoingSession = await this.socketSessionControl.hasSession(characterId);
-
-        if (hasSocketOngoingSession) {
-          // force disconnect the previous socket connection
-
-          const previousCharacter = await Character.findById(characterId).lean().select("channelId");
-
-          if (!previousCharacter) {
-            throw new Error("Character not found!");
-          }
-
-          void this.emitToUser(previousCharacter.channelId!, CharacterSocketEvents.CharacterForceDisconnect, {
-            reason: "You have been disconnected because you logged in from another device!",
-          });
-
-          const previousChannel = this.getChannelById(previousCharacter.channelId!);
-
-          if (previousChannel) {
-            await previousChannel.leave();
-            previousChannel.removeAllListeners();
-            await socketEventsBinderControl.unbindEvents(previousChannel);
-          }
-        }
-      }
-
-      await socketEventsBinderControl.bindEvents(channel);
+      // const socketQuery = channel?.handshake?.query;
+      // const hasCharacterId = socketQuery.characterId !== "undefined" && socketQuery.characterId !== undefined;
+      // if (hasCharacterId) {
+      //   const characterId = socketQuery.characterId as string;
+      //   const hasSocketOngoingSession = await this.socketSessionControl.hasSession(characterId);
+      //   if (hasSocketOngoingSession) {
+      //     // force disconnect the previous socket connection
+      //     const previousCharacter = await Character.findById(characterId).lean().select("channelId");
+      //     if (!previousCharacter) {
+      //       throw new Error("Character not found!");
+      //     }
+      //     void this.emitToUser(previousCharacter.channelId!, CharacterSocketEvents.CharacterForceDisconnect, {
+      //       reason: "You have been disconnected because you logged in from another device!",
+      //     });
+      //     const previousChannel = this.getChannelById(previousCharacter.channelId!);
+      //     if (previousChannel) {
+      //       await previousChannel.leave();
+      //       previousChannel.removeAllListeners();
+      //       await socketEventsBinderControl.unbindEvents(previousChannel);
+      //     }
+      //   }
+      // }
+      // await socketEventsBinderControl.bindEvents(channel);
     });
   }
 

@@ -1,4 +1,3 @@
-import { CharacterConnection } from "@providers/character/CharacterConnection";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provide } from "inversify-binding-decorators";
 import { appEnv } from "../config/env";
@@ -7,7 +6,7 @@ import { IServerBootstrapVars } from "../types/ServerTypes";
 
 @provide(ServerHelper)
 export class ServerHelper {
-  constructor(private redisManager: RedisManager, private characterConnection: CharacterConnection) {}
+  constructor(private redisManager: RedisManager) {}
 
   public showBootstrapMessage(config: IServerBootstrapVars, microserviceName?: string): void {
     const { port, language, timezone, adminEmail, startupTime } = config;
