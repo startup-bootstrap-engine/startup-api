@@ -12,7 +12,7 @@ npm run db:export:swarm
 
 # Update the startup-api service to restart containers
 echo "🐳 Restarting startup-api swarm service..."
-docker service update --force --image definya/definya-team:api-latest --with-registry-auth --stop-grace-period=10s $API_SERVICE_NAME
+docker service update --force --image startup-engine/team:api-latest --with-registry-auth --stop-grace-period=10s $API_SERVICE_NAME
 
 
 echo "🐳 Deployment complete."

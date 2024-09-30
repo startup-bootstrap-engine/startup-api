@@ -40,8 +40,8 @@ cp ./environment/Dockerfile.prod ./Dockerfile
 
 # Build and push startup-api Docker image
 echo "🐳 Building and pushing startup-api Docker image..."
-docker build -t definya/definya-team:api-latest .
-docker push definya/definya-team:api-latest
+docker build -t startup-engine/team:api-latest .
+docker push startup-engine/team:api-latest
 
 
 cp ~/definya/api/microservices/startup-pathfinder/environment/Dockerfile.prod ~/definya/api/microservices/startup-pathfinder/Dockerfile
@@ -50,8 +50,8 @@ cp ~/definya/api/microservices/startup-pathfinder/environment/Dockerfile.prod ~/
 echo "🐳 Building and pushing startup-pathfinder Docker image..."
 cd ~/definya/api/microservices/startup-pathfinder
 
-docker build -t definya/definya-team:startup-pathfinder-latest .
-docker push definya/definya-team:startup-pathfinder-latest
+docker build -t startup-engine/team:startup-pathfinder-latest .
+docker push startup-engine/team:startup-pathfinder-latest
 
 # Update the Docker Swarm stack
 echo "🐳 Updating swarm..."

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # define variables for VPS and backup file locations
-VPS_HOST="na-ssh.definya.com"
+VPS_HOST="na-ssh.startup-engine.com"
 VPS_USER="jonit"
 BACKUP_PATH="/home/jonit/definya/api/environment/backups/db-dump.zip"
 LOCAL_DOWNLOAD_DIR="./environment/backups"

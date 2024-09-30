@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   startup-api:
-    image: definya/definya-team:api-latest
+    image: startup-engine/team:api-latest
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:5002"]
       interval: 60s
@@ -28,14 +28,14 @@ services:
       labels:
         # Basic setup for API config
         - traefik.enable=true
-        - traefik.http.routers.startup-api.rule=Host(`na.definya.com`)
+        - traefik.http.routers.startup-api.rule=Host(`na.startup-engine.com`)
         - traefik.http.routers.startup-api.entrypoints=websecure
         - traefik.http.routers.startup-api.tls.certresolver=myresolver
         - traefik.http.services.startup-api-service.loadbalancer.server.port=5002
         - traefik.http.routers.startup-api.service=startup-api-service
 
         # Websockets
-        - traefik.http.routers.startup-api-socket.rule=Host(`na.definya.com`) && Path(`/socket.io/`)
+        - traefik.http.routers.startup-api-socket.rule=Host(`na.startup-engine.com`) && Path(`/socket.io/`)
         - traefik.http.routers.startup-api-socket.entrypoints=websecure
         - traefik.http.routers.startup-api-socket.tls.certresolver=myresolver
         - traefik.http.services.startup-api-socket-service.loadbalancer.server.port=5101
@@ -58,56 +58,11 @@ services:
     environment:
       FORCE_COLOR: "true"
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
-      NEW_RELIC_APP_NAME: "Definya API"
+      NEW_RELIC_APP_NAME: "API"
       RABBITMQ_HOST: "${RABBITMQ_HOST}"
       RABBITMQ_PORT: "${RABBITMQ_PORT}"
       RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
       RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
-    networks:
-      - startup-network
-    depends_on:
-      - startup-rabbitmq
-      - startup-redis
-      - startup-db
-
-  startup-npc:
-    image: definya/definya-team:api-latest
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:5005"]
-      interval: 60s
-      timeout: 30s
-      retries: 5
-    environment:
-      MICROSERVICE_NAME: "startup-npc"
-      FORCE_COLOR: "true"
-      CHOKIDAR_USEPOLLING: "true"
-      NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
-      NEW_RELIC_APP_NAME: "Definya NPC"
-      RABBITMQ_HOST: "${RABBITMQ_HOST}"
-      RABBITMQ_PORT: "${RABBITMQ_PORT}"
-      RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
-      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
-    deploy:
-      replicas: 2
-      restart_policy:
-        condition: on-failure
-      placement:
-        constraints:
-          - node.labels.npc == true
-        preferences:
-          - spread: node.id
-        max_replicas_per_node: 1
-      update_config:
-        parallelism: 2
-        delay: 10s
-        failure_action: rollback
-        monitor: 10s
-        max_failure_ratio: 0.3
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "5m" # Added log rotation
-        max-file: "2"
     networks:
       - startup-network
     depends_on:
@@ -116,7 +71,7 @@ services:
       - startup-db
 
   startup-client:
-    image: definya/definya-team:client-latest
+    image: startup-engine/team:client-latest
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080"]
       interval: 120s
@@ -133,7 +88,7 @@ services:
         condition: on-failure
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.startup-client.rule=Host(`play.definya.com`)"
+        - "traefik.http.routers.startup-client.rule=Host(`play.startup-engine.com`)"
         - "traefik.http.routers.startup-client.entrypoints=websecure"
         - "traefik.http.routers.startup-client.tls.certresolver=myresolver"
         - "traefik.http.services.startup-client.loadbalancer.server.port=8080"
@@ -142,12 +97,12 @@ services:
           - node.labels.accessory == true
     environment:
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
-      NEW_RELIC_APP_NAME: "Definya Client"
+      NEW_RELIC_APP_NAME: "StartupEngine Client"
     networks:
       - startup-network
 
   startup-docs:
-    image: definya/definya-team:docs-latest
+    image: startup-engine/team:docs-latest
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:3000"]
       interval: 120s
@@ -164,7 +119,7 @@ services:
         condition: on-failure
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.startup-docs.rule=Host(`docs.definya.com`) || Host(`definya.com`)"
+        - "traefik.http.routers.startup-docs.rule=Host(`docs.startup-engine.com`) || Host(`startup-engine.com`)"
         - "traefik.http.routers.startup-docs.entrypoints=websecure"
         - "traefik.http.routers.startup-docs.tls.certresolver=myresolver"
         - "traefik.http.services.startup-docs.loadbalancer.server.port=3000"
@@ -173,7 +128,7 @@ services:
           - node.labels.accessory == true
     environment:
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
-      NEW_RELIC_APP_NAME: "Definya Docs"
+      NEW_RELIC_APP_NAME: "StartupEngine Docs"
     networks:
       - startup-network
 
@@ -196,7 +151,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
-      NEW_RELIC_APP_NAME: "Definya DB"
+      NEW_RELIC_APP_NAME: "StartupEngine DB"
     deploy:
       placement:
         constraints:
@@ -219,7 +174,7 @@ services:
     command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--port", "${REDIS_PORT}"]
     environment:
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
-      NEW_RELIC_APP_NAME: "Definya Redis"
+      NEW_RELIC_APP_NAME: "StartupEngine Redis"
     logging:
       driver: "json-file"
       options:
@@ -244,7 +199,7 @@ services:
       - /:/host:ro
     environment:
       NRIA_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
-      NRIA_DISPLAY_NAME: "Definya Swarm Node"
+      NRIA_DISPLAY_NAME: "StartupEngine Swarm Node"
     deploy:
       mode: global
     logging:
@@ -284,7 +239,7 @@ services:
         condition: on-failure
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.startup-rabbitmq.rule=Host(`rabbitmq.definya.com`)"
+      - "traefik.http.routers.startup-rabbitmq.rule=Host(`rabbitmq.startup-engine.com`)"
       - "traefik.http.routers.startup-rabbitmq.entrypoints=websecure"
       - "traefik.http.routers.startup-rabbitmq.tls.certresolver=myresolver"
       - "traefik.http.services.startup-rabbitmq.loadbalancer.server.port=15672"

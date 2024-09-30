@@ -30,7 +30,7 @@ services:
       VIRTUAL_PORT: "${SERVER_PORT}"
       CHOKIDAR_USEPOLLING: "true"
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
-      NEW_RELIC_APP_NAME: "Definya API"
+      NEW_RELIC_APP_NAME: "StartupEngine API"
     networks:
       - startup-network
 

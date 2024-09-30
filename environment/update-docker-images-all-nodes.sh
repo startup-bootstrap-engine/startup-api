@@ -9,7 +9,7 @@
 servers=($(<swarm-api-nodes.txt))
 
 # Command to run on each server
-command="docker pull definya/definya-team:startup-pathfinder-latest && docker pull definya/definya-team:api-latest"
+command="docker pull startup-engine/team:startup-pathfinder-latest && docker pull startup-engine/team:api-latest"
 
 # Loop through each server and run the command
 for server in "${servers[@]}"; do
@@ -30,9 +30,9 @@ server=$(<swarm-accessory-nodes.txt)
 
 # Commands to run on the server
 commands=(
-    "docker pull definya/definya-team:docs-latest"
-    "docker pull definya/definya-team:client-latest"
-    "docker pull definya/definya-team:startup-pathfinder-latest"
+    "docker pull startup-engine/team:docs-latest"
+    "docker pull startup-engine/team:client-latest"
+    "docker pull startup-engine/team:startup-pathfinder-latest"
 )
 
 # Loop through each command and run it on the server

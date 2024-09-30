@@ -35,11 +35,11 @@ echo "🐳 Building React..."
 npm run build
 
 echo "🐳 Building Docker image..."
-docker build -t definya/definya-team:client-latest .
-docker push definya/definya-team:client-latest
+docker build -t startup-engine/team:client-latest .
+docker push startup-engine/team:client-latest
 
 # Update the service to restart containers and force image update
 echo "🐳 Restarting swarm service..."
-docker service update --force --image definya/definya-team:client-latest --with-registry-auth swarm-stack_startup-client
+docker service update --force --image startup-engine/team:client-latest --with-registry-auth swarm-stack_startup-client
 
 docker container prune -f
