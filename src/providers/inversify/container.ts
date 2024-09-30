@@ -4,9 +4,12 @@ import { InMemoryRepository } from "@providers/database/InMemoryRepository";
 import { RedisManager } from "@providers/database/RedisManager";
 import { HashGenerator } from "@providers/hash/HashGenerator";
 import { Locker } from "@providers/locks/Locker";
+import { LinearInterpolation } from "@providers/math/LinearInterpolation";
+import { MathHelper } from "@providers/math/MathHelper";
 import { MessagingBrokerHandlers } from "@providers/microservice/messaging-broker/MessagingBrokerHandlers";
 import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
 import { BullBoardMonitor } from "@providers/queue/BullBoardMonitor";
+import { EntityQueueScalingCalculator } from "@providers/queue/EntityQueueScalingCalculator";
 import { RabbitMQ } from "@providers/rabbitmq/RabbitMQ";
 import { RedisPubSubListeners } from "@providers/redis/RedisPubSubListeners";
 import { RedisStreams } from "@providers/redis/RedisStreams";
@@ -16,6 +19,8 @@ import { ServerBootstrap } from "@providers/server/ServerBootstrap";
 import { SocketAdapter } from "@providers/sockets/SocketAdapter";
 import { SocketEventsBinder } from "@providers/sockets/SocketEventsBinder";
 import { SocketEventsBinderControl } from "@providers/sockets/SocketEventsBinderControl";
+import { NumberFormatter } from "@providers/text/NumberFormatter";
+import { TextFormatter } from "@providers/text/TextFormatter";
 import { UnitTestHelper } from "@providers/unitTests/UnitTestHelper";
 import { Container } from "inversify";
 import { autoProvide, buildProviderModule } from "inversify-binding-decorators";
@@ -78,5 +83,15 @@ export const newRelic = container.get<NewRelic>(NewRelic);
 export const hashGenerator = container.get<HashGenerator>(HashGenerator);
 
 export const locker = container.get<Locker>(Locker);
+
+export const textFormatter = container.get<TextFormatter>(TextFormatter);
+
+export const entityQueueScalingCalculator = container.get<EntityQueueScalingCalculator>(EntityQueueScalingCalculator);
+
+export const numberFormatter = container.get<NumberFormatter>(NumberFormatter);
+
+export const linearInterpolation = container.get<LinearInterpolation>(LinearInterpolation);
+
+export const mathHelper = container.get<MathHelper>(MathHelper);
 
 export { container };

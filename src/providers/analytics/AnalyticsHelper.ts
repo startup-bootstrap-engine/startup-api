@@ -1,15 +1,16 @@
 import { Identify } from "@amplitude/identify";
 import { DEFAULT_DATE_FORMAT } from "@providers/constants/DateConstants";
+import { MixpanelTracker } from "@providers/mixpanel/Mixpanel";
 import { EnvType } from "@rpg-engine/shared/dist";
 import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 import { IUser } from "../../entities/ModuleSystem/UserModel";
 import { appEnv } from "../config/env";
-import { amplitudeClient, mixpanel } from "../constants/AnalyticsConstants";
+import { amplitudeClient } from "../constants/AnalyticsConstants";
 
 @provide(AnalyticsHelper)
 export class AnalyticsHelper {
-  constructor() {}
+  constructor(private mixpanelTracker: MixpanelTracker) {}
 
   public async track(eventName: string, user?: IUser): Promise<void> {
     try {
@@ -39,11 +40,7 @@ export class AnalyticsHelper {
         mixpanelProperties = { time: new Date() };
       }
 
-      mixpanel.track(eventName, mixpanelProperties, (err) => {
-        if (err) {
-          console.log(err);
-        }
-      });
+      this.mixpanelTracker.track(eventName, mixpanelProperties);
     } catch (error) {
       console.error(error);
     }
@@ -65,21 +62,7 @@ export class AnalyticsHelper {
         await amplitudeClient.identify(user._id, user._id, identify);
 
         // mixpanel user
-        mixpanel.people.set(
-          user._id,
-          {
-            $first_name: user.name,
-            $created: user.createdAt,
-            $region: user.address,
-            plan: user.role,
-            $email: user.email,
-            address: user.address,
-            phone: user.phone,
-          },
-          {
-            $ip: "127.0.0.1",
-          }
-        );
+        this.mixpanelTracker.setUserInfo(user);
       }
     } catch (error) {
       console.error(error);
