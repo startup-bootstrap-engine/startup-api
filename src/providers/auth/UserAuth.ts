@@ -1,8 +1,9 @@
-import { IUser, User } from "@entities/ModuleSystem/UserModel";
+import { IUser } from "@entities/ModuleSystem/UserModel";
 import { appEnv } from "@providers/config/env";
 import { InternalServerError } from "@providers/errors/InternalServerError";
 import { NotFoundError } from "@providers/errors/NotFoundError";
 import { TS } from "@providers/translation/TranslationHelper";
+import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { UserAuthFlow } from "@startup-engine/shared";
 import bcrypt from "bcrypt";
 import { provide } from "inversify-binding-decorators";
@@ -10,6 +11,8 @@ import jwt from "jsonwebtoken";
 
 @provide(UserAuth)
 export class UserAuth {
+  constructor(private userRepository: UserRepository) {}
+
   public async isValidPassword(providedPassword: string, user: IUser): Promise<boolean> {
     const comparisonHash = await bcrypt.hash(providedPassword, user.salt!);
 
@@ -27,7 +30,8 @@ export class UserAuth {
     );
     const refreshToken = jwt.sign({ _id: user._id, email: user.email }, appEnv.authentication.REFRESH_TOKEN_SECRET!);
 
-    await User.updateOne({ _id: user._id }, { $push: { refreshTokens: { token: refreshToken } } });
+    const updatedRefreshTokens = [...(user.refreshTokens ?? []), { token: refreshToken }] as any;
+    await this.userRepository.update(user._id, { refreshTokens: updatedRefreshTokens });
 
     return {
       accessToken,
@@ -36,7 +40,8 @@ export class UserAuth {
   }
 
   public async checkIfExists(email: string): Promise<boolean> {
-    const exists = await User.exists({ email: email.toLocaleLowerCase() });
+    // const exists = await User.exists({ email: email.toLocaleLowerCase() });
+    const exists = await this.userRepository.exists({ email: email.toLocaleLowerCase() });
 
     if (exists) {
       return true;
@@ -46,7 +51,7 @@ export class UserAuth {
   }
 
   public async findByCredentials(email: string, password: string): Promise<IUser | null> {
-    const user = await User.findOne({ email: email.toLocaleLowerCase() }).lean<IUser>();
+    const user = await this.userRepository.findBy({ email: email.toLocaleLowerCase() });
 
     if (!user) {
       throw new NotFoundError(TS.translate("users", "userNotFound"));
@@ -72,15 +77,10 @@ export class UserAuth {
     const salt = await bcrypt.genSalt();
     const hash = await bcrypt.hash(user.password, salt);
 
-    await User.updateOne(
-      { _id: user._id },
-      {
-        $set: {
-          email: email,
-          password: hash,
-          salt: salt,
-        },
-      }
-    );
+    await this.userRepository.update(user._id, {
+      email: email,
+      password: hash,
+      salt: salt,
+    });
   }
 }

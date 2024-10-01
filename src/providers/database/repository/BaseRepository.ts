@@ -12,7 +12,7 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
 
   public async create(data: Partial<T>, uniqueByKey?: string): Promise<T> {
     if (uniqueByKey) {
-      const existing = await this.repositoryAdapter.findByQueryParams({ [uniqueByKey]: data[uniqueByKey] });
+      const existing = await this.repositoryAdapter.findBy({ [uniqueByKey]: data[uniqueByKey] });
       if (existing) {
         throw new ConflictError(
           TS.translate("validation", "alreadyExists", {
@@ -29,8 +29,8 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
     return await this.repositoryAdapter.findById(id);
   }
 
-  public async findByQueryParams(params: FilterQuery<T>): Promise<T | null> {
-    return await this.repositoryAdapter.findByQueryParams(params);
+  public async findBy(params: FilterQuery<T>): Promise<T | null> {
+    return await this.repositoryAdapter.findBy(params);
   }
 
   public async update(id: string, data: Partial<T>): Promise<T | null> {
@@ -39,5 +39,9 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
 
   public async delete(id: string): Promise<boolean> {
     return await this.repositoryAdapter.delete(id);
+  }
+
+  public async exists(params: Record<string, unknown>): Promise<boolean> {
+    return await this.repositoryAdapter.exists(params);
   }
 }

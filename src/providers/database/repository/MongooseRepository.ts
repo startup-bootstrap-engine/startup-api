@@ -15,7 +15,7 @@ export class MongooseRepository<T extends Document> implements IRepositoryAdapte
     return await this.model.findById(id).lean<T>().exec();
   }
 
-  public async findByQueryParams(params: FilterQuery<T>): Promise<T | null> {
+  public async findBy(params: FilterQuery<T>): Promise<T | null> {
     return await this.model.findOne(params).lean<T>().exec();
   }
 
@@ -29,5 +29,9 @@ export class MongooseRepository<T extends Document> implements IRepositoryAdapte
   public async delete(id: string): Promise<boolean> {
     const result = await this.model.findByIdAndDelete(id).exec();
     return result !== null;
+  }
+
+  public async exists(params: FilterQuery<T>): Promise<boolean> {
+    return await this.model.exists(params);
   }
 }

@@ -28,7 +28,7 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
   }
 
   public async findUser(params: object): Promise<IUser> {
-    const user = await this.findByQueryParams(params);
+    const user = await this.findBy(params);
 
     if (!user) {
       throw new NotFoundError(TS.translate("users", "userNotFound"));

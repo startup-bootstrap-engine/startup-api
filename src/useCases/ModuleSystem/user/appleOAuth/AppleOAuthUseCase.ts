@@ -31,7 +31,7 @@ export class AppleOAuthUseCase {
     }
 
     // eslint-disable-next-line mongoose-performance/require-lean
-    const dbUser = await this.userRepository.findByQueryParams({
+    const dbUser = await this.userRepository.findBy({
       authFlow: UserAuthFlow.AppleOAuth,
       email: validationPayload.email,
     });
