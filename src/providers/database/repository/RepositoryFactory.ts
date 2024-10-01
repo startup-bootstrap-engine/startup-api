@@ -6,7 +6,7 @@ import { MongooseRepository } from "./MongooseRepository";
 
 @provide(RepositoryFactory)
 export class RepositoryFactory {
-  public createRepository<T extends Document>(
+  public static createRepository<T extends Document>(
     model: Model<any>,
     type: DatabaseAdaptersAvailable = "mongoose"
   ): IRepositoryAdapter<T> | IRepositoryAdapter<any> {

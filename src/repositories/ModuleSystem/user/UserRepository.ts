@@ -11,8 +11,8 @@ export interface IUserRepository {
 
 @provide(UserRepository)
 export class UserRepository extends BaseRepository<IUser> implements IUserRepository {
-  constructor(private analyticsHelper: AnalyticsHelper, private repositoryFactory: RepositoryFactory) {
-    super(repositoryFactory.createRepository<IUser>(User));
+  constructor(private analyticsHelper: AnalyticsHelper) {
+    super(RepositoryFactory.createRepository<IUser>(User));
   }
 
   public async signUp(newUserData: any): Promise<IUser> {
