@@ -1,32 +1,35 @@
 import { IUser, User } from "@entities/ModuleSystem/UserModel";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
+import { RepositoryFactory } from "@providers/database/repository/RepositoryFactory";
 import { NotFoundError } from "@providers/errors/NotFoundError";
-import { CRUD } from "@providers/mongoDB/MongoCRUDGeneric";
 import { TS } from "@providers/translation/TranslationHelper";
 import { provide } from "inversify-binding-decorators";
 
-import { IUserRepository } from "./IUserRepository";
+import { BaseRepository } from "@providers/database/repository/BaseRepository";
+import { AuthSignUpDTO } from "@useCases/ModuleSystem/user/AuthDTO";
+
+export interface IUserRepository {
+  findUser(params: object): Promise<IUser>;
+  signUp(newUserData): Promise<IUser>;
+}
 
 @provide(UserRepository)
-export class UserRepository extends CRUD implements IUserRepository {
-  constructor(private analyticsHelper: AnalyticsHelper) {
-    super(analyticsHelper);
+export class UserRepository extends BaseRepository<IUser> implements IUserRepository {
+  constructor(private analyticsHelper: AnalyticsHelper, private repositoryFactory: RepositoryFactory) {
+    super(repositoryFactory.createRepository<IUser>(User));
   }
 
-  public async signUp(newUserData: any): Promise<IUser> {
-    //! Note: password is hashed on pre("save") method from userSchema
-    const newUser = await User.create({ ...newUserData });
+  public async signUp(newUserData: AuthSignUpDTO): Promise<IUser> {
+    const newUser = await this.create(newUserData, "email");
 
     void this.analyticsHelper.track("UserRegister", newUser);
-
     void this.analyticsHelper.updateUserInfo(newUser);
 
     return newUser;
   }
 
   public async findUser(params: object): Promise<IUser> {
-    // eslint-disable-next-line mongoose-performance/require-lean
-    const user = await User.findOne(params).lean<IUser>();
+    const user = await this.findByQueryParams(params);
 
     if (!user) {
       throw new NotFoundError(TS.translate("users", "userNotFound"));

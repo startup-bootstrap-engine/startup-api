@@ -8,9 +8,9 @@ import _ from "lodash";
 import { Document, FilterQuery, Model } from "mongoose";
 import { MongooseQueryParser } from "mongoose-query-parser";
 import pluralize from "pluralize";
-import { ConflictError } from "../errors/ConflictError";
-import { InternalServerError } from "../errors/InternalServerError";
-import { TS } from "../translation/TranslationHelper";
+import { ConflictError } from "../../errors/ConflictError";
+import { InternalServerError } from "../../errors/InternalServerError";
+import { TS } from "../../translation/TranslationHelper";
 
 @provide(CRUD)
 export class CRUD {

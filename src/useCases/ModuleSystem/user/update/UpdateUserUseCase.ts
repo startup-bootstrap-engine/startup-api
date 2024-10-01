@@ -1,4 +1,4 @@
-import { IUser, User } from "@entities/ModuleSystem/UserModel";
+import { IUser } from "@entities/ModuleSystem/UserModel";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { provide } from "inversify-binding-decorators";
 
@@ -9,6 +9,6 @@ export class UpdateUserUseCase {
   constructor(private userRepository: UserRepository) {}
 
   public async update(user: IUser, updateFields: UserUpdateDTO): Promise<IUser> {
-    return await this.userRepository.update(User, user._id, updateFields, null, user);
+    return (await this.userRepository.update(user._id, updateFields as unknown as Partial<IUser>)) as IUser;
   }
 }

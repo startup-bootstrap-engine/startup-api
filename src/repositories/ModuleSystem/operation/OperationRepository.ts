@@ -1,5 +1,5 @@
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
-import { CRUD } from "@providers/mongoDB/MongoCRUDGeneric";
+import { CRUD } from "@providers/database/generics/MongoCRUDGeneric";
 import { provide } from "inversify-binding-decorators";
 
 import { IOperation } from "./IOperation";

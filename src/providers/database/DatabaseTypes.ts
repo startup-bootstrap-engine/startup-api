@@ -4,3 +4,13 @@ export interface IDatabaseAdapter {
 }
 
 export type DatabaseAdaptersAvailable = "mongoose";
+
+export type RepositoriesAvailable = "mongoose";
+
+export interface IRepositoryAdapter<T> {
+  create(item: T): Promise<T>;
+  findById(id: string): Promise<T | null>;
+  findByQueryParams(params: Record<string, unknown>): Promise<T | null>;
+  update(id: string, item: Partial<T>): Promise<T | null>;
+  delete(id: string): Promise<boolean>;
+}
