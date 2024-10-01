@@ -7,7 +7,7 @@ import { Document, FilterQuery } from "mongoose";
 export interface IBaseRepository<T extends Document> extends IRepositoryAdapter<T> {}
 
 export interface IBaseRepositoryCreateOptions {
-  uniqueByKey?: string;
+  uniqueByKeys?: string | string[];
 }
 
 export interface IBaseRepositoryFindByOptions {
@@ -18,6 +18,7 @@ export interface IBaseRepositoryFindByOptions {
   cacheQuery?: {
     cacheKey: string;
   };
+  limit?: number;
 }
 
 @provide(BaseRepository)
@@ -25,8 +26,11 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
   constructor(private repositoryAdapter: IRepositoryAdapter<T>) {}
 
   public async create(data: Partial<T>, options?: IBaseRepositoryCreateOptions): Promise<T> {
-    if (options?.uniqueByKey) {
-      const existing = await this.repositoryAdapter.findBy({ [options.uniqueByKey]: data[options.uniqueByKey] });
+    if (options?.uniqueByKeys) {
+      const keys = Array.isArray(options.uniqueByKeys) ? options.uniqueByKeys : [options.uniqueByKeys];
+      const existing = await this.repositoryAdapter.findBy({
+        $or: keys.map((key) => ({ [key]: data[key] })),
+      });
       if (existing) {
         throw new ConflictError(
           TS.translate("validation", "alreadyExists", {
@@ -45,6 +49,10 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
 
   public async findBy(params: FilterQuery<T>, options?: IBaseRepositoryFindByOptions): Promise<T | null> {
     return await this.repositoryAdapter.findBy(params, options);
+  }
+
+  public async findAll(query: FilterQuery<T>, options?: IBaseRepositoryFindByOptions): Promise<T[]> {
+    return await this.repositoryAdapter.findAll(query, options);
   }
 
   public async updateById(id: string, data: Partial<T>): Promise<T | null> {

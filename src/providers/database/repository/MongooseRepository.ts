@@ -22,11 +22,20 @@ export class MongooseRepository<T extends Document> implements IRepositoryAdapte
     return await this.applyOptionsAndExecQuery(query, options);
   }
 
+  public async findAll(params: FilterQuery<T>, options?: IBaseRepositoryFindByOptions): Promise<T[]> {
+    const query = this.model.find(params as any).lean<T>();
+    return (await this.applyOptionsAndExecQuery(query, options)) as unknown as T[];
+  }
+
   private async applyOptionsAndExecQuery(query: any, options?: IBaseRepositoryFindByOptions): Promise<T | null> {
     if (!options) return await query.exec();
 
     if (options.select) {
       query = query.select(options.select);
+    }
+
+    if (options.limit) {
+      query = query.limit(options.limit);
     }
 
     if (options.populate) {

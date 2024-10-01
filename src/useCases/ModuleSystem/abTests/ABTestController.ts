@@ -38,7 +38,7 @@ export class ABTestController implements interfaces.Controller {
   }
 
   @httpGet("/:id")
-  private async read(@request() req, @response() res, @requestParam("id") id: string): Promise<IABTest> {
+  private async read(@request() req, @response() res, @requestParam("id") id: string): Promise<IABTest | null> {
     return await this.readABTestUseCase.read(id);
   }
 
@@ -58,7 +58,7 @@ export class ABTestController implements interfaces.Controller {
   }
 
   @httpDelete("/:id")
-  private async delete(@request() req, @response() res, @requestParam("id") id: string): Promise<void> {
+  private async delete(@request() req, @response() res, @requestParam("id") id: string): Promise<boolean> {
     return await this.deleteABTestUseCase.delete(id);
   }
 }

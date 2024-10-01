@@ -1,4 +1,4 @@
-import { ABTest, IABTest } from "@entities/ModuleSystem/ABTestModel";
+import { IABTest } from "@entities/ModuleSystem/ABTestModel";
 import { ABTestRepository } from "@repositories/ModuleSystem/abTests/ABTestRepository";
 import { provide } from "inversify-binding-decorators";
 
@@ -9,7 +9,9 @@ export class CreateABTestUseCase {
   constructor(private abTestsRepository: ABTestRepository) {}
 
   public async create(createABTestDTO: CreateABTestDTO): Promise<IABTest> {
-    const createdABTest = await this.abTestsRepository.create(ABTest, createABTestDTO, null, ["name", "slug"], null);
+    const createdABTest = await this.abTestsRepository.create(createABTestDTO, {
+      uniqueByKeys: ["name", "slug"],
+    });
 
     return createdABTest;
   }
