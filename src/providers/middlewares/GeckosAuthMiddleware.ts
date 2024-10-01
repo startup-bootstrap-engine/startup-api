@@ -1,5 +1,7 @@
-import { IUser, User } from "@entities/ModuleSystem/UserModel";
+import { IUser } from "@entities/ModuleSystem/UserModel";
 import { appEnv } from "@providers/config/env";
+import { container } from "@providers/inversify/container";
+import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { HttpStatus } from "@startup-engine/shared";
 import http from "http";
 import jwt from "jsonwebtoken";
@@ -9,6 +11,8 @@ export const GeckosAuthMiddleware = async (
   request: http.IncomingMessage,
   response: http.OutgoingMessage
 ): Promise<HttpStatus | IUser> => {
+  const userRepository = container.get<UserRepository>(UserRepository);
+
   const authToken = auth?.split(" ")[1];
 
   if (!authToken) {
@@ -24,12 +28,11 @@ export const GeckosAuthMiddleware = async (
           reject(HttpStatus.Unauthorized);
         }
 
-        // eslint-disable-next-line mongoose-performance/require-lean
-        const dbUser = (await User.findOne({ email: jwtPayload.email })) as IUser;
+        const dbUser = await userRepository.findBy({ email: jwtPayload.email });
 
         if (!dbUser) {
           console.log(`Authorization error: User not found (${jwtPayload.email})`);
-          reject(HttpStatus.Unauthorized);
+          return reject(HttpStatus.Unauthorized);
         }
 
         resolve(dbUser);

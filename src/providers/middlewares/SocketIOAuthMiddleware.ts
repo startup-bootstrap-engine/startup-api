@@ -1,8 +1,11 @@
-import { IUser, User } from "@entities/ModuleSystem/UserModel";
 import { appEnv } from "@providers/config/env";
+import { container } from "@providers/inversify/container";
+import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import jwt from "jsonwebtoken";
 
 export const SocketIOAuthMiddleware = (socket, next): void => {
+  const userRepository = container.get<UserRepository>(UserRepository);
+
   const authToken = socket.handshake.auth.token.split(" ")[1];
 
   if (!authToken) {
@@ -17,14 +20,16 @@ export const SocketIOAuthMiddleware = (socket, next): void => {
         next(new Error("Unauthorized"));
       }
 
-      const dbUser = (await User.findOne({ email: jwtPayload.email })
-        .lean({
+      const dbUser = await userRepository.findBy(
+        { email: jwtPayload.email },
+        {
           virtuals: true,
           defaults: true,
-        })
-        .cacheQuery({
-          cacheKey: `user-${jwtPayload.email}`,
-        })) as IUser;
+          cacheQuery: {
+            cacheKey: `user-${jwtPayload.email}`,
+          },
+        }
+      );
 
       if (!dbUser) {
         console.log(`Authorization error: User not found (${jwtPayload.email})`);

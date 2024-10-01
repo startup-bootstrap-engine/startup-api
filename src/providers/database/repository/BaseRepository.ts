@@ -6,13 +6,27 @@ import { Document, FilterQuery } from "mongoose";
 
 export interface IBaseRepository<T extends Document> extends IRepositoryAdapter<T> {}
 
+export interface IBaseRepositoryCreateOptions {
+  uniqueByKey?: string;
+}
+
+export interface IBaseRepositoryFindByOptions {
+  select?: string;
+  populate?: string | string[];
+  virtuals?: boolean;
+  defaults?: boolean;
+  cacheQuery?: {
+    cacheKey: string;
+  };
+}
+
 @provide(BaseRepository)
 export class BaseRepository<T extends Document> implements IBaseRepository<T> {
   constructor(private repositoryAdapter: IRepositoryAdapter<T>) {}
 
-  public async create(data: Partial<T>, uniqueByKey?: string): Promise<T> {
-    if (uniqueByKey) {
-      const existing = await this.repositoryAdapter.findBy({ [uniqueByKey]: data[uniqueByKey] });
+  public async create(data: Partial<T>, options?: IBaseRepositoryCreateOptions): Promise<T> {
+    if (options?.uniqueByKey) {
+      const existing = await this.repositoryAdapter.findBy({ [options.uniqueByKey]: data[options.uniqueByKey] });
       if (existing) {
         throw new ConflictError(
           TS.translate("validation", "alreadyExists", {
@@ -25,12 +39,12 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
     return await this.repositoryAdapter.create(data as T);
   }
 
-  public async findById(id: string): Promise<T | null> {
-    return await this.repositoryAdapter.findById(id);
+  public async findById(id: string, options?: IBaseRepositoryFindByOptions): Promise<T | null> {
+    return await this.repositoryAdapter.findById(id, options);
   }
 
-  public async findBy(params: FilterQuery<T>): Promise<T | null> {
-    return await this.repositoryAdapter.findBy(params);
+  public async findBy(params: FilterQuery<T>, options?: IBaseRepositoryFindByOptions): Promise<T | null> {
+    return await this.repositoryAdapter.findBy(params, options);
   }
 
   public async update(id: string, data: Partial<T>): Promise<T | null> {

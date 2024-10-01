@@ -19,7 +19,9 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
   }
 
   public async signUp(newUserData: any): Promise<IUser> {
-    const newUser = await this.create(newUserData, "email");
+    const newUser = await this.create(newUserData, {
+      uniqueByKey: "email",
+    });
 
     void this.analyticsHelper.track("UserRegister", newUser);
     void this.analyticsHelper.updateUserInfo(newUser);
