@@ -1,4 +1,4 @@
-version: "3.8" # Upgraded version to support health checks
+version: "3.9" # Upgraded version to support health checks
 
 services:
   startup-api:
@@ -7,28 +7,29 @@ services:
     build: .
     env_file: .env
     ports:
-      - "$SERVER_PORT:$SERVER_PORT"
+      - "${SERVER_PORT}:${SERVER_PORT}"
       - "9229:9229" # debugging port
-      - "$SOCKET_PORT:$SOCKET_PORT"
-      - "$SOCKET_UDP_RANGE"
+      - "${SOCKET_PORT}:${SOCKET_PORT}"
+      - "${SOCKET_UDP_RANGE}"
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     environment:
       FORCE_COLOR: "true"
-      CHOKIDAR_USEPOLLING: "true" # enables hot-reloading on windows host
+      CHOKIDAR_USEPOLLING: "true" # enables hot-reloading on Windows host
       NEW_RELIC_LICENSE_KEY: "${NEW_RELIC_LICENSE_KEY}"
       NEW_RELIC_APP_NAME: "StartupEngine API Dev"
-      RABBITMQ_HOST: ${RABBITMQ_HOST}
-      RABBITMQ_PORT: ${RABBITMQ_PORT}
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
-    links:
-      - startup-db
+      RABBITMQ_HOST: "${RABBITMQ_HOST}"
+      RABBITMQ_PORT: "${RABBITMQ_PORT}"
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
     depends_on:
-      - startup-db
-      - startup-redis
-      - startup-rabbitmq
+      startup-rabbitmq:
+        condition: service_healthy
+      startup-db:
+        condition: service_healthy
+      startup-redis:
+        condition: service_healthy
     networks:
       - startup-network
 
@@ -44,29 +45,43 @@ services:
     volumes:
       - ./docker_scripts/:/docker-entrypoint-initdb.d
     ports:
-      - "$MONGO_PORT:$MONGO_PORT"
+      - "${MONGO_PORT}:${MONGO_PORT}"
     environment:
-      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
-      MONGO_PORT: ${MONGO_PORT}
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: "${MONGO_INITDB_DATABASE}"
+      MONGO_PORT: "${MONGO_PORT}"
+      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INITDB_ROOT_USERNAME}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INITDB_ROOT_PASSWORD}"
     networks:
       - startup-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'mongosh --host localhost --port ${MONGO_PORT} --eval ''if (db.adminCommand("ping").ok) { exit(0) } else { exit(1) }''',
+        ]
+      interval: 2s
+      timeout: 10s
+      retries: 5
 
   startup-redis:
     container_name: startup-redis
     restart: always
     image: redis:latest
     ports:
-      - "$REDIS_PORT:$REDIS_PORT"
+      - "${REDIS_PORT}:${REDIS_PORT}"
     expose:
-      - "$REDIS_PORT"
+      - "${REDIS_PORT}"
     env_file: .env
     volumes:
       - ./config/redis.conf:/redis.conf
     command: ["redis-server", "/redis.conf", "--port", "${REDIS_PORT}"]
     networks:
       - startup-network
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -p ${REDIS_PORT} ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 2
 
   startup-redis-commander:
     container_name: startup-redis-commander
@@ -75,7 +90,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      REDIS_HOSTS: "redis:startup-redis:6380"
+      REDIS_HOSTS: "redis:startup-redis:${REDIS_PORT}"
     networks:
       - startup-network
 
@@ -86,13 +101,18 @@ services:
       - "5672:5672" # AMQP protocol port
       - "15672:15672" # Management UI port
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
       - ./environment/rabbit-init.sh:/docker-entrypoint-initdb.d/rabbit-init.sh
     networks:
       - startup-network
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmqctl node_health_check || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
 
 networks:
   startup-network:
