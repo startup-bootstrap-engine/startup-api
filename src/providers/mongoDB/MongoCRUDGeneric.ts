@@ -1,4 +1,4 @@
-/* eslint-disable mongoose-lean/require-lean */
+/* eslint-disable mongoose-performance/require-lean */
 import { IUser } from "@entities/ModuleSystem/UserModel";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { NotFoundError } from "@providers/errors/NotFoundError";
@@ -51,11 +51,9 @@ export class CRUD {
     }
 
     try {
-      const newRecord = new Model({
+      const newRecord = await Model.create({
         ...props,
       });
-
-      await newRecord.save();
 
       if (user) {
         await this.analytics.track(`Create${Model.modelName}`, user);
@@ -245,6 +243,7 @@ export class CRUD {
         await this.analytics.track(`UpdateOne${Model.modelName}`, user);
       }
 
+      // eslint-disable-next-line mongoose-performance/avoid-direct-save
       await model.save();
 
       if (populateKeys) {
@@ -301,9 +300,10 @@ export class CRUD {
       // create new field and set new references
 
       for (const field of updateArray) {
-        const newField = new ReferenceModel({ ...field });
-        await newField.save();
+        const newField = await ReferenceModel.create(field);
+
         parent[referenceFieldName]?.push(newField._id);
+        // eslint-disable-next-line mongoose-performance/avoid-direct-save
         await parent.save();
       }
     } else {
@@ -438,10 +438,9 @@ export class CRUD {
     parentId,
     updateFields
   ): Promise<R> {
-    const newReferenceModel = new ReferenceModel({
+    const newReferenceModel = await ReferenceModel.create({
       ...updateFields,
     });
-    await newReferenceModel.save();
 
     await ParentModel.updateOne(
       { _id: parentId },

@@ -14,7 +14,7 @@ export class AppleOAuthController implements interfaces.Controller {
   @httpPost("/apple", DTOValidatorMiddleware(AppleOAuthDTO))
   public async appleOAuth(@requestBody() appleOAuthDTO: AppleOAuthDTO, @request() req): Promise<IAuthResponse> {
     // Check if this user was registered using a Basic auth flow (instead of Google OAuth)
-    // eslint-disable-next-line mongoose-lean/require-lean
+    // eslint-disable-next-line mongoose-performance/require-lean
     const userWithBasic = await User.findOne({ email: appleOAuthDTO.email, authFlow: UserAuthFlow.Basic });
 
     if (userWithBasic) {

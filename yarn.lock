@@ -5598,10 +5598,10 @@ eslint-plugin-import@^2.22.1:
     semver "^6.3.1"
     tsconfig-paths "^3.14.2"
 
-eslint-plugin-mongoose-lean@1.0.7:
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-mongoose-lean/-/eslint-plugin-mongoose-lean-1.0.7.tgz#0286a30ebe0df98e084db602b3007c026a9e93dc"
-  integrity sha512-F7blQB2pzMYW+CFDjPknYjmXeF6cLeaBIaYPxPVfdt2UAeIPRjkTBm2C0mYP29+fC74hiB8UeMcnbq/yVnFuzQ==
+eslint-plugin-mongoose-performance@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-mongoose-performance/-/eslint-plugin-mongoose-performance-0.0.1.tgz#874b6517ab2e0623e71268ace77d924f90d05ca8"
+  integrity sha512-0qYzcdoJevzo215H6zYG28Bg4ZhRx3tKXMVLH1VKnzObqkg5U5eH2126Ts2HbJSHKc9HLIRF1tzA+izZNQmvRA==
   dependencies:
     "@typescript-eslint/eslint-plugin" "6.0.0"
     "@typescript-eslint/parser" "6.0.0"

@@ -41,7 +41,7 @@ export class TransactionalEmail {
         const providerEmailsToday = await Log.find({
           action: `${emailProvider.key}_EMAIL_SUBMISSION`,
           createdAt: { $gte: new Date(today) },
-        });
+        }).lean();
 
         if (providerEmailsToday.length < emailProvider.credits) {
           console.log("Smart sending email...");
@@ -52,7 +52,7 @@ export class TransactionalEmail {
 
           // Unsubscribed users: check if we should skip this user submission or not
 
-          const user = (await User.findOne({ email: to })) as IUser;
+          const user = (await User.findOne({ email: to }).lean()) as IUser;
 
           if (!user) {
             console.log("This user is not in our database! Skipping sending e-mail");
@@ -91,12 +91,11 @@ export class TransactionalEmail {
 
           if (submissionStatus) {
             // register submission in our logs, so we can keep track of whats being sent
-            const newEmailProviderLog = new Log({
+            await Log.create({
               action: `${emailProvider.key}_EMAIL_SUBMISSION`,
               emitter: from,
               target: to,
             });
-            await newEmailProviderLog.save();
 
             console.log(`E-mail submitted to ${to} successfully!`);
 

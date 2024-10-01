@@ -52,16 +52,14 @@ export class PushNotificationHelper {
         console.log(response);
 
         if (response.includes("Requested entity was not found.")) {
-          // eslint-disable-next-line mongoose-lean/require-lean
-          const user = await User.findOne({ pushNotificationToken: userToken });
+          const user = await User.findOne({ pushNotificationToken: userToken }).lean();
 
-          // remove user push notification token
-
-          if (user) {
-            user.pushNotificationToken = undefined;
-            // eslint-disable-next-line mongoose-lean/require-lean
-            await user.save();
+          if (!user) {
+            console.log("User not found");
+            return;
           }
+
+          await User.updateOne({ _id: user._id }, { $unset: { pushNotificationToken: "" } });
         }
       }
     } catch (error) {

@@ -20,7 +20,7 @@ export class PushNotificationController implements interfaces.Controller {
     @response() res: Response
   ): Promise<Response> {
     try {
-      // eslint-disable-next-line mongoose-lean/require-lean
+      // eslint-disable-next-line mongoose-performance/require-lean
       const user = await User.findOne({ _id: userId });
 
       if (!user) {

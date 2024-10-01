@@ -1,4 +1,4 @@
-/* eslint-disable mongoose-lean/require-lean */
+/* eslint-disable mongoose-performance/require-lean */
 /* eslint-disable require-await */
 import { IUser } from "@entities/ModuleSystem/UserModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";

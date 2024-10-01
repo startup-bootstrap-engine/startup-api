@@ -15,10 +15,7 @@ export class UserRepository extends CRUD implements IUserRepository {
 
   public async signUp(newUserData: any): Promise<IUser> {
     //! Note: password is hashed on pre("save") method from userSchema
-    const newUser = new User({ ...newUserData });
-
-    // eslint-disable-next-line mongoose-lean/require-lean
-    await newUser.save();
+    const newUser = await User.create({ ...newUserData });
 
     void this.analyticsHelper.track("UserRegister", newUser);
 
@@ -28,7 +25,7 @@ export class UserRepository extends CRUD implements IUserRepository {
   }
 
   public async findUser(params: object): Promise<IUser> {
-    // eslint-disable-next-line mongoose-lean/require-lean
+    // eslint-disable-next-line mongoose-performance/require-lean
     const user = await User.findOne(params).lean<IUser>();
 
     if (!user) {

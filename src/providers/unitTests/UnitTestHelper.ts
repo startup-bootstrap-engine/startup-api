@@ -1,4 +1,4 @@
-/* eslint-disable mongoose-lean/require-lean */
+/* eslint-disable mongoose-performance/require-lean */
 
 import { IUser, User } from "@entities/ModuleSystem/UserModel";
 
@@ -14,12 +14,10 @@ export class UnitTestHelper {
   private readonly oneMinuteAgo = 60 * 1000;
 
   public async createMockUser(extraProps?: Partial<IUser>): Promise<IUser> {
-    const newUser = new User({
+    const newUser = await User.create({
       ...userMock,
       ...extraProps,
     });
-
-    await newUser.save();
 
     return newUser;
   }

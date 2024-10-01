@@ -19,14 +19,16 @@
     {
       "files": ["**/*.test.ts", "**/*.spec.ts"], // Adjust the pattern as needed
       "rules": {
-        "mongoose-lean/require-lean": "off"
+        "mongoose-performance/require-lean": "off",
+        "mongoose-performance/no-model-direct-access": "off",
+        "mongoose-performance/avoid-direct-save": "off"
       }
     }
   ],
   "globals": {
     "NodeJS": true
   },
-  "plugins": ["@typescript-eslint", "unused-imports", "promise", "mongoose-lean"],
+  "plugins": ["@typescript-eslint", "unused-imports", "promise", "mongoose-performance"],
   "rules": {
     "semi": ["warn", "always"],
     "quotes": ["warn", "double", { "avoidEscape": true }],
@@ -63,6 +65,8 @@
     ],
     "indent": "off",
     "no-new": "off",
-    "mongoose-lean/require-lean": "error"
+    "mongoose-performance/require-lean": "error",
+    "mongoose-performance/no-model-direct-access": "error",
+    "mongoose-performance/avoid-direct-save": "error"
   }
 }

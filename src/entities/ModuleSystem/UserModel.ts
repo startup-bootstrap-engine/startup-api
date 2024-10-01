@@ -1,4 +1,4 @@
-/* eslint-disable mongoose-lean/require-lean */
+/* eslint-disable mongoose-performance/require-lean */
 import { TypeHelper, UserAccountTypes, UserAuthFlow, UserTypes } from "@startup-engine/shared";
 import bcrypt from "bcrypt";
 import uniqueValidator from "mongoose-unique-validator";

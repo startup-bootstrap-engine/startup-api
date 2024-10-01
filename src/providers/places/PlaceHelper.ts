@@ -7,7 +7,7 @@ import { provide } from "inversify-binding-decorators";
 @provide(PlaceHelper)
 export class PlaceHelper {
   public getCountry(countryCode: string): ICountry | undefined {
-    // eslint-disable-next-line mongoose-lean/require-lean
+    // eslint-disable-next-line mongoose-performance/require-lean
     const country = countries.find((c: ICountry) => c.code === countryCode);
 
     if (!country) {
