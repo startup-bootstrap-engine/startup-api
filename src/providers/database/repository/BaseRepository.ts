@@ -1,6 +1,5 @@
 import { IRepositoryAdapter } from "@providers/database/DatabaseTypes";
 import { ConflictError } from "@providers/errors/ConflictError";
-import { NotFoundError } from "@providers/errors/NotFoundError";
 import { TS } from "@providers/translation/TranslationHelper";
 import { provide } from "inversify-binding-decorators";
 import { Document, FilterQuery } from "mongoose";
@@ -41,33 +40,11 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
   }
 
   public async findById(id: string, options?: IBaseRepositoryFindByOptions): Promise<T | null> {
-    const result = await this.repositoryAdapter.findById(id, options);
-
-    if (!result) {
-      throw new NotFoundError(
-        TS.translate("validation", "notFound", {
-          // @ts-ignore
-          field: this.repositoryAdapter.model.modelName,
-        })
-      );
-    }
-
-    return result;
+    return await this.repositoryAdapter.findById(id, options);
   }
 
   public async findBy(params: FilterQuery<T>, options?: IBaseRepositoryFindByOptions): Promise<T | null> {
-    const result = await this.repositoryAdapter.findBy(params, options);
-
-    if (!result) {
-      throw new NotFoundError(
-        TS.translate("validation", "notFound", {
-          // @ts-ignore
-          field: this.repositoryAdapter.model.modelName,
-        })
-      );
-    }
-
-    return result;
+    return await this.repositoryAdapter.findBy(params, options);
   }
 
   public async updateById(id: string, data: Partial<T>): Promise<T | null> {

@@ -1,7 +1,8 @@
 /* eslint-disable mongoose-performance/require-lean */
 
-import { IUser, User } from "@entities/ModuleSystem/UserModel";
+import { IUser } from "@entities/ModuleSystem/UserModel";
 
+import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { provide } from "inversify-binding-decorators";
 import { userMock } from "./mock/userMock";
 
@@ -11,11 +12,11 @@ export enum InteractionQuestSubtype {
 
 @provide(UnitTestHelper)
 export class UnitTestHelper {
-  private readonly oneMinuteAgo = 60 * 1000;
+  constructor(private userRepository: UserRepository) {}
 
   public async createMockUser(extraProps?: Partial<IUser>): Promise<IUser> {
-    const newUser = await User.create({
-      ...userMock,
+    const newUser = await this.userRepository.create({
+      ...(userMock as unknown as IUser),
       ...extraProps,
     });
 

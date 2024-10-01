@@ -1,7 +1,7 @@
-import { User } from "@entities/ModuleSystem/UserModel";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { TS } from "@providers/translation/TranslationHelper";
+import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { IGoogleOAuthIdTokenResponse, IGoogleOAuthUserInfoResponse, UserAuthFlow } from "@startup-engine/shared";
 import { Request, Response } from "express";
 import { controller, httpGet, httpPost, interfaces } from "inversify-express-utils";
@@ -19,7 +19,8 @@ export class GoogleOAuthSyncController implements interfaces.Controller {
     private getGoogleUserUseCase: GetGoogleUserUseCase,
     private googleOAuthSyncUseCase: GoogleOAuthSyncUseCase,
     private googleOAuthHelper: GoogleOAuthHelper,
-    private analyticsHelper: AnalyticsHelper
+    private analyticsHelper: AnalyticsHelper,
+    private userRepository: UserRepository
   ) {}
 
   //! This is for web based oauth flow only! Does not work with Ionic
@@ -30,8 +31,7 @@ export class GoogleOAuthSyncController implements interfaces.Controller {
     const googleUserInfo: IGoogleOAuthUserInfoResponse = await this.getGoogleUserUseCase.getGoogleUser(String(code));
 
     // Check if this user was registered using a Basic auth flow (instead of Google OAuth)
-    // eslint-disable-next-line mongoose-performance/require-lean
-    const user = await User.findOne({ email: googleUserInfo.email });
+    const user = await this.userRepository.findBy({ email: googleUserInfo.email });
 
     if (user && user.authFlow === UserAuthFlow.Basic) {
       // on this case it's google only oauth method...
@@ -79,7 +79,8 @@ export class GoogleOAuthSyncController implements interfaces.Controller {
     }
 
     // Check if this user was registered using a Basic auth flow (instead of Google OAuth)
-    const user = await User.findOne({ email: googleUserInfo.email }).lean();
+
+    const user = await this.userRepository.findBy({ email: googleUserInfo.email });
 
     if (user && user.authFlow === UserAuthFlow.Basic) {
       // on this case it's google only oauth method...

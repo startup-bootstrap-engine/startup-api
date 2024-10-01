@@ -1,4 +1,4 @@
-import { User } from "@entities/ModuleSystem/UserModel";
+import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { EnvType } from "@startup-engine/shared/dist";
 import firebaseAdmin from "firebase-admin";
 import { provide } from "inversify-binding-decorators";
@@ -8,6 +8,8 @@ import { ENV_KEYS_PATH } from "../constants/PathConstants";
 @provide(PushNotificationHelper)
 export class PushNotificationHelper {
   public static firebaseAdmin: firebaseAdmin.app.App;
+
+  constructor(private userRepository: UserRepository) {}
 
   // PS: I'm not initializing on the constructor because it causes a bug in firebase, since inversify leads to be it being triggered twice.
   public static initialize(): void {
@@ -52,14 +54,17 @@ export class PushNotificationHelper {
         console.log(response);
 
         if (response.includes("Requested entity was not found.")) {
-          const user = await User.findOne({ pushNotificationToken: userToken }).lean();
+          // const user = await User.findOne({ pushNotificationToken: userToken }).lean();
+          const user = await this.userRepository.findBy({ pushNotificationToken: userToken });
 
           if (!user) {
             console.log("User not found");
             return;
           }
 
-          await User.updateOne({ _id: user._id }, { $unset: { pushNotificationToken: "" } });
+          await this.userRepository.updateById(user._id, {
+            pushNotificationToken: "",
+          });
         }
       }
     } catch (error) {

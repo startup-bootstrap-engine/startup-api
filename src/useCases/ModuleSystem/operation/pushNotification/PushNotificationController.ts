@@ -1,8 +1,7 @@
-import { User } from "@entities/ModuleSystem/UserModel";
 import { BadRequestError } from "@providers/errors/BadRequestError";
-import { NotFoundError } from "@providers/errors/NotFoundError";
 import { AuthMiddleware } from "@providers/middlewares/AuthMiddleware";
 import { TS } from "@providers/translation/TranslationHelper";
+import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { HttpStatus } from "@startup-engine/shared";
 import { Request, Response } from "express";
 import { controller, httpGet, interfaces, request, requestParam, response } from "inversify-express-utils";
@@ -11,7 +10,7 @@ import { PushNotificationHelper } from "../../../../providers/pushNotification/P
 
 @controller("/operations", AuthMiddleware, isAdminMiddleware)
 export class PushNotificationController implements interfaces.Controller {
-  constructor(private pushNotificationHelper: PushNotificationHelper) {}
+  constructor(private pushNotificationHelper: PushNotificationHelper, private userRepository: UserRepository) {}
 
   @httpGet("/push-notification/test/:userId")
   private async submitTestPushNotification(
@@ -20,11 +19,10 @@ export class PushNotificationController implements interfaces.Controller {
     @response() res: Response
   ): Promise<Response> {
     try {
-      // eslint-disable-next-line mongoose-performance/require-lean
-      const user = await User.findOne({ _id: userId });
+      const user = await this.userRepository.findById(userId);
 
       if (!user) {
-        throw new NotFoundError(TS.translate("users", "userNotFound"));
+        throw new BadRequestError(TS.translate("validation", "notFound", { field: "user" }));
       }
 
       const userPushToken = user.pushNotificationToken;

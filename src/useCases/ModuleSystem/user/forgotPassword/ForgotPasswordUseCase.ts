@@ -1,9 +1,9 @@
-import { IUser, User } from "@entities/ModuleSystem/UserModel";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { UserAuth } from "@providers/auth/UserAuth";
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { NotFoundError } from "@providers/errors/NotFoundError";
 import { TS } from "@providers/translation/TranslationHelper";
+import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { UserAuthFlow } from "@startup-engine/shared";
 import randomString from "crypto-random-string";
 import { provide } from "inversify-binding-decorators";
@@ -13,7 +13,11 @@ import { InternalServerError } from "../../../../providers/errors/InternalServer
 
 @provide(ForgotPasswordUseCase)
 export class ForgotPasswordUseCase {
-  constructor(private analyticsHelper: AnalyticsHelper, private userAuth: UserAuth) {}
+  constructor(
+    private analyticsHelper: AnalyticsHelper,
+    private userAuth: UserAuth,
+    private userRepository: UserRepository
+  ) {}
 
   public async forgotPassword(email: string): Promise<boolean> {
     try {
@@ -21,8 +25,7 @@ export class ForgotPasswordUseCase {
         throw new BadRequestError("You are not allowed to reset the password for this user");
       }
       // Try to get user with the mentioned email
-      let user = await User.findOne({ email }).lean<IUser>();
-
+      let user = await this.userRepository.findBy({ email });
       if (!user) {
         throw new NotFoundError(TS.translate("users", "userNotFound"));
       }
@@ -39,7 +42,13 @@ export class ForgotPasswordUseCase {
       console.log(`New password for user ${user.email}: ${randomPassword}`);
 
       // Update user's password
-      user = await User.findOneAndUpdate({ _id: user._id }, { password: randomPassword }, { new: true }).lean<IUser>();
+      // user = await User.findOneAndUpdate({ _id: user._id }, { password: randomPassword }, { new: true }).lean<IUser>();
+
+      user = await this.userRepository.updateById(user._id, { password: randomPassword });
+
+      if (!user) {
+        throw new InternalServerError(TS.translate("users", "userNotFound"));
+      }
 
       await this.userAuth.recalculatePasswordHash(user);
 

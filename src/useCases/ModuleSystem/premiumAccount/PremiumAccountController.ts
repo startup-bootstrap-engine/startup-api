@@ -1,9 +1,9 @@
-import { IUser, User } from "@entities/ModuleSystem/UserModel";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { AuthMiddleware } from "@providers/middlewares/AuthMiddleware";
 import { isAdminMiddleware } from "@providers/middlewares/IsAdminMiddleware";
 import { PremiumAccountActivator } from "@providers/premiumAccount/PremiumAccountActivator";
+import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { controller, httpPost, interfaces, requestBody, response } from "inversify-express-utils";
 import { PremiumAccountUseCase } from "./PremiumAccountUseCase";
 
@@ -12,14 +12,15 @@ export class PremiumAccountController implements interfaces.Controller {
   constructor(
     private premiumAccountUseCase: PremiumAccountUseCase,
     private inMemoryHashTable: InMemoryHashTable,
-    private premiumAccountActivator: PremiumAccountActivator
+    private premiumAccountActivator: PremiumAccountActivator,
+    private userRepository: UserRepository
   ) {}
 
   @httpPost("/activate")
   public async activatePremiumAccount(@response() res, @requestBody() body): Promise<void> {
     const { email, accountType } = body;
 
-    const user = (await User.findOne({ email: email }).lean()) as IUser;
+    const user = await this.userRepository.findBy({ email: email });
 
     if (!user) {
       return res.status(400).send({
@@ -40,7 +41,7 @@ export class PremiumAccountController implements interfaces.Controller {
   public async deactivatePremiumAccount(@response() res, @requestBody() body): Promise<void> {
     const { email } = body;
 
-    const user = (await User.findOne({ email: email }).lean()) as IUser;
+    const user = await this.userRepository.findBy({ email: email });
 
     if (!user) {
       throw new BadRequestError("User not found!");

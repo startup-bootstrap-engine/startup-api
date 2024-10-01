@@ -1,13 +1,16 @@
-import { IUser, User } from "@entities/ModuleSystem/UserModel";
+import { IUser } from "@entities/ModuleSystem/UserModel";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
+import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { UserAccountTypes } from "@startup-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
 @provide(PremiumAccountActivator)
 export class PremiumAccountActivator {
+  constructor(private userRepository: UserRepository) {}
+
   @TrackNewRelicTransaction()
   public async isPremiumAccountActive(email: string): Promise<boolean> {
-    const user = await User.findOne({ email: email }).lean().select("accountType");
+    const user = await this.userRepository.findBy({ email: email }, { select: "accountType" });
 
     if (!user) {
       return false;
@@ -29,11 +32,9 @@ export class PremiumAccountActivator {
     try {
       console.log("✨ Activating premium account for user", user.email, "with account type", accountType);
 
-      await User.findByIdAndUpdate(user._id, {
-        $set: {
-          accountType: accountType,
-          ...data,
-        },
+      await this.userRepository.updateById(user._id, {
+        accountType: accountType,
+        ...data,
       });
     } catch (error) {
       console.error(error);
@@ -48,13 +49,9 @@ export class PremiumAccountActivator {
 
       console.log("😔 Deactivating premium account for user", user?.email);
 
-      await User.findByIdAndUpdate(user._id, {
-        $set: {
-          accountType: UserAccountTypes.Free,
-        },
-        $unset: {
-          isManuallyControlledPremiumAccount: "",
-        },
+      await this.userRepository.updateById(user._id, {
+        accountType: UserAccountTypes.Free,
+        isManuallyControlledPremiumAccount: false,
       });
 
       return true;

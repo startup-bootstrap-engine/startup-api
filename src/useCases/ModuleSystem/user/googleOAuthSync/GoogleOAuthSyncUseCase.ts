@@ -1,4 +1,3 @@
-import { User } from "@entities/ModuleSystem/UserModel";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { UserAuth } from "@providers/auth/UserAuth";
 import { TS } from "@providers/translation/TranslationHelper";
@@ -20,7 +19,7 @@ export class GoogleOAuthSyncUseCase {
       throw new InternalServerError(TS.translate("auth", "oauthGoogleEmailNotProvided"));
     }
 
-    const user = await User.findOne({ email: googleUserInfo.email });
+    const user = await this.userRepository.findBy({ email: googleUserInfo.email });
 
     if (!user) {
       //! create a new user and generate accessToken

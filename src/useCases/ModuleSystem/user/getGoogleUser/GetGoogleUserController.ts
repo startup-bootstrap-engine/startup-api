@@ -1,4 +1,4 @@
-import { User } from "@entities/ModuleSystem/UserModel";
+import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { IGoogleOAuthUserInfoResponse, UserAuthFlow } from "@startup-engine/shared";
 import { Request, Response } from "express";
 import { controller, httpGet, interfaces } from "inversify-express-utils";
@@ -13,7 +13,8 @@ import { GetGoogleUserUseCase } from "./GetGoogleUserUseCase";
 export class GetGoogleUserController implements interfaces.Controller {
   constructor(
     private getGoogleUserUseCase: GetGoogleUserUseCase,
-    private googleOAuthSyncUseCase: GoogleOAuthSyncUseCase
+    private googleOAuthSyncUseCase: GoogleOAuthSyncUseCase,
+    private userRepository: UserRepository
   ) {}
 
   @httpGet("/google/redirect")
@@ -26,8 +27,8 @@ export class GetGoogleUserController implements interfaces.Controller {
     const googleUserInfo: IGoogleOAuthUserInfoResponse = await this.getGoogleUserUseCase.getGoogleUser(String(code));
 
     // Check if this user was registered using a Basic auth flow (instead of Google OAuth)
-    // eslint-disable-next-line mongoose-performance/require-lean
-    const user = await User.findOne({ email: googleUserInfo.email });
+
+    const user = await this.userRepository.findBy({ email: googleUserInfo.email });
 
     if (user && user.authFlow === UserAuthFlow.Basic) {
       // on this case it's google only oauth method...
