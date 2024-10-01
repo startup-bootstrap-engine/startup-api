@@ -4,11 +4,12 @@ import "express-async-errors";
 import "reflect-metadata";
 
 import { appEnv } from "@providers/config/env";
+import { DatabaseAdaptersAvailable } from "@providers/database/DatabaseTypes";
 import {
   bullBoardMonitor,
   container,
   cronJobs,
-  database,
+  databaseFactory,
   inMemoryHashTable,
   inMemoryRepository,
   messagingBroker,
@@ -73,7 +74,9 @@ async function initializeServerComponents(): Promise<void> {
 
   const redisPubSub = container.get(RedisPubSub);
 
-  await Promise.all([database.initialize(), redisManager.connect()]);
+  const dbAdapter = databaseFactory.createDatabaseAdapter(appEnv.database.DB_ADAPTER as DatabaseAdaptersAvailable);
+
+  await Promise.all([dbAdapter.initialize(), redisManager.connect()]);
 
   await socketAdapter.init(appEnv.socket.type);
 

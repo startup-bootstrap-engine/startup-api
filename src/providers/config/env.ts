@@ -33,6 +33,7 @@ export const appEnv = {
     exchangeRate: process.env.EXCHANGE_RATE_API,
   },
   database: {
+    DB_ADAPTER: process.env.DB_ADAPTER,
     FB_DB_PATH: process.env.FB_DB_PATH,
     MONGO_INITDB_DATABASE: process.env.MONGO_INITDB_DATABASE,
     MONGO_HOST_CONTAINER: process.env.MONGO_HOST_CONTAINER,

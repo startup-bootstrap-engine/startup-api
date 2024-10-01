@@ -1,4 +1,5 @@
 import { NewRelic } from "@providers/analytics/NewRelic";
+import { DatabaseFactory } from "@providers/database/factory/DatabaseFactory";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { InMemoryRepository } from "@providers/database/InMemoryRepository";
 import { RedisManager } from "@providers/database/RedisManager";
@@ -25,7 +26,6 @@ import { UnitTestHelper } from "@providers/unitTests/UnitTestHelper";
 import { Container } from "inversify";
 import { autoProvide, buildProviderModule } from "inversify-binding-decorators";
 import { Cronjob } from "../cronjobs/CronJobs";
-import { Database } from "../database/Database";
 import { Seeder } from "../seeds/Seeder";
 import { ServerHelper } from "../server/ServerHelper";
 import {
@@ -55,7 +55,7 @@ export const messagingBrokerHandlers = container.get<MessagingBrokerHandlers>(Me
 export const redisPubSubListeners = container.get<RedisPubSubListeners>(RedisPubSubListeners);
 export const redisStreamsListeners = container.get<RedisStreamsListeners>(RedisStreamsListeners);
 export const redisStreams = container.get<RedisStreams>(RedisStreams);
-export const database = container.get<Database>(Database);
+export const databaseFactory = container.get<DatabaseFactory>(DatabaseFactory);
 export const cronJobs = container.get<Cronjob>(Cronjob);
 export const seeds = container.get<Seeder>(Seeder);
 export const serverHelper = container.get<ServerHelper>(ServerHelper);
