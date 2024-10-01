@@ -6,7 +6,6 @@ import { TS } from "@providers/translation/TranslationHelper";
 import { provide } from "inversify-binding-decorators";
 
 import { BaseRepository } from "@providers/database/repository/BaseRepository";
-import { AuthSignUpDTO } from "@useCases/ModuleSystem/user/AuthDTO";
 
 export interface IUserRepository {
   findUser(params: object): Promise<IUser>;
@@ -19,7 +18,7 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
     super(repositoryFactory.createRepository<IUser>(User));
   }
 
-  public async signUp(newUserData: AuthSignUpDTO): Promise<IUser> {
+  public async signUp(newUserData: any): Promise<IUser> {
     const newUser = await this.create(newUserData, "email");
 
     void this.analyticsHelper.track("UserRegister", newUser);

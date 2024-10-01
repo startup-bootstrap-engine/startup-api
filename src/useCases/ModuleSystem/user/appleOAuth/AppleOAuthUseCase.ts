@@ -1,4 +1,3 @@
-import { User } from "@entities/ModuleSystem/UserModel";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { AppleOAuthHelper } from "@providers/auth/AppleOAuthHelper";
 import { UserAuth } from "@providers/auth/UserAuth";
@@ -32,7 +31,7 @@ export class AppleOAuthUseCase {
     }
 
     // eslint-disable-next-line mongoose-performance/require-lean
-    const dbUser = await User.findOne({
+    const dbUser = await this.userRepository.findByQueryParams({
       authFlow: UserAuthFlow.AppleOAuth,
       email: validationPayload.email,
     });
