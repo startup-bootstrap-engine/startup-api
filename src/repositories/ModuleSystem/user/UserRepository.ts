@@ -1,14 +1,11 @@
 import { IUser, User } from "@entities/ModuleSystem/UserModel";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { RepositoryFactory } from "@providers/database/repository/RepositoryFactory";
-import { NotFoundError } from "@providers/errors/NotFoundError";
-import { TS } from "@providers/translation/TranslationHelper";
 import { provide } from "inversify-binding-decorators";
 
 import { BaseRepository } from "@providers/database/repository/BaseRepository";
 
 export interface IUserRepository {
-  findUser(params: object): Promise<IUser>;
   signUp(newUserData): Promise<IUser>;
 }
 
@@ -27,15 +24,5 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
     void this.analyticsHelper.updateUserInfo(newUser);
 
     return newUser;
-  }
-
-  public async findUser(params: object): Promise<IUser> {
-    const user = await this.findBy(params);
-
-    if (!user) {
-      throw new NotFoundError(TS.translate("users", "userNotFound"));
-    }
-
-    return user;
   }
 }

@@ -22,6 +22,17 @@ content-type: application/json
     "password": "123"
 }
 
+### 
+
+# User :: Logout
+POST {{baseUrl}}/auth/logout HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NmZiZjVhNWRmZDIwNTAwN2Q4YzUyY2QiLCJlbWFpbCI6ImpvYW9wYXVsb2Z1cnRhZG9AbGl2ZS5jb20iLCJpYXQiOjE3Mjc3OTEyMDR9.unNEf6fzx3Uo8OPTzAmqhLXi8a4YicRYAWKGSs2_LlM"
+}
+
 ###
 
 # User :: Read (own info) 

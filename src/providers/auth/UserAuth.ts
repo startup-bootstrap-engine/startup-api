@@ -31,7 +31,7 @@ export class UserAuth {
     const refreshToken = jwt.sign({ _id: user._id, email: user.email }, appEnv.authentication.REFRESH_TOKEN_SECRET!);
 
     const updatedRefreshTokens = [...(user.refreshTokens ?? []), { token: refreshToken }] as any;
-    await this.userRepository.update(user._id, { refreshTokens: updatedRefreshTokens });
+    await this.userRepository.updateById(user._id, { refreshTokens: updatedRefreshTokens });
 
     return {
       accessToken,
@@ -77,7 +77,7 @@ export class UserAuth {
     const salt = await bcrypt.genSalt();
     const hash = await bcrypt.hash(user.password, salt);
 
-    await this.userRepository.update(user._id, {
+    await this.userRepository.updateById(user._id, {
       email: email,
       password: hash,
       salt: salt,

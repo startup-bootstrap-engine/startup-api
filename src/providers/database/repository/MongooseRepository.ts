@@ -58,9 +58,16 @@ export class MongooseRepository<T extends Document> implements IRepositoryAdapte
     return await query.exec();
   }
 
-  public async update(id: string, item: Partial<T>): Promise<T | null> {
+  public async updateById(id: string, item: Partial<T>): Promise<T | null> {
     return (await this.model
       .findByIdAndUpdate(id, item as any, { new: true })
+      .lean()
+      .exec()) as unknown as T | null;
+  }
+
+  public async updateBy(params: FilterQuery<T>, item: Partial<T>): Promise<T | null> {
+    return (await this.model
+      .findOneAndUpdate(params, item as any, { new: true })
       .lean()
       .exec()) as unknown as T | null;
   }

@@ -1,7 +1,7 @@
 import { provide } from "inversify-binding-decorators";
 
-import { User } from "@entities/ModuleSystem/UserModel";
 import { BadRequestError } from "@providers/errors/BadRequestError";
+import { NotFoundError } from "@providers/errors/NotFoundError";
 import { TS } from "@providers/translation/TranslationHelper";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 
@@ -10,12 +10,16 @@ export class UnsubscribeUserUseCase {
   constructor(private userRepository: UserRepository) {}
 
   public async unsubscribeUser(email: string): Promise<void> {
-    const user = await this.userRepository.findUser({ email });
+    const user = await this.userRepository.findBy({ email });
+
+    if (!user) {
+      throw new NotFoundError(TS.translate("validation", "notFound", { field: "User" }));
+    }
 
     if (user.unsubscribed === true) {
       throw new BadRequestError(TS.translate("users", "userAlreadyUnsubscribed"));
     }
 
-    await User.updateOne({ email }, { unsubscribed: true });
+    await this.userRepository.updateBy({ email }, { unsubscribed: true });
   }
 }
