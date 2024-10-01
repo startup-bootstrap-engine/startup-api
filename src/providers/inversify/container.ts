@@ -25,8 +25,8 @@ import { UnitTestHelper } from "@providers/unitTests/UnitTestHelper";
 import { Container } from "inversify";
 import { autoProvide, buildProviderModule } from "inversify-binding-decorators";
 import { Cronjob } from "../cronjobs/CronJobs";
+import { Database } from "../database/Database";
 import { Seeder } from "../seeds/Seeder";
-import { Database } from "../server/Database";
 import { ServerHelper } from "../server/ServerHelper";
 import {
   abTestsControllerContainer,
