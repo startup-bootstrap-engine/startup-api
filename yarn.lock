@@ -2499,6 +2499,17 @@
     "@newrelic/native-metrics" "^11.0.0"
     "@prisma/prisma-fmt-wasm" "^4.17.0-16.27eb2449f178cd9fe1a4b892d732cc4795f75085"
 
+"@rpg-engine/shared@^0.9.75":
+  version "0.9.75"
+  resolved "https://registry.yarnpkg.com/@rpg-engine/shared/-/shared-0.9.75.tgz#26249ea6e819847a3e7975452bfde6fdd2b8f6bb"
+  integrity sha512-9VtxmFvMtcXA2GHykir3Xxhi3TKj7CXxj4YOH2O7rO8vqIiSNvrpgWP5sMX4OJZWrExDpCbFfKxZ8G+Y+OOyzg==
+  dependencies:
+    husky "^4.3.0"
+    mobile-device-detect "^0.4.3"
+    prettier "^2.2.1"
+    tsc "^2.0.4"
+    typescript "^4.6.4"
+
 "@sapphire/async-queue@^1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@sapphire/async-queue/-/async-queue-1.5.0.tgz#2f255a3f186635c4fb5a2381e375d3dfbc5312d8"
