@@ -177,8 +177,22 @@ function buildDockerCompose() {
     }
   });
 
+  // Ensure all object sections have their entries as objects, not null
+  Object.keys(baseCompose).forEach((section) => {
+    if (typeof baseCompose[section] === "object" && baseCompose[section] !== null) {
+      Object.keys(baseCompose[section]).forEach((key) => {
+        if (baseCompose[section][key] === null) {
+          baseCompose[section][key] = {};
+        }
+      });
+    }
+  });
+
   // Convert back to YAML and write to docker-compose.yml
-  const finalYaml = yaml.dump(baseCompose, { noRefs: true, indent: 2 });
+  let finalYaml = yaml.dump(baseCompose, { noRefs: true, indent: 2 });
+
+  // replace finalYaml {} with empty string
+  finalYaml = finalYaml.replace(/: {}\n/g, ":\n");
 
   fs.writeFileSync(outputComposePath, finalYaml, "utf8");
 
