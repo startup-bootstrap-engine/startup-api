@@ -15,3 +15,5 @@ export const DATA_PATH = path.join(ROOT_PATH, "./src/providers/data");
 export const ENV_KEYS_PATH = path.join(ROOT_PATH, "./environment/keys");
 
 export const PROVIDERS_PATH = path.join(ROOT_PATH, "./src/providers");
+
+export const ENVIRONMENT_PATH = path.join(ROOT_PATH, "./environment");
