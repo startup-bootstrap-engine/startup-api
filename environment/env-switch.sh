@@ -6,8 +6,6 @@ case $1 in
   cp -fr ./environment/dev.env .env
   cp -fr ./environment/docker-compose.dev.yml docker-compose.yml
   cp -fr ./environment/Dockerfile.dev Dockerfile
-
-  echo ${machine}
   ;;
 
 "prod")
@@ -23,6 +21,7 @@ case $1 in
   cp -fr ./environment/docker-compose.test.yml docker-compose.yml
   cp -fr ./environment/Dockerfile.prod Dockerfile
   ;;
+
 "debug")
   echo "Generating Debug WSL environment .env files"
   cp -fr ./environment/dev.env .env
@@ -31,7 +30,7 @@ case $1 in
   ;;
 
 *)
-  echo "Invalid environment option. Please provide 'dev', 'prod', or 'prod:wsl-local'."
+  echo "Invalid environment option. Please provide 'dev', 'prod', 'prod:test', or 'debug'."
   exit 1
   ;;
 esac
