@@ -61,6 +61,11 @@ function buildDockerCompose() {
   // Load base docker-compose.yml
   let baseCompose = yaml.load(fs.readFileSync(baseComposePath, "utf8")) || {};
 
+  // Initialize services, volumes, and networks if not present
+  baseCompose.services = baseCompose.services || {};
+  baseCompose.volumes = baseCompose.volumes || {};
+  baseCompose.networks = baseCompose.networks || {};
+
   // Define available modules and their corresponding file paths
   const modules = {
     rabbitmq: {
@@ -80,11 +85,6 @@ function buildDockerCompose() {
     // },
     // Add more modules here
   };
-
-  // Initialize services, volumes, and networks if not present
-  baseCompose.services = baseCompose.services || {};
-  baseCompose.volumes = baseCompose.volumes || {};
-  baseCompose.networks = baseCompose.networks || {};
 
   // Arrays to track volumes and networks to remove
   const volumesToRemove = [];
@@ -141,7 +141,7 @@ function buildDockerCompose() {
     baseCompose.networks = cleanConfig(baseCompose.networks, networksToRemove);
   }
 
-  // Optionally, remove services associated with disabled modules
+  // Remove services associated with disabled modules
   // (If services are pre-defined in baseCompose.base.yml)
   Object.keys(modules).forEach((moduleKey) => {
     const module = modules[moduleKey];
@@ -162,20 +162,6 @@ function buildDockerCompose() {
   // Remove entire 'volumes' or 'networks' sections if they are empty
   removeEmptySection(baseCompose, "volumes");
   removeEmptySection(baseCompose, "networks");
-
-  // Ensure all network entries are objects, not null
-  Object.keys(baseCompose.networks).forEach((key) => {
-    if (baseCompose.networks[key] === null) {
-      baseCompose.networks[key] = {};
-    }
-  });
-
-  // Ensure all volume entries are objects, not null
-  Object.keys(baseCompose.volumes).forEach((key) => {
-    if (baseCompose.volumes[key] === null) {
-      baseCompose.volumes[key] = {};
-    }
-  });
 
   // Ensure all object sections have their entries as objects, not null
   Object.keys(baseCompose).forEach((section) => {
