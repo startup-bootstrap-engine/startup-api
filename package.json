@@ -31,7 +31,9 @@
     "db:import:swarm": "echo 'Please import by running bash ./environment/db-import-swarm.sh'",
     "db:download": "./environment/db-download.sh",
     "cache:clear": "sudo rm -rf ./src/providers/data/cache/**",
-    "tag:release": "VERSION=$(node -p -e \"require('./package.json').version\") && git tag -d latest-stable || true && git push origin --no-verify --delete latest-stable || true && git tag latest-stable -m 'Latest stable tag' && git tag v$VERSION && git push origin latest-stable --no-verify && git push origin v$VERSION --no-verify"
+    "tag:release": "VERSION=$(node -p -e \"require('./package.json').version\") && git tag -d latest-stable || true && git push origin --no-verify --delete latest-stable || true && git tag latest-stable -m 'Latest stable tag' && git tag v$VERSION && git push origin latest-stable --no-verify && git push origin v$VERSION --no-verify",
+    "module:build": "node ./environment/modules/module-builder.js",
+    "tree": "tree -I 'node_modules|dist'"
   },
   "husky": {
     "hooks": {
@@ -71,6 +73,7 @@
     "glob": "^10.3.15",
     "helmet": "^7.1.0",
     "ioredis": "^5.4.1",
+    "js-yaml": "^4.1.0",
     "jsonwebtoken": "^9.0.0",
     "jwks-rsa": "^2.0.4",
     "mixpanel": "^0.13.0",

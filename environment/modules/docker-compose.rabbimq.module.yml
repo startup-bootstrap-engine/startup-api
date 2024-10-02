@@ -1,0 +1,19 @@
+startup-rabbitmq:
+  container_name: startup-rabbitmq
+  image: rabbitmq:3-management
+  ports:
+    - "5672:5672" # AMQP protocol port
+    - "15672:15672" # Management UI port
+  environment:
+    RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
+    RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
+  volumes:
+    - rabbitmq_data:/var/lib/rabbitmq
+    - ./environment/rabbit-init.sh:/docker-entrypoint-initdb.d/rabbit-init.sh
+  networks:
+    - startup-network
+  healthcheck:
+    test: ["CMD-SHELL", "rabbitmqctl node_health_check || exit 1"]
+    interval: 10s
+    timeout: 10s
+    retries: 10
