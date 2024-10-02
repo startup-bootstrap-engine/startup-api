@@ -7,7 +7,7 @@ import { Time } from "@providers/time/Time";
 import Redis from "ioredis";
 
 export enum RedisStreamChannels {
-  SocketEvents = "startup-api-socket-events",
+  SocketEvents = "rpg-api-socket-events",
 }
 
 @provideSingleton(RedisStreams)
@@ -161,36 +161,44 @@ export class RedisStreams {
    * @param message - The message to add.
    * @returns The ID of the added message or null if failed.
    */
-  public async addToStream(channel: RedisStreamChannels, message: Record<string, any>): Promise<string | null> {
-    try {
-      if (!this.streamWriter || this.streamWriter.status !== "ready") {
-        throw new Error("Writer connection is not active.");
-      }
-
-      const serializedMessage = this.serializeMessage(message);
-
-      if (serializedMessage.length > 1000) {
-        throw new Error("Message size exceeds the allowed limit.");
-      }
-
-      const messageId = await this.streamWriter.xadd(channel, "*", ...serializedMessage);
-      return messageId;
-    } catch (error) {
-      console.error(`Failed to add message to stream '${channel}':`, error);
-      // Implement retry logic
-      for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
-        try {
-          const messageId = await this.retryOperation(() =>
-            this.streamWriter!.xadd(channel, "*", ...this.serializeMessage(message))
-          );
-          return messageId;
-        } catch (retryError) {
-          console.error(`Retry ${attempt} failed for adding message to stream '${channel}':`, retryError);
-        }
-      }
-      // Optionally, push the message to a dead-letter queue or alert monitoring
-      return null;
+  public addToStream(channel: RedisStreamChannels, message: Record<string, any>): void {
+    if (!this.streamWriter || this.streamWriter.status !== "ready") {
+      throw new Error("Writer connection is not active.");
     }
+
+    const serializedMessage = this.serializeMessage(message);
+
+    if (serializedMessage.length > 1000) {
+      throw new Error("Message size exceeds the allowed limit.");
+    }
+
+    // Fire and forget the xadd operation
+    this.streamWriter
+      .xadd(channel, "*", ...serializedMessage)
+      // eslint-disable-next-line promise/always-return
+      .then((messageId) => {
+        console.log(`Message added to stream '${channel}' with ID: ${messageId}`);
+      })
+      .catch((error) => {
+        console.error(`Failed to add message to stream '${channel}':`, error);
+        // Implement retry logic
+        for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+          // eslint-disable-next-line promise/no-nesting
+          this.retryOperation(() => this.streamWriter!.xadd(channel, "*", ...this.serializeMessage(message)))
+            // eslint-disable-next-line promise/always-return
+            .then((messageId) => {
+              console.log(`Message added to stream '${channel}' with ID: ${messageId} on retry ${attempt}`);
+              // Exit the retry loop on success
+            })
+            .catch((retryError) => {
+              console.error(`Retry ${attempt} failed for adding message to stream '${channel}':`, retryError);
+              if (attempt === this.maxRetries) {
+                // Optionally, push the message to a dead-letter queue or alert monitoring
+                console.error(`All retries failed for adding message to stream '${channel}'.`);
+              }
+            });
+        }
+      });
   }
 
   private async retryOperation<T>(operation: () => Promise<T>): Promise<T> {
@@ -242,7 +250,6 @@ export class RedisStreams {
         if (streams) {
           for (const stream of streams) {
             // @ts-ignore
-            // eslint-disable-next-line no-unused-vars
             const [_, messages] = stream;
             const ackIds: string[] = [];
             const processingPromises: Promise<void>[] = [];

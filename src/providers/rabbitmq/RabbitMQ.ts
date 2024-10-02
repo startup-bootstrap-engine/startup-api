@@ -26,6 +26,16 @@ export class RabbitMQ {
   private consumers: IConsumerConfig[] = [];
   private consumerChannels: Map<string, Channel> = new Map();
 
+  private readonly prefetchCount: number = SERVER_API_NODES_QTY * 10;
+
+  // {{ edit_1: Reuse channels where possible }}
+  private consumerChannel: Channel | null = null;
+
+  // {{ edit_2: Batch acknowledgments }}
+  private ackBatchSize: number = 10;
+  private ackBuffer: Message[] = [];
+  private ackTimer: NodeJS.Timeout | null = null;
+
   constructor() {
     if (appEnv.general.IS_UNIT_TEST) {
       return;
@@ -165,44 +175,42 @@ export class RabbitMQ {
     routingKey: string,
     callback: (data: any) => Promise<void>
   ): Promise<void> {
-    if (!this.connection || !this.isChannelValid(this.connection)) {
-      await this.connect();
+    if (!this.connection || !this.isChannelValid(this.consumerChannel)) {
+      this.consumerChannel = await this.connection.createChannel();
+      // Set up channel event handlers if necessary
     }
 
-    const channel = await this.connection.createChannel();
-    await channel.prefetch(SERVER_API_NODES_QTY * 2);
+    const channel = this.consumerChannel;
 
     try {
       await channel.assertQueue(queue, { durable: true });
       await channel.bindQueue(queue, exchange, routingKey);
 
+      // Set prefetch to allow more unacknowledged messages
+      await channel.prefetch(this.prefetchCount);
+
       const { consumerTag } = await channel.consume(
         queue,
         async (msg: Message | null) => {
           if (msg) {
+            this.ackBuffer.push(msg);
+            if (this.ackBuffer.length >= this.ackBatchSize) {
+              this.flushAcks(channel);
+            } else if (!this.ackTimer) {
+              this.ackTimer = setTimeout(() => this.flushAcks(channel), 5000);
+            }
+
             const content = msg.content.toString();
             try {
               const data = content ? JSON.parse(content) : null;
               await callback(data);
-              if (this.isChannelValid(channel)) {
-                try {
-                  channel.ack(msg);
-                } catch (ackError) {
-                  console.error("Failed to acknowledge message:", ackError, data);
-                }
-              } else {
-                console.warn("Consume channel invalid. Cannot acknowledge message.");
-              }
+              // Removed individual ack
             } catch (error) {
               console.error("Error processing message:", error);
               console.error("Raw message content:", content);
               if (this.isChannelValid(channel)) {
-                try {
-                  channel.nack(msg, false, false);
-                  console.log(`❌ Message rejected and discarded with delivery tag ${msg.fields.deliveryTag}`);
-                } catch (nackError) {
-                  console.error("Failed to reject message:", nackError, content);
-                }
+                channel.nack(msg, false, false);
+                console.log(`❌ Message rejected and discarded with delivery tag ${msg.fields.deliveryTag}`);
               } else {
                 console.warn("Consume channel invalid. Cannot reject message.");
               }
@@ -225,6 +233,18 @@ export class RabbitMQ {
       });
     } catch (consumptionError) {
       console.error("Failed to set up consumer:", consumptionError);
+    }
+  }
+
+  private flushAcks(channel: Channel): void {
+    if (this.ackBuffer.length > 0) {
+      const lastMsg = this.ackBuffer[this.ackBuffer.length - 1];
+      channel.ack(lastMsg, true); // Acknowledge all messages up to lastMsg
+      this.ackBuffer = [];
+      if (this.ackTimer) {
+        clearTimeout(this.ackTimer);
+        this.ackTimer = null;
+      }
     }
   }
 

@@ -1,8 +1,8 @@
 import { ForbiddenError } from "@providers/errors/ForbiddenError";
 import { container } from "@providers/inversify/container";
 import { ServerRequest } from "@providers/server/ServerRequest";
+import newrelic from "@rpg-engine/newrelic";
 import { NextFunction, Request, Response } from "express";
-import newrelic from "newrelic";
 
 export const InternalRequestMiddleware = (req: Request, res: Response, next: NextFunction): void => {
   const serverRequest = container.get(ServerRequest);

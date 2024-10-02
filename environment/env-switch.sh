@@ -5,19 +5,7 @@ case $1 in
   echo "Generating Development environment .env files"
   cp -fr ./environment/dev.env .env
   cp -fr ./environment/docker-compose.dev.yml docker-compose.yml
-
-  unameOut="$(uname -s)"
-  case "${unameOut}" in
-    Linux*)     
-      cp -fr ./environment/Dockerfile.linux.dev Dockerfile
-      ;;
-    Darwin*)    
-      cp -fr ./environment/Dockerfile.mac.dev Dockerfile
-      ;;
-    *)    
-      cp -fr ./environment/Dockerfile.dev Dockerfile
-      ;;
-  esac
+  cp -fr ./environment/Dockerfile.dev Dockerfile
 
   echo ${machine}
   ;;
@@ -48,7 +36,7 @@ case $1 in
   ;;
 esac
 
-echo "✅ Done! Note that you should run 'docker-compose build startup-api' to rebuild your container with the new changes applied."
+echo "✅ Done! Note that you should run 'docker-compose build rpg-api' to rebuild your container with the new changes applied."
 
 echo "
 ⚠️ WARNING: Make sure you change your CLIENT environment to match your API environment, otherwise it won't work!"

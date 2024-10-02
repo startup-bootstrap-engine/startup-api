@@ -1,14 +1,14 @@
 {
   "apps": [
     {
-      "name": "startup-api",
+      "name": "rpg-api",
       "script": "./dist/src/server.js",
       "merge_logs": true,
       "max_restarts": 20,
       "autorestart": true,
       "instances": "max",
       "exec_mode": "cluster",
-      "node_args": "-r dotenv/config -r newrelic -r ./register-paths.js",
+      "node_args": "-r dotenv/config -r @rpg-engine/newrelic -r ./register-paths.js",
       "max_memory_restart": "8G",
       "kill_timeout": 20000,
       "min_uptime": 10000,

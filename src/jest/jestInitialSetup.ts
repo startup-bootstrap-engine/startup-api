@@ -9,7 +9,7 @@ jest.setTimeout(30000);
 
 jest.mock("redis", () => redis);
 
-jest.mock("newrelic", () => ({
+jest.mock("@rpg-engine/newrelic", () => ({
   startBackgroundTransaction: jest.fn(),
   endTransaction: jest.fn(),
   recordMetric: jest.fn(),

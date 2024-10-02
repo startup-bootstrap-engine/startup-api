@@ -39,10 +39,15 @@ export class MessagingBroker {
     }
   }
 
-  async sendMessage<T>(service: string, action: string, data: T): Promise<void> {
-    await this.ensureInitialized();
-    const routingKey = `${service}.${action}`;
-    await this.rabbitMQ.publishMessage(MessagingBroker.EXCHANGE, routingKey, data);
+  sendMessage<T>(service: string, action: string, data: T): void {
+    this.ensureInitialized()
+      .then(() => {
+        const routingKey = `${service}.${action}`;
+        return this.rabbitMQ.publishMessage(MessagingBroker.EXCHANGE, routingKey, data);
+      })
+      .catch((error) => {
+        console.error(`Failed to send message: ${error.message}`);
+      });
   }
 
   async listenForMessages(

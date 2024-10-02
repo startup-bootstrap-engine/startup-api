@@ -4,14 +4,14 @@ import "express-async-errors";
 import "reflect-metadata";
 
 import { appEnv } from "@providers/config/env";
-import { DatabaseAdaptersAvailable } from "@providers/database/DatabaseTypes";
 import {
   bullBoardMonitor,
   container,
   cronJobs,
-  databaseFactory,
+  database,
   inMemoryHashTable,
   inMemoryRepository,
+  mapLoader,
   messagingBroker,
   messagingBrokerHandlers,
   newRelic,
@@ -28,13 +28,14 @@ import { RedisPubSub } from "@providers/redis/RedisPubSub";
 import { router } from "@providers/server/Router";
 import { app } from "@providers/server/app";
 import { NewRelicTransactionCategory } from "@providers/types/NewRelicTypes";
-import { EnvType } from "@startup-engine/shared/dist";
+import { EnvType } from "@rpg-engine/shared/dist";
+import { unassignedItemChecker } from "scripts/unassignedItemChecker";
 
 dayjs.extend(duration);
 
 // Load New Relic if not running unit tests
 if (!appEnv.general.IS_UNIT_TEST) {
-  require("newrelic");
+  require("@rpg-engine/newrelic");
 }
 
 // Determine the port to use
@@ -60,7 +61,7 @@ app.listen(port, async () => {
  * @returns {number} The port number.
  */
 function getPort(): number {
-  if (appEnv.general.MICROSERVICE_NAME === "startup-npc") {
+  if (appEnv.general.MICROSERVICE_NAME === "rpg-npc") {
     return 5005;
   }
   return Number(appEnv.general.SERVER_PORT) || 3002;
@@ -74,9 +75,7 @@ async function initializeServerComponents(): Promise<void> {
 
   const redisPubSub = container.get(RedisPubSub);
 
-  const dbAdapter = databaseFactory.createDatabaseAdapter(appEnv.database.DB_ADAPTER as DatabaseAdaptersAvailable);
-
-  await Promise.all([dbAdapter.initialize(), redisManager.connect()]);
+  await Promise.all([database.initialize(), redisManager.connect()]);
 
   await socketAdapter.init(appEnv.socket.type);
 
@@ -93,7 +92,13 @@ async function initializeServerComponents(): Promise<void> {
 
   await bullBoardMonitor.init();
 
-  !IS_MICROSERVICE && cronJobs.start(); // only schedule on startup-api
+  !IS_MICROSERVICE && cronJobs.start(); // only schedule on rpg-api
+
+  await mapLoader.init(); // must be the first thing loaded!
+
+  if (appEnv.general.ENV === EnvType.Development && appEnv.general.DEBUG_MODE === true) {
+    unassignedItemChecker();
+  }
 
   app.use(router);
   app.use(errorHandlerMiddleware);

@@ -6,8 +6,8 @@ import {
   NewRelicSubCategory,
   NewRelicTransactionCategory,
 } from "@providers/types/NewRelicTypes";
+import newrelic from "@rpg-engine/newrelic";
 import { provide } from "inversify-binding-decorators";
-import newrelic from "newrelic";
 
 @provide(NewRelic)
 export class NewRelic {

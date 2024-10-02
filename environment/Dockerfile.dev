@@ -1,27 +1,30 @@
-# Use the official Node.js 20 image
-FROM node:20
+# Use the official Node.js 20 slim image
+FROM node:20-slim
 
-# Install system dependencies including Git (which might not be included by default)
+# Install system dependencies and upgrade npm in a single RUN statement
 RUN apt-get update && \
-    apt-get install -y git && \
+    apt-get install -y --no-install-recommends \
+        git \
+        cmake \
+        build-essential \
+        libssl-dev \
+        ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
 # Set the working directory inside the container
 WORKDIR /usr/src/app
 
-# Copy the package files
+# Copy package files first for better caching
 COPY package.json yarn.lock ./
 
 # Install dependencies using yarn
-RUN yarn --frozen-lockfile
+RUN yarn install --frozen-lockfile
 
 # Copy the rest of the application code
 COPY . .
 
 # Expose necessary ports
-EXPOSE 5002
-EXPOSE 5100
-EXPOSE 5101
+EXPOSE 5002 5100 5101
 
-# Command to run the application
+# Define the command to run the application
 CMD ["yarn", "dev"]
