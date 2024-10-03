@@ -80,13 +80,16 @@ async function initializeServerComponents(): Promise<void> {
 
   await socketAdapter.init(appEnv.socket.type);
 
-  await messagingBrokerHandlers.onAddHandlers();
+  console.log(`rabbitMQ: ${appEnv.modules.rabbitMQ}`);
+  if (appEnv.modules.rabbitMQ) {
+    await messagingBrokerHandlers.onAddHandlers();
+    await messagingBroker.initialize();
+  }
+
   await redisPubSub.init();
   await redisStreams.init();
-
   await redisPubSubListeners.addSubscribers();
   await redisStreamsListeners.addSubscribers();
-  await messagingBroker.initialize();
 
   await inMemoryHashTable.init();
   await inMemoryRepository.init();

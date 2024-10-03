@@ -37,7 +37,7 @@ export class RabbitMQ {
   private ackTimer: NodeJS.Timeout | null = null;
 
   constructor() {
-    if (appEnv.general.IS_UNIT_TEST) {
+    if (appEnv.general.IS_UNIT_TEST && !appEnv.modules.rabbitMQ) {
       return;
     }
 
@@ -75,6 +75,10 @@ export class RabbitMQ {
   }
 
   public async connect(): Promise<void> {
+    if (!appEnv.modules.rabbitMQ) {
+      return;
+    }
+
     if (this.connection && this.isChannelValid(this.publishChannel)) {
       console.log("RabbitMQ is already connected and channels are valid");
       return;

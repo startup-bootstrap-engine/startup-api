@@ -155,6 +155,28 @@ function buildDockerCompose() {
     }
   });
 
+  Object.values(baseCompose.services).forEach((service) => {
+    if (service.depends_on) {
+      if (Array.isArray(service.depends_on)) {
+        // If depends_on is an array, filter out undefined services
+        service.depends_on = service.depends_on.filter((dep) => baseCompose.services[dep]);
+        if (service.depends_on.length === 0) {
+          delete service.depends_on;
+        }
+      } else if (typeof service.depends_on === "object") {
+        // If depends_on is an object, remove keys of undefined services
+        Object.keys(service.depends_on).forEach((dep) => {
+          if (!baseCompose.services[dep]) {
+            delete service.depends_on[dep];
+          }
+        });
+        if (Object.keys(service.depends_on).length === 0) {
+          delete service.depends_on;
+        }
+      }
+    }
+  });
+
   // Remove empty objects from 'volumes' and 'networks'
   removeEmptyObjects(baseCompose.volumes);
   removeEmptyObjects(baseCompose.networks);

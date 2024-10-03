@@ -84,4 +84,10 @@ export const appEnv = {
     username: process.env.RABBITMQ_DEFAULT_USER,
     password: process.env.RABBITMQ_DEFAULT_PASS,
   },
+
+  modules: {
+    rabbitMQ: process.env.MODULE_RABBITMQ === "true",
+    redis: process.env.MODULE_REDIS === "true",
+    websocket: process.env.MODULE_WEBSOCKET === "true",
+  },
 };
