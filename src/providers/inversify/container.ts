@@ -1,7 +1,6 @@
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { DatabaseFactory } from "@providers/database/factory/DatabaseFactory";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
-import { InMemoryRepository } from "@providers/database/InMemoryRepository";
 import { RedisManager } from "@providers/database/RedisManager";
 import { HashGenerator } from "@providers/hash/HashGenerator";
 import { Locker } from "@providers/locks/Locker";
@@ -69,8 +68,6 @@ export const socketEventsBinderControl = container.get<SocketEventsBinderControl
 export const redisManager = container.get<RedisManager>(RedisManager);
 
 export const inMemoryHashTable = container.get<InMemoryHashTable>(InMemoryHashTable);
-
-export const inMemoryRepository = container.get<InMemoryRepository>(InMemoryRepository);
 
 export const bullBoardMonitor = container.get<BullBoardMonitor>(BullBoardMonitor);
 

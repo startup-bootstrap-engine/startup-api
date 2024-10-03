@@ -18,6 +18,12 @@ export class RedisManager {
   ) {}
 
   public async connect(retries: number = this.maxRetries): Promise<void> {
+    if (!appEnv.modules.redis) {
+      throw new Error(
+        "⚠️ Redis module is not enabled. Please set MODULE_REDIS=true in your .env and run yarn module:build"
+      );
+    }
+
     if (this.client) return;
 
     try {

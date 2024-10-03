@@ -4,7 +4,6 @@ import { Seeder } from "@providers/seeds/Seeder";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
 import { cache } from "@providers/constants/CacheConstants";
-import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { DiscordBot } from "@providers/discord/DiscordBot";
 import { ErrorHandlingTracker } from "@providers/errorHandling/ErrorHandlingTracker";
 import { Locker } from "@providers/locks/Locker";
@@ -26,7 +25,6 @@ export class ServerBootstrap {
     private pm2Helper: PM2Helper,
     private seeder: Seeder,
     private locker: Locker,
-    private inMemoryHashTable: InMemoryHashTable,
     private discordBot: DiscordBot,
     private socketSessionControl: SocketSessionControl,
     private errorHandlingTracker: ErrorHandlingTracker,

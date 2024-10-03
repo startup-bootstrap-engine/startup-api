@@ -5,7 +5,7 @@ import { RedisManager } from "./RedisManager";
 
 @provideSingleton(InMemoryHashTable)
 export class InMemoryHashTable {
-  private connection: Redis;
+  private connection: Redis | undefined;
 
   constructor(private redisManager: RedisManager) {}
 
@@ -18,32 +18,45 @@ export class InMemoryHashTable {
     this.connection = await this.redisManager.getPoolClient("in-memory-hash-table");
   }
 
+  private ensureConnection(): void {
+    if (!this.connection) {
+      throw new Error(
+        "Redis connection is not established. Set MODULE_REDIS=true in your .env and run yarn module:build."
+      );
+    }
+  }
+
   public async set(namespace: string, key: string, value: any): Promise<void> {
-    await this.connection.hset(namespace?.toString(), key?.toString(), JSON.stringify(value));
+    this.ensureConnection();
+    await this.connection!.hset(namespace.toString(), key.toString(), JSON.stringify(value));
   }
 
   public async setNx(namespace: string, key: string, value: any): Promise<boolean> {
-    const result = await this.connection.hsetnx(namespace?.toString(), key?.toString(), JSON.stringify(value));
+    this.ensureConnection();
+    const result = await this.connection!.hsetnx(namespace.toString(), key.toString(), JSON.stringify(value));
     return result === 1;
   }
 
   public async expire(key: string, seconds: number, mode: "NX" | "XX" | "GT" | "LT"): Promise<void> {
+    this.ensureConnection();
     if (!appEnv.general.IS_UNIT_TEST) {
-      await this.connection.expire(key?.toString(), seconds, mode as any);
+      await this.connection!.expire(key.toString(), seconds, mode as any);
     }
   }
 
   public async getExpire(namespace: string): Promise<number> {
+    this.ensureConnection();
     if (!namespace) {
       throw new Error("Namespace is undefined or null.");
     }
 
-    const timeLeft = (await this.connection.pttl(namespace.toString())) ?? 0;
+    const timeLeft = (await this.connection!.pttl(namespace.toString())) ?? 0;
     return timeLeft;
   }
 
   public async getAll<T>(namespace: string): Promise<Record<string, T> | undefined> {
-    const values = await this.connection.hgetall(namespace?.toString());
+    this.ensureConnection();
+    const values = await this.connection!.hgetall(namespace.toString());
 
     if (!values) {
       return;
@@ -53,17 +66,20 @@ export class InMemoryHashTable {
   }
 
   public async has(namespace: string, key: string): Promise<boolean> {
-    const result = await this.connection.hexists(namespace?.toString(), key?.toString());
+    this.ensureConnection();
+    const result = await this.connection!.hexists(namespace.toString(), key.toString());
     return Boolean(result);
   }
 
   public async hasAll(namespace: string): Promise<boolean> {
-    const result = await this.connection.exists(namespace?.toString());
+    this.ensureConnection();
+    const result = await this.connection!.exists(namespace.toString());
     return result === 1;
   }
 
   public async get(namespace: string, key: string): Promise<Record<string, any> | undefined> {
-    const value = await this.connection.hget(namespace?.toString(), key?.toString());
+    this.ensureConnection();
+    const value = await this.connection!.hget(namespace.toString(), key.toString());
 
     if (!value) {
       return;
@@ -73,21 +89,25 @@ export class InMemoryHashTable {
   }
 
   public async getAllKeysWithPrefix(prefix: string): Promise<string[]> {
-    const keys = await this.connection.keys(`${prefix}*`);
+    this.ensureConnection();
+    const keys = await this.connection!.keys(`${prefix}*`);
     return keys ?? [];
   }
 
   public async getAllKeys(namespace: string): Promise<string[]> {
-    const keys = await this.connection.hkeys(namespace?.toString());
+    this.ensureConnection();
+    const keys = await this.connection!.hkeys(namespace.toString());
     return keys ?? [];
   }
 
   public async delete(namespace: string, key: string): Promise<void> {
-    await this.connection.hdel(namespace?.toString(), key?.toString());
+    this.ensureConnection();
+    await this.connection!.hdel(namespace.toString(), key.toString());
   }
 
   public async deleteAll(namespace: string): Promise<void> {
-    await this.connection.del(namespace?.toString());
+    this.ensureConnection();
+    await this.connection!.del(namespace.toString());
   }
 
   private parseObject(object: Record<string, string>): Record<string, any> {

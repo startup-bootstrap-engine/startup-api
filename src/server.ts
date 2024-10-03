@@ -11,7 +11,6 @@ import {
   cronJobs,
   databaseFactory,
   inMemoryHashTable,
-  inMemoryRepository,
   messagingBroker,
   messagingBrokerHandlers,
   newRelic,
@@ -76,31 +75,29 @@ async function initializeServerComponents(): Promise<void> {
 
   const database = databaseFactory.createDatabaseAdapter(appEnv.database.DB_ADAPTER as DatabaseAdaptersAvailable);
 
-  await Promise.all([database.initialize(), redisManager.connect()]);
+  await Promise.all([database.initialize(), appEnv.modules.redis && redisManager.connect()]);
 
   await socketAdapter.init(appEnv.socket.type);
 
-  console.log(`rabbitMQ: ${appEnv.modules.rabbitMQ}`);
   if (appEnv.modules.rabbitMQ) {
     await messagingBrokerHandlers.onAddHandlers();
     await messagingBroker.initialize();
   }
 
-  await redisPubSub.init();
-  await redisStreams.init();
-  await redisPubSubListeners.addSubscribers();
-  await redisStreamsListeners.addSubscribers();
-
-  await inMemoryHashTable.init();
-  await inMemoryRepository.init();
-
-  await bullBoardMonitor.init();
+  if (appEnv.modules.redis) {
+    await redisPubSub.init();
+    await redisStreams.init();
+    await redisPubSubListeners.addSubscribers();
+    await redisStreamsListeners.addSubscribers();
+    await inMemoryHashTable.init();
+    await bullBoardMonitor.init();
+  }
 
   !IS_MICROSERVICE && cronJobs.start(); // only schedule on rpg-api
 
   app.use(router);
   app.use(errorHandlerMiddleware);
-  app.use("/admin/queues", bullBoardMonitor.getRouter());
+  appEnv.modules.redis && app.use("/admin/queues", bullBoardMonitor.getRouter());
 
   await serverBootstrap.performOneTimeOperations();
   await serverBootstrap.performMultipleInstancesOperations();
