@@ -189,6 +189,12 @@ export class DynamicQueue {
   };
 
   private async getQueueConnection(queueName: string): Promise<Redis> {
+    if (!appEnv.modules.redis && !appEnv.modules.bullMQ) {
+      throw new Error(
+        "⚠️ Redis or BullMQ modules are not enabled. Please set MODULE_REDIS=true and MODULE_BULLMQ=true in your .env and run yarn module:build"
+      );
+    }
+
     if (!this.queueConnections.has(queueName)) {
       const connection = await this.redisManager.getPoolClient(queueName);
       this.queueConnections.set(queueName, connection);

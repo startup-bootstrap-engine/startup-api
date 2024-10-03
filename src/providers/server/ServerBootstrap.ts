@@ -60,7 +60,9 @@ export class ServerBootstrap {
 
     await this.shutdownHandling();
 
-    await this.clearSomeQueues();
+    if (appEnv.modules.bullMQ) {
+      await this.clearSomeQueues();
+    }
 
     this.errorHandlingTracker.overrideDebugHandling();
 
@@ -82,21 +84,26 @@ export class ServerBootstrap {
 
     process.on("SIGTERM", async () => {
       await execQueueShutdown();
-      await this.messagingBroker.close();
-
+      if (appEnv.modules.rabbitMQ) {
+        await this.messagingBroker.close();
+      }
       process.exit(0);
     });
 
     process.on("SIGINT", async () => {
       await execQueueShutdown();
 
-      await this.messagingBroker.close();
+      if (appEnv.modules.rabbitMQ) {
+        await this.messagingBroker.close();
+      }
       process.exit(0);
     });
   }
 
   private async execOneTimeOperations(): Promise<void> {
-    await this.socketSessionControl.clearAllSessions();
+    if (appEnv.modules.websocket) {
+      await this.socketSessionControl.clearAllSessions();
+    }
 
     await this.cooldown.clearAll();
 

@@ -102,7 +102,7 @@ async function initializeServerComponents(): Promise<void> {
 
   app.use(router);
   app.use(errorHandlerMiddleware);
-  appEnv.modules.redis && app.use("/admin/queues", bullBoardMonitor.getRouter());
+  appEnv.modules.redis && appEnv.modules.bullMQ && app.use("/admin/queues", bullBoardMonitor.getRouter());
 
   await serverBootstrap.performOneTimeOperations();
   await serverBootstrap.performMultipleInstancesOperations();

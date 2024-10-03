@@ -91,5 +91,6 @@ export const appEnv = {
     websocket: process.env.MODULE_WEBSOCKET === "true",
     redisStreams: process.env.MODULE_REDIS_STREAMS === "true",
     redisPubSub: process.env.MODULE_REDIS_PUBSUB === "true",
+    bullMQ: process.env.MODULE_BULLMQ === "true",
   },
 };
