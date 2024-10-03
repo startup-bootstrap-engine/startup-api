@@ -83,12 +83,17 @@ async function initializeServerComponents(): Promise<void> {
   }
 
   if (appEnv.modules.redis) {
-    const redisPubSub = container.get(RedisPubSub);
+    if (appEnv.modules.redisPubSub) {
+      const redisPubSub = container.get(RedisPubSub);
+      await redisPubSub.init();
+      await redisPubSubListeners.addSubscribers();
+    }
 
-    await redisPubSub.init();
-    await redisStreams.init();
-    await redisPubSubListeners.addSubscribers();
-    await redisStreamsListeners.addSubscribers();
+    if (appEnv.modules.redisStreams) {
+      await redisStreams.init();
+      await redisStreamsListeners.addSubscribers();
+    }
+
     await inMemoryHashTable.init();
     await bullBoardMonitor.init();
   }

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable require-await */
+import { appEnv } from "@providers/config/env";
 import { SERVER_API_NODES_QTY } from "@providers/constants/ServerConstants";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
@@ -30,6 +31,12 @@ export class RedisStreams {
    * Initialize the RedisStreams by connecting to Redis and setting up consumer groups.
    */
   public async init(): Promise<void> {
+    if (!appEnv.modules.redis || !appEnv.modules.redisStreams) {
+      throw new Error(
+        "⚠️ Redis or RedisStreams modules are not enabled. Please set MODULE_REDIS=true and MODULE_REDIS_STREAMS=true in your .env and run yarn module:build"
+      );
+    }
+
     await this.connectToRedis();
     await this.initializeConsumerGroups();
     this.startPeriodicTrim();

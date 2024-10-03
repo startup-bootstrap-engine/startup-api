@@ -21,9 +21,9 @@ export class SocketAdapter implements ISocket {
   ) {}
 
   public async init(socketType: SocketTypes): Promise<void> {
-    if (!appEnv.modules.websocket && !appEnv.modules.redis) {
+    if (!appEnv.modules.websocket || !appEnv.modules.redis) {
       throw new Error(
-        "⚠️ Redis and Websocket module are not enabled. Please set MODULE_REDIS=true and MODULE_WEBSOCKET=true in your .env and run yarn module:build"
+        "⚠️ Redis or Websocket modules are not enabled. Please set MODULE_REDIS=true and MODULE_WEBSOCKET=true in your .env and run yarn module:build"
       );
     }
 

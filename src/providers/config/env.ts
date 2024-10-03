@@ -89,5 +89,7 @@ export const appEnv = {
     rabbitMQ: process.env.MODULE_RABBITMQ === "true",
     redis: process.env.MODULE_REDIS === "true",
     websocket: process.env.MODULE_WEBSOCKET === "true",
+    redisStreams: process.env.MODULE_REDIS_STREAMS === "true",
+    redisPubSub: process.env.MODULE_REDIS_PUBSUB === "true",
   },
 };

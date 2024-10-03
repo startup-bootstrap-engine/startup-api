@@ -1,3 +1,4 @@
+import { appEnv } from "@providers/config/env";
 import { RedisManager } from "@providers/database/RedisManager";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import Redis from "ioredis";
@@ -15,6 +16,12 @@ export class RedisPubSub {
   constructor(private redisManager: RedisManager) {}
 
   public async init(): Promise<void> {
+    if (!appEnv.modules.redis) {
+      throw new Error(
+        "⚠️ Redis or RedisPubSub modules are not enabled. Please set MODULE_REDIS=true and MODULE_REDIS_PUBSUB=true in your .env and run yarn module:build"
+      );
+    }
+
     this.subConnection = await this.redisManager.getPoolClient("redis-pubsub-sub");
     this.pubConnection = await this.redisManager.getPoolClient("redis-pubsub-pub");
 
