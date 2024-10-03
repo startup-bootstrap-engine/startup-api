@@ -19,11 +19,12 @@ export class SocketAuth {
   ): void {
     this.removeListenerIfExists(channel, event);
 
-    channel.on(event, async (data: any) => {
+    channel.on(event, async (data: any, owner: IUser) => {
       try {
         if (!(await this.socketAuthLock.acquireGlobalLock(`global-lock-event-${event}-${channel.id}`))) return;
 
         // await this.socketAuthEventsValidator.handleEventLogic(event, data, callback, owner);
+        await callback(data, owner);
       } catch (error) {
         console.error(error);
       } finally {

@@ -1,10 +1,13 @@
 import { appEnv } from "@providers/config/env";
+import { socketEventsBinderControl } from "@providers/inversify/container";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { ISocket, SocketTypes } from "@startup-engine/shared";
 import { GeckosIO } from "./GeckosIO";
 import { SocketIO } from "./SocketIO";
 import { SocketSessionControl } from "./SocketSessionControl";
 import { SocketClasses } from "./SocketsTypes";
+
+import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 
 @provideSingleton(SocketAdapter)
 export class SocketAdapter implements ISocket {
@@ -13,10 +16,17 @@ export class SocketAdapter implements ISocket {
   constructor(
     private socketIO: SocketIO,
     private geckosIO: GeckosIO,
-    private socketSessionControl: SocketSessionControl
+    private socketSessionControl: SocketSessionControl,
+    private userRepository: UserRepository
   ) {}
 
   public async init(socketType: SocketTypes): Promise<void> {
+    if (!appEnv.modules.websocket && !appEnv.modules.redis) {
+      throw new Error(
+        "⚠️ Redis and Websocket module are not enabled. Please set MODULE_REDIS=true and MODULE_WEBSOCKET=true in your .env and run yarn module:build"
+      );
+    }
+
     switch (socketType as SocketTypes) {
       case SocketTypes.UDP:
         console.log("🔌 Initializing UDP socket...");
@@ -61,29 +71,39 @@ export class SocketAdapter implements ISocket {
 
   public onConnect(): void {
     SocketAdapter.socketClass?.onConnect(async (channel) => {
-      // const socketQuery = channel?.handshake?.query;
-      // const hasCharacterId = socketQuery.characterId !== "undefined" && socketQuery.characterId !== undefined;
-      // if (hasCharacterId) {
-      //   const characterId = socketQuery.characterId as string;
-      //   const hasSocketOngoingSession = await this.socketSessionControl.hasSession(characterId);
-      //   if (hasSocketOngoingSession) {
-      //     // force disconnect the previous socket connection
-      //     const previousCharacter = await Character.findById(characterId).lean().select("channelId");
-      //     if (!previousCharacter) {
-      //       throw new Error("Character not found!");
-      //     }
-      //     void this.emitToUser(previousCharacter.channelId!, CharacterSocketEvents.CharacterForceDisconnect, {
-      //       reason: "You have been disconnected because you logged in from another device!",
-      //     });
-      //     const previousChannel = this.getChannelById(previousCharacter.channelId!);
-      //     if (previousChannel) {
-      //       await previousChannel.leave();
-      //       previousChannel.removeAllListeners();
-      //       await socketEventsBinderControl.unbindEvents(previousChannel);
-      //     }
-      //   }
-      // }
-      // await socketEventsBinderControl.bindEvents(channel);
+      const socketQuery = channel?.handshake?.query;
+
+      // grap userId from socketQuery and update User with channelId
+
+      const { userId } = socketQuery;
+
+      await this.userRepository.updateById(userId, { channelId: channel.id });
+
+      const hasUserId = socketQuery.userId !== "undefined" && socketQuery.userId !== undefined;
+      if (hasUserId) {
+        const userId = socketQuery.userId as string;
+        const hasSocketOngoingSession = await this.socketSessionControl.hasSession(userId);
+        if (hasSocketOngoingSession) {
+          // force disconnect the previous socket connection
+          // const previousUser = await User.findById(userId).lean().select("channelId");
+
+          const previousUser = await this.userRepository.findById(userId, { select: "channelId" });
+
+          if (!previousUser) {
+            throw new Error("User not found!");
+          }
+          void this.emitToUser(previousUser.channelId!, "UserForceDisconnect", {
+            reason: "You have been disconnected because you logged in from another device!",
+          });
+          const previousChannel = this.getChannelById(previousUser.channelId!);
+          if (previousChannel) {
+            await previousChannel.leave();
+            previousChannel.removeAllListeners();
+            await socketEventsBinderControl.unbindEvents(previousChannel);
+          }
+        }
+      }
+      await socketEventsBinderControl.bindEvents(channel);
     });
   }
 

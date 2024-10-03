@@ -1,6 +1,10 @@
-- Always look for pattern samples on the codebase involving what you want to generate. Please follow codebase patterns!
-- Mongoose queries: always favor .lean and also atomic updates
-- no need to try catch on controllers
-- remember to use return type on functions
-- for lock keys, prefer dash-case
-- always prefix interfaces with I (IUser, ICharacter, etc)
+* Always look for pattern samples on the codebase involving what you want to generate. Please follow codebase patterns!
+* We're in a TS codebase. Careful with types.
+* Always favor repository pattern usage. No need to use lean with that because its built in.
+* Don't access database models directly. Use repositories.
+* Prefer interfaces with I prefix, instead of using type (IUser, ICharacter, etc).
+* no need to try catch on controllers
+* remember to use return type on functions
+* for lock keys, prefer dash-case
+* Always use container.get to get dependencies
+* Always use await before methods that return promises

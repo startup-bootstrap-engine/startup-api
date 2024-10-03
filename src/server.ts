@@ -71,13 +71,11 @@ function getPort(): number {
 async function initializeServerComponents(): Promise<void> {
   const { IS_MICROSERVICE } = appEnv.general;
 
-  const redisPubSub = container.get(RedisPubSub);
-
   const database = databaseFactory.createDatabaseAdapter(appEnv.database.DB_ADAPTER as DatabaseAdaptersAvailable);
 
   await Promise.all([database.initialize(), appEnv.modules.redis && redisManager.connect()]);
 
-  await socketAdapter.init(appEnv.socket.type);
+  appEnv.modules.redis && appEnv.modules.websocket && (await socketAdapter.init(appEnv.socket.type));
 
   if (appEnv.modules.rabbitMQ) {
     await messagingBrokerHandlers.onAddHandlers();
@@ -85,6 +83,8 @@ async function initializeServerComponents(): Promise<void> {
   }
 
   if (appEnv.modules.redis) {
+    const redisPubSub = container.get(RedisPubSub);
+
     await redisPubSub.init();
     await redisStreams.init();
     await redisPubSubListeners.addSubscribers();

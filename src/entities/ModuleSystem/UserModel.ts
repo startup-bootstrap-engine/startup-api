@@ -47,6 +47,9 @@ const userSchema = createSchema(
     isManuallyControlledPremiumAccount: Type.boolean({ default: false }),
 
     pushNotificationToken: Type.string({ default: null }),
+
+    // Websocket channelId
+    channelId: Type.string({ default: null }),
   },
   { timestamps: { createdAt: true, updatedAt: true } }
 );
