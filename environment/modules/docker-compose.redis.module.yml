@@ -1,0 +1,31 @@
+services:
+  startup-redis:
+    container_name: startup-redis
+    restart: always
+    image: redis:latest
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    expose:
+      - "${REDIS_PORT}"
+    env_file: .env
+    volumes:
+      - ./config/redis.conf:/redis.conf
+    command: ["redis-server", "/redis.conf", "--port", "${REDIS_PORT}"]
+    networks:
+      - startup-network
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -p ${REDIS_PORT} ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 2
+
+  startup-redis-commander:
+    container_name: startup-redis-commander
+    restart: always
+    image: rediscommander/redis-commander:latest
+    ports:
+      - "8081:8081"
+    environment:
+      REDIS_HOSTS: "redis:startup-redis:${REDIS_PORT}"
+    networks:
+      - startup-network
