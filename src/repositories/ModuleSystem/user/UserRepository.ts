@@ -16,7 +16,7 @@ export class UserRepository extends BaseRepository<IUser> implements IBaseReposi
     super(repositoryFactory.createRepository<IUser>(model, userSchema));
   }
 
-  public async signUp(newUserData: any): Promise<IUser> {
+  public async signUp(newUserData: IUser): Promise<IUser> {
     const newUser = await this.create(newUserData, {
       uniqueByKeys: "email",
     });

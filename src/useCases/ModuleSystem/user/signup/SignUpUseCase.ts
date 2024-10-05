@@ -5,13 +5,14 @@ import { provide } from "inversify-binding-decorators";
 
 import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { UserAuth } from "@providers/auth/UserAuth";
+import { UserPassword } from "@providers/user/UserPassword";
 import { validate } from "email-validator";
 import { ConflictError } from "../../../../providers/errors/ConflictError";
 import { AuthSignUpDTO } from "../AuthDTO";
 
 @provide(SignUpUseCase)
 export class SignUpUseCase {
-  constructor(private userRepository: UserRepository, private userAuth: UserAuth) {}
+  constructor(private userRepository: UserRepository, private userAuth: UserAuth, private userPassword: UserPassword) {}
 
   public async signUp(authSignUpDTO: AuthSignUpDTO): Promise<IUser> {
     const { email, password, passwordConfirmation } = authSignUpDTO;
@@ -30,7 +31,11 @@ export class SignUpUseCase {
       throw new BadRequestError("Sorry, your e-mail is invalid");
     }
 
-    const newUser = await this.userRepository.signUp(authSignUpDTO);
+    authSignUpDTO.email = authSignUpDTO.email.toLocaleLowerCase();
+
+    const userWithHashedPassword = await this.userPassword.generatePasswordHash(authSignUpDTO);
+
+    const newUser = await this.userRepository.signUp(userWithHashedPassword);
 
     // if (newUser) {
     //   console.log("🤖 Submitting new user's welcome e-mail");

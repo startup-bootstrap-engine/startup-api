@@ -19,7 +19,7 @@ content-type: application/json
 
 {
     "email": "joaopaulofurtado@live.com",
-    "password": "123"
+    "password": "123456"
 }
 
 ### 
