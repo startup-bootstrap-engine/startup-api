@@ -1,4 +1,4 @@
-import { IUser } from "@entities/ModuleSystem/UserModel";
+import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { appEnv } from "@providers/config/env";
 import { container } from "@providers/inversify/container";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";

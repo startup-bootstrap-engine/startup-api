@@ -1,6 +1,5 @@
 import { appEnv } from "@providers/config/env";
 import { provide } from "inversify-binding-decorators";
-import { Model } from "mongoose";
 import { DatabaseAdaptersAvailable, IRepositoryAdapter } from "../DatabaseTypes";
 import { FirebaseRepository } from "./FirebaseRepository";
 import { MongooseRepository } from "./MongooseRepository";
@@ -10,7 +9,7 @@ export class RepositoryFactory {
   constructor(private firebaseRepository: FirebaseRepository<any>) {}
 
   public createRepository<T extends { [key: string]: any }>(
-    model: Model<any>,
+    model: any,
     type: DatabaseAdaptersAvailable = appEnv.database.DB_ADAPTER as DatabaseAdaptersAvailable
   ): IRepositoryAdapter<T> {
     switch (type) {

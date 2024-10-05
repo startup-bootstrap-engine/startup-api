@@ -1,4 +1,4 @@
-import { IUser } from "@entities/ModuleSystem/UserModel";
+import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { UserAccountTypes } from "@startup-engine/shared";

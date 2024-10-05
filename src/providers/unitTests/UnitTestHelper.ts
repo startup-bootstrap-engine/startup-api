@@ -1,7 +1,6 @@
 /* eslint-disable mongoose-performance/require-lean */
 
-import { IUser } from "@entities/ModuleSystem/UserModel";
-
+import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { provide } from "inversify-binding-decorators";
 import { userMock } from "./mock/userMock";

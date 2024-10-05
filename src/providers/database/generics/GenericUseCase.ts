@@ -1,9 +1,10 @@
+import { AvailableSchemas } from "@entities/ModuleSystem/schemas/schemaIndex";
 import { provide } from "inversify-binding-decorators";
-import { Document, FilterQuery, Model } from "mongoose";
+import { FilterQuery, Model } from "mongoose";
 import { BaseRepository, IBaseRepositoryFindByOptions } from "../repository/BaseRepository";
 
 @provide(GenericUseCase)
-export class GenericUseCase<T extends Document> {
+export class GenericUseCase<T extends AvailableSchemas> {
   constructor(protected model: Model<T>, protected repository: BaseRepository<T>) {}
 
   public async create(data: T): Promise<T> {

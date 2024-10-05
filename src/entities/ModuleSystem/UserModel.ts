@@ -1,98 +1,31 @@
-/* eslint-disable mongoose-performance/require-lean */
-import { TypeHelper, UserAccountTypes, UserAuthFlow, UserTypes } from "@startup-engine/shared";
-import bcrypt from "bcrypt";
-import uniqueValidator from "mongoose-unique-validator";
-import { SpeedGooseCacheAutoCleaner } from "speedgoose";
-import { ExtractDoc, Type, createSchema, typedModel } from "ts-mongoose";
+// src/models/UserModel.ts
+import { appEnv } from "@providers/config/env";
+import { DatabaseAdaptersAvailable } from "@providers/database/DatabaseTypes";
+import { provide } from "inversify-binding-decorators";
+import { createMongooseModel } from "./mongoose/createMongooseModel";
+import { IAgnosticSchema } from "./schemas/schemaTypes";
+import { IUser, userSchema } from "./schemas/userSchema";
 
-const mongooseHidden = require("mongoose-hidden")();
+@provide(UserModel)
+export class UserModel implements IAgnosticSchema {
+  private adapter: string;
 
-const userSchema = createSchema(
-  {
-    name: Type.string(),
-    role: Type.string({
-      required: true,
-      default: UserTypes.Regular,
-      enum: TypeHelper.enumToStringArray(UserTypes),
-    }),
-    authFlow: Type.string({
-      required: true,
-      default: UserAuthFlow.Basic,
-      enum: TypeHelper.enumToStringArray(UserAuthFlow),
-    }),
-    email: Type.string({ required: true, unique: true }),
-    password: Type.string(),
-    address: Type.string(),
-    phone: Type.string(),
-    salt: Type.string(),
-    unsubscribed: Type.boolean({ default: false }),
-    refreshTokens: Type.array().of({
-      token: Type.string(),
-    }),
-    wallet: {
-      publicAddress: Type.string(),
-      networkId: Type.number(),
-    },
-    characters: Type.array().of(
-      Type.objectId({
-        ref: "Character",
-      })
-    ),
-    accountType: Type.string({
-      required: true,
-      default: UserAccountTypes.Free,
-      enum: TypeHelper.enumToStringArray(UserAccountTypes),
-    }),
+  /**
+   * Initializes and validates user data.
+   * @param userData Partial user data input.
+   * @returns Validated and processed user data.
+   * @throws ValidationError if validation fails.
+   */
+  public initializeData(userData, adapter = appEnv.database.DB_ADAPTER as DatabaseAdaptersAvailable): IUser {
+    switch (adapter) {
+      case "mongoose":
+        const mongooseModel = createMongooseModel("User", userSchema);
 
-    isManuallyControlledPremiumAccount: Type.boolean({ default: false }),
-
-    pushNotificationToken: Type.string({ default: null }),
-
-    // Websocket channelId
-    channelId: Type.string({ default: null }),
-  },
-  { timestamps: { createdAt: true, updatedAt: true } }
-);
-
-userSchema.index(
-  {
-    email: 1,
-  },
-  { background: true }
-);
-
-userSchema.plugin(SpeedGooseCacheAutoCleaner);
-
-userSchema.plugin(uniqueValidator);
-
-export type IUser = ExtractDoc<typeof userSchema>;
-
-//  Hidden fields (not exposed through API responses)
-userSchema.plugin(mongooseHidden, {
-  hidden: {
-    _id: false,
-    password: true,
-    salt: true,
-    refreshTokens: true,
-    createdAt: true,
-    updatedAt: true,
-  },
-});
-
-// Hooks ========================================
-
-userSchema.pre("save", async function (next): Promise<void> {
-  // @ts-ignore
-  const user = this as IUser;
-  user.email = user.email.toLocaleLowerCase();
-  const salt = await bcrypt.genSalt();
-
-  if (user.isModified("password")) {
-    const hash = await bcrypt.hash(user.password, salt);
-    user.password = hash;
-    user.salt = salt;
-    next();
+        return mongooseModel as unknown as IUser;
+      case "firebase":
+        return userData as IUser;
+      default:
+        throw new Error(`Adapter type ${adapter} is not supported`);
+    }
   }
-});
-
-export const User = typedModel("User", userSchema);
+}

@@ -1,10 +1,10 @@
-import { IUser } from "@entities/ModuleSystem/UserModel";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { TS } from "@providers/translation/TranslationHelper";
 import { provide } from "inversify-binding-decorators";
 import jwt from "jsonwebtoken";
 
+import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { appEnv } from "../../../../providers/config/env";
 import { ForbiddenError } from "../../../../providers/errors/ForbiddenError";
 import { UnauthorizedError } from "../../../../providers/errors/UnauthorizedError";

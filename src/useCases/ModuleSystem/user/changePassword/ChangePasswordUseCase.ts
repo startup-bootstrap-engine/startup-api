@@ -1,10 +1,10 @@
-import { IUser } from "@entities/ModuleSystem/UserModel";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { TS } from "@providers/translation/TranslationHelper";
 import bcrypt from "bcrypt";
 import { provide } from "inversify-binding-decorators";
 
+import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { UserAuth } from "@providers/auth/UserAuth";
 import { TransactionalEmail } from "../../../../../emails/TransactionalEmail";
 import { appEnv } from "../../../../providers/config/env";

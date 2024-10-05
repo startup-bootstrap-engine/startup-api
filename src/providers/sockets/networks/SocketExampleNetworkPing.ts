@@ -1,4 +1,4 @@
-import { IUser } from "@entities/ModuleSystem/UserModel";
+import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";

@@ -1,10 +1,10 @@
+import { AvailableSchemas } from "@entities/ModuleSystem/schemas/schemaIndex";
 import { IRepositoryAdapter } from "@providers/database/DatabaseTypes";
 import { ConflictError } from "@providers/errors/ConflictError";
 import { TS } from "@providers/translation/TranslationHelper";
 import { provide } from "inversify-binding-decorators";
-import { Document, FilterQuery } from "mongoose";
 
-export interface IBaseRepository<T extends Document> extends IRepositoryAdapter<T> {}
+export interface IBaseRepository<T extends AvailableSchemas> extends IRepositoryAdapter<T> {}
 
 export interface IBaseRepositoryCreateOptions {
   uniqueByKeys?: string | string[];
@@ -22,7 +22,7 @@ export interface IBaseRepositoryFindByOptions {
 }
 
 @provide(BaseRepository)
-export class BaseRepository<T extends Document> implements IBaseRepository<T> {
+export class BaseRepository<T extends AvailableSchemas> implements IBaseRepository<T> {
   constructor(private repositoryAdapter: IRepositoryAdapter<T>) {}
 
   public async create(data: Partial<T>, options?: IBaseRepositoryCreateOptions): Promise<T> {
@@ -49,11 +49,11 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
     return await this.repositoryAdapter.findById(id, options);
   }
 
-  public async findBy(params: FilterQuery<T>, options?: IBaseRepositoryFindByOptions): Promise<T | null> {
+  public async findBy(params: Record<string, unknown>, options?: IBaseRepositoryFindByOptions): Promise<T | null> {
     return await this.repositoryAdapter.findBy(params, options);
   }
 
-  public async findAll(query: FilterQuery<T>, options?: IBaseRepositoryFindByOptions): Promise<T[]> {
+  public async findAll(query: Record<string, unknown>, options?: IBaseRepositoryFindByOptions): Promise<T[]> {
     return await this.repositoryAdapter.findAll(query, options);
   }
 
@@ -61,7 +61,7 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
     return await this.repositoryAdapter.updateById(id, data);
   }
 
-  public async updateBy(params: FilterQuery<T>, data: Partial<T>): Promise<T | null> {
+  public async updateBy(params: Record<string, unknown>, data: Partial<T>): Promise<T | null> {
     return await this.repositoryAdapter.updateBy(params, data);
   }
 

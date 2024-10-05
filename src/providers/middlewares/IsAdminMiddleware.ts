@@ -1,5 +1,5 @@
+import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { UserTypes } from "@startup-engine/shared";
-import { IUser } from "../../entities/ModuleSystem/UserModel";
 import { UnauthorizedError } from "../errors/UnauthorizedError";
 import { TS } from "../translation/TranslationHelper";
 import { IAuthenticatedRequest } from "../types/ServerTypes";

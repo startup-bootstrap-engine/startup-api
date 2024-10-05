@@ -1,8 +1,8 @@
-import { IUser } from "@entities/ModuleSystem/UserModel";
 import { AuthMiddleware } from "@providers/middlewares/AuthMiddleware";
 import { Response } from "express";
 import { controller, httpGet, interfaces } from "inversify-express-utils";
 
+import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { IAuthenticatedRequest } from "../../../../providers/types/ServerTypes";
 import { OwnInfoUserUseCase } from "./OwnInfoUserUseCase";
 

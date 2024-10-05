@@ -1,6 +1,5 @@
+import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { Request } from "express";
-
-import { IUser } from "../../entities/ModuleSystem/UserModel";
 
 export interface IRequestCustom extends Request {
   body: {

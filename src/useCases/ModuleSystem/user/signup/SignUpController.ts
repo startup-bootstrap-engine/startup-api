@@ -1,4 +1,4 @@
-import { IUser } from "@entities/ModuleSystem/UserModel";
+import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { DTOValidatorMiddleware } from "@providers/middlewares/DTOValidatorMiddleware";
 import { HttpStatus } from "@startup-engine/shared";

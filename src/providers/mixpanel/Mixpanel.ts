@@ -1,7 +1,7 @@
+import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { EnvType } from "@startup-engine/shared/dist";
 import { provide } from "inversify-binding-decorators";
 import Mixpanel from "mixpanel";
-import { IUser } from "../../entities/ModuleSystem/UserModel";
 import { appEnv } from "../config/env";
 
 @provide(MixpanelTracker)

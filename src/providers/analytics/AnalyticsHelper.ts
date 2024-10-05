@@ -1,10 +1,10 @@
 import { Identify } from "@amplitude/identify";
+import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { DEFAULT_DATE_FORMAT } from "@providers/constants/DateConstants";
 import { MixpanelTracker } from "@providers/mixpanel/Mixpanel";
 import { EnvType } from "@startup-engine/shared/dist";
 import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
-import { IUser } from "../../entities/ModuleSystem/UserModel";
 import { appEnv } from "../config/env";
 import { amplitudeClient } from "../constants/AnalyticsConstants";
 

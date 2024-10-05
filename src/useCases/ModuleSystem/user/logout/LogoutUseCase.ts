@@ -1,4 +1,4 @@
-import { IUser } from "@entities/ModuleSystem/UserModel";
+import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { provide } from "inversify-binding-decorators";
