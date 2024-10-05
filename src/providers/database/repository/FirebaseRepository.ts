@@ -34,8 +34,6 @@ export class FirebaseRepository<T> implements IRepositoryAdapter<T> {
   public async create(item: T): Promise<T> {
     const dbItem = joiToObject(this.schema, item) as T;
 
-    console.log(dbItem);
-
     // Generate a key first
     const newKey = this.dbRef.push().key;
 

@@ -1,10 +1,10 @@
 import { AvailableSchemas } from "@entities/ModuleSystem/schemas/schemaIndex";
-import { IRepositoryAdapter } from "@providers/database/DatabaseTypes";
 import { ConflictError } from "@providers/errors/ConflictError";
 import { TS } from "@providers/translation/TranslationHelper";
 import { provide } from "inversify-binding-decorators";
+import { IRepositoryAdapter } from "../DatabaseTypes";
 
-export interface IBaseRepository<T extends AvailableSchemas> extends IRepositoryAdapter<T> {}
+export interface IBaseRepository<T extends AvailableSchemas> extends IRepositoryAdapter<T, Record<string, unknown>> {}
 
 export interface IBaseRepositoryCreateOptions {
   uniqueByKeys?: string | string[];
@@ -23,7 +23,7 @@ export interface IBaseRepositoryFindByOptions {
 
 @provide(BaseRepository)
 export class BaseRepository<T extends AvailableSchemas> implements IBaseRepository<T> {
-  constructor(private repositoryAdapter: IRepositoryAdapter<T>) {}
+  constructor(private repositoryAdapter: IRepositoryAdapter<T, Record<string, unknown>>) {}
 
   public async create(data: Partial<T>, options?: IBaseRepositoryCreateOptions): Promise<T> {
     if (options?.uniqueByKeys) {
