@@ -1,20 +1,25 @@
-import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { joiToObject } from "@entities/schemaUtils";
 import admin from "firebase-admin";
-import { Model } from "mongoose";
+import { provide } from "inversify-binding-decorators";
+import { ObjectSchema } from "joi";
 import { FirebaseAdapter } from "../adapters/FirebaseAdapter";
 import { IRepositoryAdapter } from "../DatabaseTypes";
 import { ModelUtils } from "../utils/ModelUtils";
 
-@provideSingleton(FirebaseRepository)
+@provide(FirebaseRepository)
 export class FirebaseRepository<T> implements IRepositoryAdapter<T> {
   private database: admin.database.Database | undefined;
   private dbRef: admin.database.Reference;
-  private MongoModelRef: Model<any>;
+  private schema: ObjectSchema;
 
   constructor(private firebaseAdapter: FirebaseAdapter, private modelUtils: ModelUtils) {}
 
-  public init(model: Model<any>): void {
-    this.MongoModelRef = model;
+  public init(modelName: string, schema: ObjectSchema): void {
+    if (!modelName) {
+      throw new Error("Model not initialized");
+    }
+
+    this.schema = schema;
 
     this.database = this.firebaseAdapter.getDatabase();
 
@@ -22,10 +27,15 @@ export class FirebaseRepository<T> implements IRepositoryAdapter<T> {
       return;
     }
 
-    this.dbRef = this.database.ref(this.modelUtils.getModelNamePluralized(this.MongoModelRef));
+    // Initialize dbRef with the collection name
+    this.dbRef = this.database.ref(this.modelUtils.getModelNamePluralized(modelName));
   }
 
   public async create(item: T): Promise<T> {
+    const dbItem = joiToObject(this.schema, item) as T;
+
+    console.log(dbItem);
+
     // Generate a key first
     const newKey = this.dbRef.push().key;
 
@@ -33,24 +43,13 @@ export class FirebaseRepository<T> implements IRepositoryAdapter<T> {
       throw new Error("Failed to generate key for new item");
     }
 
-    console.log(`Generated key: ${newKey}`);
-
-    // Create the mongoose model with the generated key
-    let mongoMockModel = new this.MongoModelRef({
-      ...(item as Record<string, unknown>),
-    });
-
-    const itemData = mongoMockModel.toObject();
-
     const newItemRef = this.dbRef.child(newKey);
     await newItemRef.set({
-      ...itemData,
+      ...dbItem,
       _id: newKey.toString(),
     });
 
-    mongoMockModel = null; // Free up memory
-
-    return { ...item, id: newKey } as T;
+    return { ...dbItem, id: newKey } as T;
   }
 
   public async findById(id: string): Promise<T | null> {

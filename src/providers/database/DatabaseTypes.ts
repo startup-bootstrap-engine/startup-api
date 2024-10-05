@@ -1,3 +1,4 @@
+import { ObjectSchema } from "joi";
 import { Model } from "mongoose";
 import { IBaseRepositoryFindByOptions } from "./repository/BaseRepository";
 
@@ -9,7 +10,7 @@ export interface IDatabaseAdapter {
 export type DatabaseAdaptersAvailable = "mongoose" | "firebase";
 
 export interface IRepositoryAdapter<T> {
-  init?(model: Model<any>): Promise<void> | void;
+  init?(model: Model<any> | string, schema: ObjectSchema): Promise<void> | void;
   create(item: T): Promise<T>;
   findById(id: string, options?: IBaseRepositoryFindByOptions): Promise<T | null>;
   findBy(params: any, options?: IBaseRepositoryFindByOptions): Promise<T | null>;

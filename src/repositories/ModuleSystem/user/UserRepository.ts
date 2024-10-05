@@ -13,8 +13,7 @@ export class UserRepository extends BaseRepository<IUser> implements IBaseReposi
     private userModel: UserModel
   ) {
     const model = userModel.initializeData(userSchema);
-
-    super(repositoryFactory.createRepository<IUser>(model));
+    super(repositoryFactory.createRepository<IUser>(model, userSchema));
   }
 
   public async signUp(newUserData: any): Promise<IUser> {

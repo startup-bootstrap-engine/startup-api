@@ -32,13 +32,11 @@ export const userSchema = Joi.object({
 
   role: Joi.string()
     .valid(...Object.values(UserTypes))
-    .default(UserTypes.Regular)
-    .required(),
+    .default(UserTypes.Regular),
 
   authFlow: Joi.string()
     .valid(...Object.values(UserAuthFlow))
-    .default(UserAuthFlow.Basic)
-    .required(),
+    .default(UserAuthFlow.Basic),
 
   email: Joi.string().email().required(),
 
@@ -69,8 +67,7 @@ export const userSchema = Joi.object({
 
   accountType: Joi.string()
     .valid(...Object.values(UserAccountTypes))
-    .default(UserAccountTypes.Free)
-    .required(),
+    .default(UserAccountTypes.Free),
 
   isManuallyControlledPremiumAccount: Joi.boolean().default(false),
 

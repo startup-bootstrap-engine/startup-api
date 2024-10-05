@@ -1,4 +1,4 @@
-import { ObjectSchema } from "joi";
+import Joi, { ObjectSchema, ValidationResult } from "joi";
 import mongoose, { Document, Model, Schema, SchemaDefinition, SchemaTypeOpts } from "mongoose";
 
 /**
@@ -141,4 +141,30 @@ export function createMongooseModel<T extends Document>(modelName: string, joiSc
 
   // Create and return the Mongoose model
   return mongoose.model<T>(modelName, schema);
+}
+
+/**
+ * Validates and sanitizes data using the provided Joi schema.
+ * Populates default values as defined in the schema.
+ *
+ * @param joiSchema - The Joi schema to validate against.
+ * @param data - The input data to validate.
+ * @param options - Optional Joi validation options.
+ * @returns The validated and sanitized object.
+ * @throws An error if validation fails.
+ */
+export function joiToObject<T>(joiSchema: ObjectSchema, data: any, options?: Joi.ValidationOptions): T {
+  const { value, error }: ValidationResult = joiSchema.validate(data, {
+    abortEarly: false,
+    stripUnknown: true,
+    ...options,
+  });
+
+  if (error) {
+    // Customize error handling as needed
+    const errorMessages = error.details.map((detail) => detail.message).join(", ");
+    throw new Error(`Joi validation error: ${errorMessages}`);
+  }
+
+  return value as T;
 }
