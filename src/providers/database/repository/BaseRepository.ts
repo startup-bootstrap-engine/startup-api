@@ -28,16 +28,18 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
   public async create(data: Partial<T>, options?: IBaseRepositoryCreateOptions): Promise<T> {
     if (options?.uniqueByKeys) {
       const keys = Array.isArray(options.uniqueByKeys) ? options.uniqueByKeys : [options.uniqueByKeys];
-      const existing = await this.repositoryAdapter.findBy({
-        $or: keys.map((key) => ({ [key]: data[key] })),
-      });
-      if (existing) {
-        throw new ConflictError(
-          TS.translate("validation", "alreadyExists", {
-            // @ts-ignore
-            field: this.repositoryAdapter.model.modelName,
-          })
-        );
+      for (const key of keys) {
+        const value = data[key];
+        if (value != null) {
+          const existing = await this.repositoryAdapter.findBy({ [key]: value });
+          if (existing) {
+            throw new ConflictError(
+              TS.translate("validation", "alreadyExists", {
+                field: key,
+              })
+            );
+          }
+        }
       }
     }
     return await this.repositoryAdapter.create(data as T);

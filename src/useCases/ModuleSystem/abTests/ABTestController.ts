@@ -22,10 +22,10 @@ import { CreateABTestDTO, UpdateABTestDTO } from "./ABTestDTO";
 export class ABTestController implements interfaces.Controller {
   private ABTestUseCase: GenericUseCase<IABTest>;
 
-  constructor() {
+  constructor(private repositoryFactory: RepositoryFactory) {
     this.ABTestUseCase = new GenericUseCase(
       ABTest,
-      RepositoryFactory.createRepository<IABTest>(ABTest) as BaseRepository<IABTest>
+      repositoryFactory.createRepository<IABTest>(ABTest) as BaseRepository<IABTest>
     );
   }
 

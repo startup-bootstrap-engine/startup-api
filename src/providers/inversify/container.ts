@@ -1,5 +1,5 @@
 import { NewRelic } from "@providers/analytics/NewRelic";
-import { DatabaseFactory } from "@providers/database/factory/DatabaseFactory";
+import { DatabaseFactory } from "@providers/database/adapters/DatabaseFactory";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
 import { HashGenerator } from "@providers/hash/HashGenerator";

@@ -1,9 +1,9 @@
+import { firebaseAdminApp } from "@providers/database/firebase/FirebaseApp";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { EnvType } from "@startup-engine/shared/dist";
 import firebaseAdmin from "firebase-admin";
 import { provide } from "inversify-binding-decorators";
 import { appEnv } from "../config/env";
-import { ENV_KEYS_PATH } from "../constants/PathConstants";
 
 @provide(PushNotificationHelper)
 export class PushNotificationHelper {
@@ -13,12 +13,7 @@ export class PushNotificationHelper {
 
   // PS: I'm not initializing on the constructor because it causes a bug in firebase, since inversify leads to be it being triggered twice.
   public static initialize(): void {
-    const serviceAccount = require(`${ENV_KEYS_PATH}/firebase-admin-keyfile.json`);
-
-    PushNotificationHelper.firebaseAdmin = firebaseAdmin.initializeApp({
-      credential: firebaseAdmin.credential.cert(serviceAccount),
-      databaseURL: appEnv.database.FB_DB_PATH,
-    });
+    PushNotificationHelper.firebaseAdmin = firebaseAdminApp;
   }
 
   public async sendMessage(
