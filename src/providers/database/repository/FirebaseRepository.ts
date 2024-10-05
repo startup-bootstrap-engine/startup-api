@@ -1,31 +1,56 @@
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import admin from "firebase-admin";
-import pluralize from "pluralize";
+import { Model } from "mongoose";
 import { FirebaseAdapter } from "../adapters/FirebaseAdapter";
 import { IRepositoryAdapter } from "../DatabaseTypes";
+import { ModelUtils } from "../utils/ModelUtils";
 
 @provideSingleton(FirebaseRepository)
 export class FirebaseRepository<T> implements IRepositoryAdapter<T> {
   private database: admin.database.Database | undefined;
   private dbRef: admin.database.Reference;
+  private MongoModelRef: Model<any>;
 
-  constructor(private firebaseAdapter: FirebaseAdapter) {}
+  constructor(private firebaseAdapter: FirebaseAdapter, private modelUtils: ModelUtils) {}
 
-  public init(baseModelName: string): void {
-    const modelName = pluralize(baseModelName.toLowerCase());
+  public init(model: Model<any>): void {
+    this.MongoModelRef = model;
+
     this.database = this.firebaseAdapter.getDatabase();
 
     if (!this.database) {
       return;
     }
 
-    this.dbRef = this.database.ref(modelName);
+    this.dbRef = this.database.ref(this.modelUtils.getModelNamePluralized(this.MongoModelRef));
   }
 
   public async create(item: T): Promise<T> {
-    const newItemRef = this.dbRef.push();
-    await newItemRef.set(item);
-    return { ...item, id: newItemRef.key } as T;
+    // Generate a key first
+    const newKey = this.dbRef.push().key;
+
+    if (!newKey) {
+      throw new Error("Failed to generate key for new item");
+    }
+
+    console.log(`Generated key: ${newKey}`);
+
+    // Create the mongoose model with the generated key
+    let mongoMockModel = new this.MongoModelRef({
+      ...(item as Record<string, unknown>),
+    });
+
+    const itemData = mongoMockModel.toObject();
+
+    const newItemRef = this.dbRef.child(newKey);
+    await newItemRef.set({
+      ...itemData,
+      _id: newKey.toString(),
+    });
+
+    mongoMockModel = null; // Free up memory
+
+    return { ...item, id: newKey } as T;
   }
 
   public async findById(id: string): Promise<T | null> {

@@ -49,7 +49,6 @@ export class PushNotificationHelper {
         console.log(response);
 
         if (response.includes("Requested entity was not found.")) {
-          // const user = await User.findOne({ pushNotificationToken: userToken }).lean();
           const user = await this.userRepository.findBy({ pushNotificationToken: userToken });
 
           if (!user) {

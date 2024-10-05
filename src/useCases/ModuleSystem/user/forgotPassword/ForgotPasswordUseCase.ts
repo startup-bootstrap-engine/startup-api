@@ -16,7 +16,8 @@ export class ForgotPasswordUseCase {
   constructor(
     private analyticsHelper: AnalyticsHelper,
     private userAuth: UserAuth,
-    private userRepository: UserRepository
+    private userRepository: UserRepository,
+    private transactionalEmail: TransactionalEmail
   ) {}
 
   public async forgotPassword(email: string): Promise<boolean> {
@@ -42,7 +43,6 @@ export class ForgotPasswordUseCase {
       console.log(`New password for user ${user.email}: ${randomPassword}`);
 
       // Update user's password
-      // user = await User.findOneAndUpdate({ _id: user._id }, { password: randomPassword }, { new: true }).lean<IUser>();
 
       user = await this.userRepository.updateById(user._id, { password: randomPassword });
 
@@ -53,19 +53,24 @@ export class ForgotPasswordUseCase {
       await this.userAuth.recalculatePasswordHash(user);
 
       // Send email to user with the new password content
-      await TransactionalEmail.send(user.email, TS.translate("email", "passwordRecoveryGreetings"), "notification", {
-        notificationGreetings: TS.translate("email", "passwordRecoveryGreetings"),
-        notificationMessage: TS.translate(
-          "email",
-          "passwordRecoveryMessage",
-          {
-            randomPassword,
-          },
-          false
-        ),
-        notificationEndPhrase: TS.translate("email", "passwordRecoveryEndPhrase"),
-        adminEmail: appEnv.general.ADMIN_EMAIL,
-      });
+      await this.transactionalEmail.send(
+        user.email,
+        TS.translate("email", "passwordRecoveryGreetings"),
+        "notification",
+        {
+          notificationGreetings: TS.translate("email", "passwordRecoveryGreetings"),
+          notificationMessage: TS.translate(
+            "email",
+            "passwordRecoveryMessage",
+            {
+              randomPassword,
+            },
+            false
+          ),
+          notificationEndPhrase: TS.translate("email", "passwordRecoveryEndPhrase"),
+          adminEmail: appEnv.general.ADMIN_EMAIL,
+        }
+      );
 
       return true;
     } catch (error) {

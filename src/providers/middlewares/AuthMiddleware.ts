@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 
-import { IUser, User } from "../../entities/ModuleSystem/UserModel";
+import { container } from "@providers/inversify/container";
+import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { appEnv } from "../config/env";
 import { UnauthorizedError } from "../errors/UnauthorizedError";
 import { TS } from "../translation/TranslationHelper";
@@ -27,7 +28,9 @@ export const AuthMiddleware = (req: IAuthenticatedRequest, res, next): void => {
         next(error);
       }
 
-      const dbUser = await User.findOne({ email: jwtPayload?.email }).lean<IUser>();
+      const userRepository = container.get(UserRepository);
+
+      const dbUser = await userRepository.findBy({ email: jwtPayload?.email });
 
       if (!dbUser) {
         const error = new UnauthorizedError(TS.translate("auth", "loginAccessResource"));

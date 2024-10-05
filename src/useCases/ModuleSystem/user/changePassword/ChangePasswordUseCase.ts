@@ -12,7 +12,11 @@ import { AuthChangePasswordDTO } from "../AuthDTO";
 
 @provide(ChangePasswordUseCase)
 export class ChangePasswordUseCase {
-  constructor(private analyticsHelper: AnalyticsHelper, private userAuth: UserAuth) {}
+  constructor(
+    private analyticsHelper: AnalyticsHelper,
+    private userAuth: UserAuth,
+    private transactionalEmail: TransactionalEmail
+  ) {}
 
   public async changePassword(user: IUser, authChangePasswordDTO: AuthChangePasswordDTO): Promise<void> {
     if (user.email === "playstore-testing@gmail.com") {
@@ -41,7 +45,7 @@ export class ChangePasswordUseCase {
       await this.userAuth.recalculatePasswordHash(user);
 
       // Send confirmation to user
-      await TransactionalEmail.send(user.email, TS.translate("email", "passwordChangeTitle"), "notification", {
+      await this.transactionalEmail.send(user.email, TS.translate("email", "passwordChangeTitle"), "notification", {
         notificationGreetings: TS.translate("email", "genericConfirmationTitle"),
         notificationMessage: TS.translate("email", "passwordChangeMessage", {
           adminEmail: appEnv.general.ADMIN_EMAIL!,

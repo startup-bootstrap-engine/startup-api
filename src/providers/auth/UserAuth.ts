@@ -40,7 +40,6 @@ export class UserAuth {
   }
 
   public async checkIfExists(email: string): Promise<boolean> {
-    // const exists = await User.exists({ email: email.toLocaleLowerCase() });
     const exists = await this.userRepository.exists({ email: email.toLocaleLowerCase() });
 
     if (exists) {

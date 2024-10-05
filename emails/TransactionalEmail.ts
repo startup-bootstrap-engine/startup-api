@@ -1,15 +1,19 @@
+import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { EnvType } from "@startup-engine/shared/dist";
 import { readFileSync } from "fs";
+import { provide } from "inversify-binding-decorators";
 import moment from "moment-timezone";
 import { Log } from "../src/entities/ModuleSystem/LogModel";
-import { IUser, User } from "../src/entities/ModuleSystem/UserModel";
 import { EncryptionHelper } from "../src/providers/auth/EncryptionHelper";
 import { appEnv } from "../src/providers/config/env";
 import { TextHelper } from "../src/providers/text/TextHelper";
 import { EmailType } from "./email.types";
 import { emailProviders } from "./emailProviders";
 
+@provide(TransactionalEmail)
 export class TransactionalEmail {
+  constructor(private userRepository: UserRepository) {}
+
   /**
    *
    * @param to email's destination
@@ -18,7 +22,7 @@ export class TransactionalEmail {
    * @param template folder name from emails/templates
    * @param customVars object containing any custom vars to replace in your template.
    */
-  public static async send(
+  public async send(
     to: string | undefined,
     subject: string,
     template: string,
@@ -52,7 +56,7 @@ export class TransactionalEmail {
 
           // Unsubscribed users: check if we should skip this user submission or not
 
-          const user = (await User.findOne({ email: to }).lean()) as IUser;
+          const user = await this.userRepository.findBy({ email: to });
 
           if (!user) {
             console.log("This user is not in our database! Skipping sending e-mail");
@@ -115,7 +119,7 @@ export class TransactionalEmail {
     return false;
   }
 
-  public static loadEmailTemplate(type: EmailType, template: string, customVars?: object): string {
+  private loadEmailTemplate(type: EmailType, template: string, customVars?: object): string {
     let extension;
 
     if (type === EmailType.Html) {
@@ -136,7 +140,7 @@ export class TransactionalEmail {
     return content;
   }
 
-  private static _replaceTemplateCustomVars(html: string, customVars: object): string {
+  private _replaceTemplateCustomVars(html: string, customVars: object): string {
     const keys = Object.keys(customVars);
 
     const globalTemplateVars = {
