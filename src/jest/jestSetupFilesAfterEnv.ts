@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 
-import { container, inMemoryHashTable, inMemoryRepository, redisManager } from "@providers/inversify/container";
+import { container, inMemoryHashTable, redisManager } from "@providers/inversify/container";
 
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
@@ -39,7 +39,6 @@ beforeAll(async () => {
   await redisManager.connect();
 
   await inMemoryHashTable.init();
-  await inMemoryRepository.init();
 });
 
 afterAll(async () => {
