@@ -13,11 +13,7 @@ export interface IUser {
   salt?: string;
   unsubscribed?: boolean;
   refreshTokens?: { token: string }[];
-  wallet?: {
-    publicAddress?: string;
-    networkId?: number;
-  };
-  characters?: string[];
+
   accountType: string;
   isManuallyControlledPremiumAccount?: boolean;
   pushNotificationToken?: string | null;
@@ -57,13 +53,6 @@ export const userSchema = Joi.object({
       })
     )
     .default([]),
-
-  wallet: Joi.object({
-    publicAddress: Joi.string().optional(),
-    networkId: Joi.number().optional(),
-  }).optional(),
-
-  characters: Joi.array().items(Joi.string().optional()).default([]),
 
   accountType: Joi.string()
     .valid(...Object.values(UserAccountTypes))
