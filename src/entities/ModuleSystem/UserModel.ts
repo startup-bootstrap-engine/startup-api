@@ -10,8 +10,6 @@ import { IUser, userSchema } from "./schemas/userSchema";
 
 @provide(UserModel)
 export class UserModel implements IAgnosticSchema {
-  constructor() {}
-
   /**
    * Initializes and validates user data.
    * @param schema Partial user data input.
