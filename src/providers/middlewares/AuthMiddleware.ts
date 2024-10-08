@@ -30,7 +30,12 @@ export const AuthMiddleware = (req: IAuthenticatedRequest, res, next): void => {
 
       const userRepository = container.get(UserRepository);
 
-      const dbUser = await userRepository.findBy({ email: jwtPayload?.email });
+      const dbUser = await userRepository.findBy(
+        { email: jwtPayload?.email },
+        {
+          hideSensitiveFields: ["password", "salt"],
+        }
+      );
 
       if (!dbUser) {
         const error = new UnauthorizedError(TS.translate("auth", "loginAccessResource"));

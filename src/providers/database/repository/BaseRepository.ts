@@ -20,6 +20,7 @@ export interface IBaseRepositoryFindByOptions {
     cacheKey: string;
   };
   limit?: number;
+  hideSensitiveFields?: string[];
 }
 
 @provide(BaseRepository)
@@ -50,9 +51,21 @@ export class BaseRepository<T extends AvailableSchemas> implements IBaseReposito
     }
   }
 
+  private hideSensitiveFields(item: T | null, hideSensitiveFields?: string[]): T | null {
+    if (item && hideSensitiveFields && hideSensitiveFields.length > 0) {
+      const { ...rest } = item;
+      hideSensitiveFields.forEach((field) => {
+        delete rest[field];
+      });
+      return rest as T;
+    }
+    return item;
+  }
+
   public async findById(id: string, options?: IBaseRepositoryFindByOptions): Promise<T | null> {
     try {
-      return await this.repositoryAdapter.findById(id, options);
+      const result = await this.repositoryAdapter.findById(id, options);
+      return this.hideSensitiveFields(result, options?.hideSensitiveFields);
     } catch (error) {
       throw new BadRequestError(error.message);
     }
@@ -60,18 +73,16 @@ export class BaseRepository<T extends AvailableSchemas> implements IBaseReposito
 
   public async findBy(params: Record<string, unknown>, options?: IBaseRepositoryFindByOptions): Promise<T | null> {
     try {
-      return await this.repositoryAdapter.findBy(params, options);
+      const result = await this.repositoryAdapter.findBy(params, options);
+      return this.hideSensitiveFields(result, options?.hideSensitiveFields);
     } catch (error) {
       throw new BadRequestError(error.message);
     }
   }
 
   public async findAll(query: Record<string, unknown>, options?: IBaseRepositoryFindByOptions): Promise<T[]> {
-    try {
-      return await this.repositoryAdapter.findAll(query, options);
-    } catch (error) {
-      throw new BadRequestError(error.message);
-    }
+    const results = await this.repositoryAdapter.findAll(query, options);
+    return results.map((item) => this.hideSensitiveFields(item, options?.hideSensitiveFields)) as T[];
   }
 
   public async updateById(id: string, data: Partial<T>): Promise<T | null> {
