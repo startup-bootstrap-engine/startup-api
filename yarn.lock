@@ -2976,16 +2976,17 @@
   resolved "https://registry.yarnpkg.com/@socket.io/sticky/-/sticky-1.0.4.tgz#5f6d3ae62881b17e0fb756c6074f18ddb7b2014f"
   integrity sha512-VuauT5CJLvzYtKIgouFSQ8rUaygseR+zRutnwh6ZA2QYcXx+8g52EoJ8V2SLxfo+Tfs3ELUDy08oEXxlWNrxaw==
 
-"@startup-engine/shared@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@startup-engine/shared/-/shared-0.0.1.tgz#88de1660244b57b8dc08a882e0050703c70a22d7"
-  integrity sha512-lEUR2hJRcRGbyXE85ItDCgwRn4WhwsOhn1PhWciH3ontpjI2WU9OL898WkPts+KS3d7QEYn9soaYw3cIvnlDmg==
+"@startup-engine/shared@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@startup-engine/shared/-/shared-0.0.5.tgz#1e3cb97d904e06761d3e1e7b7fa1dfb62777ff16"
+  integrity sha512-v6FLe7kYFKOp25omVl2s95XKaXmCHPeuobDKyEp+BSXFxbBsbgcOlKykB76hTZOeBv145WloX3hsYWRIRIwh2w==
   dependencies:
     husky "^4.3.0"
     mobile-device-detect "^0.4.3"
     prettier "^2.2.1"
     tsc "^2.0.4"
     typescript "^4.6.4"
+    zod "^3.23.8"
 
 "@swc/core-darwin-arm64@1.3.105":
   version "1.3.105"

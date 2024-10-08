@@ -4,8 +4,8 @@ import { TS } from "@providers/translation/TranslationHelper";
 import bcrypt from "bcrypt";
 import { provide } from "inversify-binding-decorators";
 
-import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { UserAuth } from "@providers/auth/UserAuth";
+import { IUser } from "@startup-engine/shared";
 import { TransactionalEmail } from "../../../../../emails/TransactionalEmail";
 import { appEnv } from "../../../../providers/config/env";
 import { AuthChangePasswordDTO } from "../AuthDTO";

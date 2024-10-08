@@ -1,4 +1,4 @@
-import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
+import { IUser } from "@startup-engine/shared";
 import { EnvType } from "@startup-engine/shared/dist";
 import { provide } from "inversify-binding-decorators";
 import Mixpanel from "mixpanel";

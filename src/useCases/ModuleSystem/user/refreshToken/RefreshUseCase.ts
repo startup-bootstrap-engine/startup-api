@@ -4,7 +4,7 @@ import { TS } from "@providers/translation/TranslationHelper";
 import { provide } from "inversify-binding-decorators";
 import jwt from "jsonwebtoken";
 
-import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
+import { IUser } from "@startup-engine/shared";
 import { appEnv } from "../../../../providers/config/env";
 import { ForbiddenError } from "../../../../providers/errors/ForbiddenError";
 import { UnauthorizedError } from "../../../../providers/errors/UnauthorizedError";

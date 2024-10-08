@@ -1,7 +1,5 @@
 import { unitTestHelper } from "@providers/inversify/container";
-import { UserAuthFlow, UserTypes } from "@startup-engine/shared";
-import { IUser } from "../schemas/userSchema";
-
+import { IUser, UserAuthFlow, UserTypes } from "@startup-engine/shared";
 describe("UserModel.ts", () => {
   let testUser: IUser;
 

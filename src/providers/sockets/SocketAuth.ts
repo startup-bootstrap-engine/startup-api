@@ -1,8 +1,8 @@
 /* eslint-disable mongoose-performance/require-lean */
 /* eslint-disable require-await */
-import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
+import { IUser } from "@startup-engine/shared";
 import { SocketAuthLock } from "./SocketAuthLock";
 
 @provideSingleton(SocketAuth)

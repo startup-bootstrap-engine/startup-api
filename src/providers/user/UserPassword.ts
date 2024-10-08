@@ -1,4 +1,4 @@
-import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
+import { IUser } from "@startup-engine/shared";
 import { AuthSignUpDTO } from "@useCases/ModuleSystem/user/AuthDTO";
 import bcrypt from "bcrypt";
 import { provide } from "inversify-binding-decorators";

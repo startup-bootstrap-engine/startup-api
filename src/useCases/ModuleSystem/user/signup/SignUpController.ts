@@ -1,7 +1,6 @@
-import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { DTOValidatorMiddleware } from "@providers/middlewares/DTOValidatorMiddleware";
-import { HttpStatus } from "@startup-engine/shared";
+import { HttpStatus, IUser } from "@startup-engine/shared";
 import rateLimit from "express-rate-limit";
 import { controller, httpPost, interfaces, request, requestBody, response } from "inversify-express-utils";
 import { AuthSignUpDTO } from "../AuthDTO";

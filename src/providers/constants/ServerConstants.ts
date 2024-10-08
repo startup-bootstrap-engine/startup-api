@@ -1,12 +1,3 @@
-import {
-  BattleSocketEvents,
-  ChatSocketEvents,
-  ItemSocketEvents,
-  SpellSocketEvents,
-  UseWithSocketEvents,
-  ViewSocketEvents,
-} from "@startup-engine/shared";
-
 import os from "os";
 
 export const USER_CONTROL_ONLINE = {
@@ -23,58 +14,19 @@ export const SERVER_DISCONNECT_IDLE_TIMEOUT = 10; // how many minutes does a cha
 
 export const USER_EXHAUST_TIMEOUT = 1000;
 
-export const EXHAUSTABLE_EVENTS = [
-  ChatSocketEvents.GlobalChatMessageCreate,
-  ChatSocketEvents.GlobalChatMessageRead,
-  ChatSocketEvents.PrivateChatMessageCreate,
-  ItemSocketEvents.UseWith,
-  "UseWithItem",
-  UseWithSocketEvents.UseWithTile,
-  ItemSocketEvents.Use,
-  ItemSocketEvents.CraftItem,
-] as string[];
+export const EXHAUSTABLE_EVENTS = ["UseWithItem"] as string[];
 
-export const CUSTOM_EXHAUSTABLE_EVENTS = {
-  [SpellSocketEvents.CastSpell]: 500,
-};
+export const CUSTOM_EXHAUSTABLE_EVENTS = {};
 
-export const LOGGABLE_EVENTS = [
-  ItemSocketEvents.Use,
-  ItemSocketEvents.UseWith,
-  ItemSocketEvents.CraftItem,
-  "CastSpell",
-];
+export const LOGGABLE_EVENTS = ["CastSpell"];
 
-export const LOCKABLE_EVENTS = [
-  ItemSocketEvents.Pickup,
-  ItemSocketEvents.Equip,
-  ItemSocketEvents.Unequip,
-  ItemSocketEvents.Drop,
-  ItemSocketEvents.Use,
-  ItemSocketEvents.UseWith,
-  ItemSocketEvents.ContainerTransfer,
-  ItemSocketEvents.CraftItem,
-  ItemSocketEvents.Move,
-  UseWithSocketEvents.UseWithTile,
-  "UseWithItem",
-  BattleSocketEvents.InitTargeting,
-  BattleSocketEvents.StopTargeting,
-  ItemSocketEvents.LoadCraftBook,
-  ItemSocketEvents.CraftItem,
-  ChatSocketEvents.GlobalChatMessageCreate,
-  ViewSocketEvents.Destroy,
-] as string[];
+export const LOCKABLE_EVENTS = [] as string[];
 
 export const THROTTABLE_EVENTS_MS_THRESHOLD_DISCONNECT = 20;
 
 export const THROTTABLE_DEFAULT_MS_THRESHOLD = 1000;
 
-export const THROTTABLE_EVENTS = {
-  [UseWithSocketEvents.UseWithTile]: 2000,
-  [ItemSocketEvents.CraftItem]: 2000,
-  [ChatSocketEvents.GlobalChatMessageCreate]: THROTTABLE_DEFAULT_MS_THRESHOLD,
-  [ChatSocketEvents.PrivateChatMessageCreate]: THROTTABLE_DEFAULT_MS_THRESHOLD,
-};
+export const THROTTABLE_EVENTS = {};
 
 export const PROMISE_DEFAULT_CONCURRENCY = os.cpus().length || SERVER_API_NODES_PM2_PROCESSES_QTY;
 

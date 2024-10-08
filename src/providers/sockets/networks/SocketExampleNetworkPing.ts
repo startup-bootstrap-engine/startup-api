@@ -1,9 +1,9 @@
-import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { SocketAuth } from "@providers/sockets/SocketAuth";
 import { SocketMessaging } from "@providers/sockets/SocketMessaging";
 import { SocketChannel } from "@providers/sockets/SocketsTypes";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { CharacterSocketEvents, ICharacterPing } from "@rpg-engine/shared";
+import { IUser } from "@startup-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
 @provide(SocketExampleNetworkPing)

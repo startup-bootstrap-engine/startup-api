@@ -1,4 +1,4 @@
-import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
+import { IUser } from "@startup-engine/shared";
 import { Request } from "express";
 
 export interface IRequestCustom extends Request {

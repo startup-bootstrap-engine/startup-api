@@ -1,6 +1,6 @@
 import countries from "@data/countries.json";
 import { NotFoundError } from "@providers/errors/NotFoundError";
-import { ICountry } from "@startup-engine/shared/dist";
+import { ICountry } from "@startup-engine/shared";
 import * as Places from "countries-cities";
 import { provide } from "inversify-binding-decorators";
 

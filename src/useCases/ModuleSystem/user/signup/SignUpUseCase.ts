@@ -3,9 +3,9 @@ import { TS } from "@providers/translation/TranslationHelper";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { provide } from "inversify-binding-decorators";
 
-import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { UserAuth } from "@providers/auth/UserAuth";
 import { UserPassword } from "@providers/user/UserPassword";
+import { IUser } from "@startup-engine/shared";
 import { validate } from "email-validator";
 import { ConflictError } from "../../../../providers/errors/ConflictError";
 import { AuthSignUpDTO } from "../AuthDTO";

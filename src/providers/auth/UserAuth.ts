@@ -1,10 +1,9 @@
-import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { appEnv } from "@providers/config/env";
 import { InternalServerError } from "@providers/errors/InternalServerError";
 import { NotFoundError } from "@providers/errors/NotFoundError";
 import { TS } from "@providers/translation/TranslationHelper";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
-import { UserAuthFlow } from "@startup-engine/shared";
+import { IUser, UserAuthFlow } from "@startup-engine/shared";
 import bcrypt from "bcrypt";
 import { provide } from "inversify-binding-decorators";
 import jwt from "jsonwebtoken";
@@ -72,7 +71,12 @@ export class UserAuth {
   }
 
   public async recalculatePasswordHash(user: IUser): Promise<void> {
-    const email = user.email.toLocaleLowerCase();
+    const email = user.email?.toLocaleLowerCase();
+
+    if (!email) {
+      throw new InternalServerError("User email not found");
+    }
+
     const salt = await bcrypt.genSalt();
     const hash = await bcrypt.hash(user.password, salt);
 

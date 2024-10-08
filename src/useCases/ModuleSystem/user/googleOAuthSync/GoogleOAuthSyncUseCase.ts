@@ -1,9 +1,8 @@
-import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { UserAuth } from "@providers/auth/UserAuth";
 import { TS } from "@providers/translation/TranslationHelper";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
-import { IAuthResponse, IGoogleOAuthUserInfoResponse, UserAuthFlow } from "@startup-engine/shared";
+import { IAuthResponse, IGoogleOAuthUserInfoResponse, IUser, UserAuthFlow } from "@startup-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import { InternalServerError } from "../../../../providers/errors/InternalServerError";
 

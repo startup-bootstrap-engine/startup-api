@@ -1,7 +1,7 @@
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { provide } from "inversify-binding-decorators";
 
-import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
+import { IUser } from "@startup-engine/shared";
 import { UserUpdateDTO } from "../UserDTO";
 
 @provide(UpdateUserUseCase)

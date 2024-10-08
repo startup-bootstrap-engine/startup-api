@@ -1,8 +1,7 @@
-import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { appEnv } from "@providers/config/env";
 import { container } from "@providers/inversify/container";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
-import { HttpStatus } from "@startup-engine/shared";
+import { HttpStatus, IUser } from "@startup-engine/shared";
 import http from "http";
 import jwt from "jsonwebtoken";
 

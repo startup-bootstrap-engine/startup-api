@@ -1,8 +1,8 @@
-import { IUser, userSchema } from "@entities/ModuleSystem/schemas/userSchema";
 import { UserModel } from "@entities/ModuleSystem/UserModel";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { BaseRepository, IBaseRepository } from "@providers/database/repository/BaseRepository";
 import { RepositoryFactory } from "@providers/database/repository/RepositoryFactory";
+import { IUser, userSchema } from "@startup-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
 @provide(UserRepository)

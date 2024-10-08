@@ -1,7 +1,7 @@
-import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { TS } from "@providers/translation/TranslationHelper";
+import { IUser } from "@startup-engine/shared";
 import { provide } from "inversify-binding-decorators";
 
 @provide(OwnInfoUserUseCase)

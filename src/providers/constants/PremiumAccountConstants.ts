@@ -1,4 +1,4 @@
-import { SpellsBlueprint, UserAccountTypes } from "@startup-engine/shared";
+import { UserAccountTypes } from "@startup-engine/shared";
 
 type CustomSpellCooldown = {
   [spell: string]: number;
@@ -33,7 +33,7 @@ const CUSTOM_COOLDOWN_REDUCTION_DEFAULT_ULTIMATE = 75;
 
 const generateCustomCooldownReduction = (defaultValues: number): CustomSpellCooldown => {
   return {
-    [SpellsBlueprint.Teleport]: defaultValues,
+    Teleport: defaultValues,
   };
 };
 

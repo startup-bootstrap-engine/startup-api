@@ -2,7 +2,7 @@ import { AuthMiddleware } from "@providers/middlewares/AuthMiddleware";
 import { DTOValidatorMiddleware } from "@providers/middlewares/DTOValidatorMiddleware";
 import { controller, httpPatch, interfaces, request, requestBody } from "inversify-express-utils";
 
-import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
+import { IUser } from "@startup-engine/shared";
 import { UserUpdateDTO } from "../UserDTO";
 import { UpdateUserUseCase } from "./UpdateUserUseCase";
 
