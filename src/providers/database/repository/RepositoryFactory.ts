@@ -1,7 +1,7 @@
 import { appEnv } from "@providers/config/env";
 import { provide } from "inversify-binding-decorators";
-import { ObjectSchema } from "joi";
 import { Model } from "mongoose";
+import { ZodObject } from "zod";
 import { DatabaseAdaptersAvailable, IRepositoryAdapter } from "../DatabaseTypes";
 import { FirebaseRepository } from "./FirebaseRepository";
 import { MongooseRepository } from "./MongooseRepository";
@@ -12,7 +12,7 @@ export class RepositoryFactory {
 
   public createRepository<T extends { [key: string]: any }>(
     model: Model<any> | string,
-    schema: ObjectSchema,
+    schema: ZodObject<any>,
     type: DatabaseAdaptersAvailable = appEnv.database.DB_ADAPTER as DatabaseAdaptersAvailable
   ): IRepositoryAdapter<T> {
     switch (type) {

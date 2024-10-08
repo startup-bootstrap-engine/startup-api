@@ -1,66 +1,61 @@
 import { UserAccountTypes, UserAuthFlow, UserTypes } from "@startup-engine/shared";
-import Joi from "joi";
+import { z } from "zod";
 
-export interface IUser {
-  _id: string;
-  name: string;
-  role: string;
-  authFlow: string;
-  email: string;
-  password?: string;
-  address?: string;
-  phone?: string;
-  salt?: string;
-  unsubscribed?: boolean;
-  refreshTokens?: { token: string }[];
+export const userSchema = z.object({
+  name: z.string().min(1),
 
-  accountType: string;
-  isManuallyControlledPremiumAccount?: boolean;
-  pushNotificationToken?: string | null;
-  channelId?: string | null;
-  // Timestamps can be added if needed
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
-export const userSchema = Joi.object({
-  name: Joi.string().required(),
-
-  role: Joi.string()
-    .valid(...Object.values(UserTypes))
+  role: z
+    .nativeEnum(UserTypes, {
+      required_error: "Role is required",
+      invalid_type_error: "Role must be a valid UserType",
+    })
     .default(UserTypes.Regular),
 
-  authFlow: Joi.string()
-    .valid(...Object.values(UserAuthFlow))
+  authFlow: z
+    .nativeEnum(UserAuthFlow, {
+      required_error: "Auth flow is required",
+      invalid_type_error: "Auth flow must be a valid UserAuthFlow",
+    })
     .default(UserAuthFlow.Basic),
 
-  email: Joi.string().email().required(),
+  email: z.string().email("Invalid email address"),
 
-  password: Joi.string().min(6).optional(), // Optional because Firebase may handle it differently
+  password: z.string().min(6).optional(), // Optional because Firebase may handle it differently
 
-  address: Joi.string().optional(),
+  address: z.string().optional(),
 
-  phone: Joi.string().optional(),
+  phone: z.string().optional(),
 
-  salt: Joi.string().optional(),
+  salt: z.string().optional(),
 
-  unsubscribed: Joi.boolean().default(false),
+  unsubscribed: z.boolean().default(false),
 
-  refreshTokens: Joi.array()
-    .items(
-      Joi.object({
-        token: Joi.string().required(),
+  refreshTokens: z
+    .array(
+      z.object({
+        token: z.string(),
       })
     )
     .default([]),
 
-  accountType: Joi.string()
-    .valid(...Object.values(UserAccountTypes))
+  accountType: z
+    .nativeEnum(UserAccountTypes, {
+      required_error: "Account type is required",
+      invalid_type_error: "Account type must be a valid UserAccountType",
+    })
     .default(UserAccountTypes.Free),
 
-  isManuallyControlledPremiumAccount: Joi.boolean().default(false),
+  isManuallyControlledPremiumAccount: z.boolean().default(false),
 
-  pushNotificationToken: Joi.string().optional().allow(null),
+  pushNotificationToken: z.string().nullable().optional(),
 
-  channelId: Joi.string().optional().allow(null),
-}) as Joi.ObjectSchema<IUser>;
+  channelId: z.string().nullable().optional(),
+});
+
+export type BaseIUser = z.infer<typeof userSchema>;
+
+export interface IUser extends BaseIUser {
+  _id: string;
+  createdAt: Date;
+  updatedAt: Date;
+}

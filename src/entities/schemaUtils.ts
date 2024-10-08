@@ -1,98 +1,162 @@
-import Joi, { ObjectSchema, ValidationResult } from "joi";
 import mongoose, { Document, Model, Schema, SchemaDefinition, SchemaTypeOpts } from "mongoose";
+import {
+  z,
+  ZodArray,
+  ZodBoolean,
+  ZodDate,
+  ZodDefault,
+  ZodEnum,
+  ZodLiteral,
+  ZodNullable,
+  ZodNumber,
+  ZodObject,
+  ZodOptional,
+  ZodString,
+  ZodTypeAny,
+} from "zod";
 
 /**
  * Converts a Joi schema to a Mongoose SchemaDefinition.
  * @param joiSchema - The Joi schema to convert.
  * @returns A Mongoose SchemaDefinition.
  */
-export function joiToMongoose(joiSchema: ObjectSchema): SchemaDefinition {
+// Zod to Mongoose Conversion Utility
+
+/**
+ * Converts a Zod schema to a Mongoose SchemaDefinition.
+ * @param zodSchema - The Zod schema to convert.
+ * @returns A Mongoose SchemaDefinition.
+ */
+export function zodToMongoose(zodSchema: ZodObject<any>): SchemaDefinition {
   const mongooseSchemaDefinition: SchemaDefinition = {};
 
-  const describe = joiSchema.describe();
+  const shape = zodSchema.shape;
 
-  for (const [key, value] of Object.entries(describe.keys) as [string, any][]) {
+  for (const [key, schema] of Object.entries(shape)) {
     const mongooseField: SchemaTypeOpts<any> = {};
 
-    // Map Joi types to Mongoose types
-    switch (value.type) {
-      case "string":
+    let currentSchema: ZodTypeAny = schema as ZodTypeAny;
+    let isOptional = false;
+    let hasDefault = false;
+    let defaultValue: any;
+
+    // Unwrap optional and default schemas
+    while (
+      currentSchema instanceof ZodOptional ||
+      currentSchema instanceof ZodDefault ||
+      currentSchema instanceof ZodNullable
+    ) {
+      if (currentSchema instanceof ZodOptional) {
+        isOptional = true;
+        currentSchema = currentSchema._def.innerType;
+      }
+      if (currentSchema instanceof ZodDefault) {
+        hasDefault = true;
+        defaultValue = currentSchema._def.defaultValue();
+        currentSchema = currentSchema._def.innerType;
+      }
+      if (currentSchema instanceof ZodNullable) {
+        // Handle nullable if needed
+        currentSchema = currentSchema._def.innerType;
+      }
+    }
+
+    // Map Zod types to Mongoose types
+    switch (currentSchema.constructor) {
+      case ZodString:
         mongooseField.type = String;
-        if (value.rules) {
-          value.rules.forEach((rule: any) => {
-            if (rule.name === "min") {
-              mongooseField.minlength = rule.args.limit;
-            }
-            if (rule.name === "max") {
-              mongooseField.maxlength = rule.args.limit;
-            }
-            if (rule.name === "email") {
+        const stringSchema = currentSchema as ZodString;
+        stringSchema._def.checks.forEach((check) => {
+          switch (check.kind) {
+            case "min":
+              mongooseField.minlength = check.value;
+              break;
+            case "max":
+              mongooseField.maxlength = check.value;
+              break;
+            case "email":
               mongooseField.match = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            }
-            if (rule.name === "regex") {
-              mongooseField.match = new RegExp(rule.args.pattern);
-            }
-            if (rule.name === "valid") {
-              mongooseField.enum = rule.args.allow;
-            }
-          });
-        }
+              break;
+            case "regex":
+              mongooseField.match = check.regex;
+              break;
+            case "includes":
+              // Handle includes if necessary
+              break;
+            case "length":
+              mongooseField.length = check.value;
+              break;
+            default:
+              break;
+          }
+        });
         break;
 
-      case "number":
+      case ZodNumber:
         mongooseField.type = Number;
-        if (value.rules) {
-          value.rules.forEach((rule: any) => {
-            if (rule.name === "min") {
-              mongooseField.min = rule.args.limit;
-            }
-            if (rule.name === "max") {
-              mongooseField.max = rule.args.limit;
-            }
-            if (rule.name === "integer") {
+        const numberSchema = currentSchema as ZodNumber;
+        numberSchema._def.checks.forEach((check) => {
+          switch (check.kind) {
+            case "min":
+              mongooseField.min = check.value;
+              break;
+            case "max":
+              mongooseField.max = check.value;
+              break;
+            case "int":
               mongooseField.validate = {
                 validator: Number.isInteger,
                 message: "{VALUE} is not an integer value",
               };
-            }
-          });
-        }
+              break;
+            default:
+              break;
+          }
+        });
         break;
 
-      case "boolean":
+      case ZodBoolean:
         mongooseField.type = Boolean;
         break;
 
-      case "date":
+      case ZodDate:
         mongooseField.type = Date;
         break;
 
-      case "array":
-        if (value.items && value.items.length > 0) {
-          // Assuming array of strings for simplicity
-          const itemType = value.items[0].type;
-          switch (itemType) {
-            case "string":
-              mongooseField.type = [String];
-              break;
-            case "number":
-              mongooseField.type = [Number];
-              break;
-            case "boolean":
-              mongooseField.type = [Boolean];
-              break;
-            case "object":
-              mongooseField.type = [Schema.Types.Mixed];
-              break;
-            default:
-              mongooseField.type = [Schema.Types.Mixed];
-          }
-        } else {
-          mongooseField.type = Array;
+      case ZodArray:
+        const arraySchema = currentSchema as ZodArray<any>;
+        const itemType = arraySchema._def.type;
+        switch (itemType.constructor) {
+          case ZodString:
+            mongooseField.type = [String];
+            break;
+          case ZodNumber:
+            mongooseField.type = [Number];
+            break;
+          case ZodBoolean:
+            mongooseField.type = [Boolean];
+            break;
+          case ZodObject:
+            mongooseField.type = [Schema.Types.Mixed];
+            break;
+          default:
+            mongooseField.type = [Schema.Types.Mixed];
         }
         break;
 
-      case "object":
+      case ZodEnum:
+        const enumSchema = currentSchema as ZodEnum<any>;
+        mongooseField.type = String;
+        mongooseField.enum = enumSchema.options;
+        break;
+
+      case ZodLiteral:
+        const literalSchema = currentSchema as ZodLiteral<any>;
+        mongooseField.type = typeof literalSchema.value;
+        mongooseField.enum = [literalSchema.value];
+        break;
+
+      case ZodObject:
         mongooseField.type = Schema.Types.Mixed;
         break;
 
@@ -101,17 +165,18 @@ export function joiToMongoose(joiSchema: ObjectSchema): SchemaDefinition {
     }
 
     // Handle default values
-    if (value.flags && value.flags.default !== undefined) {
-      mongooseField.default = typeof value.flags.default === "function" ? value.flags.default() : value.flags.default;
+    if (hasDefault) {
+      mongooseField.default = defaultValue;
     }
 
     // Handle required fields
-    mongooseField.required = value.flags?.presence === "required";
+    mongooseField.required = !isOptional;
 
-    // Handle uniqueness
-    if (value.flags?.unique) {
-      mongooseField.unique = true;
-    }
+    // Handle uniqueness if Zod schema has refinements or specific markers
+    // Zod does not have a built-in 'unique' method, so this needs to be handled separately
+    // For example, by using a custom Zod refinement or metadata
+    // Here, we assume uniqueness is handled via a custom Zod refinement or external logic
+    // If you have a way to mark fields as unique in Zod, handle it here
 
     // Assign the field to the schema definition
     mongooseSchemaDefinition[key] = mongooseField;
@@ -127,14 +192,14 @@ export function joiToMongoose(joiSchema: ObjectSchema): SchemaDefinition {
  * @param joiSchema - The Joi schema to convert.
  * @returns A Mongoose model.
  */
-export function createMongooseModel<T extends Document>(modelName: string, joiSchema: ObjectSchema): Model<T> {
+export function createMongooseModel<T extends Document>(modelName: string, zodSchema: ZodObject<any>): Model<T> {
   // Check if the model already exists in Mongoose's model registry
   if (mongoose.models[modelName]) {
     return mongoose.models[modelName] as Model<T>;
   }
 
-  // Convert Joi schema to Mongoose schema definition
-  const mongooseSchemaDefinition: SchemaDefinition = joiToMongoose(joiSchema);
+  // Convert Zod schema to Mongoose schema definition
+  const mongooseSchemaDefinition: SchemaDefinition = zodToMongoose(zodSchema);
 
   // Create a new Mongoose schema
   const schema = new Schema(mongooseSchemaDefinition, { timestamps: true });
@@ -144,27 +209,21 @@ export function createMongooseModel<T extends Document>(modelName: string, joiSc
 }
 
 /**
- * Validates and sanitizes data using the provided Joi schema.
+ * Validates and sanitizes data using the provided Zod schema.
  * Populates default values as defined in the schema.
  *
- * @param joiSchema - The Joi schema to validate against.
+ * @param zodSchema - The Zod schema to validate against.
  * @param data - The input data to validate.
- * @param options - Optional Joi validation options.
  * @returns The validated and sanitized object.
  * @throws An error if validation fails.
  */
-export function joiToObject<T>(joiSchema: ObjectSchema, data: any, options?: Joi.ValidationOptions): T {
-  const { value, error }: ValidationResult = joiSchema.validate(data, {
-    abortEarly: false,
-    stripUnknown: true,
-    ...options,
-  });
+export function zodToObject<T>(zodSchema: z.ZodType<T>, data: any): T {
+  const parseResult = zodSchema.safeParse(data);
 
-  if (error) {
-    // Customize error handling as needed
-    const errorMessages = error.details.map((detail) => detail.message).join(", ");
-    throw new Error(`Joi validation error: ${errorMessages}`);
+  if (!parseResult.success) {
+    const errorMessages = parseResult.error.errors.map((err) => `${err.path.join(".")} - ${err.message}`).join(", ");
+    throw new Error(`Zod validation error: ${errorMessages}`);
   }
 
-  return value as T;
+  return parseResult.data;
 }

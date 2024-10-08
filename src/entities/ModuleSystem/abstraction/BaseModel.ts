@@ -1,15 +1,13 @@
-// src/base/BaseModel.ts
-
 import { createMongooseModel } from "@entities/schemaUtils";
 import { appEnv } from "@providers/config/env";
 import { DatabaseAdaptersAvailable } from "@providers/database/DatabaseTypes";
 import { provide } from "inversify-binding-decorators";
-import { ObjectSchema } from "joi";
 import pluralize from "pluralize";
+import { z, ZodSchema } from "zod";
 import { IAgnosticSchema } from "../schemas/schemaTypes";
 
 @provide(BaseModel)
-export abstract class BaseModel<T> implements IAgnosticSchema {
+export abstract class BaseModel<T extends z.ZodTypeAny> implements IAgnosticSchema {
   /**
    * Initializes and validates data.
    * @param schema Partial data input.
@@ -18,12 +16,12 @@ export abstract class BaseModel<T> implements IAgnosticSchema {
    * @throws Error if adapter is not supported.
    */
   public initializeData(
-    schema: ObjectSchema<T>,
+    schema: ZodSchema,
     adapter: DatabaseAdaptersAvailable = appEnv.database.DB_ADAPTER as DatabaseAdaptersAvailable
   ): any {
     switch (adapter) {
       case "mongoose":
-        return createMongooseModel(this.modelName, schema);
+        return createMongooseModel(this.modelName, schema.parse({}));
       case "firebase":
         return this.collectionName; // Return collection name as a string
       default:

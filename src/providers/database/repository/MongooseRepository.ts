@@ -1,6 +1,6 @@
 import { provide } from "inversify-binding-decorators";
 
-import { Document, FilterQuery, Model } from "mongoose";
+import mongoose, { Document, Model } from "mongoose";
 import { IRepositoryAdapter } from "../DatabaseTypes";
 import { IBaseRepositoryFindByOptions } from "./BaseRepository";
 
@@ -17,12 +17,12 @@ export class MongooseRepository<T extends Document> implements IRepositoryAdapte
     return await this.applyOptionsAndExecQuery(query, options);
   }
 
-  public async findBy(params: FilterQuery<T>, options?: IBaseRepositoryFindByOptions): Promise<T | null> {
+  public async findBy(params: mongoose.FilterQuery<T>, options?: IBaseRepositoryFindByOptions): Promise<T | null> {
     const query = this.model.findOne(params).lean<T>();
     return await this.applyOptionsAndExecQuery(query, options);
   }
 
-  public async findAll(params: FilterQuery<T>, options?: IBaseRepositoryFindByOptions): Promise<T[]> {
+  public async findAll(params: mongoose.FilterQuery<T>, options?: IBaseRepositoryFindByOptions): Promise<T[]> {
     const query = this.model.find(params as any).lean<T>();
     return (await this.applyOptionsAndExecQuery(query, options)) as unknown as T[];
   }
@@ -74,7 +74,7 @@ export class MongooseRepository<T extends Document> implements IRepositoryAdapte
       .exec()) as unknown as T | null;
   }
 
-  public async updateBy(params: FilterQuery<T>, item: Partial<T>): Promise<T | null> {
+  public async updateBy(params: mongoose.FilterQuery<T>, item: Partial<T>): Promise<T | null> {
     return (await this.model
       .findOneAndUpdate(params, item as any, { new: true })
       .lean()
@@ -86,7 +86,7 @@ export class MongooseRepository<T extends Document> implements IRepositoryAdapte
     return result !== null;
   }
 
-  public async exists(params: FilterQuery<T>): Promise<boolean> {
+  public async exists(params: mongoose.FilterQuery<T>): Promise<boolean> {
     return await this.model.exists(params);
   }
 }

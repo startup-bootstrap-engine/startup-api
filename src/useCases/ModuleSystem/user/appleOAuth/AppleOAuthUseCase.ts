@@ -1,3 +1,4 @@
+import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { AppleOAuthHelper } from "@providers/auth/AppleOAuthHelper";
 import { UserAuth } from "@providers/auth/UserAuth";
@@ -47,7 +48,7 @@ export class AppleOAuthUseCase {
         name: appleOAuthDTO.givenName,
         email: appleOAuthDTO.email,
         authFlow: UserAuthFlow.AppleOAuth,
-      });
+      } as unknown as IUser);
 
       await this.analyticsHelper.track("UserLogin", newUser);
       await this.analyticsHelper.track("UserLoginApple", newUser);

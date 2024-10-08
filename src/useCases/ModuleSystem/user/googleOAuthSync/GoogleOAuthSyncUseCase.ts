@@ -1,3 +1,4 @@
+import { IUser } from "@entities/ModuleSystem/schemas/userSchema";
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { UserAuth } from "@providers/auth/UserAuth";
 import { TS } from "@providers/translation/TranslationHelper";
@@ -28,7 +29,7 @@ export class GoogleOAuthSyncUseCase {
         name: googleUserInfo.name,
         email: googleUserInfo.email,
         authFlow: UserAuthFlow.GoogleOAuth,
-      });
+      } as unknown as IUser);
 
       await this.analyticsHelper.track("UserLogin", newUser);
       await this.analyticsHelper.track("UserLoginGoogle", newUser);

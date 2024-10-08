@@ -1,4 +1,5 @@
 import { AvailableSchemas } from "@entities/ModuleSystem/schemas/schemaIndex";
+import { BadRequestError } from "@providers/errors/BadRequestError"; // Import BadRequestError
 import { ConflictError } from "@providers/errors/ConflictError";
 import { TS } from "@providers/translation/TranslationHelper";
 import { provide } from "inversify-binding-decorators";
@@ -26,50 +27,82 @@ export class BaseRepository<T extends AvailableSchemas> implements IBaseReposito
   constructor(private repositoryAdapter: IRepositoryAdapter<T, Record<string, unknown>>) {}
 
   public async create(data: Partial<T>, options?: IBaseRepositoryCreateOptions): Promise<T> {
-    if (options?.uniqueByKeys) {
-      const keys = Array.isArray(options.uniqueByKeys) ? options.uniqueByKeys : [options.uniqueByKeys];
-      for (const key of keys) {
-        const value = data[key];
-        if (value != null) {
-          const existing = await this.repositoryAdapter.findBy({ [key]: value });
-          if (existing) {
-            throw new ConflictError(
-              TS.translate("validation", "alreadyExists", {
-                field: key,
-              })
-            );
+    try {
+      if (options?.uniqueByKeys) {
+        const keys = Array.isArray(options.uniqueByKeys) ? options.uniqueByKeys : [options.uniqueByKeys];
+        for (const key of keys) {
+          const value = data[key];
+          if (value != null) {
+            const existing = await this.repositoryAdapter.findBy({ [key]: value });
+            if (existing) {
+              throw new ConflictError(
+                TS.translate("validation", "alreadyExists", {
+                  field: key,
+                })
+              );
+            }
           }
         }
       }
+      return await this.repositoryAdapter.create(data as T);
+    } catch (error) {
+      throw new BadRequestError(error.message);
     }
-    return await this.repositoryAdapter.create(data as T);
   }
 
   public async findById(id: string, options?: IBaseRepositoryFindByOptions): Promise<T | null> {
-    return await this.repositoryAdapter.findById(id, options);
+    try {
+      return await this.repositoryAdapter.findById(id, options);
+    } catch (error) {
+      throw new BadRequestError(error.message);
+    }
   }
 
   public async findBy(params: Record<string, unknown>, options?: IBaseRepositoryFindByOptions): Promise<T | null> {
-    return await this.repositoryAdapter.findBy(params, options);
+    try {
+      return await this.repositoryAdapter.findBy(params, options);
+    } catch (error) {
+      throw new BadRequestError(error.message);
+    }
   }
 
   public async findAll(query: Record<string, unknown>, options?: IBaseRepositoryFindByOptions): Promise<T[]> {
-    return await this.repositoryAdapter.findAll(query, options);
+    try {
+      return await this.repositoryAdapter.findAll(query, options);
+    } catch (error) {
+      throw new BadRequestError(error.message);
+    }
   }
 
   public async updateById(id: string, data: Partial<T>): Promise<T | null> {
-    return await this.repositoryAdapter.updateById(id, data);
+    try {
+      return await this.repositoryAdapter.updateById(id, data);
+    } catch (error) {
+      throw new BadRequestError(error.message);
+    }
   }
 
   public async updateBy(params: Record<string, unknown>, data: Partial<T>): Promise<T | null> {
-    return await this.repositoryAdapter.updateBy(params, data);
+    try {
+      return await this.repositoryAdapter.updateBy(params, data);
+    } catch (error) {
+      throw new BadRequestError(error.message);
+    }
   }
 
   public async delete(id: string): Promise<boolean> {
-    return await this.repositoryAdapter.delete(id);
+    try {
+      return await this.repositoryAdapter.delete(id);
+    } catch (error) {
+      throw new BadRequestError(error.message);
+    }
   }
 
   public async exists(params: Record<string, unknown>): Promise<boolean> {
-    return await this.repositoryAdapter.exists(params);
+    try {
+      return await this.repositoryAdapter.exists(params);
+    } catch (error) {
+      throw new BadRequestError(error.message);
+    }
   }
 }
