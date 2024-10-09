@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Load .env variable properly in docker swarm environment
+export $(cat .env) > /dev/null 2>&1; 
+
 # Function to detect the current shell and set the appropriate profile file
 detect_shell_profile() {
     local shell_name
@@ -87,5 +90,9 @@ fi
 # Proceed to authenticate
 echo "Authenticating Google Cloud SDK..."
 gcloud auth application-default login
+
+echo "Setting project to $GOOGLE_CLOUD_PROJECT_ID"
+gcloud config set project $GOOGLE_CLOUD_PROJECT_ID
+
 
 echo "Google Cloud SDK setup and authentication complete."
