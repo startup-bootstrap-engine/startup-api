@@ -1,0 +1,30 @@
+services:
+  startup-db:
+    container_name: startup-db
+    image: mongo
+    restart: always
+    command: mongod --port ${MONGO_PORT}
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    volumes:
+      - ./docker_scripts/:/docker-entrypoint-initdb.d
+    ports:
+      - ${MONGO_PORT}:${MONGO_PORT}
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    networks:
+      - startup-network
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          mongosh --host localhost --port ${MONGO_PORT} --eval 'if
+          (db.adminCommand("ping").ok) { exit(0) } else { exit(1) }'
+      interval: 2s
+      timeout: 10s
+      retries: 5

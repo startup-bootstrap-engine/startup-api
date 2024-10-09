@@ -41,6 +41,12 @@ function getModules() {
       serviceKeys: ["startup-redis"],
       networkKeys: ["startup-network"], // Shared network
     },
+    mongodb: {
+      enabled: process.env.MODULE_MONGODB === "true",
+      composePath: path.join(MODULES_PATH, "docker-compose.mongodb.module.yml"),
+      serviceKeys: ["startup-db"],
+      networkKeys: ["startup-network"], // Shared network
+    },
     // Add additional modules here
     // anotherModule: {
     //   enabled: process.env.MODULE_ANOTHER === "true",

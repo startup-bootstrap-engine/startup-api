@@ -92,5 +92,6 @@ export const appEnv = {
     redisStreams: process.env.MODULE_REDIS_STREAMS === "true",
     redisPubSub: process.env.MODULE_REDIS_PUBSUB === "true",
     bullMQ: process.env.MODULE_BULLMQ === "true",
+    mongodb: process.env.MODULE_MONGODB === "true",
   },
 };
