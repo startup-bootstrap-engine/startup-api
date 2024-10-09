@@ -27,7 +27,7 @@ import { RedisPubSub } from "@providers/redis/RedisPubSub";
 import { router } from "@providers/server/Router";
 import { app } from "@providers/server/app";
 import { NewRelicTransactionCategory } from "@providers/types/NewRelicTypes";
-import { EnvType } from "@rpg-engine/shared";
+import { EnvType } from "@startup-engine/shared";
 
 dayjs.extend(duration);
 
