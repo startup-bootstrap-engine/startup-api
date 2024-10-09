@@ -36,20 +36,24 @@ export class FirebaseRepository<T> implements IRepositoryAdapter<T> {
 
     const dbItem = zodToObject<T>(this.schema as ZodSchema, item);
 
-    // Generate a key first
     const newKey = this.dbRef.push().key;
 
     if (!newKey) {
       throw new Error("Failed to generate key for new item");
     }
 
-    const newItemRef = this.dbRef.child(newKey);
-    await newItemRef.set({
+    const now = new Date().toISOString();
+    const newItemData = {
       ...dbItem,
       _id: newKey.toString(),
-    });
+      createdAt: now,
+      updatedAt: now,
+    };
 
-    return { ...dbItem, id: newKey } as T;
+    const newItemRef = this.dbRef.child(newKey);
+    await newItemRef.set(newItemData);
+
+    return { ...newItemData, id: newKey } as T;
   }
 
   public async findById(id: string): Promise<T | null> {
@@ -101,10 +105,14 @@ export class FirebaseRepository<T> implements IRepositoryAdapter<T> {
     this.basicValidations();
 
     const itemRef = this.dbRef.child(id);
-    await itemRef.update(item);
+    const updatedData = {
+      ...item,
+      updatedAt: new Date().toISOString(),
+    };
+    await itemRef.update(updatedData);
     const updatedSnapshot = await itemRef.once("value");
-    const updatedData = updatedSnapshot.val();
-    return updatedData ? { ...updatedData, id } : null;
+    const updatedItem = updatedSnapshot.val();
+    return updatedItem ? { ...updatedItem, id } : null;
   }
 
   public async updateBy(params: Record<string, unknown>, item: Partial<T>): Promise<T | null> {
@@ -126,10 +134,16 @@ export class FirebaseRepository<T> implements IRepositoryAdapter<T> {
         return true; // Stop after first match
       });
       if (childSnapshot) {
+        const updatedData = {
+          ...item,
+          updatedAt: new Date().toISOString(),
+        };
         // @ts-ignore
-        await childSnapshot.ref.update(item);
+        await childSnapshot.ref.update(updatedData);
         // @ts-ignore
-        updatedItem = { ...childSnapshot.val(), id: childSnapshot.key };
+        const updatedSnapshot = await childSnapshot.ref.once("value");
+        // @ts-ignore
+        updatedItem = { ...updatedSnapshot.val(), id: childSnapshot.key } as T;
       }
       return updatedItem;
     }
