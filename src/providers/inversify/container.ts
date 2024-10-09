@@ -2,6 +2,7 @@ import { NewRelic } from "@providers/analytics/NewRelic";
 import { DatabaseFactory } from "@providers/database/adapters/DatabaseFactory";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
+import { RepositoryFactory } from "@providers/database/repository/RepositoryFactory";
 import { HashGenerator } from "@providers/hash/HashGenerator";
 import { Locker } from "@providers/locks/Locker";
 import { LinearInterpolation } from "@providers/math/LinearInterpolation";
@@ -91,4 +92,5 @@ export const linearInterpolation = container.get<LinearInterpolation>(LinearInte
 
 export const mathHelper = container.get<MathHelper>(MathHelper);
 
+export const repositoryFactory = container.get<RepositoryFactory>(RepositoryFactory);
 export { container };

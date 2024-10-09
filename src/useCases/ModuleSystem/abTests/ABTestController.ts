@@ -1,4 +1,3 @@
-import { ABTest, IABTest } from "@entities/ModuleSystem/ABTestModel";
 import {
   controller,
   httpDelete,
@@ -13,21 +12,14 @@ import {
   response,
 } from "inversify-express-utils";
 
-import { GenericUseCase } from "@providers/database/generics/GenericUseCase";
-import { BaseRepository } from "@providers/database/repository/BaseRepository";
 import { RepositoryFactory } from "@providers/database/repository/RepositoryFactory";
+import { ABRepository } from "@repositories/ModuleSystem/user/ABRepository";
+import { IABTest } from "@startup-engine/shared";
 import { CreateABTestDTO, UpdateABTestDTO } from "./ABTestDTO";
 
 @controller("/ab-tests")
 export class ABTestController implements interfaces.Controller {
-  private ABTestUseCase: GenericUseCase<IABTest>;
-
-  constructor(private repositoryFactory: RepositoryFactory) {
-    this.ABTestUseCase = new GenericUseCase(
-      ABTest,
-      repositoryFactory.createRepository<IABTest>(ABTest) as BaseRepository<IABTest>
-    );
-  }
+  constructor(private repositoryFactory: RepositoryFactory, private abRepository: ABRepository) {}
 
   @httpPost("/")
   private async create(
@@ -35,17 +27,17 @@ export class ABTestController implements interfaces.Controller {
     @response() res,
     @requestBody() createABTestDTO: CreateABTestDTO
   ): Promise<IABTest> {
-    return await this.ABTestUseCase.create(createABTestDTO as IABTest);
+    return await this.abRepository.create(createABTestDTO as IABTest);
   }
 
   @httpGet("/:id")
   private async read(@request() req, @response() res, @requestParam("id") id: string): Promise<IABTest | null> {
-    return await this.ABTestUseCase.findById(id);
+    return await this.abRepository.findById(id);
   }
 
   @httpGet("/")
   private async readAll(@request() req, @response() res, @queryParam() query): Promise<IABTest[]> {
-    return await this.ABTestUseCase.findAll(query);
+    return await this.abRepository.findAll(query);
   }
 
   @httpPatch("/:id")
@@ -55,11 +47,11 @@ export class ABTestController implements interfaces.Controller {
     @requestParam("id") id: string,
     @requestBody() updateABTestDTO: UpdateABTestDTO
   ): Promise<IABTest | null> {
-    return await this.ABTestUseCase.updateById(id, updateABTestDTO as IABTest);
+    return await this.abRepository.updateById(id, updateABTestDTO as IABTest);
   }
 
   @httpDelete("/:id")
   private async delete(@request() req, @response() res, @requestParam("id") id: string): Promise<boolean> {
-    return await this.ABTestUseCase.delete(id);
+    return await this.abRepository.delete(id);
   }
 }

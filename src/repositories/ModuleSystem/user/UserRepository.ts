@@ -12,8 +12,8 @@ export class UserRepository extends BaseRepository<IUser> implements IBaseReposi
     private repositoryFactory: RepositoryFactory,
     private userModel: UserModel
   ) {
-    const model = userModel.initializeData(userSchema);
-    super(repositoryFactory.createRepository<IUser>(model, userSchema));
+    // Initialize the base repository after ensuring userSchema is available
+    super(repositoryFactory.createRepository<IUser>(userModel.initializeData(userSchema), userSchema));
   }
 
   public async signUp(newUserData: IUser): Promise<IUser> {

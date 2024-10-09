@@ -1,15 +1,13 @@
-import { createSchema, ExtractDoc, Type, typedModel } from "ts-mongoose";
+// src/entities/ModuleSystem/UserModel.ts
 
-const abTestSchema = createSchema(
-  {
-    name: Type.string(),
-    slug: Type.string(),
-    description: Type.string(),
-    enabled: Type.boolean({ default: true }),
-  },
-  { timestamps: { createdAt: true, updatedAt: true } }
-);
+import { IABTest } from "@startup-engine/shared";
+import { provide } from "inversify-binding-decorators";
+import { ZodType } from "zod";
+import { BaseModel } from "./abstraction/BaseModel";
 
-export type IABTest = ExtractDoc<typeof abTestSchema>;
-
-export const ABTest = typedModel("ABTest", abTestSchema);
+@provide(ABTestModel)
+export class ABTestModel extends BaseModel<ZodType<IABTest>> {
+  protected get modelName(): string {
+    return "ABTest";
+  }
+}

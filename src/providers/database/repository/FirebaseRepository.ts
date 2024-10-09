@@ -32,9 +32,7 @@ export class FirebaseRepository<T> implements IRepositoryAdapter<T> {
   }
 
   public async create(item: T): Promise<T> {
-    if (!this.dbRef) {
-      throw new Error("Database reference not initialized");
-    }
+    this.basicValidations();
 
     const dbItem = zodToObject<T>(this.schema as ZodSchema, item);
 
@@ -55,9 +53,7 @@ export class FirebaseRepository<T> implements IRepositoryAdapter<T> {
   }
 
   public async findById(id: string): Promise<T | null> {
-    if (!this.dbRef) {
-      throw new Error("Database reference not initialized");
-    }
+    this.basicValidations();
 
     const snapshot = await this.dbRef.child(id).once("value");
     const data = snapshot.val();
@@ -65,9 +61,7 @@ export class FirebaseRepository<T> implements IRepositoryAdapter<T> {
   }
 
   public async findBy(params: Record<string, unknown>): Promise<T | null> {
-    if (!this.dbRef) {
-      throw new Error("Database reference not initialized");
-    }
+    this.basicValidations();
 
     const keys = Object.keys(params);
     if (keys.length === 0) {
@@ -86,9 +80,7 @@ export class FirebaseRepository<T> implements IRepositoryAdapter<T> {
   }
 
   public async findAll(params?: Record<string, unknown>): Promise<T[]> {
-    if (!this.dbRef) {
-      throw new Error("Database reference not initialized");
-    }
+    this.basicValidations();
 
     let query: admin.database.Query = this.dbRef;
     if (params) {
@@ -106,9 +98,7 @@ export class FirebaseRepository<T> implements IRepositoryAdapter<T> {
   }
 
   public async updateById(id: string, item: Partial<T>): Promise<T | null> {
-    if (!this.dbRef) {
-      throw new Error("Database reference not initialized");
-    }
+    this.basicValidations();
 
     const itemRef = this.dbRef.child(id);
     await itemRef.update(item);
@@ -118,9 +108,7 @@ export class FirebaseRepository<T> implements IRepositoryAdapter<T> {
   }
 
   public async updateBy(params: Record<string, unknown>, item: Partial<T>): Promise<T | null> {
-    if (!this.dbRef) {
-      throw new Error("Database reference not initialized");
-    }
+    this.basicValidations();
 
     const keys = Object.keys(params);
     if (keys.length === 0) {
@@ -149,18 +137,14 @@ export class FirebaseRepository<T> implements IRepositoryAdapter<T> {
   }
 
   public async delete(id: string): Promise<boolean> {
-    if (!this.dbRef) {
-      throw new Error("Database reference not initialized");
-    }
+    this.basicValidations();
 
     await this.dbRef.child(id).remove();
     return true;
   }
 
   public async exists(params: Record<string, unknown>): Promise<boolean> {
-    if (!this.dbRef) {
-      throw new Error("Database reference not initialized");
-    }
+    this.basicValidations();
 
     const keys = Object.keys(params);
     if (keys.length === 0) {
@@ -171,5 +155,15 @@ export class FirebaseRepository<T> implements IRepositoryAdapter<T> {
     const query = this.dbRef.orderByChild(key).equalTo(value as string | number | boolean);
     const snapshot = await query.once("value");
     return snapshot.exists();
+  }
+
+  private basicValidations(): void {
+    if (!this.dbRef) {
+      throw new Error("Database reference not initialized");
+    }
+
+    if (!this.schema) {
+      throw new Error("Schema not initialized");
+    }
   }
 }
