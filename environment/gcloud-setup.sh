@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# Load .env variable properly in docker swarm environment
-export $(cat .env) > /dev/null 2>&1; 
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+# Load .env variables, ignoring commented lines
+export $(grep -v '^#' .env | xargs) > /dev/null 2>&1
 
 # Function to detect the current shell and set the appropriate profile file
 detect_shell_profile() {
@@ -24,7 +27,7 @@ detect_shell_profile() {
     esac
 }
 
-# Function to add gcloud to PATH in the shell profile
+# Function to add gcloud to PATH in the shell profile (optional)
 add_gcloud_to_path() {
     local profile_file=$1
     local gcloud_path="$HOME/.gcloud-sdk/google-cloud-sdk/bin"
@@ -79,7 +82,17 @@ else
     # Add gcloud to PATH in the current session
     export PATH="$INSTALL_DIR/google-cloud-sdk/bin:$PATH"
 
-    # Detect the shell profile and add gcloud to PATH
+    # Create a symlink to gcloud in /usr/local/bin
+    # Requires write permission to /usr/local/bin
+    if [ -w /usr/local/bin ]; then
+        ln -sf "$INSTALL_DIR/google-cloud-sdk/bin/gcloud" /usr/local/bin/gcloud
+        echo "Symlinked gcloud to /usr/local/bin/"
+    else
+        echo "Warning: Cannot create symlink to /usr/local/bin/. Permission denied."
+        echo "Ensure that $INSTALL_DIR/google-cloud-sdk/bin is in your PATH."
+    fi
+
+    # Detect the shell profile and add gcloud to PATH (optional)
     SHELL_PROFILE=$(detect_shell_profile)
     add_gcloud_to_path "$SHELL_PROFILE"
 
@@ -92,7 +105,8 @@ echo "Authenticating Google Cloud SDK..."
 gcloud auth application-default login
 
 echo "Setting project to $GOOGLE_CLOUD_PROJECT_ID"
-gcloud config set project $GOOGLE_CLOUD_PROJECT_ID
+gcloud config set project "$GOOGLE_CLOUD_PROJECT_ID"
 
+source "$SHELL_PROFILE"
 
 echo "Google Cloud SDK setup and authentication complete."
