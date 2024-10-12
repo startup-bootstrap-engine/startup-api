@@ -1,8 +1,7 @@
 import { Identify } from "@amplitude/identify";
 import { DEFAULT_DATE_FORMAT } from "@providers/constants/DateConstants";
 import { MixpanelTracker } from "@providers/mixpanel/Mixpanel";
-import { IUser } from "@startup-engine/shared";
-import { EnvType } from "@startup-engine/shared/dist";
+import { EnvType, IUser } from "@startup-engine/shared";
 import dayjs from "dayjs";
 import { provide } from "inversify-binding-decorators";
 import { appEnv } from "../config/env";

@@ -257,6 +257,7 @@ export class RedisStreams {
         if (streams) {
           for (const stream of streams) {
             // @ts-ignore
+            // eslint-disable-next-line no-unused-vars
             const [_, messages] = stream;
             const ackIds: string[] = [];
             const processingPromises: Promise<void>[] = [];

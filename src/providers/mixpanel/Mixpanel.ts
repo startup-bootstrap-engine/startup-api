@@ -1,5 +1,4 @@
-import { IUser } from "@startup-engine/shared";
-import { EnvType } from "@startup-engine/shared/dist";
+import { EnvType, IUser } from "@startup-engine/shared";
 import { provide } from "inversify-binding-decorators";
 import Mixpanel from "mixpanel";
 import { appEnv } from "../config/env";
