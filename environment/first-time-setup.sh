@@ -14,6 +14,13 @@ tput setaf 2
 cp -fr ./environment/dev.env .env
 cp -fr ./environment/Dockerfile.dev Dockerfile
 
+
+# Create dir if not exists
+mkdir -p ./environment/keys
+
+# Setup keys folder permissions
+chmod +w ./environment/keys
+
 # Install OS dependencies
 print_message "Starting OS Dependencies Installation"
 bash ./environment/os-dependencies.sh
