@@ -4,8 +4,9 @@ import { abTestSchema, userSchema } from "@startup-engine/shared";
 import fs from "fs";
 import path from "path";
 import { z } from "zod";
-import { generatePrismaEnums, generatePrismaModel } from "./schemaPrismaTools";
+import { generatePrismaEnums, generatePrismaModel, handleRelations } from "./schemaPrismaTools";
 
+// Define any additional schemas here
 const ChannelSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
@@ -18,6 +19,10 @@ const models = [
   { name: "Channel", schema: ChannelSchema },
   // Add more models as needed
 ];
+
+// Create a mapping from Zod schemas to model names
+const schemaToModelName = new Map<z.ZodSchema<any>, string>();
+models.forEach((model) => schemaToModelName.set(model.schema, model.name));
 
 // Prisma schema header
 const prismaSchemaHeader = `
@@ -33,7 +38,12 @@ generator client {
 `;
 
 // Generate models and enums
-const prismaModels = models.map((model) => generatePrismaModel(model.name, model.schema)).join("\n\n");
+const prismaModels = models
+  .map((model) => {
+    const modelString = generatePrismaModel(model.name, model.schema, schemaToModelName);
+    return handleRelations(modelString, model.schema);
+  })
+  .join("\n\n");
 const prismaEnums = generatePrismaEnums();
 
 // Combine all parts

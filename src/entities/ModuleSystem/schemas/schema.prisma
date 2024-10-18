@@ -47,7 +47,6 @@ model User {
   isManuallyControlledPremiumAccount Boolean @default(false)
   pushNotificationToken String?
   channelId String?
-  channel Channel? @relation(fields: [channelId], references: [id])
 }
 
 model ABTest {

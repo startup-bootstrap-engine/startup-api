@@ -2,6 +2,7 @@
 /* eslint-disable mongoose-performance/require-lean */
 // zodToPrisma.ts
 import {
+  z,
   ZodArray,
   ZodBoolean,
   ZodDate,
@@ -42,6 +43,7 @@ interface IPrismaEnum {
   values: string[];
 }
 
+// Collection of enums to avoid duplication
 const enums: IPrismaEnum[] = [];
 
 // Helper function to capitalize strings
@@ -51,10 +53,10 @@ function capitalize(str: string): string {
 }
 
 // Function to convert Zod types to Prisma types
-function zodTypeToPrisma(zodType: ZodTypeAny): string {
+function zodTypeToPrisma(zodType: ZodTypeAny, schemaToModelName: Map<ZodSchema<any>, string>): string {
   // Handle ZodEffects by unwrapping
   if (zodType instanceof ZodEffects) {
-    return zodTypeToPrisma(zodType._def.schema);
+    return zodTypeToPrisma(zodType._def.schema, schemaToModelName);
   }
 
   if (zodType instanceof ZodString) {
@@ -62,7 +64,7 @@ function zodTypeToPrisma(zodType: ZodTypeAny): string {
   }
   if (zodType instanceof ZodNumber) {
     // Determine if it's Int or Float based on Zod refinements
-    if (zodType.isInt) {
+    if ((zodType as any)._def.checks?.some((check: any) => check.kind === "int")) {
       return "Int";
     }
     return "Float";
@@ -74,8 +76,13 @@ function zodTypeToPrisma(zodType: ZodTypeAny): string {
     return "DateTime";
   }
   if (zodType instanceof ZodArray) {
-    const elementType = zodTypeToPrisma(zodType.element);
-    return `${elementType}[]`;
+    const elementType = zodType.element;
+    const relatedModelName = schemaToModelName.get(elementType);
+    if (relatedModelName) {
+      return `${relatedModelName}[]`;
+    }
+    const prismaElementType = zodTypeToPrisma(elementType, schemaToModelName);
+    return `${prismaElementType}[]`;
   }
   if (zodType instanceof ZodEnum) {
     const enumName = `${capitalize(zodType._def.values[0])}Enum`; // Example naming
@@ -114,7 +121,10 @@ function zodTypeToPrisma(zodType: ZodTypeAny): string {
     // Handle other literal types as needed
   }
   if (zodType instanceof ZodObject) {
-    // Map ZodObject to Prisma's Json type
+    const relatedModelName = schemaToModelName.get(zodType);
+    if (relatedModelName) {
+      return relatedModelName;
+    }
     return "Json";
   }
   // Add more type mappings as needed
@@ -122,7 +132,11 @@ function zodTypeToPrisma(zodType: ZodTypeAny): string {
 }
 
 // Function to extract Prisma fields from ZodObject
-function extractPrismaFields(zodObject: ZodObject<any>): IPrismaField[] {
+function extractPrismaFields(
+  zodObject: ZodObject<any>,
+  schemaToModelName: Map<ZodSchema<any>, string>,
+  modelName: string
+): IPrismaField[] {
   const shape = zodObject.shape;
   const fields: IPrismaField[] = [];
 
@@ -143,7 +157,7 @@ function extractPrismaFields(zodObject: ZodObject<any>): IPrismaField[] {
     // Skip 'id' if it's already handled
     if (key === "id") {
       const zodType = value as ZodTypeAny;
-      const prismaType = zodTypeToPrisma(zodType);
+      // Assuming 'id' is a string with default uuid
       fields.push({
         name: "id",
         type: "String",
@@ -164,6 +178,7 @@ function extractPrismaFields(zodObject: ZodObject<any>): IPrismaField[] {
     let isEnum = false;
     let isRelation = false;
     let relationModel: string | undefined;
+    let relationName: string | undefined;
     let relationFields: string[] = [];
     let references: string[] = [];
     let zodType: ZodTypeAny = value as ZodTypeAny;
@@ -212,18 +227,52 @@ function extractPrismaFields(zodObject: ZodObject<any>): IPrismaField[] {
       isEnum = true;
     }
 
-    // Handle relations based on naming convention (e.g., channelId)
+    // Automatically infer relations
     if (key.endsWith("Id") && (zodType instanceof ZodString || zodType instanceof ZodNumber)) {
-      isRelation = true;
-      const relationModelName = key.slice(0, -2); // Remove 'Id' to get the model name
-      relationModel = capitalize(relationModelName);
-      relationFields = [key];
-      references = ["id"];
+      const relatedModelName = capitalize(key.slice(0, -2)); // Remove 'Id' and capitalize
+      if (schemaToModelName.has(relatedModelName as any)) {
+        isRelation = true;
+        relationModel = relatedModelName;
+        relationName = `${modelName}To${relatedModelName}`;
+        relationFields = [key];
+        references = ["id"];
+        isUnique = true; // Assuming one-to-one or many-to-one relation
+      }
+    }
+
+    // Handle relations defined as nested objects or arrays
+    if (zodType instanceof ZodObject || (zodType instanceof ZodArray && zodType.element instanceof ZodObject)) {
+      const relatedSchema = zodType instanceof ZodArray ? zodType.element : zodType;
+      const relatedModelName = schemaToModelName.get(relatedSchema);
+      if (relatedModelName) {
+        isRelation = true;
+        relationModel = relatedModelName;
+        relationName = `${modelName}To${relatedModelName}`;
+        if (zodType instanceof ZodArray) {
+          // One-to-Many or Many-to-Many
+          // No need to add a foreign key field here
+        } else {
+          // One-to-One or Many-to-One
+          // Add foreign key field
+          const foreignKeyName = `${key}Id`;
+          fields.push({
+            name: foreignKeyName,
+            type: "String",
+            isRequired: false,
+            isUnique: true,
+            isRelation: true,
+            relationModel: relatedModelName,
+            relationName,
+            relationFields: [foreignKeyName],
+            references: ["id"],
+          });
+        }
+      }
     }
 
     let prismaType: string;
     try {
-      prismaType = zodTypeToPrisma(zodType);
+      prismaType = zodTypeToPrisma(zodType, schemaToModelName);
     } catch (error: any) {
       console.error(`Error processing field "${key}": ${error.message}`);
       throw error;
@@ -240,6 +289,7 @@ function extractPrismaFields(zodObject: ZodObject<any>): IPrismaField[] {
       isEnum,
       isRelation,
       relationModel,
+      relationName,
       relationFields,
       references,
     });
@@ -249,12 +299,16 @@ function extractPrismaFields(zodObject: ZodObject<any>): IPrismaField[] {
 }
 
 // Function to generate Prisma model from Zod schema
-function generatePrismaModel(modelName: string, zodSchema: ZodSchema<any>): string {
+function generatePrismaModel(
+  modelName: string,
+  zodSchema: ZodSchema<any>,
+  schemaToModelName: Map<ZodSchema<any>, string>
+): string {
   if (!(zodSchema instanceof ZodObject)) {
     throw new Error("Only ZodObject schemas are supported for Prisma model generation.");
   }
 
-  const fields = extractPrismaFields(zodSchema);
+  const fields = extractPrismaFields(zodSchema, schemaToModelName, modelName);
 
   const prismaFields: string[] = [];
 
@@ -265,7 +319,7 @@ function generatePrismaModel(modelName: string, zodSchema: ZodSchema<any>): stri
     let line = `  ${field.name} ${field.type}`;
 
     // Append '?' immediately after the type if the field is not required
-    if (!field.isRequired) {
+    if (!field.isRequired && !field.isRelation) {
       line += "?";
     }
 
@@ -279,30 +333,26 @@ function generatePrismaModel(modelName: string, zodSchema: ZodSchema<any>): stri
     if (field.isEnum && field.default) {
       line += ` @default(${field.default})`;
     }
-    // Only add @relation to foreign key fields if not already part of a relation
+
+    // Handle relations
     if (field.isRelation && field.relationModel) {
-      // Do NOT add @relation to the foreign key field
-      // The @relation should be on the relation field
-      // Hence, skip adding @relation here
+      if (field.type.endsWith("[]")) {
+        // One-to-Many or Many-to-Many relation
+        line += ` @relation("${field.relationName || modelName + "_" + field.relationModel}")`;
+      } else {
+        // One-to-One or Many-to-One relation
+        line += ` @relation("${field.relationName || modelName + "_" + field.relationModel}", fields: [${
+          field.name
+        }], references: [id])`;
+      }
     }
 
     prismaFields.push(line);
 
-    // If it's a relation, add the relation field
-    if (field.isRelation && field.relationModel && !processedRelations.has(field.relationModel)) {
-      // Generate the relation field name in lowercase for the related model's back-reference
-      const relationFieldName = field.relationModel.toLowerCase();
-
-      // Define the relation field (e.g., channel Channel? @relation(...))
-      const relationLine = `  ${relationFieldName} ${
-        field.relationModel
-      }? @relation(fields: [${field.relationFields?.join(", ")}], references: [${field.references?.join(", ")}])`;
-
-      // Avoid duplicating relation fields
-      if (!prismaFields.includes(relationLine)) {
-        prismaFields.push(relationLine);
-        processedRelations.add(field.relationModel);
-      }
+    // If it's a relation and not an array, add the relation field in the related model
+    if (field.isRelation && field.relationModel && !field.type.endsWith("[]")) {
+      // Assuming bi-directional relation; add back-reference in the related model
+      // This requires knowledge of all models; handled in the main generation loop
     }
   });
 
@@ -319,5 +369,44 @@ function generatePrismaEnums(): string {
     .join("\n\n");
 }
 
+// Function to generate the complete Prisma schema
+function generatePrismaSchema(models: { [key: string]: ZodSchema<any> }): string {
+  // Create schema to model name mapping
+  const schemaToModelName = new Map<ZodSchema<any>, string>();
+  for (const [name, schema] of Object.entries(models)) {
+    schemaToModelName.set(schema, name);
+  }
+
+  // Generate models
+  const prismaModels = Object.entries(models)
+    .map(([name, schema]) => generatePrismaModel(name, schema, schemaToModelName))
+    .join("\n\n");
+
+  // Generate enums
+  const prismaEnums = generatePrismaEnums();
+
+  // Combine enums and models
+  const prismaSchema = `${prismaEnums}\n\n${prismaModels}`;
+
+  return prismaSchema;
+}
+
 // Export functions
-export { generatePrismaEnums, generatePrismaModel };
+export { generatePrismaEnums, generatePrismaModel, generatePrismaSchema };
+
+export function handleRelations(modelString: string, schema: z.ZodObject<any>): string {
+  const shape = schema.shape;
+  let updatedModelString = modelString;
+
+  for (const [key, value] of Object.entries(shape)) {
+    if (value instanceof z.ZodString && value.description?.includes("@relation")) {
+      const relationInfo = value.description.match(/@relation\((.*?)\)/);
+      if (relationInfo) {
+        const [, relationDetails] = relationInfo;
+        updatedModelString = updatedModelString.replace(`${key} String`, `${key} String @relation(${relationDetails})`);
+      }
+    }
+  }
+
+  return updatedModelString;
+}
