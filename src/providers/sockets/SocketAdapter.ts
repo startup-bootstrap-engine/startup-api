@@ -77,7 +77,7 @@ export class SocketAdapter implements ISocket {
 
       const { userId } = socketQuery;
 
-      await this.userRepository.updateById(userId, { channelId: channel.id });
+      await this.userRepository.updateById(userId, { channel: channel.id });
 
       const hasUserId = socketQuery.userId !== "undefined" && socketQuery.userId !== undefined;
       if (hasUserId) {
@@ -92,10 +92,10 @@ export class SocketAdapter implements ISocket {
           if (!previousUser) {
             throw new Error("User not found!");
           }
-          void this.emitToUser(previousUser.channelId!, "UserForceDisconnect", {
+          void this.emitToUser(previousUser.channel!, "UserForceDisconnect", {
             reason: "You have been disconnected because you logged in from another device!",
           });
-          const previousChannel = this.getChannelById(previousUser.channelId!);
+          const previousChannel = this.getChannelById(previousUser.channel!);
           if (previousChannel) {
             await previousChannel.leave();
             previousChannel.removeAllListeners();

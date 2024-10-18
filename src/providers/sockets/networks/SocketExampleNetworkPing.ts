@@ -19,7 +19,7 @@ export class SocketExampleNetworkPing {
       // use an enum here
       "CharacterPing",
       async (data: any, user: IUser) => {
-        this.socketMessaging.sendEventToUser(user.channelId!, "CharacterPing", data);
+        this.socketMessaging.sendEventToUser(user.channel!, "CharacterPing", data);
 
         await this.userRepository.updateById(user._id, {
           updatedAt: new Date(),
