@@ -20,4 +20,4 @@ export const ENVIRONMENT_PATH = path.join(ROOT_PATH, "./environment");
 
 export const FIREBASE_CONFIG_PATH = path.join(ENVIRONMENT_PATH, "./keys");
 
-export const PRISMA_SCHEMA_PATH = path.join(ROOT_PATH, "./src/entities/ModuleSystem/schemas");
+export const PRISMA_SCHEMA_PATH = path.join(ROOT_PATH, "./prisma/schema.prisma");

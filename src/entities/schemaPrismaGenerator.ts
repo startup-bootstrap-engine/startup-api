@@ -42,13 +42,19 @@ async function generatePrismaSchemaFile(): Promise<void> {
     // Combine with header
     const completePrismaSchema = `${prismaSchemaHeader}\n${prismaSchemaContent}\n`;
 
-    // Write to schema.prisma
-    const schemaPath = path.join(PRISMA_SCHEMA_PATH, "schema.prisma");
-    await fs.writeFile(schemaPath, completePrismaSchema, { encoding: "utf-8" });
+    // Ensure the directory exists
+    const schemaDir = path.dirname(PRISMA_SCHEMA_PATH);
+    await fs.mkdir(schemaDir, { recursive: true });
 
-    console.log("✅ Prisma schema generated successfully.");
+    // Write to schema.prisma
+    await fs.writeFile(PRISMA_SCHEMA_PATH, completePrismaSchema, { encoding: "utf-8" });
+
+    console.log(`✅ Prisma schema generated successfully at ${PRISMA_SCHEMA_PATH}`);
   } catch (error) {
     console.error("❌ Failed to generate Prisma schema:", error);
+    if (error instanceof Error) {
+      console.error("Error details:", error.message);
+    }
     process.exit(1);
   }
 }
