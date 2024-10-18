@@ -1,0 +1,64 @@
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+enum AdminEnum {
+  Admin
+  Regular
+  Staff
+}
+
+enum BasicEnum {
+  Basic
+  GoogleOAuth
+  FacebookOAuth
+  LinkedInOAuth
+  AppleOAuth
+}
+
+enum FreeEnum {
+  free
+  bronze
+  silver
+  gold
+  ultimate
+}
+
+model User {
+  id String @id @unique @default(uuid())
+  name String
+  role AdminEnum @default(Regular)
+  authFlow BasicEnum @default(Basic)
+  email String @unique
+  password String?
+  address String?
+  phone String?
+  salt String?
+  unsubscribed Boolean @default(false)
+  refreshTokens Json[]
+  accountType FreeEnum @default(free)
+  isManuallyControlledPremiumAccount Boolean @default(false)
+  pushNotificationToken String?
+  channelId String?
+  channel Channel? @relation(fields: [channelId], references: [id])
+}
+
+model ABTest {
+  id String @id @unique @default(uuid())
+  name String
+  slug String
+  description String
+  enabled Boolean @default(true)
+}
+
+model Channel {
+  id String @id @unique @default(uuid())
+  name String
+}
