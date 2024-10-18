@@ -46,7 +46,7 @@ model User {
   accountType AccountTypeEnum @default(free)
   isManuallyControlledPremiumAccount Boolean @default(false)
   pushNotificationToken String?
-  channelId String?
+  channel String?
 }
 
 model ABTest {
@@ -55,9 +55,4 @@ model ABTest {
   slug String
   description String
   enabled Boolean @default(true)
-}
-
-model Channel {
-  id String @id @unique @default(uuid())
-  name String
 }

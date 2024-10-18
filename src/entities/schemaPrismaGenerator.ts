@@ -5,17 +5,10 @@ import path from "path";
 import { z } from "zod";
 import { generatePrismaSchema } from "./schemaPrismaTools";
 
-// Define any additional schemas here
-const ChannelSchema = z.object({
-  id: z.string().uuid(),
-  name: z.string(),
-});
-
 // Initialize models
 const models = [
   { name: "User", schema: userSchema },
   { name: "ABTest", schema: abTestSchema },
-  { name: "Channel", schema: ChannelSchema },
   // Add more models as needed
 ];
 
