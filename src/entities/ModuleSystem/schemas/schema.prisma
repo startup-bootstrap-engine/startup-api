@@ -9,13 +9,13 @@ generator client {
 }
 
 
-enum AdminEnum {
+enum RoleEnum {
   Admin
   Regular
   Staff
 }
 
-enum BasicEnum {
+enum AuthFlowEnum {
   Basic
   GoogleOAuth
   FacebookOAuth
@@ -23,7 +23,7 @@ enum BasicEnum {
   AppleOAuth
 }
 
-enum FreeEnum {
+enum AccountTypeEnum {
   free
   bronze
   silver
@@ -34,8 +34,8 @@ enum FreeEnum {
 model User {
   id String @id @unique @default(uuid())
   name String
-  role AdminEnum @default(Regular)
-  authFlow BasicEnum @default(Basic)
+  role RoleEnum @default(Regular)
+  authFlow AuthFlowEnum @default(Basic)
   email String @unique
   password String?
   address String?
@@ -43,7 +43,7 @@ model User {
   salt String?
   unsubscribed Boolean @default(false)
   refreshTokens Json[]
-  accountType FreeEnum @default(free)
+  accountType AccountTypeEnum @default(free)
   isManuallyControlledPremiumAccount Boolean @default(false)
   pushNotificationToken String?
   channelId String?

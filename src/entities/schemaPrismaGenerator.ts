@@ -1,10 +1,9 @@
-// generatePrismaSchema.ts
 import { PRISMA_SCHEMA_PATH } from "@providers/constants/PathConstants";
 import { abTestSchema, userSchema } from "@startup-engine/shared";
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
 import { z } from "zod";
-import { generatePrismaEnums, generatePrismaModel, handleRelations } from "./schemaPrismaTools";
+import { generatePrismaSchema } from "./schemaPrismaTools";
 
 // Define any additional schemas here
 const ChannelSchema = z.object({
@@ -20,9 +19,13 @@ const models = [
   // Add more models as needed
 ];
 
-// Create a mapping from Zod schemas to model names
+// Create mappings
 const schemaToModelName = new Map<z.ZodSchema<any>, string>();
-models.forEach((model) => schemaToModelName.set(model.schema, model.name));
+const modelNameToSchema = new Map<string, z.ZodSchema<any>>();
+models.forEach((model) => {
+  schemaToModelName.set(model.schema, model.name);
+  modelNameToSchema.set(model.name, model.schema);
+});
 
 // Prisma schema header
 const prismaSchemaHeader = `
@@ -37,19 +40,24 @@ generator client {
 
 `;
 
-// Generate models and enums
-const prismaModels = models
-  .map((model) => {
-    const modelString = generatePrismaModel(model.name, model.schema, schemaToModelName);
-    return handleRelations(modelString, model.schema);
-  })
-  .join("\n\n");
-const prismaEnums = generatePrismaEnums();
+// Generate Prisma schema
+async function generatePrismaSchemaFile(): Promise<void> {
+  try {
+    // Generate the complete Prisma schema
+    const prismaSchemaContent = generatePrismaSchema(models, schemaToModelName, modelNameToSchema);
 
-// Combine all parts
-const prismaSchema = `${prismaSchemaHeader}\n${prismaEnums}\n\n${prismaModels}\n`;
+    // Combine with header
+    const completePrismaSchema = `${prismaSchemaHeader}\n${prismaSchemaContent}\n`;
 
-// Write to schema.prisma
-fs.writeFileSync(path.join(PRISMA_SCHEMA_PATH, "schema.prisma"), prismaSchema);
+    // Write to schema.prisma
+    const schemaPath = path.join(PRISMA_SCHEMA_PATH, "schema.prisma");
+    await fs.writeFile(schemaPath, completePrismaSchema, { encoding: "utf-8" });
 
-console.log("✅ Prisma schema generated successfully.");
+    console.log("✅ Prisma schema generated successfully.");
+  } catch (error) {
+    console.error("❌ Failed to generate Prisma schema:", error);
+    process.exit(1);
+  }
+}
+
+void generatePrismaSchemaFile();
