@@ -47,6 +47,12 @@ function getModules() {
       serviceKeys: ["startup-db"],
       networkKeys: ["startup-network"], // Shared network
     },
+    postgresql: {
+      enabled: process.env.MODULE_POSTGRESQL === "true",
+      composePath: path.join(MODULES_PATH, "docker-compose.postgresql.module.yml"),
+      serviceKeys: ["startup-postgresql"],
+      networkKeys: ["startup-network"], // Shared network
+    },
     // Add additional modules here
     // anotherModule: {
     //   enabled: process.env.MODULE_ANOTHER === "true",

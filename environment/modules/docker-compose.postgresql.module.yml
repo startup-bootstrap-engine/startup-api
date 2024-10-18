@@ -1,0 +1,30 @@
+services:
+  startup-postgresql:
+    container_name: startup-postgresql
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    networks:
+      - startup-network
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c '\q'
+      interval: 2s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  postgres_data:

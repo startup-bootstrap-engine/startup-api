@@ -24,7 +24,7 @@ models.forEach((model) => {
 const prismaSchemaHeader = `
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("POSTGRESQL_DATABASE_URL")
 }
 
 generator client {
