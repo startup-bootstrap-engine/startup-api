@@ -120,7 +120,7 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-    "email": "br.developer@gmail.com"
+    "email": "joaopaulofurtado@live.com"
 }
 
 ### 
@@ -131,6 +131,6 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-    "currentPassword": "cc0cfa806f",
-    "newPassword": "123"
+    "currentPassword": "2f27553428",
+    "newPassword": "123456"
 }
