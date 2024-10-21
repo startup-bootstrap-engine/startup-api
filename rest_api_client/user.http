@@ -131,6 +131,6 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-    "currentPassword": "2f27553428",
+    "currentPassword": "123",
     "newPassword": "123456"
 }
