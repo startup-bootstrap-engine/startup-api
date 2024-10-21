@@ -31,6 +31,8 @@ export abstract class BaseModel<T extends z.ZodTypeAny> implements IAgnosticSche
         return Model;
       case "firebase":
         return this.collectionName; // Return collection name as a string
+      case "prisma":
+        return this.modelName;
       default:
         throw new Error(`Adapter type ${adapter} is not supported`);
     }
@@ -39,7 +41,6 @@ export abstract class BaseModel<T extends z.ZodTypeAny> implements IAgnosticSche
   protected abstract get modelName(): string;
 
   protected get collectionName(): string {
-    // Implemented in BaseModel
     return pluralize(this.modelName).toLowerCase();
   }
 }

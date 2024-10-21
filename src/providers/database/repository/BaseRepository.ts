@@ -5,7 +5,7 @@ import { TS } from "@providers/translation/TranslationHelper";
 import { provide } from "inversify-binding-decorators";
 import { IRepositoryAdapter } from "../DatabaseTypes";
 
-export interface IBaseRepository<T extends AvailableSchemas> extends IRepositoryAdapter<T, Record<string, unknown>> {}
+export interface IBaseRepository<T extends AvailableSchemas> extends IRepositoryAdapter<T> {}
 
 export interface IBaseRepositoryCreateOptions {
   uniqueByKeys?: string | string[];
@@ -25,7 +25,7 @@ export interface IBaseRepositoryFindByOptions {
 
 @provide(BaseRepository)
 export class BaseRepository<T extends AvailableSchemas> implements IBaseRepository<T> {
-  constructor(private repositoryAdapter: IRepositoryAdapter<T, Record<string, unknown>>) {}
+  constructor(private repositoryAdapter: IRepositoryAdapter<T>) {}
 
   public async create(data: Partial<T>, options?: IBaseRepositoryCreateOptions): Promise<T> {
     try {

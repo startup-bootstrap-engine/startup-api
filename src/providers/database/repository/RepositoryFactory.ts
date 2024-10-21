@@ -5,10 +5,11 @@ import { ZodObject } from "zod";
 import { DatabaseAdaptersAvailable, IRepositoryAdapter } from "../DatabaseTypes";
 import { FirebaseRepository } from "./FirebaseRepository";
 import { MongooseRepository } from "./MongooseRepository";
+import { PrismaModelName, PrismaRepository } from "./PrismaRepository";
 
 @provide(RepositoryFactory)
 export class RepositoryFactory {
-  constructor(private firebaseRepository: FirebaseRepository<any>) {}
+  constructor(private firebaseRepository: FirebaseRepository<any>, private prismaRepository: PrismaRepository<any>) {}
 
   public createRepository<T extends { [key: string]: any }>(
     model: Model<any> | string,
@@ -18,10 +19,15 @@ export class RepositoryFactory {
     switch (type) {
       case "mongoose":
         return new MongooseRepository(model as Model<any>);
+
       case "firebase":
         // Ensure model is a string for Firebase
-        this.firebaseRepository.init(model as string, schema);
+        void this.firebaseRepository.init(model as string, schema);
         return this.firebaseRepository;
+
+      case "prisma":
+        this.prismaRepository.init(model as PrismaModelName, schema);
+        return this.prismaRepository;
 
       default:
         throw new Error(`Repository type ${type} is not supported`);
