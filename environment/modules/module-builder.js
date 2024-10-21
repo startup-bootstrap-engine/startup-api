@@ -53,6 +53,16 @@ function getModules() {
       serviceKeys: ["startup-postgresql"],
       networkKeys: ["startup-network"], // Shared network
     },
+    prismastudio: {
+      enabled: process.env.MODULE_PRISMA_STUDIO === "true",
+      composePath: path.join(MODULES_PATH, "docker-compose.prismastudio.module.yml"),
+      serviceKeys: ["prisma-studio"],
+    },
+    pgadmin: {
+      enabled: process.env.MODULE_PGADMIN === "true",
+      composePath: path.join(MODULES_PATH, "docker-compose.pgadmin.module.yml"),
+      serviceKeys: ["pgadmin"],
+    },
     // Add additional modules here
     // anotherModule: {
     //   enabled: process.env.MODULE_ANOTHER === "true",

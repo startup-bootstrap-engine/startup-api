@@ -8,6 +8,7 @@ import { IBaseRepositoryFindByOptions } from "./BaseRepository";
 
 export type PrismaModelName = keyof PrismaClient;
 export type PrismaModelDelegate = {
+  name: any;
   create: (args: any) => Promise<any>;
   findUnique: (args: any) => Promise<any>;
   findFirst: (args: any) => Promise<any>;
@@ -29,14 +30,44 @@ export class PrismaRepository<T extends object> implements IRepositoryAdapter<T>
   /**
    * Initializes the repository by setting up the Prisma client and model delegate.
    */
-  public init(modelName: PrismaModelName, schema: ZodObject<any>): void {
+  public async init(modelName: PrismaModelName, schema: ZodObject<any>): Promise<void> {
     this.schema = schema;
     const prisma = this.prismaAdapter.getClient();
     const delegate = prisma[modelName];
     if (!delegate) {
       throw new Error(`Model ${String(modelName)} does not exist on Prisma Client.`);
     }
-    this.modelDelegate = delegate as PrismaModelDelegate;
+    this.modelDelegate = delegate as unknown as PrismaModelDelegate;
+
+    // Ensure table exists
+    await this.ensureTableExists();
+  }
+
+  private async ensureTableExists(): Promise<void> {
+    try {
+      // Attempt to query the table
+      await this.modelDelegate.findFirst({});
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2021") {
+        console.warn(`Table for model ${this.modelDelegate.name} does not exist. Running migrations...`);
+        // Run Prisma migrations
+        const { exec } = require("child_process");
+        await new Promise((resolve, reject) => {
+          exec("npx prisma migrate deploy", (error: Error | null, stdout: string, stderr: string) => {
+            if (error) {
+              console.error(`Migration error: ${error}`);
+              reject(error);
+              return;
+            }
+            console.log(`Migration stdout: ${stdout}`);
+            console.error(`Migration stderr: ${stderr}`);
+            resolve(stdout);
+          });
+        });
+      } else {
+        throw error;
+      }
+    }
   }
 
   public async create(item: T): Promise<T> {
@@ -53,12 +84,20 @@ export class PrismaRepository<T extends object> implements IRepositoryAdapter<T>
   }
 
   public async findBy(params: Record<string, unknown>, options?: IBaseRepositoryFindByOptions): Promise<T | null> {
-    const where = this.parseWhere(params);
-    return await this.modelDelegate.findFirst({
-      where,
-      select: options?.select ? this.parseSelect(options.select) : undefined,
-      include: options?.populate ? this.parseInclude(options.populate) : undefined,
-    });
+    try {
+      const where = this.parseWhere(params);
+      return await this.modelDelegate.findFirst({
+        where,
+        select: options?.select ? this.parseSelect(options.select) : undefined,
+        include: options?.populate ? this.parseInclude(options.populate) : undefined,
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2021") {
+        console.error(`Table for model ${this.modelDelegate.name} does not exist in the database.`);
+        return null;
+      }
+      throw error;
+    }
   }
 
   public async findAll(params?: Record<string, unknown>, options?: IBaseRepositoryFindByOptions): Promise<T[]> {
@@ -99,8 +138,17 @@ export class PrismaRepository<T extends object> implements IRepositoryAdapter<T>
   }
 
   public async exists(params: Record<string, unknown>): Promise<boolean> {
-    const count = await this.modelDelegate.count({ where: this.parseWhere(params) });
-    return count > 0;
+    try {
+      const count = await this.modelDelegate.count({ where: this.parseWhere(params) });
+      return count > 0;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2021") {
+        // P2021 is the error code for "The table does not exist in the current database"
+        console.error(`Table for model ${this.modelDelegate.name} does not exist in the database.`);
+        return false;
+      }
+      throw error;
+    }
   }
 
   private parseWhere(params: Record<string, unknown>): Prisma.Subset<any, any> {

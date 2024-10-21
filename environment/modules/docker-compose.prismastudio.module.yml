@@ -1,0 +1,16 @@
+services:
+  prisma-studio:
+    container_name: prisma-studio
+    image: node:18
+    command: npx prisma studio
+    environment:
+      - DATABASE_URL=${POSTGRESQL_DATABASE_URL}
+    ports:
+      - "5555:5555"
+    depends_on:
+      - startup-postgresql
+    volumes:
+      - ./:/app
+    working_dir: /app
+    networks:
+      - startup-network
