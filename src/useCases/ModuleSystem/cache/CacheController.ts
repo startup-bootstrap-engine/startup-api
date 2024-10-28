@@ -4,7 +4,7 @@ import { AuthMiddleware } from "@providers/middlewares/AuthMiddleware";
 import { UserTypes } from "@startup-engine/shared";
 import { controller, httpGet, interfaces, request } from "inversify-express-utils";
 
-@controller("/cache", AuthMiddleware)
+@controller("/cache", AuthMiddleware())
 export class CacheController implements interfaces.Controller {
   @httpGet("/purge")
   public purge(@request() req): object {

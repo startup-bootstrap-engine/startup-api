@@ -15,7 +15,7 @@ import { RefreshUseCase } from "./RefreshUseCase";
 export class RefreshController implements interfaces.Controller {
   constructor(private refreshUseCase: RefreshUseCase) {}
 
-  @httpPost("/refresh-token", DTOValidatorMiddleware(AuthRefreshTokenDTO), AuthMiddleware)
+  @httpPost("/refresh-token", DTOValidatorMiddleware(AuthRefreshTokenDTO), AuthMiddleware())
   public async refreshToken(req: IAuthenticatedRequest, res): Promise<IAuthRefreshTokenResponse> {
     // These variables will always be defined, since we have the DTO validation that happens before the code below.
     const refreshToken = req.body.refreshToken!;

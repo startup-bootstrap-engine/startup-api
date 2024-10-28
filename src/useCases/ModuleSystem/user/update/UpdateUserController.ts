@@ -6,7 +6,7 @@ import { IUser } from "@startup-engine/shared";
 import { UserUpdateDTO } from "../UserDTO";
 import { UpdateUserUseCase } from "./UpdateUserUseCase";
 
-@controller("/users", AuthMiddleware)
+@controller("/users", AuthMiddleware())
 export class UpdateUserController implements interfaces.Controller {
   constructor(private updateUserUseCase: UpdateUserUseCase) {}
 

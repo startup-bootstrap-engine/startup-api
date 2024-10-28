@@ -10,7 +10,7 @@ import { OwnInfoUserUseCase } from "./OwnInfoUserUseCase";
 export class OwnInfoUserController implements interfaces.Controller {
   constructor(private ownInfoUseCase: OwnInfoUserUseCase) {}
 
-  @httpGet("/self", AuthMiddleware)
+  @httpGet("/self", AuthMiddleware())
   private async ownInfo(req: IAuthenticatedRequest, res: Response): Promise<IUser> {
     const user = req.user;
 
