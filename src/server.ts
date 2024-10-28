@@ -23,7 +23,6 @@ import {
   socketAdapter,
 } from "@providers/inversify/container";
 import { errorHandlerMiddleware } from "@providers/middlewares/ErrorHandlerMiddleware";
-import { SensitiveDataMiddleware } from "@providers/middlewares/SensitiveDataMiddleware";
 import { RedisPubSub } from "@providers/redis/RedisPubSub";
 import { router } from "@providers/server/Router";
 import { app } from "@providers/server/app";
@@ -102,7 +101,7 @@ async function initializeServerComponents(): Promise<void> {
   !IS_MICROSERVICE && cronJobs.start(); // only schedule on rpg-api
 
   // Register middleware before router
-  app.use(SensitiveDataMiddleware());
+  // app.use(SensitiveDataMiddleware());
 
   app.use(router);
   app.use(errorHandlerMiddleware);

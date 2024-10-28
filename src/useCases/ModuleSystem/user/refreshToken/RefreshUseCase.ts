@@ -35,12 +35,11 @@ export class RefreshUseCase {
       throw new BadRequestError(TS.translate("auth", "refreshTokenInvalid"));
     }
 
-    jwt.verify(refreshToken, appEnv.authentication.REFRESH_TOKEN_SECRET!, (err) => {
-      if (err) {
-        throw new ForbiddenError(TS.translate("auth", "refreshTokenInvalid"));
-      }
+    try {
+      // Verify the refresh token
+      jwt.verify(refreshToken, appEnv.authentication.REFRESH_TOKEN_SECRET!);
 
-      // provide a new accessToken to the user
+      // If verification passes, generate new access token
       const accessToken = jwt.sign(
         { _id: user._id, email: user.email },
         appEnv.authentication.JWT_SECRET!
@@ -48,7 +47,8 @@ export class RefreshUseCase {
       );
 
       return accessToken;
-    });
-    return false;
+    } catch (err) {
+      throw new ForbiddenError(TS.translate("auth", "refreshTokenInvalid"));
+    }
   }
 }

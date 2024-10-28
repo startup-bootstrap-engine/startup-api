@@ -8,16 +8,20 @@ import { TS } from "../translation/TranslationHelper";
 import { IAuthenticatedRequest } from "../types/ServerTypes";
 
 interface IAuthMiddlewareOptions {
+  sensitiveFields?: string[];
   hideSensitiveUserFields?: boolean;
+  excludeFromHiding?: string[];
 }
 
 const defaultOptions: IAuthMiddlewareOptions = {
+  sensitiveFields: ["password", "salt", "refreshTokens"],
   hideSensitiveUserFields: true,
+  excludeFromHiding: [],
 };
 
 export const AuthMiddleware = (options: IAuthMiddlewareOptions = defaultOptions) => {
   return async (req: IAuthenticatedRequest, res, next): Promise<void> => {
-    const { hideSensitiveUserFields } = { ...defaultOptions, ...options };
+    const { hideSensitiveUserFields, excludeFromHiding } = { ...defaultOptions, ...options };
     let authHeader = req.headers.authorization;
 
     // Development only :: accepting requests from swagger jwt
@@ -34,28 +38,43 @@ export const AuthMiddleware = (options: IAuthMiddlewareOptions = defaultOptions)
       try {
         const jwtPayload: any = await new Promise((resolve, reject) => {
           jwt.verify(token, appEnv.authentication.JWT_SECRET!, (err, decoded) => {
-            if (err) reject(err);
-            else resolve(decoded);
+            if (err) {
+              // Check if error is due to token expiration
+              if (err.name === "TokenExpiredError") {
+                reject(new UnauthorizedError(TS.translate("auth", "tokenExpired")));
+              } else {
+                reject(err);
+              }
+            } else {
+              resolve(decoded);
+            }
           });
         });
 
         const userRepository = container.get(UserRepository);
 
+        const sensitiveFields = options.sensitiveFields?.filter((field) => !excludeFromHiding?.includes(field));
+
         const dbUser = await userRepository.findBy(
           { email: jwtPayload?.email },
           {
-            hideSensitiveFields: hideSensitiveUserFields ? ["password", "salt"] : [],
+            hideSensitiveFields: hideSensitiveUserFields ? sensitiveFields : [],
           }
         );
 
         if (!dbUser) {
+          console.log("dbUser", dbUser);
           throw new UnauthorizedError(TS.translate("auth", "loginAccessResource"));
         }
 
         req.user = dbUser;
         next();
       } catch (error) {
-        next(new UnauthorizedError(TS.translate("auth", "loginAccessResource")));
+        if (error instanceof UnauthorizedError) {
+          next(error);
+        } else {
+          next(new UnauthorizedError(TS.translate("auth", "loginAccessResource")));
+        }
       }
     } else {
       next(new UnauthorizedError(TS.translate("auth", "notAllowedResource")));

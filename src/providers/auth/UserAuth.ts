@@ -3,34 +3,53 @@ import { InternalServerError } from "@providers/errors/InternalServerError";
 import { NotFoundError } from "@providers/errors/NotFoundError";
 import { TS } from "@providers/translation/TranslationHelper";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
-import { IUser, UserAuthFlow } from "@startup-engine/shared";
+import { EnvType, IUser, UserAuthFlow } from "@startup-engine/shared";
 import bcrypt from "bcrypt";
 import { provide } from "inversify-binding-decorators";
 import jwt from "jsonwebtoken";
+import { AuthRefreshToken } from "./AuthRefreshToken";
+
+export interface IGenerateAccessTokenResponse {
+  accessToken: string;
+  refreshToken: string;
+}
 
 @provide(UserAuth)
 export class UserAuth {
-  constructor(private userRepository: UserRepository) {}
+  constructor(private userRepository: UserRepository, private authRefreshToken: AuthRefreshToken) {}
 
   public async isValidPassword(providedPassword: string, user: IUser): Promise<boolean> {
     const comparisonHash = await bcrypt.hash(providedPassword, user.salt!);
 
+    if (!comparisonHash || !user.password) {
+      throw new InternalServerError("Comparison hash or user password not found");
+    }
+
     return comparisonHash === user.password;
   }
 
-  public async generateAccessToken(user: IUser): Promise<{
-    accessToken: string;
-    refreshToken: string;
-  }> {
-    const accessToken = jwt.sign(
-      { _id: user._id, email: user.email },
-      appEnv.authentication.JWT_SECRET!
-      // { expiresIn: "20m" }
-    );
-    const refreshToken = jwt.sign({ _id: user._id, email: user.email }, appEnv.authentication.REFRESH_TOKEN_SECRET!);
+  public async generateAccessToken(user: IUser): Promise<IGenerateAccessTokenResponse> {
+    if (!user) {
+      throw new InternalServerError("User not found");
+    }
 
-    const updatedRefreshTokens = [...(user.refreshTokens ?? []), { token: refreshToken }] as any;
-    await this.userRepository.updateById(user._id, { refreshTokens: updatedRefreshTokens });
+    if (!appEnv.authentication.JWT_SECRET) {
+      throw new InternalServerError("JWT_SECRET is not set");
+    }
+
+    const payload = { _id: user._id, email: user.email };
+
+    const expiration =
+      appEnv.general.ENV !== EnvType.Development
+        ? Math.floor(Date.now() / 1000) + 60 * 20
+        : Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 * 999; // 999 years
+
+    Object.assign(payload, { exp: expiration });
+
+    const accessToken = jwt.sign(payload, appEnv.authentication.JWT_SECRET!);
+
+    const refreshToken = this.authRefreshToken.generateRefreshToken(user);
+    await this.authRefreshToken.addRefreshToken(user, refreshToken);
 
     return {
       accessToken,
@@ -38,14 +57,24 @@ export class UserAuth {
     };
   }
 
+  public async refreshToken(refreshToken: string): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
+    const user = await this.authRefreshToken.verifyRefreshToken(refreshToken);
+
+    // Generate new tokens
+    const newTokens = await this.generateAccessToken(user);
+
+    // Remove old refresh token
+    await this.authRefreshToken.removeRefreshToken(user, refreshToken);
+
+    return newTokens;
+  }
+
   public async checkIfExists(email: string): Promise<boolean> {
     const exists = await this.userRepository.exists({ email: email.toLocaleLowerCase() });
-
-    if (exists) {
-      return true;
-    }
-
-    return false;
+    return !!exists;
   }
 
   public async findByCredentials(email: string, password: string): Promise<IUser | null> {
@@ -55,19 +84,13 @@ export class UserAuth {
       throw new NotFoundError(TS.translate("users", "userNotFound"));
     }
 
-    // check if user was created using Basic UserAuthFlow (this route is only for this!)
-
     if (user.authFlow !== UserAuthFlow.Basic) {
       throw new InternalServerError(TS.translate("auth", "authModeError"));
     }
 
     const isValidPassword = await this.isValidPassword(password, user);
 
-    if (isValidPassword) {
-      return user;
-    }
-
-    return null;
+    return isValidPassword ? user : null;
   }
 
   public async recalculatePasswordHash(user: IUser): Promise<void> {

@@ -38,4 +38,8 @@ export class LoginUseCase {
       refreshToken,
     };
   }
+
+  public async refreshToken(refreshToken: string): Promise<IAuthResponse> {
+    return await this.userAuth.refreshToken(refreshToken);
+  }
 }

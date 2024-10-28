@@ -12,8 +12,9 @@ export class AuthRefreshToken {
   constructor(private userRepository: UserRepository) {}
 
   public async addRefreshToken(user: IUser, refreshToken: string): Promise<void> {
+    const currentTokens = user.refreshTokens ?? [];
     await this.userRepository.updateById(user._id, {
-      refreshTokens: [{ token: refreshToken }],
+      refreshTokens: [...currentTokens, { token: refreshToken }],
     });
   }
 

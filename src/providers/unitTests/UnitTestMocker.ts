@@ -1,5 +1,17 @@
+import { IGenerateAccessTokenResponse } from "@providers/auth/UserAuth";
 import { IUser, UserAuthFlow } from "@startup-engine/shared";
 import bcrypt from "bcrypt";
+
+interface IChangePasswordDTO {
+  currentPassword: string;
+  newPassword: string;
+}
+
+interface IAuthDTO {
+  email: string;
+  password: string;
+  passwordConfirmation: string;
+}
 
 export class UnitTestMocker {
   public static async createMockUser(overrides: Partial<IUser> = {}): Promise<IUser> {
@@ -24,14 +36,14 @@ export class UnitTestMocker {
     };
   }
 
-  public static createMockTokens(): { accessToken: string; refreshToken: string } {
+  public static createMockTokens(): IGenerateAccessTokenResponse {
     return {
       accessToken: "mock-access-token",
       refreshToken: "mock-refresh-token",
     };
   }
 
-  public static createMockAuthDTO(): { email: string; password: string; passwordConfirmation: string } {
+  public static createMockAuthDTO(): IAuthDTO {
     return {
       email: "test@example.com",
       password: "password123",
@@ -39,7 +51,7 @@ export class UnitTestMocker {
     };
   }
 
-  public static createMockChangePasswordDTO(): { currentPassword: string; newPassword: string } {
+  public static createMockChangePasswordDTO(): IChangePasswordDTO {
     return {
       currentPassword: "password123",
       newPassword: "new-password",

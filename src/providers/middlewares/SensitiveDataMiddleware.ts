@@ -2,33 +2,31 @@ import { NextFunction, Request, Response } from "express";
 
 interface ISensitiveDataMiddlewareOptions {
   sensitiveFields?: string[];
+  excludeFromHiding?: string[];
 }
 
 const defaultOptions: ISensitiveDataMiddlewareOptions = {
   sensitiveFields: ["password", "refreshToken", "accessToken", "salt", "refreshTokens"],
+  excludeFromHiding: [],
 };
 
 export const SensitiveDataMiddleware = (
   options: ISensitiveDataMiddlewareOptions = defaultOptions
 ): ((req: Request, res: Response, next: NextFunction) => void) => {
-  const { sensitiveFields } = { ...defaultOptions, ...options };
+  const { sensitiveFields, excludeFromHiding } = { ...defaultOptions, ...options };
+
+  // Filter out excluded fields from sensitive fields
+  const effectiveSensitiveFields = sensitiveFields?.filter((field) => !excludeFromHiding?.includes(field));
 
   return (req: Request, res: Response, next: NextFunction): void => {
-    console.log("🔒 SensitiveDataMiddleware: Processing request");
-
     const originalJson = res.json;
 
     res.json = function (body: any): Response {
-      console.log("🔒 SensitiveDataMiddleware: Intercepting response", {
-        hasBody: !!body,
-        isArray: Array.isArray(body),
-      });
-
       if (body) {
         if (Array.isArray(body)) {
-          body = body.map((item) => filterSensitiveData(item, sensitiveFields!));
+          body = body.map((item) => filterSensitiveData(item, effectiveSensitiveFields!));
         } else {
-          body = filterSensitiveData(body, sensitiveFields!);
+          body = filterSensitiveData(body, effectiveSensitiveFields!);
         }
       }
       return originalJson.call(this, body);
@@ -48,7 +46,6 @@ function filterSensitiveData(data: any, sensitiveFields: string[]): any {
   sensitiveFields.forEach((field) => {
     if (field in filtered) {
       delete filtered[field];
-      console.log(`🔒 SensitiveDataMiddleware: Removed field "${field}"`);
     }
   });
 
