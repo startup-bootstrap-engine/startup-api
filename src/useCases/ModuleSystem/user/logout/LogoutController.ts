@@ -14,7 +14,7 @@ import { LogoutUseCase } from "./LogoutUseCase";
 export class LogoutController implements interfaces.Controller {
   constructor(private logoutUseCase: LogoutUseCase) {}
 
-  @httpPost("/logout", DTOValidatorMiddleware(AuthRefreshTokenDTO), AuthMiddleware)
+  @httpPost("/logout", DTOValidatorMiddleware(AuthRefreshTokenDTO), AuthMiddleware())
   public async logout(@requestBody() authRefreshTokenDTO, req: IAuthenticatedRequest, res: Response): Promise<any> {
     const { refreshToken } = authRefreshTokenDTO;
 

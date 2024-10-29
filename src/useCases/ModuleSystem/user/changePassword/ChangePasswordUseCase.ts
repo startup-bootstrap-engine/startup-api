@@ -1,4 +1,5 @@
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
+import { AuthRefreshToken } from "@providers/auth/AuthRefreshToken";
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { TS } from "@providers/translation/TranslationHelper";
 import bcrypt from "bcrypt";
@@ -15,7 +16,8 @@ export class ChangePasswordUseCase {
   constructor(
     private analyticsHelper: AnalyticsHelper,
     private userAuth: UserAuth,
-    private transactionalEmail: TransactionalEmail
+    private transactionalEmail: TransactionalEmail,
+    private authRefreshToken: AuthRefreshToken
   ) {}
 
   public async changePassword(user: IUser, authChangePasswordDTO: AuthChangePasswordDTO): Promise<void> {
@@ -25,35 +27,44 @@ export class ChangePasswordUseCase {
 
     await this.analyticsHelper.track("ChangePassword", user);
 
-    const { currentPassword, newPassword } = authChangePasswordDTO;
+    const { currentPassword: providedCurrentPassword, newPassword } = authChangePasswordDTO;
 
     // check if passwords are the same
-
-    if (currentPassword === newPassword) {
+    if (providedCurrentPassword === newPassword) {
       throw new BadRequestError(TS.translate("auth", "changePasswordSamePasswords"));
     }
 
-    // check if current password is correct
+    if (!providedCurrentPassword) {
+      throw new BadRequestError("Current password is required");
+    }
 
-    const currentPasswordHash = await bcrypt.hash(currentPassword, user.salt!);
+    if (!user.salt) {
+      throw new BadRequestError("User salt is required");
+    }
 
-    // compare both hashes
-    if (currentPasswordHash === user.password) {
-      // if currentPassword is correct, just change our current password to the new one provided.
-      user.password = newPassword;
+    const providedCurrentPasswordHash = await bcrypt.hash(providedCurrentPassword, user.salt);
 
-      await this.userAuth.recalculatePasswordHash(user);
+    const isCurrentPasswordCorrect = providedCurrentPasswordHash === user.password;
 
-      // Send confirmation to user
-      await this.transactionalEmail.send(user.email, TS.translate("email", "passwordChangeTitle"), "notification", {
-        notificationGreetings: TS.translate("email", "genericConfirmationTitle"),
-        notificationMessage: TS.translate("email", "passwordChangeMessage", {
-          adminEmail: appEnv.general.ADMIN_EMAIL!,
-        }),
-        notificationEndPhrase: TS.translate("email", "genericEndPhrase"),
-      });
-    } else {
+    if (!isCurrentPasswordCorrect) {
       throw new BadRequestError(TS.translate("auth", "changePasswordIncorrectCurrentPassword"));
     }
+
+    // Invalidate all refresh tokens when password is changed
+    await this.authRefreshToken.invalidateAllRefreshTokens(user._id);
+
+    // if currentPassword is correct, just change our current password to the new one provided.
+    user.password = newPassword;
+
+    await this.userAuth.recalculatePasswordHash(user);
+
+    // Send confirmation to user
+    await this.transactionalEmail.send(user.email, TS.translate("email", "passwordChangeTitle"), "notification", {
+      notificationGreetings: TS.translate("email", "genericConfirmationTitle"),
+      notificationMessage: TS.translate("email", "passwordChangeMessage", {
+        adminEmail: appEnv.general.ADMIN_EMAIL!,
+      }),
+      notificationEndPhrase: TS.translate("email", "genericEndPhrase"),
+    });
   }
 }

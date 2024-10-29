@@ -7,46 +7,77 @@ import { UnauthorizedError } from "../errors/UnauthorizedError";
 import { TS } from "../translation/TranslationHelper";
 import { IAuthenticatedRequest } from "../types/ServerTypes";
 
-export const AuthMiddleware = (req: IAuthenticatedRequest, res, next): void => {
-  let authHeader = req.headers.authorization;
+interface IAuthMiddlewareOptions {
+  sensitiveFields?: string[];
+  hideSensitiveUserFields?: boolean;
+  excludeFromHiding?: string[];
+}
 
-  // Development only :: accepting requests from swagger jwt
-  if (appEnv.general.ENV === "Development") {
-    const swaggerRoot = `${appEnv.general.API_URL}/api-docs/`;
-    if (req.headers.referer === swaggerRoot) {
-      authHeader = "Bearer " + appEnv.general.SWAGGER_AUTH_TOKEN;
+const defaultOptions: IAuthMiddlewareOptions = {
+  sensitiveFields: ["password", "salt", "refreshTokens"],
+  hideSensitiveUserFields: true,
+  excludeFromHiding: [],
+};
+
+export const AuthMiddleware = (options: IAuthMiddlewareOptions = defaultOptions) => {
+  return async (req: IAuthenticatedRequest, res, next): Promise<void> => {
+    const { hideSensitiveUserFields, excludeFromHiding } = { ...defaultOptions, ...options };
+    let authHeader = req.headers.authorization;
+
+    // Development only :: accepting requests from swagger jwt
+    if (appEnv.general.ENV === "Development") {
+      const swaggerRoot = `${appEnv.general.API_URL}/api-docs/`;
+      if (req.headers.referer === swaggerRoot) {
+        authHeader = "Bearer " + appEnv.general.SWAGGER_AUTH_TOKEN;
+      }
     }
-  }
 
-  if (authHeader) {
-    const token = authHeader.split(" ")[1];
+    if (authHeader) {
+      const token = authHeader.split(" ")[1];
 
-    jwt.verify(token, appEnv.authentication.JWT_SECRET!, async (err, jwtPayload: any) => {
-      if (err || !jwtPayload) {
-        // here we associate the error to a variable because just throwing then inside this async block won't allow them to achieve the outside scope and be caught by errorHandler.middleware. That's why we're passing then to next...
-        const error = new UnauthorizedError(TS.translate("auth", "loginAccessResource"));
-        next(error);
-      }
+      try {
+        const jwtPayload: any = await new Promise((resolve, reject) => {
+          jwt.verify(token, appEnv.authentication.JWT_SECRET!, (err, decoded) => {
+            if (err) {
+              // Check if error is due to token expiration
+              if (err.name === "TokenExpiredError") {
+                reject(new UnauthorizedError(TS.translate("auth", "tokenExpired")));
+              } else {
+                reject(err);
+              }
+            } else {
+              resolve(decoded);
+            }
+          });
+        });
 
-      const userRepository = container.get(UserRepository);
+        const userRepository = container.get(UserRepository);
 
-      const dbUser = await userRepository.findBy(
-        { email: jwtPayload?.email },
-        {
-          hideSensitiveFields: ["password", "salt"],
+        const sensitiveFields = options.sensitiveFields?.filter((field) => !excludeFromHiding?.includes(field));
+
+        const dbUser = await userRepository.findBy(
+          { email: jwtPayload?.email },
+          {
+            hideSensitiveFields: hideSensitiveUserFields ? sensitiveFields : [],
+          }
+        );
+
+        if (!dbUser) {
+          console.log("dbUser", dbUser);
+          throw new UnauthorizedError(TS.translate("auth", "loginAccessResource"));
         }
-      );
 
-      if (!dbUser) {
-        const error = new UnauthorizedError(TS.translate("auth", "loginAccessResource"));
-        next(error);
-      } else {
         req.user = dbUser;
+        next();
+      } catch (error) {
+        if (error instanceof UnauthorizedError) {
+          next(error);
+        } else {
+          next(new UnauthorizedError(TS.translate("auth", "loginAccessResource")));
+        }
       }
-
-      next();
-    });
-  } else {
-    throw new UnauthorizedError(TS.translate("auth", "notAllowedResource"));
-  }
+    } else {
+      next(new UnauthorizedError(TS.translate("auth", "notAllowedResource")));
+    }
+  };
 };

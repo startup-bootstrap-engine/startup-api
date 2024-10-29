@@ -39,6 +39,7 @@ if (!appEnv.general.IS_UNIT_TEST) {
 // Determine the port to use
 const port = getPort();
 
+void initializeServerComponents();
 // Start the server
 app.listen(port, async () => {
   const startTime = dayjs();
@@ -46,8 +47,7 @@ app.listen(port, async () => {
   await newRelic.trackTransaction(
     NewRelicTransactionCategory.Operation,
     "ServerBootstrap",
-    async () => {
-      await initializeServerComponents();
+    () => {
       logStartupMessage(startTime, port);
     },
     appEnv.general.ENV === EnvType.Development
@@ -99,6 +99,9 @@ async function initializeServerComponents(): Promise<void> {
   }
 
   !IS_MICROSERVICE && cronJobs.start(); // only schedule on rpg-api
+
+  // Register middleware before router
+  // app.use(SensitiveDataMiddleware());
 
   app.use(router);
   app.use(errorHandlerMiddleware);

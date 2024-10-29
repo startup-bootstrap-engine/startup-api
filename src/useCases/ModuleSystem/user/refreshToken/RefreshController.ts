@@ -1,5 +1,6 @@
 import { AuthMiddleware } from "@providers/middlewares/AuthMiddleware";
 import { DTOValidatorMiddleware } from "@providers/middlewares/DTOValidatorMiddleware";
+import { SensitiveDataMiddleware } from "@providers/middlewares/SensitiveDataMiddleware";
 import { TS } from "@providers/translation/TranslationHelper";
 import { HttpStatus, IAuthRefreshTokenResponse } from "@startup-engine/shared";
 import { controller, httpPost, interfaces } from "inversify-express-utils";
@@ -15,7 +16,17 @@ import { RefreshUseCase } from "./RefreshUseCase";
 export class RefreshController implements interfaces.Controller {
   constructor(private refreshUseCase: RefreshUseCase) {}
 
-  @httpPost("/refresh-token", DTOValidatorMiddleware(AuthRefreshTokenDTO), AuthMiddleware)
+  @httpPost(
+    "/refresh-token",
+    DTOValidatorMiddleware(AuthRefreshTokenDTO),
+    AuthMiddleware({
+      hideSensitiveUserFields: true,
+      excludeFromHiding: ["refreshTokens"],
+    }),
+    SensitiveDataMiddleware({
+      excludeFromHiding: ["accessToken"],
+    })
+  )
   public async refreshToken(req: IAuthenticatedRequest, res): Promise<IAuthRefreshTokenResponse> {
     // These variables will always be defined, since we have the DTO validation that happens before the code below.
     const refreshToken = req.body.refreshToken!;

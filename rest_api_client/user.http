@@ -24,6 +24,18 @@ content-type: application/json
 
 ### 
 
+# User :: Refresh Token
+POST {{baseUrl}}/auth/refresh-token HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiItTzhsV1dHNm9LUkJPRGlkVF82diIsImVtYWlsIjoiam9hb3BhdWxvZnVydGFkb0BsaXZlLmNvbSIsImlhdCI6MTczMDEyODkzNn0.LU2UmZHFS4xaxLxPW9EBah2NEAyr1lcB2j0_R-wEWpA"
+}
+
+
+### 
+
 # User :: Logout
 POST {{baseUrl}}/auth/logout HTTP/1.1
 Authorization: Bearer {{authToken}}
@@ -120,7 +132,7 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-    "email": "br.developer@gmail.com"
+    "email": "joaopaulofurtado@live.com"
 }
 
 ### 
@@ -131,6 +143,6 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-    "currentPassword": "cc0cfa806f",
-    "newPassword": "123"
+    "currentPassword": "123",
+    "newPassword": "123456"
 }
