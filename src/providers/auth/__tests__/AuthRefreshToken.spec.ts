@@ -1,6 +1,5 @@
 import { appEnv } from "@providers/config/env";
-import { container } from "@providers/inversify/container";
-import { UnitTestMocker } from "@providers/unitTests/UnitTestMocker";
+import { container, unitTestMocker } from "@providers/inversify/container";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { IUser } from "@startup-engine/shared";
 import jwt from "jsonwebtoken";
@@ -12,7 +11,7 @@ describe("AuthRefreshToken", () => {
 
   beforeEach(async () => {
     authRefreshToken = container.get(AuthRefreshToken);
-    mockUser = await UnitTestMocker.createMockUser();
+    mockUser = await unitTestMocker.createMockUser();
   });
 
   describe("generateRefreshToken", () => {
@@ -41,7 +40,7 @@ describe("AuthRefreshToken", () => {
   describe("removeRefreshToken", () => {
     it("should remove a specific refresh token", async () => {
       const token = "token-to-remove";
-      const mockUserWithToken = await UnitTestMocker.createMockUser({
+      const mockUserWithToken = await unitTestMocker.createMockUser({
         refreshTokens: [{ token }, { token: "other-token" }],
       });
 
@@ -70,7 +69,7 @@ describe("AuthRefreshToken", () => {
   describe("verifyRefreshToken", () => {
     it("should verify and return user for valid token", async () => {
       const token = authRefreshToken.generateRefreshToken(mockUser);
-      const mockUserWithToken = await UnitTestMocker.createMockUser({
+      const mockUserWithToken = await unitTestMocker.createMockUser({
         refreshTokens: [{ token }],
       });
 
@@ -97,7 +96,7 @@ describe("AuthRefreshToken", () => {
 
     it("should throw error when token not in user's refresh tokens", async () => {
       const token = authRefreshToken.generateRefreshToken(mockUser);
-      const mockUserWithoutToken = await UnitTestMocker.createMockUser();
+      const mockUserWithoutToken = await unitTestMocker.createMockUser();
 
       jest.spyOn(UserRepository.prototype, "findById").mockResolvedValueOnce(mockUserWithoutToken);
 

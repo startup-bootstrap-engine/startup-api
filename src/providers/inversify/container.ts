@@ -20,9 +20,10 @@ import { ServerBootstrap } from "@providers/server/ServerBootstrap";
 import { SocketAdapter } from "@providers/sockets/SocketAdapter";
 import { SocketEventsBinder } from "@providers/sockets/SocketEventsBinder";
 import { SocketEventsBinderControl } from "@providers/sockets/SocketEventsBinderControl";
+import { IntegrationTestMocker } from "@providers/tests/IntegrationMocker";
+import { UnitTestMocker } from "@providers/tests/UnitTestMocker";
 import { NumberFormatter } from "@providers/text/NumberFormatter";
 import { TextFormatter } from "@providers/text/TextFormatter";
-import { UnitTestHelper } from "@providers/unitTests/UnitTestHelper";
 import { Container } from "inversify";
 import { autoProvide, buildProviderModule } from "inversify-binding-decorators";
 import { Cronjob } from "../cronjobs/CronJobs";
@@ -61,7 +62,9 @@ export const seeds = container.get<Seeder>(Seeder);
 export const serverHelper = container.get<ServerHelper>(ServerHelper);
 export const socketAdapter = container.get<SocketAdapter>(SocketAdapter);
 
-export const unitTestHelper = container.get<UnitTestHelper>(UnitTestHelper);
+export const integrationTestMocker = container.get<IntegrationTestMocker>(IntegrationTestMocker);
+export const unitTestMocker = container.get<UnitTestMocker>(UnitTestMocker);
+
 export const socketEventsBinder = container.get<SocketEventsBinder>(SocketEventsBinder);
 
 export const socketEventsBinderControl = container.get<SocketEventsBinderControl>(SocketEventsBinderControl);
