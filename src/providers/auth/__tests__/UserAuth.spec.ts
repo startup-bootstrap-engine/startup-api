@@ -2,7 +2,6 @@ import { appEnv } from "@providers/config/env";
 import { InternalServerError } from "@providers/errors/InternalServerError";
 import { NotFoundError } from "@providers/errors/NotFoundError";
 import { container, unitTestMocker } from "@providers/inversify/container";
-import { IntegrationTestMocker } from "@providers/tests/IntegrationMocker";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { IUser, UserAuthFlow } from "@startup-engine/shared";
 import bcrypt from "bcrypt";
@@ -12,8 +11,6 @@ import { UserAuth } from "../UserAuth";
 describe("UserAuth", () => {
   let userAuth: UserAuth;
   let userRepository: UserRepository;
-  let authRefreshToken: AuthRefreshToken;
-  let integrationTestHelper: IntegrationTestMocker;
   let mockUser: IUser;
   let generateRefreshTokenSpy: jest.SpyInstance;
   let addRefreshTokenSpy: jest.SpyInstance;

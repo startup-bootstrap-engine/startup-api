@@ -26,7 +26,7 @@ export class RepositoryFactory {
         return this.firebaseRepository;
 
       case "prisma":
-        this.prismaRepository.init(model as PrismaModelName, schema);
+        void this.prismaRepository.init(model as PrismaModelName, schema);
         return this.prismaRepository;
 
       default:

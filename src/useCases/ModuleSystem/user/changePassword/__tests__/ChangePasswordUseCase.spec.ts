@@ -8,10 +8,7 @@ import { ChangePasswordUseCase } from "../ChangePasswordUseCase";
 
 describe("ChangePasswordUseCase", () => {
   let changePasswordUseCase: ChangePasswordUseCase;
-  let analyticsHelper: AnalyticsHelper;
-  let userAuth: UserAuth;
-  let transactionalEmail: TransactionalEmail;
-  let authRefreshToken: AuthRefreshToken;
+
   let mockUser: IUser;
   let authRefreshTokenSpy: jest.SpyInstance;
   let analyticsHelperSpy: jest.SpyInstance;
@@ -23,10 +20,6 @@ describe("ChangePasswordUseCase", () => {
     mockUser = await unitTestMocker.createMockUser();
 
     changePasswordUseCase = container.get(ChangePasswordUseCase);
-    analyticsHelper = container.get(AnalyticsHelper);
-    userAuth = container.get(UserAuth);
-    transactionalEmail = container.get(TransactionalEmail);
-    authRefreshToken = container.get(AuthRefreshToken);
 
     // Mock methods using .prototype
     analyticsHelperSpy = jest.spyOn(AnalyticsHelper.prototype, "track").mockResolvedValue();

@@ -167,7 +167,6 @@ function extractPrismaFields(
   for (const [key, value] of Object.entries(shape)) {
     // Skip 'id' if it's already handled
     if (key === "id") {
-      const zodType = value as ZodTypeAny;
       // Assuming 'id' is a string with default uuid
       fields.push({
         name: "id",
@@ -342,9 +341,6 @@ function generatePrismaModel(
   const fields = extractPrismaFields(zodSchema, schemaToModelName, modelName, modelNameToRelations);
 
   const prismaFields: string[] = [];
-
-  // To keep track of relation fields to avoid duplication
-  const processedRelations = new Set<string>();
 
   fields.forEach((field) => {
     let line = `  ${field.name} ${field.type}`;
