@@ -44,7 +44,7 @@ describe("ChangePasswordUseCase", () => {
 
     await changePasswordUseCase.changePassword(mockUser, dto);
 
-    expect(authRefreshTokenSpy).toHaveBeenCalledWith(mockUser._id);
+    expect(authRefreshTokenSpy).toHaveBeenCalledWith(mockUser.id);
     expect(userAuthSpy).toHaveBeenCalledWith(mockUser);
     expect(transactionalEmailSpy).toHaveBeenCalledWith(
       mockUser.email,

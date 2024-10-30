@@ -51,7 +51,7 @@ export class ChangePasswordUseCase {
     }
 
     // Invalidate all refresh tokens when password is changed
-    await this.authRefreshToken.invalidateAllRefreshTokens(user._id);
+    await this.authRefreshToken.invalidateAllRefreshTokens(user.id);
 
     // if currentPassword is correct, just change our current password to the new one provided.
     user.password = newPassword;

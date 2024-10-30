@@ -9,7 +9,7 @@ describe("UserModel.ts", () => {
 
   it("Validate if the record is being created", () => {
     const user = {
-      _id: testUser._id,
+      id: testUser.id,
       name: "User Mock Test",
       role: UserTypes.Regular,
       authFlow: UserAuthFlow.Basic,
@@ -28,7 +28,7 @@ describe("UserModel.ts", () => {
 
     expect(user).toBeDefined();
 
-    expect(user._id).toEqual(testUser._id);
+    expect(user.id).toEqual(testUser.id);
     expect(user.name).toEqual(testUser.name);
     expect(user.role).toEqual(testUser.role);
     expect(user.authFlow).toEqual(testUser.authFlow);

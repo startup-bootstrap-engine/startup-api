@@ -147,7 +147,7 @@ describe("UserAuth", () => {
 
       expect(bcryptGenSaltSpy).toHaveBeenCalled();
       expect(bcryptHashSpy).toHaveBeenCalledWith(mockUser.password, "newSalt");
-      expect(userRepository.updateById).toHaveBeenCalledWith(mockUser._id, {
+      expect(userRepository.updateById).toHaveBeenCalledWith(mockUser.id, {
         email: mockUser.email,
         password: "hashed_password",
         salt: "newSalt",

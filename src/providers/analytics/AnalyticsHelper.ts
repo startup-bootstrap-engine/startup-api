@@ -34,7 +34,7 @@ export class AnalyticsHelper {
 
       let mixpanelProperties;
       if (user) {
-        mixpanelProperties = { distinct_id: user._id, time: new Date() };
+        mixpanelProperties = { distinct_id: user.id, time: new Date() };
       } else {
         mixpanelProperties = { time: new Date() };
       }
@@ -58,7 +58,7 @@ export class AnalyticsHelper {
         const identify = new Identify();
         identify.set("start_date", dayjs(new Date()).format(DEFAULT_DATE_FORMAT));
 
-        await amplitudeClient.identify(user._id, user._id, identify);
+        await amplitudeClient.identify(user.id, user.id, identify);
 
         // mixpanel user
         this.mixpanelTracker.setUserInfo(user);

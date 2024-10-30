@@ -216,16 +216,19 @@ export function createMongooseModel<T extends Document>(modelName: string, zodSc
  *
  * @param zodSchema - The Zod schema to validate against.
  * @param data - The input data to validate.
+ * @param options - Optional configuration for validation behavior.
+ * @param options.partial - If true, makes all fields optional for partial validation (useful for updates).
  * @returns The validated and sanitized object.
  * @throws An error if validation fails.
  */
-export function zodToObject<T>(zodSchema: z.ZodType<T>, data: any): T {
-  const parseResult = zodSchema.safeParse(data);
+export function zodToObject<T>(zodSchema: z.ZodType<T>, data: any, options?: { partial?: boolean }): T {
+  const schemaToUse = options?.partial && zodSchema instanceof ZodObject ? zodSchema.partial() : zodSchema;
+  const parseResult = schemaToUse.safeParse(data);
 
   if (!parseResult.success) {
     const errorMessages = parseResult.error.errors.map((err) => `${err.path.join(".")} - ${err.message}`).join(", ");
     throw new Error(`Zod validation error: ${errorMessages}`);
   }
 
-  return parseResult.data;
+  return parseResult.data as T;
 }

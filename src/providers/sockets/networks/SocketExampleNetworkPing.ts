@@ -21,7 +21,7 @@ export class SocketExampleNetworkPing {
       async (data: any, user: IUser) => {
         this.socketMessaging.sendEventToUser(user.channel!, "CharacterPing", data);
 
-        await this.userRepository.updateById(user._id, {
+        await this.userRepository.updateById(user.id, {
           updatedAt: new Date(),
         });
       }

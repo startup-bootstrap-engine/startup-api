@@ -31,7 +31,7 @@ export class MixpanelTracker {
       console.log(`✨ Mixpanel: Tracking event ${eventName} ${user ? `for user ${user.email}` : ""}`);
       let properties;
       if (user) {
-        properties = { distinct_id: user._id, time: new Date() };
+        properties = { distinct_id: user.id, time: new Date() };
       } else {
         properties = { time: new Date() };
       }
@@ -53,7 +53,7 @@ export class MixpanelTracker {
       }
 
       this.mixpanel?.people.set(
-        user._id,
+        user.id,
         {
           $first_name: user.name,
           $created: user.createdAt,

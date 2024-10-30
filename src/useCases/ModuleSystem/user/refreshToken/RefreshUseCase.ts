@@ -41,7 +41,7 @@ export class RefreshUseCase {
 
       // If verification passes, generate new access token
       const accessToken = jwt.sign(
-        { _id: user._id, email: user.email },
+        { _id: user.id, email: user.email },
         appEnv.authentication.JWT_SECRET!
         // { expiresIn: "20m" }
       );

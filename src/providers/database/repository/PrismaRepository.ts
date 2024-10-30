@@ -111,7 +111,7 @@ export class PrismaRepository<T extends object> implements IRepositoryAdapter<T>
   }
 
   public async updateById(id: string, item: Partial<T>): Promise<T | null> {
-    const validatedData = zodToObject(this.schema, item);
+    const validatedData = zodToObject(this.schema, item, { partial: true });
     return await this.modelDelegate.update({
       where: { id },
       data: validatedData,
@@ -120,7 +120,7 @@ export class PrismaRepository<T extends object> implements IRepositoryAdapter<T>
 
   public async updateBy(params: Record<string, unknown>, item: Partial<T>): Promise<T | null> {
     const where = this.parseWhere(params);
-    const validatedData = zodToObject(this.schema, item);
+    const validatedData = zodToObject(this.schema, item, { partial: true });
     await this.modelDelegate.updateMany({
       where,
       data: validatedData,

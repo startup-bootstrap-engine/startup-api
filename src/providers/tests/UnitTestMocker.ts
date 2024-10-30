@@ -22,7 +22,7 @@ export class UnitTestMocker {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const defaultUser: IUser = {
-      _id: "mock-user-id",
+      id: "mock-user-id",
       email: "test@example.com",
       password: hashedPassword,
       salt,

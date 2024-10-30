@@ -36,6 +36,6 @@ export class GenericUseCase<T extends AvailableSchemas> {
   }
 
   public async exists(id: string): Promise<boolean> {
-    return await this.repository.exists({ _id: id });
+    return await this.repository.exists({ id });
   }
 }

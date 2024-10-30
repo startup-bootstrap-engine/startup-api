@@ -14,7 +14,7 @@ export class LogoutUseCase {
       (token) => token?.token?.toString() !== refreshToken.toString()
     );
 
-    await this.userRepository.updateBy({ _id: user._id }, { refreshTokens: updatedRefreshTokens });
+    await this.userRepository.updateBy({ id: user.id }, { refreshTokens: updatedRefreshTokens });
 
     void this.analyticsHelper.track("UserLogout", user);
   }

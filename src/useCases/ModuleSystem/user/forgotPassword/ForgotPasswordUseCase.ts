@@ -44,7 +44,7 @@ export class ForgotPasswordUseCase {
 
       // Update user's password
 
-      user = await this.userRepository.updateById(user._id, { password: randomPassword });
+      user = await this.userRepository.updateById(user.id, { password: randomPassword });
 
       if (!user) {
         throw new InternalServerError(TS.translate("users", "userNotFound"));

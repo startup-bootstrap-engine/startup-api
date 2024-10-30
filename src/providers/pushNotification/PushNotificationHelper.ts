@@ -56,7 +56,7 @@ export class PushNotificationHelper {
             return;
           }
 
-          await this.userRepository.updateById(user._id, {
+          await this.userRepository.updateById(user.id, {
             pushNotificationToken: "",
           });
         }

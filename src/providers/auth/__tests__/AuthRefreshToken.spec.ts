@@ -19,7 +19,7 @@ describe("AuthRefreshToken", () => {
       const token = await authRefreshToken.generateRefreshToken(mockUser);
 
       const decoded = jwt.verify(token, appEnv.authentication.REFRESH_TOKEN_SECRET!) as any;
-      expect(decoded._id).toBe(mockUser._id);
+      expect(decoded.id).toBe(mockUser.id);
       expect(decoded.email).toBe(mockUser.email);
     });
   });
@@ -31,7 +31,7 @@ describe("AuthRefreshToken", () => {
 
       await authRefreshToken.addRefreshToken(mockUser, token);
 
-      expect(UserRepository.prototype.updateById).toHaveBeenCalledWith(mockUser._id, {
+      expect(UserRepository.prototype.updateById).toHaveBeenCalledWith(mockUser.id, {
         refreshTokens: [{ token }],
       });
     });
@@ -48,7 +48,7 @@ describe("AuthRefreshToken", () => {
 
       await authRefreshToken.removeRefreshToken(mockUserWithToken, token);
 
-      expect(UserRepository.prototype.updateById).toHaveBeenCalledWith(mockUserWithToken._id, {
+      expect(UserRepository.prototype.updateById).toHaveBeenCalledWith(mockUserWithToken.id, {
         refreshTokens: [{ token: "other-token" }],
       });
     });
@@ -58,9 +58,9 @@ describe("AuthRefreshToken", () => {
     it("should remove all refresh tokens", async () => {
       jest.spyOn(UserRepository.prototype, "updateById").mockResolvedValueOnce(mockUser);
 
-      await authRefreshToken.invalidateAllRefreshTokens(mockUser._id);
+      await authRefreshToken.invalidateAllRefreshTokens(mockUser.id);
 
-      expect(UserRepository.prototype.updateById).toHaveBeenCalledWith(mockUser._id, {
+      expect(UserRepository.prototype.updateById).toHaveBeenCalledWith(mockUser.id, {
         refreshTokens: [],
       });
     });

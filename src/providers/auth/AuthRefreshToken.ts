@@ -13,14 +13,15 @@ export class AuthRefreshToken {
 
   public async addRefreshToken(user: IUser, refreshToken: string): Promise<void> {
     const currentTokens = user.refreshTokens ?? [];
-    await this.userRepository.updateById(user._id, {
+
+    await this.userRepository.updateById(user.id, {
       refreshTokens: [...currentTokens, { token: refreshToken }],
     });
   }
 
   public async removeRefreshToken(user: IUser, refreshToken: string): Promise<void> {
     const updatedRefreshTokens = user.refreshTokens?.filter((t: any) => t.token !== refreshToken) ?? [];
-    await this.userRepository.updateById(user._id, { refreshTokens: updatedRefreshTokens });
+    await this.userRepository.updateById(user.id, { refreshTokens: updatedRefreshTokens });
   }
 
   public async invalidateAllRefreshTokens(userId: string): Promise<void> {
@@ -30,7 +31,7 @@ export class AuthRefreshToken {
   public async verifyRefreshToken(refreshToken: string): Promise<IUser> {
     try {
       const payload = jwt.verify(refreshToken, appEnv.authentication.REFRESH_TOKEN_SECRET!) as any;
-      const user = await this.userRepository.findById(payload._id);
+      const user = await this.userRepository.findById(payload.id);
 
       if (!user) {
         throw new NotFoundError(TS.translate("users", "userNotFound"));
@@ -51,6 +52,6 @@ export class AuthRefreshToken {
   }
 
   public generateRefreshToken(user: IUser): string {
-    return jwt.sign({ _id: user._id, email: user.email }, appEnv.authentication.REFRESH_TOKEN_SECRET!);
+    return jwt.sign({ id: user.id, email: user.email }, appEnv.authentication.REFRESH_TOKEN_SECRET!);
   }
 }

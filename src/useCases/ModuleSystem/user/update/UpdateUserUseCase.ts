@@ -9,6 +9,6 @@ export class UpdateUserUseCase {
   constructor(private userRepository: UserRepository) {}
 
   public async update(user: IUser, updateFields: UserUpdateDTO): Promise<IUser> {
-    return (await this.userRepository.updateById(user._id, updateFields as unknown as Partial<IUser>)) as IUser;
+    return (await this.userRepository.updateById(user.id, updateFields as unknown as Partial<IUser>)) as IUser;
   }
 }

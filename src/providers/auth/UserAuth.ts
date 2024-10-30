@@ -37,7 +37,7 @@ export class UserAuth {
       throw new InternalServerError("JWT_SECRET is not set");
     }
 
-    const payload = { _id: user._id, email: user.email };
+    const payload = { _id: user.id, email: user.email };
 
     const expiration =
       appEnv.general.ENV !== EnvType.Development
@@ -103,7 +103,7 @@ export class UserAuth {
     const salt = await bcrypt.genSalt();
     const hash = await bcrypt.hash(user.password, salt);
 
-    await this.userRepository.updateById(user._id, {
+    await this.userRepository.updateById(user.id, {
       email: email,
       password: hash,
       salt: salt,

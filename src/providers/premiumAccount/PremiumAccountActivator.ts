@@ -31,7 +31,7 @@ export class PremiumAccountActivator {
     try {
       console.log("✨ Activating premium account for user", user.email, "with account type", accountType);
 
-      await this.userRepository.updateById(user._id, {
+      await this.userRepository.updateById(user.id, {
         accountType: accountType,
         ...data,
       });
@@ -48,7 +48,7 @@ export class PremiumAccountActivator {
 
       console.log("😔 Deactivating premium account for user", user?.email);
 
-      await this.userRepository.updateById(user._id, {
+      await this.userRepository.updateById(user.id, {
         accountType: UserAccountTypes.Free,
         isManuallyControlledPremiumAccount: false,
       });
