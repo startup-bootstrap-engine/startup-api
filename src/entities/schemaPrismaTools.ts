@@ -1,6 +1,5 @@
 /* eslint-disable no-prototype-builtins */
 /* eslint-disable mongoose-performance/require-lean */
-// zodToPrisma.ts
 import {
   z,
   ZodArray,
