@@ -41,7 +41,8 @@
     "src/jest/jestInitialSetup.ts",
     "src/jest/jestSetupFilesAfterEnv.ts",
     "src/*.d.ts",
-    "src/index.d.ts"
+    "src/index.d.ts",
+    "docs/**/*.ts"
   ],
   "exclude": ["node_modules", "dist"]
 }
