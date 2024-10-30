@@ -1,8 +1,7 @@
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { AuthRefreshToken } from "@providers/auth/AuthRefreshToken";
 import { UserAuth } from "@providers/auth/UserAuth";
-import { container } from "@providers/inversify/container";
-import { UnitTestMocker } from "@providers/unitTests/UnitTestMocker";
+import { container, unitTestMocker } from "@providers/inversify/container";
 import { IUser } from "@startup-engine/shared";
 import { TransactionalEmail } from "../../../../../../emails/TransactionalEmail";
 import { ChangePasswordUseCase } from "../ChangePasswordUseCase";
@@ -21,7 +20,7 @@ describe("ChangePasswordUseCase", () => {
 
   beforeEach(async () => {
     // Initialize mocks
-    mockUser = await UnitTestMocker.createMockUser();
+    mockUser = await unitTestMocker.createMockUser();
 
     changePasswordUseCase = container.get(ChangePasswordUseCase);
     analyticsHelper = container.get(AnalyticsHelper);
@@ -41,7 +40,7 @@ describe("ChangePasswordUseCase", () => {
   });
 
   it("should change password and invalidate refresh tokens", async () => {
-    const dto = UnitTestMocker.createMockChangePasswordDTO();
+    const dto = unitTestMocker.createMockChangePasswordDTO();
 
     await changePasswordUseCase.changePassword(mockUser, dto);
 
@@ -61,10 +60,10 @@ describe("ChangePasswordUseCase", () => {
   });
 
   it("should throw error for playstore testing user", async () => {
-    const playstoreUser = await UnitTestMocker.createMockUser({
+    const playstoreUser = await unitTestMocker.createMockUser({
       email: "playstore-testing@gmail.com",
     });
-    const dto = UnitTestMocker.createMockChangePasswordDTO();
+    const dto = unitTestMocker.createMockChangePasswordDTO();
 
     await expect(changePasswordUseCase.changePassword(playstoreUser, dto)).rejects.toThrow(
       "You are not allowed to change the password for this user"
@@ -83,7 +82,7 @@ describe("ChangePasswordUseCase", () => {
   });
 
   it("should throw error for incorrect current password", async () => {
-    const dto = UnitTestMocker.createMockChangePasswordDTO();
+    const dto = unitTestMocker.createMockChangePasswordDTO();
 
     mockUser.password = "incorrect-password";
 

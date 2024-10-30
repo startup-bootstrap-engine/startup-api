@@ -1,10 +1,10 @@
-import { unitTestHelper } from "@providers/inversify/container";
+import { integrationTestMocker } from "@providers/inversify/container";
 import { IUser, UserAuthFlow, UserTypes } from "@startup-engine/shared";
 describe("UserModel.ts", () => {
   let testUser: IUser;
 
   beforeEach(async () => {
-    testUser = await unitTestHelper.createMockUser();
+    testUser = await integrationTestMocker.createMockUser();
   });
 
   it("Validate if the record is being created", () => {

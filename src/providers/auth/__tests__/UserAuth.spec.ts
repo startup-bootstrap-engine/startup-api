@@ -1,9 +1,8 @@
 import { appEnv } from "@providers/config/env";
 import { InternalServerError } from "@providers/errors/InternalServerError";
 import { NotFoundError } from "@providers/errors/NotFoundError";
-import { container } from "@providers/inversify/container";
-import { UnitTestHelper } from "@providers/unitTests/UnitTestHelper";
-import { UnitTestMocker } from "@providers/unitTests/UnitTestMocker";
+import { container, unitTestMocker } from "@providers/inversify/container";
+import { IntegrationTestMocker } from "@providers/tests/IntegrationMocker";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { IUser, UserAuthFlow } from "@startup-engine/shared";
 import bcrypt from "bcrypt";
@@ -14,7 +13,7 @@ describe("UserAuth", () => {
   let userAuth: UserAuth;
   let userRepository: UserRepository;
   let authRefreshToken: AuthRefreshToken;
-  let unitTestHelper: UnitTestHelper;
+  let integrationTestHelper: IntegrationTestMocker;
   let mockUser: IUser;
   let generateRefreshTokenSpy: jest.SpyInstance;
   let addRefreshTokenSpy: jest.SpyInstance;
@@ -23,7 +22,7 @@ describe("UserAuth", () => {
     userAuth = container.get(UserAuth);
     userRepository = container.get(UserRepository);
 
-    mockUser = await UnitTestMocker.createMockUser();
+    mockUser = await unitTestMocker.createMockUser();
 
     generateRefreshTokenSpy = jest
       .spyOn(AuthRefreshToken.prototype, "generateRefreshToken")
@@ -128,7 +127,7 @@ describe("UserAuth", () => {
     });
 
     it("should throw error when auth flow is not Basic", async () => {
-      const googleUser = await UnitTestMocker.createMockUser({
+      const googleUser = await unitTestMocker.createMockUser({
         authFlow: UserAuthFlow.GoogleOAuth,
       });
       jest.spyOn(UserRepository.prototype, "findBy").mockResolvedValue(googleUser);

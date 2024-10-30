@@ -9,8 +9,8 @@ export enum InteractionQuestSubtype {
   craft = "craft",
 }
 
-@provide(UnitTestHelper)
-export class UnitTestHelper {
+@provide(IntegrationTestMocker)
+export class IntegrationTestMocker {
   constructor(private userRepository: UserRepository) {}
 
   public async createMockUser(extraProps?: Partial<IUser>): Promise<IUser> {

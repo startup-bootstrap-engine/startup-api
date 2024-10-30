@@ -1,6 +1,7 @@
 import { IGenerateAccessTokenResponse } from "@providers/auth/UserAuth";
 import { IUser, UserAuthFlow } from "@startup-engine/shared";
 import bcrypt from "bcrypt";
+import { provide } from "inversify-binding-decorators";
 
 interface IChangePasswordDTO {
   currentPassword: string;
@@ -13,8 +14,9 @@ interface IAuthDTO {
   passwordConfirmation: string;
 }
 
+@provide(UnitTestMocker)
 export class UnitTestMocker {
-  public static async createMockUser(overrides: Partial<IUser> = {}): Promise<IUser> {
+  public async createMockUser(overrides: Partial<IUser> = {}): Promise<IUser> {
     const password = "password123";
     const salt = "$2b$10$m0nisNV7q2tJhp0OSaRZfe";
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -36,14 +38,14 @@ export class UnitTestMocker {
     };
   }
 
-  public static createMockTokens(): IGenerateAccessTokenResponse {
+  public createMockTokens(): IGenerateAccessTokenResponse {
     return {
       accessToken: "mock-access-token",
       refreshToken: "mock-refresh-token",
     };
   }
 
-  public static createMockAuthDTO(): IAuthDTO {
+  public createMockAuthDTO(): IAuthDTO {
     return {
       email: "test@example.com",
       password: "password123",
@@ -51,7 +53,7 @@ export class UnitTestMocker {
     };
   }
 
-  public static createMockChangePasswordDTO(): IChangePasswordDTO {
+  public createMockChangePasswordDTO(): IChangePasswordDTO {
     return {
       currentPassword: "password123",
       newPassword: "new-password",
