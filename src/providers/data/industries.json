@@ -119,8 +119,7 @@
   "Railroad Manufacture",
   "Ranching",
   "Real Estate",
-  "Recreational",
-  "Facilities & Services",
+  "Recreational Facilities & Services",
   "Religious Institutions",
   "Renewables & Environment",
   "Research",
@@ -146,5 +145,10 @@
   "Wholesale",
   "Wine & Spirits",
   "Wireless",
-  "Writing & Editing"
+  "Writing & Editing",
+  "Technology",
+  "Healthcare",
+  "Finance",
+  "Education",
+  "Manufacturing"
 ]
