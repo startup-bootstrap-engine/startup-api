@@ -22,13 +22,11 @@ export class UserAuth {
   ) {}
 
   public async isValidPassword(providedPassword: string, user: IUser): Promise<boolean> {
-    const comparisonHash = await bcrypt.hash(providedPassword, user.salt!);
-
-    if (!comparisonHash || !user.password) {
-      throw new InternalServerError("Comparison hash or user password not found");
+    if (!user.password) {
+      throw new InternalServerError("User password not found");
     }
 
-    return comparisonHash === user.password;
+    return await bcrypt.compare(providedPassword, user.password);
   }
 
   public async generateAccessToken(user: IUser): Promise<IGenerateAccessTokenResponse> {
@@ -42,14 +40,15 @@ export class UserAuth {
 
     const payload = { _id: user.id, email: user.email };
 
-    const expiration =
-      appEnv.general.ENV !== EnvType.Development
-        ? Math.floor(Date.now() / 1000) + 60 * 20
-        : Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 * 999; // 999 years
+    const expiresIn =
+      appEnv.general.ENV === EnvType.Development
+        ? "24h" // 24 hours for development
+        : "20m"; // 20 minutes for production
 
-    Object.assign(payload, { exp: expiration });
-
-    const accessToken = jwt.sign(payload, appEnv.authentication.JWT_SECRET!);
+    const accessToken = jwt.sign(payload, appEnv.authentication.JWT_SECRET!, {
+      algorithm: "HS256",
+      expiresIn,
+    });
 
     const refreshToken = this.authRefreshToken.generateRefreshToken(user);
     await this.authRefreshToken.addRefreshToken(user, refreshToken);
