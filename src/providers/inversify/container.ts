@@ -1,8 +1,8 @@
 import { NewRelic } from "@providers/analytics/NewRelic";
-import { DatabaseFactory } from "@providers/database/adapters/DatabaseFactory";
 import { DatabaseAdaptersInfo } from "@providers/database/DatabaseAdaptersInfo";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
+import { DatabaseFactory } from "@providers/database/adapters/DatabaseFactory";
 import { RepositoryFactory } from "@providers/database/repository/RepositoryFactory";
 import { HashGenerator } from "@providers/hash/HashGenerator";
 import { Locker } from "@providers/locks/Locker";
@@ -10,6 +10,7 @@ import { LinearInterpolation } from "@providers/math/LinearInterpolation";
 import { MathHelper } from "@providers/math/MathHelper";
 import { MessagingBrokerHandlers } from "@providers/microservice/messaging-broker/MessagingBrokerHandlers";
 import { MessagingBroker } from "@providers/microservice/messaging-broker/MessagingBrokerMessaging";
+import { SecurityMiddleware } from "@providers/middlewares/SecurityMiddleware";
 import { BullBoardMonitor } from "@providers/queue/BullBoardMonitor";
 import { EntityQueueScalingCalculator } from "@providers/queue/EntityQueueScalingCalculator";
 import { RabbitMQ } from "@providers/rabbitmq/RabbitMQ";
@@ -18,6 +19,7 @@ import { RedisStreams } from "@providers/redis/RedisStreams";
 import { RedisStreamsListeners } from "@providers/redis/RedisStreamsListeners";
 import { PM2Helper } from "@providers/server/PM2Helper";
 import { ServerBootstrap } from "@providers/server/ServerBootstrap";
+import { ServerRequest } from "@providers/server/ServerRequest";
 import { SocketAdapter } from "@providers/sockets/SocketAdapter";
 import { SocketEventsBinder } from "@providers/sockets/SocketEventsBinder";
 import { SocketEventsBinderControl } from "@providers/sockets/SocketEventsBinderControl";
@@ -99,4 +101,9 @@ export const linearInterpolation = container.get<LinearInterpolation>(LinearInte
 export const mathHelper = container.get<MathHelper>(MathHelper);
 
 export const repositoryFactory = container.get<RepositoryFactory>(RepositoryFactory);
+
+export const serverRequest = container.get<ServerRequest>(ServerRequest);
+
+export const securityMiddleware = container.get<SecurityMiddleware>(SecurityMiddleware);
+
 export { container };
