@@ -9,7 +9,7 @@ import { PrismaAdapter } from "./PrismaAdapter";
 export class DatabaseFactory {
   constructor(
     private mongooseAdapter: MongooseAdapter,
-    private firebaseAdapter: FirebaseAdapter, // Inject the FirebaseAdapter
+    private firebaseAdapter: FirebaseAdapter,
     private prismaAdapter: PrismaAdapter
   ) {}
 
