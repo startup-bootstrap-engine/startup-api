@@ -74,12 +74,6 @@ describe("Forgot Password E2E", () => {
       // First create the user
       await testRequest.post("/auth/signup").send(validSignupData);
 
-      // Login to get auth token
-      const loginResponse = await testRequest.post("/auth/login").send({
-        email: validSignupData.email,
-        password: validSignupData.password,
-      });
-
       // Try to reset password
       const response = await testRequest.post("/auth/forgot-password").send({
         email: validSignupData.email,
