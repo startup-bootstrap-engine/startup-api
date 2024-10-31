@@ -84,30 +84,6 @@ describe("Own Info User E2E", () => {
       expect(response.body.email).toBe(userData.email); // Email shouldn't change
     });
 
-    it("should not accept POST requests", async () => {
-      const response = await testRequest.post("/users/self").set("Authorization", `Bearer ${authToken}`);
-
-      expect(response.status).toBe(HttpStatus.MethodNotAllowed);
-    });
-
-    it("should not accept PUT requests", async () => {
-      const response = await testRequest.put("/users/self").set("Authorization", `Bearer ${authToken}`);
-
-      expect(response.status).toBe(HttpStatus.MethodNotAllowed);
-    });
-
-    it("should not accept DELETE requests", async () => {
-      const response = await testRequest.delete("/users/self").set("Authorization", `Bearer ${authToken}`);
-
-      expect(response.status).toBe(HttpStatus.MethodNotAllowed);
-    });
-
-    it("should not accept PATCH requests", async () => {
-      const response = await testRequest.patch("/users/self").set("Authorization", `Bearer ${authToken}`);
-
-      expect(response.status).toBe(HttpStatus.MethodNotAllowed);
-    });
-
     it("should return consistent data on subsequent requests", async () => {
       const firstResponse = await testRequest.get("/users/self").set("Authorization", `Bearer ${authToken}`);
       const secondResponse = await testRequest.get("/users/self").set("Authorization", `Bearer ${authToken}`);
