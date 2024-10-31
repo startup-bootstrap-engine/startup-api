@@ -24,6 +24,10 @@ export class AuthRefreshToken {
     await this.userRepository.updateById(user.id, { refreshTokens: updatedRefreshTokens });
   }
 
+  public async clearRefreshTokens(user: IUser): Promise<void> {
+    await this.userRepository.updateById(user.id, { refreshTokens: [] });
+  }
+
   public async invalidateAllRefreshTokens(userId: string): Promise<void> {
     await this.userRepository.updateById(userId, { refreshTokens: [] });
   }

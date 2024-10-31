@@ -4,6 +4,7 @@ import { TS } from "@providers/translation/TranslationHelper";
 import { provide } from "inversify-binding-decorators";
 import jwt from "jsonwebtoken";
 
+import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { IUser } from "@startup-engine/shared";
 import { appEnv } from "../../../../providers/config/env";
 import { ForbiddenError } from "../../../../providers/errors/ForbiddenError";
@@ -11,7 +12,10 @@ import { UnauthorizedError } from "../../../../providers/errors/UnauthorizedErro
 
 @provide(RefreshUseCase)
 export class RefreshUseCase {
-  constructor(private analyticsHelper: AnalyticsHelper) {}
+  constructor(
+    private analyticsHelper: AnalyticsHelper,
+    private userRepository: UserRepository
+  ) {}
 
   /**
    * Generates a new accessToken based on a previous refreshToken
@@ -30,6 +34,7 @@ export class RefreshUseCase {
     if (!user.refreshTokens) {
       throw new BadRequestError(TS.translate("auth", "dontHaveRefreshTokens"));
     }
+
     // @ts-ignore
     if (!user.refreshTokens.find((item) => item.token === refreshToken)) {
       throw new BadRequestError(TS.translate("auth", "refreshTokenInvalid"));
@@ -39,9 +44,13 @@ export class RefreshUseCase {
       // Verify the refresh token
       jwt.verify(refreshToken, appEnv.authentication.REFRESH_TOKEN_SECRET!);
 
-      // If verification passes, generate new access token
+      // Generate new access token with unique jti (JWT ID) to ensure uniqueness
       const accessToken = jwt.sign(
-        { _id: user.id, email: user.email },
+        {
+          _id: user.id,
+          email: user.email,
+          jti: Math.random().toString(36).substring(2),
+        },
         appEnv.authentication.JWT_SECRET!
         // { expiresIn: "20m" }
       );

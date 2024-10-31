@@ -83,7 +83,7 @@ describe("Refresh Token E2E", () => {
 
     it("should fail with refresh token after logout", async () => {
       // First logout
-      await testRequest.post("/auth/logout").set("Authorization", `Bearer ${authToken}`).send({ refreshToken });
+      await testRequest.post("/auth/logout").set("Authorization", `Bearer ${authToken}`).send();
 
       // Then try to refresh with the same token
       const response = await testRequest

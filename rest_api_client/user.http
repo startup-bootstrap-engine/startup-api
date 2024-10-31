@@ -5,7 +5,7 @@ POST {{baseUrl}}/auth/signup HTTP/1.1
 content-type: application/json
 
 {
-    "email": "joaopaulofurtado1234@live.com",
+    "email": "joaopaulofurtado@live.com",
     "password": "123456",
     "passwordConfirmation": "123456",
     "name": "Null Pointer Dev"
@@ -18,7 +18,7 @@ POST {{baseUrl}}/auth/login HTTP/1.1
 content-type: application/json
 
 {
-    "email": "joaopaulofurtado1234@live.com",
+    "email": "joaopaulofurtado@live.com",
     "password": "123456"
 }
 
@@ -30,7 +30,7 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFiMmJlMzk3LWU5NjYtNDkyYy1hZTkwLTYyZjE5NTQyNTFiNCIsImVtYWlsIjoiam9hb3BhdWxvZnVydGFkb0BsaXZlLmNvbSIsImlhdCI6MTczMDMwMDM3OX0.4AwRsQQ1HqlzeS4ToZrSvXOv52uQCI7AzTu-tFUhvVg"
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjNmM2U3NGYyNWQ1MGU3ZGEwMGE1ZSIsImVtYWlsIjoiam9hb3BhdWxvZnVydGFkb0BsaXZlLmNvbSIsImlhdCI6MTczMDQwOTQ1Mn0.oD1vvgkSGmBY5jwtghaVteApGjql8zXFIxVEOjQM7SQ"
 }
 
 
@@ -40,10 +40,6 @@ Content-Type: application/json
 POST {{baseUrl}}/auth/logout HTTP/1.1
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
-
-{
-    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NmZiZjVhNWRmZDIwNTAwN2Q4YzUyY2QiLCJlbWFpbCI6ImpvYW9wYXVsb2Z1cnRhZG9AbGl2ZS5jb20iLCJpYXQiOjE3Mjc3OTEyMDR9.unNEf6fzx3Uo8OPTzAmqhLXi8a4YicRYAWKGSs2_LlM"
-}
 
 ###
 
