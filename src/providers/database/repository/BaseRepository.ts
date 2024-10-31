@@ -3,7 +3,7 @@ import { BadRequestError } from "@providers/errors/BadRequestError"; // Import B
 import { ConflictError } from "@providers/errors/ConflictError";
 import { TS } from "@providers/translation/TranslationHelper";
 import { provide } from "inversify-binding-decorators";
-import { IRepositoryAdapter } from "../DatabaseTypes";
+import type { IRepositoryAdapter } from "../DatabaseTypes";
 
 export interface IBaseRepository<T extends AvailableSchemas> extends IRepositoryAdapter<T> {}
 

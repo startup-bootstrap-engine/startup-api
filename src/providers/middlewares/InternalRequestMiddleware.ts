@@ -6,7 +6,7 @@ import { NextFunction, Request, Response } from "express";
 
 export const InternalRequestMiddleware = (req: Request, res: Response, next: NextFunction): void => {
   const serverRequest = container.get(ServerRequest);
-  const ip = req.ip;
+  const ip = req.ip as string;
 
   if (serverRequest.isInternalRequest(ip)) {
     const transaction = newrelic.getTransaction(); // Get the current transaction

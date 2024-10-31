@@ -16,7 +16,10 @@ export interface IGenerateAccessTokenResponse {
 
 @provide(UserAuth)
 export class UserAuth {
-  constructor(private userRepository: UserRepository, private authRefreshToken: AuthRefreshToken) {}
+  constructor(
+    private userRepository: UserRepository,
+    private authRefreshToken: AuthRefreshToken
+  ) {}
 
   public async isValidPassword(providedPassword: string, user: IUser): Promise<boolean> {
     const comparisonHash = await bcrypt.hash(providedPassword, user.salt!);
@@ -101,12 +104,12 @@ export class UserAuth {
     }
 
     const salt = await bcrypt.genSalt();
-    const hash = await bcrypt.hash(user.password, salt);
+    const hash = await bcrypt.hash(user.password!, salt);
 
     await this.userRepository.updateById(user.id, {
-      email: email,
+      email,
       password: hash,
-      salt: salt,
+      salt,
     });
   }
 }

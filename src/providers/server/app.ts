@@ -31,7 +31,8 @@ const limiter = rateLimit({
 });
 
 expressServer.setConfig((app) => {
-  app.set("trust proxy", true);
+  // Configure trust proxy to only trust our known proxy IPs
+  app.set("trust proxy", ["loopback", "linklocal", "uniquelocal"]);
 
   app.use(compression());
   app.use("*", cors());
@@ -39,7 +40,7 @@ expressServer.setConfig((app) => {
   app.use(express.urlencoded({ extended: true }));
   app.use(
     morgan("dev", {
-      skip: (req, res) => serverRequest.isInternalRequest(req.ip),
+      skip: (req, res) => serverRequest.isInternalRequest(req.ip as string),
     })
   );
   app.use(express.static("public"));

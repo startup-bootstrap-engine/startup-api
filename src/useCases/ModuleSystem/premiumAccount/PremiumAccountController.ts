@@ -20,7 +20,7 @@ export class PremiumAccountController implements interfaces.Controller {
   public async activatePremiumAccount(@response() res, @requestBody() body): Promise<void> {
     const { email, accountType } = body;
 
-    const user = await this.userRepository.findBy({ email: email });
+    const user = await this.userRepository.findBy({ email });
 
     if (!user) {
       return res.status(400).send({
@@ -41,7 +41,7 @@ export class PremiumAccountController implements interfaces.Controller {
   public async deactivatePremiumAccount(@response() res, @requestBody() body): Promise<void> {
     const { email } = body;
 
-    const user = await this.userRepository.findBy({ email: email });
+    const user = await this.userRepository.findBy({ email });
 
     if (!user) {
       throw new BadRequestError("User not found!");

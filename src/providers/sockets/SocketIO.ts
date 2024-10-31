@@ -46,7 +46,7 @@ export class SocketIO implements ISocket {
       console.warn("Redis Sub Client Connection Closed. Attempting to reconnect...");
     });
 
-    this.socket.adapter(createAdapter(pubClient, subClient, { requestsTimeout: 5000 }));
+    this.socket.adapter(createAdapter(pubClient, subClient, { requestsTimeout: 5000 }) as any);
 
     this.socket.use(SocketIOAuthMiddleware);
     this.socket.listen(appEnv.socket.port.SOCKET);

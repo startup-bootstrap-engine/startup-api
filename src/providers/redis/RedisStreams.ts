@@ -1,3 +1,4 @@
+/* eslint-disable promise/no-nesting */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable require-await */
 import { appEnv } from "@providers/config/env";
@@ -25,7 +26,10 @@ export class RedisStreams {
   private readonly maxRetries: number = 3;
   private readonly retryDelay: number = 1000; // 1 second
 
-  constructor(private redisManager: RedisManager, private time: Time) {}
+  constructor(
+    private redisManager: RedisManager,
+    private time: Time
+  ) {}
 
   /**
    * Initialize the RedisStreams by connecting to Redis and setting up consumer groups.
@@ -280,6 +284,7 @@ export class RedisStreams {
                   // @ts-ignore
                   const index = processingPromises.indexOf(processingPromise);
                   if (index > -1) {
+                    // eslint-disable-next-line @typescript-eslint/no-floating-promises
                     processingPromises.splice(index, 1);
                   }
                 }

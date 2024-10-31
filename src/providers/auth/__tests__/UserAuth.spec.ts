@@ -34,6 +34,7 @@ describe("UserAuth", () => {
     });
 
     it("should return false when password does not match", async () => {
+      // @ts-ignore
       jest.spyOn(bcrypt, "hash").mockResolvedValueOnce("differentHash");
       const result = await userAuth.isValidPassword("testPassword", mockUser);
       expect(result).toBe(false);
@@ -135,7 +136,9 @@ describe("UserAuth", () => {
 
   describe("recalculatePasswordHash", () => {
     it("should update user password with new hash", async () => {
+      // @ts-ignore
       const bcryptGenSaltSpy = jest.spyOn(bcrypt, "genSalt").mockResolvedValue("newSalt");
+      // @ts-ignore
       const bcryptHashSpy = jest.spyOn(bcrypt, "hash").mockResolvedValue("hashed_password");
 
       jest.spyOn(UserRepository.prototype, "updateById").mockResolvedValue(mockUser);

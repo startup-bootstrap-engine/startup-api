@@ -1,6 +1,6 @@
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
-import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+import axios from "axios";
 import axiosRetry from "axios-retry";
 import Bottleneck from "bottleneck"; // Rate limiting library
 import http from "http";
@@ -38,7 +38,7 @@ const httpsAgent = new https.Agent(agentConfig);
 
 @provideSingleton(MicroserviceRequest)
 export class MicroserviceRequest {
-  private axiosInstance: AxiosInstance;
+  private axiosInstance: axios.AxiosInstance;
   private limiter: Bottleneck;
 
   constructor() {
@@ -68,7 +68,7 @@ export class MicroserviceRequest {
     endpoint: string,
     data: any,
     method: "GET" | "POST" | "PUT" | "DELETE" = "POST",
-    config: AxiosRequestConfig = {}
+    config: axios.AxiosRequestConfig = {}
   ): Promise<T> {
     const microserviceConfig = MICROSERVICE_METADATA[microservice];
 
@@ -102,7 +102,7 @@ export class MicroserviceRequest {
           Status: ${error.response?.status}
           Status Text: ${error.response?.statusText}
           Response Data: ${JSON.stringify(error.response?.data, null, 2)}
-          Request Headers: ${JSON.stringify(error.config.headers, null, 2)}
+          Request Headers: ${JSON.stringify(error.config?.headers, null, 2)}
           Network Error: ${error.isAxiosError ? "Yes" : "No"}
         `);
       } else {

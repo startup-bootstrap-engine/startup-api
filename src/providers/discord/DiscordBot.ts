@@ -1,9 +1,9 @@
 import { TrackNewRelicTransaction } from "@providers/analytics/decorator/TrackNewRelicTransaction";
 import { appEnv } from "@providers/config/env";
-import { DISCORD_CHANNEL_IDS, DiscordChannelName } from "@providers/constants/DiscordConstants";
+import * as DiscordConstants from "@providers/constants/DiscordConstants";
 import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { EnvType } from "@startup-engine/shared";
-import { Client, ColorResolvable, Colors, EmbedBuilder, GatewayIntentBits, TextChannel } from "discord.js";
+import * as discordJs from "discord.js";
 
 const emojisMessages = ["✨", "⭐", "🌀", "🌌", "🚀", "🤟", "🤙", "💪🏻", "💪🏽"];
 
@@ -32,7 +32,7 @@ const lvlUpMessages = [
 
 @provideSingleton(DiscordBot)
 export class DiscordBot {
-  private client: Client;
+  private client: discordJs.Client;
   private isReady: boolean = false;
   private token: string;
 
@@ -49,8 +49,8 @@ export class DiscordBot {
       }
 
       this.token = appEnv.general.DISCORD_TOKEN!;
-      this.client = new Client({
-        intents: [GatewayIntentBits.Guilds],
+      this.client = new discordJs.Client({
+        intents: [discordJs.GatewayIntentBits.Guilds],
       });
 
       this.client.once("ready", () => {
@@ -67,7 +67,7 @@ export class DiscordBot {
   }
 
   @TrackNewRelicTransaction()
-  public async sendMessage(message: string, channelName: DiscordChannelName): Promise<void> {
+  public async sendMessage(message: string, channelName: DiscordConstants.DiscordChannelName): Promise<void> {
     try {
       console.log("🤖 Discord bot - Sending message: ", message, `Channel: ${channelName}`);
 
@@ -75,13 +75,13 @@ export class DiscordBot {
         return;
       }
 
-      const channelId = DISCORD_CHANNEL_IDS[channelName];
+      const channelId = DiscordConstants.DISCORD_CHANNEL_IDS[channelName];
 
       if (!channelId) {
         throw new Error(`Channel ID for ${channelName} not found`);
       }
 
-      const channel = (await this.client.channels.fetch(channelId!)) as TextChannel;
+      const channel = (await this.client.channels.fetch(channelId!)) as discordJs.TextChannel;
       await channel.send(message);
     } catch (error) {
       console.error(`Failed to send message: ${error}`);
@@ -91,14 +91,14 @@ export class DiscordBot {
   @TrackNewRelicTransaction()
   public async sendMessageWithColor(
     message: string,
-    channelName: DiscordChannelName,
+    channelName: DiscordConstants.DiscordChannelName,
     title?: string,
-    color?: ColorResolvable,
+    color?: discordJs.ColorResolvable,
     imageUrl?: string
   ): Promise<void> {
-    const embed = new EmbedBuilder()
+    const embed = new discordJs.EmbedBuilder()
       .setTitle(title || "")
-      .setColor(color ?? Colors.Orange)
+      .setColor(color ?? discordJs.Colors.Orange)
       .setAuthor({
         name: "StartupEngine Bot",
         iconURL: "https://i.imgur.com/VVy83d8.png",
@@ -110,13 +110,13 @@ export class DiscordBot {
       embed.setImage(imageUrl);
     }
 
-    const channelId = DISCORD_CHANNEL_IDS[channelName];
+    const channelId = DiscordConstants.DISCORD_CHANNEL_IDS[channelName];
 
     if (!channelId) {
       throw new Error(`Channel ID for ${channelName} not found`);
     }
 
-    const channel = (await this.client?.channels?.fetch(channelId)) as TextChannel;
+    const channel = (await this.client?.channels?.fetch(channelId)) as discordJs.TextChannel;
 
     if (!channel) {
       return;

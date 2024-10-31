@@ -251,7 +251,7 @@ function extractPrismaFields(
         // Record the relation to add back-reference later
         const relatedRelations = modelNameToRelations.get(relatedModelName) || [];
         relatedRelations.push({
-          relationName: relationName,
+          relationName,
           relatedModel: modelName,
           type: "many", // Could be "one" or "many", infer based on context
         });
@@ -274,7 +274,7 @@ function extractPrismaFields(
           // Record the relation to add back-reference later
           const relatedRelations = modelNameToRelations.get(relatedModelName) || [];
           relatedRelations.push({
-            relationName: relationName,
+            relationName,
             relatedModel: modelName,
             type: "many",
           });
