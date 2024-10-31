@@ -16,6 +16,7 @@ const config: Config.InitialOptions = {
     "^@repositories/(.*)$": "<rootDir>/src/repositories/$1",
     "^@useCases/(.*)$": "<rootDir>/src/useCases/$1",
     "^@data/(.*)$": "<rootDir>/src/providers/data/$1",
+    "^@e2e/(.*)$": "<rootDir>/src/jest/e2e/$1",
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
   transformIgnorePatterns: ["/node_modules/"],

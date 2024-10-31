@@ -26,7 +26,8 @@
       "@providers/*": ["providers/*"],
       "@repositories/*": ["repositories/*"],
       "@useCases/*": ["useCases/*"],
-      "@data/*": ["providers/data/*"]
+      "@data/*": ["providers/data/*"],
+      "@e2e/*": ["jest/e2e/*"]
     },
     "types": ["reflect-metadata", "jest", "node"],
     "esModuleInterop": true,

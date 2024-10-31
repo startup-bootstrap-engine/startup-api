@@ -1,6 +1,7 @@
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
 import { DTOValidatorMiddleware } from "@providers/middlewares/DTOValidatorMiddleware";
 import { AuthRateLimitMiddleware } from "@providers/middlewares/RateLimitMiddleware";
+import { SensitiveDataMiddleware } from "@providers/middlewares/SensitiveDataMiddleware";
 import { HttpStatus, IUser } from "@startup-engine/shared";
 import { controller, httpPost, interfaces, request, requestBody, response } from "inversify-express-utils";
 import { AuthSignUpDTO } from "../AuthDTO";
@@ -16,7 +17,14 @@ export class SignUpController implements interfaces.Controller {
     private analyticsHelper: AnalyticsHelper
   ) {}
 
-  @httpPost("/signup", AuthRateLimitMiddleware({ max: 10, windowMs: 60 * 1000 }), DTOValidatorMiddleware(AuthSignUpDTO))
+  @httpPost(
+    "/signup",
+    AuthRateLimitMiddleware({ max: 10, windowMs: 60 * 1000 }),
+    DTOValidatorMiddleware(AuthSignUpDTO),
+    SensitiveDataMiddleware({
+      sensitiveFields: ["password", "passwordConfirmation"],
+    })
+  )
   public async signUp(@requestBody() authSignUpDTO, @request() req, @response() res): Promise<IUser> {
     const newUser = await this.signupUseCase.signUp(authSignUpDTO);
 
