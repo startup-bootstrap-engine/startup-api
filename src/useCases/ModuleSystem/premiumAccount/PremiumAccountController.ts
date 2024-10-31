@@ -1,9 +1,11 @@
-import { BadRequestError } from "@providers/errors/BadRequestError";
 import { AuthMiddleware } from "@providers/middlewares/AuthMiddleware";
+import { DTOValidatorMiddleware } from "@providers/middlewares/DTOValidatorMiddleware";
 import { isAdminMiddleware } from "@providers/middlewares/IsAdminMiddleware";
 import { PremiumAccountActivator } from "@providers/premiumAccount/PremiumAccountActivator";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
+import { HttpStatus, UserAccountTypes } from "@startup-engine/shared";
 import { controller, httpPost, interfaces, requestBody, response } from "inversify-express-utils";
+import { PremiumAccountActivationDTO } from "./PremiumAccountActivationDTO";
 
 @controller("/premium-account", AuthMiddleware(), isAdminMiddleware)
 export class PremiumAccountController implements interfaces.Controller {
@@ -12,25 +14,32 @@ export class PremiumAccountController implements interfaces.Controller {
     private userRepository: UserRepository
   ) {}
 
-  @httpPost("/activate")
-  public async activatePremiumAccount(@response() res, @requestBody() body): Promise<void> {
-    const { email, accountType } = body;
+  @httpPost("/activate", DTOValidatorMiddleware(PremiumAccountActivationDTO))
+  public async activatePremiumAccount(
+    @response() res,
+    @requestBody() premiumAccountActivationDTO: PremiumAccountActivationDTO
+  ): Promise<void> {
+    const { email, accountType } = premiumAccountActivationDTO;
 
     const user = await this.userRepository.findBy({ email });
 
     if (!user) {
-      throw new BadRequestError("User not found!");
+      return res.status(HttpStatus.BadRequest).send({ error: "User not found!" });
     }
 
-    const result = await this.premiumAccountActivator.activateUserPremiumAccount(user, accountType, {
-      isManuallyControlledPremiumAccount: true,
-    });
+    const result = await this.premiumAccountActivator.activateUserPremiumAccount(
+      user,
+      accountType as UserAccountTypes,
+      {
+        isManuallyControlledPremiumAccount: true,
+      }
+    );
 
     if (!result) {
-      throw new BadRequestError("Error activating premium account!");
+      return res.status(HttpStatus.BadRequest).send({ error: "Error activating premium account!" });
     }
 
-    return res.status(200).send({
+    return res.status(HttpStatus.OK).send({
       message: "Premium account activated successfully!",
     });
   }
@@ -39,19 +48,23 @@ export class PremiumAccountController implements interfaces.Controller {
   public async deactivatePremiumAccount(@response() res, @requestBody() body): Promise<void> {
     const { email } = body;
 
+    if (!email) {
+      return res.status(HttpStatus.BadRequest).send({ error: "Email is required" });
+    }
+
     const user = await this.userRepository.findBy({ email });
 
     if (!user) {
-      throw new BadRequestError("User not found!");
+      return res.status(HttpStatus.BadRequest).send({ error: "User not found!" });
     }
 
     const result = await this.premiumAccountActivator.deactivateUserPremiumAccount(user);
 
     if (!result) {
-      throw new BadRequestError("Error deactivating premium account!");
+      return res.status(HttpStatus.BadRequest).send({ error: "Error deactivating premium account!" });
     }
 
-    return res.status(200).send({
+    return res.status(HttpStatus.OK).send({
       message: "Premium account deactivated successfully!",
     });
   }

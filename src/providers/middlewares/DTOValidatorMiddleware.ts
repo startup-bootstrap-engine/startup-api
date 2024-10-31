@@ -1,4 +1,5 @@
-import { HttpStatus, IValidationError } from "@startup-engine/shared";
+import { appEnv } from "@providers/config/env";
+import { EnvType, HttpStatus, IValidationError } from "@startup-engine/shared";
 import { plainToClass } from "class-transformer";
 import { validate } from "class-validator";
 import { NextFunction, Request, Response } from "express";
@@ -20,7 +21,9 @@ export const DTOValidatorMiddleware = (dtoClass: any) => {
         if (errors.length > 0) {
           const errorList: string[] = [];
           for (const validationError of errors) {
-            console.log(validationError);
+            if (appEnv.general.ENV === EnvType.Development) {
+              console.log(validationError);
+            }
 
             const constraintsKv = Object.entries(validationError.constraints!).map(([key, value]) => ({ key, value }));
 

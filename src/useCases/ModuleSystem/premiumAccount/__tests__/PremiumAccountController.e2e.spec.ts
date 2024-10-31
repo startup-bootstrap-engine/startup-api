@@ -1,7 +1,7 @@
 import { testRequest } from "@e2e/setup";
 import { AccountTypeEnum } from "@prisma/client";
 import { e2eTestMocker } from "@providers/inversify/container";
-import { HttpStatus, IUser } from "@startup-engine/shared";
+import { HttpStatus, IUser, UserAccountTypes } from "@startup-engine/shared";
 import bcrypt from "bcrypt";
 describe("Premium Account E2E", () => {
   let adminUser: IUser;
@@ -84,7 +84,7 @@ describe("Premium Account E2E", () => {
         .set("Authorization", `Bearer ${adminToken}`)
         .send({
           email: "nonexistent@example.com",
-          accountType: "premium",
+          accountType: UserAccountTypes.PremiumUltimate,
         });
 
       expect(response.status).toBe(HttpStatus.BadRequest);
