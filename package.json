@@ -6,8 +6,8 @@
   "scripts": {
     "tsc": "tsc -p . --pretty --skipLibCheck --noEmit",
     "test": "DEBUG_MODE=false yarn jest --silent",
-    "test:unit": "DEBUG_MODE=false yarn jest --testMatch '**/*.spec.ts' --silent",
-    "test:e2e": "DEBUG_MODE=false yarn jest --testMatch '**/*.e2e.spec.ts' --silent",
+    "test:unit": "DEBUG_MODE=false yarn jest --testMatch \"**/!(*.e2e).spec.ts\" --silent",
+    "test:e2e": "DEBUG_MODE=false yarn jest --testMatch \"**/*.e2e.spec.ts\" --silent",
     "test:ci": "yarn jest test --silent --maxWorkers=2 --forceExit",
     "test:debug": "jest test --detectOpenHandles --maxWorkers=4 --maxConcurrency=4 --max-old-space-size=20096",
     "test:coverage": "yarn jest --silent --coverage --maxWorkers=4 --maxConcurrency=4 --forceExit",

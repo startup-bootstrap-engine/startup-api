@@ -9,7 +9,6 @@ import randomString from "crypto-random-string";
 import { provide } from "inversify-binding-decorators";
 import { TransactionalEmail } from "../../../../../emails/TransactionalEmail";
 import { appEnv } from "../../../../providers/config/env";
-import { InternalServerError } from "../../../../providers/errors/InternalServerError";
 
 @provide(ForgotPasswordUseCase)
 export class ForgotPasswordUseCase {
@@ -26,7 +25,7 @@ export class ForgotPasswordUseCase {
         throw new BadRequestError("You are not allowed to reset the password for this user");
       }
       // Try to get user with the mentioned email
-      let user = await this.userRepository.findBy({ email });
+      const user = await this.userRepository.findBy({ email });
       if (!user) {
         throw new NotFoundError(TS.translate("users", "userNotFound"));
       }
@@ -34,7 +33,7 @@ export class ForgotPasswordUseCase {
       void this.analyticsHelper.track("ForgotPassword", user);
 
       if (user.authFlow !== UserAuthFlow.Basic) {
-        throw new InternalServerError(TS.translate("auth", "authModeError"));
+        throw new Error(TS.translate("auth", "authModeError"));
       }
 
       // Generate a new password
@@ -43,14 +42,13 @@ export class ForgotPasswordUseCase {
       console.log(`New password for user ${user.email}: ${randomPassword}`);
 
       // Update user's password
+      const updatedUser = await this.userRepository.updateById(user.id, { password: randomPassword });
 
-      user = await this.userRepository.updateById(user.id, { password: randomPassword });
-
-      if (!user) {
-        throw new InternalServerError(TS.translate("users", "userNotFound"));
+      if (!updatedUser) {
+        throw new Error(TS.translate("users", "userNotFound"));
       }
 
-      await this.userAuth.recalculatePasswordHash(user);
+      await this.userAuth.recalculatePasswordHash(updatedUser);
 
       // Send email to user with the new password content
       await this.transactionalEmail.send(
@@ -75,10 +73,7 @@ export class ForgotPasswordUseCase {
       return true;
     } catch (error) {
       console.error(error);
-
-      throw new InternalServerError(
-        `Error while trying to generate your new password. Please, contact the server admin at ${appEnv.general.ADMIN_EMAIL}`
-      );
+      throw error; // Re-throw the original error
     }
   }
 }

@@ -1,8 +1,8 @@
 import { DTOValidatorMiddleware } from "@providers/middlewares/DTOValidatorMiddleware";
 import { HttpStatus } from "@startup-engine/shared";
 import { Request, Response } from "express";
-import { controller, httpPost, interfaces, JsonContent, requestBody } from "inversify-express-utils";
-import { AuthForgotPasswordDTO } from "../AuthDTO";
+import { JsonContent, controller, httpPost, interfaces, requestBody } from "inversify-express-utils";
+import { ForgotPasswordDTO } from "../AuthDTO";
 import { ForgotPasswordUseCase } from "./ForgotPasswordUseCase";
 
 //! Reference:
@@ -12,7 +12,7 @@ import { ForgotPasswordUseCase } from "./ForgotPasswordUseCase";
 export class ForgotPasswordController implements interfaces.Controller {
   constructor(private forgotPasswordUseCase: ForgotPasswordUseCase) {}
 
-  @httpPost("/forgot-password", DTOValidatorMiddleware(AuthForgotPasswordDTO))
+  @httpPost("/forgot-password", DTOValidatorMiddleware(ForgotPasswordDTO))
   private async forgotPassword(@requestBody() body, req: Request, res: Response): Promise<Response<JsonContent>> {
     const { email } = body;
 

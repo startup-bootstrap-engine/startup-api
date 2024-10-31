@@ -1,4 +1,4 @@
-import { IsDefined, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import { IsDefined, IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 
 import { tsDefaultDecorator } from "../../../providers/constants/ValidationConstants";
 
@@ -102,4 +102,11 @@ export class AppleOAuthDTO {
   @IsNotEmpty(tsDefaultDecorator("validation", "isNotEmpty"))
   @IsString(tsDefaultDecorator("validation", "isType", { type: "string" }))
   authorizationCode: string;
+}
+
+export class ForgotPasswordDTO {
+  @IsDefined()
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
 }
