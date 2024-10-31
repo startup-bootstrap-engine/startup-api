@@ -67,6 +67,7 @@ export class AppleOAuthHelper {
       jwt.verify(identityToken, publicKey, (err, payload) => {
         if (err) {
           console.log(err);
+          reject(err);
           return;
         }
 

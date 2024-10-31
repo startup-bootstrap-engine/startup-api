@@ -34,11 +34,6 @@ export class GoogleOAuthHelper {
    */
   private createConnection(): any {
     throw new Error("googleapis package consumes a ton of memory, so it was removed!");
-    // return new google.auth.OAuth2(
-    //   this.googleConfig.clientID,
-    //   this.googleConfig.clientSecret,
-    //   this.googleConfig.redirectURI
-    // );
   }
 
   /**
@@ -98,12 +93,10 @@ export class GoogleOAuthHelper {
   public async validateIdToken(idToken: string): Promise<string | false> {
     const client = new OAuth2Client(appEnv.authentication.googleOAuth.GOOGLE_CLIENT_ID);
 
-    const audience = process.env.GOOGLE_CLIENT_ID;
-
     try {
       const ticket = await client.verifyIdToken({
         idToken,
-        audience,
+        audience: appEnv.authentication.googleOAuth.GOOGLE_CLIENT_ID,
       });
       const payload = ticket.getPayload();
 
