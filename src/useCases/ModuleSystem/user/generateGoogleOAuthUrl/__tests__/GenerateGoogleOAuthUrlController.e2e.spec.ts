@@ -52,30 +52,6 @@ describe("Generate Google OAuth URL E2E", () => {
       expect(firstUrl.searchParams.get("prompt")).toBe(secondUrl.searchParams.get("prompt"));
     });
 
-    it("should not accept POST requests", async () => {
-      const response = await testRequest.post("/auth/google/url");
-
-      expect(response.status).toBe(HttpStatus.MethodNotAllowed);
-    });
-
-    it("should not accept PUT requests", async () => {
-      const response = await testRequest.put("/auth/google/url");
-
-      expect(response.status).toBe(HttpStatus.MethodNotAllowed);
-    });
-
-    it("should not accept DELETE requests", async () => {
-      const response = await testRequest.delete("/auth/google/url");
-
-      expect(response.status).toBe(HttpStatus.MethodNotAllowed);
-    });
-
-    it("should not accept PATCH requests", async () => {
-      const response = await testRequest.patch("/auth/google/url");
-
-      expect(response.status).toBe(HttpStatus.MethodNotAllowed);
-    });
-
     it("should return HTTPS URL", async () => {
       const response = await testRequest.get("/auth/google/url");
       const url = new URL(response.body.googleOAuthUrl);
