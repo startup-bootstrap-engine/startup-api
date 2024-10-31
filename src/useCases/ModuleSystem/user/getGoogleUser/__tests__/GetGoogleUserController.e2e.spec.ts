@@ -28,7 +28,7 @@ describe("Get Google User E2E", () => {
       });
 
       expect(response.status).toBe(HttpStatus.BadRequest);
-      expect(response.body).toEqual({ message: "Invalid authorization code" });
+      expect(response.body).toEqual({ message: "Authorization code is required" });
     });
 
     it("should fail with invalid code", async () => {

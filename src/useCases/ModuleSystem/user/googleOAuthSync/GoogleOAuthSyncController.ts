@@ -4,9 +4,8 @@ import { TS } from "@providers/translation/TranslationHelper";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { IGoogleOAuthIdTokenResponse, IGoogleOAuthUserInfoResponse, UserAuthFlow } from "@startup-engine/shared";
 import { Request, Response } from "express";
-import { controller, httpGet, httpPost, interfaces } from "inversify-express-utils";
+import { controller, httpPost, interfaces } from "inversify-express-utils";
 import { GoogleOAuthHelper } from "../../../../providers/auth/GoogleOauthHelper";
-import { appEnv } from "../../../../providers/config/env";
 import { GetGoogleUserUseCase } from "../getGoogleUser/GetGoogleUserUseCase";
 import { GoogleOAuthSyncUseCase } from "./GoogleOAuthSyncUseCase";
 
@@ -23,47 +22,18 @@ export class GoogleOAuthSyncController implements interfaces.Controller {
     private userRepository: UserRepository
   ) {}
 
-  //! This is for web based oauth flow only! Does not work with Ionic
-  @httpGet("/google/redirect")
-  public async googleOAuth(req: Request, res: Response): Promise<any> {
-    const { code } = req.query;
-
-    const googleUserInfo: IGoogleOAuthUserInfoResponse = await this.getGoogleUserUseCase.getGoogleUser(String(code));
-
-    // Check if this user was registered using a Basic auth flow (instead of Google OAuth)
-    const user = await this.userRepository.findBy({ email: googleUserInfo.email });
-
-    if (user && user.authFlow === UserAuthFlow.Basic) {
-      // on this case it's google only oauth method...
-      return res.redirect(`${appEnv.general.APP_URL}/auth?errorType=auth&&errorMessage=accountAuthFlowMismatch`);
-    }
-
-    const { accessToken, refreshToken } = await this.googleOAuthSyncUseCase.googleOAuthSync(googleUserInfo);
-
-    // redirect to our APP with a provided accessToken ( so he can fetch his user info )
-    return res.redirect(`${appEnv.general.APP_URL}/auth?&accessToken=${accessToken}&refreshToken=${refreshToken}`);
-  }
-
   @httpPost("/google/mobile")
-  public async googleOAuthMobile(req, res: Response): Promise<any> {
+  public async googleOAuthMobile(req: Request, res: Response): Promise<any> {
     const { idToken } = req.body;
 
     if (!idToken) {
-      throw new BadRequestError(
-        TS.translate("validation", "isNotEmpty", {
-          field: "idToken",
-        })
-      );
+      throw new BadRequestError(TS.translate("validation", "isNotEmpty", { field: "idToken" }));
     }
 
     const isIdTokenValid = await this.googleOAuthHelper.validateIdToken(idToken);
 
     if (!isIdTokenValid) {
-      throw new BadRequestError(
-        TS.translate("validation", "isInvalid", {
-          field: "idToken",
-        })
-      );
+      throw new BadRequestError(TS.translate("validation", "isInvalid", { field: "idToken" }));
     }
 
     const googleUserInfo: IGoogleOAuthIdTokenResponse | undefined =
@@ -71,22 +41,20 @@ export class GoogleOAuthSyncController implements interfaces.Controller {
 
     if (!googleUserInfo) {
       console.log("Failed to fetch user information from IDToken");
-      throw new BadRequestError(
-        TS.translate("validation", "isInvalid", {
-          field: "googleUserInfo",
-        })
-      );
+      throw new BadRequestError(TS.translate("validation", "isInvalid", { field: "googleUserInfo" }));
     }
 
     // Check if this user was registered using a Basic auth flow (instead of Google OAuth)
-
     const user = await this.userRepository.findBy({ email: googleUserInfo.email });
 
     if (user && user.authFlow === UserAuthFlow.Basic) {
       // on this case it's google only oauth method...
       throw new BadRequestError(TS.translate("auth", "accountAuthFlowMismatch"));
     }
-    const { accessToken, refreshToken } = await this.googleOAuthSyncUseCase.googleOAuthSync(googleUserInfo);
+
+    const { accessToken, refreshToken } = await this.googleOAuthSyncUseCase.googleOAuthSync(
+      googleUserInfo as IGoogleOAuthUserInfoResponse
+    );
 
     return {
       accessToken,

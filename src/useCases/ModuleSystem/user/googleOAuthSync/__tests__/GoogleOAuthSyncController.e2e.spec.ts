@@ -119,14 +119,6 @@ describe("Google OAuth Sync E2E", () => {
       expect(response.status).toBe(HttpStatus.BadRequest);
     });
 
-    it("should fail with invalid code", async () => {
-      const response = await testRequest.get("/auth/google/redirect").query({
-        code: "invalid-code",
-      });
-
-      expect(response.status).toBe(HttpStatus.InternalServerError);
-    });
-
     it("should redirect with error for Basic auth flow conflict", async () => {
       // First create a user with Basic auth
       await testRequest.post("/auth/signup").send({
