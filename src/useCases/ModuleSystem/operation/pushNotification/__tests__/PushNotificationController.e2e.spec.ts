@@ -50,7 +50,7 @@ describe("Push Notification E2E", () => {
   describe("GET /operations/push-notification/test/:userId", () => {
     it("should successfully send push notification to valid user", async () => {
       const response = await testRequest
-        .get(`/operations/push-notification/test/${regularUser._id}`)
+        .get(`/operations/push-notification/test/${regularUser.id}`)
         .set("Authorization", `Bearer ${adminToken}`);
 
       expect(response.status).toBe(HttpStatus.OK);
@@ -59,14 +59,14 @@ describe("Push Notification E2E", () => {
     });
 
     it("should fail without auth token", async () => {
-      const response = await testRequest.get(`/operations/push-notification/test/${regularUser._id}`);
+      const response = await testRequest.get(`/operations/push-notification/test/${regularUser.id}`);
 
       expect(response.status).toBe(HttpStatus.Unauthorized);
     });
 
     it("should fail with invalid auth token", async () => {
       const response = await testRequest
-        .get(`/operations/push-notification/test/${regularUser._id}`)
+        .get(`/operations/push-notification/test/${regularUser.id}`)
         .set("Authorization", "Bearer invalid-token");
 
       expect(response.status).toBe(HttpStatus.Unauthorized);
@@ -81,7 +81,7 @@ describe("Push Notification E2E", () => {
       const regularToken = regularLogin.body.accessToken;
 
       const response = await testRequest
-        .get(`/operations/push-notification/test/${regularUser._id}`)
+        .get(`/operations/push-notification/test/${regularUser.id}`)
         .set("Authorization", `Bearer ${regularToken}`);
 
       expect(response.status).toBe(HttpStatus.Forbidden);
@@ -97,7 +97,7 @@ describe("Push Notification E2E", () => {
 
     it("should fail for user without push token", async () => {
       const response = await testRequest
-        .get(`/operations/push-notification/test/${userWithoutToken._id}`)
+        .get(`/operations/push-notification/test/${userWithoutToken.id}`)
         .set("Authorization", `Bearer ${adminToken}`);
 
       expect(response.status).toBe(HttpStatus.BadRequest);
