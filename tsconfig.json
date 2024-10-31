@@ -44,7 +44,8 @@
     "src/jest/jestInitialSetup.ts",
     "src/jest/jestSetupFilesAfterEnv.ts",
     "src/*.d.ts",
-    "src/index.d.ts"
+    "src/index.d.ts",
+    "src/useCases/ModuleSystem/user/appleOAuth/__tests__/AppleOAuthController.e2e.spec.skip"
   ],
   "exclude": ["node_modules", "dist", "docs"]
 }
