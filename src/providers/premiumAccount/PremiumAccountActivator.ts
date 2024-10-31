@@ -28,7 +28,7 @@ export class PremiumAccountActivator {
     user: IUser,
     accountType: UserAccountTypes,
     data?: Partial<IUser>
-  ): Promise<void> {
+  ): Promise<boolean> {
     try {
       console.log("✨ Activating premium account for user", user.email, "with account type", accountType);
 
@@ -36,8 +36,10 @@ export class PremiumAccountActivator {
         accountType,
         ...data,
       });
+      return true;
     } catch (error) {
       console.error(error);
+      return false;
     }
   }
 
