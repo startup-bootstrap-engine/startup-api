@@ -8,9 +8,12 @@ import { controller, httpGet, interfaces, request, requestParam, response } from
 import { isAdminMiddleware } from "../../../../providers/middlewares/IsAdminMiddleware";
 import { PushNotificationHelper } from "../../../../providers/pushNotification/PushNotificationHelper";
 
-@controller("/operations", AuthMiddleware, isAdminMiddleware)
+@controller("/operations", AuthMiddleware(), isAdminMiddleware)
 export class PushNotificationController implements interfaces.Controller {
-  constructor(private pushNotificationHelper: PushNotificationHelper, private userRepository: UserRepository) {}
+  constructor(
+    private pushNotificationHelper: PushNotificationHelper,
+    private userRepository: UserRepository
+  ) {}
 
   @httpGet("/push-notification/test/:userId")
   private async submitTestPushNotification(

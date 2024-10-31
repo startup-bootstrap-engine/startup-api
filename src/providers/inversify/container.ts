@@ -23,6 +23,7 @@ import { ServerRequest } from "@providers/server/ServerRequest";
 import { SocketAdapter } from "@providers/sockets/SocketAdapter";
 import { SocketEventsBinder } from "@providers/sockets/SocketEventsBinder";
 import { SocketEventsBinderControl } from "@providers/sockets/SocketEventsBinderControl";
+import { E2ETestMocker } from "@providers/tests/E2ETestMocker";
 import { IntegrationTestMocker } from "@providers/tests/IntegrationMocker";
 import { UnitTestMocker } from "@providers/tests/UnitTestMocker";
 import { NumberFormatter } from "@providers/text/NumberFormatter";
@@ -105,5 +106,7 @@ export const repositoryFactory = container.get<RepositoryFactory>(RepositoryFact
 export const serverRequest = container.get<ServerRequest>(ServerRequest);
 
 export const securityMiddleware = container.get<SecurityMiddleware>(SecurityMiddleware);
+
+export const e2eTestMocker = container.get<E2ETestMocker>(E2ETestMocker);
 
 export { container };

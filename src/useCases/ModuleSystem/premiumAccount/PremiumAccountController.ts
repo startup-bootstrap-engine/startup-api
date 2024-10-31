@@ -5,7 +5,7 @@ import { PremiumAccountActivator } from "@providers/premiumAccount/PremiumAccoun
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { controller, httpPost, interfaces, requestBody, response } from "inversify-express-utils";
 
-@controller("/premium-account", AuthMiddleware, isAdminMiddleware)
+@controller("/premium-account", AuthMiddleware(), isAdminMiddleware)
 export class PremiumAccountController implements interfaces.Controller {
   constructor(
     private premiumAccountActivator: PremiumAccountActivator,
