@@ -17,7 +17,7 @@ describe("Own Info User E2E", () => {
   beforeEach(async () => {
     // Create a test user
     const signupResponse = await testRequest.post("/auth/signup").send(userData);
-    userId = signupResponse.body._id;
+    userId = signupResponse.body.id;
 
     // Login to get auth token
     const loginResponse = await testRequest.post("/auth/login").send({
@@ -38,7 +38,8 @@ describe("Own Info User E2E", () => {
         address: userData.address,
         phone: userData.phone,
       });
-      expect(response.body).toHaveProperty("_id", userId);
+      console.log(response.body);
+      expect(response.body).toHaveProperty("id", userId);
       expect(response.body).not.toHaveProperty("password");
     });
 

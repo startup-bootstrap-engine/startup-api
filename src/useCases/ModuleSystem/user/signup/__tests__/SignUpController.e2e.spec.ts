@@ -16,9 +16,9 @@ describe("Auth Signup E2E", () => {
       const response = await testRequest.post("/auth/signup").send(validSignupData);
 
       expect(response.status).toBe(HttpStatus.Created);
-      expect(response.body._doc).toHaveProperty("email", validSignupData.email);
-      expect(response.body._doc).toHaveProperty("name", validSignupData.name);
-      expect(response.body._doc).not.toHaveProperty("password");
+      expect(response.body).toHaveProperty("email", validSignupData.email);
+      expect(response.body).toHaveProperty("name", validSignupData.name);
+      expect(response.body).not.toHaveProperty("password");
     });
 
     it("should fail with invalid email", async () => {

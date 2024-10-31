@@ -9,7 +9,7 @@ export class MongooseRepository<T extends Document> implements IRepositoryAdapte
   constructor(private model: Model<T>) {}
 
   public async create(item: T): Promise<T> {
-    return await this.model.create(item);
+    return (await this.model.create(item)).toObject() as T;
   }
 
   public async findById(id: string, options?: IBaseRepositoryFindByOptions): Promise<T | null> {
