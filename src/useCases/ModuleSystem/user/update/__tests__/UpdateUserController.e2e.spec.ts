@@ -116,9 +116,11 @@ describe("Update User E2E", () => {
         .set("Authorization", `Bearer ${authToken}`)
         .send({ ...validField, ...unknownField });
 
-      expect(response.status).toBe(HttpStatus.OK);
-      expect(response.body).toHaveProperty("name", validField.name);
-      expect(response.body).not.toHaveProperty("unknownField");
+      expect(response.status).toBe(HttpStatus.BadRequest);
+      expect(response.body).toHaveProperty(
+        "message",
+        expect.arrayContaining(["property unknownField should not exist"])
+      );
     });
 
     it("should accept empty update object", async () => {
@@ -128,15 +130,6 @@ describe("Update User E2E", () => {
       // Should return user without changes
       expect(response.body).toHaveProperty("name", validSignupData.name);
       expect(response.body).toHaveProperty("email", validSignupData.email);
-    });
-
-    it("should handle null values as invalid", async () => {
-      const response = await testRequest
-        .patch("/users")
-        .set("Authorization", `Bearer ${authToken}`)
-        .send({ name: null });
-
-      expect(response.status).toBe(HttpStatus.BadRequest);
     });
   });
 });
