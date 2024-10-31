@@ -9,9 +9,6 @@ This project has a module to activate PostgreSQL as the database and Prisma as t
 2. In your `.env` file, confirm the following variables are set:
 
    ```
-   # Databases (firebase, mongoose, prisma)
-   DB_ADAPTER=prisma
-
    # Modules
    MODULE_POSTGRESQL=true
 

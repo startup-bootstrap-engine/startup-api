@@ -1,6 +1,6 @@
 import { createMongooseModel, zodToObject } from "@entities/schemaUtils";
-import { appEnv } from "@providers/config/env";
 import { DatabaseAdaptersAvailable } from "@providers/database/DatabaseTypes";
+import { databaseAdaptersInfo } from "@providers/inversify/container";
 import { provide } from "inversify-binding-decorators";
 import pluralize from "pluralize";
 import { z, ZodSchema } from "zod";
@@ -19,7 +19,8 @@ export abstract class BaseModel<T extends z.ZodTypeAny> implements IAgnosticSche
   public initializeData(
     schema: ZodSchema,
     data?: Partial<z.infer<T>>,
-    adapter: DatabaseAdaptersAvailable = appEnv.database.DB_ADAPTER as DatabaseAdaptersAvailable
+
+    adapter: DatabaseAdaptersAvailable = databaseAdaptersInfo.getCurrentDatabaseAdapter()
   ): any {
     switch (adapter) {
       case "mongoose":

@@ -4,11 +4,11 @@ import "express-async-errors";
 import "reflect-metadata";
 
 import { appEnv } from "@providers/config/env";
-import { DatabaseAdaptersAvailable } from "@providers/database/DatabaseTypes";
 import {
   bullBoardMonitor,
   container,
   cronJobs,
+  databaseAdaptersInfo,
   databaseFactory,
   inMemoryHashTable,
   messagingBroker,
@@ -71,7 +71,7 @@ function getPort(): number {
 async function initializeServerComponents(): Promise<void> {
   const { IS_MICROSERVICE } = appEnv.general;
 
-  const database = databaseFactory.createDatabaseAdapter(appEnv.database.DB_ADAPTER as DatabaseAdaptersAvailable);
+  const database = databaseFactory.createDatabaseAdapter(databaseAdaptersInfo.getCurrentDatabaseAdapter());
 
   await Promise.all([database.initialize(), appEnv.modules.redis && redisManager.connect()]);
 

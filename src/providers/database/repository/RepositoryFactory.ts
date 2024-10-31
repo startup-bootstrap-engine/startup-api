@@ -1,7 +1,7 @@
-import { appEnv } from "@providers/config/env";
 import { provide } from "inversify-binding-decorators";
 import { Model } from "mongoose";
 import { ZodObject } from "zod";
+import { DatabaseAdaptersInfo } from "../DatabaseAdaptersInfo";
 import { DatabaseAdaptersAvailable, IRepositoryAdapter } from "../DatabaseTypes";
 import { FirebaseRepository } from "./FirebaseRepository";
 import { MongooseRepository } from "./MongooseRepository";
@@ -9,12 +9,16 @@ import { PrismaModelName, PrismaRepository } from "./PrismaRepository";
 
 @provide(RepositoryFactory)
 export class RepositoryFactory {
-  constructor(private firebaseRepository: FirebaseRepository<any>, private prismaRepository: PrismaRepository<any>) {}
+  constructor(
+    private firebaseRepository: FirebaseRepository<any>,
+    private prismaRepository: PrismaRepository<any>,
+    private databaseAdaptersInfo: DatabaseAdaptersInfo
+  ) {}
 
   public createRepository<T extends { [key: string]: any }>(
     model: Model<any> | string,
     schema: ZodObject<any>,
-    type: DatabaseAdaptersAvailable = appEnv.database.DB_ADAPTER as DatabaseAdaptersAvailable
+    type: DatabaseAdaptersAvailable = this.databaseAdaptersInfo.getCurrentDatabaseAdapter()
   ): IRepositoryAdapter<T> {
     switch (type) {
       case "mongoose":

@@ -45,7 +45,12 @@ export class BaseRepository<T extends AvailableSchemas> implements IBaseReposito
           }
         }
       }
-      return await this.repositoryAdapter.create(data as T);
+
+      let result = await this.repositoryAdapter.create(data as T);
+
+      result = this.autoPopulateMissingFields(result) as T;
+
+      return result;
     } catch (error) {
       throw new BadRequestError(error.message);
     }
@@ -64,7 +69,9 @@ export class BaseRepository<T extends AvailableSchemas> implements IBaseReposito
 
   public async findById(id: string, options?: IBaseRepositoryFindByOptions): Promise<T | null> {
     try {
-      const result = await this.repositoryAdapter.findById(id, options);
+      let result = await this.repositoryAdapter.findById(id, options);
+
+      result = this.autoPopulateMissingFields(result);
       return this.hideSensitiveFields(result, options?.hideSensitiveFields);
     } catch (error) {
       throw new BadRequestError(error.message);
@@ -73,7 +80,10 @@ export class BaseRepository<T extends AvailableSchemas> implements IBaseReposito
 
   public async findBy(params: Record<string, unknown>, options?: IBaseRepositoryFindByOptions): Promise<T | null> {
     try {
-      const result = await this.repositoryAdapter.findBy(params, options);
+      let result = await this.repositoryAdapter.findBy(params, options);
+
+      result = this.autoPopulateMissingFields(result);
+
       return this.hideSensitiveFields(result, options?.hideSensitiveFields);
     } catch (error) {
       throw new BadRequestError(error.message);
@@ -81,13 +91,20 @@ export class BaseRepository<T extends AvailableSchemas> implements IBaseReposito
   }
 
   public async findAll(query: Record<string, unknown>, options?: IBaseRepositoryFindByOptions): Promise<T[]> {
-    const results = await this.repositoryAdapter.findAll(query, options);
+    let results = await this.repositoryAdapter.findAll(query, options);
+
+    results = results.map((item) => this.autoPopulateMissingFields(item) as T);
+
     return results.map((item) => this.hideSensitiveFields(item, options?.hideSensitiveFields)) as T[];
   }
 
   public async updateById(id: string, data: Partial<T>): Promise<T | null> {
     try {
-      return await this.repositoryAdapter.updateById(id, data);
+      let result = await this.repositoryAdapter.updateById(id, data);
+
+      result = this.autoPopulateMissingFields(result) as T;
+
+      return result;
     } catch (error) {
       throw new BadRequestError(error.message);
     }
@@ -95,7 +112,11 @@ export class BaseRepository<T extends AvailableSchemas> implements IBaseReposito
 
   public async updateBy(params: Record<string, unknown>, data: Partial<T>): Promise<T | null> {
     try {
-      return await this.repositoryAdapter.updateBy(params, data);
+      let result = await this.repositoryAdapter.updateBy(params, data);
+
+      result = this.autoPopulateMissingFields(result) as T;
+
+      return result;
     } catch (error) {
       throw new BadRequestError(error.message);
     }
@@ -115,5 +136,14 @@ export class BaseRepository<T extends AvailableSchemas> implements IBaseReposito
     } catch (error) {
       throw new BadRequestError(error.message);
     }
+  }
+
+  private autoPopulateMissingFields(result: T | null): T | null {
+    // noSQL like MongoDB will return an _id instead of id. For consistency, we will fix it and delete the _id, returning the id instead.
+    if (result && "_id" in result) {
+      result.id = result._id?.toString()!;
+      delete result._id;
+    }
+    return result;
   }
 }

@@ -1,5 +1,6 @@
 import { NewRelic } from "@providers/analytics/NewRelic";
 import { DatabaseFactory } from "@providers/database/adapters/DatabaseFactory";
+import { DatabaseAdaptersInfo } from "@providers/database/DatabaseAdaptersInfo";
 import { InMemoryHashTable } from "@providers/database/InMemoryHashTable";
 import { RedisManager } from "@providers/database/RedisManager";
 import { RepositoryFactory } from "@providers/database/repository/RepositoryFactory";
@@ -49,6 +50,8 @@ container.load(
 );
 
 autoProvide(container);
+
+export const databaseAdaptersInfo = container.get<DatabaseAdaptersInfo>(DatabaseAdaptersInfo);
 
 export const rabbitMQ = container.get<RabbitMQ>(RabbitMQ);
 export const messagingBroker = container.get<MessagingBroker>(MessagingBroker);

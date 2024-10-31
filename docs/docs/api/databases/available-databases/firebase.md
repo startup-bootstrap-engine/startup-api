@@ -11,10 +11,6 @@ You can check some firebase basics [here](https://www.youtube.com/watch?v=9kRgVx
 ## Firebase - .env
 
 ```bash
-# Databases (firebase, mongoose)
-DB_ADAPTER=firebase
-...
-
 # Make sure all other DB related modules are turned off. For example:
 MODULE_MONGODB=false
 ```

@@ -2,9 +2,6 @@ import "express-async-errors";
 import "reflect-metadata";
 import redis from "./redisV4Mock";
 
-// Set the DB_ADAPTER environment variable to "mongoose"
-process.env.DB_ADAPTER = "mongoose";
-
 //! Useful for debugging during tests
 process.env.DEBUG_MODE = "true";
 

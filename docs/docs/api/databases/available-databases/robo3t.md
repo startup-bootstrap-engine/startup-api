@@ -27,10 +27,7 @@ Open your `startup-api` .env and make sure you have the following:
 
 ```bash
 ...
-# Databases (firebase, mongoose)
-DB_ADAPTER=mongoose
 
-...
 MODULE_MONGODB=true
 ```
 

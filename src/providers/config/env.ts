@@ -33,7 +33,6 @@ export const appEnv = {
     exchangeRate: process.env.EXCHANGE_RATE_API,
   },
   database: {
-    DB_ADAPTER: process.env.DB_ADAPTER,
     FB_DB_PATH: process.env.FB_DB_PATH,
     MONGO_INITDB_DATABASE: process.env.MONGO_INITDB_DATABASE,
     MONGO_HOST_CONTAINER: process.env.MONGO_HOST_CONTAINER,
@@ -86,12 +85,17 @@ export const appEnv = {
   },
 
   modules: {
+    firebase: process.env.MODULE_FIREBASE === "true",
+    mongodb: process.env.MODULE_MONGODB === "true",
+    postgreSQL: process.env.MODULE_POSTGRESQL === "true",
+
     rabbitMQ: process.env.MODULE_RABBITMQ === "true",
     redis: process.env.MODULE_REDIS === "true",
     websocket: process.env.MODULE_WEBSOCKET === "true",
     redisStreams: process.env.MODULE_REDIS_STREAMS === "true",
     redisPubSub: process.env.MODULE_REDIS_PUBSUB === "true",
     bullMQ: process.env.MODULE_BULLMQ === "true",
-    mongodb: process.env.MODULE_MONGODB === "true",
+    prismaStudio: process.env.MODULE_PRISMA_STUDIO === "true",
+    pgAdmin: process.env.MODULE_PGADMIN === "true",
   },
 };
