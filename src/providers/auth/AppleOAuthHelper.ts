@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import jwksClient from "jwks-rsa";
 
 /* eslint-disable prefer-promise-reject-errors */
-interface IAppleIdentityTokenResponse {
+export interface IAppleIdentityTokenResponse {
   iss: string;
   aud: string;
   exp: number;

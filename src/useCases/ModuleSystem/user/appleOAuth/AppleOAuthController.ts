@@ -9,7 +9,10 @@ import { AppleOAuthUseCase } from "./AppleOAuthUseCase";
 
 @controller("/auth")
 export class AppleOAuthController implements interfaces.Controller {
-  constructor(private appleOAuthUseCase: AppleOAuthUseCase, private userRepository: UserRepository) {}
+  constructor(
+    private appleOAuthUseCase: AppleOAuthUseCase,
+    private userRepository: UserRepository
+  ) {}
 
   @httpPost("/apple", DTOValidatorMiddleware(AppleOAuthDTO))
   public async appleOAuth(@requestBody() appleOAuthDTO: AppleOAuthDTO, @request() req): Promise<IAuthResponse> {

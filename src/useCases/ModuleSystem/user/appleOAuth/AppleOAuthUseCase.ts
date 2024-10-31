@@ -1,5 +1,5 @@
 import { AnalyticsHelper } from "@providers/analytics/AnalyticsHelper";
-import { AppleOAuthHelper } from "@providers/auth/AppleOAuthHelper";
+import { AppleOAuthHelper, IAppleIdentityTokenResponse } from "@providers/auth/AppleOAuthHelper";
 import { UserAuth } from "@providers/auth/UserAuth";
 import { BadRequestError } from "@providers/errors/BadRequestError";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
@@ -17,52 +17,71 @@ export class AppleOAuthUseCase {
   ) {}
 
   public async appleOAuthSync(appleOAuthDTO: AppleOAuthDTO): Promise<IAuthResponse> {
-    const { identityToken, user } = appleOAuthDTO;
+    const validationPayload = await this.validateAppleToken(appleOAuthDTO);
+    const dbUser = await this.findExistingUser(validationPayload.email);
 
+    if (dbUser) {
+      return this.handleExistingUser(dbUser);
+    }
+    return this.handleNewUser(appleOAuthDTO, validationPayload);
+  }
+
+  private async validateAppleToken(appleOAuthDTO: AppleOAuthDTO): Promise<IAppleIdentityTokenResponse> {
+    const { identityToken, user } = appleOAuthDTO;
     const validationPayload = await this.appleOAuthHelper.verifyIdentityToken(identityToken);
 
     if (!validationPayload) {
       throw new BadRequestError("Failed to validate Apple identity token");
     }
 
-    // this verifies if the user is the same from our identity token and if the package name is correct
     if (validationPayload.sub !== user || validationPayload.aud !== "com.blueship.mobile") {
       throw new BadRequestError("Apple SignIn: failed to validate user");
     }
 
-    // eslint-disable-next-line mongoose-performance/require-lean
-    const dbUser = await this.userRepository.findBy({
+    return validationPayload;
+  }
+
+  private async findExistingUser(email: string): Promise<IUser | null> {
+    return await this.userRepository.findBy({
       authFlow: UserAuthFlow.AppleOAuth,
-      email: validationPayload.email,
+      email,
     });
+  }
 
-    if (!dbUser) {
-      if (!appleOAuthDTO.email) {
-        throw new BadRequestError(
-          "User creation error: No e-mail was provided. Please try signing up by using the traditional Sign Up form."
-        );
-      }
-
-      const newUser = await this.userRepository.signUp({
-        name: appleOAuthDTO.givenName,
-        email: appleOAuthDTO.email,
-        authFlow: UserAuthFlow.AppleOAuth,
-      } as unknown as IUser);
-
-      await this.analyticsHelper.track("UserLogin", newUser);
-      await this.analyticsHelper.track("UserLoginApple", newUser);
-      await this.analyticsHelper.updateUserInfo(newUser);
-
-      return await this.userAuth.generateAccessToken(newUser);
-    } else {
-      // Check if user already exists on database...
-      // just create a new access token and refresh token and provide it
-
-      await this.analyticsHelper.track("UserLogin", dbUser);
-      await this.analyticsHelper.track("UserLoginApple", dbUser);
-      await this.analyticsHelper.updateUserInfo(dbUser);
-
-      return await this.userAuth.generateAccessToken(dbUser);
+  private async handleNewUser(
+    appleOAuthDTO: AppleOAuthDTO,
+    validationPayload: IAppleIdentityTokenResponse
+  ): Promise<IAuthResponse> {
+    if (!appleOAuthDTO.email) {
+      throw new BadRequestError(
+        "User creation error: No e-mail was provided. Please try signing up by using the traditional Sign Up form."
+      );
     }
+
+    if (appleOAuthDTO.email !== validationPayload.email) {
+      throw new BadRequestError("Email mismatch between provided data and Apple token");
+    }
+
+    const newUser = await this.userRepository.signUp({
+      name: appleOAuthDTO.givenName || appleOAuthDTO.familyName || `AppleUser-${validationPayload.sub}`,
+      email: appleOAuthDTO.email,
+      authFlow: UserAuthFlow.AppleOAuth,
+    } as unknown as IUser);
+
+    await this.trackUserAnalytics(newUser);
+    return this.userAuth.generateAccessToken(newUser);
+  }
+
+  private async handleExistingUser(user: IUser): Promise<IAuthResponse> {
+    await this.trackUserAnalytics(user);
+    return this.userAuth.generateAccessToken(user);
+  }
+
+  private async trackUserAnalytics(user: IUser): Promise<void> {
+    await Promise.all([
+      this.analyticsHelper.track("UserLogin", user),
+      this.analyticsHelper.track("UserLoginApple", user),
+      this.analyticsHelper.updateUserInfo(user),
+    ]);
   }
 }
