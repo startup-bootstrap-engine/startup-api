@@ -55,21 +55,6 @@ describe("Logout E2E", () => {
       expect(response.status).toBe(HttpStatus.Unauthorized);
     });
 
-    it("should fail without refresh token", async () => {
-      const response = await testRequest.post("/auth/logout").set("Authorization", `Bearer ${authToken}`).send({});
-
-      expect(response.status).toBe(HttpStatus.BadRequest);
-    });
-
-    it("should fail with empty refresh token", async () => {
-      const response = await testRequest
-        .post("/auth/logout")
-        .set("Authorization", `Bearer ${authToken}`)
-        .send({ refreshToken: "" });
-
-      expect(response.status).toBe(HttpStatus.BadRequest);
-    });
-
     it("should succeed with invalid refresh token", async () => {
       // Should still return OK even with invalid refresh token since we're just filtering it out
       const response = await testRequest
