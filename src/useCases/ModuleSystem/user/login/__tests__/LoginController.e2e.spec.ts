@@ -33,10 +33,10 @@ describe("Auth Login E2E", () => {
     it("should fail with invalid email", async () => {
       const response = await testRequest.post("/auth/login").send({
         ...validLoginData,
-        email: "nonexistent@example.com",
+        email: "nonexistent",
       });
 
-      expect(response.status).toBe(HttpStatus.Unauthorized);
+      expect(response.status).toBe(HttpStatus.BadRequest);
     });
 
     it("should fail with invalid password", async () => {
