@@ -15,7 +15,7 @@ describe("AB Test E2E", () => {
 
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body).toMatchObject(validABTestData);
-      expect(response.body).toHaveProperty("_id");
+      expect(response.body).toHaveProperty("id");
     });
 
     it("should create AB test without optional enabled field", async () => {
@@ -64,7 +64,7 @@ describe("AB Test E2E", () => {
     });
 
     it("should get AB test by valid ID", async () => {
-      const response = await testRequest.get(`/ab-tests/${createdTest._id}`);
+      const response = await testRequest.get(`/ab-tests/${createdTest.id}`);
 
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body).toMatchObject(validABTestData);
@@ -132,7 +132,7 @@ describe("AB Test E2E", () => {
         enabled: false,
       };
 
-      const response = await testRequest.patch(`/ab-tests/${createdTest._id}`).send(updates);
+      const response = await testRequest.patch(`/ab-tests/${createdTest.id}`).send(updates);
 
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body).toMatchObject(updates);
@@ -140,7 +140,7 @@ describe("AB Test E2E", () => {
     });
 
     it("should update single field", async () => {
-      const response = await testRequest.patch(`/ab-tests/${createdTest._id}`).send({
+      const response = await testRequest.patch(`/ab-tests/${createdTest.id}`).send({
         name: "Only Name Updated",
       });
 
@@ -160,8 +160,8 @@ describe("AB Test E2E", () => {
 
     it("should fail with invalid field types", async () => {
       const responses = await Promise.all([
-        testRequest.patch(`/ab-tests/${createdTest._id}`).send({ name: 123 }),
-        testRequest.patch(`/ab-tests/${createdTest._id}`).send({ enabled: "true" }),
+        testRequest.patch(`/ab-tests/${createdTest.id}`).send({ name: 123 }),
+        testRequest.patch(`/ab-tests/${createdTest.id}`).send({ enabled: "true" }),
       ]);
 
       responses.forEach((response) => {
@@ -179,12 +179,12 @@ describe("AB Test E2E", () => {
     });
 
     it("should delete AB test with valid ID", async () => {
-      const deleteResponse = await testRequest.delete(`/ab-tests/${createdTest._id}`);
+      const deleteResponse = await testRequest.delete(`/ab-tests/${createdTest.id}`);
       expect(deleteResponse.status).toBe(HttpStatus.OK);
       expect(deleteResponse.body).toBe(true);
 
       // Verify deletion
-      const getResponse = await testRequest.get(`/ab-tests/${createdTest._id}`);
+      const getResponse = await testRequest.get(`/ab-tests/${createdTest.id}`);
       expect(getResponse.body).toBeNull();
     });
 
