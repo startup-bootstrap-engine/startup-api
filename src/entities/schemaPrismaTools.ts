@@ -51,6 +51,11 @@ function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+function camelCase(str: string): string {
+  if (!str) return str;
+  return str.charAt(0).toLowerCase() + str.slice(1);
+}
+
 function zodTypeToPrisma(
   zodType: ZodTypeAny,
   fieldName: string,
@@ -362,7 +367,7 @@ function generatePrismaModel(
   // Add back-references for relations
   const relations = modelNameToRelations.get(modelName) || [];
   relations.forEach((rel: any) => {
-    const fieldName = rel.fieldName || rel.relatedModel.toLowerCase() + (rel.type === "many" ? "s" : "");
+    const fieldName = rel.fieldName || camelCase(rel.relatedModel) + (rel.type === "many" ? "s" : "");
     const fieldType = `${rel.relatedModel}${rel.type === "many" ? "[]" : "?"}`;
     const line = `  ${fieldName} ${fieldType} @relation("${rel.relationName}")`;
     prismaFields.push(line);

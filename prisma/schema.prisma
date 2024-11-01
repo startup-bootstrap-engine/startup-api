@@ -55,7 +55,7 @@ model User {
   isManuallyControlledPremiumAccount Boolean @default(false)
   pushNotificationToken String?
   channel String?
-  userpreference UserPreference? @relation("UserPreferenceToUser")
+  userPreference UserPreference? @relation("UserPreferenceToUser")
 }
 
 model ABTest {
