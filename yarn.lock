@@ -3109,10 +3109,10 @@
   resolved "https://registry.yarnpkg.com/@socket.io/sticky/-/sticky-1.0.4.tgz#5f6d3ae62881b17e0fb756c6074f18ddb7b2014f"
   integrity sha512-VuauT5CJLvzYtKIgouFSQ8rUaygseR+zRutnwh6ZA2QYcXx+8g52EoJ8V2SLxfo+Tfs3ELUDy08oEXxlWNrxaw==
 
-"@startup-engine/shared@^0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@startup-engine/shared/-/shared-0.0.8.tgz#949ad3bb8cd056ef0dc6192e41fe111a0abc88db"
-  integrity sha512-cfXPAvekaQdEnR5kIKl5mM4hEHuqZyQSk8c0fRLen/SSYZGdYitDVkphdd34jXeKGVJ30XHfg2KWrsr92gXRpA==
+"@startup-engine/shared@^0.0.15":
+  version "0.0.15"
+  resolved "https://registry.yarnpkg.com/@startup-engine/shared/-/shared-0.0.15.tgz#8b6cfd2ec2cda1fba6991fc43a7d2cb263c6f6cd"
+  integrity sha512-skE2L3C/l7OdGKNwDRJqzreVRy5PUQWeGa7RXuuNlueKeJAD5UA98WFdqsyQNYiraMSnUaJJNQdiPPSacBPjBw==
   dependencies:
     husky "^4.3.0"
     mobile-device-detect "^0.4.3"
