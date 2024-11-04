@@ -41,7 +41,7 @@ export const AuthMiddleware = (options: IAuthMiddlewareOptions = defaultOptions)
             if (err) {
               // Check if error is due to token expiration
               if (err.name === "TokenExpiredError") {
-                reject(new UnauthorizedError(TS.translate("auth", "tokenExpired")));
+                reject(new UnauthorizedError("Your session has expired. Please login again."));
               } else {
                 reject(err);
               }
