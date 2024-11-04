@@ -79,8 +79,7 @@
     "number-string": "^1.1.5",
     "pathfinding": "^0.4.18",
     "pm2": "^5.3.0",
-    "socket.io": "^4.7.4",
-    "socket.io-adapter": "^2.4.0",
+    "socket.io": "^4.7.2",
     "speedgoose": "^1.2.23",
     "zod": "^3.23.8"
   },
