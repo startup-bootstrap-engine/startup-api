@@ -5,6 +5,22 @@ import redis from "./redisV4Mock";
 //! Useful for debugging during tests
 process.env.DEBUG_MODE = "true";
 
+// Mock environment variables before any imports
+const envVars = {
+  MODULE_REDIS: "true",
+  MODULE_REDIS_STREAMS: "false",
+  MODULE_REDIS_PUBSUB: "false",
+  MODULE_BULLMQ: "false",
+  MODULE_WEBSOCKET: "false",
+  MODULE_RABBITMQ: "false",
+  MODULE_MONGODB: "true",
+  MODULE_POSTGRESQL: "false",
+  MODULE_PRISMA_STUDIO: "false",
+  MODULE_PGADMIN: "false",
+};
+
+Object.assign(process.env, envVars);
+
 jest.setTimeout(30000);
 
 jest.mock("redis", () => redis);
