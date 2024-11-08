@@ -419,7 +419,20 @@ function generatePrismaSchema(
   // Combine enums and models
   const prismaSchema = `${prismaEnums}\n\n${prismaModels}`;
 
-  return prismaSchema;
+  // Prisma schema header
+  const prismaSchemaHeader = `
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRESQL_DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+`;
+
+  return `${prismaSchemaHeader}\n${prismaSchema}`;
 }
 
 // Function to handle relations, currently not used, can be integrated if needed

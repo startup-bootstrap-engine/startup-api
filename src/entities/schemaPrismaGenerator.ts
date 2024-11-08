@@ -20,34 +20,18 @@ models.forEach((model) => {
   modelNameToSchema.set(model.name, model.schema);
 });
 
-// Prisma schema header
-const prismaSchemaHeader = `
-datasource db {
-  provider = "postgresql"
-  url      = env("POSTGRESQL_DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
-}
-
-`;
-
 // Generate Prisma schema
 async function generatePrismaSchemaFile(): Promise<void> {
   try {
     // Generate the complete Prisma schema
-    const prismaSchemaContent = generatePrismaSchema(models, schemaToModelName, modelNameToSchema);
-
-    // Combine with header
-    const completePrismaSchema = `${prismaSchemaHeader}\n${prismaSchemaContent}\n`;
+    const prismaSchema = generatePrismaSchema(models, schemaToModelName, modelNameToSchema);
 
     // Ensure the directory exists
     const schemaDir = path.dirname(PRISMA_SCHEMA_PATH);
     await fs.mkdir(schemaDir, { recursive: true });
 
     // Write to schema.prisma
-    await fs.writeFile(PRISMA_SCHEMA_PATH, completePrismaSchema, { encoding: "utf-8" });
+    await fs.writeFile(PRISMA_SCHEMA_PATH, prismaSchema, { encoding: "utf-8" });
 
     console.log(`✅ Prisma schema generated successfully at ${PRISMA_SCHEMA_PATH}`);
   } catch (error) {
