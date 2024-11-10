@@ -13,7 +13,7 @@ export class AnalyticsHelper {
 
   public async track(eventName: string, user?: IUser): Promise<void> {
     try {
-      if (appEnv.general.ENV === EnvType.Development) {
+      if (appEnv.general.ENV === EnvType.Development && !appEnv.general.IS_UNIT_TEST) {
         console.log(
           `✨ Analytics: Tracking event ${eventName} ${user ? `for user ${user.email}` : ""} (disabled in development)`
         );
