@@ -29,6 +29,9 @@ describe("TransactionalEmail", () => {
 
     // @ts-ignore
     jest.replaceProperty(appEnv.general, "ENV", "Production");
+
+    // @ts-ignore
+    jest.spyOn(transactionalEmail, "loadEmailTemplate").mockReturnValue("<html></html>");
   });
 
   it("should send an email and log the action", async () => {
@@ -42,8 +45,6 @@ describe("TransactionalEmail", () => {
     jest.spyOn(UserRepository.prototype, "findBy").mockResolvedValue(mockUser);
     jest.spyOn(LogRepository.prototype, "createLog").mockResolvedValue({} as ILog);
     jest.spyOn(LogRepository.prototype, "findLogsByAction").mockResolvedValue([]);
-    // @ts-ignore
-    jest.spyOn(transactionalEmail, "loadEmailTemplate").mockReturnValue("<html></html>");
 
     const result = await transactionalEmail.send(to, subject, template, customVars);
 
