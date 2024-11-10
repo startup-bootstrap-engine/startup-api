@@ -5,7 +5,7 @@ import { glob } from "glob";
 import { camelCase as lodashCamelCase } from "lodash";
 import path from "path";
 import { z } from "zod";
-import { generatePrismaSchema } from "./schemaPrismaTools";
+import { zodToPrisma } from "zod-to-schema";
 
 /**
  * Utility function to find model files using glob.
@@ -88,17 +88,6 @@ function createMappings(models: Array<{ name: string; schema: z.ZodSchema<any> }
   return { schemaToModelName, modelNameToSchema };
 }
 
-const prismaSchemaHeader = `
-datasource db {
-  provider = "postgresql"
-  url      = env("POSTGRESQL_DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
-}
-`;
-
 async function generatePrismaSchemaFile(): Promise<void> {
   try {
     console.log("🔄 Starting Prisma schema generation...");
@@ -110,8 +99,7 @@ async function generatePrismaSchemaFile(): Promise<void> {
     }
 
     const { schemaToModelName, modelNameToSchema } = createMappings(models);
-    const prismaSchemaContent = generatePrismaSchema(models, schemaToModelName, modelNameToSchema);
-    const completePrismaSchema = `${prismaSchemaHeader}\n${prismaSchemaContent}\n`;
+    const prismaSchema = zodToPrisma(models, schemaToModelName, modelNameToSchema);
 
     console.log("✅ Generated Prisma schema content.");
 
@@ -119,7 +107,7 @@ async function generatePrismaSchemaFile(): Promise<void> {
     await fs.mkdir(schemaDir, { recursive: true });
     console.log(`📂 Ensured schema directory exists: ${schemaDir}`);
 
-    await fs.writeFile(PRISMA_SCHEMA_PATH, completePrismaSchema, { encoding: "utf-8" });
+    await fs.writeFile(PRISMA_SCHEMA_PATH, prismaSchema, { encoding: "utf-8" });
     console.log(`✅ Prisma schema generated successfully at ${PRISMA_SCHEMA_PATH}`);
   } catch (error) {
     console.error("❌ Failed to generate Prisma schema:", error);

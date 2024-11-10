@@ -7,6 +7,7 @@ process.env.DEBUG_MODE = "true";
 
 // Mock environment variables before any imports
 const envVars = {
+  MODULE_FIREBASE: "false",
   MODULE_REDIS: "true",
   MODULE_REDIS_STREAMS: "false",
   MODULE_REDIS_PUBSUB: "false",

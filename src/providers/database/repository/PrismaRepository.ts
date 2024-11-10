@@ -1,9 +1,9 @@
-import { zodToObject } from "@entities/schemaUtils";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { provide } from "inversify-binding-decorators";
 import { ZodObject } from "zod";
-import { PrismaAdapter } from "../adapters/PrismaAdapter";
+import { zodToObject } from "zod-to-schema";
 import { IRepositoryAdapter } from "../DatabaseTypes";
+import { PrismaAdapter } from "../adapters/PrismaAdapter";
 import { IBaseRepositoryFindByOptions } from "./BaseRepository";
 
 export type PrismaModelName = keyof PrismaClient;

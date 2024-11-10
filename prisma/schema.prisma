@@ -8,6 +8,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
+
 enum RoleEnum {
   Admin
   Regular
