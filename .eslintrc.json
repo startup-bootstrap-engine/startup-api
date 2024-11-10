@@ -67,6 +67,8 @@
     "no-new": "off",
     "mongoose-performance/require-lean": "error",
     "mongoose-performance/no-model-direct-access": "error",
-    "mongoose-performance/avoid-direct-save": "error"
+    "mongoose-performance/avoid-direct-save": "error",
+
+    "brace-style": "off"
   }
 }

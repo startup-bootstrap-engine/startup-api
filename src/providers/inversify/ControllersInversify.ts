@@ -18,6 +18,7 @@ import { GoogleOAuthSyncController } from "@useCases/ModuleSystem/user/googleOAu
 import { BasicEmailPwLoginController } from "@useCases/ModuleSystem/user/login/LoginController";
 import { LogoutController } from "@useCases/ModuleSystem/user/logout/LogoutController";
 import { OwnInfoUserController } from "@useCases/ModuleSystem/user/ownInfo/OwnInfoUserController";
+import { UserPreferenceController } from "@useCases/ModuleSystem/user/preferences/UserPreferenceController";
 import { RefreshController } from "@useCases/ModuleSystem/user/refreshToken/RefreshController";
 import { SignUpController } from "@useCases/ModuleSystem/user/signup/SignUpController";
 import { UnsubscribeUsercontroller } from "@useCases/ModuleSystem/user/unsubscribe/UnsubscribeUsercontroller";
@@ -40,6 +41,7 @@ export const userControllerContainer = new ContainerModule((bind: interfaces.Bin
   bind<AppleOAuthController>(AppleOAuthController).toSelf();
   bind<PushNotificationController>(PushNotificationController).toSelf();
   bind<PingController>(PingController).toSelf();
+  bind<UserPreferenceController>(UserPreferenceController).toSelf();
 });
 
 export const dbTasksControllerContainer = new ContainerModule((bind: interfaces.Bind, unbind: interfaces.Unbind) => {});

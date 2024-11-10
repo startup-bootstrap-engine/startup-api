@@ -1,0 +1,40 @@
+# User Preferences :: Get
+GET {{baseUrl}}/user/preferences HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+###
+
+# User Preferences :: Create
+POST {{baseUrl}}/user/preferences HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "theme": "dark",
+    "notifications": {
+      "email": true,
+      "push": true
+    },
+    "language": "en"
+}
+
+###
+
+# User Preferences :: Update
+PATCH {{baseUrl}}/user/preferences HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "theme": "light"
+}
+
+###
+
+# User Preferences :: Delete
+DELETE {{baseUrl}}/user/preferences HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+###

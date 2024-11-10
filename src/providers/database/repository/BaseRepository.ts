@@ -1,7 +1,6 @@
 import { AvailableSchemas } from "@entities/ModuleSystem/schemas/schemaIndex";
 import { BadRequestError } from "@providers/errors/BadRequestError"; // Import BadRequestError
 import { ConflictError } from "@providers/errors/ConflictError";
-import { TS } from "@providers/translation/TranslationHelper";
 import { provide } from "inversify-binding-decorators";
 import type { IRepositoryAdapter } from "../DatabaseTypes";
 
@@ -36,11 +35,7 @@ export class BaseRepository<T extends AvailableSchemas> implements IBaseReposito
           if (value != null) {
             const existing = await this.repositoryAdapter.findBy({ [key]: value });
             if (existing) {
-              throw new ConflictError(
-                TS.translate("validation", "alreadyExists", {
-                  field: key,
-                })
-              );
+              throw new ConflictError(`A record with the same ${key} already exists.`);
             }
           }
         }
