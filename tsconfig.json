@@ -41,6 +41,7 @@
   "include": [
     "src/**/*.ts",
     "test/*.ts",
+    "emails/**/*.ts",
     "src/jest/jestInitialSetup.ts",
     "src/jest/jestSetupFilesAfterEnv.ts",
     "src/*.d.ts",

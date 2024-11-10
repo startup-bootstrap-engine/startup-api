@@ -1,27 +1,23 @@
+import { LogRepository } from "@repositories/ModuleSystem/LogRepository";
 import { UserRepository } from "@repositories/ModuleSystem/user/UserRepository";
 import { EnvType } from "@startup-engine/shared/dist";
 import { readFileSync } from "fs";
 import { provide } from "inversify-binding-decorators";
 import moment from "moment-timezone";
-import { Log } from "../src/entities/ModuleSystem/LogModel";
 import { EncryptionHelper } from "../src/providers/auth/EncryptionHelper";
 import { appEnv } from "../src/providers/config/env";
 import { TextHelper } from "../src/providers/text/TextHelper";
+import { TransactionalEmailProviders } from "./TransactionalEmailProviders";
 import { EmailType } from "./email.types";
-import { emailProviders } from "./emailProviders";
 
 @provide(TransactionalEmail)
 export class TransactionalEmail {
-  constructor(private userRepository: UserRepository) {}
+  constructor(
+    private userRepository: UserRepository,
+    private logRepository: LogRepository,
+    private emailProviders: TransactionalEmailProviders
+  ) {}
 
-  /**
-   *
-   * @param to email's destination
-   * @param from email's sender
-   * @param subject what's the e-mail about?
-   * @param template folder name from emails/templates
-   * @param customVars object containing any custom vars to replace in your template.
-   */
   public async send(
     to: string | undefined,
     subject: string,
@@ -39,13 +35,12 @@ export class TransactionalEmail {
 
     const today = moment.tz(new Date(), appEnv.general.TIMEZONE!).format("YYYY-MM-DD[T00:00:00.000Z]");
 
-    // loop through email providers and check which one has an unmet free tier threshold.
-    for (const emailProvider of emailProviders) {
+    for (const emailProvider of this.emailProviders.getProviders()) {
       try {
-        const providerEmailsToday = await Log.find({
-          action: `${emailProvider.key}_EMAIL_SUBMISSION`,
-          createdAt: { $gte: new Date(today) },
-        }).lean();
+        const providerEmailsToday = await this.logRepository.findLogsByAction(
+          `${emailProvider.key}_EMAIL_SUBMISSION`,
+          new Date(today)
+        );
 
         if (providerEmailsToday.length < emailProvider.credits) {
           console.log("Smart sending email...");
@@ -53,8 +48,6 @@ export class TransactionalEmail {
           console.log(`Using ${emailProvider.key} to submit email...`);
 
           console.log(`Credits balance today: ${providerEmailsToday.length}/${emailProvider.credits}`);
-
-          // Unsubscribed users: check if we should skip this user submission or not
 
           const user = await this.userRepository.findBy({ email: to });
 
@@ -68,21 +61,17 @@ export class TransactionalEmail {
             return true;
           }
 
-          // insert unsubscribe link into [Unsubscribe Link] tag
-
           if (!to) {
             console.log('You should provide a valid "to" email');
             return false;
           }
 
-          // here we encrypt the to email for security purposes
           const encryptionHelper = new EncryptionHelper();
           const encryptedEmail = encryptionHelper.encrypt(to);
 
           const htmlWithUnsubscribeLink = html.replace(
             "[Unsubscribe Link]",
-            `<a href="${appEnv.general.API_URL!}/users/unsubscribe?hashEmail=${encryptedEmail}&lang=${appEnv.general
-              .LANGUAGE!}">Do you want to stop receiving these e-mails? Click here!</p>`
+            `<a href="${appEnv.general.API_URL!}/users/unsubscribe?hashEmail=${encryptedEmail}&lang=${appEnv.general.LANGUAGE!}">Do you want to stop receiving these e-mails? Click here!</p>`
           );
 
           const submissionStatus = await emailProvider.emailSendingFunction(
@@ -94,12 +83,7 @@ export class TransactionalEmail {
           );
 
           if (submissionStatus) {
-            // register submission in our logs, so we can keep track of whats being sent
-            await Log.create({
-              action: `${emailProvider.key}_EMAIL_SUBMISSION`,
-              emitter: from,
-              target: to,
-            });
+            await this.logRepository.createLog(`${emailProvider.key}_EMAIL_SUBMISSION`, from!, to!);
 
             console.log(`E-mail submitted to ${to} successfully!`);
 
@@ -115,7 +99,6 @@ export class TransactionalEmail {
       }
     }
 
-    // if we reach this point, it means that there's no providers with credits left!
     return false;
   }
 
