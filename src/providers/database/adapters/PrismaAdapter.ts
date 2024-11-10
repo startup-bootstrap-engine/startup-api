@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { appEnv } from "@providers/config/env";
 import { provide } from "inversify-binding-decorators";
 import { IDatabaseAdapter } from "../DatabaseTypes";
 
@@ -7,6 +8,10 @@ export class PrismaAdapter implements IDatabaseAdapter {
   private prisma: PrismaClient;
 
   constructor() {
+    if (!appEnv.modules.postgreSQL) {
+      return;
+    }
+
     this.prisma = new PrismaClient();
   }
 
