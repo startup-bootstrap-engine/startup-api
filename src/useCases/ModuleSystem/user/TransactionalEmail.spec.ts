@@ -83,4 +83,23 @@ describe("TransactionalEmail", () => {
     expect(result).toBe(false);
     expect(LogRepository.prototype.createLog).not.toHaveBeenCalled();
   });
+
+  it("should handle email sending failure", async () => {
+    const to = "test@example.com";
+    const subject = "Test Subject";
+    const template = "test-template";
+    const customVars = {};
+
+    const mockUser = await unitTestMocker.createMockUser({ unsubscribed: false });
+
+    jest.spyOn(UserRepository.prototype, "findBy").mockResolvedValue(mockUser);
+    jest.spyOn(LogRepository.prototype, "findLogsByAction").mockResolvedValue([]);
+    // @ts-ignore
+    jest.spyOn(mockEmailProvider, "emailSendingFunction").mockResolvedValue(false); // Simulate failure
+
+    const result = await transactionalEmail.send(to, subject, template, customVars);
+
+    expect(result).toBe(false);
+    expect(LogRepository.prototype.createLog).not.toHaveBeenCalled();
+  });
 });
