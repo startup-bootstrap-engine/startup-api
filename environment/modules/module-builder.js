@@ -52,6 +52,13 @@ function getModules() {
       composePath: path.join(MODULES_PATH, "docker-compose.postgresql.module.yml"),
       serviceKeys: ["startup-postgresql"],
       networkKeys: ["startup-network"], // Shared network
+      addDependsOn: {
+        "startup-api": {
+          "prisma-migrations": {
+            condition: "service_completed_successfully",
+          },
+        },
+      },
     },
     prismastudio: {
       enabled: process.env.MODULE_PRISMA_STUDIO === "true",
@@ -64,13 +71,6 @@ function getModules() {
       serviceKeys: ["pgadmin"],
     },
     // Add additional modules here
-    // anotherModule: {
-    //   enabled: process.env.MODULE_ANOTHER === "true",
-    //   composePath: path.join(MODULES_PATH, "docker-compose.another.module.yml"),
-    //   serviceKeys: ["startup-another"],
-    //   volumeKeys: ["another_data"],
-    //   networkKeys: ["startup-network"], // Shared network
-    // },
   };
 }
 
@@ -107,6 +107,26 @@ function buildDockerCompose() {
 
       const moduleCompose = loadYamlFile(moduleConfig.composePath);
       mergeModuleCompose(baseCompose, moduleCompose);
+
+      // Add depends_on conditions for other services if specified
+      if (moduleConfig.addDependsOn) {
+        Object.entries(moduleConfig.addDependsOn).forEach(([serviceKey, dependencies]) => {
+          baseCompose.services[serviceKey] = baseCompose.services[serviceKey] || {};
+          baseCompose.services[serviceKey].depends_on = {
+            ...baseCompose.services[serviceKey].depends_on,
+            ...dependencies,
+          };
+        });
+      }
+
+      // Add depends_on conditions if specified
+      if (moduleConfig.dependsOn) {
+        baseCompose.services[moduleKey] = baseCompose.services[moduleKey] || {};
+        baseCompose.services[moduleKey].depends_on = {
+          ...baseCompose.services[moduleKey].depends_on,
+          ...moduleConfig.dependsOn,
+        };
+      }
     } else {
       console.log(`⚠️  Module disabled: ${moduleKey}`);
 

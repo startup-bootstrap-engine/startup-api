@@ -1,9 +1,9 @@
-import { zodToObject } from "@entities/schemaUtils";
 import admin from "firebase-admin";
 import { provide } from "inversify-binding-decorators";
 import { ZodObject, ZodSchema } from "zod";
-import { FirebaseAdapter } from "../adapters/FirebaseAdapter";
+import { zodToObject } from "zod-to-schema";
 import { IRepositoryAdapter } from "../DatabaseTypes";
+import { FirebaseAdapter } from "../adapters/FirebaseAdapter";
 import { ModelUtils } from "../utils/ModelUtils";
 
 @provide(FirebaseRepository)
@@ -12,7 +12,10 @@ export class FirebaseRepository<T> implements IRepositoryAdapter<T> {
   private dbRef: admin.database.Reference;
   private schema: ZodObject<any>;
 
-  constructor(private firebaseAdapter: FirebaseAdapter, private modelUtils: ModelUtils) {}
+  constructor(
+    private firebaseAdapter: FirebaseAdapter,
+    private modelUtils: ModelUtils
+  ) {}
 
   public init(modelName: string, schema: ZodObject<any>): void {
     if (!modelName) {

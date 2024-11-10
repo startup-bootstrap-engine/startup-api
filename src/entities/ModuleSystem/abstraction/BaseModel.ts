@@ -1,9 +1,9 @@
-import { createMongooseModel, zodToObject } from "@entities/schemaUtils";
 import { DatabaseAdaptersAvailable } from "@providers/database/DatabaseTypes";
 import { databaseAdaptersInfo } from "@providers/inversify/container";
 import { provide } from "inversify-binding-decorators";
 import pluralize from "pluralize";
 import { z, ZodSchema } from "zod";
+import { createMongooseModel, zodToObject } from "zod-to-schema";
 import { IAgnosticSchema } from "../schemas/schemaTypes";
 
 @provide(BaseModel)
