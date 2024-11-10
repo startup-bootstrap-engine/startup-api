@@ -23,6 +23,8 @@ EXPOSE 5002
 EXPOSE 5100
 EXPOSE 5101
 
+ENV HUSKY=0
+
 # Install PM2 globally
 RUN npm install -g pm2
 
