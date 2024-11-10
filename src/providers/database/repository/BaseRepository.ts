@@ -46,7 +46,15 @@ export class BaseRepository<T extends AvailableSchemas> implements IBaseReposito
         }
       }
 
-      let result = await this.repositoryAdapter.create(data as T);
+      // Set createdAt and updatedAt fields
+      const timestamp = new Date();
+      const newData = {
+        ...data,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      };
+
+      let result = await this.repositoryAdapter.create(newData as T);
 
       result = this.autoPopulateMissingFields(result) as T;
 
@@ -100,7 +108,13 @@ export class BaseRepository<T extends AvailableSchemas> implements IBaseReposito
 
   public async updateById(id: string, data: Partial<T>): Promise<T | null> {
     try {
-      let result = await this.repositoryAdapter.updateById(id, data);
+      // Set updatedAt field
+      const updatedData = {
+        ...data,
+        updatedAt: new Date(),
+      };
+
+      let result = await this.repositoryAdapter.updateById(id, updatedData);
 
       result = this.autoPopulateMissingFields(result) as T;
 

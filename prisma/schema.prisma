@@ -38,6 +38,8 @@ model UserPreference {
   theme String @default("lara")
   language String @default("en")
   notifications Json
+  createdAt DateTime?
+  updatedAt DateTime?
 }
 
 model User {
@@ -56,7 +58,18 @@ model User {
   isManuallyControlledPremiumAccount Boolean @default(false)
   pushNotificationToken String?
   channel String?
+  createdAt DateTime?
+  updatedAt DateTime?
   userPreference UserPreference? @relation("UserPreferenceToUser")
+}
+
+model Log {
+  id String @id @unique @default(uuid())
+  action String
+  emitter String
+  target String
+  createdAt DateTime?
+  updatedAt DateTime?
 }
 
 model ABTest {
@@ -65,4 +78,6 @@ model ABTest {
   slug String
   description String
   enabled Boolean @default(true)
+  createdAt DateTime?
+  updatedAt DateTime?
 }

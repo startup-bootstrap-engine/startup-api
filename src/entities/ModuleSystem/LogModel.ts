@@ -1,14 +1,11 @@
-import { createSchema, ExtractDoc, Type, typedModel } from "ts-mongoose";
+import { ILog } from "@startup-engine/shared";
+import { provide } from "inversify-binding-decorators";
+import { ZodType } from "zod";
+import { BaseModel } from "./abstraction/BaseModel";
 
-const logSchema = createSchema(
-  {
-    action: Type.string(),
-    emitter: Type.string(),
-    target: Type.string(),
-  },
-  { timestamps: { createdAt: true, updatedAt: true } }
-);
-
-export type ILog = ExtractDoc<typeof logSchema>;
-
-export const Log = typedModel("Log", logSchema);
+@provide(LogModel)
+export class LogModel extends BaseModel<ZodType<ILog>> {
+  protected get modelName(): string {
+    return "Log";
+  }
+}
