@@ -22,29 +22,8 @@ services:
         - CMD-SHELL
         - >-
           psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c '\q'
-      interval: 2s
-      timeout: 10s
+      interval: 4s
+      timeout: 15s
       retries: 5
-
-  prisma-migrations:
-    image: node:18
-    container_name: prisma-migrations
-    working_dir: /app
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@startup-postgresql:${POSTGRES_PORT}/${POSTGRES_DB}?schema=public
-    volumes:
-      - ./:/app
-    depends_on:
-      startup-postgresql:
-        condition: service_healthy
-    command: >
-      sh -c "
-      npm install -g prisma &&
-      npx prisma generate &&
-      npx prisma migrate dev --name init
-      "
-    networks:
-      - startup-network
-    restart: "no"
 volumes:
   postgres_data:

@@ -2,7 +2,7 @@ const yaml = require("js-yaml");
 const fs = require("fs");
 const path = require("path");
 const dotenv = require("dotenv");
-const merge = require("lodash.merge"); // Assuming lodash is already installed
+const merge = require("lodash.merge");
 
 const {
   cleanConfig,
@@ -33,30 +33,35 @@ function getModules() {
       composePath: path.join(MODULES_PATH, "docker-compose.rabbitmq.module.yml"),
       serviceKeys: ["startup-rabbitmq"],
       volumeKeys: ["rabbitmq_data"],
-      networkKeys: [], // Add specific networks if any
+      networkKeys: [],
     },
     redis: {
       enabled: process.env.MODULE_REDIS === "true",
       composePath: path.join(MODULES_PATH, "docker-compose.redis.module.yml"),
       serviceKeys: ["startup-redis"],
-      networkKeys: ["startup-network"], // Shared network
+      networkKeys: ["startup-network"],
     },
     mongodb: {
       enabled: process.env.MODULE_MONGODB === "true",
       composePath: path.join(MODULES_PATH, "docker-compose.mongodb.module.yml"),
       serviceKeys: ["startup-db"],
-      networkKeys: ["startup-network"], // Shared network
+      networkKeys: ["startup-network"],
     },
     postgresql: {
       enabled: process.env.MODULE_POSTGRESQL === "true",
       composePath: path.join(MODULES_PATH, "docker-compose.postgresql.module.yml"),
       serviceKeys: ["startup-postgresql"],
-      networkKeys: ["startup-network"], // Shared network
+      networkKeys: ["startup-network"],
       addDependsOn: {
         "startup-api": {
-          "prisma-migrations": {
-            condition: "service_completed_successfully",
+          "startup-postgresql": {
+            condition: "service_healthy",
           },
+        },
+      },
+      addCommandOn: {
+        "startup-api": {
+          command: `sh -c "yarn db:prisma:generate && npx prisma migrate dev --name init && yarn dev"`,
         },
       },
     },
@@ -70,7 +75,6 @@ function getModules() {
       composePath: path.join(MODULES_PATH, "docker-compose.pgadmin.module.yml"),
       serviceKeys: ["pgadmin"],
     },
-    // Add additional modules here
   };
 }
 
@@ -116,6 +120,15 @@ function buildDockerCompose() {
             ...baseCompose.services[serviceKey].depends_on,
             ...dependencies,
           };
+        });
+      }
+
+      // Add commands to services if specified
+      if (moduleConfig.addCommandOn) {
+        Object.entries(moduleConfig.addCommandOn).forEach(([serviceKey, config]) => {
+          if (baseCompose.services[serviceKey]) {
+            baseCompose.services[serviceKey].command = config.command;
+          }
         });
       }
 
