@@ -34,6 +34,7 @@
     "db:download": "./environment/db-download.sh",
     "db:prisma:generate": "ts-node-dev --transpile-only -r tsconfig-paths/register ./src/entities/schemaPrismaGenerator.ts && npx prisma generate",
     "db:prisma:migrate:dev": "./environment/prisma-migrate.sh dev",
+    "db:prisma:check": "node scripts/check-prisma-changes.js",
     "cache:clear": "sudo rm -rf ./src/providers/data/cache/**",
     "tag:release": "VERSION=$(node -p -e \"require('./package.json').version\") && git tag -d latest-stable || true && git push origin --no-verify --delete latest-stable || true && git tag latest-stable -m 'Latest stable tag' && git tag v$VERSION && git push origin latest-stable --no-verify && git push origin v$VERSION --no-verify",
     "module:build": "node ./environment/modules/module-builder.js && docker-compose up -d --remove-orphans",

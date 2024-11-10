@@ -61,7 +61,7 @@ function getModules() {
       },
       addCommandOn: {
         "startup-api": {
-          command: `sh -c "yarn db:prisma:generate && npx prisma migrate dev --name init && yarn dev"`,
+          command: `sh -c "node scripts/check-prisma-changes.js && yarn dev"`,
         },
       },
     },
