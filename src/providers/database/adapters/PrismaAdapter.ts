@@ -1,23 +1,17 @@
 import { PrismaClient } from "@prisma/client";
-import { appEnv } from "@providers/config/env";
-import { provide } from "inversify-binding-decorators";
+import { provideSingleton } from "@providers/inversify/provideSingleton";
 import { IDatabaseAdapter } from "../DatabaseTypes";
 
-@provide(PrismaAdapter)
+@provideSingleton(PrismaAdapter)
 export class PrismaAdapter implements IDatabaseAdapter {
   private prisma: PrismaClient;
 
-  constructor() {
-    if (!appEnv.modules.postgreSQL) {
-      return;
-    }
-
-    this.prisma = new PrismaClient();
-  }
+  constructor() {}
 
   public async initialize(): Promise<void> {
     try {
-      await this.prisma.$connect();
+      const prisma = this.getClient();
+      await prisma.$connect();
       console.log("✅ Connected to the PostgreSQL database using Prisma.");
     } catch (error) {
       console.error("❌ Failed to connect to PostgreSQL with Prisma:", error);
@@ -27,7 +21,9 @@ export class PrismaAdapter implements IDatabaseAdapter {
 
   public async close(): Promise<void> {
     try {
-      await this.prisma.$disconnect();
+      const prisma = this.getClient();
+
+      await prisma.$disconnect();
       console.log("✅ Disconnected from the PostgreSQL database.");
     } catch (error) {
       console.error("❌ Error disconnecting Prisma:", error);
@@ -36,6 +32,10 @@ export class PrismaAdapter implements IDatabaseAdapter {
   }
 
   public getClient(): PrismaClient {
-    return this.prisma;
+    if (this.prisma) {
+      return this.prisma;
+    }
+
+    return new PrismaClient();
   }
 }

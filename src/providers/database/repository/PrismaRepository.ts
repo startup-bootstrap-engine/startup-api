@@ -30,7 +30,7 @@ export class PrismaRepository<T extends object> implements IRepositoryAdapter<T>
   /**
    * Initializes the repository by setting up the Prisma client and model delegate.
    */
-  public async init(modelName: PrismaModelName, schema: ZodObject<any>): Promise<void> {
+  public init(modelName: PrismaModelName, schema: ZodObject<any>): void {
     this.schema = schema;
     const prisma = this.prismaAdapter.getClient();
     const delegate = prisma[modelName];
@@ -38,36 +38,6 @@ export class PrismaRepository<T extends object> implements IRepositoryAdapter<T>
       throw new Error(`Model ${String(modelName)} does not exist on Prisma Client.`);
     }
     this.modelDelegate = delegate as unknown as PrismaModelDelegate;
-
-    // Ensure table exists
-    await this.ensureTableExists();
-  }
-
-  private async ensureTableExists(): Promise<void> {
-    try {
-      // Attempt to query the table
-      await this.modelDelegate.findFirst({});
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2021") {
-        console.warn(`Table for model ${this.modelDelegate.name} does not exist. Running migrations...`);
-        // Run Prisma migrations
-        const { exec } = require("child_process");
-        await new Promise((resolve, reject) => {
-          exec("npx prisma migrate deploy", (error: Error | null, stdout: string, stderr: string) => {
-            if (error) {
-              console.error(`Migration error: ${error}`);
-              reject(error);
-              return;
-            }
-            console.log(`Migration stdout: ${stdout}`);
-            console.error(`Migration stderr: ${stderr}`);
-            resolve(stdout);
-          });
-        });
-      } else {
-        throw error;
-      }
-    }
   }
 
   public async create(item: T): Promise<T> {
